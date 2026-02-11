@@ -1,0 +1,606 @@
+<!-- Dashboard Module Content -->
+<div class="max-w-6xl mx-auto space-y-8 animate__animated animate__fadeIn">
+
+    <!-- 1. Welcome Header -->
+    <div class="flex flex-col gap-6">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <div class="text-xs font-semibold text-emerald-600 mb-1 uppercase tracking-wide">Good afternoon</div>
+                <h2 class="text-2xl font-semibold text-gray-800 tracking-tight">Welcome back, John!</h2>
+                <p class="text-sm text-gray-400 mt-1 font-light">Here's a summary of your finances. You're doing great!
+                </p>
+            </div>
+
+        </div>
+
+        <!-- 2. Pending Invitation -->
+        <div class="bg-white rounded-xl p-0.5 shadow-sm border border-gray-100/60 relative overflow-hidden group">
+            <div
+                class="absolute inset-0 bg-gradient-to-r from-emerald-50/30 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            </div>
+            <div
+                class="bg-white rounded-[10px] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+                <div class="flex items-start gap-4">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-emerald-500 flex-shrink-0">
+                        <iconify-icon icon="solar:users-group-two-rounded-linear" width="20"></iconify-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-800 flex items-center gap-2">
+                            Pending Invitation
+                            <span
+                                class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-100">New</span>
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-1 leading-relaxed">
+                            You have been invited by <span class="text-gray-600 font-medium">sarah@example.com</span> to
+                            join the <span class="text-gray-600 font-medium">Smith Family</span> dashboard.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto pl-14 sm:pl-0">
+                    <button
+                        class="px-4 py-2 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors">Decline</button>
+                    <button
+                        class="px-4 py-2 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors shadow-sm">Accept
+                        Invitation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Financial Insights (Grid Layout) -->
+    <div>
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                <iconify-icon icon="solar:stars-linear" class="text-purple-500"></iconify-icon>
+                Financial Insights
+            </h3>
+            <button
+                class="text-[10px] font-medium text-gray-400 hover:text-purple-600 flex items-center gap-1 transition-colors">
+                <iconify-icon icon="solar:refresh-linear"></iconify-icon> Refresh
+            </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Warning Insight -->
+            <div
+                class="bg-white rounded-xl border-l-4 border-amber-500 shadow-sm p-4 hover:shadow-md transition-all group">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Warning</div>
+                    <iconify-icon icon="solar:danger-triangle-linear" class="text-amber-500" width="16"></iconify-icon>
+                </div>
+                <h4 class="text-sm font-bold text-gray-800 mb-1">Unusual Subscription</h4>
+                <p class="text-[11px] text-gray-500 leading-relaxed mb-3">Duplicate "Netflix" charge detected.</p>
+                <button
+                    class="text-[10px] font-medium text-amber-600 hover:text-amber-700 flex items-center gap-1 group-hover:gap-2 transition-all">
+                    Review <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
+                </button>
+            </div>
+
+            <!-- Success Insight -->
+            <div
+                class="bg-white rounded-xl border-l-4 border-emerald-500 shadow-sm p-4 hover:shadow-md transition-all group">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Success</div>
+                    <iconify-icon icon="solar:check-circle-linear" class="text-emerald-500" width="16"></iconify-icon>
+                </div>
+                <h4 class="text-sm font-bold text-gray-800 mb-1">Goal Reached</h4>
+                <p class="text-[11px] text-gray-500 leading-relaxed mb-3">Hit 100% of "Emergency Fund" goal.</p>
+                <button
+                    class="text-[10px] font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1 group-hover:gap-2 transition-all">
+                    View Goal <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
+                </button>
+            </div>
+
+            <!-- Info Insight -->
+            <div
+                class="bg-white rounded-xl border-l-4 border-blue-500 shadow-sm p-4 hover:shadow-md transition-all group">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Tip</div>
+                    <iconify-icon icon="solar:info-circle-linear" class="text-blue-500" width="16"></iconify-icon>
+                </div>
+                <h4 class="text-sm font-bold text-gray-800 mb-1">Investment</h4>
+                <p class="text-[11px] text-gray-500 leading-relaxed mb-3">+2% savings could generate +$5k.</p>
+                <button
+                    class="text-[10px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 group-hover:gap-2 transition-all">
+                    Learn More <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
+                </button>
+            </div>
+
+            <!-- Danger Insight -->
+            <div
+                class="bg-white rounded-xl border-l-4 border-rose-500 shadow-sm p-4 hover:shadow-md transition-all group">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Alert</div>
+                    <iconify-icon icon="solar:bell-bing-linear" class="text-rose-500" width="16"></iconify-icon>
+                </div>
+                <h4 class="text-sm font-bold text-gray-800 mb-1">Over Budget</h4>
+                <p class="text-[11px] text-gray-500 leading-relaxed mb-3">Entertainment exceeded by 20%.</p>
+                <button
+                    class="text-[10px] font-medium text-rose-600 hover:text-rose-700 flex items-center gap-1 group-hover:gap-2 transition-all">
+                    Adjust Budget <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Monthly Income -->
+        <div
+            class="bg-white p-5 rounded-xl border border-gray-50 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-sm hover:border-gray-100 transition-all">
+            <div class="flex justify-between items-start mb-4">
+                <div class="text-gray-400 bg-gray-50 p-2 rounded-lg">
+                    <iconify-icon icon="solar:wallet-linear" width="22" stroke-width="1.5"></iconify-icon>
+                </div>
+                <div
+                    class="flex items-center gap-1 text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
+                    <iconify-icon icon="solar:trending-up-linear"></iconify-icon> 12%
+                </div>
+            </div>
+            <div class="text-gray-400 text-xs font-medium mb-1 uppercase tracking-wide">Income</div>
+            <div class="text-xl font-bold text-gray-800 tracking-tight">$8,240.00</div>
+        </div>
+
+        <!-- Monthly Expenses -->
+        <div
+            class="bg-white p-5 rounded-xl border border-gray-50 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-sm hover:border-gray-100 transition-all">
+            <div class="flex justify-between items-start mb-4">
+                <div class="text-gray-400 bg-gray-50 p-2 rounded-lg">
+                    <iconify-icon icon="solar:bag-3-linear" width="22" stroke-width="1.5"></iconify-icon>
+                </div>
+                <div
+                    class="flex items-center gap-1 text-[10px] font-medium text-amber-700 bg-amber-50 px-2 py-1 rounded-full border border-amber-100">
+                    <iconify-icon icon="solar:trending-up-linear"></iconify-icon> 5.4%
+                </div>
+            </div>
+            <div class="text-gray-400 text-xs font-medium mb-1 uppercase tracking-wide">Expenses</div>
+            <div class="text-xl font-bold text-gray-800 tracking-tight">$3,405.50</div>
+        </div>
+
+        <!-- Balance -->
+        <div
+            class="bg-white p-5 rounded-xl border border-gray-50 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-sm hover:border-gray-100 transition-all">
+            <div class="flex justify-between items-start mb-4">
+                <div class="text-gray-400 bg-gray-50 p-2 rounded-lg">
+                    <iconify-icon icon="solar:scale-linear" width="22" stroke-width="1.5"></iconify-icon>
+                </div>
+            </div>
+            <div class="text-gray-400 text-xs font-medium mb-1 uppercase tracking-wide">Net Balance</div>
+            <div class="text-xl font-bold text-gray-800 tracking-tight">$4,834.50</div>
+        </div>
+
+        <!-- Savings Rate -->
+        <div
+            class="bg-white p-5 rounded-xl border border-gray-50 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-sm hover:border-gray-100 transition-all">
+            <div class="flex justify-between items-start mb-4">
+                <div class="text-gray-400 bg-gray-50 p-2 rounded-lg">
+                    <iconify-icon icon="solar:pig-money-linear" width="22" stroke-width="1.5"></iconify-icon>
+                </div>
+                <div
+                    class="flex items-center gap-1 text-[10px] font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full border border-gray-200">
+                    Target: 50%
+                </div>
+            </div>
+            <div class="text-gray-400 text-xs font-medium mb-1 uppercase tracking-wide">Savings Rate</div>
+            <div class="text-xl font-bold text-gray-800 tracking-tight">58.6%</div>
+        </div>
+    </div>
+
+    <!-- 5. Charts Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Income vs Expenses Chart -->
+        <div class="lg:col-span-2 bg-white rounded-xl border border-gray-100/60 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800">Income vs Expenses</h3>
+                    <p class="text-xs text-gray-400 mt-1 font-light">6-month comparison.</p>
+                </div>
+                <div class="flex gap-3">
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2 h-2 rounded-full bg-gray-300"></div><span
+                            class="text-[10px] font-medium text-gray-400">Income</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div><span
+                            class="text-[10px] font-medium text-gray-400">Expense</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CSS Bar Chart Visualization (Same as before) -->
+            <div class="h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-gray-50 relative">
+                <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                    <div class="w-full h-px bg-gray-100/50"></div>
+                    <div class="w-full h-px bg-gray-100/50"></div>
+                    <div class="w-full h-px bg-gray-100/50"></div>
+                    <div class="w-full h-px bg-gray-100/50"></div>
+                    <div class="w-full h-px bg-gray-100/50"></div>
+                </div>
+                <!-- Data Bars repeated from previous, just simplified wrapper -->
+                <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
+                    <div class="w-3 sm:w-5 bg-gray-300 rounded-t-[2px] h-[45%]"></div>
+                    <div class="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] h-[35%]"></div>
+                </div>
+                <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
+                    <div class="w-3 sm:w-5 bg-gray-300 rounded-t-[2px] h-[55%]"></div>
+                    <div class="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] h-[40%]"></div>
+                </div>
+                <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
+                    <div class="w-3 sm:w-5 bg-gray-300 rounded-t-[2px] h-[48%]"></div>
+                    <div class="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] h-[42%]"></div>
+                </div>
+                <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
+                    <div class="w-3 sm:w-5 bg-gray-300 rounded-t-[2px] h-[65%]"></div>
+                    <div class="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] h-[45%]"></div>
+                </div>
+                <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
+                    <div class="w-3 sm:w-5 bg-gray-300 rounded-t-[2px] h-[72%]"></div>
+                    <div class="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] h-[38%]"></div>
+                </div>
+                <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
+                    <div class="w-3 sm:w-5 bg-gray-300 rounded-t-[2px] h-[82%]"></div>
+                    <div class="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] h-[34%]"></div>
+                </div>
+            </div>
+            <div class="flex justify-between mt-4 text-[10px] font-medium text-gray-400 px-4 uppercase tracking-wider">
+                <span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span
+                    class="text-gray-600">Oct</span>
+            </div>
+        </div>
+
+        <!-- Expense Categories -->
+        <div class="bg-white rounded-xl border border-gray-100/60 shadow-sm p-6 flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-sm font-semibold text-gray-800">Categories</h3>
+                <button class="text-gray-400 hover:text-gray-600"><iconify-icon
+                        icon="solar:menu-dots-bold"></iconify-icon></button>
+            </div>
+
+            <div class="flex items-center gap-6 mb-6">
+                <!-- Donut Chart -->
+                <div class="w-32 h-32 mx-auto rounded-full flex-shrink-0 relative"
+                    style="background: conic-gradient(#10b981 0% 35%, #f59e0b 35% 65%, #64748b 65% 85%, #cbd5e1 85% 100%);">
+                    <div
+                        class="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                        <span class="text-xs text-gray-400 font-medium">Total</span>
+                        <span class="text-sm font-bold text-gray-800">$3.4k</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3 flex-1">
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div><span class="text-gray-600">Food</span>
+                    </div>
+                    <span class="font-medium text-gray-800">$1,191</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-amber-500"></div><span class="text-gray-600">Housing</span>
+                    </div>
+                    <span class="font-medium text-gray-800">$1,021</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-gray-500"></div><span class="text-gray-600">Transport</span>
+                    </div>
+                    <span class="font-medium text-gray-800">$681</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-gray-300"></div><span class="text-gray-600">Other</span>
+                    </div>
+                    <span class="font-medium text-gray-800">$511</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Trends Section (NEW) -->
+    <div>
+        <h3 class="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <iconify-icon icon="solar:chart-2-linear" class="text-gray-400"></iconify-icon>
+            Spending Trends
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Trend 1 -->
+            <div
+                class="bg-white p-4 rounded-xl border border-gray-50 shadow-sm flex items-center justify-between hover:border-emerald-100 transition-colors">
+                <div>
+                    <div class="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Dinning Out</div>
+                    <div class="text-sm font-bold text-gray-800">$324.50</div>
+                    <div class="text-[10px] font-medium text-emerald-600 flex items-center gap-0.5 mt-1">
+                        <iconify-icon icon="solar:arrow-down-linear"></iconify-icon> 5% less
+                    </div>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
+                    <iconify-icon icon="solar:chef-hat-heart-linear" width="20"></iconify-icon>
+                </div>
+            </div>
+            <!-- Trend 2 -->
+            <div
+                class="bg-white p-4 rounded-xl border border-gray-50 shadow-sm flex items-center justify-between hover:border-red-100 transition-colors">
+                <div>
+                    <div class="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Groceries</div>
+                    <div class="text-sm font-bold text-gray-800">$450.00</div>
+                    <div class="text-[10px] font-medium text-red-500 flex items-center gap-0.5 mt-1">
+                        <iconify-icon icon="solar:arrow-up-linear"></iconify-icon> 12% more
+                    </div>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+                    <iconify-icon icon="solar:cart-large-linear" width="20"></iconify-icon>
+                </div>
+            </div>
+            <!-- Trend 3 -->
+            <div
+                class="bg-white p-4 rounded-xl border border-gray-50 shadow-sm flex items-center justify-between hover:border-gray-100 transition-colors">
+                <div>
+                    <div class="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Transport</div>
+                    <div class="text-sm font-bold text-gray-800">$180.00</div>
+                    <div class="text-[10px] font-medium text-gray-400 flex items-center gap-0.5 mt-1">
+                        <iconify-icon icon="solar:minus-circle-linear"></iconify-icon> No change
+                    </div>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                    <iconify-icon icon="solar:bus-linear" width="20"></iconify-icon>
+                </div>
+            </div>
+            <!-- Trend 4 -->
+            <div
+                class="bg-white p-4 rounded-xl border border-gray-50 shadow-sm flex items-center justify-between hover:border-red-100 transition-colors">
+                <div>
+                    <div class="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Entertainment</div>
+                    <div class="text-sm font-bold text-gray-800">$120.00</div>
+                    <div class="text-[10px] font-medium text-red-500 flex items-center gap-0.5 mt-1">
+                        <iconify-icon icon="solar:arrow-up-linear"></iconify-icon> 2% more
+                    </div>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+                    <iconify-icon icon="solar:gamepad-linear" width="20"></iconify-icon>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Bottom Section (Budget Progress & Recent Transactions) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Budget Progress -->
+        <div class="bg-white rounded-xl border border-gray-100/60 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-sm font-semibold text-gray-800">Budget Progress</h3>
+                <button
+                    class="text-xs font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition-colors"
+                    onclick="window.loadModule('budgets')">
+                    Manage <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
+                </button>
+            </div>
+
+            <div class="space-y-5">
+                <!-- Item 1 -->
+                <div class="group">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <iconify-icon icon="solar:chef-hat-heart-linear" width="16"></iconify-icon>
+                            </div>
+                            <div>
+                                <div class="text-xs font-medium text-gray-800">Food & Dining</div>
+                                <div class="text-[10px] text-gray-400">$450 / $600</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs font-bold text-gray-800">75%</div>
+                            <div
+                                class="text-[9px] font-medium text-emerald-600 p-0.5 rounded bg-emerald-50 inline-block px-1.5">
+                                On Track</div>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-emerald-500 h-full rounded-full w-3/4"></div>
+                    </div>
+                </div>
+                <!-- Item 2 -->
+                <div class="group">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                                <iconify-icon icon="solar:bus-linear" width="16"></iconify-icon>
+                            </div>
+                            <div>
+                                <div class="text-xs font-medium text-gray-800">Transportation</div>
+                                <div class="text-[10px] text-gray-400">$190 / $200</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs font-bold text-gray-800">95%</div>
+                            <div
+                                class="text-[9px] font-medium text-amber-600 p-0.5 rounded bg-amber-50 inline-block px-1.5">
+                                Warning</div>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-amber-500 h-full rounded-full w-[95%]"></div>
+                    </div>
+                </div>
+                <!-- Item 3 -->
+                <div class="group">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                                <iconify-icon icon="solar:gamepad-linear" width="16"></iconify-icon>
+                            </div>
+                            <div>
+                                <div class="text-xs font-medium text-gray-800">Entertainment</div>
+                                <div class="text-[10px] text-gray-400">$120 / $100</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs font-bold text-gray-800">120%</div>
+                            <div
+                                class="text-[9px] font-medium text-red-600 p-0.5 rounded bg-red-50 inline-block px-1.5">
+                                Over Budget</div>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-red-500 h-full rounded-full w-full"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Recent Transactions (List View) -->
+        <div class="bg-white rounded-xl border border-gray-100/60 shadow-sm p-6 flex flex-col">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-sm font-semibold text-gray-800">Recent Transactions</h3>
+
+            </div>
+
+            <div class="space-y-4 flex-1">
+                <!-- Transaction 1 -->
+                <div
+                    class="flex items-center justify-between group cursor-pointer p-2 -mx-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-9 h-9 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                            <iconify-icon icon="solar:cart-large-linear" width="16"></iconify-icon>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-gray-800">Whole Foods Market</div>
+                            <div class="text-[10px] text-gray-400">Groceries • Today, 2:30 PM</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-bold text-gray-800">-$86.42</div>
+                        <div class="text-[10px] text-gray-400">Chase ••42</div>
+                    </div>
+                </div>
+
+                <!-- Transaction 2 -->
+                <div
+                    class="flex items-center justify-between group cursor-pointer p-2 -mx-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                            <iconify-icon icon="solar:wallet-money-linear" width="16"></iconify-icon>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-gray-800">Tech Corp Salary</div>
+                            <div class="text-[10px] text-gray-400">Income • Today, 9:00 AM</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-bold text-emerald-600">+$2,450.00</div>
+                        <div class="text-[10px] text-gray-400">Checking ••90</div>
+                    </div>
+                </div>
+
+                <!-- Transaction 3 -->
+                <div
+                    class="flex items-center justify-between group cursor-pointer p-2 -mx-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-9 h-9 rounded-full bg-gray-50 text-gray-600 flex items-center justify-center border border-gray-100">
+                            <iconify-icon icon="solar:bus-linear" width="16"></iconify-icon>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-gray-800">Uber Trip</div>
+                            <div class="text-[10px] text-gray-400">Transport • Yesterday</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-bold text-gray-800">-$14.50</div>
+                        <div class="text-[10px] text-gray-400">Chase ••42</div>
+                    </div>
+                </div>
+
+                <!-- Transaction 4 -->
+                <div
+                    class="flex items-center justify-between group cursor-pointer p-2 -mx-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-9 h-9 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
+                            <iconify-icon icon="solar:clapperboard-play-linear" width="16"></iconify-icon>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-gray-800">Netflix</div>
+                            <div class="text-[10px] text-gray-400">Subscription • Oct 21</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-bold text-gray-800">-$15.99</div>
+                        <div class="text-[10px] text-gray-400">Chase ••42</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="h-8"></div>
+
+    <!-- Include accounts modal -->
+    <div id="accountSetupModalContainer"></div>
+
+    <script>
+        (function () {
+            // Check if we need to load the accounts modal
+            const setupCompleted = localStorage.getItem('accountSetupCompleted');
+            const skipUntil = localStorage.getItem('accountSetupSkipUntil');
+            let shouldShow = true;
+
+            if (setupCompleted === 'true') {
+                shouldShow = false;
+            } else if (skipUntil) {
+                const skipTime = new Date(skipUntil);
+                if (new Date() < skipTime) {
+                    shouldShow = false;
+                }
+            }
+
+            if (shouldShow) {
+                // Fetch the accounts module content
+                fetch('modules/accounts.html')
+                    .then(response => {
+                        if (!response.ok) throw new Error("Failed to load accounts.html");
+                        return response.text();
+                    })
+                    .then(html => {
+                        const container = document.getElementById('accountSetupModalContainer');
+                        if (!container) return;
+
+                        // Create a temporary container to parse the HTML
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = html;
+
+                        // Extract scripts
+                        const scripts = tempDiv.querySelectorAll('script');
+
+                        // Move content to actual container
+                        container.innerHTML = tempDiv.innerHTML;
+
+                        // Execute scripts manually since innerHTML doesn't
+                        scripts.forEach(script => {
+                            const newScript = document.createElement('script');
+                            newScript.textContent = script.textContent;
+                            document.body.appendChild(newScript);
+                        });
+
+                        // Auto-open logic after scripts are loaded
+                        setTimeout(() => {
+                            if (window.openAccountSetupModal) {
+                                window.openAccountSetupModal();
+                            } else {
+                                console.error("openAccountSetupModal function not found");
+                            }
+                        }, 500);
+                    })
+                    .catch(error => {
+                        console.error('Error loading accounts modal:', error);
+                    });
+            }
+        })();
+    </script>
+</div>

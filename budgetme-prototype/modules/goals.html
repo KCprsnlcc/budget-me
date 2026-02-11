@@ -1,0 +1,2674 @@
+<!-- Goals Module Content -->
+<div class="max-w-6xl mx-auto space-y-8 animate__animated animate__fadeIn">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-semibold text-slate-900 tracking-tight">Financial Goals</h2>
+            <p class="text-sm text-slate-500 mt-1 font-light">Track your savings goals and milestones</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="bg-slate-100 p-1 rounded-lg flex items-center border border-slate-200">
+                <button id="grid-view-btn"
+                    class="p-1.5 rounded-md bg-white text-emerald-600 shadow-sm transition-all active-view"
+                    title="Grid View" onclick="setViewMode('grid')">
+                    <iconify-icon icon="solar:widget-2-linear" width="18"></iconify-icon>
+                </button>
+                <button id="table-view-btn" class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 transition-all"
+                    title="Table View" onclick="setViewMode('table')">
+                    <iconify-icon icon="solar:list-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+            <button class="btn btn-secondary hidden sm:flex" onclick="toggleExportMenu()">
+                <iconify-icon icon="solar:export-linear" width="16"></iconify-icon>
+                Export
+            </button>
+            <button class="btn btn-primary" onclick="openModal('createGoalModal')">
+                <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+                Create Goal
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total Goals -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all">
+            <div class="flex justify-between items-start mb-4">
+                <div class="p-2 rounded-lg bg-slate-50 text-slate-600">
+                    <iconify-icon icon="solar:flag-linear" width="22"></iconify-icon>
+                </div>
+                <span class="badge badge-neutral">Active</span>
+            </div>
+            <div class="text-slate-400 text-xs font-medium mb-1 uppercase tracking-wide">Total Goals</div>
+            <div class="text-2xl font-bold text-slate-900 tracking-tight">4</div>
+        </div>
+
+        <!-- Target Amount -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all">
+            <div class="flex justify-between items-start mb-4">
+                <div class="p-2 rounded-lg bg-blue-50 text-blue-600">
+                    <iconify-icon icon="solar:bullseye-linear" width="22"></iconify-icon>
+                </div>
+                <iconify-icon icon="solar:info-circle-linear" class="text-slate-300" width="18"></iconify-icon>
+            </div>
+            <div class="text-slate-400 text-xs font-medium mb-1 uppercase tracking-wide">Target Amount</div>
+            <div class="text-2xl font-bold text-slate-900 tracking-tight">$65,000</div>
+        </div>
+
+        <!-- Saved Amount -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all">
+            <div class="flex justify-between items-start mb-4">
+                <div class="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                    <iconify-icon icon="solar:pig-money-linear" width="22"></iconify-icon>
+                </div>
+                <div
+                    class="flex items-center gap-1 text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
+                    <iconify-icon icon="solar:trending-up-linear"></iconify-icon> +$500
+                </div>
+            </div>
+            <div class="text-slate-400 text-xs font-medium mb-1 uppercase tracking-wide">Saved Amount</div>
+            <div class="text-2xl font-bold text-slate-900 tracking-tight">$37,600</div>
+        </div>
+
+        <!-- Overall Progress -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all">
+            <div class="flex justify-between items-start mb-4">
+                <div class="p-2 rounded-lg bg-purple-50 text-purple-600">
+                    <iconify-icon icon="solar:chart-line-linear" width="22"></iconify-icon>
+                </div>
+                <span class="text-sm font-bold text-slate-900">58%</span>
+            </div>
+            <div class="text-slate-400 text-xs font-medium mb-2 uppercase tracking-wide">Overall Progress</div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill success" style="width: 58%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section (Desktop) -->
+    <div class="hidden lg:grid grid-cols-3 gap-6">
+        <!-- Progress Chart -->
+        <div class="col-span-2 bg-white rounded-xl border border-slate-200/60 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900">Savings Progress</h3>
+                    <p class="text-xs text-slate-500 mt-1 font-light">Target vs Saved over last 6 months</p>
+                </div>
+                <div class="flex gap-3">
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
+                        <span class="text-[10px] font-medium text-slate-400">Target</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <span class="text-[10px] font-medium text-slate-400">Saved</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-48 flex items-end justify-between gap-6 px-2 relative">
+                <div
+                    class="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-slate-100">
+                    <div class="w-full h-px bg-slate-50"></div>
+                    <div class="w-full h-px bg-slate-50"></div>
+                    <div class="w-full h-px bg-slate-50"></div>
+                    <div class="w-full h-px bg-slate-50"></div>
+                </div>
+                <!-- Bars -->
+                <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group relative">
+                    <div class="w-4 bg-slate-200 rounded-t-sm h-[40%] group-hover:bg-slate-300 transition-colors"></div>
+                    <div class="w-4 bg-emerald-400 rounded-t-sm h-[30%] group-hover:bg-emerald-500 transition-colors">
+                    </div>
+                    <!-- Tooltip -->
+                    <div
+                        class="absolute bottom-full mb-2 hidden group-hover:block bg-slate-800 text-white text-[10px] py-1 px-2 rounded shadow-lg whitespace-nowrap z-20">
+                        Target: $30k | Saved: $22k
+                    </div>
+                </div>
+                <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group relative">
+                    <div class="w-4 bg-slate-200 rounded-t-sm h-[50%] group-hover:bg-slate-300 transition-colors"></div>
+                    <div class="w-4 bg-emerald-400 rounded-t-sm h-[38%] group-hover:bg-emerald-500 transition-colors">
+                    </div>
+                </div>
+                <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group relative">
+                    <div class="w-4 bg-slate-200 rounded-t-sm h-[60%] group-hover:bg-slate-300 transition-colors"></div>
+                    <div class="w-4 bg-emerald-400 rounded-t-sm h-[45%] group-hover:bg-emerald-500 transition-colors">
+                    </div>
+                </div>
+                <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group relative">
+                    <div class="w-4 bg-slate-200 rounded-t-sm h-[70%] group-hover:bg-slate-300 transition-colors"></div>
+                    <div class="w-4 bg-emerald-400 rounded-t-sm h-[52%] group-hover:bg-emerald-500 transition-colors">
+                    </div>
+                </div>
+                <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group relative">
+                    <div class="w-4 bg-slate-200 rounded-t-sm h-[80%] group-hover:bg-slate-300 transition-colors"></div>
+                    <div class="w-4 bg-emerald-400 rounded-t-sm h-[55%] group-hover:bg-emerald-500 transition-colors">
+                    </div>
+                </div>
+                <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group relative">
+                    <div class="w-4 bg-slate-200 rounded-t-sm h-[90%] group-hover:bg-slate-300 transition-colors"></div>
+                    <div class="w-4 bg-emerald-400 rounded-t-sm h-[58%] group-hover:bg-emerald-500 transition-colors">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
+                <span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span
+                    class="text-slate-600">Jan</span>
+            </div>
+        </div>
+
+        <!-- Goal Health -->
+        <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 flex flex-col">
+            <h3 class="text-sm font-semibold text-slate-900 mb-6">Goal Health</h3>
+
+            <div class="flex items-center justify-center mb-6 relative">
+                <!-- CSS Donut Chart -->
+                <div class="w-32 h-32 rounded-full relative"
+                    style="background: conic-gradient(#10b981 0% 25%, #3b82f6 25% 75%, #f59e0b 75% 100%);">
+                    <div
+                        class="absolute inset-0 m-auto w-24 h-24 bg-white rounded-full flex flex-col items-center justify-center">
+                        <span class="text-xs text-slate-400">Total</span>
+                        <span class="text-xl font-bold text-slate-900">4</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3 flex-1 px-4">
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <span class="text-slate-600">Completed</span>
+                    </div>
+                    <span class="font-medium text-slate-900">1 (25%)</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <span class="text-slate-600">In Progress</span>
+                    </div>
+                    <span class="font-medium text-slate-900">2 (50%)</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                        <span class="text-slate-600">Overdue</span>
+                    </div>
+                    <span class="font-medium text-slate-900">1 (25%)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div
+        class="bg-white p-4 rounded-xl border border-slate-200/60 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div class="relative w-full md:w-64">
+            <iconify-icon icon="solar:magnifer-linear" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                width="16"></iconify-icon>
+            <input type="text" placeholder="Search goals..."
+                class="form-input pl-9 py-2 text-sm rounded-lg border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 w-full">
+        </div>
+
+        <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 no-scrollbar">
+            <select
+                class="form-select py-2 text-sm border-slate-200 rounded-lg focus:border-emerald-500 focus:ring-emerald-500 text-slate-600 bg-white min-w-[120px]">
+                <option value="all">All Priorities</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
+            <select
+                class="form-select py-2 text-sm border-slate-200 rounded-lg focus:border-emerald-500 focus:ring-emerald-500 text-slate-600 bg-white min-w-[120px]">
+                <option value="all">All Status</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="overdue">Overdue</option>
+            </select>
+            <button
+                class="px-3 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200">
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <!-- Goals Grid View -->
+    <div id="grid-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate__animated animate__fadeIn">
+        <!-- Goal 1 - Completed -->
+        <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5 hover:shadow-md transition-all group cursor-pointer"
+            onclick="openViewGoalModal('emergency')">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                        <iconify-icon icon="solar:shield-check-linear" width="20"></iconify-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-900 group-hover:text-emerald-600 transition-colors">
+                            Emergency Fund</h3>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span
+                                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-50 text-red-600 border border-red-100">High
+                                Priority</span>
+                        </div>
+                    </div>
+                </div>
+                <span class="badge badge-success">Completed</span>
+            </div>
+            <div class="space-y-3">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-500">Saved</span>
+                    <span class="font-medium text-slate-900">$10,000 / $10,000</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill success" style="width: 100%"></div>
+                </div>
+                <div class="flex justify-between text-[10px]">
+                    <span class="text-emerald-600 flex items-center gap-1"><iconify-icon
+                            icon="solar:check-circle-linear" width="12"></iconify-icon> Goal reached!</span>
+                    <span class="font-medium text-emerald-600">100%</span>
+                </div>
+            </div>
+            <div class="mt-5 pt-4 border-t border-slate-50 flex items-center justify-between text-xs text-slate-400">
+                <span class="flex items-center gap-1"><iconify-icon icon="solar:calendar-linear"
+                        width="12"></iconify-icon> Completed Jan 2025</span>
+                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button class="hover:text-emerald-600"
+                        onclick="event.stopPropagation(); openViewGoalModal('emergency')"><iconify-icon
+                            icon="solar:eye-linear" width="16"></iconify-icon></button>
+                    <button class="hover:text-blue-600"
+                        onclick="event.stopPropagation(); openEditGoalModal('emergency')"><iconify-icon
+                            icon="solar:pen-linear" width="16"></iconify-icon></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Goal 2 - In Progress (Family) -->
+        <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5 hover:shadow-md transition-all group cursor-pointer"
+            onclick="openViewGoalModal('house')">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-blue-50 text-blue-600">
+                        <iconify-icon icon="solar:home-2-linear" width="20"></iconify-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-900 group-hover:text-emerald-600 transition-colors">
+                            House Down Payment</h3>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span
+                                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-50 text-red-600 border border-red-100">High
+                                Priority</span>
+                            <span
+                                class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-indigo-50 text-indigo-600 border border-indigo-100"
+                                title="Family Goal">
+                                <iconify-icon icon="solar:users-group-linear" width="10"></iconify-icon> Family
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <span class="badge badge-info">In Progress</span>
+            </div>
+            <div class="space-y-3">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-500">Saved</span>
+                    <span class="font-medium text-slate-900">$25,000 / $50,000</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill success" style="width: 50%"></div>
+                </div>
+                <div class="flex justify-between text-[10px]">
+                    <span class="text-slate-400">$25,000 remaining</span>
+                    <span class="font-medium text-blue-600">50%</span>
+                </div>
+            </div>
+            <div class="mt-5 pt-4 border-t border-slate-50 flex items-center justify-between">
+                <span class="text-xs text-slate-400 flex items-center gap-1"><iconify-icon icon="solar:calendar-linear"
+                        width="12"></iconify-icon> Due Dec 2026</span>
+                <button class="btn btn-sm text-xs py-1 px-2 btn-secondary"
+                    onclick="event.stopPropagation(); openContributeModal('house')">
+                    Contribute
+                </button>
+            </div>
+        </div>
+
+        <!-- Goal 3 - In Progress -->
+        <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5 hover:shadow-md transition-all group cursor-pointer"
+            onclick="openViewGoalModal('vacation')">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-purple-50 text-purple-600">
+                        <iconify-icon icon="solar:airplane-linear" width="20"></iconify-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-900 group-hover:text-emerald-600 transition-colors">
+                            Vacation Fund</h3>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span
+                                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600 border border-amber-100">Medium
+                                Priority</span>
+                        </div>
+                    </div>
+                </div>
+                <span class="badge badge-info">In Progress</span>
+            </div>
+            <div class="space-y-3">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-500">Saved</span>
+                    <span class="font-medium text-slate-900">$1,800 / $3,000</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill success" style="width: 60%"></div>
+                </div>
+                <div class="flex justify-between text-[10px]">
+                    <span class="text-slate-400">$1,200 remaining</span>
+                    <span class="font-medium text-purple-600">60%</span>
+                </div>
+            </div>
+            <div class="mt-5 pt-4 border-t border-slate-50 flex items-center justify-between">
+                <span class="text-xs text-slate-400 flex items-center gap-1"><iconify-icon icon="solar:calendar-linear"
+                        width="12"></iconify-icon> Due Jun 2026</span>
+                <button class="btn btn-sm text-xs py-1 px-2 btn-secondary"
+                    onclick="event.stopPropagation(); openContributeModal('vacation')">
+                    Contribute
+                </button>
+            </div>
+        </div>
+
+        <!-- Goal 4 - Overdue -->
+        <div class="bg-white rounded-xl border border-amber-200 shadow-sm p-5 hover:shadow-md transition-all group cursor-pointer"
+            onclick="openViewGoalModal('laptop')">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-amber-50 text-amber-600">
+                        <iconify-icon icon="solar:laptop-linear" width="20"></iconify-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-900 group-hover:text-emerald-600 transition-colors">
+                            New Laptop</h3>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span
+                                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 text-slate-600 border border-slate-100">Low
+                                Priority</span>
+                        </div>
+                    </div>
+                </div>
+                <span class="badge badge-warning">Overdue</span>
+            </div>
+            <div class="space-y-3">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-500">Saved</span>
+                    <span class="font-medium text-slate-900">$800 / $2,000</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill warning" style="width: 40%"></div>
+                </div>
+                <div class="flex justify-between text-[10px]">
+                    <span class="text-amber-500 flex items-center gap-1"><iconify-icon
+                            icon="solar:danger-triangle-linear" width="12"></iconify-icon> Off track</span>
+                    <span class="font-medium text-amber-600">40%</span>
+                </div>
+            </div>
+            <div class="mt-5 pt-4 border-t border-slate-50 flex items-center justify-between">
+                <span class="text-xs text-amber-500 font-medium flex items-center gap-1"><iconify-icon
+                        icon="solar:calendar-linear" width="12"></iconify-icon> Due Dec 2025</span>
+                <button class="btn btn-sm text-xs py-1 px-2 btn-secondary"
+                    onclick="event.stopPropagation(); openContributeModal('laptop')">
+                    Contribute
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goals Table View (Hidden by default) -->
+    <div id="table-view"
+        class="hidden bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden animate__animated">
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Goal Name</th>
+                        <th>Target</th>
+                        <th>Current</th>
+                        <th>Progress</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="group hover:bg-slate-50 transition-colors cursor-pointer"
+                        onclick="openViewGoalModal('emergency')">
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="p-1.5 rounded-md bg-emerald-50 text-emerald-600">
+                                    <iconify-icon icon="solar:shield-check-linear" width="16"></iconify-icon>
+                                </div>
+                                <span class="font-medium text-slate-900">Emergency Fund</span>
+                            </div>
+                        </td>
+                        <td class="font-medium">$10,000</td>
+                        <td class="text-emerald-600 font-medium">$10,000</td>
+                        <td>
+                            <div class="w-24 flex flex-col gap-1">
+                                <div class="progress-bar h-1.5">
+                                    <div class="progress-bar-fill success" style="width: 100%"></div>
+                                </div>
+                                <span class="text-[10px] text-right text-emerald-600">100%</span>
+                            </div>
+                        </td>
+                        <td><span
+                                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-50 text-red-600 border border-red-100">High</span>
+                        </td>
+                        <td><span class="badge badge-success">Completed</span></td>
+                        <td class="text-xs text-slate-500">Jan 15, 2025</td>
+                        <td class="text-right">
+                            <div class="flex items-center justify-end gap-1" onclick="event.stopPropagation()">
+                                <button class="action-btn" title="View Details"
+                                    onclick="openViewGoalModal('emergency')">
+                                    <iconify-icon icon="solar:eye-linear" width="16"></iconify-icon>
+                                </button>
+                                <button class="action-btn" title="Edit" onclick="openEditGoalModal('emergency')">
+                                    <iconify-icon icon="solar:pen-linear" width="16"></iconify-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="group hover:bg-slate-50 transition-colors cursor-pointer"
+                        onclick="openViewGoalModal('house')">
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="p-1.5 rounded-md bg-blue-50 text-blue-600">
+                                    <iconify-icon icon="solar:home-2-linear" width="16"></iconify-icon>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-slate-900 block">House Down Payment</span>
+                                    <span class="text-[10px] text-indigo-500 flex items-center gap-0.5"><iconify-icon
+                                            icon="solar:users-group-linear" width="10"></iconify-icon> Family</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="font-medium">$50,000</td>
+                        <td class="text-slate-600">$25,000</td>
+                        <td>
+                            <div class="w-24 flex flex-col gap-1">
+                                <div class="progress-bar h-1.5">
+                                    <div class="progress-bar-fill success" style="width: 50%"></div>
+                                </div>
+                                <span class="text-[10px] text-right text-slate-500">50%</span>
+                            </div>
+                        </td>
+                        <td><span
+                                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-50 text-red-600 border border-red-100">High</span>
+                        </td>
+                        <td><span class="badge badge-info">In Progress</span></td>
+                        <td class="text-xs text-slate-500">Dec 31, 2026</td>
+                        <td class="text-right">
+                            <div class="flex items-center justify-end gap-1" onclick="event.stopPropagation()">
+                                <button class="action-btn" title="View Details" onclick="openViewGoalModal('house')">
+                                    <iconify-icon icon="solar:eye-linear" width="16"></iconify-icon>
+                                </button>
+                                <button class="action-btn" title="Edit" onclick="openEditGoalModal('house')">
+                                    <iconify-icon icon="solar:pen-linear" width="16"></iconify-icon>
+                                </button>
+                                <button class="action-btn text-emerald-600 hover:bg-emerald-50" title="Contribute"
+                                    onclick="openContributeModal('house')">
+                                    <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="group hover:bg-slate-50 transition-colors cursor-pointer"
+                        onclick="openViewGoalModal('vacation')">
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="p-1.5 rounded-md bg-purple-50 text-purple-600">
+                                    <iconify-icon icon="solar:airplane-linear" width="16"></iconify-icon>
+                                </div>
+                                <span class="font-medium text-slate-900">Vacation Fund</span>
+                            </div>
+                        </td>
+                        <td class="font-medium">$3,000</td>
+                        <td class="text-slate-600">$1,800</td>
+                        <td>
+                            <div class="w-24 flex flex-col gap-1">
+                                <div class="progress-bar h-1.5">
+                                    <div class="progress-bar-fill success" style="width: 60%"></div>
+                                </div>
+                                <span class="text-[10px] text-right text-slate-500">60%</span>
+                            </div>
+                        </td>
+                        <td><span
+                                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600 border border-amber-100">Medium</span>
+                        </td>
+                        <td><span class="badge badge-info">In Progress</span></td>
+                        <td class="text-xs text-slate-500">Jun 01, 2026</td>
+                        <td class="text-right">
+                            <div class="flex items-center justify-end gap-1" onclick="event.stopPropagation()">
+                                <button class="action-btn" title="View Details" onclick="openViewGoalModal('vacation')">
+                                    <iconify-icon icon="solar:eye-linear" width="16"></iconify-icon>
+                                </button>
+                                <button class="action-btn" title="Edit" onclick="openEditGoalModal('vacation')">
+                                    <iconify-icon icon="solar:pen-linear" width="16"></iconify-icon>
+                                </button>
+                                <button class="action-btn text-emerald-600 hover:bg-emerald-50" title="Contribute"
+                                    onclick="openContributeModal('vacation')">
+                                    <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="group hover:bg-slate-50 transition-colors cursor-pointer"
+                        onclick="openViewGoalModal('laptop')">
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="p-1.5 rounded-md bg-amber-50 text-amber-600">
+                                    <iconify-icon icon="solar:laptop-linear" width="16"></iconify-icon>
+                                </div>
+                                <span class="font-medium text-slate-900">New Laptop</span>
+                            </div>
+                        </td>
+                        <td class="font-medium">$2,000</td>
+                        <td class="text-slate-600">$800</td>
+                        <td>
+                            <div class="w-24 flex flex-col gap-1">
+                                <div class="progress-bar h-1.5">
+                                    <div class="progress-bar-fill warning" style="width: 40%"></div>
+                                </div>
+                                <span class="text-[10px] text-right text-amber-600">40%</span>
+                            </div>
+                        </td>
+                        <td><span
+                                class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 text-slate-600 border border-slate-100">Low</span>
+                        </td>
+                        <td><span class="badge badge-warning">Overdue</span></td>
+                        <td class="text-xs text-slate-500">Dec 20, 2025</td>
+                        <td class="text-right">
+                            <div class="flex items-center justify-end gap-1" onclick="event.stopPropagation()">
+                                <button class="action-btn" title="View Details" onclick="openViewGoalModal('laptop')">
+                                    <iconify-icon icon="solar:eye-linear" width="16"></iconify-icon>
+                                </button>
+                                <button class="action-btn" title="Edit" onclick="openEditGoalModal('laptop')">
+                                    <iconify-icon icon="solar:pen-linear" width="16"></iconify-icon>
+                                </button>
+                                <button class="action-btn text-emerald-600 hover:bg-emerald-50" title="Contribute"
+                                    onclick="openContributeModal('laptop')">
+                                    <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination (Shared) -->
+    <div class="flex items-center justify-between px-1 py-3 border-t border-slate-100/80 mt-2 transition-all">
+        <div class="text-[11px] text-slate-400 font-light">
+            Showing <span class="text-slate-600 font-medium">1-4</span> of <span
+                class="text-slate-600 font-medium">4</span>
+        </div>
+        <div class="flex items-center gap-0.5">
+            <button
+                class="p-1.5 rounded-md text-slate-300 hover:text-slate-600 hover:bg-slate-50 disabled:opacity-20 transition-all"
+                disabled>
+                <iconify-icon icon="solar:alt-arrow-left-linear" width="14"></iconify-icon>
+            </button>
+            <button
+                class="w-7 h-7 rounded-md bg-emerald-50/60 text-emerald-600 text-[11px] font-bold flex items-center justify-center">1</button>
+            <button
+                class="p-1.5 rounded-md text-slate-300 hover:text-slate-600 hover:bg-slate-50 disabled:opacity-20 transition-all"
+                disabled>
+                <iconify-icon icon="solar:alt-arrow-right-linear" width="14"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- View Goal Details Modal -->
+<div class="modal-overlay" id="view-goal-modal">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                <span id="viewGoalHeaderTitle">View Goal</span>
+            </h3>
+            <div class="flex items-center gap-3">
+                <span id="viewGoalStepText" class="text-[10px] text-slate-400 font-medium tracking-wide">Step 1 of
+                    2</span>
+                <button
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                    onclick="closeModal('view-goal-modal')" aria-label="Close">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <div class="goal-stepper" aria-label="Goal viewing progress">
+            <div class="goal-step-wrap">
+                <div class="goal-step-dot active" data-step="1" aria-current="step">1</div><span
+                    class="goal-step-label active">Overview</span>
+            </div>
+            <div class="goal-step-connector" data-connector="1"></div>
+            <div class="goal-step-wrap">
+                <div class="goal-step-dot" data-step="2">2</div><span class="goal-step-label">Analysis</span>
+            </div>
+        </div>
+
+        <div class="modal-body overflow-y-auto flex-1">
+            <!-- Step 1: Goal Overview -->
+            <div id="viewGoalStep1" class="goal-step-content">
+                <div class="space-y-4 goal-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Goal Overview</h4>
+                        <p class="text-xs text-slate-500">Review your goal details and current progress</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Goal Header -->
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="p-2 rounded-lg bg-blue-50 text-blue-600" id="view-goal-icon">
+                                    <iconify-icon icon="solar:home-2-linear" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-slate-900" id="view-goal-title">House Down
+                                        Payment</h3>
+                                    <span class="badge badge-info" id="view-goal-status">In Progress</span>
+                                </div>
+                            </div>
+
+                            <!-- Summary Cards -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                                    <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Target Amount</div>
+                                    <div class="text-lg font-bold text-slate-900" id="view-goal-target">$50,000.00</div>
+                                </div>
+                                <div class="bg-emerald-50 rounded-lg p-3 border border-emerald-100">
+                                    <div class="text-xs text-emerald-600 uppercase tracking-wide mb-1">Current Saved
+                                    </div>
+                                    <div class="text-lg font-bold text-emerald-700" id="view-goal-current">$25,000.00
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progress Section -->
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-medium text-slate-900">Progress</span>
+                                <span class="text-sm font-bold text-emerald-600" id="view-goal-percent">50%</span>
+                            </div>
+                            <div class="progress-bar h-3">
+                                <div class="progress-bar-fill success" id="view-goal-progress-bar" style="width: 50%">
+                                </div>
+                            </div>
+                            <div class="flex justify-between mt-2 text-xs text-slate-500">
+                                <span id="view-goal-remaining">$25,000.00 remaining</span>
+                                <span id="view-goal-due">Due Dec 2026</span>
+                            </div>
+                        </div>
+
+                        <!-- Details Grid -->
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                            <h5 class="text-xs font-semibold text-slate-900 mb-3 uppercase tracking-wide">Goal Details
+                            </h5>
+                            <div class="space-y-3">
+                                <div class="flex justify-between py-2 border-b border-slate-100">
+                                    <span class="text-xs text-slate-500">Priority</span>
+                                    <span
+                                        class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600 border border-red-100"
+                                        id="view-goal-priority">High Priority</span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-slate-100">
+                                    <span class="text-xs text-slate-500">Monthly Contribution Needed</span>
+                                    <span class="text-sm font-medium text-slate-900"
+                                        id="view-goal-monthly">$850.00/month</span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-slate-100">
+                                    <span class="text-xs text-slate-500">Family Goal</span>
+                                    <span class="text-sm font-medium text-slate-900" id="view-goal-family">Yes</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                            <div class="text-xs text-slate-500 uppercase tracking-wide mb-2">Notes</div>
+                            <p class="text-sm text-slate-600" id="view-goal-notes">Saving for a 20% down payment on a
+                                new home.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Goal Analysis -->
+            <div id="viewGoalStep2" class="goal-step-content hidden">
+                <div class="space-y-4 goal-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Goal Analysis</h4>
+                        <p class="text-xs text-slate-500">Detailed insights and recommendations for your goal</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Progress Analysis -->
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                            <h5 class="text-xs font-semibold text-slate-900 mb-3 uppercase tracking-wide">Progress
+                                Analysis</h5>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-slate-600">Completion Rate</span>
+                                    <span class="text-sm font-bold text-emerald-600"
+                                        id="view-analysis-percent">50%</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-slate-600">Time Remaining</span>
+                                    <span class="text-sm font-medium text-slate-900" id="view-analysis-time">8
+                                        months</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-slate-600">On Track</span>
+                                    <span class="text-sm font-medium text-emerald-600"
+                                        id="view-analysis-track">Yes</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recommendations -->
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+                            <h5 class="text-xs font-semibold text-slate-900 mb-3 uppercase tracking-wide">
+                                Recommendations</h5>
+                            <div class="space-y-2">
+                                <div class="flex items-start gap-2">
+                                    <iconify-icon icon="solar:check-circle-bold" class="text-emerald-600 mt-0.5"
+                                        width="16"></iconify-icon>
+                                    <p class="text-xs text-slate-600">You're on track to reach your goal on time</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <iconify-icon icon="solar:lightbulb-bold" class="text-blue-600 mt-0.5"
+                                        width="16"></iconify-icon>
+                                    <p class="text-xs text-slate-600">Consider increasing monthly contribution by $50 to
+                                        finish earlier</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <iconify-icon icon="solar:shield-check-bold" class="text-purple-600 mt-0.5"
+                                        width="16"></iconify-icon>
+                                    <p class="text-xs text-slate-600">Your emergency fund goal is well-funded</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Items -->
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                            <h5 class="text-xs font-semibold text-slate-900 mb-3 uppercase tracking-wide">Next Actions
+                            </h5>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
+                                    <span class="text-xs text-slate-600">Review monthly budget</span>
+                                    <iconify-icon icon="solar:arrow-right-linear" class="text-slate-400"
+                                        width="14"></iconify-icon>
+                                </div>
+                                <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
+                                    <span class="text-xs text-slate-600">Set up automatic transfers</span>
+                                    <iconify-icon icon="solar:arrow-right-linear" class="text-slate-400"
+                                        width="14"></iconify-icon>
+                                </div>
+                                <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
+                                    <span class="text-xs text-slate-600">Track spending habits</span>
+                                    <iconify-icon icon="solar:arrow-right-linear" class="text-slate-400"
+                                        width="14"></iconify-icon>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button id="viewGoalBtnBack" onclick="viewGoalPreviousStep()" class="btn btn-secondary hidden">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button id="viewGoalBtnNext" onclick="viewGoalNextStep()" class="btn btn-primary"
+                style="background:#10b981; box-shadow:none;">
+                View Analysis <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Goal Modal -->
+<div class="modal-overlay" id="edit-goal-modal">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                <span id="editGoalHeaderTitle">Edit Goal</span>
+            </h3>
+            <div class="flex items-center gap-3">
+                <span id="editGoalStepText" class="text-[10px] text-slate-400 font-medium tracking-wide">Step 1 of
+                    3</span>
+                <button
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                    onclick="closeModal('edit-goal-modal')" aria-label="Close">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <div class="goal-stepper" aria-label="Goal editing progress">
+            <div class="goal-step-wrap">
+                <div class="goal-step-dot active" data-step="1" aria-current="step">1</div><span
+                    class="goal-step-label active">Details</span>
+            </div>
+            <div class="goal-step-connector" data-connector="1"></div>
+            <div class="goal-step-wrap">
+                <div class="goal-step-dot" data-step="2">2</div><span class="goal-step-label">Settings</span>
+            </div>
+            <div class="goal-step-connector" data-connector="2"></div>
+            <div class="goal-step-wrap">
+                <div class="goal-step-dot" data-step="3">3</div><span class="goal-step-label">Review</span>
+            </div>
+        </div>
+
+        <div class="modal-body overflow-y-auto flex-1">
+            <!-- Step 1: Goal Details -->
+            <div id="editGoalStep1" class="goal-step-content">
+                <div class="space-y-4 goal-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Goal Details</h4>
+                        <p class="text-xs text-slate-500">Update your goal information and targets</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Goal Name</label>
+                            <div class="relative">
+                                <iconify-icon icon="solar:flag-linear"
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                    width="18"></iconify-icon>
+                                <input type="text" id="edit-goal-name" class="goal-input pl-10"
+                                    value="House Down Payment" required>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1.5">Target Amount</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+                                    <input type="number" id="edit-goal-target" class="goal-input pl-6" value="50000.00"
+                                        min="0.01" step="0.01" required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1.5">Current Amount</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+                                    <input type="number" id="edit-goal-current"
+                                        class="goal-input pl-6 bg-slate-50 text-slate-500" value="25000.00" disabled>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-1">To update amount, add a contribution instead.</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Target Date</label>
+                            <div class="relative">
+                                <iconify-icon icon="solar:calendar-linear"
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                    width="18"></iconify-icon>
+                                <input type="date" id="edit-goal-date" class="goal-input pl-10" value="2026-12-31"
+                                    required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Goal Settings -->
+            <div id="editGoalStep2" class="goal-step-content hidden">
+                <div class="space-y-4 goal-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Goal Settings</h4>
+                        <p class="text-xs text-slate-500">Configure status, priority, and sharing options</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Status</label>
+                            <select id="edit-goal-status" class="goal-input">
+                                <option value="not_started">Not Started</option>
+                                <option value="in_progress" selected>In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Priority Level</label>
+                            <div class="grid grid-cols-3 gap-3" id="edit-priority-selector">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="edit-priority" value="high" class="peer sr-only" checked>
+                                    <div class="goal-card text-center py-3">
+                                        <div class="text-xs font-semibold">High</div>
+                                        <div class="goal-check">
+                                            <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="edit-priority" value="medium" class="peer sr-only">
+                                    <div class="goal-card text-center py-3">
+                                        <div class="text-xs font-semibold">Medium</div>
+                                        <div class="goal-check">
+                                            <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="edit-priority" value="low" class="peer sr-only">
+                                    <div class="goal-card text-center py-3">
+                                        <div class="text-xs font-semibold">Low</div>
+                                        <div class="goal-check">
+                                            <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Notes</label>
+                            <textarea id="edit-goal-notes"
+                                class="goal-input min-h-[80px]">Saving for a 20% down payment on a new home.</textarea>
+                        </div>
+
+                        <div
+                            class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-4 border border-indigo-100">
+                            <div class="flex items-start gap-3">
+                                <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+                                    <iconify-icon icon="solar:users-group-rounded-linear" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <h4 class="text-sm font-semibold text-slate-900">Family Goal</h4>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" id="edit-goal-family" class="sr-only peer" checked>
+                                            <div
+                                                class="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600">
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-slate-500 leading-relaxed">
+                                        Share this goal with family members.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Review Changes -->
+            <div id="editGoalStep3" class="goal-step-content hidden">
+                <div class="space-y-4 goal-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Review Changes</h4>
+                        <p class="text-xs text-slate-500">Review your goal updates before saving</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                            <h5 class="text-xs font-semibold text-slate-900 mb-3 uppercase tracking-wide">Updated
+                                Information</h5>
+                            <div class="space-y-2">
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Goal Name</span>
+                                    <span class="goal-review-value" id="editReviewGoalName">House Down Payment</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Target Amount</span>
+                                    <span class="goal-review-value" id="editReviewGoalTarget">$50,000.00</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Target Date</span>
+                                    <span class="goal-review-value" id="editReviewGoalDate">Dec 31, 2026</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Status</span>
+                                    <span class="goal-review-value" id="editReviewGoalStatus">In Progress</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Priority</span>
+                                    <span class="goal-review-value" id="editReviewGoalPriority">High</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Family Goal</span>
+                                    <span class="goal-review-value" id="editReviewGoalFamily">Yes</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="goal-notice info">
+                            <iconify-icon icon="solar:info-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <p class="font-medium text-blue-900">Review your changes</p>
+                                <p class="text-blue-700">Make sure all information is correct before saving. You can
+                                    always edit again later.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button id="editGoalBtnBack" onclick="editGoalPreviousStep()" class="btn btn-secondary hidden">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button id="editGoalBtnNext" onclick="editGoalNextStep()" class="btn btn-primary"
+                style="background:#10b981; box-shadow:none;">
+                Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Create Goal Modal -->
+<div id="createGoalModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="createGoalHeaderTitle">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                <span id="createGoalHeaderTitle">Create Goal</span>
+            </h3>
+            <div class="flex items-center gap-3">
+                <span id="createGoalStepText" class="text-[10px] text-slate-400 font-medium tracking-wide">Step 1 of
+                    3</span>
+                <button
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                    onclick="closeModal('createGoalModal')" aria-label="Close">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <div class="goal-stepper" aria-label="Goal creation progress">
+            <div class="goal-step-wrap">
+                <div class="goal-step-dot active" data-step="1" aria-current="step">1</div><span
+                    class="goal-step-label active">Details</span>
+            </div>
+            <div class="goal-step-connector" data-connector="1"></div>
+            <div class="goal-step-wrap">
+                <div class="goal-step-dot" data-step="2">2</div><span class="goal-step-label">Settings</span>
+            </div>
+            <div class="goal-step-connector" data-connector="2"></div>
+            <div class="goal-step-wrap">
+                <div class="goal-step-dot" data-step="3">3</div><span class="goal-step-label">Review</span>
+            </div>
+        </div>
+        <div class="modal-body overflow-y-auto flex-1">
+            <!-- Step 1: Goal Details -->
+            <div id="createGoalStep1" class="goal-step-content">
+                <div class="space-y-4 goal-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Goal Details</h4>
+                        <p class="text-xs text-slate-500">Enter your goal information and targets</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Goal Name</label>
+                            <div class="relative">
+                                <iconify-icon icon="solar:flag-linear"
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                    width="18"></iconify-icon>
+                                <input type="text" id="createGoalName" class="goal-input pl-10"
+                                    placeholder="e.g., Emergency Fund, New Car" required>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1.5">Target Amount</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+                                    <input type="number" id="createGoalTarget" class="goal-input pl-6"
+                                        placeholder="0.00" min="0.01" step="0.01" required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1.5">Current Amount</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+                                    <input type="number" id="createGoalCurrent" class="goal-input pl-6"
+                                        placeholder="0.00" min="0" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Target Date</label>
+                            <div class="relative">
+                                <iconify-icon icon="solar:calendar-linear"
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                    width="18"></iconify-icon>
+                                <input type="date" id="createGoalDate" class="goal-input pl-10" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Settings -->
+            <div id="createGoalStep2" class="goal-step-content hidden">
+                <div class="space-y-4 goal-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Goal Settings</h4>
+                        <p class="text-xs text-slate-500">Configure priority, notes, and sharing options</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Priority Level</label>
+                            <div class="grid grid-cols-3 gap-3" id="create-priority-selector">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="create-priority" value="high" class="peer sr-only">
+                                    <div class="goal-card text-center py-3">
+                                        <div class="text-xs font-semibold">High</div>
+                                        <div class="goal-check">
+                                            <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="create-priority" value="medium" class="peer sr-only"
+                                        checked>
+                                    <div class="goal-card text-center py-3">
+                                        <div class="text-xs font-semibold">Medium</div>
+                                        <div class="goal-check">
+                                            <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="create-priority" value="low" class="peer sr-only">
+                                    <div class="goal-card text-center py-3">
+                                        <div class="text-xs font-semibold">Low</div>
+                                        <div class="goal-check">
+                                            <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Notes (Optional)</label>
+                            <textarea id="createGoalNotes" class="goal-input min-h-[80px]"
+                                placeholder="Add details about why you're saving..."></textarea>
+                        </div>
+
+                        <div
+                            class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-4 border border-indigo-100">
+                            <div class="flex items-start gap-3">
+                                <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+                                    <iconify-icon icon="solar:users-group-rounded-linear" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <h4 class="text-sm font-semibold text-slate-900">Family Goal</h4>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" id="createGoalFamily" class="sr-only peer">
+                                            <div
+                                                class="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600">
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-slate-500 leading-relaxed">
+                                        Share this goal with family members.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Review -->
+            <div id="createGoalStep3" class="goal-step-content hidden">
+                <div class="space-y-4 goal-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Review Goal</h4>
+                        <p class="text-xs text-slate-500">Confirm your goal details before creating</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                            <h5 class="text-xs font-semibold text-slate-900 mb-3 uppercase tracking-wide">Goal
+                                Information</h5>
+                            <div class="space-y-2">
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Goal Name</span>
+                                    <span class="goal-review-value" id="createReviewGoalName">-</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Target Amount</span>
+                                    <span class="goal-review-value" id="createReviewGoalTarget">-</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Current Amount</span>
+                                    <span class="goal-review-value" id="createReviewGoalCurrent">-</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Target Date</span>
+                                    <span class="goal-review-value" id="createReviewGoalDate">-</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Priority</span>
+                                    <span class="goal-review-value" id="createReviewGoalPriority">-</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Family Goal</span>
+                                    <span class="goal-review-value" id="createReviewGoalFamily">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="goal-notice info">
+                            <iconify-icon icon="solar:info-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <p class="font-medium text-blue-900">Review your goal</p>
+                                <p class="text-blue-700">Make sure all information is correct before creating. You can
+                                    always edit later.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button id="createGoalBtnBack" onclick="createGoalPreviousStep()" class="btn btn-secondary hidden">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button id="createGoalBtnNext" onclick="createGoalNextStep()" class="btn btn-primary"
+                style="background:#10b981; box-shadow:none;">
+                Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Contribute Modal -->
+<div class="modal-overlay" id="contribute-modal">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wide">
+                <span id="contributeHeaderTitle">Add Contribution</span>
+            </h3>
+            <div class="flex items-center gap-3">
+                <span id="contributeStepText" class="text-[10px] text-slate-400 font-medium tracking-wide">Step 1 of
+                    3</span>
+                <button
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                    onclick="closeModal('contribute-modal')" aria-label="Close">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <div class="goal-stepper" aria-label="Contribution process">
+            <div class="goal-step-wrap">
+                <div class="goal-step-dot active" data-step="1" aria-current="step">1</div><span
+                    class="goal-step-label active">Select Goal</span>
+            </div>
+            <div class="goal-step-connector" data-connector="1"></div>
+            <div class="goal-step-wrap">
+                <div class="goal-step-dot" data-step="2">2</div><span class="goal-step-label">Amount</span>
+            </div>
+            <div class="goal-step-connector" data-connector="2"></div>
+            <div class="goal-step-wrap">
+                <div class="goal-step-dot" data-step="3">3</div><span class="goal-step-label">Review</span>
+            </div>
+        </div>
+
+        <div class="modal-body overflow-y-auto flex-1">
+            <!-- Step 1: Select Goal -->
+            <div id="contributeStep1" class="goal-step-content">
+                <div class="space-y-4 goal-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Select Goal</h4>
+                        <p class="text-xs text-slate-500">Choose which goal to contribute to</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                            <div class="space-y-3">
+                                <div class="goal-card" onclick="selectContributeGoal('house')">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2 rounded-lg bg-blue-50 text-blue-600">
+                                            <iconify-icon icon="solar:home-2-linear" width="20"></iconify-icon>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-slate-900 flex items-center gap-2">
+                                                House Down Payment
+                                                <span
+                                                    class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center gap-0.5">
+                                                    <iconify-icon icon="solar:users-group-linear"
+                                                        width="10"></iconify-icon> Family
+                                                </span>
+                                            </div>
+                                            <div class="text-xs text-slate-500 flex items-center gap-2">
+                                                <span>$25,000 / $50,000</span>
+                                                <span class="text-blue-600 font-medium">50%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="progress-bar h-1.5">
+                                        <div class="progress-bar-fill success" style="width: 50%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="goal-card" onclick="selectContributeGoal('vacation')">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2 rounded-lg bg-purple-50 text-purple-600">
+                                            <iconify-icon icon="solar:airplane-linear" width="20"></iconify-icon>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-slate-900">Vacation Fund</div>
+                                            <div class="text-xs text-slate-500 flex items-center gap-2">
+                                                <span>$1,800 / $3,000</span>
+                                                <span class="text-purple-600 font-medium">60%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="progress-bar h-1.5">
+                                        <div class="progress-bar-fill success" style="width: 60%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="goal-card" onclick="selectContributeGoal('laptop')">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2 rounded-lg bg-amber-50 text-amber-600">
+                                            <iconify-icon icon="solar:laptop-linear" width="20"></iconify-icon>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-slate-900 flex items-center gap-2">
+                                                New Laptop
+                                                <span class="badge badge-warning text-[9px]">Overdue</span>
+                                            </div>
+                                            <div class="text-xs text-slate-500 flex items-center gap-2">
+                                                <span>$800 / $2,000</span>
+                                                <span class="text-amber-600 font-medium">40%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="progress-bar h-1.5">
+                                        <div class="progress-bar-fill warning" style="width: 40%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Contribution Amount -->
+            <div id="contributeStep2" class="goal-step-content hidden">
+                <div class="space-y-4 goal-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Contribution Amount</h4>
+                        <p class="text-xs text-slate-500">Enter the amount you want to contribute</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Contribution Amount</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-lg">$</span>
+                                <input type="number" id="contribution-amount"
+                                    class="goal-input pl-10 text-lg font-medium" placeholder="0.00" min="0.01"
+                                    step="0.01" required oninput="updateContributePreview(this.value)">
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">Enter the amount you want to add to this goal</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Contribution Date</label>
+                            <div class="relative">
+                                <iconify-icon icon="solar:calendar-linear"
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                    width="18"></iconify-icon>
+                                <input type="date" id="contribution-date" class="goal-input pl-10" required>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Notes (Optional)</label>
+                            <textarea id="contribution-notes" class="goal-input min-h-[80px]"
+                                placeholder="e.g., Monthly savings, Bonus"></textarea>
+                        </div>
+
+                        <div class="goal-notice info">
+                            <iconify-icon icon="solar:info-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <div class="font-medium">Contribution Details</div>
+                                <div class="text-xs opacity-90">Your contribution will be added immediately and help you
+                                    reach your goal faster</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Review -->
+            <div id="contributeStep3" class="goal-step-content hidden">
+                <div class="space-y-4 goal-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Review Contribution</h4>
+                        <p class="text-xs text-slate-500">Confirm your contribution details</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                            <h5 class="text-xs font-semibold text-slate-900 mb-3 uppercase tracking-wide">Contribution
+                                Summary</h5>
+                            <div class="space-y-2">
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Selected Goal</span>
+                                    <span class="goal-review-value" id="contributeReviewGoal">House Down Payment</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Contribution Amount</span>
+                                    <span class="goal-review-value" id="contributeReviewAmount">$0.00</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Contribution Date</span>
+                                    <span class="goal-review-value" id="contributeReviewDate">-</span>
+                                </div>
+                                <div class="goal-review">
+                                    <span class="goal-review-title">Notes</span>
+                                    <span class="goal-review-value" id="contributeReviewNotes">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-100">
+                            <h5 class="text-xs font-semibold text-slate-900 mb-3 uppercase tracking-wide">Impact Preview
+                            </h5>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-600">Current Progress</span>
+                                    <span class="font-medium text-slate-900"
+                                        id="contributePreviewCurrent">$25,000.00</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-emerald-700 font-medium">+ New Contribution</span>
+                                    <span class="font-bold text-emerald-700"
+                                        id="contributePreviewContribution">$0.00</span>
+                                </div>
+                                <div class="h-px bg-emerald-200"></div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-semibold text-slate-900">New Total</span>
+                                    <span class="text-lg font-bold text-emerald-600"
+                                        id="contributePreviewNewTotal">$25,000.00</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-slate-500">Progress</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-slate-400" id="contributePreviewOldPercent">50%</span>
+                                            <iconify-icon icon="solar:arrow-right-linear" class="text-slate-300"
+                                                width="12"></iconify-icon>
+                                            <span class="font-bold text-emerald-600"
+                                                id="contributePreviewNewPercent">50%</span>
+                                        </div>
+                                    </div>
+                                    <div class="progress-bar h-2">
+                                        <div class="progress-bar-fill success transition-all duration-500"
+                                            id="contributePreviewProgressBar" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="goal-notice success">
+                            <iconify-icon icon="solar:check-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <div class="font-medium">Ready to Contribute</div>
+                                <div class="text-xs opacity-90">Your contribution will be processed immediately and help
+                                    you reach your goal faster</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button id="contributeBtnBack" onclick="contributePreviousStep()" class="btn btn-secondary hidden">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button id="contributeBtnNext" onclick="contributeNextStep()" class="btn btn-primary"
+                style="background:#10b981; box-shadow:none;">
+                Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // Goal Details Data (extended)
+    // ==========================================
+    var goalDetailsData = {
+        emergency: {
+            name: 'Emergency Fund',
+            icon: 'solar:shield-check-linear',
+            iconClass: 'bg-emerald-50 text-emerald-600',
+            current: 10000,
+            target: 10000,
+            status: 'Completed',
+            statusClass: 'badge-success',
+            priority: 'high',
+            priorityLabel: 'High Priority',
+            priorityClass: 'bg-red-50 text-red-600 border-red-100',
+            dueDate: 'Completed Jan 2025',
+            family: false,
+            notes: 'Six months of expenses saved for emergencies.'
+        },
+        house: {
+            name: 'House Down Payment',
+            icon: 'solar:home-2-linear',
+            iconClass: 'bg-blue-50 text-blue-600',
+            current: 25000,
+            target: 50000,
+            status: 'In Progress',
+            statusClass: 'badge-info',
+            priority: 'high',
+            priorityLabel: 'High Priority',
+            priorityClass: 'bg-red-50 text-red-600 border-red-100',
+            dueDate: 'Dec 31, 2026',
+            family: true,
+            notes: 'Saving for a 20% down payment on a new home.'
+        },
+        vacation: {
+            name: 'Vacation Fund',
+            icon: 'solar:airplane-linear',
+            iconClass: 'bg-purple-50 text-purple-600',
+            current: 1800,
+            target: 3000,
+            status: 'In Progress',
+            statusClass: 'badge-info',
+            priority: 'medium',
+            priorityLabel: 'Medium Priority',
+            priorityClass: 'bg-amber-50 text-amber-600 border-amber-100',
+            dueDate: 'Jun 01, 2026',
+            family: false,
+            notes: 'Summer vacation to Europe.'
+        },
+        laptop: {
+            name: 'New Laptop',
+            icon: 'solar:laptop-linear',
+            iconClass: 'bg-amber-50 text-amber-600',
+            current: 800,
+            target: 2000,
+            status: 'Overdue',
+            statusClass: 'badge-warning',
+            priority: 'low',
+            priorityLabel: 'Low Priority',
+            priorityClass: 'bg-slate-50 text-slate-600 border-slate-100',
+            dueDate: 'Dec 20, 2025',
+            family: false,
+            notes: 'New MacBook Pro for work.'
+        }
+    };
+
+    var currentViewGoalId = 'house';
+    var currentEditGoalId = 'house';
+
+    // ==========================================
+    // View Goal Modal
+    // ==========================================
+    window.openViewGoalModal = function (goalId) {
+        const goal = goalDetailsData[goalId];
+        if (!goal) return;
+
+        currentViewGoalId = goalId;
+
+        const percent = Math.round((goal.current / goal.target) * 100);
+        const remaining = goal.target - goal.current;
+        const monthlyNeeded = remaining > 0 ? (remaining / 24).toFixed(2) : 0; // rough estimate
+
+        // Update modal content
+        document.getElementById('view-goal-icon').className = `p-2 rounded-lg ${goal.iconClass}`;
+        document.getElementById('view-goal-icon').innerHTML = `<iconify-icon icon="${goal.icon}" width="20"></iconify-icon>`;
+        document.getElementById('view-goal-title').textContent = goal.name;
+        document.getElementById('view-goal-status').className = `badge ${goal.statusClass}`;
+        document.getElementById('view-goal-status').textContent = goal.status;
+        document.getElementById('view-goal-target').textContent = `$${goal.target.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        document.getElementById('view-goal-current').textContent = `$${goal.current.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        document.getElementById('view-goal-percent').textContent = `${percent}%`;
+        document.getElementById('view-goal-progress-bar').style.width = `${percent}%`;
+        document.getElementById('view-goal-remaining').textContent = remaining > 0 ? `$${remaining.toLocaleString('en-US', { minimumFractionDigits: 2 })} remaining` : 'Goal reached!';
+        document.getElementById('view-goal-due').textContent = goal.status === 'Completed' ? goal.dueDate : `Due ${goal.dueDate}`;
+        document.getElementById('view-goal-priority').className = `px-2.5 py-0.5 rounded-full text-xs font-medium ${goal.priorityClass}`;
+        document.getElementById('view-goal-priority').textContent = goal.priorityLabel;
+        document.getElementById('view-goal-monthly').textContent = remaining > 0 ? `$${parseFloat(monthlyNeeded).toLocaleString('en-US', { minimumFractionDigits: 2 })}/month` : 'N/A';
+        document.getElementById('view-goal-family').textContent = goal.family ? 'Yes' : 'No';
+        document.getElementById('view-goal-notes').textContent = goal.notes;
+
+        openModal('view-goal-modal');
+    }
+
+    // ==========================================
+    // Edit Goal Modal
+    // ==========================================
+    window.openEditGoalModal = function (goalId) {
+        const goal = goalDetailsData[goalId];
+        if (!goal) return;
+
+        currentEditGoalId = goalId;
+
+        // Populate form fields
+        document.getElementById('edit-goal-name').value = goal.name;
+        document.getElementById('edit-goal-target').value = goal.target.toFixed(2);
+        document.getElementById('edit-goal-current').value = goal.current.toFixed(2);
+        document.getElementById('edit-goal-notes').value = goal.notes;
+        document.getElementById('edit-goal-family').checked = goal.family;
+
+        // Set status
+        const statusMap = { 'Completed': 'completed', 'In Progress': 'in_progress', 'Overdue': 'in_progress', 'Not Started': 'not_started' };
+        document.getElementById('edit-goal-status').value = statusMap[goal.status] || 'in_progress';
+
+        // Set priority radio
+        const priorityRadios = document.querySelectorAll('input[name="edit-priority"]');
+        priorityRadios.forEach(radio => {
+            radio.checked = (radio.value === goal.priority);
+        });
+
+        openModal('edit-goal-modal');
+    }
+
+    window.submitUpdateGoal = function () {
+        const btn = document.querySelector('#edit-goal-modal .btn-primary');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Saving...';
+
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            closeModal('edit-goal-modal');
+            alert('Goal updated successfully!');
+        }, 1000);
+    }
+
+    // Inline script to handle view toggling locally for this module
+    function setViewMode(mode) {
+        const gridView = document.getElementById('grid-view');
+        const tableView = document.getElementById('table-view');
+        const gridBtn = document.getElementById('grid-view-btn');
+        const tableBtn = document.getElementById('table-view-btn');
+
+        // Reset animations
+        gridView.classList.remove('animate__fadeIn', 'animate__animated');
+        tableView.classList.remove('animate__fadeIn', 'animate__animated');
+
+        // Trigger reflow for animation restart
+        void gridView.offsetWidth;
+        void tableView.offsetWidth;
+
+        if (mode === 'table') {
+            gridView.classList.add('hidden');
+            tableView.classList.remove('hidden');
+            tableView.classList.add('animate__animated', 'animate__fadeIn');
+
+            // Update button states
+            tableBtn.classList.add('bg-white', 'text-emerald-600', 'shadow-sm');
+            tableBtn.classList.remove('text-slate-400');
+            gridBtn.classList.remove('bg-white', 'text-emerald-600', 'shadow-sm');
+            gridBtn.classList.add('text-slate-400');
+        } else {
+            tableView.classList.add('hidden');
+            gridView.classList.remove('hidden');
+            gridView.classList.add('animate__animated', 'animate__fadeIn');
+
+            // Update button states
+            gridBtn.classList.add('bg-white', 'text-emerald-600', 'shadow-sm');
+            gridBtn.classList.remove('text-slate-400');
+            tableBtn.classList.remove('bg-white', 'text-emerald-600', 'shadow-sm');
+            tableBtn.classList.add('text-slate-400');
+        }
+    }
+
+    function toggleExportMenu() {
+        // Mock export menu toggle
+        alert('Export menu would open here');
+    }
+
+    // ==========================================
+    // Create Goal Logic
+    // ==========================================
+    window.submitCreateGoal = function () {
+        const btn = document.querySelector('#createGoalModal .btn-primary');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Creating...';
+
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            closeModal('createGoalModal');
+            alert('Goal created successfully!');
+        }, 1500);
+    }
+
+    // ==========================================
+    // Contribute Logic
+    // ==========================================
+
+    // Goal data
+    var goalsData = {
+        house: { name: 'House Down Payment', current: 25000, target: 50000, icon: 'solar:home-2-linear', colorClass: 'bg-blue-50 text-blue-600' },
+        vacation: { name: 'Vacation Fund', current: 1800, target: 3000, icon: 'solar:airplane-linear', colorClass: 'bg-purple-50 text-purple-600' },
+        laptop: { name: 'New Laptop', current: 800, target: 2000, icon: 'solar:laptop-linear', colorClass: 'bg-amber-50 text-amber-600' }
+    };
+
+    var currentGoalId = 'house';
+
+    window.openContributeModal = function (goalId) {
+        // Set the selected goal
+        if (goalsData[goalId]) {
+            contributeSelectedGoal = goalId;
+        }
+
+        // Reset to step 1
+        contributeCurrentStep = 1;
+        contributeGoToStep(1);
+
+        // Pre-select the correct goal card in the contribute modal
+        var modal = document.getElementById('contribute-modal');
+        if (modal) {
+            modal.querySelectorAll('.goal-card').forEach(function (card) {
+                card.classList.remove('selected');
+            });
+
+            // Find the card with the matching goalId and select it
+            modal.querySelectorAll('.goal-card[onclick]').forEach(function (card) {
+                var onclick = card.getAttribute('onclick');
+                if (onclick && onclick.indexOf("'" + goalId + "'") !== -1) {
+                    card.classList.add('selected');
+                }
+            });
+        }
+
+        // Reset form fields
+        var amountInput = document.getElementById('contribution-amount');
+        var dateInput = document.getElementById('contribution-date');
+        var notesInput = document.getElementById('contribution-notes');
+        if (amountInput) amountInput.value = '';
+        if (dateInput) dateInput.value = '';
+        if (notesInput) notesInput.value = '';
+
+        openModal('contribute-modal');
+    }
+
+
+
+    // ==========================================
+    // Create Goal Modal Multi-Step Logic
+    // ==========================================
+    var createGoalCurrentStep = 1;
+    var createGoalSelectedPriority = 'medium';
+
+    window.createGoalNextStep = function () {
+        if (createGoalCurrentStep === 1) {
+            // Validate step 1
+            const name = document.getElementById('createGoalName').value;
+            const target = document.getElementById('createGoalTarget').value;
+            const date = document.getElementById('createGoalDate').value;
+
+            if (!name || !target || !date) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Update review data
+            updateCreateGoalReview();
+            createGoalGoToStep(2);
+        } else if (createGoalCurrentStep === 2) {
+            createGoalGoToStep(3);
+        } else if (createGoalCurrentStep === 3) {
+            submitCreateGoal();
+        }
+    };
+
+    window.createGoalPreviousStep = function () {
+        if (createGoalCurrentStep > 1) {
+            createGoalGoToStep(createGoalCurrentStep - 1);
+        }
+    };
+
+    window.createGoalGoToStep = function (step) {
+        var modal = document.getElementById('createGoalModal');
+        if (!modal) return;
+
+        // Hide all steps within this modal
+        modal.querySelectorAll('.goal-step-content').forEach(function (content) {
+            content.classList.add('hidden');
+        });
+
+        // Show current step
+        document.getElementById('createGoalStep' + step).classList.remove('hidden');
+
+        // Update stepper within this modal
+        modal.querySelectorAll('.goal-step-dot').forEach(function (dot) {
+            dot.classList.remove('active');
+        });
+        modal.querySelectorAll('.goal-step-label').forEach(function (label) {
+            label.classList.remove('active');
+        });
+
+        var dots = modal.querySelectorAll('.goal-step-dot');
+        var labels = modal.querySelectorAll('.goal-step-label');
+        if (dots[step - 1]) dots[step - 1].classList.add('active');
+        if (labels[step - 1]) labels[step - 1].classList.add('active');
+
+        // Update connectors within this modal
+        modal.querySelectorAll('.goal-step-connector').forEach(function (connector) {
+            connector.classList.remove('completed');
+        });
+        for (var i = 1; i < step; i++) {
+            var connector = modal.querySelector('.goal-step-connector[data-connector="' + i + '"]');
+            if (connector) connector.classList.add('completed');
+        }
+
+        // Update step text
+        document.getElementById('createGoalStepText').textContent = 'Step ' + step + ' of 3';
+
+        // Update buttons
+        var backBtn = document.getElementById('createGoalBtnBack');
+        var nextBtn = document.getElementById('createGoalBtnNext');
+
+        if (step === 1) {
+            backBtn.classList.add('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (step === 2) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (step === 3) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = '<iconify-icon icon="solar:check-circle-linear" width="16"></iconify-icon> Create Goal';
+        }
+
+        createGoalCurrentStep = step;
+    };
+    window.selectCreatePriority = function (priority) {
+        // Check the corresponding radio button
+        const selector = document.getElementById('create-priority-selector');
+        if (!selector) return;
+        const radio = selector.querySelector('input[value="' + priority + '"]');
+        if (radio) radio.checked = true;
+
+        // Update visual selected state on cards
+        selector.querySelectorAll('.goal-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        if (radio) {
+            radio.closest('label').querySelector('.goal-card').classList.add('selected');
+        }
+
+        createGoalSelectedPriority = priority;
+    };
+
+    // Handle radio button clicks for priority selection
+    (function () {
+        const selector = document.getElementById('create-priority-selector');
+        if (selector) {
+            selector.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    // Update visual state
+                    selector.querySelectorAll('.goal-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    this.closest('label').querySelector('.goal-card').classList.add('selected');
+                    createGoalSelectedPriority = this.value;
+                });
+            });
+
+            // Initialize: mark the default checked radio's card as selected
+            const checked = selector.querySelector('input[type="radio"]:checked');
+            if (checked) {
+                checked.closest('label').querySelector('.goal-card').classList.add('selected');
+                createGoalSelectedPriority = checked.value;
+            }
+        }
+    })();
+
+    window.updateCreateGoalReview = function () {
+        const name = document.getElementById('createGoalName').value;
+        const target = document.getElementById('createGoalTarget').value;
+        const current = document.getElementById('createGoalCurrent').value || '0';
+        const date = document.getElementById('createGoalDate').value;
+        const isFamily = document.getElementById('createGoalFamily').checked;
+
+        // Read priority from radio buttons
+        const selector = document.getElementById('create-priority-selector');
+        if (selector) {
+            const checkedRadio = selector.querySelector('input[type="radio"]:checked');
+            if (checkedRadio) createGoalSelectedPriority = checkedRadio.value;
+        }
+
+        // Update review display
+        document.getElementById('createReviewGoalName').textContent = name || '-';
+        document.getElementById('createReviewGoalTarget').textContent = target ? `$${parseFloat(target).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '-';
+        document.getElementById('createReviewGoalCurrent').textContent = current ? `$${parseFloat(current).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '$0.00';
+        document.getElementById('createReviewGoalDate').textContent = date ? new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
+        document.getElementById('createReviewGoalPriority').textContent = createGoalSelectedPriority.charAt(0).toUpperCase() + createGoalSelectedPriority.slice(1);
+        document.getElementById('createReviewGoalFamily').textContent = isFamily ? 'Yes' : 'No';
+    };
+
+    // Override existing submitCreateGoal function
+    window.submitCreateGoal = function () {
+        const btn = document.querySelector('#createGoalBtnNext');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Creating...';
+
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            closeModal('createGoalModal');
+            alert('Goal created successfully!');
+
+            // Reset form
+            document.getElementById('createGoalName').value = '';
+            document.getElementById('createGoalTarget').value = '';
+            document.getElementById('createGoalCurrent').value = '';
+            document.getElementById('createGoalDate').value = '';
+            document.getElementById('createGoalNotes').value = '';
+            document.getElementById('createGoalFamily').checked = false;
+
+            // Reset to step 1
+            createGoalGoToStep(1);
+        }, 1500);
+    };
+
+    // Initialize date
+    const dateInput = document.getElementById('contribution-date');
+    if (dateInput) dateInput.valueAsDate = new Date();
+
+    // ==========================================
+    // View Goal Modal Multi-Step Logic
+    // ==========================================
+    var viewGoalCurrentStep = 1;
+
+    window.viewGoalNextStep = function () {
+        if (viewGoalCurrentStep === 1) {
+            viewGoalGoToStep(2);
+        } else if (viewGoalCurrentStep === 2) {
+            // On final step, could add action buttons or close
+            closeModal('view-goal-modal');
+        }
+    };
+
+    window.viewGoalPreviousStep = function () {
+        if (viewGoalCurrentStep > 1) {
+            viewGoalGoToStep(viewGoalCurrentStep - 1);
+        }
+    };
+
+    window.viewGoalGoToStep = function (step) {
+        var modal = document.getElementById('view-goal-modal');
+        if (!modal) return;
+
+        // Hide all steps within this modal
+        modal.querySelectorAll('.goal-step-content').forEach(function (content) {
+            content.classList.add('hidden');
+        });
+
+        // Show current step
+        document.getElementById('viewGoalStep' + step).classList.remove('hidden');
+
+        // Update stepper within this modal
+        modal.querySelectorAll('.goal-step-dot').forEach(function (dot) {
+            dot.classList.remove('active');
+        });
+        modal.querySelectorAll('.goal-step-label').forEach(function (label) {
+            label.classList.remove('active');
+        });
+
+        var dots = modal.querySelectorAll('.goal-step-dot');
+        var labels = modal.querySelectorAll('.goal-step-label');
+        if (dots[step - 1]) dots[step - 1].classList.add('active');
+        if (labels[step - 1]) labels[step - 1].classList.add('active');
+
+        // Update connectors within this modal
+        modal.querySelectorAll('.goal-step-connector').forEach(function (connector) {
+            connector.classList.remove('completed');
+        });
+        for (var i = 1; i < step; i++) {
+            var connector = modal.querySelector('.goal-step-connector[data-connector="' + i + '"]');
+            if (connector) connector.classList.add('completed');
+        }
+
+        // Update step text
+        document.getElementById('viewGoalStepText').textContent = 'Step ' + step + ' of 2';
+
+        // Update buttons
+        var backBtn = document.getElementById('viewGoalBtnBack');
+        var nextBtn = document.getElementById('viewGoalBtnNext');
+
+        if (step === 1) {
+            backBtn.classList.add('hidden');
+            nextBtn.innerHTML = 'View Analysis <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (step === 2) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = 'Close <iconify-icon icon="solar:check-circle-linear" width="16"></iconify-icon>';
+        }
+
+        viewGoalCurrentStep = step;
+    };
+
+    // ==========================================
+    // Edit Goal Modal Multi-Step Logic
+    // ==========================================
+    var editGoalCurrentStep = 1;
+    var editGoalSelectedPriority = 'high';
+
+    window.editGoalNextStep = function () {
+        if (editGoalCurrentStep === 1) {
+            // Validate step 1
+            const name = document.getElementById('edit-goal-name').value;
+            const target = document.getElementById('edit-goal-target').value;
+            const date = document.getElementById('edit-goal-date').value;
+
+            if (!name || !target || !date) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Update review data
+            updateEditGoalReview();
+            editGoalGoToStep(2);
+        } else if (editGoalCurrentStep === 2) {
+            // Update review data
+            updateEditGoalReview();
+            editGoalGoToStep(3);
+        } else if (editGoalCurrentStep === 3) {
+            submitUpdateGoal();
+        }
+    };
+
+    window.editGoalPreviousStep = function () {
+        if (editGoalCurrentStep > 1) {
+            editGoalGoToStep(editGoalCurrentStep - 1);
+        }
+    };
+
+    window.editGoalGoToStep = function (step) {
+        var modal = document.getElementById('edit-goal-modal');
+        if (!modal) return;
+
+        // Hide all steps within this modal
+        modal.querySelectorAll('.goal-step-content').forEach(function (content) {
+            content.classList.add('hidden');
+        });
+
+        // Show current step
+        document.getElementById('editGoalStep' + step).classList.remove('hidden');
+
+        // Update stepper within this modal
+        modal.querySelectorAll('.goal-step-dot').forEach(function (dot) {
+            dot.classList.remove('active');
+        });
+        modal.querySelectorAll('.goal-step-label').forEach(function (label) {
+            label.classList.remove('active');
+        });
+
+        var dots = modal.querySelectorAll('.goal-step-dot');
+        var labels = modal.querySelectorAll('.goal-step-label');
+        if (dots[step - 1]) dots[step - 1].classList.add('active');
+        if (labels[step - 1]) labels[step - 1].classList.add('active');
+
+        // Update connectors within this modal
+        modal.querySelectorAll('.goal-step-connector').forEach(function (connector) {
+            connector.classList.remove('completed');
+        });
+        for (var i = 1; i < step; i++) {
+            var connector = modal.querySelector('.goal-step-connector[data-connector="' + i + '"]');
+            if (connector) connector.classList.add('completed');
+        }
+
+        // Update step text
+        document.getElementById('editGoalStepText').textContent = 'Step ' + step + ' of 3';
+
+        // Update buttons
+        var backBtn = document.getElementById('editGoalBtnBack');
+        var nextBtn = document.getElementById('editGoalBtnNext');
+
+        if (step === 1) {
+            backBtn.classList.add('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (step === 2) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (step === 3) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = '<iconify-icon icon="solar:check-circle-linear" width="16"></iconify-icon> Save Changes';
+        }
+
+        editGoalCurrentStep = step;
+    };
+
+    window.selectEditPriority = function (priority) {
+        // Check the corresponding radio button
+        const selector = document.getElementById('edit-priority-selector');
+        if (!selector) return;
+        const radio = selector.querySelector('input[value="' + priority + '"]');
+        if (radio) radio.checked = true;
+
+        // Update visual selected state on cards
+        selector.querySelectorAll('.goal-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        if (radio) {
+            radio.closest('label').querySelector('.goal-card').classList.add('selected');
+        }
+
+        editGoalSelectedPriority = priority;
+    };
+
+    // Handle radio button clicks for edit priority selection
+    (function () {
+        const selector = document.getElementById('edit-priority-selector');
+        if (selector) {
+            selector.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    // Update visual state
+                    selector.querySelectorAll('.goal-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    this.closest('label').querySelector('.goal-card').classList.add('selected');
+                    editGoalSelectedPriority = this.value;
+                });
+            });
+
+            // Initialize: mark the default checked radio's card as selected
+            const checked = selector.querySelector('input[type="radio"]:checked');
+            if (checked) {
+                checked.closest('label').querySelector('.goal-card').classList.add('selected');
+                editGoalSelectedPriority = checked.value;
+            }
+        }
+    })();
+
+    window.updateEditGoalReview = function () {
+        const name = document.getElementById('edit-goal-name').value;
+        const target = document.getElementById('edit-goal-target').value;
+        const date = document.getElementById('edit-goal-date').value;
+        const status = document.getElementById('edit-goal-status').value;
+        const isFamily = document.getElementById('edit-goal-family').checked;
+
+        // Read priority from radio buttons
+        const selector = document.getElementById('edit-priority-selector');
+        if (selector) {
+            const checkedRadio = selector.querySelector('input[type="radio"]:checked');
+            if (checkedRadio) editGoalSelectedPriority = checkedRadio.value;
+        }
+
+        // Update review display
+        document.getElementById('editReviewGoalName').textContent = name || '-';
+        document.getElementById('editReviewGoalTarget').textContent = target ? `$${parseFloat(target).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '-';
+        document.getElementById('editReviewGoalDate').textContent = date ? new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
+        document.getElementById('editReviewGoalStatus').textContent = status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ');
+        document.getElementById('editReviewGoalPriority').textContent = editGoalSelectedPriority.charAt(0).toUpperCase() + editGoalSelectedPriority.slice(1);
+        document.getElementById('editReviewGoalFamily').textContent = isFamily ? 'Yes' : 'No';
+    };
+
+    // Override existing submitUpdateGoal function
+    window.submitUpdateGoal = function () {
+        const btn = document.querySelector('#editGoalBtnNext');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Saving...';
+
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            closeModal('edit-goal-modal');
+            alert('Goal updated successfully!');
+
+            // Reset to step 1
+            editGoalGoToStep(1);
+        }, 1500);
+    };
+
+    // ==========================================
+    // Contribute Modal Multi-Step Logic
+    // ==========================================
+    var contributeCurrentStep = 1;
+    var contributeSelectedGoal = 'house';
+
+    window.contributeNextStep = function () {
+        if (contributeCurrentStep === 1) {
+            // Validate goal selection
+            if (!contributeSelectedGoal) {
+                alert('Please select a goal');
+                return;
+            }
+            contributeGoToStep(2);
+        } else if (contributeCurrentStep === 2) {
+            // Validate step 2
+            const amount = document.getElementById('contribution-amount').value;
+            const date = document.getElementById('contribution-date').value;
+
+            if (!amount || !date) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Update review data
+            updateContributeReview();
+            contributeGoToStep(3);
+        } else if (contributeCurrentStep === 3) {
+            submitContribution();
+        }
+    };
+
+    window.contributePreviousStep = function () {
+        if (contributeCurrentStep > 1) {
+            contributeGoToStep(contributeCurrentStep - 1);
+        }
+    };
+
+    window.contributeGoToStep = function (step) {
+        var modal = document.getElementById('contribute-modal');
+        if (!modal) return;
+
+        // Hide all steps within this modal
+        modal.querySelectorAll('.goal-step-content').forEach(function (content) {
+            content.classList.add('hidden');
+        });
+
+        // Show current step
+        document.getElementById('contributeStep' + step).classList.remove('hidden');
+
+        // Update stepper within this modal
+        modal.querySelectorAll('.goal-step-dot').forEach(function (dot) {
+            dot.classList.remove('active');
+        });
+        modal.querySelectorAll('.goal-step-label').forEach(function (label) {
+            label.classList.remove('active');
+        });
+
+        var dots = modal.querySelectorAll('.goal-step-dot');
+        var labels = modal.querySelectorAll('.goal-step-label');
+        if (dots[step - 1]) dots[step - 1].classList.add('active');
+        if (labels[step - 1]) labels[step - 1].classList.add('active');
+
+        // Update connectors within this modal
+        modal.querySelectorAll('.goal-step-connector').forEach(function (connector) {
+            connector.classList.remove('completed');
+        });
+        for (var i = 1; i < step; i++) {
+            var connector = modal.querySelector('.goal-step-connector[data-connector="' + i + '"]');
+            if (connector) connector.classList.add('completed');
+        }
+
+        // Update step text
+        document.getElementById('contributeStepText').textContent = 'Step ' + step + ' of 3';
+
+        // Update buttons
+        var backBtn = document.getElementById('contributeBtnBack');
+        var nextBtn = document.getElementById('contributeBtnNext');
+
+        if (step === 1) {
+            backBtn.classList.add('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (step === 2) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (step === 3) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = '<iconify-icon icon="solar:check-circle-linear" width="16"></iconify-icon> Add Contribution';
+        }
+
+        contributeCurrentStep = step;
+    };
+
+    window.selectContributeGoal = function (goalId) {
+        var modal = document.getElementById('contribute-modal');
+        if (!modal) return;
+
+        // Remove selected class from all cards within the contribute modal
+        modal.querySelectorAll('.goal-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        // Add selected class to the clicked card
+        modal.querySelectorAll('.goal-card[onclick]').forEach(function (card) {
+            var onclick = card.getAttribute('onclick');
+            if (onclick && onclick.indexOf("'" + goalId + "'") !== -1) {
+                card.classList.add('selected');
+            }
+        });
+
+        // Store selected goal
+        contributeSelectedGoal = goalId;
+    };
+
+    window.updateContributePreview = function (amount) {
+        const goal = goalsData[contributeSelectedGoal];
+        if (!goal) return;
+
+        const contribution = parseFloat(amount) || 0;
+        const newTotal = goal.current + contribution;
+        const oldPercent = Math.round((goal.current / goal.target) * 100);
+        const newPercent = Math.min(Math.round((newTotal / goal.target) * 100), 100);
+
+        // Update preview elements
+        document.getElementById('contributePreviewCurrent').textContent = `$${goal.current.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('contributePreviewContribution').textContent = `$${contribution.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('contributePreviewNewTotal').textContent = `$${newTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('contributePreviewOldPercent').textContent = `${oldPercent}%`;
+        document.getElementById('contributePreviewNewPercent').textContent = `${newPercent}%`;
+        document.getElementById('contributePreviewProgressBar').style.width = `${newPercent}%`;
+    };
+
+    window.updateContributeReview = function () {
+        const amount = document.getElementById('contribution-amount').value;
+        const date = document.getElementById('contribution-date').value;
+        const notes = document.getElementById('contribution-notes').value;
+        const goal = goalsData[contributeSelectedGoal];
+
+        // Update review display
+        document.getElementById('contributeReviewGoal').textContent = goal ? goal.name : '-';
+        document.getElementById('contributeReviewAmount').textContent = amount ? `$${parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '$0.00';
+        document.getElementById('contributeReviewDate').textContent = date ? new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
+        document.getElementById('contributeReviewNotes').textContent = notes || '-';
+
+        // Update preview
+        updateContributePreview(amount);
+    };
+
+    // Override existing submitContribution function
+    window.submitContribution = function () {
+        const btn = document.querySelector('#contributeBtnNext');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Processing...';
+
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            closeModal('contribute-modal');
+            alert('Contribution added successfully!');
+
+            // Reset form
+            document.getElementById('contribution-amount').value = '';
+            document.getElementById('contribution-date').value = '';
+            document.getElementById('contribution-notes').value = '';
+
+            // Reset to step 1
+            contributeGoToStep(1);
+        }, 1500);
+    };
+
+</script>
+
+<style>
+    /* Goal Modal Styles */
+    .goal-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem 1.5rem;
+        gap: 0.5rem;
+    }
+
+    .goal-step-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .goal-step-dot {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background: #f1f5f9;
+        border: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+        transition: all 0.3s ease;
+    }
+
+    .goal-step-dot.active {
+        background: #10b981;
+        border-color: #10b981;
+        color: white;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .goal-step-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #94a3b8;
+        transition: all 0.3s ease;
+    }
+
+    .goal-step-label.active {
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    .goal-step-connector {
+        width: 3rem;
+        height: 2px;
+        background: #e2e8f0;
+        position: relative;
+    }
+
+    .goal-step-connector[data-connector="1"]::after,
+    .goal-step-connector[data-connector="2"]::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 0%;
+        background: #10b981;
+        transition: width 0.3s ease;
+    }
+
+    .goal-step-connector.completed[data-connector="1"]::after,
+    .goal-step-connector.completed[data-connector="2"]::after {
+        width: 100%;
+    }
+
+    .goal-step-content {
+        animation: goalFadeIn 0.4s ease-out;
+    }
+
+    .goal-stagger>* {
+        animation: goalStagger 0.5s ease-out backwards;
+    }
+
+    .goal-stagger>*:nth-child(1) {
+        animation-delay: 0ms;
+    }
+
+    .goal-stagger>*:nth-child(2) {
+        animation-delay: 50ms;
+    }
+
+    .goal-stagger>*:nth-child(3) {
+        animation-delay: 100ms;
+    }
+
+    .goal-stagger>*:nth-child(4) {
+        animation-delay: 150ms;
+    }
+
+    .goal-stagger>*:nth-child(5) {
+        animation-delay: 200ms;
+    }
+
+    .goal-stagger>*:nth-child(6) {
+        animation-delay: 250ms;
+    }
+
+    @keyframes goalFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes goalStagger {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .goal-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .goal-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .goal-card {
+        position: relative;
+        padding: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .goal-card:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .goal-card.selected {
+        border-color: #10b981;
+        background: #f0fdf4;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .goal-check {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 50%;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.2s ease;
+        color: white;
+    }
+
+    .goal-card.selected .goal-check {
+        background: #10b981;
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .goal-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .goal-notice.info {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        color: #0369a1;
+    }
+
+    .goal-notice.success {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #15803d;
+    }
+
+    .goal-review {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .goal-review:last-child {
+        border-bottom: none;
+    }
+
+    .goal-review-title {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #64748b;
+    }
+
+    .goal-review-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .goal-step-content,
+        .goal-stagger>* {
+            animation: none !important;
+        }
+    }
+</style>

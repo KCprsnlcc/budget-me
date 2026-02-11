@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetMe - User Dashboard</title>
+    <meta name="description" content="BudgetMe - Personal finance management dashboard">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body
+    class="bg-slate-50 text-slate-600 h-screen flex overflow-hidden selection:bg-emerald-500/20 selection:text-emerald-700">
+
+    <!-- Layout Components Placeholder (Desktop Sidebar) -->
+    <div id="layout-sidebar-desktop" class="contents"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative bg-white">
+
+        <!-- Layout Components Placeholder (Header) -->
+        <div id="layout-header" class="contents"></div>
+
+        <!-- Dashboard Content Scroll Area -->
+        <div class="flex-1 overflow-y-auto p-6 lg:p-8 scroll-smooth" id="main-content">
+            <!-- Module content will be loaded here dynamically -->
+            <div class="flex items-center justify-center h-full">
+            </div>
+        </div>
+    </main>
+
+    <!-- Layout Components Placeholder (Mobile Navigation) -->
+    <div id="layout-mobile-container"></div>
+
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>

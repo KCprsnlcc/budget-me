@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - BudgetMe</title>
+    <meta name="description" content="Create your BudgetMe account for professional financial clarity.">
+
+    <!-- Scripts & Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/styles.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .text-balance {
+            text-wrap: balance;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-slate-900 antialiased overflow-hidden">
+    <div class="flex min-h-screen w-full">
+
+        <!-- Left Panel: Authentication -->
+        <div
+            class="flex w-full shrink-0 flex-col border-r border-slate-100 bg-white sm:w-[400px] lg:w-[450px] relative z-20 h-screen">
+
+            <!-- Fixed Header: Logo + Title -->
+            <div class="shrink-0 px-8 pt-6 pb-2 bg-white z-10">
+                <div class="mb-6 flex items-center gap-2">
+                    <img src="../../BudgetMe-logo/light-no-bg-logo-2.svg" alt="BudgetMe" class="h-10 w-auto">
+                </div>
+                <div class="mx-auto w-full max-w-[300px]">
+                    <h1 class="mb-1 text-xl font-medium tracking-tight text-slate-900">Create your account</h1>
+                    <p class="text-xs text-slate-500">Start your journey to financial clarity</p>
+                </div>
+            </div>
+
+            <!-- Scrollable Content: Form -->
+            <div class="flex-1 overflow-y-auto px-8 scroll-smooth">
+                <div class="flex min-h-full flex-col items-center justify-center py-2">
+                    <div class="w-full max-w-[300px]">
+
+                        <!-- Social Login -->
+                        <div class="space-y-2 mt-4">
+                            <button
+                                class="group flex w-full items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50/50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-100 focus:ring-offset-1">
+                                <i data-lucide="mail" class="h-3.5 w-3.5 text-slate-500 group-hover:text-slate-700"></i>
+                                Continue with Google
+                            </button>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="relative my-6">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-slate-100"></div>
+                            </div>
+                            <div class="relative flex justify-center text-[10px] uppercase tracking-wide">
+                                <span class="bg-white px-2 text-slate-400">or</span>
+                            </div>
+                        </div>
+
+                        <!-- Registration Form -->
+                        <form class="space-y-4">
+                            <div class="space-y-1.5">
+                                <label for="fullname" class="block text-xs font-medium text-slate-600">Full name</label>
+                                <input type="text" id="fullname" name="fullname" placeholder="John Doe"
+                                    class="block w-full rounded-md border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 placeholder-slate-400 transition-all focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/10 hover:border-slate-300">
+                                <div id="fullname-error" class="mt-1 text-xs text-red-600 hidden"></div>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label for="email" class="block text-xs font-medium text-slate-600">Email
+                                    address</label>
+                                <input type="email" id="email" name="email" placeholder="you@example.com"
+                                    class="block w-full rounded-md border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 placeholder-slate-400 transition-all focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/10 hover:border-slate-300">
+                                <div id="email-error" class="mt-1 text-xs text-red-600 hidden"></div>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label for="password" class="block text-xs font-medium text-slate-600">Password</label>
+                                <div class="relative">
+                                    <input type="password" id="password" name="password"
+                                        placeholder="Create a strong password"
+                                        class="block w-full rounded-md border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 placeholder-slate-400 transition-all focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/10 hover:border-slate-300">
+                                    <button type="button" id="toggle-password"
+                                        onclick="authUtils.togglePassword('password', 'toggle-password')"
+                                        class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors">
+                                        <i data-lucide="eye" class="h-3.5 w-3.5"></i>
+                                    </button>
+                                </div>
+                                <div id="password-error" class="mt-1 text-xs text-red-600 hidden"></div>
+                                <div class="mt-1 text-[10px] text-slate-400">
+                                    Must be at least 8 characters long
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label for="confirm-password" class="block text-xs font-medium text-slate-600">Confirm
+                                    password</label>
+                                <div class="relative">
+                                    <input type="password" id="confirm-password" name="confirm-password"
+                                        placeholder="Confirm your password"
+                                        class="block w-full rounded-md border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 placeholder-slate-400 transition-all focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/10 hover:border-slate-300">
+                                    <button type="button" id="toggle-confirm-password"
+                                        onclick="authUtils.togglePassword('confirm-password', 'toggle-confirm-password')"
+                                        class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors">
+                                        <i data-lucide="eye" class="h-3.5 w-3.5"></i>
+                                    </button>
+                                </div>
+                                <div id="confirm-password-error" class="mt-1 text-xs text-red-600 hidden"></div>
+                            </div>
+
+                            <div class="flex items-start pt-1">
+                                <div class="flex h-5 items-center">
+                                    <input id="terms" name="terms" type="checkbox"
+                                        class="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer">
+                                </div>
+                                <div class="ml-2 text-xs">
+                                    <label for="terms" class="text-slate-600 cursor-pointer select-none">
+                                        I agree to the <a href="#"
+                                            class="text-emerald-600 hover:text-emerald-700 underline decoration-emerald-200 underline-offset-2 transition-colors">Terms
+                                            of Service</a> and <a href="#"
+                                            class="text-emerald-600 hover:text-emerald-700 underline decoration-emerald-200 underline-offset-2 transition-colors">Privacy
+                                            Policy</a>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit"
+                                class="mt-2 w-full rounded-lg bg-emerald-500 px-4 py-2 text-xs font-medium text-white shadow-sm transition-all hover:bg-emerald-600 hover:shadow disabled:opacity-70 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                                Create account
+                            </button>
+                        </form>
+
+                        <div class="mt-6 text-center text-xs text-slate-500">
+                            Already have an account? <a href="login.html"
+                                class="font-medium text-emerald-600 hover:text-emerald-700 transition-colors">Sign
+                                in</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fixed Footer: Legal -->
+            <div class="shrink-0 px-8 pb-6 pt-2 bg-white z-10">
+                <div class="mx-auto w-full max-w-[300px] text-[10px] leading-relaxed text-slate-400 text-left">
+                    By creating an account, you agree to BudgetMe's <a href="#"
+                        class="underline decoration-slate-300 underline-offset-2 hover:text-slate-600 hover:decoration-slate-400 transition-all">Terms
+                        of Service</a> and <a href="#"
+                        class="underline decoration-slate-300 underline-offset-2 hover:text-slate-600 hover:decoration-slate-400 transition-all">Privacy
+                        Policy</a>.
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Testimonial -->
+        <div class="hidden flex-1 flex-col items-center justify-center bg-white p-12 lg:flex relative overflow-hidden">
+
+            <!-- Decorative Background Pattern -->
+            <div
+                class="absolute inset-0 bg-[linear-gradient(#e2e8f0_1px,transparent_1px),linear-gradient(90deg,#e2e8f0_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_100%)] opacity-40">
+            </div>
+
+            <svg class="absolute inset-0 h-full w-full pointer-events-none scale-x-[-1]" fill="none"
+                viewBox="0 0 696 316" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                    <linearGradient id="beam-gradient-0" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#10b981" stop-opacity="0" />
+                        <stop offset="20%" stop-color="#10b981" stop-opacity="1" />
+                        <stop offset="50%" stop-color="#059669" stop-opacity="1" />
+                        <stop offset="80%" stop-color="#34d399" stop-opacity="1" />
+                        <stop offset="100%" stop-color="#34d399" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient id="beam-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#64748b" stop-opacity="0" />
+                        <stop offset="20%" stop-color="#64748b" stop-opacity="0.8" />
+                        <stop offset="50%" stop-color="#94a3b8" stop-opacity="0.8" />
+                        <stop offset="80%" stop-color="#cbd5e1" stop-opacity="0.8" />
+                        <stop offset="100%" stop-color="#cbd5e1" stop-opacity="0" />
+                    </linearGradient>
+                </defs>
+                <g opacity="0.1">
+                    <path d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875" stroke="currentColor"
+                        class="text-slate-300" stroke-width="0.5" />
+                    <path d="M-358 -213C-358 -213 -290 192 174 319C638 446 706 851 706 851" stroke="currentColor"
+                        class="text-slate-300" stroke-width="0.5" />
+                    <path d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827" stroke="currentColor"
+                        class="text-slate-300" stroke-width="0.5" />
+                </g>
+                <path d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875" stroke="url(#beam-gradient-0)"
+                    stroke-width="1.5" stroke-linecap="round" class="animate-beam-slow" />
+                <path d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827" stroke="url(#beam-gradient-1)"
+                    stroke-width="1" stroke-linecap="round" class="animate-beam-medium opacity-60" />
+                <path d="M-204 -381C-204 -381 -136 24 328 151C792 278 860 683 860 683" stroke="url(#beam-gradient-0)"
+                    stroke-width="1.5" stroke-linecap="round" class="animate-beam-fast delay-200" />
+            </svg>
+
+            <!-- Top Right Action -->
+            <div class="absolute right-8 top-8 z-10">
+                <a href="../../pages/landing.html"
+                    class="group inline-flex items-center gap-2 px-6 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-[13px] font-medium transition-all shadow-sm">
+                    <i data-lucide="arrow-left" class="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-600"></i>
+                    Back to home
+                </a>
+            </div>
+
+            <!-- Quote Content -->
+            <div class="w-full max-w-[580px] relative z-10">
+                <div class="mb-8 p-3 bg-white w-fit rounded-xl border border-slate-100 shadow-sm">
+                    <i data-lucide="quote" class="h-6 w-6 rotate-180 fill-emerald-50 text-emerald-500"></i>
+                </div>
+
+                <blockquote id="testimonial-content"
+                    class="mb-10 text-2xl font-normal leading-snug tracking-tight text-slate-900 text-balance">
+                    <!-- Testimonial content will be inserted here -->
+                </blockquote>
+
+                <div class="flex items-center gap-4">
+                    <div id="testimonial-avatar"
+                        class="h-10 w-10 overflow-hidden rounded-full ring-2 ring-white shadow-sm flex items-center justify-center bg-emerald-100 text-emerald-700 text-xs font-bold">
+                        <!-- Avatar will be inserted here -->
+                    </div>
+                    <div>
+                        <div id="testimonial-name" class="text-sm font-medium text-slate-900">
+                            <!-- Name will be inserted here -->
+                        </div>
+                        <div id="testimonial-username" class="text-xs text-slate-500 font-medium">
+                            <!-- Username will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../js/auth.js"></script>
+    <script>
+        // Enhanced validation for registration with auto-scroll
+        function validateRegistration() {
+            const form = document.querySelector('form');
+            if (!form) return false;
+
+            // Clear all errors first
+            document.querySelectorAll('[id$="-error"]').forEach(error => {
+                error.classList.add('hidden');
+            });
+            document.querySelectorAll('input').forEach(input => {
+                input.classList.remove('border-red-500', 'bg-red-50');
+                input.classList.add('border-slate-200', 'bg-slate-50/50');
+            });
+
+            let isValid = true;
+            let firstInvalidFieldId = null;
+
+            // Validate full name
+            const fullname = document.getElementById('fullname');
+            if (!fullname.value.trim()) {
+                showError('fullname', 'Full name is required');
+                firstInvalidFieldId = firstInvalidFieldId || 'fullname';
+                isValid = false;
+            }
+
+            // Validate email
+            const email = document.getElementById('email');
+            if (!email.value) {
+                showError('email', 'Email is required');
+                firstInvalidFieldId = firstInvalidFieldId || 'email';
+                isValid = false;
+            } else if (!validateEmail(email.value)) {
+                showError('email', 'Please enter a valid email address');
+                firstInvalidFieldId = firstInvalidFieldId || 'email';
+                isValid = false;
+            }
+
+            // Validate password
+            const password = document.getElementById('password');
+            if (!password.value) {
+                showError('password', 'Password is required');
+                firstInvalidFieldId = firstInvalidFieldId || 'password';
+                isValid = false;
+            } else if (!validatePassword(password.value)) {
+                showError('password', 'Password must be at least 8 characters long');
+                firstInvalidFieldId = firstInvalidFieldId || 'password';
+                isValid = false;
+            }
+
+            // Validate password confirmation
+            const confirmPassword = document.getElementById('confirm-password');
+            if (!confirmPassword.value) {
+                showError('confirm-password', 'Please confirm your password');
+                firstInvalidFieldId = firstInvalidFieldId || 'confirm-password';
+                isValid = false;
+            } else if (password.value !== confirmPassword.value) {
+                showError('confirm-password', 'Passwords do not match');
+                firstInvalidFieldId = firstInvalidFieldId || 'confirm-password';
+                isValid = false;
+            }
+
+            // Validate terms acceptance
+            const terms = document.getElementById('terms');
+            if (!terms.checked) {
+                alert('Please accept the Terms of Service and Privacy Policy');
+                // Scroll to terms checkbox
+                if (typeof focusField === 'function') {
+                    focusField('terms');
+                }
+                isValid = false;
+            }
+
+            // Auto-scroll to first invalid field
+            if (!isValid && firstInvalidFieldId && typeof focusField === 'function') {
+                setTimeout(() => focusField(firstInvalidFieldId), 100);
+            }
+
+            return isValid;
+        }
+
+        // Override form submission for registration
+        document.addEventListener('DOMContentLoaded', function () {
+            initAuthPage('register');
+
+            const form = document.querySelector('form');
+            if (form) {
+                form.removeEventListener('submit', handleFormSubmit);
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    if (validateRegistration()) {
+                        // Show loading state
+                        const submitButton = form.querySelector('button[type="submit"]');
+                        submitButton.disabled = true;
+                        submitButton.innerHTML = '<span class="text-white">Creating account...</span>';
+
+                        // Simulate API call
+                        setTimeout(() => {
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'Create account';
+
+                            // Redirect to dashboard
+                            window.location.href = '../../dashboard.html#dashboard';
+                        }, 2000);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

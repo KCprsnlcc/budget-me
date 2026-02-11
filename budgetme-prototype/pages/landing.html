@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetMe - Professional Financial Clarity</title>
+    <meta name="description" content="The refined platform for professional financial clarity and growth.">
+
+    <!-- Scripts & Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-slate-900 overflow-x-hidden">
+    <!-- Background Grid & Glows -->
+    <div class="fixed inset-0 z-0 pointer-events-none"
+        style="background-image: linear-gradient(to right, #f1f5f9 1px, transparent 1px), linear-gradient(to bottom, #f1f5f9 1px, transparent 1px); background-size: 6rem 6rem;">
+    </div>
+
+    <!-- Root containers for modular sections -->
+    <div id="landing-navbar"></div>
+    <div id="landing-hero"></div>
+    <div id="landing-features"></div>
+    <div id="landing-modules"></div>
+    <div id="landing-howitworks"></div>
+    <div id="landing-testimonials"></div>
+    <div id="landing-footer"></div>
+
+    <script>
+        (function () {
+            const sections = [
+                { id: 'landing-navbar', file: 'navbar.html' },
+                { id: 'landing-hero', file: 'hero.html' },
+                { id: 'landing-features', file: 'features.html' },
+                { id: 'landing-modules', file: 'modules.html' },
+                { id: 'landing-howitworks', file: 'howitworks.html' },
+                { id: 'landing-testimonials', file: 'testimonials.html' },
+                { id: 'landing-footer', file: 'footer.html' }
+            ];
+
+            async function loadLanding() {
+                for (const section of sections) {
+                    try {
+                        const response = await fetch(section.file);
+                        if (response.ok) {
+                            const html = await response.text();
+                            document.getElementById(section.id).innerHTML = html;
+                        }
+                    } catch (error) {
+                        console.error(`Error loading ${section.file}:`, error);
+                    }
+                }
+            }
+
+            loadLanding();
+        })();
+    </script>
+</body>
+
+</html>

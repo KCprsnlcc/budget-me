@@ -1,0 +1,378 @@
+<!-- BudgetSense AI Module - Single Column Messenger Interface -->
+<style>
+    /* Scrollbar Styling */
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="max-w-5xl mx-auto h-[calc(100vh-140px)] min-h-[600px] space-y-6">
+
+    <!-- Messenger Container (Single Column) -->
+    <div class="flex h-full bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+
+        <!-- MAIN CHAT AREA -->
+        <main class="flex-1 flex flex-col min-w-0 bg-white relative">
+
+            <!-- Header -->
+            <header class="h-16 flex items-center justify-between px-6 bg-white/80 backdrop-blur-sm flex-shrink-0 z-10">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 flex items-center justify-center text-emerald-500">
+                            <iconify-icon icon="solar:chat-round-line-linear" width="28"></iconify-icon>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                                BudgetSense AI
+                                <span
+                                    class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold tracking-wide uppercase">Beta</span>
+                            </h2>
+                            <div class="flex items-center gap-1.5 text-[10px] text-slate-500">
+                                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                                Always Online
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <!-- Model Selector -->
+                    <div class="relative">
+                        <button onclick="toggleModelDropdown()"
+                            class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors text-xs font-medium text-slate-600 group">
+                            <iconify-icon icon="solar:monitor-linear"
+                                class="text-slate-400 group-hover:text-emerald-500 transition-colors"></iconify-icon>
+                            <span>gpt-oss-20b</span>
+                            <iconify-icon icon="solar:alt-arrow-down-linear" class="text-slate-400"></iconify-icon>
+                        </button>
+
+                        <!-- Dropdown -->
+                        <div id="model-dropdown"
+                            class="absolute top-full right-0 mt-2 w-72 bg-white rounded-lg border border-slate-200/60 shadow-sm overflow-hidden hidden z-50">
+                            <div class="p-3 bg-slate-50 border-b border-slate-100">
+                                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Select Model
+                                </div>
+
+                            </div>
+                            <div class="max-h-64 overflow-y-auto scrollbar-thin">
+                                <!-- Free Model -->
+                                <button
+                                    class="w-full p-3 text-left hover:bg-slate-50 transition-colors border-l-2 border-emerald-500 bg-emerald-50/50">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <div class="text-xs font-semibold text-slate-900">gpt-oss-20b</div>
+                                            <div class="text-[10px] text-slate-500">Default Model (Free)</div>
+                                        </div>
+                                        <iconify-icon icon="solar:check-circle-bold" class="text-emerald-500"
+                                            width="16"></iconify-icon>
+                                    </div>
+                                </button>
+                                <!-- Other Models -->
+                                <button class="w-full p-3 text-left hover:bg-slate-50 transition-colors group">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div
+                                                class="text-xs font-semibold text-slate-900 group-hover:text-emerald-500 transition-colors">
+                                                GPT-4o</div>
+                                            <div class="text-[10px] text-slate-500">Fastest & most capable</div>
+                                        </div>
+                                    </div>
+                                </button>
+                                <button class="w-full p-3 text-left hover:bg-slate-50 transition-colors group">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div
+                                                class="text-xs font-semibold text-slate-900 group-hover:text-emerald-500 transition-colors">
+                                                GPT-5 Preview</div>
+                                            <div class="text-[10px] text-slate-500">Reasoning capabilities</div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="h-8 w-px bg-slate-200 mx-1"></div>
+
+                    <button class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Clear Chat">
+                        <iconify-icon icon="solar:trash-bin-trash-linear" width="20"></iconify-icon>
+                    </button>
+                    <button
+                        class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                        title="Export Chat">
+                        <iconify-icon icon="solar:export-linear" width="20"></iconify-icon>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Messages Container -->
+            <div id="chat-messages"
+                class="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-thin relative scroll-smooth bg-white">
+
+                <!-- Welcome Message -->
+                <div class="flex items-start gap-4 mx-auto max-w-3xl">
+                    <div class="w-10 h-10 flex items-center justify-center flex-shrink-0 text-emerald-500 mt-1">
+                        <iconify-icon icon="solar:chat-round-line-linear" width="32"></iconify-icon>
+                    </div>
+                    <div class="flex-1 space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-800">BudgetSense AI</span>
+                            <span class="text-[10px] text-slate-400">10:30 AM</span>
+                        </div>
+
+                        <div
+                            class="bg-slate-50 rounded-[2rem] rounded-tl-sm px-6 py-5 text-slate-800 shadow-sm border border-slate-100 transition-all hover:shadow-md">
+                            <h3 class="font-semibold text-slate-800 mb-2">Hello John! 👋</h3>
+                            <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                                I'm your personal financial assistant. I've analyzed your recent transactions and I
+                                noticed your
+                                <span class="font-medium text-emerald-500">food spending</span> is trending down this
+                                month.
+                            </p>
+                            <p class="text-sm text-slate-600 leading-relaxed">
+                                How can I help you today?
+                            </p>
+                        </div>
+
+                        <!-- Suggestion Chips - Horizontal Scrollable -->
+                        <div class="flex flex-wrap gap p-1">
+                            <button
+                                class="px-5 py-2.5 bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 rounded-full text-xs text-slate-600 transition-all shadow-sm hover:shadow-md flex items-center gap-2 group mr-2 mb-2"
+                                onclick="sendSuggestion('Analyze my food spending')">
+                                <iconify-icon icon="solar:pie-chart-2-linear"
+                                    class="text-slate-400 group-hover:text-emerald-500"></iconify-icon>
+                                Analyze food spending
+                            </button>
+                            <button
+                                class="px-5 py-2.5 bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 rounded-full text-xs text-slate-600 transition-all shadow-sm hover:shadow-md flex items-center gap-2 group mr-2 mb-2"
+                                onclick="sendSuggestion('How can I save more?')">
+                                <iconify-icon icon="solar:lightbulb-bolt-linear"
+                                    class="text-slate-400 group-hover:text-emerald-500"></iconify-icon>
+                                How can I save more?
+                            </button>
+                            <button
+                                class="px-5 py-2.5 bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 rounded-full text-xs text-slate-600 transition-all shadow-sm hover:shadow-md flex items-center gap-2 group mb-2"
+                                onclick="sendSuggestion('Create a budget plan')">
+                                <iconify-icon icon="solar:checklist-minimalistic-linear"
+                                    class="text-slate-400 group-hover:text-emerald-500"></iconify-icon>
+                                Create a budget plan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Message -->
+                <div class="flex items-start gap-4 flex-row-reverse mx-auto max-w-3xl">
+                    <div class="w-10 h-10 flex items-center justify-center flex-shrink-0 mt-1">
+                        <iconify-icon icon="solar:user-circle-linear" width="32" class="text-slate-400"></iconify-icon>
+                    </div>
+                    <div class="flex flex-col items-end gap-1 max-w-[85%]">
+                        <div class="flex items-center gap-2 flex-row-reverse">
+                            <span class="text-xs font-semibold text-slate-800">You</span>
+                            <span class="text-[10px] text-slate-400">10:32 AM</span>
+                        </div>
+                        <div class="bg-emerald-500 text-white rounded-[2rem] rounded-tr-sm px-6 py-3.5 shadow-sm">
+                            <p class="text-sm leading-relaxed">Can you show me my recent subscription charges?</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Response with Table -->
+                <div class="flex items-start gap-4 mx-auto max-w-3xl">
+                    <div class="w-10 h-10 flex items-center justify-center flex-shrink-0 text-emerald-500 mt-1">
+                        <iconify-icon icon="solar:chat-round-line-linear" width="32"></iconify-icon>
+                    </div>
+                    <div class="flex-1 space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-800">BudgetSense AI</span>
+                            <span
+                                class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 text-slate-500 uppercase tracking-wide">gpt-oss-20b</span>
+                        </div>
+
+                        <div
+                            class="bg-slate-50 rounded-[2rem] rounded-tl-sm px-6 py-5 text-slate-800 shadow-sm border border-slate-100 transition-all hover:shadow-md">
+                            <div class="text-sm leading-relaxed mb-4">
+                                Here are your recent subscription charges I found in your transactions history:
+                            </div>
+
+                            <!-- Table Viewer -->
+                            <div class="overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-xs">
+                                        <thead class="bg-slate-50/50 border-b border-slate-100">
+                                            <tr>
+                                                <th
+                                                    class="px-5 py-3 text-left font-semibold text-slate-500 uppercase tracking-wider">
+                                                    Service</th>
+                                                <th
+                                                    class="px-5 py-3 text-left font-semibold text-slate-500 uppercase tracking-wider">
+                                                    Date</th>
+                                                <th
+                                                    class="px-5 py-3 text-right font-semibold text-slate-500 uppercase tracking-wider">
+                                                    Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-50">
+                                            <tr class="hover:bg-slate-50 transition-colors">
+                                                <td
+                                                    class="px-5 py-3 text-slate-700 font-medium flex items-center gap-2">
+                                                    <div
+                                                        class="w-6 h-6 rounded bg-red-50 text-red-500 flex items-center justify-center">
+                                                        <iconify-icon icon="solar:play-circle-linear"
+                                                            width="14"></iconify-icon>
+                                                    </div>
+                                                    Netflix
+                                                </td>
+                                                <td class="px-5 py-3 text-slate-500">Oct 21, 2024</td>
+                                                <td class="px-5 py-3 text-right text-slate-900 font-semibold">$15.99
+                                                </td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50 transition-colors">
+                                                <td
+                                                    class="px-5 py-3 text-slate-700 font-medium flex items-center gap-2">
+                                                    <div
+                                                        class="w-6 h-6 rounded bg-green-50 text-green-500 flex items-center justify-center">
+                                                        <iconify-icon icon="solar:music-note-linear"
+                                                            width="14"></iconify-icon>
+                                                    </div>
+                                                    Spotify
+                                                </td>
+                                                <td class="px-5 py-3 text-slate-500">Oct 18, 2024</td>
+                                                <td class="px-5 py-3 text-right text-slate-900 font-semibold">$9.99</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50 transition-colors">
+                                                <td
+                                                    class="px-5 py-3 text-slate-700 font-medium flex items-center gap-2">
+                                                    <div
+                                                        class="w-6 h-6 rounded bg-blue-50 text-blue-500 flex items-center justify-center">
+                                                        <iconify-icon icon="solar:palette-linear"
+                                                            width="14"></iconify-icon>
+                                                    </div>
+                                                    Adobe Creative
+                                                </td>
+                                                <td class="px-5 py-3 text-slate-500">Oct 15, 2024</td>
+                                                <td class="px-5 py-3 text-right text-slate-900 font-semibold">$54.99
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="p-2.5 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                                <span class="text-[10px] text-slate-400 font-medium px-2">Total: $80.97 / month</span>
+                                <button
+                                    class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-slate-500 hover:text-emerald-500 hover:bg-white border border-transparent hover:border-slate-200 rounded transition-all">
+                                    <iconify-icon icon="solar:copy-linear" width="12"></iconify-icon>
+                                    Copy Table
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spacer for scrolling -->
+                <div class="h-4"></div>
+
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-3 bg-white border-t border-slate-100 relative z-20">
+                <div class="mx-auto max-w-3xl">
+                    <div
+                        class="relative flex items-end gap-2 bg-slate-50 border border-slate-200/60 rounded-3xl p-2 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/20 transition-all shadow-sm">
+                        <!-- Attachment Button -->
+                        <button
+                            class="p-2 text-slate-400 hover:text-emerald-500 hover:bg-white rounded-full transition-colors flex-shrink-0">
+                            <iconify-icon icon="solar:paperclip-linear" width="20"></iconify-icon>
+                        </button>
+
+                        <textarea id="chat-textarea" placeholder="Message BudgetSense..." rows="1"
+                            class="w-full bg-transparent border-none text-sm text-slate-600 placeholder-slate-400 focus:outline-none resize-none py-2.5 max-h-32 leading-relaxed custom-scrollbar"
+                            oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+
+                        <!-- Send Button -->
+                        <button
+                            class="p-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full transition-all shadow-sm hover:shadow-md flex-shrink-0">
+                            <iconify-icon icon="solar:arrow-up-linear" width="20"></iconify-icon>
+                        </button>
+                    </div>
+
+                    <div class="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-medium">
+                        <span class="flex items-center gap-1">
+                            <iconify-icon icon="solar:shield-check-linear" width="10"></iconify-icon>
+                            Private & Secure
+                        </span>
+                        <div>|</div>
+                        <span>Powered by</span>
+                        <img src="BudgetMe-logo/OpenAI-black-monoblossom.svg" alt="OpenAI"
+                            class="h-3 w-auto opacity-70">
+                        <span>OpenAI</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login/Limit Overlay -->
+
+
+        </main>
+    </div>
+</div>
+
+<script>
+    (function () {
+        // Dropdown State
+        let isDropdownOpen = false;
+
+        // Elements
+        const dropdown = document.getElementById('model-dropdown');
+
+        // Toggle Model Dropdown
+        window.toggleModelDropdown = function () {
+            isDropdownOpen = !isDropdownOpen;
+            if (isDropdownOpen) {
+                dropdown.classList.remove('hidden');
+            } else {
+                dropdown.classList.add('hidden');
+            }
+        };
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const isClickInside = dropdown.contains(event.target) ||
+                event.target.closest('button[onclick="toggleModelDropdown()"]');
+
+            if (!isClickInside && isDropdownOpen) {
+                dropdown.classList.add('hidden');
+                isDropdownOpen = false;
+            }
+        });
+
+        // Show/Hide Login Modal
+
+
+        // Handle Suggestions
+        window.sendSuggestion = function (text) {
+            const textarea = document.getElementById('chat-textarea');
+            if (textarea) {
+                textarea.value = text;
+                textarea.focus();
+                // Optional: Auto-resize
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            }
+        };
+
+    })();
+</script>

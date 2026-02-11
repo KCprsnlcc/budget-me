@@ -1,0 +1,2549 @@
+<!-- Settings Module content -->
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Page Header -->
+    <div>
+        <h2 class="text-2xl font-semibold text-slate-900 tracking-tight">Settings</h2>
+        <p class="text-sm text-slate-500 mt-1 font-light">Manage your profile, accounts, and preferences.</p>
+    </div>
+
+    <!-- Settings Tabs Container -->
+    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <!-- Tab Navigation -->
+        <div class="tab-list flex border-b border-slate-100 overflow-x-auto no-scrollbar">
+            <button class="tab-btn active px-6 py-4 text-sm font-medium whitespace-nowrap flex items-center gap-2"
+                data-tab="profile">
+                <iconify-icon icon="solar:user-linear" width="18"></iconify-icon>
+                Profile
+            </button>
+            <button class="tab-btn px-6 py-4 text-sm font-medium whitespace-nowrap flex items-center gap-2"
+                data-tab="accounts">
+                <iconify-icon icon="solar:wallet-linear" width="18"></iconify-icon>
+                Financial Accounts
+            </button>
+            <button class="tab-btn px-6 py-4 text-sm font-medium whitespace-nowrap flex items-center gap-2"
+                data-tab="preferences">
+                <iconify-icon icon="solar:sliders-h-linear" width="18"></iconify-icon>
+                Preferences
+            </button>
+        </div>
+
+        <!-- ==========================================
+             TAB 1: PROFILE
+             ========================================== -->
+        <div class="tab-panel p-6 space-y-8" data-panel="profile">
+            <!-- Profile Picture Section -->
+            <div class="flex items-center gap-6 pb-6 border-b border-slate-100">
+                <div class="relative group">
+                    <div
+                        class="w-20 h-20 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center overflow-hidden">
+                        <img id="profile-preview"
+                            src="https://ui-avatars.com/api/?name=John+Doe&background=10b981&color=fff" alt="Profile"
+                            class="w-full h-full object-cover">
+                    </div>
+                    <button
+                        class="absolute bottom-0 right-0 bg-white border border-slate-200 rounded-full p-1.5 shadow-sm text-slate-500 hover:text-emerald-500 transition-colors">
+                        <iconify-icon icon="solar:camera-linear" width="14"></iconify-icon>
+                    </button>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-900 mb-2">Profile Picture</h4>
+                    <div class="flex flex-col gap-2">
+                        <button class="btn btn-secondary text-xs w-fit">
+                            <iconify-icon icon="solar:camera-linear" width="14"></iconify-icon>
+                            Upload New Picture
+                        </button>
+                        <p class="text-[10px] text-slate-400">
+                            <iconify-icon icon="solar:info-circle-linear" class="align-middle mr-1"></iconify-icon>
+                            JPEG, PNG, GIF, or WebP (max 5MB)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Form -->
+            <form id="profile-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-input" value="John" placeholder="Enter first name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-input" value="Doe" placeholder="Enter last name">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-input" value="+1 (555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date of Birth</label>
+                        <input type="date" class="form-input" value="1990-05-15">
+                    </div>
+
+                    <div class="form-group md:col-span-2">
+                        <label class="form-label">Email Address</label>
+                        <div class="relative">
+                            <input type="email" class="form-input bg-slate-50 text-slate-500 cursor-not-allowed"
+                                value="john@budgetme.app" readonly>
+                            <iconify-icon icon="solar:lock-keyhole-linear"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></iconify-icon>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-1.5">
+                            Contact support to change your email address.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                    <p class="text-xs text-slate-400 italic" id="profile-unsaved-indicator" style="display: none;">
+                        Unsaved changes...
+                    </p>
+                    <div class="flex items-center gap-3 ml-auto">
+                        <button type="button" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- ==========================================
+             TAB 2: ACCOUNTS
+             ========================================== -->
+        <div class="tab-panel p-6 space-y-6 hidden" data-panel="accounts">
+            <div class="flex items-center justify-between mb-2">
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900">Your Accounts</h3>
+                    <p class="text-xs text-slate-500">Manage your connected balances and sources.</p>
+                </div>
+                <button onclick="window.openAddAccountModal()" class="btn btn-primary">
+                    <iconify-icon icon="solar:add-circle-linear" width="18"></iconify-icon>
+                    Add Account
+                </button>
+            </div>
+
+            <!-- Accounts Grid -->
+            <div id="accounts-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Populated via JS -->
+            </div>
+
+            <!-- Empty State (Hidden) -->
+            <div id="accounts-empty-state"
+                class="hidden text-center py-12 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                    <iconify-icon icon="solar:wallet-linear" class="text-slate-400" width="32"></iconify-icon>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-900 mb-1">No Accounts Found</h3>
+                <p class="text-xs text-slate-500 mb-4 max-w-xs mx-auto">
+                    Add your first account to start tracking your finances effectively.
+                </p>
+                <button onclick="window.openAddAccountModal()" class="btn btn-secondary text-xs">
+                    Add Your First Account
+                </button>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             TAB 3: PREFERENCES
+             ========================================== -->
+        <div class="tab-panel p-6 space-y-8 hidden" data-panel="preferences">
+
+            <!-- Currency Section -->
+            <div class="max-w-xl">
+                <h4 class="text-sm font-semibold text-slate-900 mb-4">Currency & Format</h4>
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                            <iconify-icon icon="solar:dollar-linear" width="20"></iconify-icon>
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-900">Philippine Peso</div>
+                            <div class="text-xs text-slate-500">₱ PHP</div>
+                        </div>
+                    </div>
+                    <span class="badge badge-success text-[10px]">Fixed</span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-2">
+                    <iconify-icon icon="solar:info-circle-linear" class="align-text-bottom mr-1"></iconify-icon>
+                    Currency is standardized to PHP for all users to ensure consistency.
+                </p>
+            </div>
+
+            <!-- Language Section -->
+            <div class="max-w-xl">
+                <h4 class="text-sm font-semibold text-slate-900 mb-4">Language</h4>
+                <div class="form-group">
+                    <select class="form-input form-select">
+                        <option value="en" selected>English (US)</option>
+                        <option value="fil">Filipino</option>
+                        <option value="es">Español</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 flex gap-3">
+                <iconify-icon icon="solar:info-circle-linear" class="text-blue-500 shrink-0 mt-0.5"
+                    width="18"></iconify-icon>
+                <div>
+                    <h5 class="text-xs font-semibold text-blue-900 mb-1">About Data Privacy</h5>
+                    <p class="text-[11px] text-blue-700 leading-relaxed">
+                        Your settings are automatically saved. We prioritize your data privacy and security.
+                        Currently running BudgetMe Prototype v1.0.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     MODALS
+     ========================================== -->
+<!-- 1. Add Account Modal (3-Step) -->
+<!-- 1. Add Account Modal (5-Step) -->
+<div id="modal-add-account" class="modal-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="addAccountHeaderTitle">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                <span id="addAccountHeaderTitle">Workflow</span>
+            </h3>
+            <div class="flex items-center gap-3">
+                <button onclick="closeModal('modal-add-account')" id="addAccountBtnSkip"
+                    class="text-[10px] text-slate-400 hover:text-slate-900 font-semibold transition-colors uppercase tracking-wider hidden">Skip</button>
+                <div class="h-3.5 w-px bg-slate-200 hidden" id="addAccountSkipDivider"></div>
+                <span id="addAccountStepText" class="text-[10px] text-slate-400 font-medium tracking-wide">Step 1 of
+                    5</span>
+                <button
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                    onclick="closeModal('modal-add-account')" aria-label="Close">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step Stepper -->
+        <div class="acct-stepper" aria-label="Add account progress">
+            <div class="acct-step-wrap">
+                <div class="acct-step-dot active" data-step="1" aria-current="step">1</div><span
+                    class="acct-step-label active">Start</span>
+            </div>
+            <div class="acct-step-connector" data-connector="1"></div>
+            <div class="acct-step-wrap">
+                <div class="acct-step-dot" data-step="2">2</div><span class="acct-step-label">Type</span>
+            </div>
+            <div class="acct-step-connector" data-connector="2"></div>
+            <div class="acct-step-wrap">
+                <div class="acct-step-dot" data-step="3">3</div><span class="acct-step-label">Details</span>
+            </div>
+            <div class="acct-step-connector" data-connector="3"></div>
+            <div class="acct-step-wrap">
+                <div class="acct-step-dot" data-step="4">4</div><span class="acct-step-label">Funds</span>
+            </div>
+            <div class="acct-step-connector" data-connector="4"></div>
+            <div class="acct-step-wrap">
+                <div class="acct-step-dot" data-step="5">5</div><span class="acct-step-label">Review</span>
+            </div>
+        </div>
+
+        <!-- Main Body -->
+        <div class="modal-body overflow-y-auto flex-1 text-left">
+            <form id="add-account-form" onsubmit="event.preventDefault();">
+
+                <!-- STEP 1: Workflow Choice -->
+                <div id="addAccountStep1" class="settings-step-content acct-enter">
+                    <div class="mb-5">
+                        <h2 class="text-[17px] font-bold text-slate-900 mb-1">Add Account</h2>
+                        <p class="text-[11px] text-slate-500">Choose how you want to add this account.</p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3 acct-stagger">
+                        <div onclick="selectAddAccountWorkflow('new')" id="addAccountWorkflowNew" class="acct-card"
+                            role="button" tabindex="0"
+                            onkeydown="if(event.key==='Enter')selectAddAccountWorkflow('new')">
+                            <div class="flex items-start gap-4">
+                                <div class="acct-icon"><iconify-icon icon="solar:user-plus-linear"
+                                        width="18"></iconify-icon></div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-[13px] font-bold text-slate-900 mb-0.5">Create New Account</h3>
+                                    <p class="text-[11px] text-slate-500 leading-relaxed">Set up a checking, savings, or
+                                        credit card account from scratch.</p>
+                                </div>
+                                <div class="acct-check"><iconify-icon icon="solar:check-read-linear"
+                                        width="10"></iconify-icon></div>
+                            </div>
+                        </div>
+                        <div onclick="selectAddAccountWorkflow('existing')" id="addAccountWorkflowExisting"
+                            class="acct-card" role="button" tabindex="0"
+                            onkeydown="if(event.key==='Enter')selectAddAccountWorkflow('existing')">
+                            <div class="flex items-start gap-4">
+                                <div class="acct-icon"><iconify-icon icon="solar:card-transfer-linear"
+                                        width="18"></iconify-icon></div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-[13px] font-bold text-slate-900 mb-0.5">Top-up / Cash In</h3>
+                                    <p class="text-[11px] text-slate-500 leading-relaxed">Add funds to an existing
+                                        account
+                                        manually.</p>
+                                </div>
+                                <div class="acct-check"><iconify-icon icon="solar:check-read-linear"
+                                        width="10"></iconify-icon></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Account Type Choice -->
+                <div id="addAccountStep2" class="settings-step-content hidden">
+                    <div class="mb-5">
+                        <h2 class="text-[17px] font-bold text-slate-900 mb-1">Select Account Type</h2>
+                        <p class="text-[11px] text-slate-500">Choose the category that best fits your needs.</p>
+                    </div>
+                    <!-- Hidden Radio Inputs for Form Submission -->
+                    <div class="hidden">
+                        <input type="radio" name="accountType" value="checking" id="type_checking_input">
+                        <input type="radio" name="accountType" value="savings" id="type_savings_input">
+                        <input type="radio" name="accountType" value="credit" id="type_credit_input">
+                        <input type="radio" name="accountType" value="investment" id="type_investment_input">
+                        <input type="radio" name="accountType" value="cash" id="type_cash_input">
+                    </div>
+
+                    <div id="add-account-type-selector" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5 acct-stagger">
+                        <label for="type_checking_input" onclick="selectAddAccountType('checking')" class="block">
+                            <div class="acct-card">
+                                <div class="flex items-center mb-2">
+                                    <div class="acct-icon mr-3" style="width:34px;height:34px;border-radius:8px;">
+                                        <iconify-icon icon="solar:wallet-linear" width="16"></iconify-icon>
+                                    </div>
+                                    <h3 class="font-bold text-slate-900 text-[13px]">Checking</h3>
+                                </div>
+                                <p class="text-[10px] text-slate-500 leading-relaxed">Daily transactions, salary.</p>
+                                <div class="acct-check"><iconify-icon icon="solar:check-read-linear"
+                                        width="9"></iconify-icon></div>
+                            </div>
+                        </label>
+
+                        <label for="type_savings_input" onclick="selectAddAccountType('savings')" class="block">
+                            <div class="acct-card">
+                                <div class="flex items-center mb-2">
+                                    <div class="acct-icon mr-3" style="width:34px;height:34px;border-radius:8px;">
+                                        <iconify-icon icon="solar:safe-square-linear" width="16"></iconify-icon>
+                                    </div>
+                                    <h3 class="font-bold text-slate-900 text-[13px]">Savings</h3>
+                                </div>
+                                <p class="text-[10px] text-slate-500 leading-relaxed">Emergency funds, goals.</p>
+                                <div class="acct-check"><iconify-icon icon="solar:check-read-linear"
+                                        width="9"></iconify-icon></div>
+                            </div>
+                        </label>
+
+                        <label for="type_credit_input" onclick="selectAddAccountType('credit')" class="block">
+                            <div class="acct-card">
+                                <div class="flex items-center mb-2">
+                                    <div class="acct-icon mr-3" style="width:34px;height:34px;border-radius:8px;">
+                                        <iconify-icon icon="solar:card-linear" width="16"></iconify-icon>
+                                    </div>
+                                    <h3 class="font-bold text-slate-900 text-[13px]">Credit Card</h3>
+                                </div>
+                                <p class="text-[10px] text-slate-500 leading-relaxed">Credit building, rewards.</p>
+                                <div class="acct-check"><iconify-icon icon="solar:check-read-linear"
+                                        width="9"></iconify-icon></div>
+                            </div>
+                        </label>
+
+                        <label for="type_investment_input" onclick="selectAddAccountType('investment')" class="block">
+                            <div class="acct-card">
+                                <div class="flex items-center mb-2">
+                                    <div class="acct-icon mr-3" style="width:34px;height:34px;border-radius:8px;">
+                                        <iconify-icon icon="solar:graph-up-linear" width="16"></iconify-icon>
+                                    </div>
+                                    <h3 class="font-bold text-slate-900 text-[13px]">Investment</h3>
+                                </div>
+                                <p class="text-[10px] text-slate-500 leading-relaxed">Portfolio, growth.</p>
+                                <div class="acct-check"><iconify-icon icon="solar:check-read-linear"
+                                        width="9"></iconify-icon></div>
+                            </div>
+                        </label>
+
+                        <label for="type_cash_input" onclick="selectAddAccountType('cash')" class="block">
+                            <div class="acct-card">
+                                <div class="flex items-center mb-2">
+                                    <div class="acct-icon mr-3" style="width:34px;height:34px;border-radius:8px;">
+                                        <iconify-icon icon="solar:wallet-2-linear" width="16"></iconify-icon>
+                                    </div>
+                                    <h3 class="font-bold text-slate-900 text-[13px]">Cash</h3>
+                                </div>
+                                <p class="text-[10px] text-slate-500 leading-relaxed">Physical wallet.</p>
+                                <div class="acct-check"><iconify-icon icon="solar:check-read-linear"
+                                        width="9"></iconify-icon></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Experience Level (Hidden by default) -->
+                    <div id="addAccountExperienceLevelSection" class="hidden">
+                        <h3 class="text-[10px] font-bold text-slate-900 mb-3 uppercase tracking-widest">Usage Level</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 acct-stagger">
+                            <label class="acct-card !p-3 flex items-center gap-3" style="cursor:pointer">
+                                <input type="radio" name="expLevel" value="beginner"
+                                    class="w-3.5 h-3.5 accent-emerald-500 flex-shrink-0">
+                                <div>
+                                    <div class="text-[12px] font-semibold text-slate-700">Beginner</div>
+                                    <div class="text-[9px] text-slate-400">Just starting out</div>
+                                </div>
+                            </label>
+                            <label class="acct-card !p-3 flex items-center gap-3" style="cursor:pointer">
+                                <input type="radio" name="expLevel" value="intermediate" checked
+                                    class="w-3.5 h-3.5 accent-emerald-500 flex-shrink-0">
+                                <div>
+                                    <div class="text-[12px] font-semibold text-slate-700">Intermediate</div>
+                                    <div class="text-[9px] text-slate-400">Standard usage</div>
+                                </div>
+                            </label>
+                            <label class="acct-card !p-3 flex items-center gap-3" style="cursor:pointer">
+                                <input type="radio" name="expLevel" value="advanced"
+                                    class="w-3.5 h-3.5 accent-emerald-500 flex-shrink-0">
+                                <div>
+                                    <div class="text-[12px] font-semibold text-slate-700">Advanced</div>
+                                    <div class="text-[9px] text-slate-400">Power user</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: Details -->
+                <div id="addAccountStep3" class="settings-step-content hidden">
+                    <div class="mb-5">
+                        <h2 class="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
+                            <div class="acct-icon" style="width:30px;height:30px;border-radius:8px;"><iconify-icon
+                                    icon="solar:pen-new-square-linear" width="14"></iconify-icon></div>
+                            Account Details
+                        </h2>
+                    </div>
+                    <div class="space-y-5 acct-stagger">
+                        <div>
+                            <label class="acct-label" for="addAccountName">Account Name <span
+                                    class="text-slate-400">*</span></label>
+                            <input type="text" id="addAccountName" name="accountName" class="acct-input"
+                                placeholder="e.g., Main Checking" required oninput="validateAddAccountStep3()">
+                        </div>
+                        <div>
+                            <label class="acct-label" for="addAccountBalance">Initial Balance <span
+                                    class="text-slate-400">*</span></label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">₱</span>
+                                <input type="number" id="addAccountBalance" name="balance" class="acct-input pl-7"
+                                    placeholder="0.00" step="0.01" value="" required
+                                    oninput="validateAddAccountStep3()">
+                            </div>
+                            <div class="acct-notice mt-2">
+                                <iconify-icon icon="solar:info-circle-linear" width="14"
+                                    class="flex-shrink-0 mt-px text-slate-400"></iconify-icon>
+                                <span class="text-[11px]">Current funds available in this account.</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="acct-label" for="addAccountInstitution">Institution</label>
+                            <input type="text" id="addAccountInstitution" class="acct-input"
+                                placeholder="e.g., BPI, Metrobank">
+                        </div>
+                        <div>
+                            <label class="acct-label" for="addAccountDesc">Description <span
+                                    class="text-slate-400 font-normal lowercase"
+                                    style="letter-spacing:0">(optional)</span></label>
+                            <textarea id="addAccountDesc" rows="2" class="acct-input resize-none"
+                                placeholder="Notes about this account..."></textarea>
+                        </div>
+                        <div>
+                            <label class="acct-label">Color Theme</label>
+                            <div class="flex gap-2.5 flex-wrap mt-1">
+                                <button type="button" onclick="selectAddAccountColor('#3B82F6')"
+                                    class="acct-color-swatch" style="background:#3B82F6" data-color="#3B82F6"
+                                    aria-label="Blue"></button>
+                                <button type="button" onclick="selectAddAccountColor('#10B981')"
+                                    class="acct-color-swatch selected" style="background:#10B981" data-color="#10B981"
+                                    aria-label="Green"></button>
+                                <button type="button" onclick="selectAddAccountColor('#F59E0B')"
+                                    class="acct-color-swatch" style="background:#F59E0B" data-color="#F59E0B"
+                                    aria-label="Amber"></button>
+                                <button type="button" onclick="selectAddAccountColor('#EF4444')"
+                                    class="acct-color-swatch" style="background:#EF4444" data-color="#EF4444"
+                                    aria-label="Red"></button>
+                                <button type="button" onclick="selectAddAccountColor('#8B5CF6')"
+                                    class="acct-color-swatch" style="background:#8B5CF6" data-color="#8B5CF6"
+                                    aria-label="Purple"></button>
+                                <button type="button" onclick="selectAddAccountColor('#64748B')"
+                                    class="acct-color-swatch" style="background:#64748B" data-color="#64748B"
+                                    aria-label="Slate"></button>
+                            </div>
+                            <input type="hidden" id="addAccountColor" value="#10B981">
+                        </div>
+                        <label class="acct-check-area" for="addAccountIsDefault">
+                            <input type="checkbox" id="addAccountIsDefault"
+                                class="h-3.5 w-3.5 accent-emerald-500 border-slate-300 rounded flex-shrink-0">
+                            <span class="text-[12px] text-slate-600 font-medium select-none">Set as default
+                                account</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- STEP 4: Initial Funds -->
+                <div id="addAccountStep4" class="settings-step-content hidden">
+                    <div class="mb-5">
+                        <h2 class="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
+                            <div class="acct-icon" style="width:30px;height:30px;border-radius:8px;"><iconify-icon
+                                    icon="solar:wallet-money-linear" width="14"></iconify-icon></div>
+                            Initial Funds
+                        </h2>
+                    </div>
+                    <div class="acct-check-area mb-5" onclick="document.getElementById('addAccountSkipCashIn').click()">
+                        <input type="checkbox" id="addAccountSkipCashIn" onchange="toggleAddAccountCashInForm()"
+                            class="h-3.5 w-3.5 accent-emerald-500 border-slate-300 rounded flex-shrink-0"
+                            onclick="event.stopPropagation()">
+                        <div>
+                            <div class="text-[12px] font-semibold text-slate-900">Skip transaction record</div>
+                            <div class="text-[10px] text-slate-500 mt-0.5">Don't create a transaction record for the
+                                initial balance.</div>
+                        </div>
+                    </div>
+                    <div id="addAccountCashInForm" class="space-y-4 transition-all duration-300 acct-stagger">
+                        <div>
+                            <label class="acct-label" for="addAccountCashInDate">Transaction Date</label>
+                            <input type="date" id="addAccountCashInDate" class="acct-input">
+                        </div>
+                        <div>
+                            <label class="acct-label" for="addAccountCashInSource">Source</label>
+                            <select id="addAccountCashInSource" class="acct-input form-select">
+                                <option value="deposit">Over the Counter Deposit</option>
+                                <option value="transfer">Bank Transfer</option>
+                                <option value="salary">Salary</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="acct-notice">
+                            <iconify-icon icon="solar:info-circle-linear" width="14"
+                                class="flex-shrink-0 mt-px text-slate-400"></iconify-icon>
+                            <span class="text-[11px]">The initial balance (₱<strong
+                                    id="addAccountDisplayInitialBalance">0.00</strong>) will be recorded as your first
+                                income transaction.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 5: Review -->
+                <div id="addAccountStep5" class="settings-step-content hidden">
+                    <div class="mb-5">
+                        <h2 class="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
+                            <div class="acct-icon" style="width:30px;height:30px;border-radius:8px;"><iconify-icon
+                                    icon="solar:clipboard-check-linear" width="14"></iconify-icon></div>
+                            Review & Confirm
+                        </h2>
+                    </div>
+                    <div class="space-y-4 acct-stagger">
+                        <div class="acct-review">
+                            <div class="acct-review-head">
+                                <div class="acct-icon" style="width:44px;height:44px;border-radius:10px;">
+                                    <iconify-icon id="addAccountReviewIcon" icon="solar:wallet-linear"
+                                        width="20"></iconify-icon>
+                                </div>
+                                <div>
+                                    <h3 id="addAccountReviewName" class="font-bold text-slate-900 text-[15px]">Main
+                                        Checking</h3>
+                                    <span id="addAccountReviewType"
+                                        class="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-widest border border-slate-200 inline-block mt-1">Checking</span>
+                                </div>
+                            </div>
+                            <div class="acct-review-body">
+                                <div class="acct-review-row">
+                                    <span
+                                        class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Initial
+                                        Balance</span>
+                                    <span id="addAccountReviewBalance"
+                                        class="font-bold text-slate-900 text-sm">₱0.00</span>
+                                </div>
+                                <div class="acct-review-row">
+                                    <span
+                                        class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Institution</span>
+                                    <span id="addAccountReviewInstitution"
+                                        class="text-[13px] font-semibold text-slate-700">-</span>
+                                </div>
+                                <div class="acct-review-row">
+                                    <span
+                                        class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Color</span>
+                                    <div id="addAccountReviewColor" class="flex items-center gap-2"></div>
+                                </div>
+                                <div class="acct-review-row">
+                                    <span
+                                        class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Default</span>
+                                    <span id="addAccountReviewDefault"
+                                        class="text-[13px] font-semibold text-slate-700">No</span>
+                                </div>
+                                <div class="acct-review-row">
+                                    <span
+                                        class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Notes</span>
+                                    <span id="addAccountReviewDesc"
+                                        class="text-[11px] text-slate-500 italic max-w-[180px] text-right">No notes
+                                        provided.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="acct-notice warn">
+                            <iconify-icon icon="solar:danger-triangle-linear" width="16"
+                                class="flex-shrink-0 mt-px"></iconify-icon>
+                            <div>
+                                <h4 class="font-bold text-[10px] uppercase tracking-widest mb-0.5">Action is final</h4>
+                                <p class="text-[11px] leading-relaxed" style="opacity:0.85">Your account will be created
+                                    immediately. Please ensure all details are correct.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button type="button" id="addAccountBtnBack" class="btn btn-secondary hidden"
+                onclick="addAccountPreviousStep()">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button type="button" id="addAccountBtnNext" class="btn btn-primary" onclick="addAccountNextStep()"
+                style="background:#10b981; box-shadow:none;">
+                Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- 2. Delete Account Modal (2-Step) -->
+<div id="modal-delete-account" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-900">Delete Account</h3>
+                    <p class="text-sm text-slate-500 mt-0.5">Step <span id="deleteAccountStepText">1</span> of 2</p>
+                </div>
+                <button onclick="closeModal('modal-delete-account')"
+                    class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <iconify-icon icon="solar:close-circle-linear" width="20"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Stepper -->
+        <div class="settings-stepper">
+            <div class="settings-step-wrap">
+                <div class="settings-step-dot active" data-step="1">1</div>
+                <div class="settings-step-label active">Warning</div>
+            </div>
+            <div class="settings-step-connector" data-connector="1"></div>
+            <div class="settings-step-wrap">
+                <div class="settings-step-dot" data-step="2">2</div>
+                <div class="settings-step-label">Confirm</div>
+            </div>
+        </div>
+
+        <div class="modal-body">
+            <!-- Step 1: Warning -->
+            <div id="deleteAccountStep1" class="settings-step-content">
+                <div class="space-y-6">
+                    <div class="text-center mb-6">
+                        <div
+                            class="w-16 h-16 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-4">
+                            <iconify-icon icon="solar:trash-bin-trash-linear" width="32"></iconify-icon>
+                        </div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Delete Account Warning</h4>
+                        <p class="text-xs text-slate-500">This action cannot be undone</p>
+                    </div>
+
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-6 space-y-4 settings-stagger">
+                        <div class="settings-notice"
+                            style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-color: #fecaca; color: #991b1b;">
+                            <iconify-icon icon="solar:danger-triangle-linear" width="16"
+                                class="shrink-0"></iconify-icon>
+                            <div>
+                                <p class="text-xs font-semibold">Irreversible Action</p>
+                                <p class="text-xs mt-1">Once deleted, this account cannot be recovered</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                                <p class="text-xs text-slate-700">All transaction history will be permanently lost</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                                <p class="text-xs text-slate-700">Associated data and reports will be affected</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                                <p class="text-xs text-slate-700">Budget allocations may need to be updated</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-red-200">
+                            <p class="text-xs font-medium text-slate-700 mb-2">Account to be deleted:</p>
+                            <div class="bg-white rounded-lg p-3 border border-red-200">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+                                        <iconify-icon icon="solar:wallet-linear" width="16"></iconify-icon>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-900" id="delete-name-display">Account
+                                            Name</p>
+                                        <p class="text-xs text-slate-500" id="delete-type-display">Account Type</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-notice info">
+                        <iconify-icon icon="solar:info-circle-linear" width="16" class="shrink-0"></iconify-icon>
+                        <div>
+                            <p class="text-xs font-medium">Alternative Option</p>
+                            <p class="text-xs mt-1">Consider editing the account or setting it to inactive instead of
+                                deleting it completely.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Confirmation -->
+            <div id="deleteAccountStep2" class="settings-step-content hidden">
+                <div class="space-y-6">
+                    <div class="text-center mb-6">
+                        <div
+                            class="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4">
+                            <iconify-icon icon="solar:shield-check-linear" width="32"></iconify-icon>
+                        </div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Final Confirmation</h4>
+                        <p class="text-xs text-slate-500">Please confirm you want to proceed</p>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-xl border border-slate-200 p-6 space-y-4 settings-stagger">
+                        <div class="settings-review">
+                            <div class="settings-review-title">Account Name</div>
+                            <div class="settings-review-value" id="delete-confirm-name">-</div>
+                        </div>
+                        <div class="settings-review">
+                            <div class="settings-review-title">Account Type</div>
+                            <div class="settings-review-value" id="delete-confirm-type">-</div>
+                        </div>
+                        <div class="settings-review">
+                            <div class="settings-review-title">Current Balance</div>
+                            <div class="settings-review-value" id="delete-confirm-balance">-</div>
+                        </div>
+                        <div class="settings-review">
+                            <div class="settings-review-title">Transactions Affected</div>
+                            <div class="settings-review-value text-red-600" id="delete-confirm-transactions">Multiple
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                        <div class="flex items-start gap-3">
+                            <iconify-icon icon="solar:info-circle-linear" width="16"
+                                class="text-amber-600 shrink-0 mt-0.5"></iconify-icon>
+                            <div>
+                                <p class="text-xs font-medium text-amber-900">Type to confirm deletion</p>
+                                <p class="text-xs text-amber-700 mt-1">Please type <strong>"DELETE"</strong> to confirm
+                                    you want to permanently delete this account.</p>
+                            </div>
+                        </div>
+                        <input type="text" id="deleteConfirmInput" class="settings-input mt-3"
+                            placeholder="Type DELETE to confirm">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" id="deleteAccountBtnBack" class="btn btn-secondary hidden"
+                onclick="deleteAccountPreviousStep()">
+                <iconify-icon icon="solar:arrow-left-linear" width="16"></iconify-icon>
+                Back
+            </button>
+            <div class="flex gap-3 ml-auto">
+                <button type="button" class="btn btn-secondary"
+                    onclick="closeModal('modal-delete-account')">Cancel</button>
+                <button type="button" id="deleteAccountBtnNext" class="btn btn-primary"
+                    onclick="deleteAccountNextStep()">
+                    Continue
+                    <iconify-icon icon="solar:arrow-right-linear" width="16" class="ml-1"></iconify-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Edit Account Modal Placeholder (Simplified) -->
+<div id="modal-edit-account" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-900">Edit Account</h3>
+                    <p class="text-sm text-slate-500 mt-0.5">Step <span id="editAccountStepText">1</span> of 3</p>
+                </div>
+                <button onclick="closeModal('modal-edit-account')"
+                    class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <iconify-icon icon="solar:close-circle-linear" width="20"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Stepper -->
+        <div class="settings-stepper">
+            <div class="settings-step-wrap">
+                <div class="settings-step-dot active" data-step="1">1</div>
+                <div class="settings-step-label active">Details</div>
+            </div>
+            <div class="settings-step-connector" data-connector="1"></div>
+            <div class="settings-step-wrap">
+                <div class="settings-step-dot" data-step="2">2</div>
+                <div class="settings-step-label">Adjustment</div>
+            </div>
+            <div class="settings-step-connector" data-connector="2"></div>
+            <div class="settings-step-wrap">
+                <div class="settings-step-dot" data-step="3">3</div>
+                <div class="settings-step-label">Review</div>
+            </div>
+        </div>
+
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Account Name</label>
+                <input type="text" id="edit-name" class="form-input" value="">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Balance Adjustment</label>
+                <input type="number" id="edit-balance" class="form-input" value="">
+                <p class="text-[10px] text-slate-400 mt-1">Updates will be recorded as an adjustment transaction.</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" id="editAccountBtnBack" class="btn btn-secondary hidden"
+                onclick="editAccountPreviousStep()">
+                <iconify-icon icon="solar:arrow-left-linear" width="16"></iconify-icon>
+                Back
+            </button>
+            <div class="flex gap-3 ml-auto">
+                <button type="button" class="btn btn-secondary"
+                    onclick="closeModal('modal-edit-account')">Cancel</button>
+                <button type="button" id="editAccountBtnNext" class="btn btn-primary" onclick="editAccountNextStep()">
+                    Continue
+                    <iconify-icon icon="solar:arrow-right-linear" width="16" class="ml-1"></iconify-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Settings Modal Multi-Step Workflow Styles */
+    .settings-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem 0;
+        margin-bottom: 1rem;
+    }
+
+    .settings-step-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .settings-step-dot {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background: #e2e8f0;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .settings-step-dot.active {
+        background: #10b981;
+        color: white;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .settings-step-dot.completed {
+        background: #10b981;
+        color: white;
+    }
+
+    .settings-step-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: color 0.3s ease;
+    }
+
+    .settings-step-label.active {
+        color: #10b981;
+        font-weight: 600;
+    }
+
+    .settings-step-label.completed {
+        color: #10b981;
+    }
+
+    .settings-step-connector {
+        flex: 1;
+        height: 2px;
+        background: #e2e8f0;
+        margin: 0 1rem;
+        transition: background 0.3s ease;
+        position: relative;
+        top: -0.75rem;
+    }
+
+    .settings-step-connector.completed {
+        background: #10b981;
+    }
+
+    .settings-step-content {
+        display: none;
+        animation: fadeInUp 0.4s ease-out;
+    }
+
+    .settings-step-content:not(.hidden) {
+        display: block;
+    }
+
+    .settings-card {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .settings-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transform: translateY(-2px);
+    }
+
+    .settings-card.selected {
+        border-color: #10b981;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .settings-check {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 1.5rem;
+        height: 1.5rem;
+        background: #10b981;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.3s ease;
+    }
+
+    .settings-card.selected .settings-check {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .settings-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .settings-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .settings-input:hover:not(:focus) {
+        border-color: #cbd5e1;
+    }
+
+    .settings-notice {
+        display: flex;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1.4;
+    }
+
+    .settings-notice.info {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border: 1px solid #bfdbfe;
+        color: #1e40af;
+    }
+
+    .settings-notice.success {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border: 1px solid #bbf7d0;
+        color: #166534;
+    }
+
+    .settings-review {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .settings-review:last-child {
+        border-bottom: none;
+    }
+
+    .settings-review-title {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .settings-review-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .settings-stagger>* {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: staggerFadeInUp 0.5s ease-out forwards;
+    }
+
+    .settings-stagger>*:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .settings-stagger>*:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+
+    .settings-stagger>*:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .settings-stagger>*:nth-child(4) {
+        animation-delay: 0.25s;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes staggerFadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .settings-stepper {
+            padding: 1rem 0;
+            margin-bottom: 0.75rem;
+        }
+
+        .settings-step-dot {
+            width: 1.75rem;
+            height: 1.75rem;
+            font-size: 0.6875rem;
+        }
+
+        .settings-step-label {
+            font-size: 0.6875rem;
+        }
+
+        .settings-step-connector {
+            margin: 0 0.5rem;
+        }
+
+        .settings-card {
+            padding: 1rem;
+        }
+
+        .settings-review {
+            padding: 0.5rem 0;
+        }
+
+        .settings-review-title {
+            font-size: 0.6875rem;
+        }
+
+        .settings-review-value {
+            font-size: 0.8125rem;
+        }
+    }
+
+    /* ====== Account Modal — Monochromatic Design (matches accounts.html) ====== */
+    .acct-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 16px 10px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .acct-step-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .acct-step-dot {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        transition: all 300ms;
+        flex-shrink: 0;
+    }
+
+    .acct-step-dot.active {
+        background: #10b981;
+        color: white;
+    }
+
+    .acct-step-dot.completed {
+        background: #10b981;
+        color: white;
+    }
+
+    .acct-step-label {
+        font-size: 8px;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        transition: color 300ms;
+    }
+
+    .acct-step-label.active {
+        color: #10b981;
+    }
+
+    .acct-step-label.completed {
+        color: #10b981;
+    }
+
+    .acct-step-connector {
+        width: 36px;
+        height: 1.5px;
+        background: #e2e8f0;
+        margin: 0 6px;
+        margin-bottom: 18px;
+        transition: background 300ms;
+        flex-shrink: 0;
+    }
+
+    .acct-step-connector.completed {
+        background: #10b981;
+    }
+
+    /* Selection Cards — Monochromatic */
+    .acct-card {
+        position: relative;
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 200ms ease;
+        background: white;
+    }
+
+    .acct-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    }
+
+    .acct-card.selected {
+        border-color: #10b981;
+        box-shadow: 0 0 0 1px #10b981;
+    }
+
+    .acct-card .acct-check {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #10b981;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 200ms;
+    }
+
+    .acct-card.selected .acct-check {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Icon — Monochromatic grey */
+    .acct-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        color: #94a3b8;
+        flex-shrink: 0;
+        border: 1px solid #f1f5f9;
+        transition: all 200ms;
+    }
+
+    .acct-card:hover .acct-icon {
+        color: #64748b;
+    }
+
+    .acct-card.selected .acct-icon {
+        background: #f1f5f9;
+        color: #334155;
+    }
+
+    /* Form Inputs — Clean monochrome */
+    .acct-input {
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: #1e293b;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        transition: all 200ms;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .acct-input:hover {
+        border-color: #cbd5e1;
+    }
+
+    .acct-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.06);
+    }
+
+    .acct-input::placeholder {
+        color: #94a3b8;
+    }
+
+    .acct-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    /* Color picker */
+    .acct-color-swatch {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 150ms;
+        padding: 0;
+    }
+
+    .acct-color-swatch:hover {
+        transform: scale(1.12);
+    }
+
+    .acct-color-swatch.selected {
+        border-color: white;
+        box-shadow: 0 0 0 2px #0f172a;
+        transform: scale(1.08);
+    }
+
+    /* Info Notice */
+    .acct-notice {
+        display: flex;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        line-height: 1.6;
+        align-items: flex-start;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+    }
+
+    .acct-notice.warn {
+        background: #fffbeb;
+        border-color: #fef3c7;
+        color: #92400e;
+    }
+
+    /* Review Card — Flat monochrome */
+    .acct-review {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .acct-review-head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 20px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .acct-review-body {
+        padding: 20px;
+    }
+
+    .acct-review-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+    }
+
+    .acct-review-row:not(:last-child) {
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    /* Checkbox Area */
+    .acct-check-area {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #f1f5f9;
+        cursor: pointer;
+        transition: all 200ms;
+    }
+
+    .acct-check-area:hover {
+        background: #f1f5f9;
+    }
+
+    /* Animation */
+    .acct-enter {
+        animation: acctIn 300ms cubic-bezier(.4, 0, .2, 1) both;
+    }
+
+    @keyframes acctIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .acct-stagger>*:nth-child(1) {
+        animation-delay: 40ms;
+    }
+
+    .acct-stagger>*:nth-child(2) {
+        animation-delay: 100ms;
+    }
+
+    .acct-stagger>*:nth-child(3) {
+        animation-delay: 160ms;
+    }
+
+    .acct-stagger>*:nth-child(4) {
+        animation-delay: 220ms;
+    }
+
+    .acct-stagger>*:nth-child(5) {
+        animation-delay: 280ms;
+    }
+
+    .acct-stagger>*:nth-child(6) {
+        animation-delay: 340ms;
+    }
+
+    .acct-stagger>* {
+        opacity: 0;
+        animation: acctIn 300ms cubic-bezier(.4, 0, .2, 1) both;
+    }
+
+    /* Modal overrides for Add Account */
+    #modal-add-account .modal {
+        max-width: 520px;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    }
+
+    #modal-add-account .modal-header {
+        padding: 14px 20px;
+        background: white;
+    }
+
+    #modal-add-account .modal-body {
+        padding: 20px;
+    }
+
+    #modal-add-account .modal-footer {
+        padding: 14px 20px;
+        background: #f8fafc;
+        border-radius: 0 0 14px 14px;
+    }
+
+    /* Mobile responsive for acct */
+    @media(max-width:640px) {
+        .acct-stepper {
+            padding: 10px 10px 6px;
+        }
+
+        .acct-step-connector {
+            width: 16px;
+        }
+
+        .acct-step-label {
+            font-size: 7px;
+        }
+
+        .acct-step-dot {
+            width: 22px;
+            height: 22px;
+            font-size: 9px;
+        }
+
+        #modal-add-account .modal-body {
+            padding: 14px;
+        }
+
+        #modal-add-account .modal-header,
+        #modal-add-account .modal-footer {
+            padding: 10px 14px;
+        }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+        .acct-enter,
+        .acct-stagger>* {
+            animation: none !important;
+            opacity: 1 !important;
+        }
+    }
+</style>
+
+<script>
+    (function () {
+        // ===================================
+        // State & Sample Data
+        // ===================================
+        let accounts = [
+            {
+                id: "1",
+                name: "Chase Checking",
+                type: "checking",
+                balance: 12450.00,
+                color: "emerald",
+                isDefault: true,
+                icon: "solar:wallet-linear"
+            },
+            {
+                id: "2",
+                name: "Citi Savings",
+                type: "savings",
+                balance: 25000.00,
+                color: "blue",
+                isDefault: false,
+                icon: "solar:safe-linear"
+            },
+            {
+                id: "3",
+                name: "Amex Gold",
+                type: "credit",
+                balance: -1250.00,
+                color: "amber",
+                isDefault: false,
+                icon: "solar:card-linear"
+            }
+        ];
+
+        let currentStep = 1;
+        let selectedAccountType = '';
+        let accountToDelete = null;
+        let accountToEdit = null;
+
+        // ===================================
+        // Initialization
+        // ===================================
+        function init() {
+            console.log("Settings module initialized");
+            setupTabs();
+            renderAccounts();
+        }
+
+        // ===================================
+        // Tab Logic
+        // ===================================
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Deactivate all
+                    tabs.forEach(t => t.classList.remove('active', 'text-emerald-600', 'border-b-2', 'border-emerald-500'));
+                    document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+
+                    // Activate clicked
+                    tab.classList.add('active');
+                    const panelId = tab.dataset.tab;
+                    document.querySelector(`.tab-panel[data-panel="${panelId}"]`).classList.remove('hidden');
+                });
+            });
+        }
+
+        // ===================================
+        // Account Display Logic
+        // ===================================
+        function renderAccounts() {
+            const grid = document.getElementById('accounts-grid');
+            const emptyState = document.getElementById('accounts-empty-state');
+
+            if (!grid) return;
+
+            grid.innerHTML = '';
+
+            if (accounts.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            accounts.forEach(acc => {
+                const card = document.createElement('div');
+                card.className = `bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all group relative`;
+
+                // Color mapping for bg/text
+                const colorMap = {
+                    emerald: 'bg-emerald-100 text-emerald-600',
+                    blue: 'bg-blue-100 text-blue-600',
+                    amber: 'bg-amber-100 text-amber-600',
+                    purple: 'bg-purple-100 text-purple-600',
+                    slate: 'bg-slate-100 text-slate-600'
+                };
+                const iconClass = colorMap[acc.color] || colorMap.emerald;
+
+                const formatter = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
+
+                card.innerHTML = `
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg ${iconClass} flex items-center justify-center">
+                            <iconify-icon icon="${acc.icon}" width="20"></iconify-icon>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-900">${acc.name}</h4>
+                            <p class="text-xs text-slate-500 capitalize">${acc.type} Account</p>
+                        </div>
+                    </div>
+                    ${acc.isDefault ? '<span class="badge badge-success text-[10px]">Default</span>' : ''}
+                </div>
+                
+                <div class="mb-4">
+                    <div class="text-xs text-slate-500 mb-1">Current Balance</div>
+                    <div class="text-xl font-bold text-slate-900 tracking-tight">${formatter.format(acc.balance)}</div>
+                </div>
+                
+                <div class="flex items-center gap-2 pt-3 border-t border-slate-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <button class="action-btn edit" title="Edit" onclick="editAccount('${acc.id}')">
+                        <iconify-icon icon="solar:pen-linear" width="16"></iconify-icon>
+                    </button>
+                    ${!acc.isDefault ? `
+                    <button class="action-btn" title="Set Default" onclick="setDefault('${acc.id}')">
+                        <iconify-icon icon="solar:star-linear" width="16"></iconify-icon>
+                    </button>
+                    ` : ''}
+                    <button class="action-btn delete" title="Delete" onclick="deleteAccount('${acc.id}')">
+                        <iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon>
+                    </button>
+                </div>
+            `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ===================================
+        // Add Account Wizard Logic
+        // ===================================
+        // ===================================
+        // Add Account Wizard Logic (5-Step)
+        // ===================================
+
+        let addAccountStep = 1;
+        let addAccountTotalSteps = 5;
+        let addAccountFormData = { workflow: '', type: '', color: '#10B981' };
+
+        window.openAddAccountModal = function () {
+            addAccountStep = 1;
+            addAccountFormData = { workflow: '', type: '', color: '#10B981' };
+
+            // Reset Form and UI
+            document.getElementById('add-account-form')?.reset();
+
+            // Reset Workflow Selection
+            document.querySelectorAll('#addAccountStep1 .acct-card').forEach(el => el.classList.remove('selected'));
+
+            // Reset Type Selection - Fixed ID
+            document.querySelectorAll('#add-account-type-selector .acct-card').forEach(el => {
+                el.classList.remove('selected');
+                el.closest('label')?.querySelector('.acct-check')?.classList.remove('opacity-100', 'scale-100');
+            });
+
+            // Reset Logic elements
+            document.getElementById('addAccountExperienceLevelSection')?.classList.add('hidden');
+
+            // Reset Date
+            const dateInput = document.getElementById('addAccountCashInDate');
+            if (dateInput) dateInput.valueAsDate = new Date();
+
+            // Navigate to Step 1
+            addAccountNavigateToStep(1);
+
+            window.openModal('modal-add-account');
+        }
+
+        window.addAccountNavigateToStep = function (step) {
+            if (step < 1 || step > addAccountTotalSteps) return;
+
+            // Hide all steps
+            document.querySelectorAll('#modal-add-account .settings-step-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('acct-enter');
+            });
+
+            // Show current step
+            const currentStepEl = document.getElementById('addAccountStep' + step);
+            if (currentStepEl) {
+                currentStepEl.classList.remove('hidden');
+                void currentStepEl.offsetWidth; // trigger reflow
+                currentStepEl.classList.add('acct-enter');
+
+                // Reset stagger animations
+                currentStepEl.querySelectorAll('.acct-stagger > *').forEach(c => {
+                    c.style.animation = 'none';
+                    void c.offsetWidth;
+                    c.style.animation = '';
+                });
+            }
+
+            // Update UI
+            updateAddAccountStepper(step);
+
+            // Update Header Text
+            const stepText = document.getElementById('addAccountStepText');
+            if (stepText) stepText.textContent = `Step ${step} of ${addAccountTotalSteps}`;
+
+            const titles = ['Workflow', 'Account Type', 'Details', 'Initial Funds', 'Review'];
+            const headerTitle = document.getElementById('addAccountHeaderTitle');
+            if (headerTitle) headerTitle.textContent = titles[step - 1];
+
+            addAccountStep = step;
+            updateAddAccountButtons(step);
+
+            if (step === 5) updateAddAccountReview();
+        }
+
+        window.updateAddAccountButtons = function (step) {
+            const backBtn = document.getElementById('addAccountBtnBack');
+            const nextBtn = document.getElementById('addAccountBtnNext');
+
+            // Back Button visibility
+            if (backBtn) {
+                if (step === 1) {
+                    backBtn.classList.add('hidden');
+                    nextBtn.disabled = !addAccountFormData.workflow;
+                } else {
+                    backBtn.classList.remove('hidden');
+                }
+            }
+
+            // Next Button text and state
+            if (nextBtn) {
+                if (step === 5) {
+                    nextBtn.innerHTML = '<iconify-icon icon="solar:check-circle-bold" class="mr-1.5"></iconify-icon> Confirm & Add';
+                    nextBtn.style.boxShadow = '0 4px 14px rgba(16,185,129,0.25)';
+                } else {
+                    nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+                    nextBtn.style.boxShadow = 'none';
+                }
+                validateAddAccountCurrentStepButton();
+            }
+        }
+
+        window.validateAddAccountCurrentStepButton = function () {
+            const btn = document.getElementById('addAccountBtnNext');
+            if (!btn) return;
+
+            if (addAccountStep === 1) {
+                btn.disabled = !addAccountFormData.workflow;
+            } else if (addAccountStep === 2) {
+                btn.disabled = !addAccountFormData.type;
+            } else if (addAccountStep === 3) {
+                const name = document.getElementById('addAccountName').value;
+                const balance = document.getElementById('addAccountBalance').value; // Using balance input for step 3 logic check if needed, but Step 3 is Details (Name/Desc)
+                // In accounts.html Step 3 is Name & Description. 
+                // Let's check the HTML. Step 3 has #addAccountName and #addAccountDesc.
+                // Step 4 has #addAccountBalance (Initial Funds).
+                btn.disabled = !name.trim();
+            } else if (addAccountStep === 4) {
+                // Initial Funds Step. Always allow next? Or require balance?
+                // accounts.html Step 3 was name/balance. Step 4 was something else?
+                // Wait, accounts.html Step 3: Name & Initial Balance. Step 4: nothing?
+                // My 5-step plan:
+                // 1. Workflow
+                // 2. Type
+                // 3. Details (Name, Description, Institution)
+                // 4. Initial Funds (Amount, Date, Cash In)
+                // 5. Review
+
+                // So for Step 4, we likely allow proceeding (default 0).
+                btn.disabled = false;
+            } else if (addAccountStep === 5) {
+                btn.disabled = false;
+            }
+        }
+
+        window.selectAddAccountWorkflow = function (flow) {
+            addAccountFormData.workflow = flow;
+            document.querySelectorAll('#addAccountStep1 .acct-card').forEach(el => el.classList.remove('selected'));
+            document.getElementById(flow === 'new' ? 'addAccountWorkflowNew' : 'addAccountWorkflowExisting').classList.add('selected');
+            updateAddAccountButtons(addAccountStep);
+            setTimeout(() => addAccountNextStep(), 300);
+        }
+
+        window.selectAddAccountType = function (type) {
+            addAccountFormData.type = type;
+
+            // Clear previous selection
+            document.querySelectorAll('#add-account-type-selector .acct-card').forEach(card => {
+                card.classList.remove('selected');
+                card.closest('label')?.querySelector('.acct-check')?.classList.remove('opacity-100', 'scale-100');
+            });
+
+            // Find the selected one
+            const inputRadio = document.querySelector(`input[name="accountType"][value="${type}"]`);
+            if (inputRadio) {
+                // Find label pointing to this input
+                const label = document.querySelector(`label[for="${inputRadio.id}"]`);
+                if (label) {
+                    const card = label.querySelector('.acct-card');
+                    if (card) {
+                        card.classList.add('selected');
+                        card.querySelector('.acct-check')?.classList.add('opacity-100', 'scale-100');
+                    }
+                }
+            }
+
+            // Show Experience Level
+            document.getElementById('addAccountExperienceLevelSection').classList.remove('hidden');
+
+            // Update Buttons
+            updateAddAccountButtons(addAccountStep);
+        }
+
+        window.validateAddAccountStep3 = function () {
+            validateAddAccountCurrentStepButton();
+        }
+
+        window.selectAddAccountColor = function (color) {
+            addAccountFormData.color = color;
+            const colorInput = document.getElementById('addAccountColor');
+            if (colorInput) colorInput.value = color;
+            document.querySelectorAll('.acct-color-swatch').forEach(b => b.classList.toggle('selected', b.dataset.color === color));
+        }
+
+        window.toggleAddAccountCashInForm = function () {
+            const skip = document.getElementById('addAccountSkipCashIn').checked;
+            const form = document.getElementById('addAccountCashInForm');
+            if (form) {
+                form.style.opacity = skip ? '0.35' : '1';
+                form.style.pointerEvents = skip ? 'none' : 'auto';
+            }
+        }
+
+        window.updateAddAccountStepper = function (step) {
+            const modal = document.getElementById('modal-add-account');
+            if (!modal) return;
+
+            // Update dots and labels
+            for (let i = 1; i <= addAccountTotalSteps; i++) {
+                const dot = modal.querySelector(`.acct-step-dot[data-step="${i}"]`);
+                const label = dot ? dot.closest('.acct-step-wrap').querySelector('.acct-step-label') : null;
+                const conn = modal.querySelector(`.acct-step-connector[data-connector="${i}"]`);
+
+                if (!dot) continue;
+
+                dot.classList.remove('active', 'completed');
+                if (label) label.classList.remove('active', 'completed');
+
+                if (i < step) {
+                    dot.classList.add('completed');
+                    dot.innerHTML = '<iconify-icon icon="solar:check-read-linear" width="12"></iconify-icon>';
+                    if (label) label.classList.add('completed');
+                } else if (i === step) {
+                    dot.classList.add('active');
+                    dot.textContent = i;
+                    dot.setAttribute('aria-current', 'step');
+                    if (label) label.classList.add('active');
+                } else {
+                    dot.textContent = i;
+                    dot.removeAttribute('aria-current');
+                }
+
+                if (conn) conn.classList.toggle('completed', i < step);
+            }
+        }
+
+        window.addAccountNextStep = function () {
+            if (addAccountStep === 5) {
+                addAccountSubmit();
+            } else {
+                addAccountNavigateToStep(addAccountStep + 1);
+            }
+        }
+
+        window.addAccountPreviousStep = function () {
+            if (addAccountStep > 1) {
+                addAccountNavigateToStep(addAccountStep - 1);
+            }
+        }
+
+        window.updateAddAccountReview = function () {
+            // Update review fields
+            const name = document.getElementById('addAccountName')?.value || 'New Account';
+            const type = addAccountFormData.type || 'Checking';
+            const balanceVal = document.getElementById('addAccountBalance')?.value || '0';
+            const institution = document.getElementById('addAccountInstitution')?.value || '-';
+            const notes = document.getElementById('addAccountDesc')?.value || 'No notes provided.';
+
+            document.getElementById('addAccountReviewName').textContent = name;
+            document.getElementById('addAccountReviewType').textContent = type.charAt(0).toUpperCase() + type.slice(1);
+            document.getElementById('addAccountReviewBalance').textContent = parseFloat(balanceVal).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
+            document.getElementById('addAccountReviewInstitution').textContent = institution;
+            document.getElementById('addAccountReviewDesc').textContent = notes;
+
+            // Icon
+            const iconEl = document.getElementById('addAccountReviewIcon');
+            if (iconEl) iconEl.setAttribute('icon', getAccountIcon(type));
+
+            // Color
+            const colorEl = document.getElementById('addAccountReviewColor');
+            const hexColor = addAccountFormData.color;
+            const colorNames = {
+                '#10B981': 'Green', '#3B82F6': 'Blue', '#F59E0B': 'Amber',
+                '#8B5CF6': 'Purple', '#64748B': 'Slate'
+            };
+            if (colorEl) {
+                colorEl.innerHTML = `
+                    <span class="w-4 h-4 rounded-full" style="background:${hexColor}"></span>
+                    <span class="text-[13px] font-semibold text-slate-700">${colorNames[hexColor] || 'Custom'}</span>
+                `;
+            }
+        }
+
+        window.addAccountSubmit = function () {
+            const btn = document.getElementById('addAccountBtnNext');
+            if (btn) btn.disabled = true;
+
+            const hexColor = addAccountFormData.color;
+            const isDefault = document.getElementById('addAccountIsDefault')?.checked || false;
+
+            // Map hex to color name for existing rendering code
+            const hexToName = {
+                '#10B981': 'emerald', '#3B82F6': 'blue', '#F59E0B': 'amber',
+                '#8B5CF6': 'purple', '#64748B': 'slate'
+            };
+
+            const newAccount = {
+                id: Date.now().toString(),
+                name: document.getElementById('addAccountName')?.value || '',
+                type: addAccountFormData.type,
+                balance: parseFloat(document.getElementById('addAccountBalance')?.value || '0'),
+                color: hexToName[hexColor] || 'emerald',
+                isDefault: isDefault || accounts.length === 0,
+                icon: getAccountIcon(addAccountFormData.type)
+            };
+
+            // If setting as default, unset others
+            if (newAccount.isDefault) {
+                accounts.forEach(a => a.isDefault = false);
+            }
+
+            accounts.push(newAccount);
+            renderAccounts();
+
+            // Show Success Msg (Mock)/Close
+            setTimeout(() => {
+                closeModal('modal-add-account');
+                if (btn) btn.disabled = false;
+                // Reset
+                addAccountStep = 1;
+            }, 500);
+        }
+
+        window.getAccountIcon = function (type) {
+            const iconMap = {
+                'checking': 'solar:wallet-linear',
+                'savings': 'solar:safe-linear',
+                'credit': 'solar:card-linear',
+                'cash': 'solar:money-bag-linear',
+                'investment': 'solar:graph-up-linear',
+                'loan': 'solar:hand-money-linear',
+                'other': 'solar:wallet-2-linear'
+            };
+            return iconMap[type] || 'solar:wallet-linear';
+        }
+
+        // ===================================
+        // Delete Account Modal Functions
+        // ===================================
+
+        let deleteAccountStep = 1;
+        let accountToDeleteData = null;
+
+        window.deleteAccountNextStep = function () {
+            const modal = document.getElementById('modal-delete-account');
+            if (!modal) return;
+
+            let nextStep = deleteAccountStep;
+
+            // Validation
+            if (deleteAccountStep === 1) {
+                if (!accountToDeleteData) {
+                    alert('No account selected for deletion');
+                    return;
+                }
+                // Update confirmation step
+                updateDeleteAccountReview();
+                nextStep = 2;
+            } else if (deleteAccountStep === 2) {
+                const confirmInput = document.getElementById('deleteConfirmInput')?.value;
+                if (confirmInput !== 'DELETE') {
+                    alert('Please type "DELETE" to confirm account deletion');
+                    return;
+                }
+                // Submit the deletion
+                deleteAccountSubmit();
+                return;
+            }
+
+            // Navigate to next step
+            deleteAccountNavigateToStep(nextStep);
+        }
+
+        window.deleteAccountPreviousStep = function () {
+            if (deleteAccountStep > 1) {
+                deleteAccountNavigateToStep(deleteAccountStep - 1);
+            }
+        }
+
+        window.deleteAccountNavigateToStep = function (step) {
+            const modal = document.getElementById('modal-delete-account');
+            if (!modal) return;
+
+            // Hide current step
+            document.getElementById(`deleteAccountStep${deleteAccountStep}`)?.classList.add('hidden');
+
+            // Show new step
+            document.getElementById(`deleteAccountStep${step}`)?.classList.remove('hidden');
+
+            // Update stepper
+            updateDeleteAccountStepper(step);
+
+            // Update buttons
+            updateDeleteAccountButtons(step);
+
+            // Update step text
+            const stepText = document.getElementById('deleteAccountStepText');
+            if (stepText) {
+                stepText.textContent = step;
+            }
+
+            deleteAccountStep = step;
+        }
+
+        window.updateDeleteAccountStepper = function (step) {
+            const modal = document.getElementById('modal-delete-account');
+            if (!modal) return;
+
+            // Update dots and labels
+            modal.querySelectorAll('.settings-step-dot').forEach(dot => {
+                const dotStep = parseInt(dot.dataset.step);
+                dot.classList.remove('active', 'completed');
+                if (dotStep === step) dot.classList.add('active');
+                else if (dotStep < step) dot.classList.add('completed');
+            });
+
+            modal.querySelectorAll('.settings-step-label').forEach(label => {
+                const labelStep = parseInt(label.parentElement.querySelector('.settings-step-dot').dataset.step);
+                label.classList.remove('active', 'completed');
+                if (labelStep === step) label.classList.add('active');
+                else if (labelStep < step) label.classList.add('completed');
+            });
+
+            // Update connectors
+            modal.querySelectorAll('.settings-step-connector').forEach(conn => {
+                const connStep = parseInt(conn.dataset.connector);
+                conn.classList.toggle('completed', connStep < step);
+            });
+        }
+
+        window.updateDeleteAccountButtons = function (step) {
+            const backBtn = document.getElementById('deleteAccountBtnBack');
+            const nextBtn = document.getElementById('deleteAccountBtnNext');
+
+            // Show/hide back button
+            if (backBtn) {
+                backBtn.classList.toggle('hidden', step === 1);
+            }
+
+            // Update next button text
+            if (nextBtn) {
+                if (step === 2) {
+                    nextBtn.innerHTML = 'Delete Account <iconify-icon icon="solar:trash-bin-trash-linear" class="ml-1"></iconify-icon>';
+                    nextBtn.className = 'btn btn-primary bg-red-500 hover:bg-red-600 border-red-500';
+                } else {
+                    nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" width="16" class="ml-1"></iconify-icon>';
+                    nextBtn.className = 'btn btn-primary';
+                }
+            }
+        }
+
+        window.updateDeleteAccountReview = function () {
+            if (!accountToDeleteData) return;
+
+            // Update review fields
+            const nameEl = document.getElementById('delete-confirm-name');
+            const typeEl = document.getElementById('delete-confirm-type');
+            const balanceEl = document.getElementById('delete-confirm-balance');
+            const transactionsEl = document.getElementById('delete-confirm-transactions');
+
+            if (nameEl) nameEl.textContent = accountToDeleteData.name;
+            if (typeEl) typeEl.textContent = accountToDeleteData.type.charAt(0).toUpperCase() + accountToDeleteData.type.slice(1);
+            if (balanceEl) balanceEl.textContent = `₱${accountToDeleteData.balance.toFixed(2)}`;
+            if (transactionsEl) transactionsEl.textContent = 'Multiple';
+        }
+
+        window.deleteAccountSubmit = function () {
+            if (!accountToDeleteData) return;
+
+            // Delete the account
+            accounts = accounts.filter(a => a.id !== accountToDeleteData.id);
+            renderAccounts();
+            closeModal('modal-delete-account');
+
+            // Reset state
+            deleteAccountStep = 1;
+            accountToDeleteData = null;
+            document.getElementById('deleteConfirmInput')?.reset();
+        }
+
+        // Update existing deleteAccount function to use new modal
+        window.deleteAccount = function (id) {
+            accountToDelete = id;
+            const acc = accounts.find(a => a.id === id);
+            if (!acc) return;
+
+            accountToDeleteData = acc;
+
+            // Update display elements
+            const nameDisplay = document.getElementById('delete-name-display');
+            const typeDisplay = document.getElementById('delete-type-display');
+
+            if (nameDisplay) nameDisplay.textContent = acc.name;
+            if (typeDisplay) typeDisplay.textContent = acc.type.charAt(0).toUpperCase() + acc.type.slice(1) + ' Account';
+
+            // Reset modal state
+            deleteAccountStep = 1;
+        }
+
+        window.deleteAccountNavigateToStep = function (step) {
+            const modal = document.getElementById('modal-delete-account');
+            if (!modal) return;
+
+            // Hide current step
+            document.getElementById(`deleteAccountStep${deleteAccountStep}`)?.classList.add('hidden');
+
+            // Show new step
+            document.getElementById(`deleteAccountStep${step}`)?.classList.remove('hidden');
+
+            // Update stepper
+            updateDeleteAccountStepper(step);
+
+            // Update buttons
+            updateDeleteAccountButtons(step);
+
+            // Update step text
+            const stepText = document.getElementById('deleteAccountStepText');
+            if (stepText) {
+                stepText.textContent = step;
+            }
+
+            deleteAccountStep = step;
+        }
+
+        window.updateDeleteAccountStepper = function (step) {
+            const modal = document.getElementById('modal-delete-account');
+            if (!modal) return;
+
+            // Update dots and labels
+            modal.querySelectorAll('.settings-step-dot').forEach(dot => {
+                const dotStep = parseInt(dot.dataset.step);
+                dot.classList.remove('active', 'completed');
+                if (dotStep === step) dot.classList.add('active');
+                else if (dotStep < step) dot.classList.add('completed');
+            });
+
+            modal.querySelectorAll('.settings-step-label').forEach(label => {
+                const labelStep = parseInt(label.parentElement.querySelector('.settings-step-dot').dataset.step);
+                label.classList.remove('active', 'completed');
+                if (labelStep === step) label.classList.add('active');
+                else if (labelStep < step) label.classList.add('completed');
+            });
+
+            // Update connectors
+            modal.querySelectorAll('.settings-step-connector').forEach(conn => {
+                const connStep = parseInt(conn.dataset.connector);
+                conn.classList.toggle('completed', connStep < step);
+            });
+        }
+
+        window.updateDeleteAccountButtons = function (step) {
+            const backBtn = document.getElementById('deleteAccountBtnBack');
+            const nextBtn = document.getElementById('deleteAccountBtnNext');
+
+            // Show/hide back button
+            if (backBtn) {
+                backBtn.classList.toggle('hidden', step === 1);
+            }
+
+            // Update next button text
+            if (nextBtn) {
+                if (step === 2) {
+                    nextBtn.innerHTML = 'Delete Account <iconify-icon icon="solar:trash-bin-trash-linear" class="ml-1"></iconify-icon>';
+                    nextBtn.className = 'btn btn-primary bg-red-500 hover:bg-red-600 border-red-500';
+                } else {
+                    nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" width="16" class="ml-1"></iconify-icon>';
+                    nextBtn.className = 'btn btn-primary';
+                }
+            }
+        }
+
+        window.updateDeleteAccountReview = function () {
+            if (!accountToDeleteData) return;
+
+            // Update review fields
+            const nameEl = document.getElementById('delete-confirm-name');
+            const typeEl = document.getElementById('delete-confirm-type');
+            const balanceEl = document.getElementById('delete-confirm-balance');
+            const transactionsEl = document.getElementById('delete-confirm-transactions');
+
+            if (nameEl) nameEl.textContent = accountToDeleteData.name;
+            if (typeEl) typeEl.textContent = accountToDeleteData.type.charAt(0).toUpperCase() + accountToDeleteData.type.slice(1);
+            if (balanceEl) balanceEl.textContent = `₱${accountToDeleteData.balance.toFixed(2)}`;
+            if (transactionsEl) transactionsEl.textContent = 'Multiple';
+        }
+
+        window.deleteAccountSubmit = function () {
+            if (!accountToDeleteData) return;
+
+            // Delete the account
+            accounts = accounts.filter(a => a.id !== accountToDeleteData.id);
+            renderAccounts();
+            closeModal('modal-delete-account');
+
+            // Reset state
+            deleteAccountStep = 1;
+            accountToDeleteData = null;
+            document.getElementById('deleteConfirmInput')?.reset();
+        }
+
+        // Update existing deleteAccount function to use new modal
+        window.deleteAccount = function (id) {
+            accountToDelete = id;
+            const acc = accounts.find(a => a.id === id);
+            if (!acc) return;
+
+            accountToDeleteData = acc;
+
+            // Update display elements
+            const nameDisplay = document.getElementById('delete-name-display');
+            const typeDisplay = document.getElementById('delete-type-display');
+
+            if (nameDisplay) nameDisplay.textContent = acc.name;
+            if (typeDisplay) typeDisplay.textContent = acc.type.charAt(0).toUpperCase() + acc.type.slice(1) + ' Account';
+
+            // Reset modal state
+            deleteAccountStep = 1;
+            deleteAccountNavigateToStep(1);
+
+            openModal('modal-delete-account');
+        }
+
+        // Update confirmDelete function to use new workflow
+        window.confirmDelete = function () {
+            // This is now handled by the new multi-step workflow
+            // Keep for backward compatibility
+            if (accountToDeleteData) {
+                deleteAccountSubmit();
+            }
+        }
+
+        // ===================================
+        // Edit Account Modal Functions
+        // ===================================
+
+        let editAccountStep = 1;
+        let accountToEditData = null;
+        let selectedEditAdjustmentType = '';
+        let selectedEditColor = '';
+
+        window.editAccountNextStep = function () {
+            const modal = document.getElementById('modal-edit-account');
+            if (!modal) return;
+
+            let nextStep = editAccountStep;
+
+            // Validation
+            if (editAccountStep === 1) {
+                const name = document.getElementById('editAccountName')?.value;
+                if (!name) {
+                    alert('Please enter an account name');
+                    return;
+                }
+                nextStep = 2;
+            } else if (editAccountStep === 2) {
+                const adjustment = document.getElementById('editAccountAdjustment')?.value;
+                const reason = document.getElementById('editAccountReason')?.value;
+
+                if (!selectedEditAdjustmentType || !adjustment || !reason) {
+                    alert('Please fill in all adjustment fields');
+                    return;
+                }
+
+                // Update review step
+                updateEditAccountReview();
+                nextStep = 3;
+            } else if (editAccountStep === 3) {
+                // Submit the edit
+                editAccountSubmit();
+                return;
+            }
+
+            // Navigate to next step
+            editAccountNavigateToStep(nextStep);
+        }
+
+        window.editAccountPreviousStep = function () {
+            if (editAccountStep > 1) {
+                editAccountNavigateToStep(editAccountStep - 1);
+            }
+        }
+
+        window.editAccountNavigateToStep = function (step) {
+            const modal = document.getElementById('modal-edit-account');
+            if (!modal) return;
+
+            // Hide current step
+            document.getElementById(`editAccountStep${editAccountStep}`)?.classList.add('hidden');
+
+            // Show new step
+            document.getElementById(`editAccountStep${step}`)?.classList.remove('hidden');
+
+            // Update stepper
+            updateEditAccountStepper(step);
+
+            // Update buttons
+            updateEditAccountButtons(step);
+
+            // Update step text
+            const stepText = document.getElementById('editAccountStepText');
+            if (stepText) {
+                stepText.textContent = step;
+            }
+
+            editAccountStep = step;
+        }
+
+        window.updateEditAccountStepper = function (step) {
+            const modal = document.getElementById('modal-edit-account');
+            if (!modal) return;
+
+            // Update dots and labels
+            modal.querySelectorAll('.settings-step-dot').forEach(dot => {
+                const dotStep = parseInt(dot.dataset.step);
+                dot.classList.remove('active', 'completed');
+                if (dotStep === step) dot.classList.add('active');
+                else if (dotStep < step) dot.classList.add('completed');
+            });
+
+            modal.querySelectorAll('.settings-step-label').forEach(label => {
+                const labelStep = parseInt(label.parentElement.querySelector('.settings-step-dot').dataset.step);
+                label.classList.remove('active', 'completed');
+                if (labelStep === step) label.classList.add('active');
+                else if (labelStep < step) label.classList.add('completed');
+            });
+
+            // Update connectors
+            modal.querySelectorAll('.settings-step-connector').forEach(conn => {
+                const connStep = parseInt(conn.dataset.connector);
+                conn.classList.toggle('completed', connStep < step);
+            });
+        }
+
+        window.updateEditAccountButtons = function (step) {
+            const backBtn = document.getElementById('editAccountBtnBack');
+            const nextBtn = document.getElementById('editAccountBtnNext');
+
+            // Show/hide back button
+            if (backBtn) {
+                backBtn.classList.toggle('hidden', step === 1);
+            }
+
+            // Update next button text
+            if (nextBtn) {
+                if (step === 3) {
+                    nextBtn.innerHTML = 'Save Changes <iconify-icon icon="solar:check-read-linear" class="ml-1"></iconify-icon>';
+                } else {
+                    nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" width="16" class="ml-1"></iconify-icon>';
+                }
+            }
+        }
+
+        window.updateEditAccountReview = function () {
+            if (!accountToEditData) return;
+
+            const name = document.getElementById('editAccountName')?.value || '';
+            const adjustment = document.getElementById('editAccountAdjustment')?.value || '0.00';
+            const reason = document.getElementById('editAccountReason')?.value || '';
+
+            // Calculate new balance
+            const currentBalance = accountToEditData.balance;
+            const adjustmentAmount = parseFloat(adjustment);
+            let newBalance = currentBalance;
+
+            if (selectedEditAdjustmentType === 'deposit') {
+                newBalance = currentBalance + adjustmentAmount;
+            } else if (selectedEditAdjustmentType === 'withdrawal') {
+                newBalance = currentBalance - adjustmentAmount;
+            }
+
+            // Update review fields
+            const nameEl = document.getElementById('editReviewName');
+            const typeEl = document.getElementById('editReviewType');
+            const currentBalanceEl = document.getElementById('editReviewCurrentBalance');
+            const adjustmentEl = document.getElementById('editReviewAdjustment');
+            const newBalanceEl = document.getElementById('editReviewNewBalance');
+            const adjustmentTypeEl = document.getElementById('editReviewAdjustmentType');
+
+            if (nameEl) nameEl.textContent = name;
+            if (typeEl) typeEl.textContent = accountToEditData.type.charAt(0).toUpperCase() + accountToEditData.type.slice(1);
+            if (currentBalanceEl) currentBalanceEl.textContent = `₱${currentBalance.toFixed(2)}`;
+            if (adjustmentEl) adjustmentEl.textContent = `${selectedEditAdjustmentType === 'deposit' ? '+' : '-'}₱${adjustmentAmount.toFixed(2)}`;
+            if (newBalanceEl) newBalanceEl.textContent = `₱${newBalance.toFixed(2)}`;
+            if (adjustmentTypeEl) adjustmentTypeEl.textContent = selectedEditAdjustmentType.charAt(0).toUpperCase() + selectedEditAdjustmentType.slice(1);
+        }
+
+        window.editAccountSubmit = function () {
+            if (!accountToEditData) return;
+
+            const name = document.getElementById('editAccountName')?.value || '';
+            const adjustment = document.getElementById('editAccountAdjustment')?.value || '0.00';
+            const reason = document.getElementById('editAccountReason')?.value || '';
+
+            // Update account
+            const accIndex = accounts.findIndex(a => a.id === accountToEditData.id);
+            if (accIndex > -1) {
+                accounts[accIndex].name = name;
+
+                // Apply balance adjustment
+                const adjustmentAmount = parseFloat(adjustment);
+                if (selectedEditAdjustmentType === 'deposit') {
+                    accounts[accIndex].balance += adjustmentAmount;
+                } else if (selectedEditAdjustmentType === 'withdrawal') {
+                    accounts[accIndex].balance -= adjustmentAmount;
+                }
+
+                // Apply color change if selected
+                if (selectedEditColor) {
+                    accounts[accIndex].color = selectedEditColor;
+                }
+            }
+
+            renderAccounts();
+            closeModal('modal-edit-account');
+
+            // Reset state
+            editAccountStep = 1;
+            accountToEditData = null;
+            selectedEditAdjustmentType = '';
+            selectedEditColor = '';
+        }
+
+        window.selectEditAccountColor = function (color) {
+            selectedEditColor = color;
+
+            // Update color selection
+            document.querySelectorAll('#editAccountStep1 button[type="button"]').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-offset-2');
+                const colorMap = {
+                    'emerald': 'ring-emerald-500',
+                    'blue': 'ring-blue-500',
+                    'amber': 'ring-amber-500',
+                    'purple': 'ring-purple-500',
+                    'slate': 'ring-slate-500'
+                };
+                Object.values(colorMap).forEach(c => btn.classList.remove(c));
+            });
+
+            const selectedBtn = event.target;
+            const colorMap = {
+                'emerald': 'ring-emerald-500',
+                'blue': 'ring-blue-500',
+                'amber': 'ring-amber-500',
+                'purple': 'ring-purple-500',
+                'slate': 'ring-slate-500'
+            };
+            selectedBtn.classList.add('ring-2', 'ring-offset-2', colorMap[color]);
+        }
+
+        window.selectEditAdjustmentType = function (type) {
+            selectedEditAdjustmentType = type;
+
+            // Update card selection
+            document.querySelectorAll('#editAccountStep2 .settings-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            const selectedCard = document.querySelector(`input[name="adjustmentType"][value="${type}"]`)?.closest('.settings-card');
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
+        }
+
+        // Update existing editAccount function to use new modal
+        window.editAccount = function (id) {
+            accountToEdit = id;
+            const acc = accounts.find(a => a.id === id);
+            if (!acc) return;
+
+            accountToEditData = acc;
+
+            // Update form fields
+            const nameInput = document.getElementById('editAccountName');
+            const typeDisplay = document.getElementById('editAccountTypeDisplay');
+            const balanceDisplay = document.getElementById('editAccountCurrentBalance');
+
+            if (nameInput) nameInput.value = acc.name;
+            if (typeDisplay) typeDisplay.textContent = acc.type.charAt(0).toUpperCase() + acc.type.slice(1);
+            if (balanceDisplay) balanceDisplay.textContent = `₱${acc.balance.toFixed(2)}`;
+
+            // Reset modal state
+            editAccountStep = 1;
+            selectedEditAdjustmentType = '';
+            selectedEditColor = acc.color || 'emerald';
+
+            // Clear adjustment form
+            document.getElementById('editAccountAdjustment')?.reset();
+            document.getElementById('editAccountReason')?.reset();
+
+            editAccountNavigateToStep(1);
+
+            openModal('modal-edit-account');
+        }
+
+        // Update existing saveEditAccount function to use new workflow
+        window.saveEditAccount = function () {
+            // This is now handled by the new multi-step workflow
+            // Keep for backward compatibility
+            if (accountToEditData) {
+                editAccountSubmit();
+            }
+        }
+
+        // Run Init
+        init();
+
+    })();
+</script>

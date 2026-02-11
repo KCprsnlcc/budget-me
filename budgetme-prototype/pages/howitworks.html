@@ -1,0 +1,263 @@
+<section id="how-it-works" class="relative z-10 py-20 px-6 bg-slate-50/50 border-y border-slate-100">
+    <style>
+        /* How It Works section styles */
+        .hiw-step-card {
+            position: relative;
+        }
+
+        .hiw-icon-ring {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .hiw-icon-ring:hover {
+            border-color: #cbd5e1;
+            /* slate-300 */
+            background-color: #f8fafc;
+            /* slate-50 */
+            box-shadow: 0 4px 12px -2px rgba(148, 163, 184, 0.12);
+        }
+
+        .hiw-connector {
+            position: absolute;
+            top: 36px;
+            left: calc(50% + 36px);
+            width: calc(100% - 72px);
+            height: 2px;
+            background: linear-gradient(90deg, #94a3b8 0%, #e2e8f0 40%, #e2e8f0 60%, #94a3b8 100%);
+            opacity: 0.4;
+        }
+
+        @media (max-width: 767px) {
+            .hiw-connector {
+                display: none;
+            }
+
+            .hiw-vertical-connector {
+                display: block !important;
+            }
+        }
+
+        .hiw-vertical-connector {
+            display: none;
+            width: 2px;
+            height: 32px;
+            background: linear-gradient(180deg, #94a3b8 0%, #e2e8f0 50%, #94a3b8 100%);
+            margin: 0 auto;
+            opacity: 0.4;
+        }
+
+        .hiw-step-number {
+            font-variant-numeric: tabular-nums;
+        }
+
+        @keyframes gentlePulse {
+
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .hiw-step-card:hover .hiw-pulse-dot {
+            animation: gentlePulse 1.5s ease-in-out infinite;
+        }
+
+        /* Fade-in animation - CSS only, no JS needed */
+        @keyframes hiwFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hiw-step-col {
+            animation: hiwFadeUp 0.6s ease-out both;
+        }
+
+        .hiw-step-col:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .hiw-step-col:nth-child(3) {
+            animation-delay: 0.1s;
+        }
+
+        .hiw-step-col:nth-child(5) {
+            animation-delay: 0.2s;
+        }
+
+        .hiw-step-col:nth-child(7) {
+            animation-delay: 0.3s;
+        }
+    </style>
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Section Header: Centered layout matching reference image (modules.html pattern) -->
+        <div class="text-center mb-16">
+            <h2 class="text-brand-600 text-[10px] font-bold tracking-widest uppercase mb-3">Process</h2>
+            <h3 class="text-3xl md:text-4xl font-semibold text-slate-900 tracking-tight mb-4">How It Works</h3>
+            <p class="text-slate-500 max-w-2xl mx-auto mb-8 text-sm md:text-base">Get started in minutes and take
+                control of your finances with a simple, streamlined workflow.</p>
+        </div>
+
+        <!-- Steps Grid (Desktop: 4 columns, Tablet: 2 columns, Mobile: 1 column) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 md:gap-0 lg:gap-0 relative">
+
+            <!-- Step 1: Sign Up & Connect -->
+            <div class="hiw-step-col flex flex-col items-center text-center px-6 py-6 relative">
+                <div class="hiw-step-card flex flex-col items-center">
+                    <!-- Step Number Badge -->
+                    <div
+                        class="hiw-step-number text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded-full px-2.5 py-0.5 mb-4 tracking-wider uppercase">
+                        Step 01
+                    </div>
+                    <!-- Icon Ring -->
+                    <div
+                        class="hiw-icon-ring relative w-[72px] h-[72px] rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-5">
+                        <iconify-icon icon="solar:user-plus-rounded-bold-duotone"
+                            class="text-slate-500 text-3xl"></iconify-icon>
+                        <!-- Pulse Dot -->
+                        <div
+                            class="hiw-pulse-dot absolute -top-1 -right-1 w-3 h-3 bg-slate-400 rounded-full border-2 border-white">
+                        </div>
+                    </div>
+                    <!-- Text  -->
+                    <h4 class="text-[15px] font-semibold text-slate-900 mb-2">Sign Up & Connect</h4>
+                    <p class="text-[12px] text-slate-500 leading-relaxed max-w-[200px]">Create your free account and
+                        securely link your bank accounts with bank-level encryption.</p>
+                </div>
+                <!-- Desktop Connector Line -->
+                <div class="hiw-connector hidden lg:block"></div>
+            </div>
+
+            <!-- Mobile Vertical Connector -->
+            <div class="hiw-vertical-connector"></div>
+
+            <!-- Step 2: Organize & Budget -->
+            <div class="hiw-step-col flex flex-col items-center text-center px-6 py-6 relative">
+                <div class="hiw-step-card flex flex-col items-center">
+                    <div
+                        class="hiw-step-number text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded-full px-2.5 py-0.5 mb-4 tracking-wider uppercase">
+                        Step 02
+                    </div>
+                    <div
+                        class="hiw-icon-ring relative w-[72px] h-[72px] rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-5">
+                        <iconify-icon icon="solar:wallet-money-bold-duotone"
+                            class="text-slate-500 text-3xl"></iconify-icon>
+                        <div
+                            class="hiw-pulse-dot absolute -top-1 -right-1 w-3 h-3 bg-slate-400 rounded-full border-2 border-white">
+                        </div>
+                    </div>
+                    <h4 class="text-[15px] font-semibold text-slate-900 mb-2">Organize & Budget</h4>
+                    <p class="text-[12px] text-slate-500 leading-relaxed max-w-[200px]">Transactions auto-categorize
+                        while smart budgets adapt to your spending patterns.</p>
+                </div>
+                <div class="hiw-connector hidden lg:block"></div>
+            </div>
+
+            <div class="hiw-vertical-connector"></div>
+
+            <!-- Step 3: Track & Predict -->
+            <div class="hiw-step-col flex flex-col items-center text-center px-6 py-6 relative">
+                <div class="hiw-step-card flex flex-col items-center">
+                    <div
+                        class="hiw-step-number text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded-full px-2.5 py-0.5 mb-4 tracking-wider uppercase">
+                        Step 03
+                    </div>
+                    <div
+                        class="hiw-icon-ring relative w-[72px] h-[72px] rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-5">
+                        <iconify-icon icon="solar:chart-2-bold-duotone" class="text-slate-500 text-3xl"></iconify-icon>
+                        <div
+                            class="hiw-pulse-dot absolute -top-1 -right-1 w-3 h-3 bg-slate-400 rounded-full border-2 border-white">
+                        </div>
+                    </div>
+                    <h4 class="text-[15px] font-semibold text-slate-900 mb-2">Track & Predict</h4>
+                    <p class="text-[12px] text-slate-500 leading-relaxed max-w-[200px]">AI-powered insights forecast
+                        your finances, set goals, and generate detailed reports.</p>
+                </div>
+                <div class="hiw-connector hidden lg:block"></div>
+            </div>
+
+            <div class="hiw-vertical-connector"></div>
+
+            <!-- Step 4: Grow Together -->
+            <div class="hiw-step-col flex flex-col items-center text-center px-6 py-6 relative">
+                <div class="hiw-step-card flex flex-col items-center">
+                    <div
+                        class="hiw-step-number text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded-full px-2.5 py-0.5 mb-4 tracking-wider uppercase">
+                        Step 04
+                    </div>
+                    <div
+                        class="hiw-icon-ring relative w-[72px] h-[72px] rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-5">
+                        <iconify-icon icon="solar:users-group-rounded-bold-duotone"
+                            class="text-slate-500 text-3xl"></iconify-icon>
+                        <div
+                            class="hiw-pulse-dot absolute -top-1 -right-1 w-3 h-3 bg-slate-400 rounded-full border-2 border-white">
+                        </div>
+                    </div>
+                    <h4 class="text-[15px] font-semibold text-slate-900 mb-2">Grow Together</h4>
+                    <p class="text-[12px] text-slate-500 leading-relaxed max-w-[200px]">Collaborate with family on
+                        shared budgets, get AI chatbot help, and customize your experience.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Mapping: Small reference tags below -->
+        <div class="mt-14 pt-8 border-t border-slate-200/60">
+            <div class="flex flex-wrap justify-center gap-2">
+                <span
+                    class="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 bg-white border border-slate-100 rounded-full px-3 py-1.5 shadow-sm">
+                    <iconify-icon icon="solar:widget-2-linear" width="12"></iconify-icon> Dashboard
+                </span>
+                <span
+                    class="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 bg-white border border-slate-100 rounded-full px-3 py-1.5 shadow-sm">
+                    <iconify-icon icon="solar:card-transfer-linear" width="12"></iconify-icon> Transactions
+                </span>
+                <span
+                    class="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 bg-white border border-slate-100 rounded-full px-3 py-1.5 shadow-sm">
+                    <iconify-icon icon="solar:safe-square-linear" width="12"></iconify-icon> Accounts
+                </span>
+                <span
+                    class="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 bg-white border border-slate-100 rounded-full px-3 py-1.5 shadow-sm">
+                    <iconify-icon icon="solar:wallet-money-linear" width="12"></iconify-icon> Budgets
+                </span>
+                <span
+                    class="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 bg-white border border-slate-100 rounded-full px-3 py-1.5 shadow-sm">
+                    <iconify-icon icon="solar:target-linear" width="12"></iconify-icon> Goals
+                </span>
+                <span
+                    class="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 bg-white border border-slate-100 rounded-full px-3 py-1.5 shadow-sm">
+                    <iconify-icon icon="solar:chart-2-linear" width="12"></iconify-icon> Reports
+                </span>
+                <span
+                    class="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 bg-white border border-slate-100 rounded-full px-3 py-1.5 shadow-sm">
+                    <iconify-icon icon="solar:magic-stick-3-linear" width="12"></iconify-icon> Predictions
+                </span>
+                <span
+                    class="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 bg-white border border-slate-100 rounded-full px-3 py-1.5 shadow-sm">
+                    <iconify-icon icon="solar:chat-round-dots-linear" width="12"></iconify-icon> BudgetSense AI
+                </span>
+                <span
+                    class="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 bg-white border border-slate-100 rounded-full px-3 py-1.5 shadow-sm">
+                    <iconify-icon icon="solar:users-group-rounded-linear" width="12"></iconify-icon> Family Finance
+                </span>
+                <span
+                    class="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 bg-white border border-slate-100 rounded-full px-3 py-1.5 shadow-sm">
+                    <iconify-icon icon="solar:settings-linear" width="12"></iconify-icon> Settings
+                </span>
+            </div>
+            <p class="text-center text-[10px] text-slate-400 mt-4 tracking-wide">All modules work together to provide
+                a complete financial management experience.</p>
+        </div>
+    </div>
+</section>

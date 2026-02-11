@@ -1,0 +1,813 @@
+<!-- Predictions Module Content -->
+<div class="max-w-6xl mx-auto space-y-6">
+
+    <!-- Page Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+        <div>
+            <div class="flex items-center gap-3">
+                <h2 class="text-2xl font-semibold text-slate-900 tracking-tight">AI Predictions</h2>
+                <span
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-medium rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
+                    <iconify-icon icon="solar:cpu-bolt-linear" width="12"></iconify-icon>
+                    AI Powered
+                </span>
+            </div>
+            <p class="text-sm text-slate-500 mt-1 font-light">Smart forecasts and insights powered by Prophet machine
+                learning.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <button class="btn btn-primary" onclick="generatePredictions()">
+                <iconify-icon icon="solar:magic-stick-3-linear" width="16"></iconify-icon>
+                Generate Predictions
+            </button>
+            <button class="btn btn-secondary" onclick="openHistoryModal()">
+                <iconify-icon icon="solar:history-linear" width="16"></iconify-icon>
+                View History
+            </button>
+            <div class="relative group">
+                <button class="btn btn-secondary">
+                    <iconify-icon icon="solar:export-linear" width="16"></iconify-icon>
+                    Export
+                    <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
+                </button>
+                <div
+                    class="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <button
+                        class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                        <iconify-icon icon="solar:document-text-linear" width="14" class="text-blue-500"></iconify-icon>
+                        Predictions (CSV)
+                    </button>
+                    <button
+                        class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                        <iconify-icon icon="solar:code-linear" width="14" class="text-amber-500"></iconify-icon>
+                        Predictions (JSON)
+                    </button>
+                    <div class="border-t border-slate-100 my-1"></div>
+                    <button
+                        class="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                        <iconify-icon icon="solar:lightbulb-linear" width="14" class="text-emerald-500"></iconify-icon>
+                        AI Insights (JSON)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Prediction Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <!-- Monthly Income Card -->
+        <div
+            class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5 hover:border-emerald-200 transition-colors group">
+            <div class="flex justify-between items-start mb-4">
+                <div
+                    class="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                    <iconify-icon icon="solar:wallet-linear" width="22"></iconify-icon>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                    <span
+                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-100">
+                        <iconify-icon icon="solar:trending-up-linear" width="10"></iconify-icon>
+                        12.4%
+                    </span>
+                    <span class="text-[9px] text-slate-400">vs last month</span>
+                </div>
+            </div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Monthly Income</div>
+            <div class="flex items-baseline gap-2">
+                <div class="text-2xl font-bold text-slate-900">₱8,450.00</div>
+                <div class="text-[10px] text-slate-400 line-through">₱7,520</div>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
+                <iconify-icon icon="solar:info-circle-linear" width="12"></iconify-icon>
+                Confidence: <span class="text-emerald-600 font-medium">92%</span>
+            </p>
+        </div>
+
+        <!-- Monthly Expenses Card -->
+        <div
+            class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5 hover:border-amber-200 transition-colors group">
+            <div class="flex justify-between items-start mb-4">
+                <div
+                    class="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-amber-50 group-hover:text-amber-600 transition-colors">
+                    <iconify-icon icon="solar:cart-large-linear" width="22"></iconify-icon>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                    <span
+                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600 border border-amber-100">
+                        <iconify-icon icon="solar:trending-up-linear" width="10"></iconify-icon>
+                        4.2%
+                    </span>
+                    <span class="text-[9px] text-slate-400">vs last month</span>
+                </div>
+            </div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Monthly Expenses</div>
+            <div class="flex items-baseline gap-2">
+                <div class="text-2xl font-bold text-slate-900">₱4,250.00</div>
+                <div class="text-[10px] text-slate-400 line-through">₱4,080</div>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
+                <iconify-icon icon="solar:info-circle-linear" width="12"></iconify-icon>
+                Confidence: <span class="text-amber-600 font-medium">85%</span>
+            </p>
+        </div>
+
+        <!-- Net Savings Card -->
+        <div
+            class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5 hover:border-emerald-200 transition-colors group">
+            <div class="flex justify-between items-start mb-4">
+                <div
+                    class="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                    <iconify-icon icon="solar:piggy-bank-linear" width="22"></iconify-icon>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                    <span
+                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-100">
+                        <iconify-icon icon="solar:trending-up-linear" width="10"></iconify-icon>
+                        22.1%
+                    </span>
+                    <span class="text-[9px] text-slate-400">vs last month</span>
+                </div>
+            </div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Net Savings</div>
+            <div class="flex items-baseline gap-2">
+                <div class="text-2xl font-bold text-slate-900">₱4,200.00</div>
+                <div class="text-[10px] text-slate-400 line-through">₱3,440</div>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
+                <iconify-icon icon="solar:info-circle-linear" width="12"></iconify-icon>
+                Confidence: <span class="text-emerald-600 font-medium">88%</span>
+            </p>
+        </div>
+
+        <!-- Savings Rate Card -->
+        <div
+            class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5 hover:border-blue-200 transition-colors group">
+            <div class="flex justify-between items-start mb-4">
+                <div
+                    class="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                    <iconify-icon icon="solar:chart-2-linear" width="22"></iconify-icon>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                    <span
+                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-600 border border-blue-100">
+                        Target: 50%
+                    </span>
+                    <span class="text-[9px] text-slate-400">Goal progress</span>
+                </div>
+            </div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Savings Rate</div>
+            <div class="flex items-baseline gap-2">
+                <div class="text-2xl font-bold text-slate-900">49.7%</div>
+                <div class="text-[10px] text-slate-400">Predicted</div>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-1 mt-3 overflow-hidden">
+                <div class="bg-blue-500 h-full rounded-full" style="width: 49.7%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Prediction Chart -->
+    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h3 class="text-sm font-semibold text-slate-900">Income vs Expenses Forecast</h3>
+                <p class="text-xs text-slate-500 mt-1 font-light">Prophet ML predictions with confidence intervals</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center gap-1.5">
+                    <div class="w-3 h-3 rounded-sm bg-slate-200"></div>
+                    <span class="text-[10px] font-medium text-slate-500">Historical Income</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-3 h-3 rounded-sm bg-emerald-100 border border-emerald-500 border-dashed"></div>
+                    <span class="text-[10px] font-medium text-slate-500">Predicted Income</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-3 h-3 rounded-sm bg-emerald-500"></div>
+                    <span class="text-[10px] font-medium text-slate-500">Expenses</span>
+                </div>
+                <button class="p-1.5 rounded-lg hover:bg-slate-50 text-slate-400 transition-colors"
+                    title="Chart Settings">
+                    <iconify-icon icon="solar:settings-linear" width="16"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <div
+            class="h-64 flex items-end justify-between gap-2 sm:gap-4 px-2 border-b border-slate-50 relative group/chart">
+            <!-- Confidence Interval Background (Visual Mockup) -->
+            <div class="absolute inset-0 flex items-center justify-end pr-2 pointer-events-none opacity-20">
+                <div class="w-1/2 h-40 bg-emerald-50 rounded-l-full blur-2xl"></div>
+            </div>
+
+            <!-- Grid Lines -->
+            <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                <div class="w-full h-px bg-slate-100/50"></div>
+                <div class="w-full h-px bg-slate-100/50"></div>
+                <div class="w-full h-px bg-slate-100/50"></div>
+                <div class="w-full h-px bg-slate-100/50"></div>
+                <div class="w-full h-px bg-slate-100/50"></div>
+            </div>
+
+            <!-- Data Bars -->
+            <!-- Month 1 (Historical) -->
+            <div class="flex flex-col items-center flex-1 z-10 group cursor-pointer h-full justify-end">
+                <div class="flex gap-1 items-end w-full justify-center group-hover:scale-x-110 transition-transform">
+                    <div class="w-3 bg-slate-200 rounded-t-[2px] h-32" title="Historical Income: ₱7,200"></div>
+                    <div class="w-3 bg-emerald-500 rounded-t-[2px] h-24" title="Expenses: ₱4,100"></div>
+                </div>
+                <div class="mt-4 text-[10px] font-medium text-slate-400 uppercase tracking-widest">Oct</div>
+            </div>
+            <!-- Month 2 (Historical) -->
+            <div class="flex flex-col items-center flex-1 z-10 group cursor-pointer h-full justify-end">
+                <div class="flex gap-1 items-end w-full justify-center group-hover:scale-x-110 transition-transform">
+                    <div class="w-3 bg-slate-200 rounded-t-[2px] h-36" title="Historical Income: ₱7,800"></div>
+                    <div class="w-3 bg-emerald-500 rounded-t-[2px] h-28" title="Expenses: ₱4,300"></div>
+                </div>
+                <div class="mt-4 text-[10px] font-medium text-slate-400 uppercase tracking-widest">Nov</div>
+            </div>
+            <!-- Month 3 (Current) -->
+            <div class="flex flex-col items-center flex-1 z-10 group cursor-pointer h-full justify-end">
+                <div class="flex gap-1 items-end w-full justify-center group-hover:scale-x-110 transition-transform">
+                    <div class="w-3 bg-slate-200 rounded-t-[2px] h-34" title="Historical Income: ₱7,500"></div>
+                    <div class="w-3 bg-emerald-500 rounded-t-[2px] h-25" title="Expenses: ₱4,080"></div>
+                </div>
+                <div
+                    class="mt-4 text-[10px] font-bold text-slate-900 uppercase tracking-widest border-b-2 border-emerald-500 pb-1">
+                    Dec</div>
+            </div>
+            <!-- Month 4 (Predicted) -->
+            <div class="flex flex-col items-center flex-1 z-10 group cursor-pointer h-full justify-end">
+                <div class="flex gap-1 items-end w-full justify-center group-hover:scale-x-110 transition-transform">
+                    <div class="w-3 bg-emerald-50 border border-emerald-500 border-dashed rounded-t-[2px] h-40"
+                        title="Predicted Income: ₱8,450"></div>
+                    <div class="w-3 bg-emerald-500/80 border border-emerald-500/20 border-dashed rounded-t-[2px] h-26"
+                        title="Predicted Expenses: ₱4,250"></div>
+                </div>
+                <div class="mt-4 text-[10px] font-medium text-emerald-600 uppercase tracking-widest">Jan</div>
+            </div>
+            <!-- Month 5 (Predicted) -->
+            <div class="flex flex-col items-center flex-1 z-10 group cursor-pointer h-full justify-end">
+                <div class="flex gap-1 items-end w-full justify-center group-hover:scale-x-110 transition-transform">
+                    <div class="w-3 bg-emerald-50 border border-emerald-500 border-dashed rounded-t-[2px] h-42"
+                        title="Predicted Income: ₱8,800"></div>
+                    <div class="w-3 bg-emerald-500/80 border border-emerald-500/20 border-dashed rounded-t-[2px] h-27"
+                        title="Predicted Expenses: ₱4,400"></div>
+                </div>
+                <div class="mt-4 text-[10px] font-medium text-emerald-600 uppercase tracking-widest">Feb</div>
+            </div>
+            <!-- Month 6 (Predicted) -->
+            <div class="flex flex-col items-center flex-1 z-10 group cursor-pointer h-full justify-end">
+                <div class="flex gap-1 items-end w-full justify-center group-hover:scale-x-110 transition-transform">
+                    <div class="w-3 bg-emerald-50 border border-emerald-500 border-dashed rounded-t-[2px] h-44"
+                        title="Predicted Income: ₱9,100"></div>
+                    <div class="w-3 bg-emerald-500/80 border border-emerald-500/20 border-dashed rounded-t-[2px] h-24"
+                        title="Predicted Expenses: ₱4,200"></div>
+                </div>
+                <div class="mt-4 text-[10px] font-medium text-emerald-600 uppercase tracking-widest">Mar</div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-6 pt-6 border-t border-slate-100">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-slate-400">Avg. Growth</span>
+                    <span class="text-xs font-bold text-emerald-600">+4.2%</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-slate-400">Max Savings</span>
+                    <span class="text-xs font-bold text-slate-900">₱4,900</span>
+                </div>
+            </div>
+            <button
+                class="text-xs font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors">
+                View detailed breakdown
+                <iconify-icon icon="solar:alt-arrow-right-linear" width="14"></iconify-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Category Predictions Table -->
+    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden mb-8">
+        <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h3 class="text-sm font-semibold text-slate-900">Category Spending Forecast</h3>
+                <p class="text-xs text-slate-500 mt-1 font-light">Detailed predictions for each spending category</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="relative">
+                    <iconify-icon icon="solar:magnifer-linear"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="14"></iconify-icon>
+                    <input type="text" placeholder="Filter categories..."
+                        class="form-input py-1.5 pl-9 text-xs w-full lg:w-48">
+                </div>
+                <button class="btn btn-secondary py-1.5 px-3">
+                    <iconify-icon icon="solar:filter-linear" width="14"></iconify-icon>
+                </button>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr
+                        class="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+                        <th class="px-6 py-4">Category</th>
+                        <th class="px-6 py-4 text-right">Historical Avg.</th>
+                        <th class="px-6 py-4 text-right">Predicted</th>
+                        <th class="px-6 py-4 text-right">Change</th>
+                        <th class="px-6 py-4 text-center">Trend</th>
+                        <th class="px-6 py-4 text-center">Confidence</th>
+                    </tr>
+                </thead>
+                <tbody class="text-xs divide-y divide-slate-50">
+                    <!-- Category 1 -->
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                    <iconify-icon icon="solar:chef-hat-heart-linear" width="18"></iconify-icon>
+                                </div>
+                                <span class="font-medium text-slate-900">Food & Dining</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-right text-slate-500">₱1,250.00</td>
+                        <td class="px-6 py-4 text-right font-bold text-slate-900">₱1,180.00</td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-emerald-600 font-medium">-₱70.00 (-5.6%)</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex justify-center">
+                                <span class="badge badge-success px-2 py-0.5 rounded-full text-[9px]">Decreasing</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-[10px] font-bold text-slate-900">94%</span>
+                                <div class="w-12 bg-slate-100 h-1 rounded-full overflow-hidden">
+                                    <div class="bg-emerald-500 h-full w-[94%]"></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Category 2 -->
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                                    <iconify-icon icon="solar:bus-linear" width="18"></iconify-icon>
+                                </div>
+                                <span class="font-medium text-slate-900">Transportation</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-right text-slate-500">₱450.00</td>
+                        <td class="px-6 py-4 text-right font-bold text-slate-900">₱510.00</td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-amber-600 font-medium">+₱60.00 (+13.3%)</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex justify-center">
+                                <span class="badge badge-warning px-2 py-0.5 rounded-full text-[9px]">Increasing</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-[10px] font-bold text-slate-900">88%</span>
+                                <div class="w-12 bg-slate-100 h-1 rounded-full overflow-hidden">
+                                    <div class="bg-amber-500 h-full w-[88%]"></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Category 3 -->
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                                    <iconify-icon icon="solar:clapperboard-play-linear" width="18"></iconify-icon>
+                                </div>
+                                <span class="font-medium text-slate-900">Entertainment</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-right text-slate-500">₱320.00</td>
+                        <td class="px-6 py-4 text-right font-bold text-slate-900">₱305.00</td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-emerald-600 font-medium">-₱15.00 (-4.7%)</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex justify-center">
+                                <span class="badge badge-success px-2 py-0.5 rounded-full text-[9px]">Stable</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-[10px] font-bold text-slate-900">91%</span>
+                                <div class="w-12 bg-slate-100 h-1 rounded-full overflow-hidden">
+                                    <div class="bg-emerald-500 h-full w-[91%]"></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Category 4 -->
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                                    <iconify-icon icon="solar:bill-list-linear" width="18"></iconify-icon>
+                                </div>
+                                <span class="font-medium text-slate-900">Utilities</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-right text-slate-500">₱800.00</td>
+                        <td class="px-6 py-4 text-right font-bold text-slate-900">₱920.00</td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-red-600 font-medium">+₱120.00 (+15.0%)</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex justify-center">
+                                <span class="badge badge-danger px-2 py-0.5 rounded-full text-[9px]">Peak Search</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-[10px] font-bold text-slate-900">82%</span>
+                                <div class="w-12 bg-slate-100 h-1 rounded-full overflow-hidden">
+                                    <div class="bg-red-500 h-full w-[82%]"></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Transaction Type Analysis -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Recurring vs One-time Breakdown -->
+        <div class="lg:col-span-1 bg-white rounded-xl border border-slate-200/60 shadow-sm p-6">
+            <h3 class="text-sm font-semibold text-slate-900 mb-4">Expense Type Forecast</h3>
+            <div class="space-y-4">
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-medium text-slate-700">Recurring Expenses</span>
+                        <span class="text-xs font-bold text-slate-900">₱2,840</span>
+                    </div>
+                    <div class="w-full bg-white rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-blue-500 h-full rounded-full" style="width: 67%"></div>
+                    </div>
+                    <div class="flex justify-between items-center mt-2 text-[10px]">
+                        <span class="text-slate-400">67% of total</span>
+                        <span class="text-emerald-600 font-medium">-2.1% trend</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-medium text-slate-700">Variable Expenses</span>
+                        <span class="text-xs font-bold text-slate-900">₱1,410</span>
+                    </div>
+                    <div class="w-full bg-white rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-amber-500 h-full rounded-full" style="width: 33%"></div>
+                    </div>
+                    <div class="flex justify-between items-center mt-2 text-[10px]">
+                        <span class="text-slate-400">33% of total</span>
+                        <span class="text-amber-600 font-medium">+5.4% trend</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Type Table -->
+        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden text-xs">
+            <div class="p-4 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-sm font-semibold text-slate-900">Transaction Behavior Insight</h3>
+            </div>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr
+                        class="border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+                        <th class="px-4 py-3">Transaction Type</th>
+                        <th class="px-4 py-3 text-right">Current Avg.</th>
+                        <th class="px-4 py-3 text-right">Next Month</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    <tr>
+                        <td class="px-4 py-3 font-medium text-slate-700">Subscription</td>
+                        <td class="px-4 py-3 text-right text-slate-500">₱850.00</td>
+                        <td class="px-4 py-3 text-right font-bold text-slate-900">₱850.00</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-3 font-medium text-slate-700">Utility Bill</td>
+                        <td class="px-4 py-3 text-right text-slate-500">₱1,200.00</td>
+                        <td class="px-4 py-3 text-right font-bold text-slate-900">₱1,320.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- AI Insights Section -->
+    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 mb-8 overflow-hidden">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                    <iconify-icon icon="solar:lightbulb-bolt-bold" width="18" class="text-amber-500"></iconify-icon>
+                    AI Financial Intelligence
+                </h3>
+                <p class="text-xs text-slate-500 mt-1 font-light">Deep analysis of your spending habits and financial
+                    future</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="btn btn-secondary text-xs h-9 px-4" onclick="toggleDetailedInsights()">
+                    <iconify-icon icon="solar:double-alt-arrow-down-linear" id="toggleIcon" width="14"></iconify-icon>
+                    <span id="toggleText">View More</span>
+                </button>
+                <button class="btn btn-primary text-xs h-9 px-4" onclick="generatePredictions()">
+                    <iconify-icon icon="solar:magic-stick-3-linear" width="14"></iconify-icon>
+                    Regenerate
+                </button>
+            </div>
+        </div>
+
+        <!-- Initial Grid: Key Highlights -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <!-- High-Level Financial Analysis Card -->
+            <div
+                class="bg-emerald-50/40 border border-emerald-100 rounded-2xl p-5 hover:bg-emerald-50 transition-all group h-full">
+                <div class="flex items-center gap-3 mb-4">
+                    <div
+                        class="p-2 rounded-xl bg-emerald-100 text-emerald-600 group-hover:scale-110 transition-transform">
+                        <iconify-icon icon="solar:clapperboard-edit-linear" width="20"></iconify-icon>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Financial Summary</span>
+                </div>
+                <p class="text-[13px] text-slate-700 leading-relaxed font-medium">
+                    Your income stability is high, with a projected 12.4% increase, while expenses show a manageable
+                    4.2% rise.
+                </p>
+                <div class="mt-4 flex items-center gap-2 text-[10px] text-emerald-600 font-semibold">
+                    <iconify-icon icon="solar:star-linear" width="12"></iconify-icon>
+                    Strong growth profile detected
+                </div>
+            </div>
+
+            <!-- Risk Management Card -->
+            <div
+                class="bg-amber-50/40 border border-amber-100 rounded-2xl p-5 hover:bg-amber-50 transition-all group h-full">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 rounded-xl bg-amber-100 text-amber-600 group-hover:scale-110 transition-transform">
+                        <iconify-icon icon="solar:shield-warning-linear" width="20"></iconify-icon>
+                    </div>
+                    <span class="text-xs font-bold text-amber-800 uppercase tracking-wider">Risk Level: Low</span>
+                </div>
+                <p class="text-[13px] text-slate-700 leading-relaxed">
+                    Detected 3 subscription spikes totaling ₱1,240. Risk factors remain low due to high savings rate
+                    buffer.
+                </p>
+                <div class="w-full bg-amber-100/50 rounded-full h-1 mt-4">
+                    <div class="bg-amber-500 h-full rounded-full" style="width: 25%"></div>
+                </div>
+            </div>
+
+            <!-- Smart Opportunities Card -->
+            <div
+                class="bg-blue-50/40 border border-blue-100 rounded-2xl p-5 hover:bg-blue-50 transition-all group h-full">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 rounded-xl bg-blue-100 text-blue-600 group-hover:scale-110 transition-transform">
+                        <iconify-icon icon="solar:star-linear" width="20"></iconify-icon>
+                    </div>
+                    <span class="text-xs font-bold text-blue-800 uppercase tracking-wider">Growth Potential</span>
+                </div>
+                <p class="text-[13px] text-slate-700 leading-relaxed">
+                    Potential to save ₱3,500/mo by optimizing recurring transportation and dining subscriptions.
+                </p>
+                <div class="mt-4">
+                    <button
+                        class="text-[10px] font-bold text-blue-600 hover:text-blue-700 underline flex items-center gap-1">
+                        View optimization plan
+                        <iconify-icon icon="solar:arrow-right-linear" width="10"></iconify-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Expansion (Hidden by default) -->
+        <div id="detailedInsights"
+            class="hidden animate__animated animate__fadeIn space-y-6 pt-6 border-t border-slate-100">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Actionable Recommendations -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <iconify-icon icon="solar:list-check-bold" width="16" class="text-emerald-500"></iconify-icon>
+                        Smart Recommendations
+                    </h4>
+                    <div class="space-y-3">
+                        <div
+                            class="flex gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/30 hover:bg-white hover:shadow-sm transition-all group">
+                            <span
+                                class="w-6 h-6 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-800 mb-1">Optimize Transportation Budget</p>
+                                <p class="text-xs text-slate-500 leading-relaxed font-light">Reduce variable commute
+                                    costs by 15% through consolidated travel or alternative transport methods.</p>
+                            </div>
+                        </div>
+                        <div
+                            class="flex gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/30 hover:bg-white hover:shadow-sm transition-all group">
+                            <span
+                                class="w-6 h-6 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-800 mb-1">Emergency Fund Allocation</p>
+                                <p class="text-xs text-slate-500 leading-relaxed font-light">Direct the projected ₱4,200
+                                    net savings into your liquid emergency fund to cover 6 months of expenses.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deep Risk Assessment -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <iconify-icon icon="solar:shield-check-bold" width="16" class="text-amber-500"></iconify-icon>
+                        Risk Mitigation Strategies
+                    </h4>
+                    <div
+                        class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden relative group hover:border-emerald-200 transition-all">
+                        <!-- Subtle Background Accent -->
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50/50 rounded-full blur-2xl"></div>
+                        <div class="relative z-10 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span
+                                    class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase tracking-widest">Low
+                                    Risk Environment</span>
+                                <span class="text-[10px] text-slate-400 font-mono">CONFIDENCE: 94%</span>
+                            </div>
+                            <div class="space-y-4">
+                                <div
+                                    class="flex items-start gap-3 p-3 rounded-xl bg-slate-50/50 border border-slate-100">
+                                    <div
+                                        class="mt-1 w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                                    </div>
+                                    <p class="text-[11px] text-slate-600 leading-relaxed">
+                                        <span class="text-slate-900 font-bold">Data Anomaly:</span> Irregular utility
+                                        spike detected in previous 30-day window (₱820). Recommend usage audit.
+                                    </p>
+                                </div>
+                                <div
+                                    class="flex items-start gap-3 p-3 rounded-xl bg-slate-50/50 border border-slate-100">
+                                    <div
+                                        class="mt-1 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                                    </div>
+                                    <p class="text-[11px] text-slate-600 leading-relaxed">
+                                        <span class="text-slate-900 font-bold">Mitigation:</span> No immediate action
+                                        required for major assets. Financial buffer exceeds volatility margin by 18%.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opportunity Map -->
+            <div class="p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-blue-600">
+                            <iconify-icon icon="solar:plain-2-linear" width="22"></iconify-icon>
+                        </div>
+                        <div>
+                            <h4 class="text-[13px] font-bold text-slate-900">Long-term Opportunity Map</h4>
+                            <p class="text-[10px] text-slate-500">Predicted wealth accumulation markers</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <span
+                            class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-medium text-slate-600">Investment
+                            Ready</span>
+                        <span
+                            class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-medium text-slate-600">Debt
+                            Free Trend</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                        <span class="text-[9px] text-slate-400 uppercase block mb-1">Savings Goal Meta</span>
+                        <span class="text-sm font-bold text-slate-800">118% Achievable</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                        <span class="text-[9px] text-slate-400 uppercase block mb-1">Budget Efficiency</span>
+                        <span class="text-sm font-bold text-emerald-600">92/100</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                        <span class="text-[9px] text-slate-400 uppercase block mb-1">Disposable Income</span>
+                        <span class="text-sm font-bold text-slate-800">₱4,200.00</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                        <span class="text-[9px] text-slate-400 uppercase block mb-1">Model Confidence</span>
+                        <span class="text-sm font-bold text-blue-600">EXCELLENT</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Accuracy -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/60 shadow-sm p-6">
+            <h3
+                class="text-sm font-semibold text-slate-900 mb-6 font-bold uppercase tracking-widest text-xs text-slate-400">
+                Model Accuracy</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-slate-50 rounded-xl border-l-4 border-emerald-500">
+                    <div class="text-[10px] text-slate-500 uppercase tracking-widest mb-1">MAPE</div>
+                    <div class="text-xl font-bold text-slate-900">4.2%</div>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-xl border-l-4 border-blue-500">
+                    <div class="text-[10px] text-slate-500 uppercase tracking-widest mb-1">R² Score</div>
+                    <div class="text-xl font-bold text-slate-900">0.91</div>
+                </div>
+            </div>
+        </div>
+        <div
+            class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 flex flex-col items-center justify-center text-center">
+            <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mb-4">
+                <iconify-icon icon="solar:cpu-bolt-bold" width="32"></iconify-icon>
+            </div>
+            <h4 class="text-sm font-bold text-slate-900">Prophet Engine</h4>
+            <p class="text-[10px] text-slate-500 mt-1">v1.1 Advanced ML</p>
+        </div>
+    </div>
+</div>
+
+<!-- History Modal -->
+<div id="historyModal" class="fixed inset-0 z-[1000] hidden overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeHistoryModal()"></div>
+        <div
+            class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all overflow-hidden border border-slate-200">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-bold text-slate-900">Prediction History</h3>
+                <button onclick="closeHistoryModal()"><iconify-icon icon="solar:close-circle-linear"
+                        width="20"></iconify-icon></button>
+            </div>
+            <div class="p-6 max-h-[60vh] overflow-y-auto space-y-4">
+                <div
+                    class="p-4 rounded-xl border border-slate-200 hover:border-emerald-200 group transition-all cursor-pointer">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="font-bold text-slate-900">Dec 2025 Prediction</span>
+                            <p class="text-[10px] text-slate-500">3 Months Horizon • Dec 15</p>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-600">92% Acc.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-2">
+                <button class="btn btn-secondary" onclick="closeHistoryModal()">Close</button>
+                <button class="btn btn-primary px-8">Export</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function generatePredictions() {
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<iconify-icon icon="solar:refresh-linear" width="16" class="animate-spin"></iconify-icon> Generating...';
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            alert('Success! New predictions generated.');
+        }, 1500);
+    }
+    function openHistoryModal() {
+        document.getElementById('historyModal').classList.remove('hidden');
+    }
+    function closeHistoryModal() {
+        document.getElementById('historyModal').classList.add('hidden');
+    }
+    function toggleDetailedInsights() {
+        const panel = document.getElementById('detailedInsights');
+        const icon = document.getElementById('toggleIcon');
+        const text = document.getElementById('toggleText');
+
+        if (panel.classList.contains('hidden')) {
+            panel.classList.remove('hidden');
+            icon.style.transform = 'rotate(180deg)';
+            text.innerText = 'View Less';
+        } else {
+            panel.classList.add('hidden');
+            icon.style.transform = 'rotate(0deg)';
+            text.innerText = 'View More';
+        }
+    }
+</script>

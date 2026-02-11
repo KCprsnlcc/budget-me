@@ -1,0 +1,740 @@
+<!-- Reports Module Content -->
+<div class="max-w-6xl mx-auto space-y-6 animate__animated animate__fadeIn">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-semibold text-slate-900 tracking-tight">Reports</h2>
+            <p class="text-sm text-slate-500 mt-1 font-light">Generate detailed financial reports and insights.</p>
+        </div>
+        <div class="flex gap-3">
+            <!-- Export Dropdown -->
+            <div class="relative group">
+                <button class="btn btn-secondary">
+                    <iconify-icon icon="solar:export-linear" width="16"></iconify-icon>
+                    <span class="hidden sm:inline">Export</span>
+                    <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
+                </button>
+                <div
+                    class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 hidden group-hover:block z-50">
+                    <button
+                        class="w-full text-left px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2">
+                        <iconify-icon icon="solar:file-pdf-linear" class="text-rose-500"></iconify-icon> Export as PDF
+                    </button>
+                    <button
+                        class="w-full text-left px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2">
+                        <iconify-icon icon="solar:file-csv-linear" class="text-emerald-500"></iconify-icon> Export as
+                        CSV
+                    </button>
+                    <button
+                        class="w-full text-left px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2">
+                        <iconify-icon icon="solar:file-word-linear" class="text-blue-500"></iconify-icon> Export as DOCX
+                    </button>
+                </div>
+            </div>
+            <!-- View Toggle -->
+            <button id="headerToggleBtn" class="btn btn-secondary">
+                <iconify-icon icon="solar:chart-linear" width="16"></iconify-icon>
+                <span class="hidden sm:inline">Chart View</span>
+            </button>
+            <button class="btn btn-primary hidden md:flex">
+                <iconify-icon icon="solar:document-add-linear" width="16"></iconify-icon>
+                Generate Report
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total Transactions -->
+        <div
+            class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5 hover:border-emerald-200 transition-all group relative">
+            <div class="flex justify-between items-start mb-4">
+                <div
+                    class="text-slate-500 bg-slate-50 p-2 rounded-lg group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                    <iconify-icon icon="solar:card-transfer-linear" width="22" stroke-width="1.5"></iconify-icon>
+                </div>
+                <div
+                    class="flex items-center gap-1 text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
+                    <iconify-icon icon="solar:trending-up-linear"></iconify-icon> +12%
+                </div>
+            </div>
+            <div class="text-slate-500 text-[11px] font-medium uppercase tracking-wider mb-1">Total Transactions</div>
+            <div class="text-xl font-bold text-slate-900">1,248</div>
+            <p class="text-[10px] text-slate-400 mt-1 font-light">Compared to last month</p>
+        </div>
+
+
+        <!-- Active Budgets -->
+        <div
+            class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5 hover:border-emerald-200 transition-all group relative">
+            <div class="flex justify-between items-start mb-4">
+                <div
+                    class="text-slate-500 bg-slate-50 p-2 rounded-lg group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                    <iconify-icon icon="solar:pie-chart-2-linear" width="22" stroke-width="1.5"></iconify-icon>
+                </div>
+            </div>
+            <div class="text-slate-500 text-[11px] font-medium uppercase tracking-wider mb-1">Active Budgets</div>
+            <div class="text-xl font-bold text-slate-900">8</div>
+            <p class="text-[10px] text-slate-400 mt-1 font-light">6 on track, 2 warning</p>
+        </div>
+
+        <!-- Active Goals -->
+        <div
+            class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5 hover:border-emerald-200 transition-all group relative">
+            <div class="flex justify-between items-start mb-4">
+                <div
+                    class="text-slate-500 bg-slate-50 p-2 rounded-lg group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                    <iconify-icon icon="solar:target-linear" width="22" stroke-width="1.5"></iconify-icon>
+                </div>
+                <div
+                    class="flex items-center gap-1 text-[10px] font-medium text-amber-700 bg-amber-50 px-2 py-1 rounded-full border border-amber-100">
+                    <iconify-icon icon="solar:star-linear"></iconify-icon> 2 Nearing
+                </div>
+            </div>
+            <div class="text-slate-500 text-[11px] font-medium uppercase tracking-wider mb-1">Active Goals</div>
+            <div class="text-xl font-bold text-slate-900">12</div>
+            <p class="text-[10px] text-slate-400 mt-1 font-light">Total active goals</p>
+        </div>
+
+        <!-- Last Updated -->
+        <div
+            class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5 hover:border-emerald-200 transition-all group relative">
+            <div class="flex justify-between items-start mb-4">
+                <div
+                    class="text-slate-500 bg-slate-50 p-2 rounded-lg group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                    <iconify-icon icon="solar:refresh-linear" width="22" stroke-width="1.5"></iconify-icon>
+                </div>
+            </div>
+            <div class="text-slate-500 text-[11px] font-medium uppercase tracking-wider mb-1">Last Updated</div>
+            <div class="text-xl font-bold text-slate-900">Today</div>
+            <p class="text-[10px] text-slate-400 mt-1 font-light">10:45 AM via Sync</p>
+        </div>
+    </div>
+
+    <!-- Report Settings Panel -->
+    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5">
+        <div class="flex items-center gap-2 mb-4">
+            <iconify-icon icon="solar:settings-linear" class="text-slate-400" width="18"></iconify-icon>
+            <h3 class="text-sm font-semibold text-slate-900">Report Settings</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Report Type -->
+            <div>
+                <label
+                    class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                    Report Type
+                    <iconify-icon icon="solar:info-circle-linear" class="text-slate-400 cursor-help" width="12"
+                        title="Select the primary data to visualize in the report"></iconify-icon>
+                </label>
+                <select id="reportTypeSelect" class="form-input form-select py-2 px-3 text-xs w-full">
+                    <option value="spending">Spending by Category</option>
+                    <option value="income-expense">Income vs Expense</option>
+                    <option value="savings">Savings Analysis</option>
+                    <option value="trends">Spending Trends</option>
+                    <option value="goals">Goals Progress</option>
+                    <option value="predictions">Future Predictions</option>
+                </select>
+            </div>
+
+            <!-- Timeframe -->
+            <div>
+                <label
+                    class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                    Timeframe
+                    <iconify-icon icon="solar:info-circle-linear" class="text-slate-400 cursor-help" width="12"
+                        title="Choose the date range for the financial data"></iconify-icon>
+                </label>
+                <select id="timeframeSelect" class="form-input form-select py-2 px-3 text-xs w-full">
+                    <option value="month">Last 30 Days</option>
+                    <option value="quarter">Last 3 Months</option>
+                    <option value="year">Last 12 Months</option>
+                </select>
+            </div>
+
+
+
+            <!-- Chart Type -->
+            <div id="chartTypeControl">
+                <label
+                    class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                    Chart Type
+                    <iconify-icon icon="solar:info-circle-linear" class="text-slate-400 cursor-help" width="12"
+                        title="Choose a different visualization style"></iconify-icon>
+                </label>
+                <select id="chartTypeSelect" class="form-input form-select py-2 px-3 text-xs w-full">
+                    <option value="pie">Donut Chart</option>
+                    <option value="column">Bar Chart</option>
+                    <option value="line">Line Chart</option>
+                    <option value="area">Area Chart</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Anomaly Alerts Section -->
+    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+                <iconify-icon icon="solar:danger-triangle-linear" class="text-amber-500" width="18"></iconify-icon>
+                <h3 class="text-sm font-semibold text-slate-900">Anomaly Alerts</h3>
+                <span
+                    class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600 border border-amber-100">2
+                    Active</span>
+            </div>
+            <button class="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1">
+                <iconify-icon icon="solar:settings-linear" width="14"></iconify-icon>
+                Configure
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Anomaly Alert 1 -->
+            <div class="border border-amber-200 bg-amber-50/30 rounded-lg p-4 hover:shadow-sm transition-all">
+                <div class="flex items-start gap-3">
+                    <div
+                        class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">
+                        <iconify-icon icon="solar:chart-square-linear" width="16"></iconify-icon>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="text-xs font-semibold text-slate-900">Unusual Spending Pattern</h4>
+                            <span class="text-[9px] text-slate-400">2 hours ago</span>
+                        </div>
+                        <p class="text-[11px] text-slate-600 leading-relaxed mb-2">
+                            Your "Dining Out" spending is 45% higher than usual for this time of month.
+                        </p>
+                        <div class="flex items-center gap-2">
+                            <button
+                                class="text-[10px] font-medium text-amber-600 hover:text-amber-700 flex items-center gap-1">
+                                View Details <iconify-icon icon="solar:arrow-right-linear" width="10"></iconify-icon>
+                            </button>
+                            <button class="text-[10px] font-medium text-slate-400 hover:text-slate-600">
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Anomaly Alert 2 -->
+            <div class="border border-blue-200 bg-blue-50/30 rounded-lg p-4 hover:shadow-sm transition-all">
+                <div class="flex items-start gap-3">
+                    <div
+                        class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+                        <iconify-icon icon="solar:refresh-circle-linear" width="16"></iconify-icon>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="text-xs font-semibold text-slate-900">Duplicate Transaction</h4>
+                            <span class="text-[9px] text-slate-400">5 hours ago</span>
+                        </div>
+                        <p class="text-[11px] text-slate-600 leading-relaxed mb-2">
+                            Possible duplicate charge detected: Netflix subscription ($15.99) charged twice.
+                        </p>
+                        <div class="flex items-center gap-2">
+                            <button
+                                class="text-[10px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                Review <iconify-icon icon="solar:arrow-right-linear" width="10"></iconify-icon>
+                            </button>
+                            <button class="text-[10px] font-medium text-slate-400 hover:text-slate-600">
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Financial Insights Section -->
+    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+                <iconify-icon icon="solar:stars-linear" class="text-purple-500" width="18"></iconify-icon>
+                <h3 class="text-sm font-semibold text-slate-900">AI Financial Insights</h3>
+                <span
+                    class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-50 text-purple-600 border border-purple-100">Powered
+                    by AI</span>
+            </div>
+            <button class="text-xs text-slate-400 hover:text-purple-600 flex items-center gap-1 transition-colors">
+                    <div
+                        class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                        <iconify-icon icon="solar:wallet-money-linear" width="16"></iconify-icon>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="text-xs font-semibold text-slate-900">Savings Opportunity</h4>
+                            <span
+                                class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-100 text-emerald-700">High
+                                Impact</span>
+                        </div>
+                        <p class="text-[11px] text-slate-600 leading-relaxed mb-3">
+                            You could save $120/month by reducing dining out expenses by 25%. This would increase your
+                            savings rate to 65%.
+                        </p>
+                        <button
+                            class="text-[10px] font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1 group-hover:gap-2 transition-all">
+                            Learn More <iconify-icon icon="solar:arrow-right-linear" width="10"></iconify-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insight Card 2 - Budget Recommendation -->
+            <div class="border border-blue-200 bg-blue-50/30 rounded-lg p-4 hover:shadow-sm transition-all group">
+                <div class="flex items-start gap-3">
+                    <div
+                        class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+                        <iconify-icon icon="solar:chart-2-linear" width="16"></iconify-icon>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="text-xs font-semibold text-slate-900">Budget Adjustment</h4>
+                            <span
+                                class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-700">Recommended</span>
+                        </div>
+                        <p class="text-[11px] text-slate-600 leading-relaxed mb-3">
+                            Based on your spending patterns, consider increasing your "Groceries" budget by $50 to avoid
+                            overspending.
+                        </p>
+                        <button
+                            class="text-[10px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 group-hover:gap-2 transition-all">
+                            Adjust Budget <iconify-icon icon="solar:arrow-right-linear" width="10"></iconify-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insight Card 3 - Spending Trend -->
+            <div class="border border-amber-200 bg-amber-50/30 rounded-lg p-4 hover:shadow-sm transition-all group">
+                <div class="flex items-start gap-3">
+                    <div
+                        class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">
+                        <iconify-icon icon="solar:graph-up-linear" width="16"></iconify-icon>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="text-xs font-semibold text-slate-900">Spending Trend</h4>
+                            <span
+                                class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-amber-100 text-amber-700">Watch</span>
+                        </div>
+                        <p class="text-[11px] text-slate-600 leading-relaxed mb-3">
+                            Your entertainment spending has increased by 35% over the last 3 months. Consider setting a
+                            stricter limit.
+                        </p>
+                        <button
+                            class="text-[10px] font-medium text-amber-600 hover:text-amber-700 flex items-center gap-1 group-hover:gap-2 transition-all">
+                            View Trend <iconify-icon icon="solar:arrow-right-linear" width="10"></iconify-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Charts Section -->
+    <div id="chartViewSection" class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-sm font-semibold text-slate-900">Spending by Category</h3>
+                <p class="text-xs text-slate-500 mt-1 font-light">Detailed breakdown for the selected period</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="p-1.5 text-slate-400 hover:text-slate-600 rounded hover:bg-slate-50 transition-colors"
+                    title="Download Chart">
+                    <iconify-icon icon="solar:download-minimalistic-linear" width="16"></iconify-icon>
+                </button>
+                <button class="p-1.5 text-slate-400 hover:text-slate-600 rounded hover:bg-slate-50 transition-colors"
+                    title="Fullscreen">
+                    <iconify-icon icon="solar:maximize-linear" width="16"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Chart Container -->
+        <div id="reportChartContainer" class="h-96 w-full overflow-hidden">
+            <!-- Highcharts will be injected here -->
+        </div>
+    </div>
+
+    <!-- Report Data Table Section -->
+    <div id="tableViewSection" class="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden hidden">
+        <div class="p-5 border-b border-slate-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900">Detailed Report Data</h3>
+                    <p class="text-xs text-slate-500 mt-1">Spending by category for the selected period</p>
+                </div>
+                <button class="btn btn-secondary text-xs">
+                    <iconify-icon icon="solar:download-minimalistic-linear" width="14"></iconify-icon>
+                    Export Table
+                </button>
+            </div>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="overflow-x-auto hidden md:block">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr
+                        class="bg-slate-50/50 border-b border-slate-200 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+                        <th class="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
+                            <div class="flex items-center gap-1">
+                                Category <iconify-icon icon="solar:sort-vertical-linear" width="12"></iconify-icon>
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
+                            <div class="flex items-center gap-1 justify-end">
+                                Amount <iconify-icon icon="solar:sort-vertical-linear" width="12"></iconify-icon>
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
+                            <div class="flex items-center gap-1 justify-end">
+                                Percentage <iconify-icon icon="solar:sort-vertical-linear" width="12"></iconify-icon>
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
+                            <div class="flex items-center gap-1 justify-end">
+                                Transactions <iconify-icon icon="solar:sort-vertical-linear" width="12"></iconify-icon>
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 text-right">Trend</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody" class="text-xs text-slate-600 divide-y divide-slate-50">
+                    <!-- Dynamic rows will be injected here -->
+                </tbody>
+                <tfoot id="reportTableFoot" class="bg-slate-50 border-t-2 border-slate-200">
+                    <!-- Dynamic footer will be injected here -->
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div id="reportMobileContainer" class="md:hidden divide-y divide-slate-100">
+            <!-- Dynamic cards will be injected here -->
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Fixed FAB -->
+    <button
+        class="md:hidden fixed bottom-6 right-6 w-12 h-12 bg-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-emerald-700 transition-all active:scale-95 z-50">
+        <iconify-icon icon="solar:document-add-bold" width="24"></iconify-icon>
+    </button>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<script>
+    (function () {
+        const init = () => {
+            if (typeof Highcharts === 'undefined') {
+                console.error('Highcharts not loaded, retrying...');
+                setTimeout(init, 100);
+                return;
+            }
+
+            // --- State Management ---
+            const state = {
+                reportType: 'spending',
+                timeframe: 'month',
+                displayFormat: 'chart',
+                chartType: 'pie'
+            };
+
+            // --- DOM Elements ---
+            const controls = {
+                reportType: document.getElementById('reportTypeSelect'),
+                timeframe: document.getElementById('timeframeSelect'),
+
+                chartType: document.getElementById('chartTypeSelect'),
+                chartTypeControl: document.getElementById('chartTypeControl'),
+                headerToggleBtn: document.getElementById('headerToggleBtn')
+            };
+
+            const sections = {
+                chartView: document.getElementById('chartViewSection'),
+                tableView: document.getElementById('tableViewSection')
+            };
+
+            const containers = {
+                mainChart: 'reportChartContainer',
+                donutChart: 'donutChartContainer',
+                tableBody: document.getElementById('reportTableBody'),
+                tableFoot: document.getElementById('reportTableFoot'),
+                mobileList: document.getElementById('reportMobileContainer'),
+                categoryList: document.getElementById('categoryBreakdownList'),
+                chartTitle: document.querySelectorAll('#chartViewSection h3')[0],
+                tableTitle: document.querySelectorAll('#tableViewSection h3')[0]
+            };
+
+            // --- Placeholder Data Generators ---
+            const getPlaceholderData = (type) => {
+                const colors = ['#10b981', '#f59e0b', '#64748b', '#3b82f6', '#cbd5e1'];
+                const icons = ['solar:chef-hat-linear', 'solar:home-2-linear', 'solar:bus-linear', 'solar:gamepad-linear', 'solar:widget-3-linear'];
+
+                switch (type) {
+                    case 'spending':
+                        return [
+                            { name: 'Food & Dining', value: 1191, percentage: 35, transactions: 42, color: colors[0], icon: icons[0], trend: -5 },
+                            { name: 'Housing', value: 1021, percentage: 30, transactions: 8, color: colors[1], icon: icons[1], trend: 0 },
+                            { name: 'Transportation', value: 681, percentage: 20, transactions: 18, color: colors[2], icon: icons[2], trend: 12 },
+                            { name: 'Entertainment', value: 320, percentage: 9, transactions: 15, color: colors[3], icon: icons[3], trend: 35 },
+                            { name: 'Other', value: 192, percentage: 6, transactions: 9, color: colors[4], icon: icons[4], trend: -8 }
+                        ];
+                    case 'income-expense':
+                        return [
+                            { name: 'Jan', income: 4200, expenses: 3100, color: '#10b981' },
+                            { name: 'Feb', income: 4500, expenses: 3400, color: '#10b981' },
+                            { name: 'Mar', income: 4800, expenses: 3200, color: '#10b981' }
+                        ];
+                    case 'savings':
+                        return [
+                            { name: 'Emergency Fund', value: 5000, percentage: 50, transactions: 12, color: '#10b981', icon: 'solar:safe-linear', trend: 15 },
+                            { name: 'Retirement', value: 3000, percentage: 30, transactions: 3, color: '#3b82f6', icon: 'solar:graph-up-linear', trend: 5 },
+                            { name: 'Vacation', value: 2000, percentage: 20, transactions: 5, color: '#f59e0b', icon: 'solar:palmtree-linear', trend: 20 }
+                        ];
+                    case 'trends':
+                        return [
+                            { name: 'Week 1', value: 850, percentage: 25, transactions: 20, color: '#64748b' },
+                            { name: 'Week 2', value: 920, percentage: 27, transactions: 22, color: '#64748b' },
+                            { name: 'Week 3', value: 780, percentage: 23, transactions: 18, color: '#64748b' },
+                            { name: 'Week 4', value: 855, percentage: 25, transactions: 21, color: '#64748b' }
+                        ];
+                    default:
+                        // Generic data for others
+                        return [
+                            { name: 'Item A', value: 100, percentage: 50, transactions: 5, color: colors[0], icon: icons[0], trend: 0 },
+                            { name: 'Item B', value: 100, percentage: 50, transactions: 5, color: colors[1], icon: icons[1], trend: 0 }
+                        ];
+                }
+            };
+
+            // --- Rendering Functions ---
+            const updateUI = () => {
+                const data = getPlaceholderData(state.reportType);
+
+                // Update titles
+                const titles = {
+                    'spending': 'Spending by Category',
+                    'income-expense': 'Income vs Expense',
+                    'savings': 'Savings Analysis',
+                    'trends': 'Spending Trends',
+                    'goals': 'Goals Progress',
+                    'predictions': 'Future Predictions'
+                };
+                const title = titles[state.reportType] || 'Financial Report';
+                if (containers.chartTitle) containers.chartTitle.textContent = title;
+                if (containers.tableTitle) containers.tableTitle.textContent = 'Detailed ' + title;
+
+                // Toggle sections
+                if (state.displayFormat === 'chart') {
+                    sections.chartView.classList.remove('hidden');
+                    sections.tableView.classList.add('hidden');
+                    if (controls.chartTypeControl) controls.chartTypeControl.classList.remove('hidden');
+                    renderCharts(data);
+                } else {
+                    sections.chartView.classList.add('hidden');
+                    sections.tableView.classList.remove('hidden');
+                    if (controls.chartTypeControl) controls.chartTypeControl.classList.add('hidden');
+                    renderTable(data);
+                }
+
+                // Sync header button if it exists
+                if (controls.headerToggleBtn) {
+                    const icon = state.displayFormat === 'chart' ? 'solar:list-linear' : 'solar:chart-linear';
+                    const text = state.displayFormat === 'chart' ? 'Table View' : 'Chart View';
+                    controls.headerToggleBtn.innerHTML = `<iconify-icon icon="${icon}" width="16"></iconify-icon> <span class="hidden sm:inline">${text}</span>`;
+                }
+            };
+
+            const renderCharts = (data) => {
+                if (!document.getElementById(containers.mainChart)) return;
+
+                let series = [];
+                let xAxis = {};
+
+                if (state.reportType === 'income-expense') {
+                    xAxis = { categories: data.map(d => d.name) };
+                    series = [
+                        { name: 'Income', data: data.map(d => d.income), color: '#10b981' },
+                        { name: 'Expenses', data: data.map(d => d.expenses), color: '#64748b' }
+                    ];
+                } else if (state.chartType === 'pie') {
+                    series = [{
+                        name: 'Amount',
+                        colorByPoint: true,
+                        data: data.map(d => ({ name: d.name, y: d.value, color: d.color }))
+                    }];
+                } else {
+                    xAxis = { categories: data.map(d => d.name) };
+                    series = [{
+                        name: 'Amount',
+                        data: data.map(d => ({ y: d.value, color: d.color }))
+                    }];
+                }
+
+                Highcharts.chart(containers.mainChart, {
+                    chart: { type: state.reportType === 'income-expense' ? (state.chartType === 'pie' ? 'column' : state.chartType) : (state.chartType === 'pie' ? 'pie' : state.chartType), backgroundColor: 'transparent' },
+                    title: { text: null },
+                    credits: { enabled: false },
+                    xAxis: xAxis,
+                    yAxis: { title: { text: null }, gridLineColor: '#f1f5f9' },
+                    tooltip: { valuePrefix: '$', borderRadius: 8, padding: 10 },
+                    series: series,
+                    plotOptions: {
+                        pie: { innerSize: '60%', dataLabels: { enabled: true, format: '{point.name}: {point.percentage:.1f}%', style: { fontSize: '10px' } } },
+                        column: { borderRadius: 4, borderWidth: 0 },
+                        line: { marker: { radius: 4 } }
+                    }
+                });
+
+                // Donut Chart
+                if (document.getElementById(containers.donutChart)) {
+                    Highcharts.chart(containers.donutChart, {
+                        chart: { type: 'pie', backgroundColor: 'transparent' },
+                        title: {
+                            text: '$' + data.reduce((a, b) => a + b.value, 0).toLocaleString(),
+                            align: 'center', verticalAlign: 'middle', y: 10,
+                            style: { fontSize: '16px', fontWeight: 'bold', color: '#0f172a' }
+                        },
+                        subtitle: {
+                            text: 'Total', align: 'center', verticalAlign: 'middle', y: -10,
+                            style: { fontSize: '10px', color: '#64748b' }
+                        },
+                        credits: { enabled: false },
+                        tooltip: { enabled: false },
+                        plotOptions: { pie: { innerSize: '80%', dataLabels: { enabled: false }, borderWidth: 0 } },
+                        series: [{ data: data.map(d => ({ y: d.value, color: d.color })) }]
+                    });
+                }
+
+                // Update category list
+                if (containers.categoryList) {
+                    containers.categoryList.innerHTML = data.map(d => `
+                        <div class="flex items-center justify-between text-xs p-2 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer group">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full" style="background-color: ${d.color}"></div>
+                                <span class="text-slate-600 group-hover:text-slate-900">${d.name}</span>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-slate-900">$${d.value.toLocaleString()}</div>
+                                <div class="text-[10px] text-slate-400">${d.percentage}%</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            };
+
+            const renderTable = (data) => {
+                if (!containers.tableBody) return;
+
+                containers.tableBody.innerHTML = data.map(d => {
+                    const trendIcon = d.trend < 0 ? 'solar:arrow-down-linear' : d.trend > 0 ? 'solar:arrow-up-linear' : 'solar:minus-circle-linear';
+                    const trendClass = d.trend < 0 ? 'text-emerald-600' : d.trend > 0 ? 'text-red-500' : 'text-slate-400';
+                    return `
+                    <tr class="group hover:bg-slate-50/80 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center font-medium" style="background-color: ${d.color}15; color: ${d.color}">
+                                    <iconify-icon icon="${d.icon}" width="16"></iconify-icon>
+                                </div>
+                                <span class="font-medium text-slate-900">${d.name}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-right font-semibold text-slate-900">$${d.value.toLocaleString()}</td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium" style="background-color: ${d.color}10; color: ${d.color}">${d.percentage}%</span>
+                        </td>
+                        <td class="px-6 py-4 text-right text-slate-500">${d.transactions}</td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-1 ${trendClass}">
+                                <iconify-icon icon="${trendIcon}" width="14"></iconify-icon>
+                                <span class="text-[10px] font-medium">${Math.abs(d.trend)}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                `}).join('');
+
+                if (containers.tableFoot) {
+                    containers.tableFoot.innerHTML = `
+                        <tr class="font-semibold text-xs text-slate-900">
+                            <td class="px-6 py-4">Total</td>
+                            <td class="px-6 py-4 text-right">$${data.reduce((a, b) => a + b.value, 0).toLocaleString()}</td>
+                            <td class="px-6 py-4 text-right">100%</td>
+                            <td class="px-6 py-4 text-right text-slate-700">${data.reduce((a, b) => a + b.transactions, 0)}</td>
+                            <td></td>
+                        </tr>
+                    `;
+                }
+
+                if (containers.mobileList) {
+                    containers.mobileList.innerHTML = data.map(d => `
+                        <div class="p-4 hover:bg-slate-50 transition-colors">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: ${d.color}15; color: ${d.color}">
+                                        <iconify-icon icon="${d.icon}" width="18"></iconify-icon>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-900">${d.name}</div>
+                                        <div class="text-[10px] text-slate-400">${d.transactions} transactions</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-bold text-slate-900">$${d.value.toLocaleString()}</div>
+                                    <div class="text-[10px] text-slate-400">${d.percentage}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            };
+
+            // --- Event Listeners ---
+            if (controls.reportType) controls.reportType.addEventListener('change', (e) => {
+                state.reportType = e.target.value;
+                if (state.reportType === 'income-expense') {
+                    state.chartType = 'column';
+                    if (controls.chartType) controls.chartType.value = 'column';
+                }
+                updateUI();
+            });
+
+            if (controls.timeframe) controls.timeframe.addEventListener('change', (e) => {
+                state.timeframe = e.target.value;
+                updateUI();
+            });
+
+
+
+            if (controls.chartType) controls.chartType.addEventListener('change', (e) => {
+                state.chartType = e.target.value;
+                updateUI();
+            });
+
+            if (controls.headerToggleBtn) controls.headerToggleBtn.addEventListener('click', () => {
+                state.displayFormat = state.displayFormat === 'chart' ? 'table' : 'chart';
+                updateUI();
+            });
+
+            // Initial UI update
+            updateUI();
+        };
+
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            init();
+        } else {
+            document.addEventListener('DOMContentLoaded', init);
+        }
+    })();
+</script>
+</body>
+
+</html>

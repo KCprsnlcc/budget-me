@@ -1,0 +1,925 @@
+<!-- Accounts Module Content -->
+<style>
+    /* ========================================
+   Accounts Module — Monochromatic System
+   ======================================== */
+
+    /* Stepper */
+    .acct-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 20px 10px;
+        background: white;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .acct-step-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .acct-step-dot {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+        border: 1.5px solid #cbd5e1;
+        color: #94a3b8;
+        background: white;
+        transition: all 300ms cubic-bezier(.4, 0, .2, 1);
+        position: relative;
+        z-index: 2;
+        flex-shrink: 0;
+    }
+
+    .acct-step-dot.active {
+        border-color: #10b981;
+        color: white;
+        background: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .acct-step-dot.completed {
+        border-color: #10b981;
+        color: white;
+        background: #10b981;
+    }
+
+    .acct-step-label {
+        font-size: 9px;
+        font-weight: 600;
+        color: #94a3b8;
+        margin-top: 4px;
+        text-align: center;
+        transition: color 200ms;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .acct-step-label.active {
+        color: #10b981;
+    }
+
+    .acct-step-label.completed {
+        color: #475569;
+    }
+
+    .acct-step-connector {
+        width: 36px;
+        height: 1.5px;
+        background: #e2e8f0;
+        margin: 0 6px;
+        margin-bottom: 18px;
+        transition: background 300ms;
+        flex-shrink: 0;
+    }
+
+    .acct-step-connector.completed {
+        background: #10b981;
+    }
+
+    /* Selection Cards — Monochromatic */
+    .acct-card {
+        position: relative;
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 200ms ease;
+        background: white;
+    }
+
+    .acct-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    }
+
+    .acct-card.selected {
+        border-color: #10b981;
+        box-shadow: 0 0 0 1px #10b981;
+    }
+
+    .acct-card .acct-check {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #10b981;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 200ms;
+    }
+
+    .acct-card.selected .acct-check {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Icon — Monochromatic grey */
+    .acct-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        color: #94a3b8;
+        flex-shrink: 0;
+        border: 1px solid #f1f5f9;
+        transition: all 200ms;
+    }
+
+    .acct-card:hover .acct-icon {
+        color: #64748b;
+    }
+
+    .acct-card.selected .acct-icon {
+        background: #f1f5f9;
+        color: #334155;
+    }
+
+    /* Form Inputs — Clean monochrome */
+    .acct-input {
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: #1e293b;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        transition: all 200ms;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .acct-input:hover {
+        border-color: #cbd5e1;
+    }
+
+    .acct-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.06);
+    }
+
+    .acct-input::placeholder {
+        color: #94a3b8;
+    }
+
+    .acct-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    /* Color picker */
+    .acct-color-swatch {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 150ms;
+        padding: 0;
+    }
+
+    .acct-color-swatch:hover {
+        transform: scale(1.12);
+    }
+
+    .acct-color-swatch.selected {
+        border-color: white;
+        box-shadow: 0 0 0 2px #0f172a;
+        transform: scale(1.08);
+    }
+
+    /* Info Notice */
+    .acct-notice {
+        display: flex;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        line-height: 1.6;
+        align-items: flex-start;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+    }
+
+    .acct-notice.warn {
+        background: #fffbeb;
+        border-color: #fef3c7;
+        color: #92400e;
+    }
+
+    /* Review Card — Flat monochrome */
+    .acct-review {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .acct-review-head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 20px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .acct-review-body {
+        padding: 20px;
+    }
+
+    .acct-review-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+    }
+
+    .acct-review-row:not(:last-child) {
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    /* Checkbox Area */
+    .acct-check-area {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #f1f5f9;
+        cursor: pointer;
+        transition: all 200ms;
+    }
+
+    .acct-check-area:hover {
+        background: #f1f5f9;
+    }
+
+    /* Animation */
+    .acct-enter {
+        animation: acctIn 300ms cubic-bezier(.4, 0, .2, 1) both;
+    }
+
+    @keyframes acctIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .acct-stagger>*:nth-child(1) {
+        animation-delay: 40ms;
+    }
+
+    .acct-stagger>*:nth-child(2) {
+        animation-delay: 100ms;
+    }
+
+    .acct-stagger>*:nth-child(3) {
+        animation-delay: 160ms;
+    }
+
+    .acct-stagger>*:nth-child(4) {
+        animation-delay: 220ms;
+    }
+
+    .acct-stagger>*:nth-child(5) {
+        animation-delay: 280ms;
+    }
+
+    .acct-stagger>*:nth-child(6) {
+        animation-delay: 340ms;
+    }
+
+    .acct-stagger>* {
+        opacity: 0;
+        animation: acctIn 300ms cubic-bezier(.4, 0, .2, 1) both;
+    }
+
+    /* Modal overrides */
+    #accountSetupModal .modal {
+        max-width: 520px;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    }
+
+    #accountSetupModal .modal-header {
+        padding: 14px 20px;
+        background: white;
+    }
+
+    #accountSetupModal .modal-body {
+        padding: 20px;
+    }
+
+    #accountSetupModal .modal-footer {
+        padding: 14px 20px;
+        background: #f8fafc;
+        border-radius: 0 0 14px 14px;
+    }
+
+    .btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    /* Mobile */
+    @media(max-width:640px) {
+        .acct-stepper {
+            padding: 10px 10px 6px;
+        }
+
+        .acct-step-connector {
+            width: 16px;
+        }
+
+        .acct-step-label {
+            font-size: 7px;
+        }
+
+        .acct-step-dot {
+            width: 22px;
+            height: 22px;
+            font-size: 9px;
+        }
+
+        #accountSetupModal .modal-body {
+            padding: 14px;
+        }
+
+        #accountSetupModal .modal-header,
+        #accountSetupModal .modal-footer {
+            padding: 10px 14px;
+        }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+        .acct-enter,
+        .acct-stagger>* {
+            animation: none !important;
+            opacity: 1 !important;
+        }
+    }
+</style>
+
+<div id="accountSetupModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="headerStepTitle">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                <span id="headerStepTitle">Workflow</span>
+            </h3>
+            <div class="flex items-center gap-3">
+                <button onclick="skipAccountSetup()" id="headerBtnSkip"
+                    class="text-[10px] text-slate-400 hover:text-slate-900 font-semibold transition-colors uppercase tracking-wider">Skip</button>
+                <div class="h-3.5 w-px bg-slate-200"></div>
+                <span id="headerStepText" class="text-[10px] text-slate-400 font-medium tracking-wide">Step 1 of
+                    5</span>
+                <button
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                    onclick="closeAccountSetupModalWithConfirm()" aria-label="Close">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step Stepper -->
+        <div class="acct-stepper" aria-label="Setup progress">
+            <div class="acct-step-wrap">
+                <div class="acct-step-dot active" data-step="1" aria-current="step">1</div><span
+                    class="acct-step-label active">Start</span>
+            </div>
+            <div class="acct-step-connector" data-connector="1"></div>
+            <div class="acct-step-wrap">
+                <div class="acct-step-dot" data-step="2">2</div><span class="acct-step-label">Type</span>
+            </div>
+            <div class="acct-step-connector" data-connector="2"></div>
+            <div class="acct-step-wrap">
+                <div class="acct-step-dot" data-step="3">3</div><span class="acct-step-label">Details</span>
+            </div>
+            <div class="acct-step-connector" data-connector="3"></div>
+            <div class="acct-step-wrap">
+                <div class="acct-step-dot" data-step="4">4</div><span class="acct-step-label">Funds</span>
+            </div>
+            <div class="acct-step-connector" data-connector="4"></div>
+            <div class="acct-step-wrap">
+                <div class="acct-step-dot" data-step="5">5</div><span class="acct-step-label">Review</span>
+            </div>
+        </div>
+
+        <!-- Main Body -->
+        <div class="modal-body overflow-y-auto flex-1">
+
+            <!-- STEP 1: Workflow Choice -->
+            <div id="step1" class="setup-step acct-enter">
+                <div class="text-center mb-8">
+                    <img src="BudgetMe-logo/BudgetMe-logo.svg" alt="BudgetMe Logo" class="h-10 mx-auto mb-5">
+                    <h1 class="text-xl font-semibold text-slate-900 mb-2 tracking-tight">Welcome to BudgetMe</h1>
+                    <p class="text-[13px] text-slate-500 max-w-xs mx-auto leading-relaxed">Let's get your finances
+                        organized. How would you like to start?</p>
+                </div>
+                <div class="grid grid-cols-1 gap-3 acct-stagger">
+                    <div onclick="selectWorkflow('new')" id="workflowNew" class="acct-card" role="button" tabindex="0"
+                        onkeydown="if(event.key==='Enter')selectWorkflow('new')">
+                        <div class="flex items-start gap-4">
+                            <div class="acct-icon"><iconify-icon icon="solar:user-plus-linear"
+                                    width="18"></iconify-icon></div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-[13px] font-bold text-slate-900 mb-0.5">Create New Account</h3>
+                                <p class="text-[11px] text-slate-500 leading-relaxed">Set up a checking, savings, or
+                                    credit card account from scratch.</p>
+                            </div>
+                            <div class="acct-check"><iconify-icon icon="solar:check-read-linear"
+                                    width="10"></iconify-icon></div>
+                        </div>
+                    </div>
+                    <div onclick="selectWorkflow('existing')" id="workflowExisting" class="acct-card" role="button"
+                        tabindex="0" onkeydown="if(event.key==='Enter')selectWorkflow('existing')">
+                        <div class="flex items-start gap-4">
+                            <div class="acct-icon"><iconify-icon icon="solar:card-transfer-linear"
+                                    width="18"></iconify-icon></div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-[13px] font-bold text-slate-900 mb-0.5">Top-up / Cash In</h3>
+                                <p class="text-[11px] text-slate-500 leading-relaxed">Add funds to an existing account
+                                    manually.</p>
+                            </div>
+                            <div class="acct-check"><iconify-icon icon="solar:check-read-linear"
+                                    width="10"></iconify-icon></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Account Type Choice -->
+            <div id="step2" class="setup-step hidden">
+                <div class="mb-5">
+                    <h2 class="text-[17px] font-bold text-slate-900 mb-1">Select Account Type</h2>
+                    <p class="text-[11px] text-slate-500">Choose the category that best fits your needs.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5 acct-stagger" id="accountTypeGrid">
+                    <div onclick="selectAccountType('checking')" id="type_checking" class="acct-card" role="button"
+                        tabindex="0" onkeydown="if(event.key==='Enter')selectAccountType('checking')">
+                        <div class="flex items-center mb-2">
+                            <div class="acct-icon mr-3" style="width:34px;height:34px;border-radius:8px;"><iconify-icon
+                                    icon="solar:wallet-linear" width="16"></iconify-icon></div>
+                            <h3 class="font-bold text-slate-900 text-[13px]">Checking</h3>
+                        </div>
+                        <p class="text-[10px] text-slate-500 leading-relaxed">Daily transactions, salary.</p>
+                        <div class="acct-check"><iconify-icon icon="solar:check-read-linear" width="9"></iconify-icon>
+                        </div>
+                    </div>
+                    <div onclick="selectAccountType('savings')" id="type_savings" class="acct-card" role="button"
+                        tabindex="0" onkeydown="if(event.key==='Enter')selectAccountType('savings')">
+                        <div class="flex items-center mb-2">
+                            <div class="acct-icon mr-3" style="width:34px;height:34px;border-radius:8px;"><iconify-icon
+                                    icon="solar:safe-square-linear" width="16"></iconify-icon></div>
+                            <h3 class="font-bold text-slate-900 text-[13px]">Savings</h3>
+                        </div>
+                        <p class="text-[10px] text-slate-500 leading-relaxed">Emergency funds, goals.</p>
+                        <div class="acct-check"><iconify-icon icon="solar:check-read-linear" width="9"></iconify-icon>
+                        </div>
+                    </div>
+                    <div onclick="selectAccountType('credit')" id="type_credit" class="acct-card" role="button"
+                        tabindex="0" onkeydown="if(event.key==='Enter')selectAccountType('credit')">
+                        <div class="flex items-center mb-2">
+                            <div class="acct-icon mr-3" style="width:34px;height:34px;border-radius:8px;"><iconify-icon
+                                    icon="solar:card-linear" width="16"></iconify-icon></div>
+                            <h3 class="font-bold text-slate-900 text-[13px]">Credit Card</h3>
+                        </div>
+                        <p class="text-[10px] text-slate-500 leading-relaxed">Credit building, rewards.</p>
+                        <div class="acct-check"><iconify-icon icon="solar:check-read-linear" width="9"></iconify-icon>
+                        </div>
+                    </div>
+                    <div onclick="selectAccountType('investment')" id="type_investment" class="acct-card" role="button"
+                        tabindex="0" onkeydown="if(event.key==='Enter')selectAccountType('investment')">
+                        <div class="flex items-center mb-2">
+                            <div class="acct-icon mr-3" style="width:34px;height:34px;border-radius:8px;"><iconify-icon
+                                    icon="solar:graph-up-linear" width="16"></iconify-icon></div>
+                            <h3 class="font-bold text-slate-900 text-[13px]">Investment</h3>
+                        </div>
+                        <p class="text-[10px] text-slate-500 leading-relaxed">Portfolio, growth.</p>
+                        <div class="acct-check"><iconify-icon icon="solar:check-read-linear" width="9"></iconify-icon>
+                        </div>
+                    </div>
+                    <div onclick="selectAccountType('cash')" id="type_cash" class="acct-card" role="button" tabindex="0"
+                        onkeydown="if(event.key==='Enter')selectAccountType('cash')">
+                        <div class="flex items-center mb-2">
+                            <div class="acct-icon mr-3" style="width:34px;height:34px;border-radius:8px;"><iconify-icon
+                                    icon="solar:wallet-2-linear" width="16"></iconify-icon></div>
+                            <h3 class="font-bold text-slate-900 text-[13px]">Cash</h3>
+                        </div>
+                        <p class="text-[10px] text-slate-500 leading-relaxed">Physical wallet.</p>
+                        <div class="acct-check"><iconify-icon icon="solar:check-read-linear" width="9"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Experience Level -->
+                <div id="experienceLevelSection" class="hidden">
+                    <h3 class="text-[10px] font-bold text-slate-900 mb-3 uppercase tracking-widest">Usage Level</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 acct-stagger">
+                        <label class="acct-card !p-3 flex items-center gap-3" style="cursor:pointer">
+                            <input type="radio" name="expLevel" value="beginner"
+                                class="w-3.5 h-3.5 accent-emerald-500 flex-shrink-0">
+                            <div>
+                                <div class="text-[12px] font-semibold text-slate-700">Beginner</div>
+                                <div class="text-[9px] text-slate-400">Just starting out</div>
+                            </div>
+                        </label>
+                        <label class="acct-card !p-3 flex items-center gap-3" style="cursor:pointer">
+                            <input type="radio" name="expLevel" value="intermediate" checked
+                                class="w-3.5 h-3.5 accent-emerald-500 flex-shrink-0">
+                            <div>
+                                <div class="text-[12px] font-semibold text-slate-700">Intermediate</div>
+                                <div class="text-[9px] text-slate-400">Standard usage</div>
+                            </div>
+                        </label>
+                        <label class="acct-card !p-3 flex items-center gap-3" style="cursor:pointer">
+                            <input type="radio" name="expLevel" value="advanced"
+                                class="w-3.5 h-3.5 accent-emerald-500 flex-shrink-0">
+                            <div>
+                                <div class="text-[12px] font-semibold text-slate-700">Advanced</div>
+                                <div class="text-[9px] text-slate-400">Power user</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Account Config -->
+            <div id="step3" class="setup-step hidden">
+                <div class="mb-5">
+                    <h2 class="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
+                        <div class="acct-icon" style="width:30px;height:30px;border-radius:8px;"><iconify-icon
+                                icon="solar:pen-new-square-linear" width="14"></iconify-icon></div>
+                        Account Details
+                    </h2>
+                </div>
+                <div class="space-y-5 acct-stagger">
+                    <div>
+                        <label class="acct-label" for="accountName">Account Name <span
+                                class="text-slate-400">*</span></label>
+                        <input type="text" id="accountName" oninput="validateStep3()" class="acct-input"
+                            placeholder="e.g., Main Checking" required>
+                    </div>
+                    <div>
+                        <label class="acct-label" for="initialBalance">Initial Balance <span
+                                class="text-slate-400">*</span></label>
+                        <div class="relative">
+                            <span
+                                class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">₱</span>
+                            <input type="number" id="initialBalance" oninput="validateStep3()" step="0.01"
+                                class="acct-input pl-7" placeholder="0.00" required>
+                        </div>
+                        <div class="acct-notice mt-2">
+                            <iconify-icon icon="solar:info-circle-linear" width="14"
+                                class="flex-shrink-0 mt-px text-slate-400"></iconify-icon>
+                            <span class="text-[11px]">Current funds available in this account.</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="acct-label" for="institutionName">Institution</label>
+                        <input type="text" id="institutionName" class="acct-input" placeholder="e.g., BPI, Metrobank">
+                    </div>
+                    <div>
+                        <label class="acct-label" for="accountDesc">Description <span
+                                class="text-slate-400 font-normal lowercase"
+                                style="letter-spacing:0">(optional)</span></label>
+                        <textarea id="accountDesc" rows="2" class="acct-input resize-none"
+                            placeholder="Notes about this account..."></textarea>
+                    </div>
+                    <div>
+                        <label class="acct-label">Color Theme</label>
+                        <div class="flex gap-2.5 flex-wrap mt-1">
+                            <button onclick="selectColor('#3B82F6')" class="acct-color-swatch"
+                                style="background:#3B82F6" data-color="#3B82F6" aria-label="Blue"></button>
+                            <button onclick="selectColor('#10B981')" class="acct-color-swatch selected"
+                                style="background:#10B981" data-color="#10B981" aria-label="Green"></button>
+                            <button onclick="selectColor('#F59E0B')" class="acct-color-swatch"
+                                style="background:#F59E0B" data-color="#F59E0B" aria-label="Amber"></button>
+                            <button onclick="selectColor('#EF4444')" class="acct-color-swatch"
+                                style="background:#EF4444" data-color="#EF4444" aria-label="Red"></button>
+                            <button onclick="selectColor('#8B5CF6')" class="acct-color-swatch"
+                                style="background:#8B5CF6" data-color="#8B5CF6" aria-label="Purple"></button>
+                            <button onclick="selectColor('#64748B')" class="acct-color-swatch"
+                                style="background:#64748B" data-color="#64748B" aria-label="Slate"></button>
+                        </div>
+                        <input type="hidden" id="accountColor" value="#10B981">
+                    </div>
+                    <label class="acct-check-area" for="isDefault">
+                        <input type="checkbox" id="isDefault"
+                            class="h-3.5 w-3.5 accent-emerald-500 border-slate-300 rounded flex-shrink-0">
+                        <span class="text-[12px] text-slate-600 font-medium select-none">Set as default account</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- STEP 4: Cash In Setup -->
+            <div id="step4" class="setup-step hidden">
+                <div class="mb-5">
+                    <h2 class="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
+                        <div class="acct-icon" style="width:30px;height:30px;border-radius:8px;"><iconify-icon
+                                icon="solar:wallet-money-linear" width="14"></iconify-icon></div>
+                        Initial Funds
+                    </h2>
+                </div>
+                <div class="acct-check-area mb-5" onclick="document.getElementById('skipCashIn').click()">
+                    <input type="checkbox" id="skipCashIn" onchange="toggleCashInForm()"
+                        class="h-3.5 w-3.5 accent-emerald-500 border-slate-300 rounded flex-shrink-0"
+                        onclick="event.stopPropagation()">
+                    <div>
+                        <div class="text-[12px] font-semibold text-slate-900">Skip transaction record</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5">Don't create a transaction record for the initial
+                            balance.</div>
+                    </div>
+                </div>
+                <div id="cashInForm" class="space-y-4 transition-all duration-300 acct-stagger">
+                    <div>
+                        <label class="acct-label" for="cashInDate">Transaction Date</label>
+                        <input type="date" id="cashInDate" class="acct-input">
+                    </div>
+                    <div>
+                        <label class="acct-label" for="cashInSource">Source</label>
+                        <select id="cashInSource" class="acct-input form-select">
+                            <option value="deposit">Over the Counter Deposit</option>
+                            <option value="transfer">Bank Transfer</option>
+                            <option value="salary">Salary</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="acct-notice">
+                        <iconify-icon icon="solar:info-circle-linear" width="14"
+                            class="flex-shrink-0 mt-px text-slate-400"></iconify-icon>
+                        <span class="text-[11px]">The initial balance (₱<strong
+                                id="displayInitialBalance">0.00</strong>) will be recorded as your first income
+                            transaction.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: Review -->
+            <div id="step5" class="setup-step hidden">
+                <div class="mb-5">
+                    <h2 class="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
+                        <div class="acct-icon" style="width:30px;height:30px;border-radius:8px;"><iconify-icon
+                                icon="solar:clipboard-check-linear" width="14"></iconify-icon></div>
+                        Review & Confirm
+                    </h2>
+                </div>
+                <div class="space-y-4 acct-stagger">
+                    <div class="acct-review">
+                        <div class="acct-review-head">
+                            <div class="acct-icon" style="width:44px;height:44px;border-radius:10px;">
+                                <iconify-icon id="reviewIconEl" icon="solar:wallet-linear" width="20"></iconify-icon>
+                            </div>
+                            <div>
+                                <h3 id="reviewAccountName" class="font-bold text-slate-900 text-[15px]">Main Checking
+                                </h3>
+                                <span id="reviewAccountType"
+                                    class="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-widest border border-slate-200 inline-block mt-1">Checking</span>
+                            </div>
+                        </div>
+                        <div class="acct-review-body">
+                            <div class="acct-review-row">
+                                <span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Initial
+                                    Balance</span>
+                                <span id="reviewBalance" class="font-bold text-slate-900 text-sm">₱0.00</span>
+                            </div>
+                            <div class="acct-review-row">
+                                <span
+                                    class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Institution</span>
+                                <span id="reviewInstitution" class="text-[13px] font-semibold text-slate-700">-</span>
+                            </div>
+                            <div class="acct-review-row">
+                                <span
+                                    class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Notes</span>
+                                <span id="reviewNotes"
+                                    class="text-[11px] text-slate-500 italic max-w-[180px] text-right">No notes
+                                    provided.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="acct-notice warn">
+                        <iconify-icon icon="solar:danger-triangle-linear" width="16"
+                            class="flex-shrink-0 mt-px"></iconify-icon>
+                        <div>
+                            <h4 class="font-bold text-[10px] uppercase tracking-widest mb-0.5">Action is final</h4>
+                            <p class="text-[11px] leading-relaxed" style="opacity:0.85">Your account will be created
+                                immediately. Please ensure all details are correct.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button id="btnBack" onclick="previousStep()" class="btn btn-secondary hidden">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button id="btnNext" onclick="nextStep()" class="btn btn-primary" disabled
+                style="background:#10b981; box-shadow:none;">
+                Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+            <button id="btnCreate" onclick="createAccount()" class="btn btn-primary hidden"
+                style="background:#10b981; box-shadow:0 4px 14px rgba(16,185,129,0.25);">
+                <iconify-icon icon="solar:check-circle-bold" class="mr-1.5"></iconify-icon> Confirm & Create
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Skip Confirmation Modal -->
+<div id="skipConfirmModal" class="modal-overlay z-[60]" onclick="if(event.target===this) event.stopPropagation()"
+    role="dialog" aria-modal="true">
+    <div class="bg-white rounded-xl p-6 max-w-sm w-full mx-4 border border-slate-200"
+        style="box-shadow:0 25px 50px -12px rgba(0,0,0,0.15);animation:acctIn 250ms ease both;">
+        <div class="text-center mb-6">
+            <div
+                class="w-11 h-11 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4 text-slate-400 border border-slate-100">
+                <iconify-icon icon="solar:clock-circle-linear" width="22"></iconify-icon>
+            </div>
+            <h3 class="text-base font-bold text-slate-900">Skip Setup?</h3>
+            <p class="text-[11px] text-slate-500 mt-2 leading-relaxed">We'll remind you to finish setting up your
+                account in <strong>25 minutes</strong>.</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="closeSkipConfirmModal()" class="flex-1 btn btn-secondary justify-center text-[11px]">Go
+                Back</button>
+            <button onclick="confirmSkip()"
+                class="flex-1 btn justify-center text-[11px] font-semibold rounded-lg px-4 py-2.5 transition-colors text-white border-transparent"
+                style="background:#10b981;">Yes, Skip</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    var currentStep = 1;
+    var totalSteps = 5;
+    var formData = { workflow: '', type: '', color: '#10B981' };
+
+    setTimeout(() => {
+        const dateInput = document.getElementById('cashInDate');
+        if (dateInput) dateInput.valueAsDate = new Date();
+        updateFooterButtons();
+    }, 100);
+
+    function updateStepper(step) {
+        for (let i = 1; i <= totalSteps; i++) {
+            const dot = document.querySelector(`.acct-step-dot[data-step="${i}"]`);
+            const label = dot ? dot.closest('.acct-step-wrap').querySelector('.acct-step-label') : null;
+            const conn = document.querySelector(`.acct-step-connector[data-connector="${i}"]`);
+            if (!dot) continue;
+            dot.classList.remove('active', 'completed');
+            if (label) label.classList.remove('active', 'completed');
+            if (i < step) {
+                dot.classList.add('completed');
+                dot.innerHTML = '<iconify-icon icon="solar:check-read-linear" width="12"></iconify-icon>';
+                if (label) label.classList.add('completed');
+            } else if (i === step) {
+                dot.classList.add('active'); dot.textContent = i; dot.setAttribute('aria-current', 'step');
+                if (label) label.classList.add('active');
+            } else { dot.textContent = i; dot.removeAttribute('aria-current'); }
+            if (conn) conn.classList.toggle('completed', i < step);
+        }
+    }
+
+    window.openAccountSetupModal = function () {
+        const m = document.getElementById('accountSetupModal');
+        if (!m) return;
+        if (m.parentElement !== document.body) document.body.appendChild(m);
+        void m.offsetWidth; m.classList.add('open');
+        setTimeout(() => { const f = m.querySelector('button,[tabindex="0"]'); if (f) f.focus(); }, 100);
+    };
+    window.closeAccountSetupModal = function () { document.getElementById('accountSetupModal').classList.remove('open'); };
+    window.closeAccountSetupModalWithConfirm = function () { if (confirm("Close? Your progress will be saved locally.")) closeAccountSetupModal(); };
+    window.skipAccountSetup = function () {
+        const m = document.getElementById('skipConfirmModal');
+        if (!m) return;
+        if (m.parentElement !== document.body) document.body.appendChild(m);
+        m.classList.add('open');
+    };
+    window.closeSkipConfirmModal = function () { document.getElementById('skipConfirmModal').classList.remove('open'); };
+    window.confirmSkip = function () {
+        localStorage.setItem('accountSetupSkipUntil', new Date(Date.now() + 25 * 60 * 1000).toISOString());
+        closeSkipConfirmModal(); closeAccountSetupModal();
+    };
+
+    window.navigateToStep = function (step) {
+        if (step < 1 || step > totalSteps) return;
+        document.querySelectorAll('.setup-step').forEach(el => { el.classList.add('hidden'); el.classList.remove('acct-enter'); });
+        const t = document.getElementById('step' + step);
+        t.classList.remove('hidden'); void t.offsetWidth; t.classList.add('acct-enter');
+        t.querySelectorAll('.acct-stagger > *').forEach(c => { c.style.animation = 'none'; void c.offsetWidth; c.style.animation = ''; });
+        updateStepper(step);
+        document.getElementById('headerStepText').textContent = `Step ${step} of ${totalSteps}`;
+        const titles = ['Workflow', 'Account Type', 'Details', 'Initial Funds', 'Review'];
+        document.getElementById('headerStepTitle').textContent = titles[step - 1];
+        const skip = document.getElementById('headerBtnSkip');
+        if (skip) skip.style.visibility = (step === totalSteps) ? 'hidden' : 'visible';
+        currentStep = step; updateFooterButtons();
+        if (step === 5) prepareReviewStep();
+    }
+
+    window.updateFooterButtons = function () {
+        const back = document.getElementById('btnBack'), next = document.getElementById('btnNext'), create = document.getElementById('btnCreate');
+        if (currentStep === 1) { back.classList.add('hidden'); next.disabled = !formData.workflow; } else { back.classList.remove('hidden'); }
+        if (currentStep === totalSteps) { next.classList.add('hidden'); create.classList.remove('hidden'); }
+        else { next.classList.remove('hidden'); create.classList.add('hidden'); validateCurrentStepButton(); }
+    }
+    window.validateCurrentStepButton = function () {
+        const btn = document.getElementById('btnNext');
+        if (currentStep === 1) btn.disabled = !formData.workflow;
+        else if (currentStep === 2) btn.disabled = !formData.type;
+        else if (currentStep === 3) { const n = document.getElementById('accountName').value, b = document.getElementById('initialBalance').value; btn.disabled = !(n.trim() && b.trim()); }
+        else if (currentStep === 4) btn.disabled = false;
+    }
+
+    window.selectWorkflow = function (flow) {
+        formData.workflow = flow;
+        document.querySelectorAll('#step1 .acct-card').forEach(el => el.classList.remove('selected'));
+        document.getElementById(flow === 'new' ? 'workflowNew' : 'workflowExisting').classList.add('selected');
+        updateFooterButtons(); setTimeout(() => nextStep(), 300);
+    }
+    window.selectAccountType = function (type) {
+        formData.type = type;
+        document.querySelectorAll('#accountTypeGrid .acct-card').forEach(el => el.classList.remove('selected'));
+        document.getElementById('type_' + type).classList.add('selected');
+        document.getElementById('experienceLevelSection').classList.remove('hidden');
+        updateFooterButtons();
+    }
+    window.validateStep3 = function () {
+        document.getElementById('displayInitialBalance').textContent = document.getElementById('initialBalance').value || '0.00';
+        updateFooterButtons();
+    }
+    window.selectColor = function (color) {
+        formData.color = color; document.getElementById('accountColor').value = color;
+        document.querySelectorAll('.acct-color-swatch').forEach(b => b.classList.toggle('selected', b.dataset.color === color));
+    }
+    window.toggleCashInForm = function () {
+        const skip = document.getElementById('skipCashIn').checked, form = document.getElementById('cashInForm');
+        form.style.opacity = skip ? '0.35' : '1'; form.style.pointerEvents = skip ? 'none' : 'auto';
+    }
+    function prepareReviewStep() {
+        document.getElementById('reviewAccountName').textContent = document.getElementById('accountName').value || 'New Account';
+        document.getElementById('reviewAccountType').textContent = formData.type || 'Checking';
+        document.getElementById('reviewBalance').textContent = parseFloat(document.getElementById('initialBalance').value || 0).toLocaleString('en-US', { style: 'currency', currency: 'PHP' });
+        document.getElementById('reviewInstitution').textContent = document.getElementById('institutionName').value || '-';
+        document.getElementById('reviewNotes').textContent = document.getElementById('accountDesc').value || 'No notes provided.';
+    }
+
+    window.nextStep = function () { navigateToStep(currentStep + 1); }
+    window.previousStep = function () { navigateToStep(currentStep - 1); }
+
+    window.createAccount = function () {
+        const btn = document.getElementById('btnCreate'); btn.disabled = true;
+        btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-3.5 w-3.5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Creating...';
+        setTimeout(() => {
+            alert("Account created successfully! (Mock)");
+            closeAccountSetupModal(); btn.disabled = false;
+            btn.innerHTML = '<iconify-icon icon="solar:check-circle-bold" class="mr-1.5"></iconify-icon> Confirm & Create';
+            currentStep = 1; navigateToStep(1);
+        }, 1500);
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            const s = document.getElementById('skipConfirmModal');
+            if (s && s.classList.contains('open')) { closeSkipConfirmModal(); return; }
+            const m = document.getElementById('accountSetupModal');
+            if (m && m.classList.contains('open')) closeAccountSetupModalWithConfirm();
+        }
+    });
+</script>

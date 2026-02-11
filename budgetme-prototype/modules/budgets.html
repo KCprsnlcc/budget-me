@@ -1,0 +1,2618 @@
+<!-- Budgets Module Content -->
+<style>
+    /* ========================================
+   Budgets Module — Monochromatic System
+   ======================================== */
+
+    /* Stepper */
+    .bgt-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 20px 10px;
+        background: white;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .bgt-step-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .bgt-step-dot {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+        border: 1.5px solid #cbd5e1;
+        color: #94a3b8;
+        background: white;
+        transition: all 300ms cubic-bezier(.4, 0, .2, 1);
+        position: relative;
+        z-index: 2;
+        flex-shrink: 0;
+    }
+
+    .bgt-step-dot.active {
+        border-color: #10b981;
+        color: white;
+        background: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .bgt-step-dot.completed {
+        border-color: #10b981;
+        color: white;
+        background: #10b981;
+    }
+
+    .bgt-step-label {
+        font-size: 9px;
+        font-weight: 600;
+        color: #94a3b8;
+        margin-top: 4px;
+        text-align: center;
+        transition: color 200ms;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .bgt-step-label.active {
+        color: #10b981;
+    }
+
+    .bgt-step-label.completed {
+        color: #475569;
+    }
+
+    .bgt-step-connector {
+        width: 36px;
+        height: 1.5px;
+        background: #e2e8f0;
+        margin: 0 6px;
+        margin-bottom: 18px;
+        transition: background 300ms;
+        flex-shrink: 0;
+    }
+
+    .bgt-step-connector.completed {
+        background: #10b981;
+    }
+
+    /* Selection Cards — Monochromatic */
+    .bgt-card {
+        position: relative;
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 200ms ease;
+        background: white;
+    }
+
+    .bgt-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    }
+
+    .bgt-card.selected {
+        border-color: #10b981;
+        box-shadow: 0 0 0 1px #10b981;
+    }
+
+    .bgt-card .bgt-check {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #10b981;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 200ms;
+    }
+
+    .bgt-card.selected .bgt-check {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Icon — Monochromatic grey */
+    .bgt-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        color: #94a3b8;
+        flex-shrink: 0;
+        border: 1px solid #f1f5f9;
+        transition: all 200ms;
+    }
+
+    .bgt-card:hover .bgt-icon {
+        color: #64748b;
+    }
+
+    .bgt-card.selected .bgt-icon {
+        background: #f1f5f9;
+        color: #10b981;
+    }
+
+    /* Form Inputs — Monochromatic */
+    .bgt-input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        color: #1e293b;
+        transition: all 200ms;
+    }
+
+    .bgt-input::placeholder {
+        color: #94a3b8;
+    }
+
+    .bgt-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    /* Review Cards */
+    .bgt-review {
+        padding: 16px;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+    .bgt-review-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
+
+    .bgt-review-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    /* Notice Components */
+    .bgt-notice {
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .bgt-notice.info {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        color: #0369a1;
+    }
+
+    .bgt-notice.success {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #15803d;
+    }
+
+    .bgt-notice.warning {
+        background: #fffbeb;
+        border: 1px solid #fed7aa;
+        color: #c2410c;
+    }
+
+    /* Animations */
+    @keyframes bgtIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .bgt-enter {
+        animation: bgtIn 300ms cubic-bezier(.4, 0, .2, 1) both;
+    }
+
+    .bgt-stagger>* {
+        opacity: 0;
+        animation: bgtIn 300ms cubic-bezier(.4, 0, .2, 1) both;
+    }
+
+    .bgt-stagger>*:nth-child(1) {
+        animation-delay: 0ms;
+    }
+
+    .bgt-stagger>*:nth-child(2) {
+        animation-delay: 50ms;
+    }
+
+    .bgt-stagger>*:nth-child(3) {
+        animation-delay: 100ms;
+    }
+
+    .bgt-stagger>*:nth-child(4) {
+        animation-delay: 150ms;
+    }
+
+    .bgt-stagger>*:nth-child(5) {
+        animation-delay: 200ms;
+    }
+
+    .bgt-stagger>*:nth-child(6) {
+        animation-delay: 250ms;
+    }
+
+    /* Modal overrides for budget modals */
+    #addBudgetModal .modal,
+    #editBudgetModal .modal,
+    #viewBudgetModal .modal,
+    #deleteBudgetModal .modal {
+        max-width: 520px;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    }
+
+    #addBudgetModal .modal-header,
+    #editBudgetModal .modal-header,
+    #viewBudgetModal .modal-header,
+    #deleteBudgetModal .modal-header {
+        padding: 14px 20px;
+        background: white;
+    }
+
+    #addBudgetModal .modal-body,
+    #editBudgetModal .modal-body,
+    #viewBudgetModal .modal-body,
+    #deleteBudgetModal .modal-body {
+        padding: 20px;
+    }
+
+    #addBudgetModal .modal-footer,
+    #editBudgetModal .modal-footer,
+    #viewBudgetModal .modal-footer,
+    #deleteBudgetModal .modal-footer {
+        padding: 14px 20px;
+        background: #f8fafc;
+        border-radius: 0 0 14px 14px;
+    }
+
+    /* Mobile responsiveness */
+    @media(max-width:640px) {
+        .bgt-stepper {
+            padding: 10px 10px 6px;
+        }
+
+        .bgt-step-connector {
+            width: 16px;
+        }
+
+        .bgt-step-label {
+            font-size: 7px;
+        }
+
+        .bgt-step-dot {
+            width: 22px;
+            height: 22px;
+            font-size: 9px;
+        }
+
+        #addBudgetModal .modal-body,
+        #editBudgetModal .modal-body,
+        #viewBudgetModal .modal-body,
+        #deleteBudgetModal .modal-body {
+            padding: 14px;
+        }
+
+        #addBudgetModal .modal-header,
+        #editBudgetModal .modal-header,
+        #viewBudgetModal .modal-header,
+        #addBudgetModal .modal-footer,
+        #editBudgetModal .modal-footer,
+        #viewBudgetModal .modal-footer,
+        #deleteBudgetModal .modal-header,
+        #deleteBudgetModal .modal-footer {
+            padding: 10px 14px;
+        }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+        .bgt-enter,
+        .bgt-stagger>* {
+            animation: none !important;
+            opacity: 1 !important;
+        }
+    }
+</style>
+<div class="max-w-6xl mx-auto space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-semibold text-slate-900 tracking-tight">Budgets</h2>
+            <p class="text-sm text-slate-500 mt-1 font-light">Track your spending against your budget limits.</p>
+        </div>
+        <div class="flex gap-3">
+            <div class="relative group">
+                <button class="btn btn-secondary">
+                    <iconify-icon icon="solar:export-linear" width="16"></iconify-icon>
+                    <span class="hidden sm:inline">Export</span>
+                    <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
+                </button>
+                <!-- Dropdown -->
+                <div
+                    class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 hidden group-hover:block z-50">
+                    <button
+                        class="w-full text-left px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2"
+                        onclick="exportBudgets('pdf')">
+                        <iconify-icon icon="solar:file-pdf-linear" class="text-rose-500"></iconify-icon> Export as PDF
+                    </button>
+                    <button
+                        class="w-full text-left px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2"
+                        onclick="exportBudgets('csv')">
+                        <iconify-icon icon="solar:file-text-linear" class="text-emerald-500"></iconify-icon> Export as
+                        CSV
+                    </button>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('addBudgetModal')">
+                <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+                Create Budget
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Total Budget -->
+        <div class="card p-5 hover:border-emerald-200 transition-colors group relative">
+            <div class="flex justify-between items-start mb-4">
+                <div
+                    class="text-slate-500 bg-slate-50 p-2 rounded-lg group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                    <iconify-icon icon="solar:wallet-linear" width="22" stroke-width="1.5"></iconify-icon>
+                </div>
+                <div
+                    class="flex items-center gap-1 text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
+                    <iconify-icon icon="solar:trending-up-linear"></iconify-icon> +5%
+                </div>
+            </div>
+            <div class="flex items-center gap-1 mb-1">
+                <div class="text-slate-500 text-xs font-medium uppercase tracking-wide">Total Budget</div>
+                <iconify-icon icon="solar:info-circle-linear" class="text-slate-400 cursor-help" width="12"
+                    title="Total allocated budget for the current period"></iconify-icon>
+            </div>
+            <div class="text-xl font-semibold text-slate-900 tracking-tight">$4,500.00</div>
+        </div>
+
+        <!-- Total Spent -->
+        <div class="card p-5 hover:border-amber-200 transition-colors group relative">
+            <div class="flex justify-between items-start mb-4">
+                <div
+                    class="text-slate-500 bg-slate-50 p-2 rounded-lg group-hover:bg-amber-50 group-hover:text-amber-600 transition-colors">
+                    <iconify-icon icon="solar:bag-3-linear" width="22" stroke-width="1.5"></iconify-icon>
+                </div>
+                <div
+                    class="flex items-center gap-1 text-[10px] font-medium text-amber-700 bg-amber-50 px-2 py-1 rounded-full border border-amber-100">
+                    <iconify-icon icon="solar:trending-up-linear"></iconify-icon> +12%
+                </div>
+            </div>
+            <div class="flex items-center gap-1 mb-1">
+                <div class="text-slate-500 text-xs font-medium uppercase tracking-wide">Total Spent</div>
+                <iconify-icon icon="solar:info-circle-linear" class="text-slate-400 cursor-help" width="12"
+                    title="Total spent against budgets in current period"></iconify-icon>
+            </div>
+            <div class="text-xl font-semibold text-slate-900 tracking-tight">$1,960.00</div>
+        </div>
+
+        <!-- Remaining -->
+        <div class="card p-5 hover:border-blue-200 transition-colors group relative">
+            <div class="flex justify-between items-start mb-4">
+                <div
+                    class="text-slate-500 bg-slate-50 p-2 rounded-lg group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                    <iconify-icon icon="solar:pig-money-linear" width="22" stroke-width="1.5"></iconify-icon>
+                </div>
+                <span class="badge badge-success">Healthy</span>
+            </div>
+            <div class="flex items-center gap-1 mb-1">
+                <div class="text-slate-500 text-xs font-medium uppercase tracking-wide">Remaining</div>
+                <iconify-icon icon="solar:info-circle-linear" class="text-slate-400 cursor-help" width="12"
+                    title="Remaining budget available to spend"></iconify-icon>
+            </div>
+            <div class="text-xl font-semibold text-slate-900 tracking-tight">$2,540.00</div>
+        </div>
+    </div>
+
+    <!-- Budget vs Spent Chart -->
+    <div>
+        <!-- Mobile Chart Tabs -->
+        <div class="flex p-1 bg-slate-100 rounded-lg lg:hidden mb-4">
+            <button id="tab-overview"
+                class="flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-slate-900 shadow-sm transition-all"
+                onclick="switchChartTab('overview')">Overview</button>
+            <button id="tab-allocation"
+                class="flex-1 py-1.5 text-xs font-medium rounded-md text-slate-500 hover:text-slate-700 transition-all"
+                onclick="switchChartTab('allocation')">Allocation</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Budget Overview Chart -->
+            <div id="chart-overview"
+                class="lg:col-span-2 bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 block">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-900">Budget vs Spent</h3>
+                        <p class="text-xs text-slate-500 mt-1 font-light">6-month comparison.</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-2 h-2 rounded-full bg-slate-200"></div><span
+                                class="text-[10px] font-medium text-slate-400">Budget</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-2 h-2 rounded-full bg-emerald-500"></div><span
+                                class="text-[10px] font-medium text-slate-400">Spent</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Visual -->
+                <div class="h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50 relative">
+                    <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                        <div class="w-full h-px bg-slate-100/50"></div>
+                        <div class="w-full h-px bg-slate-100/50"></div>
+                        <div class="w-full h-px bg-slate-100/50"></div>
+                        <div class="w-full h-px bg-slate-100/50"></div>
+                        <div class="w-full h-px bg-slate-100/50"></div>
+                    </div>
+                    <!-- Data Bars -->
+                    <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
+                        <div
+                            class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20 shadow-lg">
+                            <div class="font-semibold mb-0.5">August</div>
+                            <div>Budget: $3.8k</div>
+                            <div>Spent: $2.4k</div>
+                        </div>
+                        <div
+                            class="w-3 sm:w-5 bg-slate-200 rounded-t-[2px] h-[75%] transition-all duration-300 hover:bg-slate-300">
+                        </div>
+                        <div
+                            class="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] h-[65%] transition-all duration-300 hover:bg-emerald-600">
+                        </div>
+                    </div>
+                    <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
+                        <div
+                            class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20 shadow-lg">
+                            <div class="font-semibold mb-0.5">September</div>
+                            <div>Budget: $3.9k</div>
+                            <div>Spent: $2.2k</div>
+                        </div>
+                        <div
+                            class="w-3 sm:w-5 bg-slate-200 rounded-t-[2px] h-[70%] transition-all duration-300 hover:bg-slate-300">
+                        </div>
+                        <div
+                            class="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] h-[55%] transition-all duration-300 hover:bg-emerald-600">
+                        </div>
+                    </div>
+                    <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
+                        <div
+                            class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20 shadow-lg">
+                            <div class="font-semibold mb-0.5">October</div>
+                            <div>Budget: $4.0k</div>
+                            <div>Spent: $3.8k</div>
+                        </div>
+                        <div
+                            class="w-3 sm:w-5 bg-slate-200 rounded-t-[2px] h-[80%] transition-all duration-300 hover:bg-slate-300">
+                        </div>
+                        <div
+                            class="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] h-[75%] transition-all duration-300 hover:bg-emerald-600">
+                        </div>
+                    </div>
+                    <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
+                        <div
+                            class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20 shadow-lg">
+                            <div class="font-semibold mb-0.5">November</div>
+                            <div>Budget: $4.2k</div>
+                            <div>Spent: $4.3k</div>
+                        </div>
+                        <div
+                            class="w-3 sm:w-5 bg-slate-200 rounded-t-[2px] h-[85%] transition-all duration-300 hover:bg-slate-300">
+                        </div>
+                        <div
+                            class="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] h-[90%] transition-all duration-300 hover:bg-emerald-600">
+                        </div>
+                    </div>
+                    <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
+                        <div
+                            class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20 shadow-lg">
+                            <div class="font-semibold mb-0.5">December</div>
+                            <div>Budget: $4.5k</div>
+                            <div>Spent: $3.5k</div>
+                        </div>
+                        <div
+                            class="w-3 sm:w-5 bg-slate-200 rounded-t-[2px] h-[80%] transition-all duration-300 hover:bg-slate-300">
+                        </div>
+                        <div
+                            class="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] h-[60%] transition-all duration-300 hover:bg-emerald-600">
+                        </div>
+                    </div>
+                    <div class="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
+                        <div
+                            class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20 shadow-lg">
+                            <div class="font-semibold mb-0.5">January</div>
+                            <div>Budget: $4.5k</div>
+                            <div>Spent: $1.9k</div>
+                        </div>
+                        <div
+                            class="w-3 sm:w-5 bg-slate-200 rounded-t-[2px] h-[75%] transition-all duration-300 hover:bg-slate-300">
+                        </div>
+                        <div
+                            class="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] h-[45%] transition-all duration-300 hover:bg-emerald-600">
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
+                    <span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span
+                        class="text-slate-600">Jan</span>
+                </div>
+            </div>
+
+            <!-- Budget Allocation Chart -->
+            <div id="chart-allocation"
+                class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 flex-col hidden lg:flex">
+                <h3 class="text-sm font-semibold text-slate-900 mb-6">Allocation</h3>
+                <div class="flex items-center gap-6 mb-6">
+                    <!-- Donut Chart -->
+                    <div class="w-32 h-32 mx-auto rounded-full flex-shrink-0 relative"
+                        style="background: conic-gradient(#10b981 0% 40%, #f59e0b 40% 70%, #ef4444 70% 85%, #64748b 85% 100%);">
+                        <div
+                            class="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                            <span class="text-xs text-slate-400 font-medium">Total</span>
+                            <span class="text-sm font-bold text-slate-900">$4.5k</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-3 flex-1">
+                    <div
+                        class="flex items-center justify-between text-xs p-1 hover:bg-slate-50 rounded transition-colors cursor-pointer group">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-emerald-500"></div><span
+                                class="text-slate-600 group-hover:text-slate-900">Housing</span>
+                        </div>
+                        <span class="font-medium text-slate-900">40%</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between text-xs p-1 hover:bg-slate-50 rounded transition-colors cursor-pointer group">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-amber-500"></div><span
+                                class="text-slate-600 group-hover:text-slate-900">Food</span>
+                        </div>
+                        <span class="font-medium text-slate-900">30%</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between text-xs p-1 hover:bg-slate-50 rounded transition-colors cursor-pointer group">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-red-500"></div><span
+                                class="text-slate-600 group-hover:text-slate-900">Entertainment</span>
+                        </div>
+                        <span class="font-medium text-slate-900">15%</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between text-xs p-1 hover:bg-slate-50 rounded transition-colors cursor-pointer group">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-slate-500"></div><span
+                                class="text-slate-600 group-hover:text-slate-900">Others</span>
+                        </div>
+                        <span class="font-medium text-slate-900">15%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overall Budget Progress -->
+    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6">
+        <div class="flex items-center justify-between mb-2">
+            <div>
+                <h3 class="text-sm font-semibold text-slate-900">Overall Budget Health</h3>
+                <p class="text-xs text-slate-500 mt-0.5">You have spent 65% of your total budget across all categories.
+                </p>
+            </div>
+            <span class="badge badge-success">Healthy</span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-3 mt-2 overflow-hidden">
+            <div class="bg-emerald-500 h-full rounded-full w-[65%]"></div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-4">
+        <div class="flex flex-col xl:flex-row items-center gap-3">
+            <!-- Scope Filter -->
+            <div class="flex bg-slate-100 p-1 rounded-lg w-full md:w-auto">
+                <button
+                    class="flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md bg-white text-slate-900 shadow-sm">All</button>
+                <button
+                    class="flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md text-slate-500 hover:text-slate-700">Personal</button>
+                <button
+                    class="flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md text-slate-500 hover:text-slate-700">Family</button>
+            </div>
+
+            <div class="h-4 w-px bg-slate-200 hidden xl:block"></div>
+
+            <div class="relative w-full md:w-64">
+                <iconify-icon icon="solar:magnifer-linear"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="14"></iconify-icon>
+                <input type="text" id="search-input" placeholder="Search budgets..."
+                    class="form-input py-1.5 pl-9 text-xs w-full">
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 w-full md:w-auto flex-1">
+                <select class="form-input form-select py-1.5 px-3 text-xs w-full" id="category-filter">
+                    <option value="all">All Categories</option>
+                    <option>Food & Dining</option>
+                    <option>Transportation</option>
+                    <option>Entertainment</option>
+                </select>
+                <select class="form-input form-select py-1.5 px-3 text-xs w-full" id="status-filter">
+                    <option value="all">All Statuses</option>
+                    <option>On Track</option>
+                    <option>Caution</option>
+                    <option>At Risk</option>
+                </select>
+                <select class="form-input form-select py-1.5 px-3 text-xs w-full" id="period-filter">
+                    <option>Monthly</option>
+                    <option>Weekly</option>
+                    <option>Quarterly</option>
+                    <option>Yearly</option>
+                </select>
+                <!-- Date Range Picker Mockup -->
+                <div class="relative w-full">
+                    <iconify-icon icon="solar:calendar-linear"
+                        class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" width="14"></iconify-icon>
+                    <input type="text" placeholder="Select dates" class="form-input py-1.5 pl-8 text-xs w-full" readonly
+                        value="Jan 1 - Jan 31">
+                </div>
+            </div>
+
+            <button class="btn btn-secondary text-xs w-full xl:w-auto justify-center" onclick="resetFilters()">
+                <iconify-icon icon="solar:restart-linear" width="14"></iconify-icon>
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <!-- Budget Cards Grid (Desktop) -->
+    <div class="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Budget Card 1 - On Track -->
+        <div class="bg-white group rounded-xl border border-slate-200/60 shadow-sm p-5 hover:shadow-md transition-all">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                        <iconify-icon icon="solar:chef-hat-linear" width="20"></iconify-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-900">Food & Dining</h3>
+                        <p class="text-[10px] text-slate-500">Monthly • Jan 2026</p>
+                    </div>
+                </div>
+                <span class="badge badge-success">On Track</span>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-500">Spent</span>
+                    <span class="font-medium text-slate-900">$450 / $600</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill success" style="width: 75%"></div>
+                </div>
+                <div class="flex justify-between text-[10px]">
+                    <span class="text-slate-400">Remaining: $150</span>
+                    <span class="font-medium text-emerald-600">75%</span>
+                </div>
+            </div>
+            <div
+                class="mt-4 pt-3 border-t border-slate-50 flex justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button class="action-btn" title="View Details" onclick="openModal('viewBudgetModal')"><iconify-icon
+                        icon="solar:eye-linear" width="18"></iconify-icon></button>
+                <button class="action-btn edit" title="Edit" onclick="openModal('editBudgetModal')"><iconify-icon
+                        icon="solar:pen-linear" width="18"></iconify-icon></button>
+                <button class="action-btn delete" title="Delete" onclick="openModal('deleteBudgetModal')"><iconify-icon
+                        icon="solar:trash-bin-trash-linear" width="18"></iconify-icon></button>
+            </div>
+        </div>
+
+        <!-- Budget Card 2 - Near Limit -->
+        <div class="bg-white group rounded-xl border border-slate-200/60 shadow-sm p-5 hover:shadow-md transition-all">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-amber-50 text-amber-600">
+                        <iconify-icon icon="solar:bus-linear" width="20"></iconify-icon>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-semibold text-slate-900">Transportation</h3>
+                            <span
+                                class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-indigo-50 text-indigo-600 border border-indigo-100"
+                                title="Family Budget">Family</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500">Monthly • Jan 2026</p>
+                    </div>
+                </div>
+                <span class="badge badge-warning">Caution</span>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-500">Spent</span>
+                    <span class="font-medium text-slate-900">$190 / $200</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill warning" style="width: 95%"></div>
+                </div>
+                <div class="flex justify-between text-[10px]">
+                    <span class="text-slate-400">Remaining: $10</span>
+                    <span class="font-medium text-amber-600">95%</span>
+                </div>
+            </div>
+            <div
+                class="mt-4 pt-3 border-t border-slate-50 flex justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button class="action-btn" title="View Details" onclick="openModal('viewBudgetModal')"><iconify-icon
+                        icon="solar:eye-linear" width="18"></iconify-icon></button>
+                <button class="action-btn edit" title="Edit" onclick="openModal('editBudgetModal')"><iconify-icon
+                        icon="solar:pen-linear" width="18"></iconify-icon></button>
+                <button class="action-btn delete" title="Delete" onclick="openModal('deleteBudgetModal')"><iconify-icon
+                        icon="solar:trash-bin-trash-linear" width="18"></iconify-icon></button>
+            </div>
+        </div>
+
+        <!-- Budget Card 3 - Over Budget -->
+        <div class="bg-white group rounded-xl border border-slate-200/60 shadow-sm p-5 hover:shadow-md transition-all">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-red-50 text-red-600">
+                        <iconify-icon icon="solar:gamepad-linear" width="20"></iconify-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-900">Entertainment</h3>
+                        <p class="text-[10px] text-slate-500">Monthly • Jan 2026</p>
+                    </div>
+                </div>
+                <span class="badge badge-danger">Over Budget</span>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-500">Spent</span>
+                    <span class="font-medium text-slate-900">$120 / $100</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill danger" style="width: 100%"></div>
+                </div>
+                <div class="flex justify-between text-[10px]">
+                    <span class="text-red-500">Over by: $20</span>
+                    <span class="font-medium text-red-600">120%</span>
+                </div>
+            </div>
+            <div
+                class="mt-4 pt-3 border-t border-slate-50 flex justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button class="action-btn" title="View Details" onclick="openModal('viewBudgetModal')"><iconify-icon
+                        icon="solar:eye-linear" width="18"></iconify-icon></button>
+                <button class="action-btn edit" title="Edit" onclick="openModal('editBudgetModal')"><iconify-icon
+                        icon="solar:pen-linear" width="18"></iconify-icon></button>
+                <button class="action-btn delete" title="Delete" onclick="openModal('deleteBudgetModal')"><iconify-icon
+                        icon="solar:trash-bin-trash-linear" width="18"></iconify-icon></button>
+            </div>
+        </div>
+
+        <!-- Budget Card 4 -->
+        <div class="bg-white group rounded-xl border border-slate-200/60 shadow-sm p-5 hover:shadow-md transition-all">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-blue-50 text-blue-600">
+                        <iconify-icon icon="solar:home-2-linear" width="20"></iconify-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-900">Housing</h3>
+                        <p class="text-[10px] text-slate-500">Monthly • Jan 2026</p>
+                    </div>
+                </div>
+                <span class="badge badge-success">On Track</span>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-500">Spent</span>
+                    <span class="font-medium text-slate-900">$1,200 / $1,500</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill success" style="width: 80%"></div>
+                </div>
+                <div class="flex justify-between text-[10px]">
+                    <span class="text-slate-400">Remaining: $300</span>
+                    <span class="font-medium text-emerald-600">80%</span>
+                </div>
+            </div>
+            <div
+                class="mt-4 pt-3 border-t border-slate-50 flex justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button class="action-btn" title="View Details" onclick="openModal('viewBudgetModal')"><iconify-icon
+                        icon="solar:eye-linear" width="18"></iconify-icon></button>
+                <button class="action-btn edit" title="Edit" onclick="openModal('editBudgetModal')"><iconify-icon
+                        icon="solar:pen-linear" width="18"></iconify-icon></button>
+                <button class="action-btn delete" title="Delete" onclick="openModal('deleteBudgetModal')"><iconify-icon
+                        icon="solar:trash-bin-trash-linear" width="18"></iconify-icon></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Cards List (Mobile) -->
+    <div class="md:hidden space-y-3">
+        <!-- Mobile Card 1 -->
+        <div class="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm relative">
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                        <iconify-icon icon="solar:chef-hat-linear" width="18"></iconify-icon>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900">Food & Dining</h4>
+                        <p class="text-[10px] text-slate-500">Monthly • Jan 2026</p>
+                    </div>
+                </div>
+                <div class="relative">
+                    <button
+                        class="w-7 h-7 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500"
+                        onclick="document.getElementById('mobile-menu-1').classList.toggle('hidden')">
+                        <iconify-icon icon="solar:menu-dots-bold" width="16"></iconify-icon>
+                    </button>
+                    <!-- Dropdown -->
+                    <div id="mobile-menu-1"
+                        class="absolute right-0 mt-1 w-32 bg-white rounded-lg shadow-lg border border-slate-100 p-1 hidden z-10">
+                        <button
+                            class="w-full text-left px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 rounded-md flex items-center gap-2"
+                            onclick="openModal('viewBudgetModal')">
+                            <iconify-icon icon="solar:eye-linear"></iconify-icon> View
+                        </button>
+                        <button
+                            class="w-full text-left px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 rounded-md flex items-center gap-2"
+                            onclick="openModal('editBudgetModal')">
+                            <iconify-icon icon="solar:pen-linear"></iconify-icon> Edit
+                        </button>
+                        <button
+                            class="w-full text-left px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 rounded-md flex items-center gap-2"
+                            onclick="openModal('deleteBudgetModal')">
+                            <iconify-icon icon="solar:trash-bin-trash-linear"></iconify-icon> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex items-center justify-between text-[10px] mb-1">
+                    <span class="text-slate-500">Progress</span>
+                    <span class="font-semibold text-emerald-600">75%</span>
+                </div>
+                <div class="progress-bar h-1.5">
+                    <div class="progress-bar-fill success" style="width: 75%"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-50">
+                <div>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-wide">Budget</p>
+                    <p class="text-xs font-semibold text-slate-900">$600</p>
+                </div>
+                <div>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-wide">Spent</p>
+                    <p class="text-xs font-semibold text-slate-900">$450</p>
+                </div>
+                <div>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-wide">Left</p>
+                    <p class="text-xs font-semibold text-emerald-600">$150</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Card 2 -->
+        <div class="bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm relative">
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-amber-50 text-amber-600">
+                        <iconify-icon icon="solar:bus-linear" width="18"></iconify-icon>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900">Transportation</h4>
+                        <p class="text-[10px] text-slate-500">Monthly • Jan 2026</p>
+                    </div>
+                </div>
+                <div class="relative">
+                    <button
+                        class="w-7 h-7 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500"
+                        onclick="document.getElementById('mobile-menu-2').classList.toggle('hidden')">
+                        <iconify-icon icon="solar:menu-dots-bold" width="16"></iconify-icon>
+                    </button>
+                    <!-- Dropdown -->
+                    <div id="mobile-menu-2"
+                        class="absolute right-0 mt-1 w-32 bg-white rounded-lg shadow-lg border border-slate-100 p-1 hidden z-10">
+                        <button
+                            class="w-full text-left px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 rounded-md flex items-center gap-2"
+                            onclick="openModal('viewBudgetModal')">
+                            <iconify-icon icon="solar:eye-linear"></iconify-icon> View
+                        </button>
+                        <button
+                            class="w-full text-left px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 rounded-md flex items-center gap-2"
+                            onclick="openModal('editBudgetModal')">
+                            <iconify-icon icon="solar:pen-linear"></iconify-icon> Edit
+                        </button>
+                        <button
+                            class="w-full text-left px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 rounded-md flex items-center gap-2"
+                            onclick="openModal('deleteBudgetModal')">
+                            <iconify-icon icon="solar:trash-bin-trash-linear"></iconify-icon> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex items-center justify-between text-[10px] mb-1">
+                    <span class="text-slate-500">Progress</span>
+                    <span class="font-semibold text-amber-600">95%</span>
+                </div>
+                <div class="progress-bar h-1.5">
+                    <div class="progress-bar-fill warning" style="width: 95%"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-50">
+                <div>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-wide">Budget</p>
+                    <p class="text-xs font-semibold text-slate-900">$200</p>
+                </div>
+                <div>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-wide">Spent</p>
+                    <p class="text-xs font-semibold text-slate-900">$190</p>
+                </div>
+                <div>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-wide">Left</p>
+                    <p class="text-xs font-semibold text-amber-600">$10</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex items-center justify-between px-1 py-3 border-t border-slate-100/80 mt-2">
+        <div class="text-[11px] text-slate-400 font-light">
+            Showing <span class="text-slate-600 font-medium">1-4</span> of <span
+                class="text-slate-600 font-medium">4</span>
+        </div>
+        <div class="flex items-center gap-0.5">
+            <button
+                class="p-1.5 rounded-md text-slate-300 hover:text-slate-600 hover:bg-slate-50 disabled:opacity-20 transition-all"
+                disabled>
+                <iconify-icon icon="solar:alt-arrow-left-linear" width="14"></iconify-icon>
+            </button>
+            <button
+                class="w-7 h-7 rounded-md bg-emerald-50/60 text-emerald-600 text-[11px] font-bold flex items-center justify-center">1</button>
+            <button
+                class="p-1.5 rounded-md text-slate-300 hover:text-slate-600 hover:bg-slate-50 disabled:opacity-20 transition-all"
+                disabled>
+                <iconify-icon icon="solar:alt-arrow-right-linear" width="14"></iconify-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Empty State (Hidden by default) -->
+    <div class="hidden bg-white rounded-xl border border-slate-200/60 shadow-sm p-12 text-center" id="empty-state">
+        <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4">
+            <iconify-icon icon="solar:wallet-linear" class="text-slate-400" width="32"></iconify-icon>
+        </div>
+        <h3 class="text-lg font-semibold text-slate-900 mb-2">No budgets yet</h3>
+        <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">
+            Create your first budget to start tracking your spending and stay on top of your finances.
+        </p>
+        <button class="btn btn-primary" onclick="openModal('addBudgetModal')">
+            <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+            Create Your First Budget
+        </button>
+        <div class="mt-6 flex items-center justify-center gap-6 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <iconify-icon icon="solar:check-circle-linear" class="text-emerald-500"></iconify-icon>
+                Set spending limits
+            </div>
+            <div class="flex items-center gap-2">
+                <iconify-icon icon="solar:check-circle-linear" class="text-emerald-500"></iconify-icon>
+                Track progress
+            </div>
+            <div class="flex items-center gap-2">
+                <iconify-icon icon="solar:check-circle-linear" class="text-emerald-500"></iconify-icon>
+                </div>
+            </div>
+
+            <div class="bgt-stepper" aria-label="Budget creation progress">
+                <div class="bgt-step-wrap">
+                    <div class="bgt-step-dot active" data-step="1" aria-current="step">1</div><span
+                        class="bgt-step-label active">Period</span>
+        <h3 class="text-lg font-semibold text-slate-900 mb-2">Failed to load budgets</h3>
+        <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">
+            We couldn't load your budgets. This could be due to a network issue or a problem with the server.
+        </p>
+        <button class="btn btn-secondary" onclick="window.location.reload()">
+            <iconify-icon icon="solar:restart-linear" width="16"></iconify-icon>
+            Try Again
+        </button>
+    </div>
+
+</div>
+
+<!-- Add Budget Modal -->
+<div id="addBudgetModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="addBgtHeaderTitle">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                <span id="addBgtHeaderTitle">Create Budget</span>
+            </h3>
+            <div class="flex items-center gap-3">
+                <span id="addBgtStepText" class="text-[10px] text-slate-400 font-medium tracking-wide">Step 1 of
+                    3</span>
+                <button
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                    onclick="closeModal('addBudgetModal')" aria-label="Close">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <div class="bgt-stepper" aria-label="Budget creation progress">
+            <div class="bgt-step-wrap">
+                <div class="bgt-step-dot active" data-step="1" aria-current="step">1</div><span
+                    class="bgt-step-label active">Period</span>
+            </div>
+            <div class="bgt-step-connector" data-connector="1"></div>
+            <div class="bgt-step-wrap">
+                <div class="bgt-step-dot" data-step="2">2</div><span class="bgt-step-label">Details</span>
+            </div>
+            <div class="bgt-step-connector" data-connector="2"></div>
+            <div class="bgt-step-wrap">
+                <div class="bgt-step-dot" data-step="3">3</div><span class="bgt-step-label">Review</span>
+            </div>
+        </div>
+
+        <div class="modal-body overflow-y-auto flex-1">
+            <!-- Step 1: Period Selection -->
+            <div id="addBgtStep1" class="bgt-step-content">
+                <div class="space-y-4 bgt-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Choose Budget Period</h4>
+                        <p class="text-xs text-slate-500">Select how often your budget resets</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="bgt-card selected" onclick="selectBudgetPeriod(this, 'monthly')">
+                            <div class="bgt-check">
+                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bgt-icon">
+                                    <iconify-icon icon="solar:calendar-bold" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900">Monthly</div>
+                                    <div class="text-xs text-slate-500">Resets on the 1st of each month</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bgt-card" onclick="selectBudgetPeriod(this, 'weekly')">
+                            <div class="bgt-check">
+                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bgt-icon">
+                                    <iconify-icon icon="solar:calendar-week-bold" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900">Weekly</div>
+                                    <div class="text-xs text-slate-500">Resets every Monday</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bgt-card" onclick="selectBudgetPeriod(this, 'quarterly')">
+                            <div class="bgt-check">
+                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bgt-icon">
+                                    <iconify-icon icon="solar:calendar-quarter-bold" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900">Quarterly</div>
+                                    <div class="text-xs text-slate-500">Resets every 3 months</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bgt-card" onclick="selectBudgetPeriod(this, 'yearly')">
+                            <div class="bgt-check">
+                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bgt-icon">
+                                    <iconify-icon icon="solar:calendar-year-bold" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900">Yearly</div>
+                                    <div class="text-xs text-slate-500">Resets annually</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Budget Details -->
+            <div id="addBgtStep2" class="bgt-step-content hidden">
+                <div class="space-y-4 bgt-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Budget Details</h4>
+                        <p class="text-xs text-slate-500">Configure your budget parameters</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Budget Name</label>
+                            <input type="text" id="addBgtName" class="bgt-input" placeholder="e.g., Monthly Groceries"
+                                value="Monthly Groceries">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1.5">Budget Amount</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+                                    <input type="number" id="addBgtAmount" class="bgt-input pl-6" placeholder="0.00"
+                                        value="600.00">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1.5">Category</label>
+                                <select id="addBgtCategory" class="bgt-input">
+                                    <option value="food">Food & Dining</option>
+                                    <option value="transportation">Transportation</option>
+                                    <option value="entertainment">Entertainment</option>
+                                    <option value="housing">Housing</option>
+                                    <option value="utilities">Utilities</option>
+                                    <option value="healthcare">Healthcare</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Start Date</label>
+                            <input type="date" id="addBgtStartDate" class="bgt-input" value="2026-01-01">
+                        </div>
+
+                        <div class="bgt-notice info">
+                            <iconify-icon icon="solar:info-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <div class="font-medium">Budget Period</div>
+                                <div class="text-xs opacity-90">Your budget will reset automatically based on the
+                                    selected period</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Review -->
+            <div id="addBgtStep3" class="bgt-step-content hidden">
+                <div class="space-y-4 bgt-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Review Budget</h4>
+                        <p class="text-xs text-slate-500">Confirm your budget details before creating</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Budget Name</div>
+                            <div class="bgt-review-value" id="reviewBgtName">Monthly Groceries</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Amount</div>
+                            <div class="bgt-review-value" id="reviewBgtAmount">$600.00</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Category</div>
+                            <div class="bgt-review-value" id="reviewBgtCategory">Food & Dining</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Period</div>
+                            <div class="bgt-review-value" id="reviewBgtPeriod">Monthly</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Start Date</div>
+                            <div class="bgt-review-value" id="reviewBgtStartDate">January 1, 2026</div>
+                        </div>
+                    </div>
+
+                    <div class="bgt-notice success">
+                        <iconify-icon icon="solar:check-circle-bold" width="16"></iconify-icon>
+                        <div>
+                            <div class="font-medium">Ready to Create</div>
+                            <div class="text-xs opacity-90">Your budget is ready to be created and will start tracking
+                                immediately</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button id="addBgtBtnBack" onclick="addBgtPreviousStep()" class="btn btn-secondary hidden">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button id="addBgtBtnNext" onclick="addBgtNextStep()" class="btn btn-primary"
+                style="background:#10b981; box-shadow:none;">
+                Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- View Budget Modal -->
+<div id="viewBudgetModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="viewBgtHeaderTitle">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+                    <iconify-icon icon="solar:chef-hat-linear" width="18"></iconify-icon>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-900">Food & Dining</h3>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="viewBgtStepText" class="text-[10px] text-slate-400 font-medium tracking-wide">Step 1 of
+                    2</span>
+                <button
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                    onclick="closeModal('viewBudgetModal')" aria-label="Close">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <div class="bgt-stepper" aria-label="Budget view progress">
+            <div class="bgt-step-wrap">
+                <div class="bgt-step-dot active" data-step="1" aria-current="step">1</div><span
+                    class="bgt-step-label active">Overview</span>
+            </div>
+            <div class="bgt-step-connector" data-connector="1"></div>
+            <div class="bgt-step-wrap">
+                <div class="bgt-step-dot" data-step="2">2</div><span class="bgt-step-label">Analysis</span>
+            </div>
+        </div>
+
+        <div class="modal-body overflow-y-auto flex-1">
+            <!-- Step 1: Overview -->
+            <div id="viewBgtStep1" class="bgt-step-content">
+                <div class="space-y-4 bgt-stagger">
+                    <div class="text-center py-6 bg-emerald-50/50 rounded-xl border border-emerald-100">
+                        <div class="text-xs text-slate-500 uppercase tracking-wide mb-1">Remaining Amount</div>
+                        <div class="text-3xl font-bold text-emerald-600">$150.00</div>
+                        <div class="text-xs text-emerald-600/80 mt-1 font-medium">of $600.00 limit</div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="text-slate-500">Progress</span>
+                                <span class="font-medium text-slate-900">75%</span>
+                            </div>
+                            <div class="progress-bar h-2">
+                                <div class="progress-bar-fill success" style="width: 75%"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bgt-review">
+                                <div class="bgt-review-title">Status</div>
+                                <div class="bgt-review-value">
+                                    <span class="badge badge-success">On Track</span>
+                                </div>
+                            </div>
+
+                            <div class="bgt-review">
+                                <div class="bgt-review-title">Period</div>
+                                <div class="bgt-review-value">Monthly</div>
+                            </div>
+
+                            <div class="bgt-review">
+                                <div class="bgt-review-title">Reset Date</div>
+                                <div class="bgt-review-value">Feb 1, 2026</div>
+                            </div>
+
+                            <div class="bgt-review">
+                                <div class="bgt-review-title">Days Left</div>
+                                <div class="bgt-review-value">12 days</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bgt-notice info">
+                        <iconify-icon icon="solar:info-circle-bold" width="16"></iconify-icon>
+                        <div>
+                            <div class="font-medium">Budget Performance</div>
+                            <div class="text-xs opacity-90">You're on track with 75% of your budget used and 12 days
+                                remaining.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Analysis -->
+            <div id="viewBgtStep2" class="bgt-step-content hidden">
+                <div class="space-y-4 bgt-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Budget Analysis & Insights</h4>
+                        <p class="text-xs text-slate-500">Comprehensive budget performance and trends</p>
+                    </div>
+
+                    <!-- Budget Performance Overview -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                            <div class="text-[10px] text-slate-500 mb-2">Budget Utilization</div>
+                            <div class="flex items-center justify-center h-16">
+                                <div class="relative">
+                                    <div class="w-14 h-14 rounded-full border-3 border-slate-200"></div>
+                                    <div
+                                        class="absolute inset-0 w-14 h-14 rounded-full border-3 border-emerald-500 border-t-transparent rotate-45">
+                                    </div>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span class="text-xs font-bold text-slate-700">75%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <div class="text-xs font-semibold text-slate-700">$150.00</div>
+                                <div class="text-[9px] text-slate-500">remaining</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                            <div class="text-[10px] text-slate-500 mb-2">Spending Trend</div>
+                            <div class="h-16 flex items-end justify-center gap-1">
+                                <div class="w-2 bg-slate-300 h-1/2 rounded-t-sm"></div>
+                                <div class="w-2 bg-slate-300 h-2/3 rounded-t-sm"></div>
+                                <div class="w-2 bg-emerald-500 h-3/4 rounded-t-sm"></div>
+                                <div class="w-2 bg-amber-500 h-full rounded-t-sm"></div>
+                                <div class="w-2 bg-slate-300 h-2/3 rounded-t-sm"></div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <div class="text-xs font-semibold text-slate-700">+12%</div>
+                                <div class="text-[9px] text-slate-500">vs avg</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Budget Details -->
+                    <div class="space-y-3">
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Budget Name</div>
+                            <div class="bgt-review-value">Food & Dining</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Budget Amount</div>
+                            <div class="bgt-review-value">$600.00</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Amount Spent</div>
+                            <div class="bgt-review-value">$450.00</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Remaining</div>
+                            <div class="bgt-review-value text-emerald-600">$150.00</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Period</div>
+                            <div class="bgt-review-value">Monthly</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Start Date</div>
+                            <div class="bgt-review-value">January 1, 2026</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Next Reset</div>
+                            <div class="bgt-review-value">February 1, 2026</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Status</div>
+                            <div class="bgt-review-value">
+                                <span class="badge badge-success">On Track</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Comparison -->
+                    <div>
+                        <h4 class="text-xs font-semibold text-slate-900 mb-3">Category Comparison</h4>
+                        <div class="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                        <span class="text-xs text-slate-600">Food & Dining</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-16 bg-slate-200 rounded-full h-1.5">
+                                            <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 75%"></div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-slate-700">$450</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-slate-400"></div>
+                                        <span class="text-xs text-slate-600">Transportation</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-16 bg-slate-200 rounded-full h-1.5">
+                                            <div class="bg-slate-400 h-1.5 rounded-full" style="width: 60%"></div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-slate-700">$320</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-slate-400"></div>
+                                        <span class="text-xs text-slate-600">Entertainment</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-16 bg-slate-200 rounded-full h-1.5">
+                                            <div class="bg-slate-400 h-1.5 rounded-full" style="width: 45%"></div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-slate-700">$180</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions -->
+                    <div>
+                        <h4 class="text-xs font-semibold text-slate-900 mb-3">Recent Transactions</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-xs p-2 bg-slate-50 rounded-lg">
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[8px] font-bold">
+                                        WF</div>
+                                    <span class="text-slate-600">Whole Foods</span>
+                                </div>
+                                <span class="font-medium text-slate-900">-$86.42</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs p-2 bg-slate-50 rounded-lg">
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        class="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-[8px] font-bold">
+                                        SB</div>
+                                    <span class="text-slate-600">Starbucks</span>
+                                </div>
+                                <span class="font-medium text-slate-900">-$12.50</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs p-2 bg-slate-50 rounded-lg">
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[8px] font-bold">
+                                        CP</div>
+                                    <span class="text-slate-600">Chipotle</span>
+                                </div>
+                                <span class="font-medium text-slate-900">-$28.75</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs p-2 bg-slate-50 rounded-lg">
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        class="w-6 h-6 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-[8px] font-bold">
+                                        BK</div>
+                                    <span class="text-slate-600">Burger King</span>
+                                </div>
+                                <span class="font-medium text-slate-900">-$15.20</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button id="viewBgtBtnBack" onclick="viewBgtPreviousStep()" class="btn btn-secondary hidden">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button id="viewBgtBtnNext" onclick="viewBgtNextStep()" class="btn btn-primary"
+                style="background:#10b981; box-shadow:none;">
+                View Analysis <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Budget Modal -->
+<div id="editBudgetModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editBgtHeaderTitle">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                <span id="editBgtHeaderTitle">Edit Budget</span>
+            </h3>
+            <div class="flex items-center gap-3">
+                <span id="editBgtStepText" class="text-[10px] text-slate-400 font-medium tracking-wide">Step 1 of
+                    3</span>
+                <button
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                    onclick="closeModal('editBudgetModal')" aria-label="Close">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <div class="bgt-stepper" aria-label="Budget edit progress">
+            <div class="bgt-step-wrap">
+                <div class="bgt-step-dot active" data-step="1" aria-current="step">1</div><span
+                    class="bgt-step-label active">Period</span>
+            </div>
+            <div class="bgt-step-connector" data-connector="1"></div>
+            <div class="bgt-step-wrap">
+                <div class="bgt-step-dot" data-step="2">2</div><span class="bgt-step-label">Details</span>
+            </div>
+            <div class="bgt-step-connector" data-connector="2"></div>
+            <div class="bgt-step-wrap">
+                <div class="bgt-step-dot" data-step="3">3</div><span class="bgt-step-label">Review</span>
+            </div>
+        </div>
+
+        <div class="modal-body overflow-y-auto flex-1">
+            <!-- Step 1: Period Selection -->
+            <div id="editBgtStep1" class="bgt-step-content">
+                <div class="space-y-4 bgt-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Budget Period</h4>
+                        <p class="text-xs text-slate-500">Current: Monthly</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="bgt-card selected" onclick="selectEditBudgetPeriod(this, 'monthly')">
+                            <div class="bgt-check">
+                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bgt-icon">
+                                    <iconify-icon icon="solar:calendar-bold" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900">Monthly</div>
+                                    <div class="text-xs text-slate-500">Resets on the 1st of each month</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bgt-card" onclick="selectEditBudgetPeriod(this, 'weekly')">
+                            <div class="bgt-check">
+                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bgt-icon">
+                                    <iconify-icon icon="solar:calendar-week-bold" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900">Weekly</div>
+                                    <div class="text-xs text-slate-500">Resets every Monday</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bgt-card" onclick="selectEditBudgetPeriod(this, 'quarterly')">
+                            <div class="bgt-check">
+                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bgt-icon">
+                                    <iconify-icon icon="solar:calendar-quarter-bold" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900">Quarterly</div>
+                                    <div class="text-xs text-slate-500">Resets every 3 months</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bgt-card" onclick="selectEditBudgetPeriod(this, 'yearly')">
+                            <div class="bgt-check">
+                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bgt-icon">
+                                    <iconify-icon icon="solar:calendar-year-bold" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900">Yearly</div>
+                                    <div class="text-xs text-slate-500">Resets annually</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Budget Details -->
+            <div id="editBgtStep2" class="bgt-step-content hidden">
+                <div class="space-y-4 bgt-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Budget Details</h4>
+                        <p class="text-xs text-slate-500">Update your budget parameters</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Budget Name</label>
+                            <input type="text" id="editBgtName" class="bgt-input" placeholder="e.g., Monthly Groceries"
+                                value="Food & Dining">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1.5">Budget Amount</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+                                    <input type="number" id="editBgtAmount" class="bgt-input pl-6" placeholder="0.00"
+                                        value="600.00">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1.5">Category</label>
+                                <select id="editBgtCategory" class="bgt-input">
+                                    <option value="food" selected>Food & Dining</option>
+                                    <option value="transportation">Transportation</option>
+                                    <option value="entertainment">Entertainment</option>
+                                    <option value="housing">Housing</option>
+                                    <option value="utilities">Utilities</option>
+                                    <option value="healthcare">Healthcare</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Start Date</label>
+                            <input type="date" id="editBgtStartDate" class="bgt-input" value="2026-01-01">
+                        </div>
+
+                        <div class="bgt-notice info">
+                            <iconify-icon icon="solar:info-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <div class="font-medium">Budget Period</div>
+                                <div class="text-xs opacity-90">Your budget will reset automatically based on the
+                                    selected period</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Review -->
+            <div id="editBgtStep3" class="bgt-step-content hidden">
+                <div class="space-y-4 bgt-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Review Changes</h4>
+                        <p class="text-xs text-slate-500">Confirm your budget updates before saving</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Budget Name</div>
+                            <div class="bgt-review-value" id="editReviewBgtName">Food & Dining</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Amount</div>
+                            <div class="bgt-review-value" id="editReviewBgtAmount">$600.00</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Category</div>
+                            <div class="bgt-review-value" id="editReviewBgtCategory">Food & Dining</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Period</div>
+                            <div class="bgt-review-value" id="editReviewBgtPeriod">Monthly</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Start Date</div>
+                            <div class="bgt-review-value" id="editReviewBgtStartDate">January 1, 2026</div>
+                        </div>
+                    </div>
+
+                    <div class="bgt-notice warning">
+                        <iconify-icon icon="solar:danger-triangle-bold" width="16"></iconify-icon>
+                        <div>
+                            <div class="font-medium">Budget Impact</div>
+                            <div class="text-xs opacity-90">Changes will affect all future tracking and calculations
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button id="editBgtBtnBack" onclick="editBgtPreviousStep()" class="btn btn-secondary hidden">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button id="editBgtBtnNext" onclick="editBgtNextStep()" class="btn btn-primary"
+                style="background:#10b981; box-shadow:none;">
+                Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteBudgetModal" class="modal-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="deleteBgtHeaderTitle">
+    <div class="modal w-full mx-4 max-w-md flex flex-col">
+        <!-- Header -->
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                <span id="deleteBgtHeaderTitle">Delete Budget</span>
+            </h3>
+            <button
+                class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                onclick="closeModal('deleteBudgetModal')" aria-label="Close">
+                <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+            </button>
+        </div>
+
+        <!-- Main Body -->
+        <div class="modal-body overflow-y-auto flex-1 py-8">
+            <div class="text-center bgt-enter">
+                <!-- Warning Icon -->
+                <div
+                    class="w-16 h-16 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-6">
+                    <iconify-icon icon="solar:trash-bin-trash-bold" width="28"></iconify-icon>
+                </div>
+
+                <!-- Warning Message -->
+                <h2 class="text-lg font-bold text-slate-900 mb-3">Delete Budget?</h2>
+                <p class="text-sm text-slate-500 mb-6 max-w-xs mx-auto leading-relaxed">
+                    Are you sure you want to delete this budget? This action cannot be undone and all tracking data for
+                    this budget will be permanently lost.
+                </p>
+
+                <!-- Budget Details -->
+                <div class="mx-auto max-w-sm space-y-3">
+                    <div class="bgt-review">
+                        <div class="bgt-review-title">Budget to Delete</div>
+                        <div class="bgt-review-value">Food & Dining</div>
+                    </div>
+
+                    <div class="bgt-review">
+                        <div class="bgt-review-title">Current Amount</div>
+                        <div class="bgt-review-value">$600.00</div>
+                    </div>
+
+                    <div class="bgt-review">
+                        <div class="bgt-review-title">Period</div>
+                        <div class="bgt-review-value">Monthly</div>
+                    </div>
+                </div>
+
+                <!-- Final Warning -->
+                <div class="bgt-notice warning mx-auto max-w-sm mt-6">
+                    <iconify-icon icon="solar:danger-triangle-linear" width="16"
+                        class="flex-shrink-0 mt-px"></iconify-icon>
+                    <div>
+                        <h4 class="font-bold text-[10px] uppercase tracking-widest mb-0.5">Irreversible Action</h4>
+                        <p class="text-[11px] leading-relaxed" style="opacity:0.85">This action cannot be undone. All
+                            budget history and tracking will be permanently deleted.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer flex justify-between border-t border-slate-100 px-6 py-4">
+            <button onclick="closeModal('deleteBudgetModal')"
+                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                <iconify-icon icon="solar:close-circle-linear" width="14"></iconify-icon>
+                Cancel
+            </button>
+            <button onclick="deleteBudget()"
+                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-600 border border-rose-600 rounded-lg text-xs font-semibold text-white hover:bg-rose-700 transition-colors ml-3">
+                <iconify-icon icon="solar:trash-bin-trash-linear" width="14"></iconify-icon>
+                Delete Budget
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Budget Modal -->
+<div id="addBudgetModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="addBgtHeaderTitle">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                <span id="addBgtHeaderTitle">Add Budget</span>
+            </h3>
+            <button
+                class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                onclick="closeModal('addBudgetModal')" aria-label="Close">
+                <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+            </button>
+        </div>
+
+        <div class="modal-body overflow-y-auto flex-1">
+            <!-- Step 1: Period Selection -->
+            <div id="addBgtStep1" class="bgt-step-content">
+                <div class="space-y-4 bgt-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Budget Period</h4>
+                        <p class="text-xs text-slate-500">Select a budget period</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="bgt-card" onclick="selectBudgetPeriod(this, 'monthly')">
+                            <div class="bgt-check">
+                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bgt-icon">
+                                    <iconify-icon icon="solar:calendar-bold" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900">Monthly</div>
+                                    <div class="text-xs text-slate-500">Resets on the 1st of each month</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bgt-card" onclick="selectBudgetPeriod(this, 'weekly')">
+                            <div class="bgt-check">
+                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bgt-icon">
+                                    <iconify-icon icon="solar:calendar-week-bold" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900">Weekly</div>
+                                    <div class="text-xs text-slate-500">Resets every Monday</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bgt-card" onclick="selectBudgetPeriod(this, 'quarterly')">
+                            <div class="bgt-check">
+                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bgt-icon">
+                                    <iconify-icon icon="solar:calendar-quarter-bold" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900">Quarterly</div>
+                                    <div class="text-xs text-slate-500">Resets every 3 months</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bgt-card" onclick="selectBudgetPeriod(this, 'yearly')">
+                            <div class="bgt-check">
+                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="bgt-icon">
+                                    <iconify-icon icon="solar:calendar-year-bold" width="20"></iconify-icon>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900">Yearly</div>
+                                    <div class="text-xs text-slate-500">Resets annually</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Budget Details -->
+            <div id="addBgtStep2" class="bgt-step-content hidden">
+                <div class="space-y-4 bgt-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Budget Details</h4>
+                        <p class="text-xs text-slate-500">Enter your budget details</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Budget Name</label>
+                            <input type="text" id="addBgtName" class="bgt-input" placeholder="e.g., Monthly Groceries"
+                                value="Monthly Groceries">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1.5">Budget Amount</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+                                    <input type="number" id="addBgtAmount" class="bgt-input pl-6" placeholder="0.00"
+                                        value="600.00">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1.5">Category</label>
+                                <select id="addBgtCategory" class="bgt-input">
+                                    <option value="food" selected>Food & Dining</option>
+                                    <option value="transportation">Transportation</option>
+                                    <option value="entertainment">Entertainment</option>
+                                    <option value="housing">Housing</option>
+                                    <option value="utilities">Utilities</option>
+                                    <option value="healthcare">Healthcare</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Start Date</label>
+                            <input type="date" id="addBgtStartDate" class="bgt-input" value="2026-01-01">
+                        </div>
+
+                        <div class="bgt-notice info">
+                            <iconify-icon icon="solar:info-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <div class="font-medium">Budget Period</div>
+                                <div class="text-xs opacity-90">Your budget will reset automatically based on the
+                                    selected period</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Review -->
+            <div id="addBgtStep3" class="bgt-step-content hidden">
+                <div class="space-y-4 bgt-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Review Budget</h4>
+                        <p class="text-xs text-slate-500">Confirm your budget details before creating</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Budget Name</div>
+                            <div class="bgt-review-value" id="reviewBgtName">Monthly Groceries</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Amount</div>
+                            <div class="bgt-review-value" id="reviewBgtAmount">$600.00</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Category</div>
+                            <div class="bgt-review-value" id="reviewBgtCategory">Food & Dining</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Period</div>
+                            <div class="bgt-review-value" id="reviewBgtPeriod">Monthly</div>
+                        </div>
+
+                        <div class="bgt-review">
+                            <div class="bgt-review-title">Start Date</div>
+                            <div class="bgt-review-value" id="reviewBgtStartDate">January 1, 2026</div>
+                        </div>
+                    </div>
+
+                    <div class="bgt-notice warning">
+                        <iconify-icon icon="solar:danger-triangle-bold" width="16"></iconify-icon>
+                        <div>
+                            <div class="font-medium">Budget Impact</div>
+                            <div class="text-xs opacity-90">Changes will affect all future tracking and calculations
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button id="addBgtBtnBack" onclick="addBgtPreviousStep()" class="btn btn-secondary hidden">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button id="addBgtBtnNext" onclick="addBgtNextStep()" class="btn btn-primary"
+                style="background:#10b981; box-shadow:none;">
+                Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // View Budget Modal State Management
+    let viewBgtCurrentStep = 1;
+
+    function viewBgtNextStep() {
+        if (viewBgtCurrentStep === 1) {
+            // Move to step 2
+            viewBgtCurrentStep = 2;
+            viewBgtUpdateStepDisplay();
+            viewBgtShowStep(2);
+        }
+    }
+
+    function viewBgtPreviousStep() {
+        if (viewBgtCurrentStep > 1) {
+            viewBgtCurrentStep--;
+            viewBgtUpdateStepDisplay();
+            viewBgtShowStep(viewBgtCurrentStep);
+        }
+    }
+
+    function viewBgtUpdateStepDisplay() {
+        // Update step text
+        document.getElementById('viewBgtStepText').textContent = `Step ${viewBgtCurrentStep} of 2`;
+
+        // Update stepper dots and labels for View modal
+        document.querySelectorAll('#viewBudgetModal .bgt-step-dot').forEach((dot, index) => {
+            const stepNum = index + 1;
+            dot.classList.remove('active', 'completed');
+
+            if (stepNum === viewBgtCurrentStep) {
+                dot.classList.add('active');
+            } else if (stepNum < viewBgtCurrentStep) {
+                dot.classList.add('completed');
+            }
+        });
+
+        document.querySelectorAll('#viewBudgetModal .bgt-step-label').forEach((label, index) => {
+            const stepNum = index + 1;
+            label.classList.remove('active', 'completed');
+
+            if (stepNum === viewBgtCurrentStep) {
+                label.classList.add('active');
+            } else if (stepNum < viewBgtCurrentStep) {
+                label.classList.add('completed');
+            }
+        });
+
+        // Update connectors
+        document.querySelectorAll('#viewBudgetModal .bgt-step-connector').forEach((connector, index) => {
+            connector.classList.remove('completed');
+            if (index < viewBgtCurrentStep - 1) {
+                connector.classList.add('completed');
+            }
+        });
+
+        // Update buttons
+        const backBtn = document.getElementById('viewBgtBtnBack');
+        const nextBtn = document.getElementById('viewBgtBtnNext');
+
+        if (viewBgtCurrentStep === 1) {
+            backBtn.classList.add('hidden');
+            nextBtn.innerHTML = 'View Analysis <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (viewBgtCurrentStep === 2) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = 'Close <iconify-icon icon="solar:check-bold" class="ml-1"></iconify-icon>';
+        }
+    }
+
+    function viewBgtShowStep(stepNum) {
+        // Hide all steps
+        document.querySelectorAll('#viewBudgetModal .bgt-step-content').forEach(step => {
+            step.classList.add('hidden');
+        });
+
+        // Show current step with animation
+        const currentStepElement = document.getElementById(`viewBgtStep${stepNum}`);
+        currentStepElement.classList.remove('hidden');
+        currentStepElement.classList.add('bgt-enter');
+
+        // Trigger stagger animation
+        setTimeout(() => {
+            currentStepElement.querySelectorAll('.bgt-stagger > *').forEach((el, index) => {
+                el.style.animationDelay = `${index * 50}ms`;
+            });
+        }, 10);
+    }
+
+    // Add Budget Modal State Management
+    let addBgtCurrentStep = 1;
+    let addBgtSelectedPeriod = 'monthly';
+
+    function selectBudgetPeriod(cardElement, period) {
+        // Remove selected class from all cards
+        document.querySelectorAll('#addBgtStep1 .bgt-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        // Add selected class to clicked card
+        cardElement.classList.add('selected');
+
+        // Store selected period
+        addBgtSelectedPeriod = period;
+    }
+
+    function addBgtNextStep() {
+        if (addBgtCurrentStep === 1) {
+            // Validate period selection
+            if (!addBgtSelectedPeriod) {
+                alert('Please select a budget period');
+                return;
+            }
+
+            // Move to step 2
+            addBgtCurrentStep = 2;
+            addBgtUpdateStepDisplay();
+            addBgtShowStep(2);
+        } else if (addBgtCurrentStep === 2) {
+            // Validate form inputs
+            const name = document.getElementById('addBgtName').value.trim();
+            const amount = document.getElementById('addBgtAmount').value;
+            const category = document.getElementById('addBgtCategory').value;
+            const startDate = document.getElementById('addBgtStartDate').value;
+
+            if (!name || !amount || !startDate) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Update review step with form data
+            addBgtUpdateReviewData();
+
+            // Move to step 3
+            addBgtCurrentStep = 3;
+            addBgtUpdateStepDisplay();
+            addBgtShowStep(3);
+        } else if (addBgtCurrentStep === 3) {
+            // Create budget
+            addBgtCreateBudget();
+        }
+    }
+
+    function addBgtPreviousStep() {
+        if (addBgtCurrentStep > 1) {
+            addBgtCurrentStep--;
+            addBgtUpdateStepDisplay();
+            addBgtShowStep(addBgtCurrentStep);
+        }
+    }
+
+    function addBgtUpdateStepDisplay() {
+        // Update step text
+        document.getElementById('addBgtStepText').textContent = `Step ${addBgtCurrentStep} of 3`;
+
+        // Update stepper dots and labels
+        document.querySelectorAll('.bgt-step-dot').forEach((dot, index) => {
+            const stepNum = index + 1;
+            dot.classList.remove('active', 'completed');
+
+            if (stepNum === addBgtCurrentStep) {
+                dot.classList.add('active');
+            } else if (stepNum < addBgtCurrentStep) {
+                dot.classList.add('completed');
+            }
+        });
+
+        document.querySelectorAll('.bgt-step-label').forEach((label, index) => {
+            const stepNum = index + 1;
+            label.classList.remove('active', 'completed');
+
+            if (stepNum === addBgtCurrentStep) {
+                label.classList.add('active');
+            } else if (stepNum < addBgtCurrentStep) {
+                label.classList.add('completed');
+            }
+        });
+
+        // Update connectors
+        document.querySelectorAll('.bgt-step-connector').forEach((connector, index) => {
+            connector.classList.remove('completed');
+            if (index < addBgtCurrentStep - 1) {
+                connector.classList.add('completed');
+            }
+        });
+
+        // Update buttons
+        const backBtn = document.getElementById('addBgtBtnBack');
+        const nextBtn = document.getElementById('addBgtBtnNext');
+
+        if (addBgtCurrentStep === 1) {
+            backBtn.classList.add('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (addBgtCurrentStep === 2) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (addBgtCurrentStep === 3) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = 'Create Budget <iconify-icon icon="solar:check-bold" class="ml-1"></iconify-icon>';
+        }
+    }
+
+    function addBgtShowStep(stepNum) {
+        // Hide all steps
+        document.querySelectorAll('.bgt-step-content').forEach(step => {
+            step.classList.add('hidden');
+        });
+
+        // Show current step with animation
+        const currentStepElement = document.getElementById(`addBgtStep${stepNum}`);
+        currentStepElement.classList.remove('hidden');
+        currentStepElement.classList.add('bgt-enter');
+
+        // Trigger stagger animation
+        setTimeout(() => {
+            currentStepElement.querySelectorAll('.bgt-stagger > *').forEach((el, index) => {
+                el.style.animationDelay = `${index * 50}ms`;
+            });
+        }, 10);
+    }
+
+    function addBgtUpdateReviewData() {
+        const name = document.getElementById('addBgtName').value;
+        const amount = document.getElementById('addBgtAmount').value;
+        const category = document.getElementById('addBgtCategory');
+        const startDate = document.getElementById('addBgtStartDate').value;
+
+        // Update review display
+        document.getElementById('reviewBgtName').textContent = name;
+        document.getElementById('reviewBgtAmount').textContent = `$${parseFloat(amount).toFixed(2)}`;
+        document.getElementById('reviewBgtCategory').textContent = category.options[category.selectedIndex].text;
+        document.getElementById('reviewBgtPeriod').textContent = addBgtSelectedPeriod.charAt(0).toUpperCase() + addBgtSelectedPeriod.slice(1);
+
+        // Format date
+        const date = new Date(startDate);
+        const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('reviewBgtStartDate').textContent = formattedDate;
+    }
+
+    function addBgtCreateBudget() {
+        // Get form data
+        const budgetData = {
+            name: document.getElementById('addBgtName').value,
+            amount: parseFloat(document.getElementById('addBgtAmount').value),
+            category: document.getElementById('addBgtCategory').value,
+            period: addBgtSelectedPeriod,
+            startDate: document.getElementById('addBgtStartDate').value
+        };
+
+        // Simulate API call
+        console.log('Creating budget:', budgetData);
+
+        // Show success message and close modal
+        setTimeout(() => {
+            alert('Budget created successfully!');
+            closeModal('addBudgetModal');
+
+            // Reset form
+            addBgtCurrentStep = 1;
+            addBgtSelectedPeriod = 'monthly';
+            addBgtUpdateStepDisplay();
+            addBgtShowStep(1);
+
+            // Reset form inputs
+            document.getElementById('addBgtName').value = 'Monthly Groceries';
+            document.getElementById('addBgtAmount').value = '600.00';
+            document.getElementById('addBgtCategory').value = 'food';
+            document.getElementById('addBgtStartDate').value = '2026-01-01';
+
+            // Reset period selection
+            document.querySelectorAll('#addBgtStep1 .bgt-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector('#addBgtStep1 .bgt-card').classList.add('selected');
+        }, 500);
+    }
+
+    function deleteBudget() {
+        // Simulate API call
+        console.log('Deleting budget: Food & Dining');
+
+        // Show success message and close modal
+        setTimeout(() => {
+            alert('Budget deleted successfully!');
+            closeModal('deleteBudgetModal');
+        }, 500);
+    }
+
+    // Edit Budget Modal State Management
+    let editBgtCurrentStep = 1;
+    let editBgtSelectedPeriod = 'monthly';
+
+    function selectEditBudgetPeriod(cardElement, period) {
+        // Remove selected class from all cards
+        document.querySelectorAll('#editBgtStep1 .bgt-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        // Add selected class to clicked card
+        cardElement.classList.add('selected');
+
+        // Store selected period
+        editBgtSelectedPeriod = period;
+    }
+
+    function editBgtNextStep() {
+        if (editBgtCurrentStep === 1) {
+            // Move to step 2
+            editBgtCurrentStep = 2;
+            editBgtUpdateStepDisplay();
+            editBgtShowStep(2);
+        } else if (editBgtCurrentStep === 2) {
+            // Validate form inputs
+            const name = document.getElementById('editBgtName').value.trim();
+            const amount = document.getElementById('editBgtAmount').value;
+            const category = document.getElementById('editBgtCategory').value;
+            const startDate = document.getElementById('editBgtStartDate').value;
+
+            if (!name || !amount || !startDate) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Update review step with form data
+            editBgtUpdateReviewData();
+
+            // Move to step 3
+            editBgtCurrentStep = 3;
+            editBgtUpdateStepDisplay();
+            editBgtShowStep(3);
+        } else if (editBgtCurrentStep === 3) {
+            // Update budget
+            editBgtUpdateBudget();
+        }
+    }
+
+    function editBgtPreviousStep() {
+        if (editBgtCurrentStep > 1) {
+            editBgtCurrentStep--;
+            editBgtUpdateStepDisplay();
+            editBgtShowStep(editBgtCurrentStep);
+        }
+    }
+
+    function editBgtUpdateStepDisplay() {
+        // Update step text
+        document.getElementById('editBgtStepText').textContent = `Step ${editBgtCurrentStep} of 3`;
+
+        // Update stepper dots and labels for Edit modal
+        document.querySelectorAll('#editBudgetModal .bgt-step-dot').forEach((dot, index) => {
+            const stepNum = index + 1;
+            dot.classList.remove('active', 'completed');
+
+            if (stepNum === editBgtCurrentStep) {
+                dot.classList.add('active');
+            } else if (stepNum < editBgtCurrentStep) {
+                dot.classList.add('completed');
+            }
+        });
+
+        document.querySelectorAll('#editBudgetModal .bgt-step-label').forEach((label, index) => {
+            const stepNum = index + 1;
+            label.classList.remove('active', 'completed');
+
+            if (stepNum === editBgtCurrentStep) {
+                label.classList.add('active');
+            } else if (stepNum < editBgtCurrentStep) {
+                label.classList.add('completed');
+            }
+        });
+
+        // Update connectors
+        document.querySelectorAll('#editBudgetModal .bgt-step-connector').forEach((connector, index) => {
+            connector.classList.remove('completed');
+            if (index < editBgtCurrentStep - 1) {
+                connector.classList.add('completed');
+            }
+        });
+
+        // Update buttons
+        const backBtn = document.getElementById('editBgtBtnBack');
+        const nextBtn = document.getElementById('editBgtBtnNext');
+
+        if (editBgtCurrentStep === 1) {
+            backBtn.classList.add('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (editBgtCurrentStep === 2) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (editBgtCurrentStep === 3) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = 'Save Changes <iconify-icon icon="solar:check-bold" class="ml-1"></iconify-icon>';
+        }
+    }
+
+    function editBgtShowStep(stepNum) {
+        // Hide all steps
+        document.querySelectorAll('#editBudgetModal .bgt-step-content').forEach(step => {
+            step.classList.add('hidden');
+        });
+
+        // Show current step with animation
+        const currentStepElement = document.getElementById(`editBgtStep${stepNum}`);
+        currentStepElement.classList.remove('hidden');
+        currentStepElement.classList.add('bgt-enter');
+
+        // Trigger stagger animation
+        setTimeout(() => {
+            currentStepElement.querySelectorAll('.bgt-stagger > *').forEach((el, index) => {
+                el.style.animationDelay = `${index * 50}ms`;
+            });
+        }, 10);
+    }
+
+    function editBgtUpdateReviewData() {
+        const name = document.getElementById('editBgtName').value;
+        const amount = document.getElementById('editBgtAmount').value;
+        const category = document.getElementById('editBgtCategory');
+        const startDate = document.getElementById('editBgtStartDate').value;
+
+        // Update review display
+        document.getElementById('editReviewBgtName').textContent = name;
+        document.getElementById('editReviewBgtAmount').textContent = `$${parseFloat(amount).toFixed(2)}`;
+        document.getElementById('editReviewBgtCategory').textContent = category.options[category.selectedIndex].text;
+        document.getElementById('editReviewBgtPeriod').textContent = editBgtSelectedPeriod.charAt(0).toUpperCase() + editBgtSelectedPeriod.slice(1);
+
+        // Format date
+        const date = new Date(startDate);
+        const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('editReviewBgtStartDate').textContent = formattedDate;
+    }
+
+    function editBgtUpdateBudget() {
+        // Get form data
+        const budgetData = {
+            name: document.getElementById('editBgtName').value,
+            amount: parseFloat(document.getElementById('editBgtAmount').value),
+            category: document.getElementById('editBgtCategory').value,
+            period: editBgtSelectedPeriod,
+            startDate: document.getElementById('editBgtStartDate').value
+        };
+
+        // Simulate API call
+        console.log('Updating budget:', budgetData);
+
+        // Show success message and close modal
+        setTimeout(() => {
+            alert('Budget updated successfully!');
+            closeModal('editBudgetModal');
+
+            // Reset form
+            editBgtCurrentStep = 1;
+            editBgtSelectedPeriod = 'monthly';
+            editBgtUpdateStepDisplay();
+            editBgtShowStep(1);
+
+            // Reset form inputs to original values
+            document.getElementById('editBgtName').value = 'Food & Dining';
+            document.getElementById('editBgtAmount').value = '600.00';
+            document.getElementById('editBgtCategory').value = 'food';
+            document.getElementById('editBgtStartDate').value = '2026-01-01';
+
+            // Reset period selection
+            document.querySelectorAll('#editBgtStep1 .bgt-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector('#editBgtStep1 .bgt-card').classList.add('selected');
+        }, 500);
+    }
+
+    function resetFilters() {
+        document.getElementById('search-input').value = '';
+        document.getElementById('category-filter').value = 'all';
+        document.getElementById('status-filter').value = 'all';
+        document.getElementById('period-filter').selectedIndex = 0;
+    }
+
+    function switchChartTab(tab) {
+        const overviewTab = document.getElementById('tab-overview');
+        const allocationTab = document.getElementById('tab-allocation');
+        const overviewChart = document.getElementById('chart-overview');
+        const allocationChart = document.getElementById('chart-allocation');
+
+        if (tab === 'overview') {
+            // Activate Overview Tab
+            overviewTab.classList.remove('text-slate-500', 'hover:text-slate-700');
+            overviewTab.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+
+            // Deactivate Allocation Tab
+            allocationTab.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+            allocationTab.classList.add('text-slate-500', 'hover:text-slate-700');
+
+            // Show Overview Chart
+            overviewChart.classList.remove('hidden');
+            overviewChart.classList.add('block');
+
+            // Hide Allocation Chart
+            allocationChart.classList.remove('flex');
+            allocationChart.classList.add('hidden');
+        } else {
+            // Activate Allocation Tab
+            allocationTab.classList.remove('text-slate-500', 'hover:text-slate-700');
+            allocationTab.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+
+            // Deactivate Overview Tab
+            overviewTab.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+            overviewTab.classList.add('text-slate-500', 'hover:text-slate-700');
+
+            // Hide Overview Chart
+            overviewChart.classList.remove('block');
+            overviewChart.classList.add('hidden');
+
+            // Show Allocation Chart
+            allocationChart.classList.remove('hidden');
+            allocationChart.classList.add('flex');
+        }
+    }
+    function exportBudgets(format) {
+        const btn = event.currentTarget;
+        const originalContent = btn.innerHTML;
+
+        // Show loading state
+        btn.innerHTML = `Exporting...`;
+        btn.disabled = true;
+
+        // Simulate API call
+        setTimeout(() => {
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+
+            // Show success toast (mock)
+            alert(`Budgets exported as ${format.toUpperCase()} successfully!`);
+        }, 1500);
+    }
+</script>

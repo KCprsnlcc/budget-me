@@ -1,0 +1,334 @@
+<!-- Desktop Sidebar -->
+<aside
+    class="w-64 bg-white text-slate-600 flex-col border-r border-slate-200 hidden md:flex flex-shrink-0 transition-all duration-300 z-30">
+
+
+    <!-- Navigation -->
+    <nav class="flex flex-col flex-1 overflow-y-auto py-4 px-2 gap-0.5 no-scrollbar">
+
+        <div class="px-2 text-[10px] font-medium text-slate-500 uppercase tracking-widest mb-2 ">Platform</div>
+
+        <!-- Landing -->
+
+
+        <!-- Dashboard -->
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="dashboard">
+            <iconify-icon icon="solar:widget-2-linear" class="nav-icon group-hover:text-emerald-600 transition-colors"
+                width="18" stroke-width="1.5"></iconify-icon>
+            Dashboard
+        </a>
+
+        <!-- Transactions -->
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="transactions">
+            <iconify-icon icon="solar:card-transfer-linear"
+                class="nav-icon group-hover:text-emerald-600 transition-colors" width="18"
+                stroke-width="1.5"></iconify-icon>
+            Transactions
+        </a>
+
+        <!-- Budgets -->
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="budgets">
+            <iconify-icon icon="solar:pie-chart-2-linear"
+                class="nav-icon group-hover:text-emerald-600 transition-colors" width="18"
+                stroke-width="1.5"></iconify-icon>
+            Budgets
+        </a>
+
+        <!-- Goals -->
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="goals">
+            <iconify-icon icon="solar:target-linear" class="nav-icon group-hover:text-emerald-600 transition-colors"
+                width="18" stroke-width="1.5"></iconify-icon>
+            Goals
+        </a>
+
+        <!-- Predictions -->
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="predictions">
+            <iconify-icon icon="solar:magic-stick-3-linear"
+                class="nav-icon group-hover:text-emerald-600 transition-colors" width="18"
+                stroke-width="1.5"></iconify-icon>
+            AI Predictions
+        </a>
+
+        <!-- Reports -->
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="reports">
+            <iconify-icon icon="solar:chart-square-linear"
+                class="nav-icon group-hover:text-emerald-600 transition-colors" width="18"
+                stroke-width="1.5"></iconify-icon>
+            Reports
+        </a>
+
+        <div class="px-2 text-[10px] font-medium text-slate-500 uppercase tracking-widest mb-2 mt-5">Intelligence
+        </div>
+
+        <!-- BudgetSense AI -->
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="chatbot">
+            <iconify-icon icon="solar:chat-round-line-linear"
+                class="nav-icon group-hover:text-emerald-600 transition-colors" width="18"
+                stroke-width="1.5"></iconify-icon>
+            BudgetSense AI
+            <span
+                class="ml-auto bg-gradient-to-r from-emerald-500/10 to-teal-500/10 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded border border-emerald-500/20">Beta</span>
+        </a>
+
+        <div class="px-2 text-[10px] font-medium text-slate-500 uppercase tracking-widest mb-2 mt-5">Settings</div>
+
+        <!-- Family -->
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="family">
+            <iconify-icon icon="solar:users-group-rounded-linear"
+                class="nav-icon group-hover:text-emerald-600 transition-colors" width="18"
+                stroke-width="1.5"></iconify-icon>
+            Family
+            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-auto shadow-[0_0_8px_rgba(16,185,129,0.5)]">
+            </div>
+        </a>
+
+        <!-- Settings -->
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="settings">
+            <iconify-icon icon="solar:settings-linear" class="nav-icon group-hover:text-emerald-600 transition-colors"
+                width="18" stroke-width="1.5"></iconify-icon>
+            Settings
+        </a>
+
+        <!-- AI Usage Limit (Moved from Predictions) -->
+        <div class="mt-auto px-2 mb-4">
+            <div class="bg-slate-50 rounded-xl border border-slate-200/60 p-3">
+                <div class="flex items-center justify-between mb-2.5">
+                    <div class="flex items-center gap-2">
+                        <div class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+                            <iconify-icon icon="solar:chart-square-linear" width="14"></iconify-icon>
+                        </div>
+                        <div>
+                            <div class="text-[9px] font-bold text-slate-900 uppercase tracking-wider">AI Usage</div>
+                            <div class="text-[9px] text-slate-500">8 / 25 daily limit</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-1 mb-2 overflow-hidden">
+                    <div class="bg-emerald-500 h-full rounded-full" style="width: 32%"></div>
+                </div>
+                <div class="flex justify-between items-center text-[9px]">
+                    <span class="text-slate-400">Daily refresh in</span>
+                    <span class="text-emerald-600 font-mono font-medium">14:52:10</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- User Profile -->
+    <div class="p-4 border-t border-slate-200/50">
+        <div class="flex items-center gap-3 group cursor-pointer">
+            <div
+                class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200 text-slate-600 text-xs font-medium">
+                JD
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <p class="text-sm font-medium text-slate-700 truncate group-hover:text-slate-900 transition-colors">
+                    John Doe</p>
+                <p class="text-[11px] text-slate-500 truncate">john@budgetme.site</p>
+            </div>
+            <button class="text-slate-400 hover:text-slate-600 transition-colors">
+                <iconify-icon icon="solar:logout-2-linear" width="18"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</aside>
+
+<!-- Top Navigation / Filters -->
+<header
+    class="h-14 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-4 md:px-6 flex-shrink-0 z-20 sticky top-0">
+    <div class="flex items-center gap-2 md:gap-4">
+        <button class="md:hidden text-slate-500 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50"
+            id="mobile-menu-btn">
+            <iconify-icon icon="solar:hamburger-menu-linear" width="20"></iconify-icon>
+        </button>
+        <nav class="flex items-center text-xs text-slate-500 overflow-hidden" id="breadcrumb">
+            <img src="BudgetMe-logo/BudgetMe-logo.svg" alt="BudgetMe" class="h-4 w-auto flex-shrink-0">
+            <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-1 md:mx-2 text-slate-400 hidden sm:block"
+                width="12"></iconify-icon>
+            <span id="breadcrumb-category" class="hover:text-slate-800 cursor-pointer hidden sm:block">Platform</span>
+            <iconify-icon icon="solar:alt-arrow-right-linear" class="mx-1 md:mx-2 text-slate-400"
+                width="12"></iconify-icon>
+            <span class="font-medium text-slate-800 truncate" id="current-page">Dashboard</span>
+        </nav>
+    </div>
+
+    <div class="flex items-center gap-2 md:gap-3">
+        <!-- Filter Data Control -->
+        <div class="hidden lg:flex items-center bg-slate-50 border border-slate-200 rounded-lg p-0.5" id="date-filters">
+            <button
+                class="filter-btn px-2.5 py-1 text-[10px] font-medium text-slate-500 hover:text-slate-900 rounded-md hover:bg-white transition-all"
+                data-filter="all">All</button>
+            <button
+                class="filter-btn px-2.5 py-1 text-[10px] font-medium text-slate-900 bg-white shadow-sm border border-slate-200 rounded-md transition-all active"
+                data-filter="current">Month</button>
+            <div class="h-3 w-px bg-slate-200 mx-1"></div>
+            <button
+                class="filter-btn flex items-center gap-1.5 px-2 py-1 text-[10px] font-medium text-slate-500 hover:text-slate-900 rounded-md hover:bg-white transition-all"
+                data-filter="custom">
+                <iconify-icon icon="solar:calendar-linear" width="12"></iconify-icon>
+            </button>
+        </div>
+
+        <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+
+        <button
+            class="flex items-center gap-2 h-9 px-3 text-xs font-medium text-emerald-700 bg-emerald-50/50 border border-emerald-200/60 hover:bg-emerald-50 hover:border-emerald-200 rounded-lg transition-all shadow-sm"
+            id="export-btn">
+            <iconify-icon icon="solar:export-linear" width="16"></iconify-icon>
+            <span class="hidden md:inline text-[11px]">Export</span>
+        </button>
+    </div>
+</header>
+
+<!-- Mobile Navigation Overlay -->
+<div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-40 hidden" id="mobile-overlay"></div>
+
+<!-- Mobile Sidebar -->
+<aside
+    class="fixed left-0 top-0 bottom-0 w-64 bg-white text-slate-600 flex-col border-r border-slate-200 z-50 transform -translate-x-full transition-transform duration-300 md:hidden"
+    id="mobile-sidebar">
+    <!-- Same content as desktop sidebar -->
+    <!-- Mobile Sidebar Header -->
+    <div class="h-14 flex items-center px-4 border-b border-slate-200/50 gap-3">
+        <img src="BudgetMe-logo/icon-logo-no-bg.svg" alt="BudgetMe" class="w-6 h-6">
+        <span class="font-medium text-slate-800 tracking-tight text-sm">BudgetMe</span>
+        <button class="ml-auto text-slate-400 hover:text-slate-600 p-1" id="close-mobile-menu">
+            <iconify-icon icon="solar:close-circle-linear" width="20"></iconify-icon>
+        </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-4 px-2 no-scrollbar">
+        <div class="px-2 text-[10px] font-medium text-slate-500 uppercase tracking-widest mb-2 ">Platform</div>
+
+
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="dashboard">
+            <iconify-icon icon="solar:widget-2-linear" class="nav-icon group-hover:text-emerald-600 transition-colors"
+                width="18" stroke-width="1.5"></iconify-icon>
+            Dashboard
+        </a>
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="transactions">
+            <iconify-icon icon="solar:card-transfer-linear"
+                class="nav-icon group-hover:text-emerald-600 transition-colors" width="18"
+                stroke-width="1.5"></iconify-icon>
+            Transactions
+        </a>
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="budgets">
+            <iconify-icon icon="solar:pie-chart-2-linear"
+                class="nav-icon group-hover:text-emerald-600 transition-colors" width="18"
+                stroke-width="1.5"></iconify-icon>
+            Budgets
+        </a>
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="goals">
+            <iconify-icon icon="solar:target-linear" class="nav-icon group-hover:text-emerald-600 transition-colors"
+                width="18" stroke-width="1.5"></iconify-icon>
+            Goals
+        </a>
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="predictions">
+            <iconify-icon icon="solar:magic-stick-3-linear"
+                class="nav-icon group-hover:text-emerald-600 transition-colors" width="18"
+                stroke-width="1.5"></iconify-icon>
+            AI Predictions
+        </a>
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="reports">
+            <iconify-icon icon="solar:chart-square-linear"
+                class="nav-icon group-hover:text-emerald-600 transition-colors" width="18"
+                stroke-width="1.5"></iconify-icon>
+            Reports
+        </a>
+
+        <div class="px-2 text-[10px] font-medium text-slate-500 uppercase tracking-widest mb-2 mt-5">Intelligence
+        </div>
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="chatbot">
+            <iconify-icon icon="solar:chat-round-line-linear"
+                class="nav-icon group-hover:text-emerald-600 transition-colors" width="18"
+                stroke-width="1.5"></iconify-icon>
+            BudgetSense AI
+        </a>
+
+        <div class="px-2 text-[10px] font-medium text-slate-500 uppercase tracking-widest mb-2 mt-5">Settings</div>
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="family">
+            <iconify-icon icon="solar:users-group-rounded-linear"
+                class="nav-icon group-hover:text-emerald-600 transition-colors" width="18"
+                stroke-width="1.5"></iconify-icon>
+            Family
+        </a>
+        <a href="#"
+            class="nav-item flex items-center gap-3 px-3 py-1.5 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors group"
+            data-module="settings">
+            <iconify-icon icon="solar:settings-linear" class="nav-icon group-hover:text-emerald-600 transition-colors"
+                width="18" stroke-width="1.5"></iconify-icon>
+            Settings
+        </a>
+
+        <!-- AI Usage Limit (Mobile) -->
+        <div class="mt-8 px-2">
+            <div class="bg-slate-50 rounded-xl border border-slate-200/60 p-3">
+                <div class="flex items-center justify-between mb-2.5">
+                    <div class="flex items-center gap-2">
+                        <div class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+                            <iconify-icon icon="solar:chart-square-linear" width="14"></iconify-icon>
+                        </div>
+                        <div>
+                            <div class="text-[9px] font-bold text-slate-900 uppercase tracking-wider">AI Usage</div>
+                            <div class="text-[9px] text-slate-500">8 / 25 daily limit</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-1 mb-2 overflow-hidden">
+                    <div class="bg-emerald-500 h-full rounded-full" style="width: 32%"></div>
+                </div>
+                <div class="flex justify-between items-center text-[9px]">
+                    <span class="text-slate-400">Daily refresh in</span>
+                    <span class="text-emerald-600 font-mono font-medium">14:52:10</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- User Profile (Mobile) -->
+    <div class="p-4 border-t border-slate-200/50">
+        <div class="flex items-center gap-3">
+            <div
+                class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200 text-slate-600 text-xs font-medium">
+                JD</div>
+            <div class="flex-1 overflow-hidden">
+                <p class="text-sm font-medium text-slate-700 truncate">John Doe</p>
+                <p class="text-[11px] text-slate-500 truncate">john@budgetme.site</p>
+            </div>
+        </div>
+    </div>
+</aside>

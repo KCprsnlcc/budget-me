@@ -1,0 +1,2812 @@
+<!-- No Family State Container -->
+<div id="no-family-state" class="max-w-4xl mx-auto py-12 animate__animated animate__fadeIn">
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <h2 class="text-3xl font-semibold text-slate-900 tracking-tight mb-3">Family Finance</h2>
+        <p class="text-sm text-slate-500 max-w-sm mx-auto font-light leading-relaxed">
+            Collaborate on budgets, track shared expenses, and reach financial goals as a household.
+        </p>
+    </div>
+
+    <!-- No Family Tabs Container -->
+    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <!-- Minimal Tabs -->
+        <div class="flex border-b border-slate-200/60">
+            <button
+                class="no-family-tab-btn flex-1 px-6 py-4 text-xs font-semibold uppercase tracking-wider text-emerald-600 border-b-2 border-emerald-500 transition-all"
+                data-tab="create">
+                <div class="flex items-center justify-center gap-2">
+                    <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+                    <span>Create</span>
+                </div>
+            </button>
+            <button
+                class="no-family-tab-btn flex-1 px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400 hover:text-slate-600 transition-all border-b-2 border-slate-100"
+                data-tab="join">
+                <div class="flex items-center justify-center gap-2">
+                    <iconify-icon icon="solar:magnifer-linear" width="16"></iconify-icon>
+                    <span>Join</span>
+                </div>
+            </button>
+            <button
+                class="no-family-tab-btn flex-1 px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400 hover:text-slate-600 transition-all border-b-2 border-slate-100 relative"
+                data-tab="invites">
+                <div class="flex items-center justify-center gap-2">
+                    <iconify-icon icon="solar:letter-linear" width="16"></iconify-icon>
+                    <span>Invitations</span>
+                    <span
+                        class="inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
+                </div>
+            </button>
+        </div>
+
+        <div class="p-10">
+            <!-- Create Tab Content -->
+            <div id="no-family-create-tab" class="no-family-tab-content space-y-10">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div class="space-y-4">
+                        <div
+                            class="w-12 h-12 rounded-lg border border-slate-100 bg-white shadow-sm flex items-center justify-center mx-auto text-emerald-500">
+                            <iconify-icon icon="solar:widget-2-linear" width="24"></iconify-icon>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-900">Combined View</h4>
+                            <p class="text-[11px] text-slate-400 mt-2 font-light leading-relaxed">Real-time dashboards
+                                showing combined household income and spending.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div
+                            class="w-12 h-12 rounded-lg border border-slate-100 bg-white shadow-sm flex items-center justify-center mx-auto text-emerald-500">
+                            <iconify-icon icon="solar:target-linear" width="24"></iconify-icon>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-900">Shared Goals</h4>
+                            <p class="text-[11px] text-slate-400 mt-2 font-light leading-relaxed">Set and track
+                                milestones for vacations, house savings, or emergency funds.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div
+                            class="w-12 h-12 rounded-lg border border-slate-100 bg-white shadow-sm flex items-center justify-center mx-auto text-emerald-500">
+                            <iconify-icon icon="solar:shield-check-linear" width="24"></iconify-icon>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-900">Privacy First</h4>
+                            <p class="text-[11px] text-slate-400 mt-2 font-light leading-relaxed">Granular permissions
+                                to control exactly who can see specific data.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 flex flex-col items-center border-t border-slate-50">
+                    <button
+                        class="btn btn-primary px-10 py-3.5 rounded-lg text-sm font-medium flex items-center gap-2 hover:translate-y-[-1px] transition-all"
+                        onclick="openModal('create-family-modal')">
+                        <iconify-icon icon="solar:home-2-linear" width="20"></iconify-icon>
+                        Create New Family
+                    </button>
+                    <p class="text-[10px] text-slate-400 mt-4 tracking-wide uppercase">Setup takes less than 2 minutes
+                    </p>
+                </div>
+            </div>
+
+            <!-- Join Tab Content -->
+            <div id="no-family-join-tab" class="no-family-tab-content hidden space-y-6">
+                <div class="max-w-md mx-auto">
+                    <div class="relative mb-8">
+                        <iconify-icon icon="solar:magnifer-linear"
+                            class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" width="18"></iconify-icon>
+                        <input type="text"
+                            class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none"
+                            placeholder="Find by name or group ID...">
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between px-1 mb-4">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nearby
+                                Groups</span>
+                            <span class="text-[10px] text-emerald-500 font-medium">Auto-discovery on</span>
+                        </div>
+                        <div
+                            class="p-4 rounded-xl border border-slate-100 hover:border-emerald-200 hover:bg-slate-50 transition-all cursor-pointer group">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center bg-white text-slate-400 group-hover:text-emerald-500 group-hover:border-emerald-200 transition-colors">
+                                        <iconify-icon icon="solar:users-group-rounded-linear" width="20"></iconify-icon>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-slate-900">Smiths Household</h4>
+                                        <p class="text-[10px] text-slate-400">3 active members</p>
+                                    </div>
+                                </div>
+                                <button
+                                    class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 px-3 py-1.5 rounded-md hover:bg-emerald-50 transition-all">Request</button>
+                            </div>
+                        </div>
+                        <div class="pt-8 mt-8 border-t border-slate-50 text-center">
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest">Can't find your group? Check
+                                the ID or ask your admin.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invites Tab Content -->
+            <div id="no-family-invites-tab" class="no-family-tab-content hidden">
+                <div class="max-w-md mx-auto">
+                    <!-- Active Invitation Card -->
+                    <div id="active-invite-card"
+                        class="p-6 rounded-xl border border-slate-200 bg-white shadow-sm space-y-5">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 rounded-full border border-emerald-100 bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                <iconify-icon icon="solar:letter-linear" width="24"></iconify-icon>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-900">Doe Family Budget</p>
+                                <p class="text-[11px] text-slate-400">Invited by <span
+                                        class="text-slate-600 font-medium">Sarah Doe</span></p>
+                            </div>
+                        </div>
+                        <p
+                            class="text-xs text-slate-500 leading-relaxed font-light italic bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            "Hey! I've set up our family budget. Come join and let's track everything together!"
+                        </p>
+                        <div class="flex gap-3 pt-6 border-t border-slate-50">
+                            <button
+                                class="flex-1 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-all"
+                                onclick="declineInvite()">Decline</button>
+                            <button
+                                class="flex-1 px-4 py-2.5 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 shadow-sm transition-all"
+                                onclick="mockCreateFamily()">Accept Invite</button>
+                        </div>
+                    </div>
+
+                    <!-- Empty State Placeholder (Initially Hidden) -->
+                    <div id="invites-empty-state"
+                        class="hidden py-12 text-center space-y-4 animate__animated animate__fadeIn">
+                        <div
+                            class="w-16 h-16 rounded-full bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center mx-auto text-slate-300">
+                            <iconify-icon icon="solar:letter-opened-linear" width="32"></iconify-icon>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-widest">Inbox Zero</h4>
+                            <p class="text-[11px] text-slate-400 mt-2 font-light max-w-[200px] mx-auto leading-relaxed">
+                                No pending invitations found. Ask your family admin to send an invite to your email.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Family Dashboard Container (Initially Hidden) -->
+<div id="family-dashboard" class="max-w-6xl mx-auto space-y-6 hidden">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-semibold text-slate-900 tracking-tight">Family</h2>
+            <p class="text-sm text-slate-500 mt-1 font-light">Manage shared budgets, goals, and family member
+                access.
+            </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button class="btn btn-secondary" onclick="openModal('edit-family-modal')">
+                <iconify-icon icon="solar:settings-linear" width="16"></iconify-icon>
+                Family Settings
+            </button>
+            <button class="btn btn-primary" onclick="openModal('invite-member-modal')">
+                <iconify-icon icon="solar:user-plus-linear" width="16"></iconify-icon>
+                Invite Member
+            </button>
+        </div>
+    </div>
+
+    <!-- Rest of the dashboard content... -->
+
+    <!-- Pending Invitation -->
+    <div class="bg-white rounded-xl p-0.5 shadow-sm border border-slate-100/60 relative overflow-hidden group">
+        <div
+            class="absolute inset-0 bg-gradient-to-r from-emerald-50/30 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        </div>
+        <div
+            class="bg-white rounded-[10px] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+            <div class="flex items-start gap-4">
+                <div
+                    class="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-emerald-500 flex-shrink-0">
+                    <iconify-icon icon="solar:users-group-two-rounded-linear" width="20"></iconify-icon>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-slate-800 flex items-center gap-2">
+                        Pending Invitation
+                        <span
+                            class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-100">New</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                        You have been invited by <span class="text-slate-600 font-medium">sarah@example.com</span> to
+                        join the <span class="text-slate-600 font-medium">Doe Family</span> dashboard.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 w-full sm:w-auto pl-14 sm:pl-0">
+                <button
+                    class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors">Decline</button>
+                <button
+                    class="px-4 py-2 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors shadow-sm">Accept
+                    Invitation</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <div class="flex border-b border-slate-200/60 overflow-x-auto no-scrollbar">
+            <button class="tab-btn px-6 py-3 text-sm font-medium text-emerald-600 border-b-2 border-emerald-500"
+                data-tab="overview">Overview</button>
+            <button
+                class="tab-btn px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors border-b-2 border-transparent"
+                data-tab="members">Members</button>
+            <button
+                class="tab-btn px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors border-b-2 border-transparent"
+                data-tab="activity">Activity</button>
+            <button
+                class="tab-btn px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors border-b-2 border-transparent"
+                data-tab="goals">Goals</button>
+        </div>
+
+        <div class="p-6">
+            <!-- Overview Tab Content -->
+            <div id="overview-tab" class="tab-content space-y-6">
+                <!-- Financial Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Family Savings Target -->
+                    <div
+                        class="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 rounded-lg bg-blue-50 text-blue-600">
+                                <iconify-icon icon="solar:bullseye-linear" width="22"></iconify-icon>
+                            </div>
+                        </div>
+                        <div class="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wide">Family
+                            Savings
+                            Target</div>
+                        <div class="text-2xl font-bold text-slate-900 tracking-tight">$65,000</div>
+                    </div>
+
+                    <!-- Goals Progress -->
+                    <div
+                        class="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                                <iconify-icon icon="solar:pig-money-linear" width="22"></iconify-icon>
+                            </div>
+                            <div
+                                class="flex items-center gap-1 text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
+                                <iconify-icon icon="solar:trending-up-linear"></iconify-icon> +$500
+                            </div>
+                        </div>
+                        <div class="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wide">Goals
+                            Progress
+                        </div>
+                        <div class="text-2xl font-bold text-slate-900 tracking-tight">$37,600</div>
+                    </div>
+
+                    <!-- Remaining to Save -->
+                    <div
+                        class="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 rounded-lg bg-slate-50 text-slate-600">
+                                <iconify-icon icon="solar:wallet-linear" width="22"></iconify-icon>
+                            </div>
+                        </div>
+                        <div class="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wide">Remaining
+                            to
+                            Save</div>
+                        <div class="text-2xl font-bold text-slate-900 tracking-tight">$27,400</div>
+                    </div>
+
+                    <!-- Progress Rate -->
+                    <div
+                        class="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 rounded-lg bg-purple-50 text-purple-600">
+                                <iconify-icon icon="solar:chart-line-linear" width="22"></iconify-icon>
+                            </div>
+                            <div
+                                class="text-[10px] font-medium text-purple-700 bg-purple-50 px-2 py-1 rounded-full border border-purple-100">
+                                58%
+                            </div>
+                        </div>
+                        <div class="text-slate-400 text-[10px] font-medium mb-1 uppercase tracking-wide">Overall
+                            Progress</div>
+                        <div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                            <div class="bg-purple-500 h-full rounded-full" style="width: 58%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Expense Categories Breakdown -->
+                    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 lg:col-span-1">
+                        <h3 class="text-sm font-semibold text-slate-900 mb-4">Family Expense Categories</h3>
+                        <div class="flex items-center justify-center h-64">
+                            <div class="relative w-48 h-48 rounded-full shadow-inner"
+                                style="background: conic-gradient(#10b981 0% 35%, #3b82f6 35% 59%, #8b5cf6 59% 77%, #f59e0b 77% 92%, #94a3b8 92% 100%);">
+                                <div
+                                    class="absolute inset-0 m-auto w-32 h-32 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                                    <span
+                                        class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Total</span>
+                                    <span class="text-xl font-bold text-slate-900">$3,450</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-2 mt-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                    <span class="text-[10px] text-slate-600">Groceries</span>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-900">35%</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                    <span class="text-[10px] text-slate-600">Utilities</span>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-900">24%</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-purple-500"></div>
+                                    <span class="text-[10px] text-slate-600">Entertainment</span>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-900">18%</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                                    <span class="text-[10px] text-slate-600">Transport</span>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-900">15%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Budget vs Actual Spending Chart -->
+                    <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/60 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-8">
+                            <div>
+                                <h3 class="text-sm font-semibold text-slate-900">Budget vs Actual Spending</h3>
+                                <p class="text-xs text-slate-500 mt-1 font-light">6-month comparison</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-sm bg-slate-200"></div>
+                                    <span class="text-[10px] font-medium text-slate-500">Budget</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-sm bg-emerald-500"></div>
+                                    <span class="text-[10px] font-medium text-slate-500">Actual</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-64 flex items-end justify-between gap-4 px-2 border-b border-slate-100 relative">
+                            <!-- Grid lines -->
+                            <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-0">
+                                <div class="w-full h-px bg-slate-50"></div>
+                                <div class="w-full h-px bg-slate-50"></div>
+                                <div class="w-full h-px bg-slate-50"></div>
+                                <div class="w-full h-px bg-slate-50"></div>
+                                <div class="w-full h-px bg-slate-100"></div>
+                            </div>
+
+                            <!-- May -->
+                            <div class="flex flex-col items-center flex-1 gap-2 z-10">
+                                <div class="flex gap-1 h-32 items-end">
+                                    <div class="w-3 bg-slate-200 rounded-t-sm h-[80%]" title="Budget: $2,000"></div>
+                                    <div class="w-3 bg-emerald-500 rounded-t-sm h-[70%]" title="Actual: $1,750"></div>
+                                </div>
+                                <span
+                                    class="text-[9px] font-medium text-slate-400 uppercase tracking-tighter">May</span>
+                            </div>
+                            <!-- Jun -->
+                            <div class="flex flex-col items-center flex-1 gap-2 z-10">
+                                <div class="flex gap-1 h-32 items-end">
+                                    <div class="w-3 bg-slate-200 rounded-t-sm h-[80%]" title="Budget: $2,000"></div>
+                                    <div class="w-3 bg-rose-500 rounded-t-sm h-[90%]" title="Actual: $2,250"></div>
+                                </div>
+                                <span
+                                    class="text-[9px] font-medium text-slate-400 uppercase tracking-tighter">Jun</span>
+                            </div>
+                            <!-- Jul -->
+                            <div class="flex flex-col items-center flex-1 gap-2 z-10">
+                                <div class="flex gap-1 h-32 items-end">
+                                    <div class="w-3 bg-slate-200 rounded-t-sm h-[85%]" title="Budget: $2,100"></div>
+                                    <div class="w-3 bg-emerald-500 rounded-t-sm h-[75%]" title="Actual: $1,850"></div>
+                                </div>
+                                <span
+                                    class="text-[9px] font-medium text-slate-400 uppercase tracking-tighter">Jul</span>
+                            </div>
+                            <!-- Aug -->
+                            <div class="flex flex-col items-center flex-1 gap-2 z-10">
+                                <div class="flex gap-1 h-32 items-end">
+                                    <div class="w-3 bg-slate-200 rounded-t-sm h-[85%]" title="Budget: $2,100"></div>
+                                    <div class="w-3 bg-rose-500 rounded-t-sm h-[95%]" title="Actual: $2,400"></div>
+                                </div>
+                                <span
+                                    class="text-[9px] font-medium text-slate-400 uppercase tracking-tighter">Aug</span>
+                            </div>
+                            <!-- Sep -->
+                            <div class="flex flex-col items-center flex-1 gap-2 z-10">
+                                <div class="flex gap-1 h-32 items-end">
+                                    <div class="w-3 bg-slate-200 rounded-t-sm h-[90%]" title="Budget: $2,250"></div>
+                                    <div class="w-3 bg-emerald-500 rounded-t-sm h-[85%]" title="Actual: $2,100"></div>
+                                </div>
+                                <span
+                                    class="text-[9px] font-medium text-slate-400 uppercase tracking-tighter">Sep</span>
+                            </div>
+                            <!-- Oct -->
+                            <div class="flex flex-col items-center flex-1 gap-2 z-10">
+                                <div class="flex gap-1 h-32 items-end">
+                                    <div class="w-3 bg-slate-200 rounded-t-sm h-[95%]" title="Budget: $2,400"></div>
+                                    <div class="w-3 bg-rose-500 rounded-t-sm h-[100%]" title="Actual: $2,600"></div>
+                                </div>
+                                <span
+                                    class="text-[9px] font-medium text-slate-900 uppercase tracking-tighter">Oct</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Family Goals Progress Section -->
+                    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-semibold text-slate-900">Top Family Goals</h3>
+                            <button class="text-xs text-emerald-600 font-medium hover:text-emerald-700"
+                                onclick="switchTab('goals')">View All</button>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- Goal 1 -->
+                            <div
+                                class="p-4 rounded-lg border border-slate-100 hover:border-emerald-200 hover:shadow-sm transition-all group">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 transition-colors group-hover:bg-emerald-100">
+                                            <iconify-icon icon="solar:shield-check-linear" width="20"></iconify-icon>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-semibold text-slate-900">Emergency Fund</h4>
+                                            <p class="text-[10px] text-slate-500 font-light">Target: Dec 2025 •
+                                                Created
+                                                by John</p>
+                                        </div>
+                                    </div>
+                                    <span class="badge badge-success text-[10px]">On Track</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-[10px]">
+                                        <span class="text-slate-500">Progress (85%)</span>
+                                        <span class="font-medium text-slate-900">$8,500 / $10,000</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-bar-fill success" style="width: 85%"></div>
+                                    </div>
+                                    <div class="flex justify-between items-center text-[10px]">
+                                        <span class="text-slate-400">45 days remaining</span>
+                                        <button
+                                            class="font-medium text-emerald-600 hover:text-emerald-700">Contribute</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Goal 2 -->
+                            <div
+                                class="p-4 rounded-lg border border-slate-100 hover:border-emerald-200 hover:shadow-sm transition-all group">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 transition-colors group-hover:bg-emerald-100">
+                                            <iconify-icon icon="solar:suitcase-linear" width="20"></iconify-icon>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-semibold text-slate-900">Family Vacation</h4>
+                                            <p class="text-[10px] text-slate-500 font-light">Target: Jun 2025 •
+                                                Created
+                                                by Sarah</p>
+                                        </div>
+                                    </div>
+                                    <span class="badge badge-success text-[10px]">On Track</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-[10px]">
+                                        <span class="text-slate-500">Progress (75%)</span>
+                                        <span class="font-medium text-slate-900">$4,500 / $6,000</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-bar-fill success" style="width: 75%"></div>
+                                    </div>
+                                    <div class="flex justify-between items-center text-[10px]">
+                                        <span class="text-slate-400">152 days remaining</span>
+                                        <button
+                                            class="font-medium text-emerald-600 hover:text-emerald-700">Contribute</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Goals by Status Breakdown -->
+                    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6">
+                        <h3 class="text-sm font-semibold text-slate-900 mb-6">Goals by Status</h3>
+                        <div class="space-y-5">
+                            <!-- In Progress -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1.5">
+                                    <span class="text-slate-600 font-medium flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                        In Progress
+                                    </span>
+                                    <span class="text-slate-900 font-semibold">3 (75%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill success" style="width: 75%"></div>
+                                </div>
+                            </div>
+                            <!-- Completed -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1.5">
+                                    <span class="text-slate-600 font-medium flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                        Completed
+                                    </span>
+                                    <span class="text-slate-900 font-semibold">1 (25%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" style="width: 25%; background-color: #3b82f6;">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Paused -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1.5">
+                                    <span class="text-slate-600 font-medium flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                                        Paused
+                                    </span>
+                                    <span class="text-slate-900 font-semibold">0 (0%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill bg-amber-200" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
+                            <div>
+                                <p class="text-2xl font-bold text-slate-900">4</p>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wide">Total Goals</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-blue-600">1</p>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wide">Finished</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Members Tab Content -->
+            <div id="members-tab" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Pending Join Requests Section -->
+                        <div class="bg-white rounded-xl border border-blue-100 bg-blue-50/10 p-6">
+                            <h3 class="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                                <iconify-icon icon="solar:user-check-linear" class="text-blue-600"
+                                    width="18"></iconify-icon>
+                                Pending Join Requests
+                                <span class="bg-blue-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">1</span>
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="p-4 rounded-xl border border-blue-100 bg-white shadow-sm">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-medium text-sm">
+                                                MJ
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-slate-900">Mike Johnson</p>
+                                                <p class="text-[10px] text-slate-500 font-light">mike@email.com •
+                                                    Requested 2 days ago</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-slate-600 mb-4 italic px-3 py-2 bg-slate-50 rounded-lg">
+                                        "Hi,
+                                        I'd like to join the family budget group to help track our shared expenses."
+                                    </p>
+                                    <div class="flex items-center gap-2">
+                                        <button class="btn btn-primary text-xs flex-1">
+                                            <iconify-icon icon="solar:check-circle-linear" width="14"></iconify-icon>
+                                            Approve as Member
+                                        </button>
+                                        <button class="btn btn-secondary text-xs">
+                                            <iconify-icon icon="solar:close-circle-linear" width="14"></iconify-icon>
+                                            Decline
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current Family Members List -->
+                        <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-sm font-semibold text-slate-900">Family Members (3)</h3>
+                                <button class="btn btn-ghost text-xs group" onclick="openModal('edit-family-modal')">
+                                    <iconify-icon icon="solar:settings-linear"
+                                        class="group-hover:rotate-45 transition-transform" width="16"></iconify-icon>
+                                    Family Settings
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <!-- Member 1 - Owner -->
+                                <div
+                                    class="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100 group hover:bg-slate-50 transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <div class="relative">
+                                            <div
+                                                class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-medium text-sm">
+                                                JD
+                                            </div>
+                                            <div
+                                                class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <p class="text-sm font-medium text-slate-900">John Doe</p>
+                                                <iconify-icon icon="solar:crown-linear" class="text-amber-500"
+                                                    width="14" title="Owner"></iconify-icon>
+                                            </div>
+                                            <p class="text-[10px] text-slate-500 font-light">john@budgetme.app •
+                                                Joined
+                                                Jan 2025</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="badge badge-success">Owner</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs text-slate-400 font-light">You</span>
+                                            <button
+                                                class="text-[10px] text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1 ml-2"
+                                                onclick="openModal('leave-family-modal')">
+                                                <iconify-icon icon="solar:logout-linear" width="12"></iconify-icon>
+                                                Leave
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Member 2 -->
+                                <div
+                                    class="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100 group hover:bg-slate-50 transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-medium text-sm">
+                                            SD
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-slate-900">Sarah Doe</p>
+                                            <p class="text-[10px] text-slate-500 font-light">sarah@budgetme.app •
+                                                Joined
+                                                Jan 2025</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="badge badge-info">Admin</span>
+                                        <button
+                                            class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                                            <iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Member 3 -->
+                                <div
+                                    class="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100 group hover:bg-slate-50 transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-medium text-sm">
+                                            ED
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-slate-900">Emma Doe</p>
+                                            <p class="text-[10px] text-slate-500 font-light">emma@budgetme.app •
+                                                Joined
+                                                Jan 2025</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="badge badge-secondary">Member</span>
+                                        <button
+                                            class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                                            <iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Pending Invitation -->
+                                <div
+                                    class="flex items-center justify-between p-4 bg-amber-50/30 rounded-xl border border-amber-100 border-dashed">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700">
+                                            <iconify-icon icon="solar:clock-circle-linear" width="20"></iconify-icon>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-slate-900">mike@email.com</p>
+                                            <p class="text-[10px] text-amber-600 font-medium">Invited 2 days ago •
+                                                Pending...</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button
+                                            class="text-[10px] font-semibold text-amber-700 hover:underline">Resend</button>
+                                        <button class="p-2 text-slate-300 hover:text-red-500 rounded-lg transition-all">
+                                            <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Role Management interface -->
+                        <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 overflow-hidden">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                                    <iconify-icon icon="solar:shield-user-linear"
+                                        class="text-purple-600"></iconify-icon>
+                                    Role Management
+                                </h3>
+                                <button
+                                    class="text-[10px] font-medium text-slate-400 hover:text-purple-600">Info</button>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-lg">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-medium text-[10px] flex-shrink-0">
+                                            SD
+                                        </div>
+                                        <span class="text-xs font-medium text-slate-900 truncate">Sarah Doe</span>
+                                    </div>
+                                    <select
+                                        class="text-[10px] border border-slate-200 rounded-lg px-2 py-1 bg-white focus:ring-1 focus:ring-emerald-500 outline-none">
+                                        <option>Admin</option>
+                                        <option>Member</option>
+                                        <option>Viewer</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-lg">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-medium text-[10px] flex-shrink-0">
+                                            ED
+                                        </div>
+                                        <span class="text-xs font-medium text-slate-900 truncate">Emma Doe</span>
+                                    </div>
+                                    <select
+                                        class="text-[10px] border border-slate-200 rounded-lg px-2 py-1 bg-white focus:ring-1 focus:ring-emerald-500 outline-none">
+                                        <option>Member</option>
+                                        <option>Admin</option>
+                                        <option>Viewer</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="w-full btn btn-secondary text-xs mt-4 justify-center py-2.5">
+                                <iconify-icon icon="solar:crown-linear" class="text-amber-500"
+                                    width="14"></iconify-icon>
+                                Transfer Ownership
+                            </button>
+                        </div>
+
+                        <!-- Info Card -->
+                        <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-6">
+                            <h4 class="text-sm font-semibold text-emerald-900 flex items-center gap-2 mb-2">
+                                <iconify-icon icon="solar:info-circle-linear" width="18"></iconify-icon>
+                                About Roles
+                            </h4>
+                            <ul class="space-y-3">
+                                <li class="text-[10px] text-emerald-800 leading-relaxed">
+                                    <span class="font-bold">Owner:</span> Complete control, can delete the family
+                                    group.
+                                </li>
+                                <li class="text-[10px] text-emerald-800 leading-relaxed">
+                                    <span class="font-bold">Admin:</span> Can invite members, manage roles, and
+                                    create
+                                    shared budgets.
+                                </li>
+                                <li class="text-[10px] text-emerald-800 leading-relaxed">
+                                    <span class="font-bold">Member:</span> Full access to shared features, budgets,
+                                    and
+                                    goals.
+                                </li>
+                                <li class="text-[10px] text-emerald-800 leading-relaxed">
+                                    <span class="font-bold">Viewer:</span> Read-only access to all family
+                                    information.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discover Families (New Section) -->
+                <div class="mt-8 pt-8 border-t border-slate-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-900">Discover Families</h3>
+                            <p class="text-[10px] text-slate-500 mt-1 font-light">Find and join other public family
+                                groups in your network.</p>
+                        </div>
+                        <button
+                            class="text-[10px] font-medium text-slate-400 hover:text-emerald-600 flex items-center gap-1 group">
+                            <iconify-icon icon="solar:refresh-linear"
+                                class="group-hover:rotate-180 transition-transform duration-500"></iconify-icon>
+                            Refresh
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Public Family Card 1 -->
+                        <div
+                            class="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all group">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-100">
+                                        <iconify-icon icon="solar:home-linear" width="24"></iconify-icon>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-slate-900">Smith Family Budget</h4>
+                                        <p class="text-[10px] text-slate-500">Created by John Smith</p>
+                                    </div>
+                                </div>
+                                <span class="badge badge-info text-[9px] flex items-center gap-1">
+                                    <iconify-icon icon="solar:users-group-rounded-linear" width="12"></iconify-icon>
+                                    4
+                                    members
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-600 mb-4 font-light leading-relaxed">"Managing our
+                                household
+                                expenses and savings goals together for our new home."</p>
+                            <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                                <span class="text-[9px] text-slate-400">Public • Created Jan 15</span>
+                                <button class="btn btn-primary text-xs py-1.5">
+                                    <iconify-icon icon="solar:login-linear" width="14"></iconify-icon>
+                                    Request Join
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Pending Request Card -->
+                        <div
+                            class="bg-white p-5 rounded-xl border border-amber-200 bg-amber-50/10 shadow-sm hover:shadow-md transition-all group">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
+                                        <iconify-icon icon="solar:clock-circle-linear" width="24"></iconify-icon>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-slate-900">Johnson Family</h4>
+                                        <p class="text-[10px] text-amber-600 font-medium">Request pending • Sent 2
+                                            days
+                                            ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-600 mb-4 font-light leading-relaxed">"Shared budget for the
+                                Johnson brothers and sisters."</p>
+                            <div class="flex items-center justify-between pt-4 border-t border-amber-100/50">
+                                <span class="text-[9px] text-slate-400">Private • Created Dec 20, 2024</span>
+                                <button
+                                    class="btn btn-secondary text-xs py-1.5 hover:text-red-500 hover:border-red-200">
+                                    <iconify-icon icon="solar:close-circle-linear" width="14"></iconify-icon>
+                                    Cancel Request
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Empty Placeholder for discovery -->
+                        <div
+                            class="border-2 border-dashed border-slate-100 rounded-xl flex items-center justify-center p-6 text-center">
+                            <div class="text-slate-300">
+                                <iconify-icon icon="solar:users-group-two-rounded-linear" width="32"></iconify-icon>
+                                <p class="text-[10px] mt-2 italic">Search by family name or owner...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Tab Content -->
+            <div id="activity-tab" class="tab-content hidden space-y-6">
+                <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <h3 class="text-sm font-semibold text-slate-900">Recent Family Activity</h3>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div class="flex items-center gap-1.5 p-1 bg-slate-50 rounded-lg border border-slate-200">
+                                <button
+                                    class="px-3 py-1 text-[10px] font-medium rounded-md bg-white text-slate-900 shadow-sm">All</button>
+                                <button
+                                    class="px-3 py-1 text-[10px] font-medium rounded-md text-slate-500 hover:text-slate-700">Transactions</button>
+                                <button
+                                    class="px-3 py-1 text-[10px] font-medium rounded-md text-slate-500 hover:text-slate-700">Goals</button>
+                                <button
+                                    class="px-3 py-1 text-[10px] font-medium rounded-md text-slate-500 hover:text-slate-700">Members</button>
+                            </div>
+                            <button
+                                class="p-2 bg-slate-50 text-slate-400 hover:text-emerald-600 rounded-lg border border-slate-200 transition-colors">
+                                <iconify-icon icon="solar:filter-linear" width="16"></iconify-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Activity Item 1 -->
+                        <div
+                            class="flex items-start gap-3 p-4 bg-slate-50/50 hover:bg-slate-50 rounded-xl transition-colors border border-transparent hover:border-slate-200">
+                            <div
+                                class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0">
+                                <iconify-icon icon="solar:wallet-linear" width="20"></iconify-icon>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1">
+                                    <p class="text-xs text-slate-700">
+                                        <span class="font-semibold text-slate-900">Sarah</span> added a transaction
+                                        of
+                                        <span class="font-bold text-slate-900">$85.00</span> to
+                                        <span class="text-emerald-600 font-medium">Groceries</span>
+                                    </p>
+                                    <span class="text-[10px] text-slate-400">2 hours ago</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="badge badge-info text-[9px] px-1.5 py-0">Transaction</span>
+                                    <span class="text-[10px] text-slate-300">•</span>
+                                    <span class="text-[10px] text-slate-400">Household Shared Budget</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activity Item 2 -->
+                        <div
+                            class="flex items-start gap-3 p-4 bg-slate-50/50 hover:bg-slate-50 rounded-xl transition-colors border border-transparent hover:border-slate-200">
+                            <div
+                                class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 flex-shrink-0">
+                                <iconify-icon icon="solar:flag-checkered-linear" width="20"></iconify-icon>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1">
+                                    <p class="text-xs text-slate-700">
+                                        <span class="font-semibold text-slate-900">Emma</span> contributed
+                                        <span class="font-bold text-slate-900">$100.00</span> to
+                                        <span class="text-emerald-600 font-medium">Family Vacation</span> goal
+                                    </p>
+                                    <span class="text-[10px] text-slate-400">Yesterday</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="badge badge-success text-[9px] px-1.5 py-0">Goal</span>
+                                    <span class="text-[10px] text-slate-300">•</span>
+                                    <span class="text-[10px] text-slate-400">Personal Contribution</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activity Item 3 -->
+                        <div
+                            class="flex items-start gap-3 p-4 bg-slate-50/50 hover:bg-slate-50 rounded-xl transition-colors border border-transparent hover:border-slate-200">
+                            <div
+                                class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 flex-shrink-0">
+                                <iconify-icon icon="solar:user-plus-linear" width="20"></iconify-icon>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1">
+                                    <p class="text-xs text-slate-700">
+                                        <span class="font-semibold text-slate-900">John</span> invited
+                                        <span class="font-bold text-slate-900">mike@email.com</span> to the family
+                                    </p>
+                                    <span class="text-[10px] text-slate-400">3 days ago</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="badge badge-secondary text-[9px] px-1.5 py-0">Member</span>
+                                    <span class="text-[10px] text-slate-300">•</span>
+                                    <span class="text-[10px] text-slate-400">Invitation Sent</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pagination/Load More -->
+                        <div class="pt-4 text-center">
+                            <button class="btn btn-secondary text-[10px] px-8 py-2">
+                                Load More Activity
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Goals Tab Content -->
+            <div id="goals-tab" class="tab-content hidden space-y-6">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-slate-900">Family Goals (4)</h3>
+                    <div class="flex items-center gap-2">
+                        <button class="btn btn-secondary text-[10px] px-3">
+                            <iconify-icon icon="solar:filter-linear" width="14"></iconify-icon>
+                            Filter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                    <!-- Detailed Goal Card 1 -->
+                    <div
+                        class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 hover:shadow-md transition-all group">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 transition-colors group-hover:scale-110">
+                                    <iconify-icon icon="solar:shield-check-linear" width="24"></iconify-icon>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-semibold text-slate-900">Emergency Fund</h4>
+                                    <p class="text-[10px] text-slate-500">Created by John • Target: Dec 2025</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="badge badge-success px-2.5 py-1">On Track</span>
+                                <button class="p-2 text-slate-300 hover:text-slate-600 hover:bg-slate-50 rounded-lg">
+                                    <iconify-icon icon="solar:menu-dots-linear" width="18"></iconify-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-500 font-medium">Overall Progress</span>
+                                <span class="font-bold text-slate-900">$8,500 / $10,000 (85%)</span>
+                            </div>
+                            <div class="progress-bar h-2">
+                                <div class="progress-bar-fill success" style="width: 85%"></div>
+                            </div>
+                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg">
+                                <span class="text-[10px] text-slate-500">45 days remaining until target date</span>
+                                <span class="text-[10px] font-bold text-emerald-600">$1,500 left</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-100 pt-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <h5 class="text-xs font-semibold text-slate-700">Member Contributions</h5>
+                                <button class="text-[10px] font-medium text-emerald-600 hover:underline">View
+                                    History</button>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-[10px] font-bold border-2 border-white shadow-sm">
+                                            JD</div>
+                                        <span class="text-slate-600">John</span>
+                                    </div>
+                                    <span class="font-bold text-slate-900">$5,000</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-[10px] font-bold border-2 border-white shadow-sm">
+                                            SD</div>
+                                        <span class="text-slate-600">Sarah</span>
+                                    </div>
+                                    <span class="font-bold text-slate-900">$3,500</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary w-full mt-6 py-2.5 shadow-emerald-100">
+                            <iconify-icon icon="solar:add-circle-linear" width="18"></iconify-icon>
+                            Contribute to Goal
+                        </button>
+                    </div>
+
+                    <!-- Detailed Goal Card 2 -->
+                    <div
+                        class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 hover:shadow-md transition-all group">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 transition-colors group-hover:scale-110">
+                                    <iconify-icon icon="solar:suitcase-linear" width="24"></iconify-icon>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-semibold text-slate-900">Family Vacation</h4>
+                                    <p class="text-[10px] text-slate-500">Created by Sarah • Target: Jun 2025</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="badge badge-success px-2.5 py-1">On Track</span>
+                                <button class="p-2 text-slate-300 hover:text-slate-600 hover:bg-slate-50 rounded-lg">
+                                    <iconify-icon icon="solar:menu-dots-linear" width="18"></iconify-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-500 font-medium">Overall Progress</span>
+                                <span class="font-bold text-slate-900">$4,500 / $6,000 (75%)</span>
+                            </div>
+                            <div class="progress-bar h-2">
+                                <div class="progress-bar-fill success" style="width: 75%"></div>
+                            </div>
+                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg">
+                                <span class="text-[10px] text-slate-500">152 days remaining until target date</span>
+                                <span class="text-[10px] font-bold text-emerald-600">$1,500 left</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-100 pt-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <h5 class="text-xs font-semibold text-slate-700">Member Contributions</h5>
+                                <button class="text-[10px] font-medium text-emerald-600 hover:underline">View
+                                    History</button>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-[10px] font-bold border-2 border-white shadow-sm">
+                                            SD</div>
+                                        <span class="text-slate-600">Sarah</span>
+                                    </div>
+                                    <span class="font-bold text-slate-900">$2,500</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 text-[10px] font-bold border-2 border-white shadow-sm">
+                                            ED</div>
+                                        <span class="text-slate-600">Emma</span>
+                                    </div>
+                                    <span class="font-bold text-slate-900">$2,000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary w-full mt-6 py-2.5 shadow-emerald-100">
+                            <iconify-icon icon="solar:add-circle-linear" width="18"></iconify-icon>
+                            Contribute to Goal
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contribution Analytics -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6">
+                        <h3 class="text-sm font-semibold text-slate-900 mb-6">Contributions by Member</h3>
+                        <div class="space-y-6">
+                            <!-- Member 1 -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-[9px] font-bold">
+                                            JD</div>
+                                        <span class="text-slate-600 font-medium">John Doe</span>
+                                    </div>
+                                    <span class="font-bold text-slate-900">$5,000</span>
+                                </div>
+                                <div class="w-full bg-slate-50 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-emerald-500 h-full rounded-full" style="width: 50%"></div>
+                                </div>
+                            </div>
+                            <!-- Member 2 -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-[9px] font-bold">
+                                            SD</div>
+                                        <span class="text-slate-600 font-medium">Sarah Doe</span>
+                                    </div>
+                                    <span class="font-bold text-slate-900">$3,500</span>
+                                </div>
+                                <div class="w-full bg-slate-50 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-blue-500 h-full rounded-full" style="width: 35%"></div>
+                                </div>
+                            </div>
+                            <!-- Member 3 -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 text-[9px] font-bold">
+                                            ED</div>
+                                        <span class="text-slate-600 font-medium">Emma Doe</span>
+                                    </div>
+                                    <span class="font-bold text-slate-900">$1,500</span>
+                                </div>
+                                <div class="w-full bg-slate-50 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-purple-500 h-full rounded-full" style="width: 15%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6">
+                        <h3 class="text-sm font-semibold text-slate-900 mb-4">Contribution Distribution</h3>
+                        <div class="flex flex-col items-center justify-center py-4">
+                            <!-- Donut Chart -->
+                            <div class="relative w-40 h-40 rounded-full shadow-inner mb-6"
+                                style="background: conic-gradient(#10b981 0% 50%, #3b82f6 50% 85%, #8b5cf6 85% 100%);">
+                                <div
+                                    class="absolute inset-0 m-auto w-28 h-28 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                                    <span class="text-[9px] text-slate-400 font-medium uppercase tracking-wider">Total
+                                        Contrib</span>
+                                    <span class="text-lg font-bold text-slate-900">$13,000</span>
+                                </div>
+                            </div>
+                            <!-- Legend -->
+                            <div class="w-full grid grid-cols-3 gap-2">
+                                <div class="text-center">
+                                    <div class="text-[10px] font-bold text-emerald-600">50%</div>
+                                    <p class="text-[9px] text-slate-400 uppercase tracking-tighter mt-0.5">John</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-[10px] font-bold text-blue-600">35%</div>
+                                    <p class="text-[9px] text-slate-400 uppercase tracking-tighter mt-0.5">Sarah</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-[10px] font-bold text-purple-600">15%</div>
+                                    <p class="text-[9px] text-slate-400 uppercase tracking-tighter mt-0.5">Emma</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Overlays -->
+
+<!-- Invite Member Modal -->
+<div id="invite-member-modal" class="modal-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="inviteMemberHeaderTitle">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                <span id="inviteMemberHeaderTitle">Invite Member</span>
+            </h3>
+            <div class="flex items-center gap-3">
+                <span id="inviteMemberStepText" class="text-[10px] text-slate-400 font-medium tracking-wide">Step 1 of
+                    2</span>
+                <button
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                    onclick="closeModal('invite-member-modal')" aria-label="Close">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step Stepper -->
+        <div class="family-stepper" aria-label="Member invitation progress">
+            <div class="family-step-wrap">
+                <div class="family-step-dot active" data-step="1" aria-current="step">1</div><span
+                    class="family-step-label active">Details</span>
+            </div>
+            <div class="family-step-connector" data-connector="1"></div>
+            <div class="family-step-wrap">
+                <div class="family-step-dot" data-step="2">2</div><span class="family-step-label">Review</span>
+            </div>
+        </div>
+
+        <!-- Main Body -->
+        <div class="modal-body overflow-y-auto flex-1">
+            <!-- Step 1: Invitation Details -->
+            <div id="inviteMemberStep1" class="family-step-content">
+                <div class="space-y-4 family-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Invitation Details</h4>
+                        <p class="text-xs text-slate-500">Enter member information and access permissions</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Email Address</label>
+                            <div class="relative">
+                                <iconify-icon icon="solar:letter-linear"
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                    width="18"></iconify-icon>
+                                <input type="email" id="inviteMemberEmail" class="family-input pl-10"
+                                    placeholder="member@email.com" required>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1.5">User must have an existing BudgetMe account.
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Assign Role</label>
+                            <div class="grid grid-cols-1 gap-3" id="invite-member-role-selector">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="invite-member-role" value="member" class="peer sr-only"
+                                        checked>
+                                    <div class="family-card p-3">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                                                <iconify-icon icon="solar:user-linear" width="16"></iconify-icon>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="text-xs font-semibold text-slate-900">Member</div>
+                                                <div class="text-[9px] text-slate-500">Full access to budgets & goals
+                                                </div>
+                                            </div>
+                                            <div class="family-check">
+                                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="invite-member-role" value="admin" class="peer sr-only">
+                                    <div class="family-card p-3">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                                <iconify-icon icon="solar:shield-check-linear"
+                                                    width="16"></iconify-icon>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="text-xs font-semibold text-slate-900">Admin</div>
+                                                <div class="text-[9px] text-slate-500">Can manage members & settings
+                                                </div>
+                                            </div>
+                                            <div class="family-check">
+                                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="invite-member-role" value="viewer" class="peer sr-only">
+                                    <div class="family-card p-3">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-8 h-8 rounded-lg bg-slate-50 text-slate-600 flex items-center justify-center">
+                                                <iconify-icon icon="solar:eye-linear" width="16"></iconify-icon>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="text-xs font-semibold text-slate-900">Viewer</div>
+                                                <div class="text-[9px] text-slate-500">Read-only access</div>
+                                            </div>
+                                            <div class="family-check">
+                                                <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Message (Optional)</label>
+                            <div class="relative">
+                                <iconify-icon icon="solar:document-text-linear"
+                                    class="absolute left-3 top-3 text-slate-400" width="18"></iconify-icon>
+                                <textarea id="inviteMemberMessage" class="family-input pl-10 min-h-[80px]"
+                                    placeholder="Hey, join our family budget!"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="family-notice info">
+                            <iconify-icon icon="solar:info-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <p class="font-medium text-blue-900">Invitation Process</p>
+                                <p class="text-blue-700">The member will receive an email invitation to join your family
+                                    group.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Review -->
+            <div id="inviteMemberStep2" class="family-step-content hidden">
+                <div class="space-y-4 family-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Review Invitation</h4>
+                        <p class="text-xs text-slate-500">Confirm invitation details before sending</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                            <h5 class="text-xs font-semibold text-slate-900 mb-3 uppercase tracking-wide">Invitation
+                                Information</h5>
+                            <div class="space-y-2">
+                                <div class="family-review">
+                                    <span class="family-review-title">Email Address</span>
+                                    <span class="family-review-value" id="inviteMemberReviewEmail">-</span>
+                                </div>
+                                <div class="family-review">
+                                    <span class="family-review-title">Role</span>
+                                    <span class="family-review-value" id="inviteMemberReviewRole">-</span>
+                                </div>
+                                <div class="family-review">
+                                    <span class="family-review-title">Message</span>
+                                    <span class="family-review-value" id="inviteMemberReviewMessage">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="family-notice success">
+                            <iconify-icon icon="solar:check-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <p class="font-medium text-emerald-900">Ready to Send</p>
+                                <p class="text-emerald-700">The invitation will be sent immediately and the member can
+                                    accept at any time.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button id="inviteMemberBtnBack" onclick="inviteMemberPreviousStep()" class="btn btn-secondary hidden">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button id="inviteMemberBtnNext" onclick="inviteMemberNextStep()" class="btn btn-primary"
+                style="background:#10b981; box-shadow:none;">
+                Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Create Family Modal -->
+<div id="create-family-modal" class="modal-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="createFamilyHeaderTitle">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                <span id="createFamilyHeaderTitle">Create Family</span>
+            </h3>
+            <div class="flex items-center gap-3">
+                <span id="createFamilyStepText" class="text-[10px] text-slate-400 font-medium tracking-wide">Step 1 of
+                    2</span>
+                <button
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                    onclick="closeModal('create-family-modal')" aria-label="Close">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step Stepper -->
+        <div class="family-stepper" aria-label="Family creation progress">
+            <div class="family-step-wrap">
+                <div class="family-step-dot active" data-step="1" aria-current="step">1</div><span
+                    class="family-step-label active">Details</span>
+            </div>
+            <div class="family-step-connector" data-connector="1"></div>
+            <div class="family-step-wrap">
+                <div class="family-step-dot" data-step="2">2</div><span class="family-step-label">Review</span>
+            </div>
+        </div>
+
+        <!-- Main Body -->
+        <div class="modal-body overflow-y-auto flex-1">
+            <!-- Step 1: Family Details -->
+            <div id="createFamilyStep1" class="family-step-content">
+                <div class="space-y-4 family-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Family Details</h4>
+                        <p class="text-xs text-slate-500">Enter your family information and preferences</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Family Name</label>
+                            <div class="relative">
+                                <iconify-icon icon="solar:home-2-linear"
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                    width="18"></iconify-icon>
+                                <input type="text" id="createFamilyName" class="family-input pl-10"
+                                    placeholder="e.g., The Doe Household" required>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Description
+                                (Optional)</label>
+                            <div class="relative">
+                                <iconify-icon icon="solar:document-text-linear"
+                                    class="absolute left-3 top-3 text-slate-400" width="18"></iconify-icon>
+                                <textarea id="createFamilyDescription" class="family-input pl-10 min-h-[80px]"
+                                    placeholder="Tell us about your family..."></textarea>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Family Type</label>
+                            <div class="grid grid-cols-2 gap-3" id="create-family-type-selector">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="create-family-type" value="private" class="peer sr-only"
+                                        checked>
+                                    <div class="family-card text-center py-3">
+                                        <div class="text-xs font-semibold">Private</div>
+                                        <div class="family-check">
+                                            <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="create-family-type" value="public" class="peer sr-only">
+                                    <div class="family-card text-center py-3">
+                                        <div class="text-xs font-semibold">Public</div>
+                                        <div class="family-check">
+                                            <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="family-notice info">
+                            <iconify-icon icon="solar:info-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <p class="font-medium text-blue-900">Family Setup</p>
+                                <p class="text-blue-700">Private families require invitations. Public families can be
+                                    discovered by others.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Review -->
+            <div id="createFamilyStep2" class="family-step-content hidden">
+                <div class="space-y-4 family-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Review Family</h4>
+                        <p class="text-xs text-slate-500">Confirm your family details before creating</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                            <h5 class="text-xs font-semibold text-slate-900 mb-3 uppercase tracking-wide">Family
+                                Information</h5>
+                            <div class="space-y-2">
+                                <div class="family-review">
+                                    <span class="family-review-title">Family Name</span>
+                                    <span class="family-review-value" id="createFamilyReviewName">-</span>
+                                </div>
+                                <div class="family-review">
+                                    <span class="family-review-title">Description</span>
+                                    <span class="family-review-value" id="createFamilyReviewDescription">-</span>
+                                </div>
+                                <div class="family-review">
+                                    <span class="family-review-title">Family Type</span>
+                                    <span class="family-review-value" id="createFamilyReviewType">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="family-notice info">
+                            <iconify-icon icon="solar:info-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <p class="font-medium text-blue-900">Review your family</p>
+                                <p class="text-blue-700">Make sure all information is correct before creating. You can
+                                    always edit later.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button id="createFamilyBtnBack" onclick="createFamilyPreviousStep()" class="btn btn-secondary hidden">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button id="createFamilyBtnNext" onclick="createFamilyNextStep()" class="btn btn-primary"
+                style="background:#10b981; box-shadow:none;">
+                Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Family Modal -->
+<div id="edit-family-modal" class="modal-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="editFamilyHeaderTitle">
+    <div class="modal w-full mx-4 flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="modal-header flex items-center justify-between border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                <span id="editFamilyHeaderTitle">Edit Family</span>
+            </h3>
+            <div class="flex items-center gap-3">
+                <span id="editFamilyStepText" class="text-[10px] text-slate-400 font-medium tracking-wide">Step 1 of
+                    2</span>
+                <button
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                    onclick="closeModal('edit-family-modal')" aria-label="Close">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step Stepper -->
+        <div class="family-stepper" aria-label="Family editing progress">
+            <div class="family-step-wrap">
+                <div class="family-step-dot active" data-step="1" aria-current="step">1</div><span
+                    class="family-step-label active">Details</span>
+            </div>
+            <div class="family-step-connector" data-connector="1"></div>
+            <div class="family-step-wrap">
+                <div class="family-step-dot" data-step="2">2</div><span class="family-step-label">Review</span>
+            </div>
+        </div>
+
+        <!-- Main Body -->
+        <div class="modal-body overflow-y-auto flex-1">
+            <!-- Step 1: Family Details -->
+            <div id="editFamilyStep1" class="family-step-content">
+                <div class="space-y-4 family-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Family Settings</h4>
+                        <p class="text-xs text-slate-500">Update your family information and preferences</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Family Name</label>
+                            <div class="relative">
+                                <iconify-icon icon="solar:home-2-linear"
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                    width="18"></iconify-icon>
+                                <input type="text" id="editFamilyName" class="family-input pl-10"
+                                    value="Doe Family Budget" required>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Description</label>
+                            <div class="relative">
+                                <iconify-icon icon="solar:document-text-linear"
+                                    class="absolute left-3 top-3 text-slate-400" width="18"></iconify-icon>
+                                <textarea id="editFamilyDescription"
+                                    class="family-input pl-10 min-h-[80px]">Our shared family finances and savings goals.</textarea>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Currency</label>
+                            <div
+                                class="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+                                <iconify-icon icon="solar:dollar-linear" class="text-emerald-600"></iconify-icon>
+                                <span class="text-sm font-medium text-slate-700">PHP - Philippine Peso (₱)</span>
+                                <span class="badge badge-neutral text-[9px] ml-auto">Default</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">Family Visibility</label>
+                            <div class="grid grid-cols-2 gap-3" id="edit-family-visibility-selector">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="edit-family-visibility" value="private"
+                                        class="peer sr-only" checked>
+                                    <div class="family-card text-center py-3">
+                                        <div class="text-xs font-semibold">Private</div>
+                                        <div class="family-check">
+                                            <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="edit-family-visibility" value="public"
+                                        class="peer sr-only">
+                                    <div class="family-card text-center py-3">
+                                        <div class="text-xs font-semibold">Public</div>
+                                        <div class="family-check">
+                                            <iconify-icon icon="solar:check-bold" width="12"></iconify-icon>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="family-notice info">
+                            <iconify-icon icon="solar:info-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <p class="font-medium text-blue-900">Family Settings</p>
+                                <p class="text-blue-700">Private families require invitations. Public families can be
+                                    discovered by others.</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-100">
+                            <button type="button"
+                                class="flex items-center gap-2 text-[10px] font-bold text-red-500 hover:text-red-700 transition-colors"
+                                onclick="openModal('delete-family-modal'); closeModal('edit-family-modal')">
+                                <iconify-icon icon="solar:trash-bin-trash-linear" width="14"></iconify-icon>
+                                DELETE FAMILY GROUP
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Review -->
+            <div id="editFamilyStep2" class="family-step-content hidden">
+                <div class="space-y-4 family-stagger">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 mb-2">Review Changes</h4>
+                        <p class="text-xs text-slate-500">Confirm your family updates before saving</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-xl border border-slate-200 p-4">
+                            <h5 class="text-xs font-semibold text-slate-900 mb-3 uppercase tracking-wide">Updated
+                                Information</h5>
+                            <div class="space-y-2">
+                                <div class="family-review">
+                                    <span class="family-review-title">Family Name</span>
+                                    <span class="family-review-value" id="editFamilyReviewName">-</span>
+                                </div>
+                                <div class="family-review">
+                                    <span class="family-review-title">Description</span>
+                                    <span class="family-review-value" id="editFamilyReviewDescription">-</span>
+                                </div>
+                                <div class="family-review">
+                                    <span class="family-review-title">Currency</span>
+                                    <span class="family-review-value">PHP - Philippine Peso (₱)</span>
+                                </div>
+                                <div class="family-review">
+                                    <span class="family-review-title">Family Type</span>
+                                    <span class="family-review-value" id="editFamilyReviewVisibility">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="family-notice info">
+                            <iconify-icon icon="solar:info-circle-bold" width="16"></iconify-icon>
+                            <div>
+                                <p class="font-medium text-blue-900">Review your changes</p>
+                                <p class="text-blue-700">Make sure all information is correct before saving. You can
+                                    always edit later.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer flex justify-between border-t border-slate-100">
+            <button id="editFamilyBtnBack" onclick="editFamilyPreviousStep()" class="btn btn-secondary hidden">
+                <iconify-icon icon="solar:arrow-left-linear" class="mr-1"></iconify-icon> Back
+            </button>
+            <div class="flex-1"></div>
+            <button id="editFamilyBtnNext" onclick="editFamilyNextStep()" class="btn btn-primary"
+                style="background:#10b981; box-shadow:none;">
+                Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Family Modal -->
+<div class="modal-overlay" id="delete-family-modal">
+    <div class="modal max-w-sm">
+        <div class="modal-body text-center p-6">
+            <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center mx-auto mb-4">
+                <iconify-icon icon="solar:trash-bin-trash-bold" width="24"></iconify-icon>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">Delete Family Group?</h3>
+            <p class="text-sm text-slate-500 mb-6 leading-relaxed">
+                All shared budgets, goals, and contributions will be lost. This action cannot be undone.
+            </p>
+
+            <div class="form-group text-left mb-6">
+                <label class="form-label">Type <span class="font-bold text-rose-600">DELETE</span> to confirm</label>
+                <input type="text" class="form-input border-rose-200 focus:border-rose-500 focus:ring-rose-100"
+                    placeholder="DELETE">
+            </div>
+
+            <div class="flex gap-3 justify-center">
+                <button type="button" class="btn btn-secondary w-full justify-center"
+                    onclick="closeModal('delete-family-modal')">Cancel</button>
+                <button type="button"
+                    class="btn w-full justify-center bg-rose-600 text-white hover:bg-rose-700 shadow-sm shadow-rose-100">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Family Modal -->
+<div class="modal-overlay" id="leave-family-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="text-sm font-semibold text-slate-900">Leave Family Group</h3>
+            <button class="text-slate-400 hover:text-slate-600" onclick="closeModal('leave-family-modal')">
+                <iconify-icon icon="solar:close-circle-linear" width="20"></iconify-icon>
+            </button>
+        </div>
+        <div class="modal-body space-y-4">
+            <div class="p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-3">
+                <iconify-icon icon="solar:danger-triangle-bold" class="text-amber-500 shrink-0"
+                    width="20"></iconify-icon>
+                <div class="space-y-1">
+                    <p class="text-xs font-semibold text-amber-900">Are you sure you want to leave?</p>
+                    <p class="text-[10px] text-amber-700 leading-relaxed">
+                        You will lose access to all shared budgets, goals, and history. You'll need a new invitation to
+                        rejoin.
+                    </p>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h4 class="text-xs font-semibold text-slate-700">What happens next:</h4>
+                <ul class="space-y-2">
+                    <li class="flex items-start gap-2 text-[11px] text-slate-500">
+                        <iconify-icon icon="solar:check-circle-linear" class="text-emerald-400 mt-0.5"
+                            width="14"></iconify-icon>
+                        Your contributions to shared goals will remain visible.
+                    </li>
+                    <li class="flex items-start gap-2 text-[11px] text-slate-500">
+                        <iconify-icon icon="solar:check-circle-linear" class="text-emerald-400 mt-0.5"
+                            width="14"></iconify-icon>
+                        Shared budgets will be removed from your dashboard.
+                    </li>
+                    <li class="flex items-start gap-2 text-[11px] text-slate-500">
+                        <iconify-icon icon="solar:check-circle-linear" class="text-emerald-400 mt-0.5"
+                            width="14"></iconify-icon>
+                        Admins will be notified of your departure.
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('leave-family-modal')">Cancel</button>
+            <button type="button" class="btn bg-rose-600 text-white hover:bg-rose-700 shadow-sm shadow-rose-100"
+                onclick="closeModal('leave-family-modal'); location.reload()">
+                Confirm & Leave
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab switching functionality
+    function switchTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+
+        // Remove active classes from all tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('text-emerald-600', 'border-emerald-500');
+            btn.classList.add('text-slate-500', 'border-transparent');
+        });
+
+        // Show selected tab content
+        const targetTab = document.getElementById(`${tabName}-tab`);
+        if (targetTab) {
+            targetTab.classList.remove('hidden');
+        }
+
+        // Mark active tab button
+        const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('text-emerald-600', 'border-emerald-500');
+            activeBtn.classList.remove('text-slate-500', 'border-transparent');
+        }
+    }
+
+    // No Family Tab switching
+    function switchNoFamilyTab(tabName) {
+        // Hide all no-family tab contents
+        document.querySelectorAll('.no-family-tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+
+        // Remove active classes from buttons
+        document.querySelectorAll('.no-family-tab-btn').forEach(btn => {
+            btn.classList.remove('text-emerald-600', 'border-emerald-500');
+            btn.classList.add('text-slate-500');
+        });
+
+        // Show target
+        const target = document.getElementById(`no-family-${tabName}-tab`);
+        if (target) target.classList.remove('hidden');
+
+        // Set active button
+        const activeBtn = document.querySelector(`.no-family-tab-btn[data-tab="${tabName}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('text-emerald-600', 'border-emerald-500');
+            activeBtn.classList.remove('text-slate-500');
+        }
+    }
+
+    // Mock family creation state
+    let hasActiveFamily = false;
+
+    function mockCreateFamily() {
+        const noFamilyState = document.getElementById('no-family-state');
+        const familyDashboard = document.getElementById('family-dashboard');
+
+        if (hasActiveFamily) {
+            showClassifiedError({
+                type: 'USER_ALREADY_MEMBER',
+                userMessage: 'This user is already a member of another family. Users can only belong to one family at a time.',
+                suggestedAction: 'The user must leave their current family before joining yours.'
+            });
+            return;
+        }
+
+        if (noFamilyState && familyDashboard) {
+            noFamilyState.classList.remove('animate__fadeIn');
+            noFamilyState.classList.add('animate__fadeOut');
+
+            setTimeout(() => {
+                noFamilyState.style.display = 'none';
+                familyDashboard.classList.remove('hidden');
+                familyDashboard.classList.add('animate__fadeIn');
+                hasActiveFamily = true;
+
+                // Show success notification
+                console.log('Family joined/initialized successfully!');
+            }, 500);
+        }
+    }
+
+    // Replicating React's error classification system for the prototype
+    function showClassifiedError(error) {
+        console.error(`[${error.type}] ${error.userMessage}`);
+
+        // Create a toast-like error message matching Supabase aesthetics
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-6 right-6 z-[60] bg-white border border-rose-100 shadow-2xl rounded-xl p-4 max-w-sm animate__animated animate__slideInUp';
+        toast.innerHTML = `
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 shrink-0">
+                    <iconify-icon icon="solar:danger-circle-linear" width="24"></iconify-icon>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-900">Permission Denied</h4>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">${error.userMessage}</p>
+                    <p class="text-[10px] text-emerald-600 font-medium mt-3 uppercase tracking-wider cursor-pointer hover:underline">${error.suggestedAction}</p>
+                </div>
+                <button class="text-slate-400 hover:text-slate-600 ml-auto" onclick="this.parentElement.parentElement.remove()">
+                    <iconify-icon icon="solar:close-circle-linear" width="18"></iconify-icon>
+                </button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+
+        // Auto hide after 6 seconds
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.classList.remove('animate__slideInUp');
+                toast.classList.add('animate__slideOutDown');
+                setTimeout(() => toast.remove(), 500);
+            }
+        }, 6000);
+    }
+
+    // Mock decline invitation
+    function declineInvite() {
+        const inviteCard = document.getElementById('active-invite-card');
+        const emptyState = document.getElementById('invites-empty-state');
+        const notificationDot = document.querySelector('.no-family-tab-btn[data-tab="invites"] span');
+
+        if (inviteCard && emptyState) {
+            inviteCard.classList.add('animate__animated', 'animate__fadeOut');
+            setTimeout(() => {
+                inviteCard.style.display = 'none';
+                emptyState.classList.remove('hidden');
+                if (notificationDot) notificationDot.style.display = 'none';
+            }, 500);
+        }
+    }
+
+
+
+    // Initialize tab listeners
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            switchTab(btn.dataset.tab);
+        });
+    });
+
+    document.querySelectorAll('.no-family-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            switchNoFamilyTab(btn.dataset.tab);
+        });
+    });
+
+    // Close modal on backdrop click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal(overlay.id);
+            }
+        });
+    });
+
+    // Handle invite submit (prototype preview)
+    function handleInviteSubmit(e) {
+        e.preventDefault();
+        // Show success toast or feedback
+        alert('Invitation sent successfully! (Prototype Preview)');
+        closeModal('invite-member-modal');
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.open').forEach(modal => {
+                closeModal(modal.id);
+            });
+        }
+    });
+
+    // ==========================================
+    // Create Family Modal Multi-Step Logic
+    // ==========================================
+    var createFamilyCurrentStep = 1;
+    var createFamilySelectedType = 'private';
+
+    window.createFamilyNextStep = function () {
+        if (createFamilyCurrentStep === 1) {
+            // Validate step 1
+            const name = document.getElementById('createFamilyName').value;
+
+            if (!name) {
+                alert('Please enter a family name');
+                return;
+            }
+
+            // Update review data
+            updateCreateFamilyReview();
+            createFamilyGoToStep(2);
+        } else if (createFamilyCurrentStep === 2) {
+            submitCreateFamily();
+        }
+    };
+
+    window.createFamilyPreviousStep = function () {
+        if (createFamilyCurrentStep > 1) {
+            createFamilyGoToStep(createFamilyCurrentStep - 1);
+        }
+    };
+
+    window.createFamilyGoToStep = function (step) {
+        var modal = document.getElementById('create-family-modal');
+        if (!modal) return;
+
+        // Hide all steps within this modal
+        modal.querySelectorAll('.family-step-content').forEach(function (content) {
+            content.classList.add('hidden');
+        });
+
+        // Show current step
+        document.getElementById('createFamilyStep' + step).classList.remove('hidden');
+
+        // Update stepper within this modal
+        modal.querySelectorAll('.family-step-dot').forEach(function (dot) {
+            dot.classList.remove('active');
+        });
+        modal.querySelectorAll('.family-step-label').forEach(function (label) {
+            label.classList.remove('active');
+        });
+
+        var dots = modal.querySelectorAll('.family-step-dot');
+        var labels = modal.querySelectorAll('.family-step-label');
+        if (dots[step - 1]) dots[step - 1].classList.add('active');
+        if (labels[step - 1]) labels[step - 1].classList.add('active');
+
+        // Update connectors within this modal
+        modal.querySelectorAll('.family-step-connector').forEach(function (connector) {
+            connector.classList.remove('completed');
+        });
+        for (var i = 1; i < step; i++) {
+            var connector = modal.querySelector('.family-step-connector[data-connector="' + i + '"]');
+            if (connector) connector.classList.add('completed');
+        }
+
+        // Update step text
+        document.getElementById('createFamilyStepText').textContent = 'Step ' + step + ' of 2';
+
+        // Update buttons
+        var backBtn = document.getElementById('createFamilyBtnBack');
+        var nextBtn = document.getElementById('createFamilyBtnNext');
+
+        if (step === 1) {
+            backBtn.classList.add('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (step === 2) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = '<iconify-icon icon="solar:check-circle-linear" width="16"></iconify-icon> Create Family';
+        }
+
+        createFamilyCurrentStep = step;
+    };
+
+    window.selectCreateFamilyType = function (type) {
+        // Check the corresponding radio button
+        const selector = document.getElementById('create-family-type-selector');
+        if (!selector) return;
+        const radio = selector.querySelector('input[value="' + type + '"]');
+        if (radio) radio.checked = true;
+
+        // Update visual selected state on cards
+        selector.querySelectorAll('.family-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        if (radio) {
+            radio.closest('label').querySelector('.family-card').classList.add('selected');
+        }
+
+        createFamilySelectedType = type;
+    };
+
+    // Handle radio button clicks for family type selection
+    (function () {
+        const selector = document.getElementById('create-family-type-selector');
+        if (selector) {
+            selector.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    // Update visual state
+                    selector.querySelectorAll('.family-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    this.closest('label').querySelector('.family-card').classList.add('selected');
+                    createFamilySelectedType = this.value;
+                });
+            });
+
+            // Initialize: mark the default checked radio's card as selected
+            const checked = selector.querySelector('input[type="radio"]:checked');
+            if (checked) {
+                checked.closest('label').querySelector('.family-card').classList.add('selected');
+                createFamilySelectedType = checked.value;
+            }
+        }
+    })();
+
+    window.updateCreateFamilyReview = function () {
+        const name = document.getElementById('createFamilyName').value;
+        const description = document.getElementById('createFamilyDescription').value;
+
+        // Read family type from radio buttons
+        const selector = document.getElementById('create-family-type-selector');
+        if (selector) {
+            const checkedRadio = selector.querySelector('input[type="radio"]:checked');
+            if (checkedRadio) createFamilySelectedType = checkedRadio.value;
+        }
+
+        // Update review display
+        document.getElementById('createFamilyReviewName').textContent = name || '-';
+        document.getElementById('createFamilyReviewDescription').textContent = description || '-';
+        document.getElementById('createFamilyReviewType').textContent = createFamilySelectedType.charAt(0).toUpperCase() + createFamilySelectedType.slice(1);
+    };
+
+    // Override existing submitCreateFamily function
+    window.submitCreateFamily = function () {
+        const btn = document.querySelector('#createFamilyBtnNext');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Creating...';
+
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            closeModal('create-family-modal');
+
+            // Reset form
+            document.getElementById('createFamilyName').value = '';
+            document.getElementById('createFamilyDescription').value = '';
+
+            // Reset to step 1
+            createFamilyGoToStep(1);
+
+            // Transition to family dashboard (simulate successful creation)
+            mockCreateFamily();
+        }, 1500);
+    };
+
+    // ==========================================
+    // Invite Member Modal Multi-Step Logic
+    // ==========================================
+    var inviteMemberCurrentStep = 1;
+    var inviteMemberSelectedRole = 'member';
+
+    window.inviteMemberNextStep = function () {
+        if (inviteMemberCurrentStep === 1) {
+            // Validate step 1
+            const email = document.getElementById('inviteMemberEmail').value;
+
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+
+            // Update review data
+            updateInviteMemberReview();
+            inviteMemberGoToStep(2);
+        } else if (inviteMemberCurrentStep === 2) {
+            submitInvitation();
+        }
+    };
+
+    window.inviteMemberPreviousStep = function () {
+        if (inviteMemberCurrentStep > 1) {
+            inviteMemberGoToStep(inviteMemberCurrentStep - 1);
+        }
+    };
+
+    window.inviteMemberGoToStep = function (step) {
+        var modal = document.getElementById('invite-member-modal');
+        if (!modal) return;
+
+        // Hide all steps within this modal
+        modal.querySelectorAll('.family-step-content').forEach(function (content) {
+            content.classList.add('hidden');
+        });
+
+        // Show current step
+        document.getElementById('inviteMemberStep' + step).classList.remove('hidden');
+
+        // Update stepper within this modal
+        modal.querySelectorAll('.family-step-dot').forEach(function (dot) {
+            dot.classList.remove('active');
+        });
+        modal.querySelectorAll('.family-step-label').forEach(function (label) {
+            label.classList.remove('active');
+        });
+
+        var dots = modal.querySelectorAll('.family-step-dot');
+        var labels = modal.querySelectorAll('.family-step-label');
+        if (dots[step - 1]) dots[step - 1].classList.add('active');
+        if (labels[step - 1]) labels[step - 1].classList.add('active');
+
+        // Update connectors within this modal
+        modal.querySelectorAll('.family-step-connector').forEach(function (connector) {
+            connector.classList.remove('completed');
+        });
+        for (var i = 1; i < step; i++) {
+            var connector = modal.querySelector('.family-step-connector[data-connector="' + i + '"]');
+            if (connector) connector.classList.add('completed');
+        }
+
+        // Update step text
+        document.getElementById('inviteMemberStepText').textContent = 'Step ' + step + ' of 2';
+
+        // Update buttons
+        var backBtn = document.getElementById('inviteMemberBtnBack');
+        var nextBtn = document.getElementById('inviteMemberBtnNext');
+
+        if (step === 1) {
+            backBtn.classList.add('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (step === 2) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = '<iconify-icon icon="solar:check-circle-linear" width="16"></iconify-icon> Send Invitation';
+        }
+
+        inviteMemberCurrentStep = step;
+    };
+
+    window.selectInviteMemberRole = function (role) {
+        // Check the corresponding radio button
+        const selector = document.getElementById('invite-member-role-selector');
+        if (!selector) return;
+        const radio = selector.querySelector('input[value="' + role + '"]');
+        if (radio) radio.checked = true;
+
+        // Update visual selected state on cards
+        selector.querySelectorAll('.family-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        if (radio) {
+            radio.closest('label').querySelector('.family-card').classList.add('selected');
+        }
+
+        inviteMemberSelectedRole = role;
+    };
+
+    // Handle radio button clicks for role selection
+    (function () {
+        const selector = document.getElementById('invite-member-role-selector');
+        if (selector) {
+            selector.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    // Update visual state
+                    selector.querySelectorAll('.family-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    this.closest('label').querySelector('.family-card').classList.add('selected');
+                    inviteMemberSelectedRole = this.value;
+                });
+            });
+
+            // Initialize: mark the default checked radio's card as selected
+            const checked = selector.querySelector('input[type="radio"]:checked');
+            if (checked) {
+                checked.closest('label').querySelector('.family-card').classList.add('selected');
+                inviteMemberSelectedRole = checked.value;
+            }
+        }
+    })();
+
+    window.updateInviteMemberReview = function () {
+        const email = document.getElementById('inviteMemberEmail').value;
+        const message = document.getElementById('inviteMemberMessage').value;
+
+        // Read role from radio buttons
+        const selector = document.getElementById('invite-member-role-selector');
+        if (selector) {
+            const checkedRadio = selector.querySelector('input[type="radio"]:checked');
+            if (checkedRadio) inviteMemberSelectedRole = checkedRadio.value;
+        }
+
+        // Update review display
+        document.getElementById('inviteMemberReviewEmail').textContent = email || '-';
+        document.getElementById('inviteMemberReviewRole').textContent = inviteMemberSelectedRole.charAt(0).toUpperCase() + inviteMemberSelectedRole.slice(1);
+        document.getElementById('inviteMemberReviewMessage').textContent = message || '-';
+    };
+
+    // Override existing handleInviteSubmit function
+    window.submitInvitation = function () {
+        const btn = document.querySelector('#inviteMemberBtnNext');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Sending...';
+
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            closeModal('invite-member-modal');
+            alert('Invitation sent successfully!');
+
+            // Reset form
+            document.getElementById('inviteMemberEmail').value = '';
+            document.getElementById('inviteMemberMessage').value = '';
+
+            // Reset to step 1
+            inviteMemberGoToStep(1);
+        }, 1500);
+    };
+
+    // ==========================================
+    // Edit Family Modal Multi-Step Logic
+    // ==========================================
+    var editFamilyCurrentStep = 1;
+    var editFamilySelectedVisibility = 'private';
+
+    window.editFamilyNextStep = function () {
+        if (editFamilyCurrentStep === 1) {
+            // Validate step 1
+            const name = document.getElementById('editFamilyName').value;
+
+            if (!name) {
+                alert('Please enter a family name');
+                return;
+            }
+
+            // Update review data
+            updateEditFamilyReview();
+            editFamilyGoToStep(2);
+        } else if (editFamilyCurrentStep === 2) {
+            submitEditFamily();
+        }
+    };
+
+    window.editFamilyPreviousStep = function () {
+        if (editFamilyCurrentStep > 1) {
+            editFamilyGoToStep(editFamilyCurrentStep - 1);
+        }
+    };
+
+    window.editFamilyGoToStep = function (step) {
+        var modal = document.getElementById('edit-family-modal');
+        if (!modal) return;
+
+        // Hide all steps within this modal
+        modal.querySelectorAll('.family-step-content').forEach(function (content) {
+            content.classList.add('hidden');
+        });
+
+        // Show current step
+        document.getElementById('editFamilyStep' + step).classList.remove('hidden');
+
+        // Update stepper within this modal
+        modal.querySelectorAll('.family-step-dot').forEach(function (dot) {
+            dot.classList.remove('active');
+        });
+        modal.querySelectorAll('.family-step-label').forEach(function (label) {
+            label.classList.remove('active');
+        });
+
+        var dots = modal.querySelectorAll('.family-step-dot');
+        var labels = modal.querySelectorAll('.family-step-label');
+        if (dots[step - 1]) dots[step - 1].classList.add('active');
+        if (labels[step - 1]) labels[step - 1].classList.add('active');
+
+        // Update connectors within this modal
+        modal.querySelectorAll('.family-step-connector').forEach(function (connector) {
+            connector.classList.remove('completed');
+        });
+        for (var i = 1; i < step; i++) {
+            var connector = modal.querySelector('.family-step-connector[data-connector="' + i + '"]');
+            if (connector) connector.classList.add('completed');
+        }
+
+        // Update step text
+        document.getElementById('editFamilyStepText').textContent = 'Step ' + step + ' of 2';
+
+        // Update buttons
+        var backBtn = document.getElementById('editFamilyBtnBack');
+        var nextBtn = document.getElementById('editFamilyBtnNext');
+
+        if (step === 1) {
+            backBtn.classList.add('hidden');
+            nextBtn.innerHTML = 'Continue <iconify-icon icon="solar:arrow-right-linear" class="ml-1"></iconify-icon>';
+        } else if (step === 2) {
+            backBtn.classList.remove('hidden');
+            nextBtn.innerHTML = '<iconify-icon icon="solar:check-circle-linear" width="16"></iconify-icon> Save Changes';
+        }
+
+        editFamilyCurrentStep = step;
+    };
+
+    window.selectEditFamilyVisibility = function (visibility) {
+        // Check the corresponding radio button
+        const selector = document.getElementById('edit-family-visibility-selector');
+        if (!selector) return;
+        const radio = selector.querySelector('input[value="' + visibility + '"]');
+        if (radio) radio.checked = true;
+
+        // Update visual selected state on cards
+        selector.querySelectorAll('.family-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        if (radio) {
+            radio.closest('label').querySelector('.family-card').classList.add('selected');
+        }
+
+        editFamilySelectedVisibility = visibility;
+    };
+
+    // Handle radio button clicks for visibility selection
+    (function () {
+        const selector = document.getElementById('edit-family-visibility-selector');
+        if (selector) {
+            selector.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    // Update visual state
+                    selector.querySelectorAll('.family-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    this.closest('label').querySelector('.family-card').classList.add('selected');
+                    editFamilySelectedVisibility = this.value;
+                });
+            });
+
+            // Initialize: mark the default checked radio's card as selected
+            const checked = selector.querySelector('input[type="radio"]:checked');
+            if (checked) {
+                checked.closest('label').querySelector('.family-card').classList.add('selected');
+                editFamilySelectedVisibility = checked.value;
+            }
+        }
+    })();
+
+    window.updateEditFamilyReview = function () {
+        const name = document.getElementById('editFamilyName').value;
+        const description = document.getElementById('editFamilyDescription').value;
+
+        // Read visibility from radio buttons
+        const selector = document.getElementById('edit-family-visibility-selector');
+        if (selector) {
+            const checkedRadio = selector.querySelector('input[type="radio"]:checked');
+            if (checkedRadio) editFamilySelectedVisibility = checkedRadio.value;
+        }
+
+        // Update review display
+        document.getElementById('editFamilyReviewName').textContent = name || '-';
+        document.getElementById('editFamilyReviewDescription').textContent = description || '-';
+        document.getElementById('editFamilyReviewVisibility').textContent = editFamilySelectedVisibility.charAt(0).toUpperCase() + editFamilySelectedVisibility.slice(1);
+    };
+
+    // Override existing submitEditFamily function
+    window.submitEditFamily = function () {
+        const btn = document.querySelector('#editFamilyBtnNext');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Saving...';
+
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            closeModal('edit-family-modal');
+            alert('Family updated successfully!');
+
+            // Reset to step 1
+            editFamilyGoToStep(1);
+        }, 1500);
+    };
+</script>
+
+<style>
+    /* Family Modal Styles */
+    .family-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem 1.5rem;
+        gap: 0.5rem;
+    }
+
+    .family-step-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .family-step-dot {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background: #f1f5f9;
+        border: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+        transition: all 0.3s ease;
+    }
+
+    .family-step-dot.active {
+        background: #10b981;
+        border-color: #10b981;
+        color: white;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .family-step-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #94a3b8;
+        transition: all 0.3s ease;
+    }
+
+    .family-step-label.active {
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    .family-step-connector {
+        width: 3rem;
+        height: 2px;
+        background: #e2e8f0;
+        position: relative;
+    }
+
+    .family-step-connector[data-connector="1"]::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 0%;
+        background: #10b981;
+        transition: width 0.3s ease;
+    }
+
+    .family-step-connector.completed[data-connector="1"]::after {
+        width: 100%;
+    }
+
+    .family-step-content {
+        animation: familyFadeIn 0.4s ease-out;
+    }
+
+    .family-stagger>* {
+        animation: familyStagger 0.5s ease-out backwards;
+    }
+
+    .family-stagger>*:nth-child(1) {
+        animation-delay: 0ms;
+    }
+
+    .family-stagger>*:nth-child(2) {
+        animation-delay: 50ms;
+    }
+
+    .family-stagger>*:nth-child(3) {
+        animation-delay: 100ms;
+    }
+
+    .family-stagger>*:nth-child(4) {
+        animation-delay: 150ms;
+    }
+
+    .family-stagger>*:nth-child(5) {
+        animation-delay: 200ms;
+    }
+
+    .family-stagger>*:nth-child(6) {
+        animation-delay: 250ms;
+    }
+
+    @keyframes familyFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes familyStagger {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .family-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .family-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .family-card {
+        position: relative;
+        padding: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .family-card:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .family-card.selected {
+        border-color: #10b981;
+        background: #f0fdf4;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .family-check {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 50%;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.2s ease;
+        color: white;
+    }
+
+    .family-card.selected .family-check {
+        background: #10b981;
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .family-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .family-notice.info {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        color: #0369a1;
+    }
+
+    .family-notice.success {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #15803d;
+    }
+
+    .family-review {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .family-review:last-child {
+        border-bottom: none;
+    }
+
+    .family-review-title {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #64748b;
+    }
+
+    .family-review-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .family-step-content,
+        .family-stagger>* {
+            animation: none !important;
+        }
+    }
+</style>
