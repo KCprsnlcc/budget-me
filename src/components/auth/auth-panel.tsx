@@ -8,21 +8,21 @@ const testimonialsData = {
     {
       name: "Marcus Alexander Roldan",
       username: "@marcus.alexander",
-      image: "/profiles/marcus.alexander.jpg",
+      image: "/profiles/marcus.alexander.webp",
       content:
         "BudgetMe helped me save enough for a down payment on my house in just 18 months. The goal tracking feature is fantastic!",
     },
     {
       name: "Edward Baulita",
       username: "@edward.bau",
-      image: "/profiles/edward.bau.jpg",
+      image: "/profiles/edward.bau.webp",
       content:
         "As a freelancer with irregular income, BudgetMe has been a game-changer. The visualization tools help me see months ahead.",
     },
     {
       name: "Kenneth Buela",
       username: "@kenneth.b",
-      image: "/profiles/kenneth.b.jpg",
+      image: "/profiles/kenneth.b.webp",
       content:
         "The AI-powered insights have completely changed how I think about my spending habits. It predicted patterns I hadn't noticed.",
     },
@@ -31,21 +31,21 @@ const testimonialsData = {
     {
       name: "Adonis Vincent Villanueva",
       username: "@adonis.vincent",
-      image: "/profiles/adonis.vincent.jpg",
+      image: "/profiles/adonis.vincent.webp",
       content:
         "The interface is so clean and premium. It doesn't feel like a chore to manage my finances anymore. Truly a modern web experience.",
     },
     {
       name: "Jamil Amilhamja",
       username: "@jamil.amil",
-      image: "/profiles/jamil.amil.jpg",
+      image: "/profiles/jamil.amil.webp",
       content:
         "I love the joint account feature. Managing household expenses with my partner has never been this transparent and stress-free.",
     },
     {
       name: "Sire Enopia",
       username: "@sire.enopia",
-      image: "/profiles/sire.enopia.jpg",
+      image: "/profiles/sire.enopia.webp",
       content:
         "The AI reminders for upcoming bills have saved me from late fees multiple times. It's like having a personal assistant in my pocket.",
     },
@@ -54,21 +54,21 @@ const testimonialsData = {
     {
       name: "Abduradzmi Amdal",
       username: "@abdu.amdal",
-      image: "/profiles/abdu.amdal.jpg",
+      image: "/profiles/abdu.amdal.webp",
       content:
         "The expense categorization is spot on. I finally know where my money goes every month. It's so much easier than my old spreadsheet!",
     },
     {
       name: "Saeed Nasre Shaidali",
       username: "@saeed.nasre",
-      image: "/profiles/saeed.nasre.jpg",
+      image: "/profiles/saeed.nasre.webp",
       content:
         "BudgetMe's debt payoff tracker is incredible. Seeing the progress bars move actually keeps me motivated to stay out of debt.",
     },
     {
       name: "Khadz Akil",
       username: "@khadz.akil",
-      image: "/profiles/khadz.akil.jpg",
+      image: "/profiles/khadz.akil.webp",
       content:
         "Highly recommended for students! The templates helped me manage my allowance and even save for a new laptop effortlessly.",
     },

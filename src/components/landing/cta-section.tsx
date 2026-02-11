@@ -48,7 +48,7 @@ export function CTASection() {
         <div className="hidden lg:block absolute right-[-5%] top-1/2 -translate-y-1/2 h-[120%] z-0 pointer-events-none [mask-image:linear-gradient(to_bottom,black_70%,transparent_100%)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/2-persons.png"
+            src="/images/2-persons.webp"
             alt="BudgetMe Team"
             className="h-full w-auto object-contain object-right-bottom drop-shadow-2xl opacity-90"
           />

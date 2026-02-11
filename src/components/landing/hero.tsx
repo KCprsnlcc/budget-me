@@ -64,13 +64,13 @@ export function Hero() {
       {/* Left Hero Image */}
       <div className="hidden xl:block absolute left-5 top-1/2 -translate-y-1/2 h-[70%] z-20 pointer-events-none [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/left-side-hero.png" alt="" className="h-full w-auto object-contain object-left-bottom" />
+        <img src="/images/left-side-hero.webp" alt="" className="h-full w-auto object-contain object-left-bottom" />
       </div>
 
       {/* Right Hero Image */}
       <div className="hidden xl:block absolute right-5 top-1/2 -translate-y-1/2 h-[70%] z-20 pointer-events-none [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/right-side-hero.png" alt="" className="h-full w-auto object-contain object-right-bottom" />
+        <img src="/images/right-side-hero.webp" alt="" className="h-full w-auto object-contain object-right-bottom" />
       </div>
 
       <div className="max-w-4xl mx-auto text-center relative z-10">
