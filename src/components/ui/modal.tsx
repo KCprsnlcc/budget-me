@@ -38,6 +38,7 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
       onClick={onClose}
       role="dialog"
       aria-modal="true"
+      data-lenis-prevent
     >
       <div
         className={cn(

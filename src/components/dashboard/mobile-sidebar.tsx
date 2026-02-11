@@ -25,6 +25,7 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
 
       {/* Sidebar */}
       <aside
+        data-lenis-prevent
         className={`fixed left-0 top-0 bottom-0 w-64 bg-white text-slate-600 flex flex-col border-r border-slate-200 z-50 transition-transform duration-300 md:hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}

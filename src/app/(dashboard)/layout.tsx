@@ -13,7 +13,7 @@ export default function DashboardLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="bg-slate-50 text-slate-600 h-screen flex overflow-hidden selection:bg-emerald-500/20 selection:text-emerald-700">
+    <div data-lenis-prevent className="bg-slate-50 text-slate-600 h-screen flex overflow-hidden selection:bg-emerald-500/20 selection:text-emerald-700">
       {/* Desktop Sidebar */}
       <Sidebar />
 
