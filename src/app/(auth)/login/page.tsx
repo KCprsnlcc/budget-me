@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <AuthPanel>
+    <AuthPanel page="login">
       <LoginForm />
     </AuthPanel>
   );

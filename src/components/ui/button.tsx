@@ -8,6 +8,8 @@ const buttonVariants = cva(
       variant: {
         default:
           "bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 shadow-emerald-500/25",
+        auth:
+          "mt-2 w-full rounded-lg bg-emerald-500 px-4 py-2 text-xs font-medium text-white shadow-sm transition-all hover:bg-emerald-600 hover:shadow disabled:opacity-70 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2",
         secondary:
           "bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300",
         ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900",

@@ -18,8 +18,8 @@ export function LoginForm() {
         <h1 className="mb-1 text-xl font-medium tracking-tight text-slate-900">
           Welcome back
         </h1>
-        <p className="text-[13px] text-slate-500">
-          Sign in to your account to continue
+        <p className="text-xs text-slate-500">
+          Sign in to your BudgetMe account
         </p>
       </div>
 
@@ -29,37 +29,35 @@ export function LoginForm() {
       {/* Divider */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-slate-200" />
+          <div className="w-full border-t border-slate-100" />
         </div>
-        <div className="relative flex justify-center text-[11px]">
-          <span className="bg-white px-3 text-slate-400 uppercase tracking-wider font-medium">
-            or
-          </span>
+        <div className="relative flex justify-center text-[10px] uppercase tracking-wide">
+          <span className="bg-white px-2 text-slate-400">or</span>
         </div>
       </div>
 
       {/* Form */}
       <form className="space-y-4">
-        <div>
-          <Label htmlFor="email">Email</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="email">Email address</Label>
           <Input
             id="email"
             type="email"
-            placeholder="name@example.com"
+            placeholder="you@example.com"
             autoComplete="email"
           />
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
             <Label htmlFor="password" className="mb-0">
               Password
             </Label>
             <Link
               href="/forgot-password"
-              className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-[10px] font-medium text-slate-500 hover:text-emerald-600 transition-colors"
             >
-              Forgot?
+              Forgot password?
             </Link>
           </div>
           <div className="relative">
@@ -72,29 +70,48 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors cursor-pointer"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              {showPassword ? (
+                <EyeOff className="h-3.5 w-3.5" />
+              ) : (
+                <Eye className="h-3.5 w-3.5" />
+              )}
             </button>
           </div>
         </div>
 
-        <Button type="submit" className="w-full">
+        <div className="flex items-center pt-1">
+          <input
+            id="remember"
+            name="remember"
+            type="checkbox"
+            className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer"
+          />
+          <label
+            htmlFor="remember"
+            className="ml-2 block text-xs text-slate-600 cursor-pointer select-none"
+          >
+            Remember for 30 days
+          </label>
+        </div>
+
+        <Button type="submit" variant="auth">
           Sign in
         </Button>
       </form>
 
       {/* Footer */}
-      <p className="mt-8 text-center text-[12px] text-slate-400">
+      <div className="mt-6 text-center text-xs text-slate-500">
         Don&apos;t have an account?{" "}
         <Link
           href="/register"
-          className="text-slate-900 font-medium hover:underline"
+          className="font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
         >
           Sign up
         </Link>
-      </p>
+      </div>
     </div>
   );
 }

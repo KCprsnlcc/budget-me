@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,49 +8,44 @@ import { Label } from "@/components/ui/label";
 export function ForgotPasswordForm() {
   return (
     <div>
-      {/* Back link */}
-      <Link
-        href="/login"
-        className="inline-flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-slate-600 transition-colors mb-8"
-      >
-        <ArrowLeft size={14} />
-        Back to sign in
-      </Link>
-
       {/* Header */}
       <div className="mb-8">
         <h1 className="mb-1 text-xl font-medium tracking-tight text-slate-900">
           Reset your password
         </h1>
-        <p className="text-[13px] text-slate-500">
-          Enter your email and we&apos;ll send you a reset link
+        <p className="text-xs text-slate-500">
+          Enter your email address and we&apos;ll send you a link to reset your
+          password.
         </p>
       </div>
 
       {/* Form */}
-      <form className="space-y-4">
-        <div>
+      <form className="space-y-4 mt-6">
+        <div className="space-y-1.5">
           <Label htmlFor="email">Email address</Label>
           <Input
             id="email"
             type="email"
-            placeholder="name@example.com"
+            placeholder="you@example.com"
             autoComplete="email"
           />
         </div>
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" variant="auth">
           Send reset link
         </Button>
       </form>
 
       {/* Footer */}
-      <p className="mt-8 text-center text-[12px] text-slate-400">
+      <div className="mt-6 text-center text-xs text-slate-500">
         Remember your password?{" "}
-        <Link href="/login" className="text-slate-900 font-medium hover:underline">
+        <Link
+          href="/login"
+          className="font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+        >
           Sign in
         </Link>
-      </p>
+      </div>
     </div>
   );
 }

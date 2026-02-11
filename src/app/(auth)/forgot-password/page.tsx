@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function ForgotPasswordPage() {
   return (
-    <AuthPanel>
+    <AuthPanel page="forgot">
       <ForgotPasswordForm />
     </AuthPanel>
   );
