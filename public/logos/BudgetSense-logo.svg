@@ -1,0 +1,8 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Chat Bubble Shape -->
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 50C10 27.9086 27.9086 10 50 10C72.0914 10 90 27.9086 90 50C90 72.0914 72.0914 90 50 90C43.5 90 37.5 88.5 32 86L15 92L20 76C13.5 69 10 60 10 50Z" fill="#10b981"/>
+  <!-- Rising Bars (Transparent/Cutout) -->
+  <rect x="30" y="55" width="10" height="15" rx="2" fill="white"/>
+  <rect x="45" y="45" width="10" height="25" rx="2" fill="white"/>
+  <rect x="60" y="30" width="10" height="40" rx="2" fill="white"/>
+</svg>
