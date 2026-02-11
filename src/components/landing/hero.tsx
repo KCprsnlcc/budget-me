@@ -68,7 +68,7 @@ export function Hero() {
       </div>
 
       {/* Right Hero Image */}
-      <div className="hidden xl:block absolute right-5 top-1/2 -translate-y-1/2 h-[70%] z-20 pointer-events-none [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
+      <div className="hidden xl:block absolute right-5 top-1/2 -translate-y-1/2 h-[70%] z-10 pointer-events-none [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/images/right-side-hero.webp" alt="" className="h-full w-auto object-contain object-right-bottom" />
       </div>
