@@ -14,7 +14,7 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import {
   ArrowLeft,
   ArrowRight,
-  Target,
+  Flag,
   TrendingUp,
   TrendingDown,
   Calendar,
@@ -108,7 +108,7 @@ export function ViewGoalModal({
       <ModalHeader onClose={handleClose} className="px-5 py-3.5">
         <div className="flex items-center gap-3">
           <div className="p-1.5 rounded-lg text-emerald-600">
-            <Target size={18} />
+            <Flag size={18} />
           </div>
           <h3 className="text-sm font-semibold text-slate-900">{goal.name}</h3>
         </div>

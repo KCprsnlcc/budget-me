@@ -7,6 +7,8 @@ import {
   AlertTriangle,
   Lightbulb,
   ArrowRight,
+  ArrowUp,
+  ArrowDown,
   Brain,
   Sparkles,
   DollarSign,
@@ -112,6 +114,13 @@ export default function PredictionsPage() {
     setDetailedInsights(prev => !prev);
   }, []);
 
+  const handleGeneratePredictions = useCallback(() => {
+    // TODO: Implement actual predictions generation logic
+    console.log("Generating predictions...");
+    // This would typically call an API to generate new predictions
+    // and update the state with the new data
+  }, []);
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Page Header */}
@@ -119,13 +128,17 @@ export default function PredictionsPage() {
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">AI Predictions</h2>
-            <Badge variant="brand" className="px-3 py-1">
-              <Brain size={12} className="mr-1" /> AI Powered
-            </Badge>
+            <span className="flex items-center gap-1 text-xs font-medium text-slate-600">
+              <Cpu size={12} /> AI Powered
+            </span>
           </div>
           <p className="text-sm text-slate-500 mt-1 font-light">Smart forecasts and insights powered by Prophet machine learning.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={handleGeneratePredictions}>
+            <Wand2 size={16} className="mr-2" />
+            Generate Predictions
+          </Button>
           <Button variant="outline" size="sm" onClick={handleHistory}>
             <History size={16} className="mr-2" />
             View History
@@ -138,99 +151,53 @@ export default function PredictionsPage() {
         {/* Monthly Income Card */}
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2 rounded-lg text-slate-400 group-hover:text-emerald-600 transition-colors">
-              <Wallet size={22} />
+            <div className="text-slate-500 p-2 rounded-lg">
+              <Wallet size={22} strokeWidth={1.5} />
             </div>
-            <div className="flex flex-col items-end gap-1">
-              <Badge variant="success" className="text-[10px] px-2 py-0.5">
-                <TrendingUp size={10} className="mr-1" />
-                12.4%
-              </Badge>
-              <span className="text-[9px] text-slate-400">vs last month</span>
+            <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-700 border-emerald-100 px-2 py-1 rounded-full border">
+              <ArrowUp size={12} />
+              +12.4%
             </div>
           </div>
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Monthly Income</div>
-          <div className="flex items-baseline gap-2">
-            <div className="text-2xl font-bold text-slate-900">₱8,450.00</div>
-            <div className="text-[10px] text-slate-400 line-through">₱7,520</div>
-          </div>
-          <p className="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
-            <AlertTriangle size={12} />
-            Confidence: <span className="text-emerald-600 font-medium">92%</span>
-          </p>
+          <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Monthly Income</div>
+          <div className="text-xl font-semibold text-slate-900 tracking-tight">$8,240.00</div>
         </Card>
 
         {/* Monthly Expenses Card */}
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2 rounded-lg text-slate-400 group-hover:text-amber-600 transition-colors">
-              <ShoppingBag size={22} />
+            <div className="text-slate-500 p-2 rounded-lg">
+              <ShoppingBag size={22} strokeWidth={1.5} />
             </div>
-            <div className="flex flex-col items-end gap-1">
-              <Badge variant="warning" className="text-[10px] px-2 py-0.5">
-                <TrendingUp size={10} className="mr-1" />
-                4.2%
-              </Badge>
-              <span className="text-[9px] text-slate-400">vs last month</span>
+            <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-700 border-emerald-100 px-2 py-1 rounded-full border">
+              <ArrowUp size={12} />
+              +5.4%
             </div>
           </div>
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Monthly Expenses</div>
-          <div className="flex items-baseline gap-2">
-            <div className="text-2xl font-bold text-slate-900">₱4,250.00</div>
-            <div className="text-[10px] text-slate-400 line-through">₱4,080</div>
-          </div>
-          <p className="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
-            <AlertTriangle size={12} />
-            Confidence: <span className="text-amber-600 font-medium">85%</span>
-          </p>
+          <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Monthly Expenses</div>
+          <div className="text-xl font-semibold text-slate-900 tracking-tight">$3,405.50</div>
         </Card>
 
-        {/* Net Savings Card */}
+        {/* Net Balance Card */}
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2 rounded-lg text-slate-400 group-hover:text-emerald-600 transition-colors">
-              <PiggyBank size={22} />
-            </div>
-            <div className="flex flex-col items-end gap-1">
-              <Badge variant="success" className="text-[10px] px-2 py-0.5">
-                <TrendingUp size={10} className="mr-1" />
-                22.1%
-              </Badge>
-              <span className="text-[9px] text-slate-400">vs last month</span>
+            <div className="text-slate-500 p-2 rounded-lg">
+              <PiggyBank size={22} strokeWidth={1.5} />
             </div>
           </div>
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Net Savings</div>
-          <div className="flex items-baseline gap-2">
-            <div className="text-2xl font-bold text-slate-900">₱4,200.00</div>
-            <div className="text-[10px] text-slate-400 line-through">₱3,440</div>
-          </div>
-          <p className="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
-            <AlertTriangle size={12} />
-            Confidence: <span className="text-emerald-600 font-medium">88%</span>
-          </p>
+          <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Net Balance</div>
+          <div className="text-xl font-semibold text-slate-900 tracking-tight">$4,834.50</div>
         </Card>
 
         {/* Savings Rate Card */}
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2 rounded-lg text-slate-400 group-hover:text-blue-600 transition-colors">
-              <ChartBar size={22} />
-            </div>
-            <div className="flex flex-col items-end gap-1">
-              <Badge variant="info" className="text-[10px] px-2 py-0.5">
-                Target: 50%
-              </Badge>
-              <span className="text-[9px] text-slate-400">Goal progress</span>
+            <div className="text-slate-500 p-2 rounded-lg">
+              <ChartBar size={22} strokeWidth={1.5} />
             </div>
           </div>
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Savings Rate</div>
-          <div className="flex items-baseline gap-2">
-            <div className="text-2xl font-bold text-slate-900">49.7%</div>
-            <div className="text-[10px] text-slate-400">Predicted</div>
-          </div>
-          <div className="w-full bg-slate-100 rounded-full h-1 mt-3 overflow-hidden">
-            <div className="bg-blue-500 h-full rounded-full" style={{ width: "49.7%" }} />
-          </div>
+          <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Savings Rate</div>
+          <div className="text-xl font-semibold text-slate-900 tracking-tight">58.6%</div>
         </Card>
       </div>
 
@@ -257,80 +224,66 @@ export default function PredictionsPage() {
           </div>
         </div>
 
-        <div className="h-80 flex items-end justify-between gap-2 sm:gap-4 px-4 border-b border-slate-50 relative group/chart bg-slate-50/30 rounded-lg">
-          {/* Confidence Interval Background */}
-          <div className="absolute inset-0 flex items-center justify-end pr-4 pointer-events-none opacity-20">
-            <div className="w-1/2 h-32 bg-emerald-100 rounded-l-full blur-3xl"></div>
+        <div className="relative h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50">
+          {/* Grid lines */}
+          <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+            <div className="w-full h-px bg-slate-100/50" />
+            <div className="w-full h-px bg-slate-100/50" />
+            <div className="w-full h-px bg-slate-100/50" />
+            <div className="w-full h-px bg-slate-100/50" />
+            <div className="w-full h-px bg-slate-100/50" />
           </div>
-
-          {/* Grid Lines */}
-          <div className="absolute inset-0 flex flex-col justify-between pointer-events-none px-4">
-            <div className="w-full h-px bg-slate-200"></div>
-            <div className="w-full h-px bg-slate-200"></div>
-            <div className="w-full h-px bg-slate-200"></div>
-            <div className="w-full h-px bg-slate-200"></div>
-            <div className="w-full h-px bg-slate-200"></div>
-          </div>
-
-          {/* Y-axis labels */}
-          <div className="absolute left-0 top-0 h-full flex flex-col justify-between pointer-events-none px-2 text-[9px] text-slate-400">
-            <span>10k</span>
-            <span>8k</span>
-            <span>6k</span>
-            <span>4k</span>
-            <span>2k</span>
-            <span>0</span>
-          </div>
-
-          {/* Data Bars */}
-          <div className="flex items-end justify-between gap-2 sm:gap-4 w-full pl-8">
-            {[
-              { month: "Oct", historicalIncome: 75, expenses: 55, type: "historical" as const },
-              { month: "Nov", historicalIncome: 80, expenses: 60, type: "historical" as const },
-              { month: "Dec", historicalIncome: 78, expenses: 58, type: "current" as const },
-              { month: "Jan", predictedIncome: 85, expenses: 62, type: "predicted" as const },
-              { month: "Feb", predictedIncome: 88, expenses: 65, type: "predicted" as const },
-              { month: "Mar", predictedIncome: 92, expenses: 60, type: "predicted" as const },
-            ].map((data) => (
-              <div key={data.month} className="flex flex-col items-center flex-1 z-10 group cursor-pointer">
-                <div className="flex gap-1 items-end w-full justify-center group-hover:scale-x-110 transition-transform relative" style={{ height: '240px' }}>
-                  {data.type === "predicted" ? (
-                    <>
-                      <div 
-                        className="w-4 bg-emerald-100 border-2 border-emerald-500 border-dashed rounded-t-sm transition-all hover:bg-emerald-200 absolute"
-                        style={{ height: `${data.predictedIncome}%`, bottom: 0 }}
-                        title={`Predicted Income: ₱${(data.predictedIncome * 100).toFixed(0)}`}
-                      />
-                      <div 
-                        className="w-4 bg-emerald-500/90 border-2 border-emerald-500/30 border-dashed rounded-t-sm transition-all hover:bg-emerald-600 absolute"
-                        style={{ height: `${data.expenses}%`, bottom: 0, left: '20px' }}
-                        title={`Predicted Expenses: ₱${(data.expenses * 100).toFixed(0)}`}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <div 
-                        className="w-4 bg-slate-300 rounded-t-sm transition-all hover:bg-slate-400 absolute"
-                        style={{ height: `${data.historicalIncome}%`, bottom: 0 }}
-                        title={`Historical Income: ₱${(data.historicalIncome * 100).toFixed(0)}`}
-                      />
-                      <div 
-                        className="w-4 bg-emerald-500 rounded-t-sm transition-all hover:bg-emerald-600 absolute"
-                        style={{ height: `${data.expenses}%`, bottom: 0, left: '20px' }}
-                        title={`Expenses: ₱${(data.expenses * 100).toFixed(0)}`}
-                      />
-                    </>
-                  )}
-                </div>
-                <div className={`mt-3 text-[10px] font-medium uppercase tracking-widest ${
-                  data.type === "current" ? "text-slate-900 border-b-2 border-emerald-500 pb-1" :
-                  data.type === "predicted" ? "text-emerald-600" : "text-slate-400"
-                }`}>
-                  {data.month}
-                </div>
-              </div>
-            ))}
-          </div>
+          {[
+            { month: "Oct", income: 75, expense: 55, type: "historical" as const },
+            { month: "Nov", income: 80, expense: 60, type: "historical" as const },
+            { month: "Dec", income: 78, expense: 58, type: "current" as const },
+            { month: "Jan", income: 85, expense: 62, type: "predicted" as const },
+            { month: "Feb", income: 88, expense: 65, type: "predicted" as const },
+            { month: "Mar", income: 92, expense: 60, type: "predicted" as const },
+          ].map((d) => (
+            <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
+              {d.type === "predicted" ? (
+                <>
+                  <div
+                    className="w-3 sm:w-5 bg-slate-200 border-2 border-emerald-500 border-dashed rounded-t-[2px]"
+                    style={{ height: `${d.income}%` }}
+                  />
+                  <div
+                    className="w-3 sm:w-5 bg-emerald-500/90 border-2 border-emerald-500/30 border-dashed rounded-t-[2px]"
+                    style={{ height: `${d.expense}%` }}
+                  />
+                </>
+              ) : (
+                <>
+                  <div
+                    className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px]"
+                    style={{ height: `${d.income}%` }}
+                  />
+                  <div
+                    className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px]"
+                    style={{ height: `${d.expense}%` }}
+                  />
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
+          {[
+            { month: "Oct", type: "historical" },
+            { month: "Nov", type: "historical" },
+            { month: "Dec", type: "current" },
+            { month: "Jan", type: "predicted" },
+            { month: "Feb", type: "predicted" },
+            { month: "Mar", type: "predicted" },
+          ].map((d) => (
+            <span key={d.month} className={
+              d.type === "current" ? "text-slate-600" : 
+              d.type === "predicted" ? "text-emerald-600" : "text-slate-400"
+            }>
+              {d.month}
+            </span>
+          ))}
         </div>
 
         <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-100">
@@ -510,57 +463,61 @@ export default function PredictionsPage() {
               <ArrowRight size={14} className={`transition-transform ${detailedInsights ? "rotate-180" : ""}`} />
               {detailedInsights ? "View Less" : "View More"}
             </Button>
+            <Button size="sm" onClick={handleGeneratePredictions} className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600">
+              <Wand2 size={14} className="mr-1" />
+              Regenerate
+            </Button>
           </div>
         </div>
 
         {/* Initial Grid: Key Highlights */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           {/* High-Level Financial Analysis Card */}
-          <Card className="bg-emerald-50/40 border border-emerald-100 rounded-2xl p-5 hover:bg-emerald-50 hover:shadow-md transition-all group h-full cursor-pointer">
+          <Card className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-xl text-emerald-600 group-hover:scale-110 transition-transform">
-                <Clapperboard size={20} />
+              <div className="text-slate-500 p-2 rounded-lg">
+                <Clapperboard size={20} strokeWidth={1.5} />
               </div>
-              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Financial Summary</span>
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Financial Summary</span>
             </div>
             <p className="text-[13px] text-slate-700 leading-relaxed font-medium">
               Your income stability is high, with a projected 12.4% increase, while expenses show a manageable 4.2% rise.
             </p>
-            <div className="mt-4 flex items-center gap-2 text-[10px] text-emerald-600 font-semibold">
+            <div className="mt-4 flex items-center gap-2 text-[10px] text-slate-600 font-semibold">
               <Star size={12} />
               Strong growth profile detected
             </div>
           </Card>
 
           {/* Risk Management Card */}
-          <Card className="bg-amber-50/40 border border-amber-100 rounded-2xl p-5 hover:bg-amber-50 hover:shadow-md transition-all group h-full cursor-pointer">
+          <Card className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-xl text-amber-600 group-hover:scale-110 transition-transform">
-                <Shield size={20} />
+              <div className="text-slate-500 p-2 rounded-lg">
+                <Shield size={20} strokeWidth={1.5} />
               </div>
-              <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">Risk Level: Low</span>
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Risk Level: Low</span>
             </div>
             <p className="text-[13px] text-slate-700 leading-relaxed">
               Detected 3 subscription spikes totaling ₱1,240. Risk factors remain low due to high savings rate buffer.
             </p>
-            <div className="w-full bg-amber-100/50 rounded-full h-1 mt-4">
+            <div className="w-full bg-slate-100 rounded-full h-1 mt-4">
               <div className="bg-amber-500 h-full rounded-full" style={{ width: "25%" }} />
             </div>
           </Card>
 
           {/* Smart Opportunities Card */}
-          <Card className="bg-blue-50/40 border border-blue-100 rounded-2xl p-5 hover:bg-blue-50 hover:shadow-md transition-all group h-full cursor-pointer">
+          <Card className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-xl text-blue-600 group-hover:scale-110 transition-transform">
-                <Star size={20} />
+              <div className="text-slate-500 p-2 rounded-lg">
+                <Star size={20} strokeWidth={1.5} />
               </div>
-              <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">Growth Potential</span>
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Growth Potential</span>
             </div>
             <p className="text-[13px] text-slate-700 leading-relaxed">
               Potential to save ₱3,500/mo by optimizing recurring transportation and dining subscriptions.
             </p>
             <div className="mt-4">
-              <Button variant="ghost" size="sm" className="text-[10px] font-bold text-blue-600 hover:text-blue-700 underline flex items-center gap-1 p-0 h-auto">
+              <Button variant="ghost" size="sm" className="text-[10px] font-bold text-slate-600 hover:text-slate-700 underline flex items-center gap-1 p-0 h-auto">
                 View optimization plan
                 <ArrowRight size={10} />
               </Button>
@@ -579,15 +536,15 @@ export default function PredictionsPage() {
                   Smart Recommendations
                 </h4>
                 <div className="space-y-3">
-                  <div className="flex gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/30 hover:bg-white hover:shadow-sm transition-all group">
-                    <span className="w-6 h-6 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                  <div className="flex gap-4 p-4 rounded-xl border border-slate-100 hover:bg-slate-50 hover:shadow-sm transition-all group">
+                    <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
                     <div>
                       <p className="text-sm font-semibold text-slate-800 mb-1">Optimize Transportation Budget</p>
                       <p className="text-xs text-slate-500 leading-relaxed font-light">Reduce variable commute costs by 15% through consolidated travel or alternative transport methods.</p>
                     </div>
                   </div>
-                  <div className="flex gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/30 hover:bg-white hover:shadow-sm transition-all group">
-                    <span className="w-6 h-6 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                  <div className="flex gap-4 p-4 rounded-xl border border-slate-100 hover:bg-slate-50 hover:shadow-sm transition-all group">
+                    <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
                     <div>
                       <p className="text-sm font-semibold text-slate-800 mb-1">Emergency Fund Allocation</p>
                       <p className="text-xs text-slate-500 leading-relaxed font-light">Direct the projected ₱4,200 net savings into your liquid emergency fund to cover 6 months of expenses.</p>
@@ -602,10 +559,8 @@ export default function PredictionsPage() {
                   <ShieldCheck size={16} className="text-amber-500" />
                   Risk Mitigation Strategies
                 </h4>
-                <Card className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden relative group hover:border-emerald-200 hover:shadow-md transition-all cursor-pointer">
-                  {/* Subtle Background Accent */}
-                  <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50/50 rounded-full blur-2xl"></div>
-                  <div className="relative z-10 space-y-4">
+                <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <Badge variant="success" className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
                         Low Risk Environment
@@ -613,14 +568,14 @@ export default function PredictionsPage() {
                       <span className="text-[10px] text-slate-400 font-mono">CONFIDENCE: 94%</span>
                     </div>
                     <div className="space-y-4">
-                      <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/50 border border-slate-100">
-                        <div className="mt-1 w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]"></div>
+                      <div className="flex items-start gap-3 p-3 rounded-xl border border-slate-100">
+                        <div className="mt-1 w-2 h-2 rounded-full bg-slate-300"></div>
                         <p className="text-[11px] text-slate-600 leading-relaxed">
                           <span className="text-slate-900 font-bold">Data Anomaly:</span> Irregular utility spike detected in previous 30-day window (₱820). Recommend usage audit.
                         </p>
                       </div>
-                      <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/50 border border-slate-100">
-                        <div className="mt-1 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.2)]"></div>
+                      <div className="flex items-start gap-3 p-3 rounded-xl border border-slate-100">
+                        <div className="mt-1 w-2 h-2 rounded-full bg-slate-300"></div>
                         <p className="text-[11px] text-slate-600 leading-relaxed">
                           <span className="text-slate-900 font-bold">Mitigation:</span> No immediate action required for major assets. Financial buffer exceeds volatility margin by 18%.
                         </p>
@@ -632,11 +587,11 @@ export default function PredictionsPage() {
             </div>
 
             {/* Long-term Opportunity Map */}
-            <Card className="p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-blue-600">
-                    <File size={22} />
+                  <div className="text-slate-500 p-2 rounded-lg">
+                    <File size={22} strokeWidth={1.5} />
                   </div>
                   <div>
                     <h4 className="text-[13px] font-bold text-slate-900">Long-term Opportunity Map</h4>
@@ -659,15 +614,15 @@ export default function PredictionsPage() {
                 </div>
                 <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
                   <span className="text-[9px] text-slate-400 uppercase block mb-1">1-Year Projection</span>
-                  <span className="text-sm font-bold text-emerald-600">₱50,400</span>
+                  <span className="text-sm font-bold text-slate-800">₱50,400</span>
                 </div>
                 <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
                   <span className="text-[9px] text-slate-400 uppercase block mb-1">Investment Ready</span>
-                  <span className="text-sm font-bold text-blue-600">Q3 2025</span>
+                  <span className="text-sm font-bold text-slate-800">Q3 2025</span>
                 </div>
                 <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
                   <span className="text-[9px] text-slate-400 uppercase block mb-1">Debt Free Target</span>
-                  <span className="text-sm font-bold text-amber-600">Q1 2026</span>
+                  <span className="text-sm font-bold text-slate-800">Q1 2026</span>
                 </div>
               </div>
             </Card>

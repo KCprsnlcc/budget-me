@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import {
   AlertTriangle,
   Trash2,
-  Target,
+  Flag,
 } from "lucide-react";
 import type { GoalType } from "./types";
 import { formatCurrency, formatDate, getGoalProgress } from "./constants";
@@ -79,7 +79,7 @@ export function DeleteGoalModal({ open, onClose, goal }: DeleteGoalModalProps) {
           <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 rounded-lg text-emerald-600">
-                <Target size={16} />
+                <Flag size={16} />
               </div>
               <div className="flex-1">
                 <h4 className="text-sm font-semibold text-slate-900">{goal.name}</h4>

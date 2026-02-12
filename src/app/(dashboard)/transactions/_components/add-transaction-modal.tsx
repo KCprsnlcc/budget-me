@@ -16,7 +16,7 @@ import {
   PlusCircle,
   Flag,
   AlertTriangle,
-  Target,
+  PiggyBank,
   ClipboardCheck,
   PenSquare,
 } from "lucide-react";
@@ -232,7 +232,7 @@ export function AddTransactionModal({ open, onClose }: AddTransactionModalProps)
                   Goal Contribution
                 </label>
                 <div className="relative">
-                  <Target size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <PiggyBank size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <select
                     value={form.goal}
                     onChange={(e) => updateField("goal", e.target.value)}

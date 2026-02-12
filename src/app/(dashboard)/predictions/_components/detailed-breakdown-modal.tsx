@@ -16,7 +16,7 @@ import {
   TrendingDown,
   Calendar,
   DollarSign,
-  Target,
+  Wrench,
   Brain,
   CheckCircle,
   AlertTriangle,
@@ -128,30 +128,30 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
                 <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                   Total Predicted Income
                 </div>
-                <div className="text-2xl font-bold text-slate-900 mb-2">₱25,350</div>
+                <div className="text-2xl font-semibold text-slate-900 mb-2">₱25,350</div>
                 <div className="flex items-center gap-2">
-                  <TrendingUp size={16} className="text-emerald-500" />
-                  <span className="text-sm text-emerald-600 font-medium">+12.4% vs last month</span>
+                  <TrendingUp size={16} className="text-slate-500" />
+                  <span className="text-sm text-slate-600 font-medium">+12.4% vs last month</span>
                 </div>
               </div>
               <div className="border border-slate-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer">
                 <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                   Total Predicted Expenses
                 </div>
-                <div className="text-2xl font-bold text-slate-900 mb-2">₱16,950</div>
+                <div className="text-2xl font-semibold text-slate-900 mb-2">₱16,950</div>
                 <div className="flex items-center gap-2">
-                  <TrendingUp size={16} className="text-amber-500" />
-                  <span className="text-sm text-amber-600 font-medium">+4.2% vs last month</span>
+                  <TrendingUp size={16} className="text-slate-500" />
+                  <span className="text-sm text-slate-600 font-medium">+4.2% vs last month</span>
                 </div>
               </div>
               <div className="border border-slate-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer">
                 <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                   Net Savings Projection
                 </div>
-                <div className="text-2xl font-bold text-emerald-600 mb-2">₱8,400</div>
+                <div className="text-2xl font-semibold text-slate-900 mb-2">₱8,400</div>
                 <div className="flex items-center gap-2">
-                  <Target size={16} className="text-blue-500" />
-                  <span className="text-sm text-blue-600 font-medium">95% of goal</span>
+                  <Wrench size={16} className="text-slate-500" />
+                  <span className="text-sm text-slate-600 font-medium">95% of goal</span>
                 </div>
               </div>
             </div>
@@ -160,18 +160,18 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
             <div>
               <h3 className="text-[15px] font-bold text-slate-900 mb-3">Key Insights</h3>
               <div className="space-y-3">
-                <div className="flex gap-3 p-3 rounded-lg border border-emerald-100 hover:shadow-md transition-all group cursor-pointer">
-                  <CheckCircle size={16} className="text-emerald-500 flex-shrink-0 mt-0.5" />
+                <div className="flex gap-3 p-3 rounded-lg border border-slate-100 hover:shadow-md transition-all group cursor-pointer">
+                  <CheckCircle size={16} className="text-slate-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-semibold text-emerald-900">Strong Income Growth</h4>
-                    <p className="text-xs text-emerald-700 mt-1">Projected 12.4% increase in monthly income based on historical patterns and market trends.</p>
+                    <h4 className="text-sm font-semibold text-slate-900">Strong Income Growth</h4>
+                    <p className="text-xs text-slate-600 mt-1">Projected 12.4% increase in monthly income based on historical patterns and market trends.</p>
                   </div>
                 </div>
-                <div className="flex gap-3 p-3 rounded-lg border border-amber-100 hover:shadow-md transition-all group cursor-pointer">
-                  <AlertTriangle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="flex gap-3 p-3 rounded-lg border border-slate-100 hover:shadow-md transition-all group cursor-pointer">
+                  <AlertTriangle size={16} className="text-slate-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-semibold text-amber-900">Expense Monitoring Needed</h4>
-                    <p className="text-xs text-amber-700 mt-1">Utility bills showing 4.2% increase, consider energy-saving measures.</p>
+                    <h4 className="text-sm font-semibold text-slate-900">Expense Monitoring Needed</h4>
+                    <p className="text-xs text-slate-600 mt-1">Utility bills showing 4.2% increase, consider energy-saving measures.</p>
                   </div>
                 </div>
               </div>
@@ -201,15 +201,15 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
                     <div className="grid grid-cols-3 gap-4 text-xs">
                       <div>
                         <span className="text-slate-400">Income</span>
-                        <div className="font-semibold text-emerald-600">₱{item.income.toLocaleString()}</div>
+                        <div className="font-semibold text-slate-900">₱{item.income.toLocaleString()}</div>
                       </div>
                       <div>
                         <span className="text-slate-400">Expenses</span>
-                        <div className="font-semibold text-amber-600">₱{item.expenses.toLocaleString()}</div>
+                        <div className="font-semibold text-slate-900">₱{item.expenses.toLocaleString()}</div>
                       </div>
                       <div>
                         <span className="text-slate-400">Savings</span>
-                        <div className="font-semibold text-blue-600">₱{item.savings.toLocaleString()}</div>
+                        <div className="font-semibold text-slate-900">₱{item.savings.toLocaleString()}</div>
                       </div>
                     </div>
                   </div>

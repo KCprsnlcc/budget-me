@@ -11,7 +11,7 @@ import {
   ShoppingBag,
   Car,
   Home,
-  Zap,
+  Toolbox,
   Music,
   Heart,
   Briefcase,
@@ -25,6 +25,8 @@ import {
   RotateCcw,
   Download,
   Info,
+  Table,
+  Grid3X3,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -44,7 +46,7 @@ const BUDGETS: BudgetType[] = [
   { id: "3", name: "Entertainment", amount: 150, spent: 148, period: "monthly", category: "entertainment", startDate: "2026-01-01", status: "at-risk", icon: "music" },
   { id: "4", name: "Shopping", amount: 400, spent: 230, period: "monthly", category: "other", startDate: "2026-01-01", status: "on-track", icon: "shopping-bag" },
   { id: "5", name: "Housing", amount: 1800, spent: 1800, period: "monthly", category: "housing", startDate: "2026-01-01", status: "at-risk", icon: "home" },
-  { id: "6", name: "Utilities", amount: 350, spent: 220, period: "monthly", category: "utilities", startDate: "2026-01-01", status: "on-track", icon: "zap" },
+  { id: "6", name: "Utilities", amount: 350, spent: 220, period: "monthly", category: "utilities", startDate: "2026-01-01", status: "on-track", icon: "toolbox" },
   { id: "7", name: "Healthcare", amount: 200, spent: 85, period: "monthly", category: "healthcare", startDate: "2026-01-01", status: "on-track", icon: "heart" },
   { id: "8", name: "Personal", amount: 250, spent: 120, period: "monthly", category: "other", startDate: "2026-01-01", status: "on-track", icon: "briefcase" },
 ];
@@ -54,7 +56,7 @@ const CATEGORY_ICONS = {
   transportation: Car,
   entertainment: Music,
   housing: Home,
-  utilities: Zap,
+  utilities: Toolbox,
   healthcare: Heart,
   other: Briefcase,
 };
@@ -105,7 +107,7 @@ const BudgetRow = memo(({
           </span>
         </div>
       </div>
-      <div className="mt-4 pt-3 border-t border-slate-50 flex justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="mt-4 pt-3 border-t border-slate-50 flex justify-center gap-3">
         <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(budget)}>
           <Eye size={16} />
         </Button>
@@ -128,6 +130,7 @@ export default function BudgetsPage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<BudgetType | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
   const handleView = useCallback((budget: BudgetType) => {
     setSelectedBudget(budget);
@@ -213,6 +216,30 @@ export default function BudgetsPage() {
           <p className="text-sm text-slate-500 mt-1 font-light">Track your spending against your budget limits.</p>
         </div>
         <div className="flex gap-3">
+          <div className="flex bg-slate-100 p-1 rounded-lg">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              }`}
+              onClick={() => setViewMode('table')}
+            >
+              <Table size={14} className="mr-1" />
+              Table
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              }`}
+              onClick={() => setViewMode('grid')}
+            >
+              <Grid3X3 size={14} className="mr-1" />
+              Grid
+            </Button>
+          </div>
           <div className="relative group">
             <Button variant="outline" size="sm">
               <Download size={16} />
@@ -308,18 +335,13 @@ export default function BudgetsPage() {
                 <div className="w-full h-px bg-slate-100/50" />
               </div>
               {chartData.map((data) => (
-                <div key={data.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
-                  <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20 shadow-lg">
-                    <div className="font-semibold mb-0.5">{data.month}</div>
-                    <div>Budget: ${((data.budget * 4500) / 100).toFixed(0)}k</div>
-                    <div>Spent: ${((data.spent * 4500) / 100).toFixed(0)}k</div>
-                  </div>
+                <div key={data.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
                   <div
-                    className="w-3 sm:w-5 bg-slate-200 rounded-t-[2px] transition-all duration-300 hover:bg-slate-300"
+                    className="w-3 sm:w-5 bg-slate-200 rounded-t-[2px] transition-all hover:opacity-100"
                     style={{ height: `${data.budget}%` }}
                   />
                   <div
-                    className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all duration-300 hover:bg-emerald-600"
+                    className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100"
                     style={{ height: `${data.spent}%` }}
                   />
                 </div>
@@ -442,31 +464,132 @@ export default function BudgetsPage() {
         </div>
       </Card>
 
-      {/* Budget Cards Grid (Desktop) */}
-      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {BUDGETS.map((budget) => (
-          <BudgetRow
-            key={budget.id}
-            budget={budget}
-            onView={handleView}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
+      {/* Budgets Display */}
+      {viewMode === 'table' ? (
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+                  <th className="px-6 py-4">Budget Name</th>
+                  <th className="px-6 py-4">Category</th>
+                  <th className="px-6 py-4 text-right">Budget</th>
+                  <th className="px-6 py-4 text-right">Spent</th>
+                  <th className="px-6 py-4 text-right">Remaining</th>
+                  <th className="px-6 py-4 text-center">Status</th>
+                  <th className="px-6 py-4 text-center">Progress</th>
+                  <th className="px-6 py-4 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="text-xs divide-y divide-slate-50">
+                {BUDGETS.map((budget) => {
+                  const remaining = budget.amount - budget.spent;
+                  const percentage = Math.round((budget.spent / budget.amount) * 100);
+                  const Icon = CATEGORY_ICONS[budget.category];
+                  return (
+                    <tr key={budget.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="text-slate-500 p-2 rounded-lg">
+                            <Icon size={16} strokeWidth={1.5} />
+                          </div>
+                          <div>
+                            <div className="font-medium text-slate-900">{budget.name}</div>
+                            <div className="text-[9px] text-slate-400">{budget.period}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge variant="neutral" className="text-xs">
+                          {budget.category}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 text-right font-medium text-slate-900">
+                        ${budget.amount.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 text-right text-slate-600">
+                        ${budget.spent.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className={remaining >= 0 ? "text-emerald-600" : "text-red-600"}>
+                          {remaining >= 0 ? 
+                            `$${remaining.toLocaleString()}` : 
+                            `-$${Math.abs(remaining).toLocaleString()}`
+                          }
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center">
+                          <Badge variant={
+                            budget.status === "on-track" ? "success" : 
+                            budget.status === "caution" ? "warning" : "danger"
+                          } className="text-xs">
+                            {budget.status === "on-track" ? "On Track" : 
+                             budget.status === "caution" ? "Caution" : "At Risk"}
+                          </Badge>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center">
+                          <div className="w-16">
+                            <ProgressBar 
+                              value={budget.spent} 
+                              max={budget.amount} 
+                              color={budget.status === "on-track" ? "success" : budget.status === "caution" ? "warning" : "danger"} 
+                            />
+                            <div className="text-[9px] text-slate-400 text-center mt-1">{percentage}%</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => handleView(budget)}>
+                            <Eye size={16} />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => handleEdit(budget)}>
+                            <Edit size={16} />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => handleDelete(budget)}>
+                            <Trash2 size={16} />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      ) : (
+        <>
+          {/* Budget Cards Grid (Desktop) */}
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {BUDGETS.map((budget) => (
+              <BudgetRow
+                key={budget.id}
+                budget={budget}
+                onView={handleView}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
 
-      {/* Budget Cards Grid (Mobile) */}
-      <div className="md:hidden space-y-4">
-        {BUDGETS.map((budget) => (
-          <BudgetRow
-            key={budget.id}
-            budget={budget}
-            onView={handleView}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
+          {/* Budget Cards Grid (Mobile) */}
+          <div className="md:hidden space-y-4">
+            {BUDGETS.map((budget) => (
+              <BudgetRow
+                key={budget.id}
+                budget={budget}
+                onView={handleView}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Modals */}
       <AddBudgetModal

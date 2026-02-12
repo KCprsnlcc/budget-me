@@ -15,7 +15,7 @@ export const DASHBOARD_NAV: NavGroup[] = [
       { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard", module: "dashboard" },
       { label: "Transactions", href: "/transactions", icon: "ArrowLeftRight", module: "transactions" },
       { label: "Budgets", href: "/budgets", icon: "PieChart", module: "budgets" },
-      { label: "Goals", href: "/goals", icon: "Target", module: "goals" },
+      { label: "Goals", href: "/goals", icon: "Flag", module: "goals" },
       { label: "AI Predictions", href: "/predictions", icon: "Wand2", module: "predictions" },
       { label: "Reports", href: "/reports", icon: "BarChart3", module: "reports" },
     ],
@@ -87,8 +87,8 @@ export const MODULE_CARDS: ModuleCard[] = [
   {
     title: "Goal Tracker",
     description: "Set ambitious financial goals with milestone tracking, timeline projections, and contribution management.",
-    icon: "Target",
-    secondaryIcon: "Flag",
+    icon: "Flag",
+    secondaryIcon: "Trophy",
   },
   {
     title: "AI Predictions",

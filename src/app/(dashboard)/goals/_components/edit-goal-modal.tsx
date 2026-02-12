@@ -12,7 +12,13 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
   ArrowRight,
-  Target,
+  Shield,
+  Home,
+  GraduationCap,
+  Plane,
+  Car,
+  Laptop,
+  Gift,
   Calendar,
   Users,
   Info,
@@ -32,13 +38,13 @@ import {
 const STEPS = ["Category", "Details", "Review"];
 
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
-  emergency: Target,
-  housing: Target,
-  education: Target,
-  travel: Target,
-  transport: Target,
-  electronics: Target,
-  other: Target,
+  emergency: Shield,
+  housing: Home,
+  education: GraduationCap,
+  travel: Plane,
+  transport: Car,
+  electronics: Laptop,
+  other: Gift,
 };
 
 function goalToFormState(goal: GoalType | null): GoalFormState {
@@ -166,7 +172,10 @@ export function EditGoalModal({ open, onClose, goal }: EditGoalModalProps) {
                           : "text-slate-500 border-slate-100"
                       )}
                     >
-                      <Target size={20} />
+                      {(() => {
+                        const IconComponent = CATEGORY_ICONS[category.key];
+                        return IconComponent ? <IconComponent size={20} /> : null;
+                      })()}
                     </div>
                     <div className="flex-1">
                       <div className="font-medium text-slate-900">{category.label}</div>

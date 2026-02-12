@@ -11,7 +11,7 @@ import {
   Utensils,
   Car,
   Home,
-  Zap,
+  Bolt,
   Music,
   Briefcase,
   Wallet,
@@ -21,14 +21,15 @@ import {
   Eye,
   Edit,
   Trash2,
-  Target,
+  PiggyBank,
   RotateCcw,
+  Table,
+  Grid3X3,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Table,
   TableHeader,
   TableBody,
   TableRow,
@@ -56,7 +57,7 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
   "Food & Dining": Utensils,
   Transportation: Car,
   Housing: Home,
-  Utilities: Zap,
+  Utilities: Bolt,
   Entertainment: Music,
   Income: Briefcase,
 };
@@ -107,7 +108,7 @@ const SUMMARY: SummaryType[] = [
     value: "58.6%",
     change: "",
     trend: "up",
-    icon: Target,
+    icon: PiggyBank,
     iconBg: "bg-blue-50",
     iconColor: "text-blue-600",
   },
@@ -149,6 +150,67 @@ const SummaryCard = memo(({ item }: { item: SummaryType }) => {
 
 SummaryCard.displayName = "SummaryCard";
 
+const TransactionCard = memo(({
+  tx,
+  onView,
+  onEdit,
+  onDelete,
+}: {
+  tx: TransactionType;
+  onView: (tx: TransactionType) => void;
+  onEdit: (tx: TransactionType) => void;
+  onDelete: (tx: TransactionType) => void;
+}) => {
+  const isIncome = tx.amount > 0;
+  const Icon = CATEGORY_ICONS[tx.category];
+  
+  return (
+    <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-center gap-3">
+          <div className="text-slate-500 p-2 rounded-lg">
+            <Icon size={20} strokeWidth={1.5} />
+          </div>
+          <div>
+            <h4 className="text-sm font-semibold text-slate-900">{tx.name}</h4>
+            <p className="text-xs text-slate-500">{tx.account}</p>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          <Badge variant={tx.category === "Income" ? "info" : "success"} className="text-xs">
+            {tx.category}
+          </Badge>
+          <span className="text-xs text-slate-400">{tx.date}</span>
+        </div>
+      </div>
+      
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <span className={`text-lg font-semibold ${
+            isIncome ? "text-emerald-600" : "text-slate-900"
+          }`}>
+            {isIncome ? "+" : ""}{Math.abs(tx.amount).toFixed(2)}
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(tx)}>
+            <Eye size={16} />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => onEdit(tx)}>
+            <Edit size={16} />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(tx)}>
+            <Trash2 size={16} />
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+});
+
+TransactionCard.displayName = "TransactionCard";
+
 const TransactionRow = memo(({
   tx,
   onView,
@@ -175,7 +237,7 @@ const TransactionRow = memo(({
         {isIncome ? "+" : ""}${Math.abs(tx.amount).toFixed(2)}
       </TableCell>
       <TableCell className="px-6 py-4">
-        <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center justify-center gap-1">
           <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(tx)}>
             <Eye size={16} />
           </Button>
@@ -199,6 +261,7 @@ export default function TransactionsPage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedTx, setSelectedTx] = useState<TransactionType | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
   const handleView = useCallback((tx: TransactionType) => {
     setSelectedTx(tx);
@@ -232,6 +295,30 @@ export default function TransactionsPage() {
           <p className="text-sm text-slate-500 mt-1 font-light">View and manage all your income and expense transactions.</p>
         </div>
         <div className="flex gap-3">
+          <div className="flex bg-slate-100 p-1 rounded-lg">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              }`}
+              onClick={() => setViewMode('table')}
+            >
+              <Table size={14} className="mr-1" />
+              Table
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              }`}
+              onClick={() => setViewMode('grid')}
+            >
+              <Grid3X3 size={14} className="mr-1" />
+              Grid
+            </Button>
+          </div>
           <div className="relative group">
             <Button variant="outline" size="sm">
               <Download size={16} />
@@ -430,44 +517,58 @@ export default function TransactionsPage() {
         </div>
       </Card>
 
-      {/* Transactions Table */}
-      <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
-                <div className="flex items-center gap-1">
-                  Date <MoreHorizontal size={12} className="rotate-90" />
-                </div>
-              </TableHead>
-              <TableHead className="px-6 py-3">Description</TableHead>
-              <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
-                <div className="flex items-center gap-1">
-                  Category <MoreHorizontal size={12} className="rotate-90" />
-                </div>
-              </TableHead>
-              <TableHead className="px-6 py-3">Account</TableHead>
-              <TableHead className="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
-                <div className="flex items-center gap-1 justify-end">
-                  Amount <MoreHorizontal size={12} className="rotate-90" />
-                </div>
-              </TableHead>
-              <TableHead className="px-6 py-3 text-center">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {ENHANCED_TRANSACTIONS.map((tx) => (
-              <TransactionRow
-                key={tx.id}
-                tx={tx}
-                onView={handleView}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
+      {/* Transactions Display */}
+      {viewMode === 'table' ? (
+        <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
+                  <div className="flex items-center gap-1">
+                    Date <MoreHorizontal size={12} className="rotate-90" />
+                  </div>
+                </TableHead>
+                <TableHead className="px-6 py-3">Description</TableHead>
+                <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
+                  <div className="flex items-center gap-1">
+                    Category <MoreHorizontal size={12} className="rotate-90" />
+                  </div>
+                </TableHead>
+                <TableHead className="px-6 py-3">Account</TableHead>
+                <TableHead className="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
+                  <div className="flex items-center gap-1 justify-end">
+                    Amount <MoreHorizontal size={12} className="rotate-90" />
+                  </div>
+                </TableHead>
+                <TableHead className="px-6 py-3 text-center">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {ENHANCED_TRANSACTIONS.map((tx) => (
+                <TransactionRow
+                  key={tx.id}
+                  tx={tx}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {ENHANCED_TRANSACTIONS.map((tx) => (
+            <TransactionCard
+              key={tx.id}
+              tx={tx}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Modals */}
       <AddTransactionModal
