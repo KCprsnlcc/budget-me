@@ -10,6 +10,7 @@ import {
   Wand2,
   BarChart3,
   MessageCircle,
+  Bot,
   Users,
   Settings,
 } from "lucide-react";
@@ -24,6 +25,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Wand2,
   BarChart3,
   MessageCircle,
+  Bot,
   Users,
   Settings,
 };
@@ -65,7 +67,7 @@ export function NavItem({ label, href, icon, badge, dot, onClick }: NavItemProps
       )}
       {label}
       {badge && (
-        <Badge variant="neutral" className="ml-auto text-[10px] px-1.5 py-0.5 text-emerald-600 !bg-transparent !border-transparent">
+        <Badge variant="neutral" className="ml-auto text-[10px] px-1.5 py-0.5 text-emerald-600 uppercase !bg-transparent !border-transparent">
           {badge}
         </Badge>
       )}

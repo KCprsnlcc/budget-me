@@ -451,7 +451,8 @@ export default function GoalsPage() {
 
         {/* Goal Health */}
         <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
-          <h3 className="text-sm font-semibold text-slate-900 mb-6">Goal Health</h3>
+          <h3 className="text-sm font-semibold text-slate-900 mb-2">Goal Health</h3>
+          <p className="text-xs text-slate-500 mb-6 font-light">Track your goal completion status</p>
 
           <div className="flex items-center justify-center mb-6 relative">
             <div className="w-32 h-32 rounded-full relative"

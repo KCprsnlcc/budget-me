@@ -23,7 +23,7 @@ export const DASHBOARD_NAV: NavGroup[] = [
     label: "Intelligence",
     items: [
       { label: "AI Predictions", href: "/predictions", icon: "Wand2", module: "predictions" },
-      { label: "BudgetSense AI", href: "/chatbot", icon: "MessageCircle", module: "chatbot", badge: "Beta" },
+      { label: "BudgetSense AI", href: "/chatbot", icon: "Bot", module: "chatbot", badge: "Beta" },
     ],
   },
   {
@@ -105,7 +105,7 @@ export const MODULE_CARDS: ModuleCard[] = [
   {
     title: "BudgetSense AI",
     description: "Your personal AI financial assistant for natural-language queries about your spending and budgets.",
-    icon: "MessageCircle",
+    icon: "Bot",
     secondaryIcon: "Sparkles",
   },
   {
