@@ -23,13 +23,14 @@ import {
   Trash2,
   PiggyBank,
   RotateCcw,
-  Table,
+  Table as TableIcon,
   Grid3X3,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Table,
   TableHeader,
   TableBody,
   TableRow,
@@ -55,7 +56,9 @@ type SummaryType = {
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
   Shopping: ShoppingBag,
   "Food & Dining": Utensils,
+  Groceries: Utensils,
   Transportation: Car,
+  Transport: Car,
   Housing: Home,
   Utilities: Bolt,
   Entertainment: Music,
@@ -304,7 +307,7 @@ export default function TransactionsPage() {
               }`}
               onClick={() => setViewMode('table')}
             >
-              <Table size={14} className="mr-1" />
+              <TableIcon size={14} className="mr-1" />
               Table
             </Button>
             <Button 

@@ -388,7 +388,10 @@ export default function PredictionsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Expense Type Forecast */}
         <Card className="lg:col-span-1 p-6 hover:shadow-md transition-all group cursor-pointer">
-          <h3 className="text-sm font-semibold text-slate-900 mb-4">Expense Type Forecast</h3>
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-slate-900">Expense Type Forecast</h3>
+            <p className="text-xs text-slate-500 mt-0.5 font-light">Analysis of recurring vs variable expenses</p>
+          </div>
           <div className="space-y-4">
             <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
               <div className="flex justify-between items-center mb-2">
@@ -422,7 +425,10 @@ export default function PredictionsPage() {
         {/* Transaction Behavior Insight */}
         <Card className="lg:col-span-2 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
           <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-            <h3 className="text-sm font-semibold text-slate-900">Transaction Behavior Insight</h3>
+            <div className="mb-2">
+              <h3 className="text-sm font-semibold text-slate-900">Transaction Behavior Insight</h3>
+              <p className="text-xs text-slate-500 mt-0.5 font-light">Detailed transaction type analysis and predictions</p>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
@@ -452,8 +458,7 @@ export default function PredictionsPage() {
       <Card className="p-6 mb-8 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-              <Lightbulb size={18} className="text-amber-500" />
+            <h3 className="text-sm font-semibold text-slate-900">
               AI Financial Intelligence
             </h3>
             <p className="text-xs text-slate-500 mt-1 font-light">Deep analysis of your spending habits and financial future</p>

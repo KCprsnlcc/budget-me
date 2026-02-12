@@ -6,7 +6,7 @@ export function AIUsageCard() {
     <div className="bg-slate-50 rounded-xl border border-slate-200/60 p-3">
       <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+          <div className="text-emerald-600">
             <BarChart3 size={14} />
           </div>
           <div>

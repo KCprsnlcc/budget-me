@@ -425,7 +425,7 @@ export default function DashboardPage() {
             <Icon icon="material-symbols:insights" width={16} height={16} className="text-emerald-500" />
             Financial Insights
           </h3>
-          <Button variant="ghost" size="xs" className="text-slate-400 hover:text-purple-600">
+          <Button variant="ghost" size="xs" className="text-slate-400 hover:text-slate-600">
             <RefreshCw size={12} /> Refresh
           </Button>
         </div>
@@ -588,9 +588,6 @@ export default function DashboardPage() {
         <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-sm font-semibold text-slate-800">Budget Progress</h3>
-            <Button variant="ghost" size="sm" className="text-xs font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
-              Manage <ArrowRight size={12} />
-            </Button>
           </div>
 
           <div className="space-y-5">
