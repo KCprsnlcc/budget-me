@@ -21,6 +21,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TypingEffect } from "@/components/ui/typing-effect";
 import {
   ModelSelectorDropdown,
   ClearChatModal,
@@ -64,6 +65,7 @@ export default function ChatbotPage() {
   const [selectedModel, setSelectedModel] = useState("gpt-oss-20b");
   const [clearChatModalOpen, setClearChatModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -103,10 +105,11 @@ export default function ChatbotPage() {
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
 
-    // Simulate AI response
+    // Simulate AI response with typing effect
     setTimeout(() => {
+      const aiResponseId = (Date.now() + 1).toString();
       const aiResponse: MessageType = {
-        id: (Date.now() + 1).toString(),
+        id: aiResponseId,
         role: "assistant",
         content: "I understand. Let me analyze that for you and provide personalized insights based on your financial data.",
         timestamp: new Date().toLocaleTimeString("en-US", {
@@ -116,6 +119,7 @@ export default function ChatbotPage() {
         model: selectedModel,
       };
       setMessages((prev) => [...prev, aiResponse]);
+      setTypingMessageId(aiResponseId);
     }, 1000);
   }, [input, selectedModel]);
 
@@ -126,6 +130,7 @@ export default function ChatbotPage() {
 
   const handleClearChat = useCallback(() => {
     setMessages([]);
+    setTypingMessageId(null);
   }, []);
 
   const handleExport = useCallback((format: ExportFormat) => {
@@ -162,7 +167,9 @@ export default function ChatbotPage() {
     [handleSend]
   );
 
-  const renderMessageContent = (content: string, role: MessageRole) => {
+  const renderMessageContent = (content: string, role: MessageRole, messageId: string) => {
+    const isTyping = role === "assistant" && typingMessageId === messageId;
+    
     // Check if content contains table data
     if (content.includes("| Service |")) {
       const parts = content.split("| Service |");
@@ -176,7 +183,16 @@ export default function ChatbotPage() {
         <div className="space-y-4">
           {textPart.trim() && (
             <div className={`text-sm leading-relaxed ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
-              {textPart.trim()}
+              {isTyping ? (
+                <TypingEffect 
+                  text={textPart.trim()} 
+                  speed={15} 
+                  delay={200}
+                  onComplete={() => setTypingMessageId(null)}
+                />
+              ) : (
+                textPart.trim()
+              )}
             </div>
           )}
           <div className="overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm">
@@ -238,13 +254,22 @@ export default function ChatbotPage() {
     // Regular content with bold text support
     return (
       <div className={`text-sm leading-relaxed whitespace-pre-wrap ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
-        {content.split("**").map((part, index) =>
-          index % 2 === 1 ? (
-            <strong key={index} className={`font-semibold ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
-              {part}
-            </strong>
-          ) : (
-            <span key={index}>{part}</span>
+        {isTyping ? (
+          <TypingEffect 
+            text={content} 
+            speed={15} 
+            delay={200}
+            onComplete={() => setTypingMessageId(null)}
+          />
+        ) : (
+          content.split("**").map((part, index) =>
+            index % 2 === 1 ? (
+              <strong key={index} className={`font-semibold ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
+                {part}
+              </strong>
+            ) : (
+              <span key={index}>{part}</span>
+            )
           )
         )}
       </div>
@@ -336,7 +361,7 @@ export default function ChatbotPage() {
                           : "bg-emerald-500 text-white rounded-[2rem] rounded-tr-sm px-6 py-3.5 shadow-sm"
                       }`}
                     >
-                      {renderMessageContent(msg.content, msg.role)}
+                      {renderMessageContent(msg.content, msg.role, msg.id)}
                     </div>
 
                     {/* Copy Button as Footer */}
@@ -379,11 +404,11 @@ export default function ChatbotPage() {
                             <button
                               key={suggestion.id}
                               onClick={() => handleSuggestionClick(suggestion.label)}
-                              className="px-5 py-2.5 bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 rounded-full text-xs text-slate-600 transition-all shadow-sm flex items-center gap-2 group"
+                              className="px-5 py-2.5 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 rounded-full text-xs text-slate-600 transition-all shadow-sm flex items-center gap-2 group cursor-pointer"
                             >
                               <Icon
                                 size={14}
-                                className="text-slate-400 group-hover:text-emerald-500"
+                                className="text-slate-400"
                               />
                               {suggestion.label}
                             </button>

@@ -8,9 +8,9 @@ interface LogoProps {
 }
 
 const LOGO_MAP = {
-  light: "/logos/light-no-bg-logo-2.svg",
-  dark: "/logos/dark-no-bg-logo-2.svg",
-  icon: "/logos/icon-logo-no-bg.svg",
+  light: "/logos/BudgetMe-logo.svg",
+  dark: "/logos/BudgetMe-logo.svg",
+  icon: "/logos/BudgetMe-logo.svg",
 } as const;
 
 const SIZE_MAP = {
