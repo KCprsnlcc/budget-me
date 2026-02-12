@@ -17,11 +17,11 @@ const Progress = React.forwardRef<
     {...props}
   >
     <ProgressPrimitive.Indicator
-      className="h-full w-full flex-1 bg-gradient-to-r from-emerald-400 to-emerald-600 transition-transform duration-600 ease-out"
+      className="h-full w-full flex-1 bg-emerald-500 shadow-emerald-500/25 transition-transform duration-600 ease-out"
       style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
     />
   </ProgressPrimitive.Root>
 ));
-Progress.displayName = ProgressPrimitive.Root.displayName;
+Progress.displayName = ProgressPrimitive.Root.displayName;  
 
 export { Progress };

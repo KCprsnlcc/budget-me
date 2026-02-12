@@ -8,7 +8,7 @@ const fillVariants = cva("h-full rounded-full transition-all duration-500", {
       warning: "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]",
       danger: "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]",
       info: "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]",
-      brand: "bg-emerald-500",
+      brand: "bg-emerald-500 shadow-emerald-500/25",
     },
   },
   defaultVariants: {
