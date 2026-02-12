@@ -126,15 +126,15 @@ const CHART_DATA = [
 const SummaryCard = memo(({ item }: { item: SummaryType }) => {
   const Icon = item.icon;
   return (
-    <Card className="p-5 hover:border-emerald-200 transition-colors">
+    <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
       <div className="flex justify-between items-start mb-4">
-        <div className="text-slate-500 bg-slate-50 p-2 rounded-lg">
+        <div className="text-slate-500 p-2 rounded-lg">
           {Icon && <Icon size={22} strokeWidth={1.5} />}
         </div>
         {item.change && (
           <div className={`flex items-center gap-1 text-[10px] font-medium ${
-            item.trend === "up" ? "text-emerald-700 bg-emerald-50 border-emerald-100" : 
-            "text-red-700 bg-red-50 border-red-100"
+            item.trend === "up" ? "text-emerald-700 border-emerald-100" : 
+            "text-red-700 border-red-100"
           } px-2 py-1 rounded-full border`}>
             {item.trend === "up" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
             {item.change}
@@ -264,7 +264,7 @@ export default function TransactionsPage() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Income vs Expenses Chart */}
-        <Card className="lg:col-span-2 p-6">
+        <Card className="lg:col-span-2 p-6 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="text-sm font-semibold text-slate-900">Income vs Expenses</h3>
@@ -313,7 +313,8 @@ export default function TransactionsPage() {
         </Card>
 
         {/* Expense Categories */}
-        <Card className="p-6 flex flex-col">
+        {/* Expense Categories */}
+        <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-sm font-semibold text-slate-900">Categories</h3>
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -365,7 +366,7 @@ export default function TransactionsPage() {
       </div>
 
       {/* Filters */}
-      <Card className="p-4">
+      <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col xl:flex-row items-center gap-3">
           <div className="flex items-center gap-2 text-xs text-slate-500 w-full xl:w-auto">
             <Filter size={16} />
@@ -430,7 +431,7 @@ export default function TransactionsPage() {
       </Card>
 
       {/* Transactions Table */}
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
         <Table>
           <TableHeader>
             <TableRow>

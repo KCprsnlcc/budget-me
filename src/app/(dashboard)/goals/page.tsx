@@ -143,11 +143,7 @@ const GoalCard = memo(({
           onClick={() => onView(goal)}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${
-            goal.status === "completed" ? "bg-emerald-50 text-emerald-600" :
-            goal.status === "in_progress" ? "bg-blue-50 text-blue-600" :
-            "bg-amber-50 text-amber-600"
-          }`}>
+          <div className={`p-2 rounded-lg text-slate-600`}>
             <Icon size={20} />
           </div>
           <div>
@@ -156,14 +152,14 @@ const GoalCard = memo(({
             </h3>
             <div className="flex items-center gap-2 mt-0.5">
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                goal.priority === "high" ? "bg-red-50 text-red-600 border border-red-100" :
-                goal.priority === "medium" ? "bg-amber-50 text-amber-600 border border-amber-100" :
-                "bg-slate-50 text-slate-600 border border-slate-100"
+                goal.priority === "high" ? "text-red-600 border border-red-100" :
+                goal.priority === "medium" ? "text-amber-600 border border-amber-100" :
+                "text-slate-600 border border-slate-100"
               }`}>
                 {goal.priority.charAt(0).toUpperCase() + goal.priority.slice(1)} Priority
               </span>
               {goal.isFamily && (
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-indigo-50 text-indigo-600 border border-indigo-100"
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-medium text-indigo-600 border border-indigo-100"
                       title="Family Goal">
                   <Users size={10} /> Family
                 </span>
@@ -350,16 +346,16 @@ export default function GoalsPage() {
           const color = colors[index];
           
           return (
-            <Card key={item.label} className="p-5 hover:border-emerald-200 transition-colors">
+            <Card key={item.label} className="p-5 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex justify-between items-start mb-4">
-                <div className="text-slate-500 bg-slate-50 p-2 rounded-lg">
+                <div className="text-slate-500 p-2 rounded-lg">
                   <Icon size={22} strokeWidth={1.5} />
                 </div>
                 {index === 0 && (
                   <div className={`flex items-center gap-1 text-[10px] font-medium ${
-                    color === "emerald" ? "text-emerald-700 bg-emerald-50 border-emerald-100" : 
-                    color === "blue" ? "text-blue-700 bg-blue-50 border-blue-100" :
-                    "text-amber-700 bg-amber-50 border-amber-100"
+                    color === "emerald" ? "text-emerald-700 border-emerald-100" : 
+                    color === "blue" ? "text-blue-700 border-blue-100" :
+                    "text-amber-700 border-amber-100"
                   } px-2 py-1 rounded-full border`}>
                     <TrendingUp size={12} /> Active
                   </div>
@@ -378,7 +374,7 @@ export default function GoalsPage() {
       {/* Charts Section */}
       <div className="hidden lg:grid grid-cols-3 gap-6">
         {/* Progress Chart */}
-        <Card className="col-span-2 p-6">
+        <Card className="col-span-2 p-6 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="text-sm font-semibold text-slate-900">Savings Progress</h3>
@@ -427,7 +423,7 @@ export default function GoalsPage() {
         </Card>
 
         {/* Goal Health */}
-        <Card className="p-6 flex flex-col">
+        <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
           <h3 className="text-sm font-semibold text-slate-900 mb-6">Goal Health</h3>
 
           <div className="flex items-center justify-center mb-6 relative">
@@ -455,7 +451,7 @@ export default function GoalsPage() {
       </div>
 
       {/* Filters */}
-      <Card className="p-4">
+      <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col xl:flex-row items-center gap-3">
           {/* Scope Filter */}
           <div className="flex bg-slate-100 p-1 rounded-lg w-full md:w-auto">

@@ -54,7 +54,7 @@ export function DeleteGoalModal({ open, onClose, goal }: DeleteGoalModalProps) {
       {/* Header */}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <div className="p-1.5 rounded-lg bg-red-50 text-red-600">
+          <div className="p-1.5 rounded-lg text-red-600">
             <Trash2 size={18} />
           </div>
           <h3 className="text-sm font-semibold text-slate-900">Delete Goal</h3>
@@ -78,7 +78,7 @@ export function DeleteGoalModal({ open, onClose, goal }: DeleteGoalModalProps) {
           {/* Goal Summary */}
           <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+              <div className="p-2 rounded-lg text-emerald-600">
                 <Target size={16} />
               </div>
               <div className="flex-1">

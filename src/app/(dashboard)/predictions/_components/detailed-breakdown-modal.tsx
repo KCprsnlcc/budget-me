@@ -124,7 +124,7 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
           <div className="space-y-6 animate-txn-in">
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+              <div className="border border-slate-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer">
                 <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                   Total Predicted Income
                 </div>
@@ -134,7 +134,7 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
                   <span className="text-sm text-emerald-600 font-medium">+12.4% vs last month</span>
                 </div>
               </div>
-              <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+              <div className="border border-slate-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer">
                 <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                   Total Predicted Expenses
                 </div>
@@ -144,7 +144,7 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
                   <span className="text-sm text-amber-600 font-medium">+4.2% vs last month</span>
                 </div>
               </div>
-              <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+              <div className="border border-slate-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer">
                 <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                   Net Savings Projection
                 </div>
@@ -160,14 +160,14 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
             <div>
               <h3 className="text-[15px] font-bold text-slate-900 mb-3">Key Insights</h3>
               <div className="space-y-3">
-                <div className="flex gap-3 p-3 rounded-lg bg-emerald-50 border border-emerald-100">
+                <div className="flex gap-3 p-3 rounded-lg border border-emerald-100 hover:shadow-md transition-all group cursor-pointer">
                   <CheckCircle size={16} className="text-emerald-500 flex-shrink-0 mt-0.5" />
                   <div>
                     <h4 className="text-sm font-semibold text-emerald-900">Strong Income Growth</h4>
                     <p className="text-xs text-emerald-700 mt-1">Projected 12.4% increase in monthly income based on historical patterns and market trends.</p>
                   </div>
                 </div>
-                <div className="flex gap-3 p-3 rounded-lg bg-amber-50 border border-amber-100">
+                <div className="flex gap-3 p-3 rounded-lg border border-amber-100 hover:shadow-md transition-all group cursor-pointer">
                   <AlertTriangle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
                   <div>
                     <h4 className="text-sm font-semibold text-amber-900">Expense Monitoring Needed</h4>
@@ -184,7 +184,7 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
           <div className="space-y-6 animate-txn-in">
             <h3 className="text-[15px] font-bold text-slate-900">Monthly Projection Breakdown</h3>
             
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-all group cursor-pointer">
               <div className="p-5 space-y-0 divide-y divide-slate-100">
                 {[
                   { month: "January", income: 8500, expenses: 5200, savings: 3300, confidence: 92 },
@@ -231,7 +231,7 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
                 { category: "Transportation", current: 180, predicted: 220, change: 22, trend: "up" },
                 { category: "Utilities", current: 1200, predicted: 1320, change: 10, trend: "up" },
               ].map((item) => (
-                <div key={item.category} className="bg-white border border-slate-200 rounded-lg p-4">
+                <div key={item.category} className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-semibold text-slate-900">{item.category}</span>
                     <div className="flex items-center gap-2">
@@ -262,7 +262,7 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
             </div>
 
             {/* AI Recommendations */}
-            <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+            <div className="border border-slate-100 rounded-lg p-4">
               <h4 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
                 <Brain size={16} className="text-emerald-500" />
                 AI Recommendations

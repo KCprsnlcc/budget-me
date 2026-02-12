@@ -99,7 +99,7 @@ export function ViewBudgetModal({
       {/* Header */}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+          <div className="p-1.5 rounded-lg text-emerald-600">
             <IconComponent size={18} />
           </div>
           <h3 className="text-sm font-semibold text-slate-900">{budget.name}</h3>

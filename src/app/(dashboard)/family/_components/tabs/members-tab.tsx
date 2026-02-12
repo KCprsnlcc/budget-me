@@ -84,7 +84,7 @@ export function MembersTab({
   if (!familyData) {
     return (
       <div className="text-center py-12">
-        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 rounded-full border border-slate-200 flex items-center justify-center mx-auto mb-4">
           <Users className="text-slate-400" size={32} />
         </div>
         <h3 className="text-lg font-semibold text-slate-900 mb-2">No Family Data</h3>
@@ -104,7 +104,7 @@ export function MembersTab({
         {/* Pending Join Requests Section */}
         <div className="lg:col-span-2 space-y-6">
           {pendingRequests.length > 0 && (
-            <Card className="p-6 bg-blue-50 border-blue-100">
+            <Card className="p-6 border-blue-100 hover:shadow-md transition-all group cursor-pointer">
               <h3 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <UserCheck className="text-blue-600" size={18} />
                 Pending Join Requests
@@ -117,7 +117,7 @@ export function MembersTab({
                   <Card key={request.id} className="p-4 bg-white shadow-sm border-blue-100">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-medium text-sm">
+                        <div className="w-10 h-10 rounded-full border border-blue-100 flex items-center justify-center text-blue-700 font-medium text-sm">
                           {request.name.split(' ').map(n => n[0]).join('')}
                         </div>
                         <div>
@@ -128,7 +128,7 @@ export function MembersTab({
                         </div>
                       </div>
                     </div>
-                    <p className="text-xs text-slate-600 mb-4 italic px-3 py-2 bg-slate-50 rounded-lg">
+                    <p className="text-xs text-slate-600 mb-4 italic px-3 py-2 border border-slate-200 rounded-lg">
                       "{request.message}"
                     </p>
                     <div className="flex items-center gap-2">
@@ -175,19 +175,19 @@ export function MembersTab({
                 return (
                   <div
                     key={member.id}
-                    className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100 group hover:bg-slate-50 transition-colors"
+                    className="flex items-center justify-between p-4 border border-slate-100 rounded-xl group hover:shadow-md transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
                       <div className="relative">
                         <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm ${
+                          className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm border ${
                             member.role === "Owner"
-                              ? "bg-emerald-100 text-emerald-700"
+                              ? "border-emerald-100 text-emerald-700"
                               : member.role === "Admin"
-                              ? "bg-blue-100 text-blue-700"
+                              ? "border-blue-100 text-blue-700"
                               : member.role === "Member"
-                              ? "bg-purple-100 text-purple-700"
-                              : "bg-slate-100 text-slate-700"
+                              ? "border-purple-100 text-purple-700"
+                              : "border-slate-100 text-slate-700"
                           }`}
                         >
                           {member.initials}
@@ -263,15 +263,15 @@ export function MembersTab({
               {members
                 .filter(m => m.role !== "Owner")
                 .map((member) => (
-                  <div key={member.id} className="flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-lg">
+                  <div key={member.id} className="flex items-center justify-between gap-3 p-3 border border-slate-100 rounded-lg hover:shadow-md transition-all cursor-pointer">
                     <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-[10px] flex-shrink-0 ${
+                        className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-[10px] flex-shrink-0 border ${
                           member.role === "Admin"
-                            ? "bg-blue-100 text-blue-700"
+                            ? "border-blue-100 text-blue-700"
                             : member.role === "Member"
-                            ? "bg-purple-100 text-purple-700"
-                            : "bg-slate-100 text-slate-700"
+                            ? "border-purple-100 text-purple-700"
+                            : "border-slate-100 text-slate-700"
                         }`}
                       >
                         {member.initials}
@@ -299,7 +299,7 @@ export function MembersTab({
           </Card>
 
           {/* Info Card */}
-          <Card className="p-6 bg-emerald-50 border-emerald-100">
+          <Card className="p-6 border-emerald-100 hover:shadow-md transition-all group cursor-pointer">
             <h4 className="text-sm font-semibold text-emerald-900 flex items-center gap-2 mb-2">
               <Info size={18} />
               About Roles
@@ -351,7 +351,7 @@ export function MembersTab({
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-100">
+                  <div className="w-12 h-12 rounded-xl border border-blue-100 flex items-center justify-center text-blue-600 transition-colors group-hover:scale-110">
                     <Home size={24} />
                   </div>
                   <div>

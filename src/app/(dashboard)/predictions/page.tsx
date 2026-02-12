@@ -136,9 +136,9 @@ export default function PredictionsPage() {
       {/* Prediction Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Monthly Income Card */}
-        <Card className="p-5 hover:border-emerald-200 transition-colors group">
+        <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+            <div className="p-2 rounded-lg text-slate-400 group-hover:text-emerald-600 transition-colors">
               <Wallet size={22} />
             </div>
             <div className="flex flex-col items-end gap-1">
@@ -161,9 +161,9 @@ export default function PredictionsPage() {
         </Card>
 
         {/* Monthly Expenses Card */}
-        <Card className="p-5 hover:border-amber-200 transition-colors group">
+        <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-amber-50 group-hover:text-amber-600 transition-colors">
+            <div className="p-2 rounded-lg text-slate-400 group-hover:text-amber-600 transition-colors">
               <ShoppingBag size={22} />
             </div>
             <div className="flex flex-col items-end gap-1">
@@ -186,9 +186,9 @@ export default function PredictionsPage() {
         </Card>
 
         {/* Net Savings Card */}
-        <Card className="p-5 hover:border-emerald-200 transition-colors group">
+        <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+            <div className="p-2 rounded-lg text-slate-400 group-hover:text-emerald-600 transition-colors">
               <PiggyBank size={22} />
             </div>
             <div className="flex flex-col items-end gap-1">
@@ -211,9 +211,9 @@ export default function PredictionsPage() {
         </Card>
 
         {/* Savings Rate Card */}
-        <Card className="p-5 hover:border-blue-200 transition-colors group">
+        <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+            <div className="p-2 rounded-lg text-slate-400 group-hover:text-blue-600 transition-colors">
               <ChartBar size={22} />
             </div>
             <div className="flex flex-col items-end gap-1">
@@ -235,7 +235,7 @@ export default function PredictionsPage() {
       </div>
 
       {/* Interactive Prediction Chart */}
-      <Card className="p-6 mb-8">
+      <Card className="p-6 mb-8 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h3 className="text-sm font-semibold text-slate-900">Income vs Expenses Forecast</h3>
@@ -351,7 +351,7 @@ export default function PredictionsPage() {
         </div>
       </Card>
               {/* Category Predictions Table */}
-      <Card className="overflow-hidden mb-8">
+      <Card className="overflow-hidden mb-8 hover:shadow-md transition-all group cursor-pointer">
         <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-slate-900">Category Spending Forecast</h3>
@@ -392,7 +392,7 @@ export default function PredictionsPage() {
                   <tr key={pred.category} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg text-emerald-600 flex items-center justify-center">
                           <Icon size={18} />
                         </div>
                         <span className="font-medium text-slate-900">{pred.category}</span>
@@ -434,7 +434,7 @@ export default function PredictionsPage() {
       {/* Expense Type Forecast and Transaction Behavior Insight */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Expense Type Forecast */}
-        <Card className="lg:col-span-1 p-6">
+        <Card className="lg:col-span-1 p-6 hover:shadow-md transition-all group cursor-pointer">
           <h3 className="text-sm font-semibold text-slate-900 mb-4">Expense Type Forecast</h3>
           <div className="space-y-4">
             <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
@@ -467,7 +467,7 @@ export default function PredictionsPage() {
         </Card>
 
         {/* Transaction Behavior Insight */}
-        <Card className="lg:col-span-2 overflow-hidden">
+        <Card className="lg:col-span-2 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
           <div className="p-4 border-b border-slate-100 bg-slate-50/50">
             <h3 className="text-sm font-semibold text-slate-900">Transaction Behavior Insight</h3>
           </div>
@@ -496,7 +496,7 @@ export default function PredictionsPage() {
           </div>
         </Card>
       </div>
-      <Card className="p-6 mb-8 overflow-hidden">
+      <Card className="p-6 mb-8 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
@@ -516,9 +516,9 @@ export default function PredictionsPage() {
         {/* Initial Grid: Key Highlights */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           {/* High-Level Financial Analysis Card */}
-          <Card className="bg-emerald-50/40 border border-emerald-100 rounded-2xl p-5 hover:bg-emerald-50 transition-all group h-full">
+          <Card className="bg-emerald-50/40 border border-emerald-100 rounded-2xl p-5 hover:bg-emerald-50 hover:shadow-md transition-all group h-full cursor-pointer">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-xl bg-emerald-100 text-emerald-600 group-hover:scale-110 transition-transform">
+              <div className="p-2 rounded-xl text-emerald-600 group-hover:scale-110 transition-transform">
                 <Clapperboard size={20} />
               </div>
               <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Financial Summary</span>
@@ -533,9 +533,9 @@ export default function PredictionsPage() {
           </Card>
 
           {/* Risk Management Card */}
-          <Card className="bg-amber-50/40 border border-amber-100 rounded-2xl p-5 hover:bg-amber-50 transition-all group h-full">
+          <Card className="bg-amber-50/40 border border-amber-100 rounded-2xl p-5 hover:bg-amber-50 hover:shadow-md transition-all group h-full cursor-pointer">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-xl bg-amber-100 text-amber-600 group-hover:scale-110 transition-transform">
+              <div className="p-2 rounded-xl text-amber-600 group-hover:scale-110 transition-transform">
                 <Shield size={20} />
               </div>
               <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">Risk Level: Low</span>
@@ -549,9 +549,9 @@ export default function PredictionsPage() {
           </Card>
 
           {/* Smart Opportunities Card */}
-          <Card className="bg-blue-50/40 border border-blue-100 rounded-2xl p-5 hover:bg-blue-50 transition-all group h-full">
+          <Card className="bg-blue-50/40 border border-blue-100 rounded-2xl p-5 hover:bg-blue-50 hover:shadow-md transition-all group h-full cursor-pointer">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-xl bg-blue-100 text-blue-600 group-hover:scale-110 transition-transform">
+              <div className="p-2 rounded-xl text-blue-600 group-hover:scale-110 transition-transform">
                 <Star size={20} />
               </div>
               <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">Growth Potential</span>
@@ -602,7 +602,7 @@ export default function PredictionsPage() {
                   <ShieldCheck size={16} className="text-amber-500" />
                   Risk Mitigation Strategies
                 </h4>
-                <Card className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden relative group hover:border-emerald-200 transition-all">
+                <Card className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden relative group hover:border-emerald-200 hover:shadow-md transition-all cursor-pointer">
                   {/* Subtle Background Accent */}
                   <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50/50 rounded-full blur-2xl"></div>
                   <div className="relative z-10 space-y-4">

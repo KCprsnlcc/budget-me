@@ -146,7 +146,7 @@ export function HistoryModal({ open, onClose }: HistoryModalProps) {
         {view === "list" ? (
           <div className="animate-txn-in">
             {/* List Header */}
-            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+            <div className="px-5 py-4 border-b border-slate-100">
               <h3 className="text-sm font-semibold text-slate-900">Recent Predictions</h3>
             </div>
             
@@ -157,7 +157,7 @@ export function HistoryModal({ open, onClose }: HistoryModalProps) {
                   <div
                     key={item.id}
                     onClick={() => handleItemClick(item)}
-                    className="px-5 py-4 hover:bg-slate-50 cursor-pointer transition-colors"
+                    className="px-5 py-4 hover:shadow-md transition-all cursor-pointer"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -226,7 +226,7 @@ export function HistoryModal({ open, onClose }: HistoryModalProps) {
                   <h4 className="text-[15px] font-bold text-slate-900 mb-3">Performance Metrics</h4>
                   <div className="grid grid-cols-2 gap-3">
                     {selectedItem.accuracy && (
-                      <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                      <div className="border border-slate-100 rounded-lg p-4">
                         <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                           Accuracy
                         </div>
@@ -240,19 +240,19 @@ export function HistoryModal({ open, onClose }: HistoryModalProps) {
                         </div>
                       </div>
                     )}
-                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                    <div className="border border-slate-100 rounded-lg p-4">
                       <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                         Data Points
                       </div>
                       <div className="text-lg font-bold text-slate-900">{selectedItem.dataPoints}</div>
                     </div>
-                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                    <div className="border border-slate-100 rounded-lg p-4">
                       <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                         Insights Generated
                       </div>
                       <div className="text-lg font-bold text-slate-900">{selectedItem.insights}</div>
                     </div>
-                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                    <div className="border border-slate-100 rounded-lg p-4">
                       <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                         Model Version
                       </div>
@@ -279,7 +279,7 @@ export function HistoryModal({ open, onClose }: HistoryModalProps) {
 
                 {/* Status Message */}
                 {selectedItem.status === "failed" && (
-                  <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-amber-50 border border-amber-100 text-amber-900 items-start">
+                  <div className="flex gap-2.5 p-3 rounded-lg text-xs border border-amber-100 text-amber-900 items-start">
                     <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
                     <div>
                       <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error Details</h4>

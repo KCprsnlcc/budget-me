@@ -75,10 +75,10 @@ const BudgetRow = memo(({
   const remaining = budget.amount - budget.spent;
 
   return (
-    <Card className="bg-white group rounded-xl border border-slate-200/60 shadow-sm p-5 hover:shadow-md transition-all">
+    <Card className="bg-white group rounded-xl border border-slate-200/60 shadow-sm p-5 hover:shadow-md transition-all cursor-pointer">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${budget.status === "on-track" ? "bg-emerald-50 text-emerald-600" : budget.status === "caution" ? "bg-amber-50 text-amber-600" : "bg-red-50 text-red-600"}`}>
+          <div className="p-2 rounded-lg text-slate-600">
             <Icon size={20} />
           </div>
           <div>
@@ -240,17 +240,17 @@ export default function BudgetsPage() {
         {summary.map((item) => {
           const Icon = item.icon;
           return (
-            <Card key={item.label} className="p-5 hover:border-emerald-200 transition-colors">
+            <Card key={item.label} className="p-5 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex justify-between items-start mb-4">
-                <div className="text-slate-500 bg-slate-50 p-2 rounded-lg">
+                <div className="text-slate-500 p-2 rounded-lg">
                   <Icon size={22} strokeWidth={1.5} />
                 </div>
                 {item.trend && (
                   <div className={`flex items-center gap-1 text-[10px] font-medium ${
-                    item.color === "emerald" ? "text-emerald-700 bg-emerald-50 border-emerald-100" : 
-                    item.color === "blue" ? "text-blue-700 bg-blue-50 border-blue-100" :
-                    item.color === "amber" ? "text-amber-700 bg-amber-50 border-amber-100" :
-                    "text-slate-700 bg-slate-50 border-slate-100"
+                    item.color === "emerald" ? "text-emerald-700 border-emerald-100" : 
+                    item.color === "blue" ? "text-blue-700 border-blue-100" :
+                    item.color === "amber" ? "text-amber-700 border-amber-100" :
+                    "text-slate-700 border-slate-100"
                   } px-2 py-1 rounded-full border`}>
                     <TrendingUp size={12} /> {item.trend}
                   </div>
@@ -280,7 +280,7 @@ export default function BudgetsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Budget Overview Chart */}
-          <Card className="lg:col-span-2 p-6">
+          <Card className="lg:col-span-2 p-6 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">Budget vs Spent</h3>
@@ -335,7 +335,7 @@ export default function BudgetsPage() {
           </Card>
 
           {/* Budget Allocation Chart */}
-          <Card className="p-6 flex flex-col">
+          <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
             <h3 className="text-sm font-semibold text-slate-900 mb-6">Allocation</h3>
             <div className="flex items-center gap-6 mb-6">
               {/* Donut Chart */}
@@ -363,7 +363,7 @@ export default function BudgetsPage() {
       </div>
 
       {/* Overall Budget Progress */}
-      <Card className="p-6">
+      <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex items-center justify-between mb-2">
           <div>
             <h3 className="text-sm font-semibold text-slate-900">Overall Budget Health</h3>
@@ -377,7 +377,7 @@ export default function BudgetsPage() {
       </Card>
 
       {/* Filters */}
-      <Card className="p-4">
+      <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col xl:flex-row items-center gap-3">
           {/* Scope Filter */}
           <div className="flex bg-slate-100 p-1 rounded-lg w-full md:w-auto">

@@ -133,8 +133,8 @@ export function AddBudgetModal({ open, onClose }: AddBudgetModalProps) {
                         className={cn(
                           "w-10 h-10 rounded-lg flex items-center justify-center border transition-all duration-200 flex-shrink-0",
                           form.period === period.key
-                            ? "bg-slate-50 text-emerald-500 border-slate-100"
-                            : "bg-slate-50 text-slate-500 border-slate-100"
+                            ? "text-emerald-500 border-slate-100"
+                            : "text-slate-500 border-slate-100"
                         )}
                       >
                         <IconComponent size={20} />

@@ -49,7 +49,7 @@ export function DeleteTransactionModal({
       <ModalBody className="px-5 py-8">
         <div className="text-center animate-txn-in">
           {/* Warning Icon */}
-          <div className="w-16 h-16 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 rounded-full text-rose-500 flex items-center justify-center mx-auto mb-6 border border-rose-200">
             <Trash2 size={28} />
           </div>
 

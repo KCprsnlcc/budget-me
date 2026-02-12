@@ -363,7 +363,7 @@ export default function FamilyPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/30 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="bg-white rounded-[10px] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-emerald-500 shrink-0">
+            <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-emerald-500 shrink-0">
               <Users size={20} />
             </div>
             <div>
@@ -384,7 +384,7 @@ export default function FamilyPage() {
       </Card>
 
       {/* Tab Navigation */}
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
         <div className="flex border-b border-slate-200/60 overflow-x-auto">
           <button 
             onClick={() => setActiveTab(FAMILY_TABS.OVERVIEW)}
@@ -434,9 +434,9 @@ export default function FamilyPage() {
             <div className="space-y-6">
               {/* Financial Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="p-5 hover:border-emerald-200 transition-colors">
+            <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex justify-between items-start mb-4">
-                <div className="text-slate-500 bg-slate-50 p-2 rounded-lg">
+                <div className="text-slate-500 p-2 rounded-lg">
                   <Users size={22} strokeWidth={1.5} />
                 </div>
               </div>
@@ -445,12 +445,12 @@ export default function FamilyPage() {
               <div className="text-[10px] text-emerald-600 mt-1">3 active, 1 pending</div>
             </Card>
 
-            <Card className="p-5 hover:border-emerald-200 transition-colors">
+            <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex justify-between items-start mb-4">
-                <div className="text-slate-500 bg-slate-50 p-2 rounded-lg">
+                <div className="text-slate-500 p-2 rounded-lg">
                   <Users size={22} strokeWidth={1.5} />
                 </div>
-                <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
+                <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-700 border-emerald-100 px-2 py-1 rounded-full border">
                   +$500
                 </div>
               </div>
@@ -458,9 +458,9 @@ export default function FamilyPage() {
               <div className="text-xl font-semibold text-slate-900 tracking-tight">$9,300</div>
             </Card>
 
-            <Card className="p-5 hover:border-emerald-200 transition-colors">
+            <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex justify-between items-start mb-4">
-                <div className="text-slate-500 bg-slate-50 p-2 rounded-lg">
+                <div className="text-slate-500 p-2 rounded-lg">
                   <Users size={22} strokeWidth={1.5} />
                 </div>
               </div>
@@ -468,12 +468,12 @@ export default function FamilyPage() {
               <div className="text-xl font-semibold text-slate-900 tracking-tight">$5,450</div>
             </Card>
 
-            <Card className="p-5 hover:border-emerald-200 transition-colors">
+            <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex justify-between items-start mb-4">
-                <div className="text-slate-500 bg-slate-50 p-2 rounded-lg">
+                <div className="text-slate-500 p-2 rounded-lg">
                   <Users size={22} strokeWidth={1.5} />
                 </div>
-                <div className="text-[10px] font-medium text-purple-700 bg-purple-50 px-2 py-1 rounded-full border border-purple-100">
+                <div className="text-[10px] font-medium text-purple-700 border-purple-100 px-2 py-1 rounded-full border">
                   58%
                 </div>
               </div>
@@ -488,7 +488,7 @@ export default function FamilyPage() {
           {/* Charts and Analytics Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Expense Categories */}
-            <Card className="p-6">
+            <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
               <h3 className="text-sm font-semibold text-slate-900 mb-4">Family Expense Categories</h3>
               <div className="flex items-center justify-center h-64">
                 <div className="relative w-48 h-48 rounded-full shadow-inner"
@@ -532,7 +532,7 @@ export default function FamilyPage() {
             </Card>
 
             {/* Budget vs Actual Chart */}
-            <Card className="p-6 lg:col-span-2">
+            <Card className="p-6 lg:col-span-2 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <h3 className="text-sm font-semibold text-slate-900">Budget vs Actual Spending</h3>

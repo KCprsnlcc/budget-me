@@ -113,7 +113,7 @@ export function GoalsTab({
   if (!isLoading && goals.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 rounded-full border border-slate-200 flex items-center justify-center mx-auto mb-4">
           <Target className="text-slate-400" size={32} />
         </div>
         <h3 className="text-lg font-semibold text-slate-900 mb-2">No Goals Yet</h3>
@@ -158,7 +158,7 @@ export function GoalsTab({
                       setShowFilters(false);
                     }}
                     className={`w-full text-left px-3 py-2 text-xs rounded-md hover:bg-slate-50 transition-colors ${
-                      activeFilter === filter ? "bg-emerald-50 text-emerald-600" : "text-slate-600"
+                      activeFilter === filter ? "border-emerald-100 text-emerald-600" : "text-slate-600"
                     }`}
                   >
                     {filter === "all" ? "All" : filter.charAt(0).toUpperCase() + filter.slice(1)}
@@ -189,7 +189,7 @@ export function GoalsTab({
               {/* Goal Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 transition-colors group-hover:scale-110">
+                  <div className="w-12 h-12 rounded-xl border border-emerald-100 flex items-center justify-center text-emerald-600 transition-colors group-hover:scale-110">
                     {getGoalIcon(goal.status)}
                   </div>
                   <div>
@@ -230,14 +230,15 @@ export function GoalsTab({
                   color={getProgressColor(goal.status)}
                   className="h-2"
                 />
-                <div className="flex justify-between items-center bg-slate-50 p-2 rounded-lg">
+                <div className="flex justify-between items-center border border-slate-100 p-2 rounded-lg">
                   <span className="text-[10px] text-slate-500">
                     {daysRemaining !== null
                       ? `${daysRemaining} days remaining until target date`
-                      : "No target date set"}
+                      : "No deadline set"
+                  }
                   </span>
-                  <span className="text-[10px] font-bold text-emerald-600">
-                    {formatCurrency(remaining)} left
+                  <span className="text-[10px] font-medium text-slate-700">
+                    {goal.targetDate ? new Date(goal.targetDate).toLocaleDateString() : "No date"}
                   </span>
                 </div>
               </div>

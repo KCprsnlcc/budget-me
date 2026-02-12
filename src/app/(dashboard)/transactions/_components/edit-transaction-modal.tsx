@@ -177,7 +177,7 @@ export function EditTransactionModal({ open, onClose, transaction }: EditTransac
           <div className="animate-txn-in">
             <div className="mb-5">
               <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                <div className="w-[30px] h-[30px] rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                <div className="w-[30px] h-[30px] rounded-lg border border-slate-100 flex items-center justify-center text-slate-400">
                   <PenSquare size={14} />
                 </div>
                 Transaction Details
@@ -309,7 +309,7 @@ export function EditTransactionModal({ open, onClose, transaction }: EditTransac
           <div className="animate-txn-in">
             <div className="mb-5">
               <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                <div className="w-[30px] h-[30px] rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                <div className="w-[30px] h-[30px] rounded-lg border border-slate-100 flex items-center justify-center text-slate-400">
                   <ClipboardCheck size={14} />
                 </div>
                 Review &amp; Confirm

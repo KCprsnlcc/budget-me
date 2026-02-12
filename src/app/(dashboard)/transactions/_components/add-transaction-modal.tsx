@@ -121,8 +121,8 @@ export function AddTransactionModal({ open, onClose }: AddTransactionModalProps)
                       <div
                         className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 ${
                           selected
-                            ? "bg-slate-100 text-slate-700 border-slate-200"
-                            : "bg-slate-50 text-slate-400 border-slate-100"
+                            ? "text-slate-700 border-slate-200"
+                            : "text-slate-400 border-slate-100"
                         }`}
                       >
                         <Icon size={18} />
@@ -152,7 +152,7 @@ export function AddTransactionModal({ open, onClose }: AddTransactionModalProps)
           <div className="animate-txn-in">
             <div className="mb-5">
               <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                <div className="w-[30px] h-[30px] rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                <div className="w-[30px] h-[30px] rounded-lg border border-slate-100 flex items-center justify-center text-slate-400">
                   <PenSquare size={14} />
                 </div>
                 Transaction Details
@@ -284,7 +284,7 @@ export function AddTransactionModal({ open, onClose }: AddTransactionModalProps)
           <div className="animate-txn-in">
             <div className="mb-5">
               <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                <div className="w-[30px] h-[30px] rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                <div className="w-[30px] h-[30px] rounded-lg border border-slate-100 flex items-center justify-center text-slate-400">
                   <ClipboardCheck size={14} />
                 </div>
                 Review &amp; Confirm

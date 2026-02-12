@@ -173,7 +173,7 @@ export function ViewTransactionModal({
                     className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400 border border-slate-100">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 border border-slate-100">
                         <ShoppingCart size={14} />
                       </div>
                       <div>

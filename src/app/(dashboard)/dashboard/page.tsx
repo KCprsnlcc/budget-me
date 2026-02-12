@@ -324,15 +324,15 @@ const CHART_DATA = [
 const StatCard = memo(({ stat }: { stat: StatType }) => {
   const Icon = stat.icon;
   return (
-    <Card className="p-5 hover:border-emerald-200 transition-colors">
+    <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
       <div className="flex justify-between items-start mb-4">
-        <div className="text-slate-500 bg-slate-50 p-2 rounded-lg">
+        <div className="text-slate-500 p-2 rounded-lg">
           <Icon size={22} strokeWidth={1.5} />
         </div>
         {stat.change && (
           <div className={`flex items-center gap-1 text-[10px] font-medium ${
-            stat.trend === "up" ? "text-emerald-700 bg-emerald-50 border-emerald-100" : 
-            "text-red-700 bg-red-50 border-red-100"
+            stat.trend === "up" ? "text-emerald-700 border-emerald-100" : 
+            "text-red-700 border-red-100"
           } px-2 py-1 rounded-full border`}>
             {stat.trend === "up" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
             {stat.change}
@@ -394,7 +394,7 @@ export default function DashboardPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/30 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <div className="bg-white rounded-[10px] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-emerald-500 shrink-0">
+              <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-emerald-500 shrink-0">
                 <Users size={20} />
               </div>
               <div>
@@ -446,7 +446,7 @@ export default function DashboardPage() {
       {/* Charts + Categories */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Income vs Expenses Chart */}
-        <Card className="lg:col-span-2 p-6">
+        <Card className="lg:col-span-2 p-6 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="text-sm font-semibold text-slate-800">Income vs Expenses</h3>
@@ -558,7 +558,7 @@ export default function DashboardPage() {
           {SPENDING_TRENDS.map((trend) => {
             const Icon = trend.icon;
             return (
-              <Card key={trend.name} className={`p-4 flex items-center justify-between transition-colors cursor-pointer ${trend.hoverBorder}`}>
+              <Card key={trend.name} className={`p-4 flex items-center justify-between transition-all cursor-pointer group hover:shadow-md ${trend.hoverBorder}`}>
                 <div>
                   <div className="text-[10px] text-slate-400 uppercase tracking-wide mb-0.5">{trend.name}</div>
                   <div className="text-sm font-bold text-slate-800">{trend.amount}</div>
@@ -573,7 +573,7 @@ export default function DashboardPage() {
                     {trend.change} {trend.trend === 'down' ? 'less' : trend.trend === 'up' ? 'more' : ''}
                   </div>
                 </div>
-                <div className={`w-10 h-10 rounded-full ${trend.iconBg} flex items-center justify-center ${trend.iconColor}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${trend.iconColor}`}>
                   <Icon size={20} />
                 </div>
               </Card>
@@ -585,7 +585,7 @@ export default function DashboardPage() {
       {/* Budget Progress & Recent Transactions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Budget Progress */}
-        <Card className="p-6">
+        <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-sm font-semibold text-slate-800">Budget Progress</h3>
             <Button variant="ghost" size="sm" className="text-xs font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
@@ -600,7 +600,7 @@ export default function DashboardPage() {
                 <div key={item.name} className="group">
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg ${item.iconBg} ${item.iconColor} flex items-center justify-center`}>
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-600">
                         <Icon size={16} />
                       </div>
                       <div>
@@ -642,9 +642,7 @@ export default function DashboardPage() {
                   className="flex items-center justify-between group cursor-pointer p-2 -mx-2 hover:bg-gray-50 rounded-lg transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-full ${tx.iconBg} ${tx.iconColor} flex items-center justify-center border ${tx.borderColor}`}>
-                      <Icon size={16} />
-                    </div>
+                    <Icon size={20} className="text-slate-600" />
                     <div>
                       <div className="text-xs font-semibold text-slate-800">{tx.name}</div>
                       <div className="text-[10px] text-slate-400">{tx.category} • {tx.date}</div>
