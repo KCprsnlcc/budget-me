@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@iconify/react";
 import {
   Users,
   AlertTriangle,
@@ -7,7 +8,6 @@ import {
   Info,
   TrendingUp,
   ArrowRight,
-  Sparkles,
   RefreshCw,
   ArrowUpRight,
   ArrowDownRight,
@@ -324,18 +324,23 @@ const CHART_DATA = [
 const StatCard = memo(({ stat }: { stat: StatType }) => {
   const Icon = stat.icon;
   return (
-    <Card className="p-5">
-      <div className="flex items-center justify-between mb-3">
-        <div className={`p-2 rounded-lg ${stat.iconBg}`}>
-          <Icon size={18} className={stat.iconColor} />
+    <Card className="p-5 hover:border-emerald-200 transition-colors">
+      <div className="flex justify-between items-start mb-4">
+        <div className="text-slate-500 bg-slate-50 p-2 rounded-lg">
+          <Icon size={22} strokeWidth={1.5} />
         </div>
-        <div className={`flex items-center gap-1 text-[11px] font-medium ${stat.trend === "up" ? "text-emerald-600" : "text-red-500"}`}>
-          {stat.trend === "up" ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-          {stat.change}
-        </div>
+        {stat.change && (
+          <div className={`flex items-center gap-1 text-[10px] font-medium ${
+            stat.trend === "up" ? "text-emerald-700 bg-emerald-50 border-emerald-100" : 
+            "text-red-700 bg-red-50 border-red-100"
+          } px-2 py-1 rounded-full border`}>
+            {stat.trend === "up" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+            {stat.change}
+          </div>
+        )}
       </div>
-      <div className="text-xl font-bold text-slate-900">{stat.value}</div>
-      <div className="text-[11px] text-slate-400 mt-0.5">{stat.label}</div>
+      <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">{stat.label}</div>
+      <div className="text-xl font-semibold text-slate-900 tracking-tight">{stat.value}</div>
     </Card>
   );
 });
@@ -417,7 +422,7 @@ export default function DashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-            <Sparkles size={16} className="text-purple-500" />
+            <Icon icon="material-symbols:insights" width={16} height={16} className="text-emerald-500" />
             Financial Insights
           </h3>
           <Button variant="ghost" size="xs" className="text-slate-400 hover:text-purple-600">

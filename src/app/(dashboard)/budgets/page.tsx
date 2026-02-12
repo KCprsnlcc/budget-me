@@ -240,13 +240,18 @@ export default function BudgetsPage() {
         {summary.map((item) => {
           const Icon = item.icon;
           return (
-            <Card key={item.label} className={`p-5 hover:border-${item.color}-200 transition-colors group relative`}>
+            <Card key={item.label} className="p-5 hover:border-emerald-200 transition-colors">
               <div className="flex justify-between items-start mb-4">
-                <div className={`text-slate-500 bg-slate-50 p-2 rounded-lg group-hover:bg-${item.color}-50 group-hover:text-${item.color}-600 transition-colors`}>
+                <div className="text-slate-500 bg-slate-50 p-2 rounded-lg">
                   <Icon size={22} strokeWidth={1.5} />
                 </div>
                 {item.trend && (
-                  <div className={`flex items-center gap-1 text-[10px] font-medium text-${item.color}-700 bg-${item.color}-50 px-2 py-1 rounded-full border border-${item.color}-100`}>
+                  <div className={`flex items-center gap-1 text-[10px] font-medium ${
+                    item.color === "emerald" ? "text-emerald-700 bg-emerald-50 border-emerald-100" : 
+                    item.color === "blue" ? "text-blue-700 bg-blue-50 border-blue-100" :
+                    item.color === "amber" ? "text-amber-700 bg-amber-50 border-amber-100" :
+                    "text-slate-700 bg-slate-50 border-slate-100"
+                  } px-2 py-1 rounded-full border`}>
                     <TrendingUp size={12} /> {item.trend}
                   </div>
                 )}
@@ -254,10 +259,7 @@ export default function BudgetsPage() {
                   <Badge variant="success">{item.status}</Badge>
                 )}
               </div>
-              <div className="flex items-center gap-1 mb-1">
-                <div className="text-slate-500 text-xs font-medium uppercase tracking-wide">{item.label}</div>
-                <Info size={12} className="text-slate-400 cursor-help" />
-              </div>
+              <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">{item.label}</div>
               <div className="text-xl font-semibold text-slate-900 tracking-tight">{item.value}</div>
             </Card>
           );

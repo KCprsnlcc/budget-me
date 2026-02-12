@@ -4,18 +4,18 @@ import { memo } from "react";
 import { Check } from "lucide-react";
 
 interface StepperProps {
-  steps: string[];
   currentStep: number;
-  className?: string;
+  totalSteps: number;
+  labels: string[];
 }
 
-export const Stepper = memo(function Stepper({ steps, currentStep, className }: StepperProps) {
+export const Stepper = memo(function Stepper({ currentStep, totalSteps, labels }: StepperProps) {
   return (
     <div
-      className={`flex items-center justify-center px-5 py-3.5 bg-white border-b border-slate-100 ${className || ''}`}
+      className="flex items-center justify-center px-5 py-3.5 bg-white border-b border-slate-100"
       aria-label="Progress"
     >
-      {steps.map((label, idx) => {
+      {labels.map((label, idx) => {
         const stepNum = idx + 1;
         const isActive = stepNum === currentStep;
         const isCompleted = stepNum < currentStep;
