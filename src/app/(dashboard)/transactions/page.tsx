@@ -231,9 +231,27 @@ export default function TransactionsPage() {
           <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">Transactions</h2>
           <p className="text-sm text-slate-500 mt-1 font-light">View and manage all your income and expense transactions.</p>
         </div>
-        <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => setAddModalOpen(true)}>
-          <Plus size={16} /> Add Transaction
-        </Button>
+        <div className="flex gap-3">
+          <div className="relative group">
+            <Button variant="outline" size="sm">
+              <Download size={16} />
+              <span className="hidden sm:inline">Export</span>
+              <MoreHorizontal size={12} />
+            </Button>
+            {/* Dropdown */}
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 hidden group-hover:block z-50">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50">
+                <span className="text-rose-500">PDF</span> Export as PDF
+              </Button>
+              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50">
+                <span className="text-emerald-500">CSV</span> Export as CSV
+              </Button>
+            </div>
+          </div>
+          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => setAddModalOpen(true)}>
+            <Plus size={16} /> Add Transaction
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
