@@ -16,20 +16,20 @@ export const DASHBOARD_NAV: NavGroup[] = [
       { label: "Transactions", href: "/transactions", icon: "ArrowLeftRight", module: "transactions" },
       { label: "Budgets", href: "/budgets", icon: "PieChart", module: "budgets" },
       { label: "Goals", href: "/goals", icon: "Flag", module: "goals" },
-      { label: "AI Predictions", href: "/predictions", icon: "Wand2", module: "predictions" },
-      { label: "Reports", href: "/reports", icon: "BarChart3", module: "reports" },
+      { label: "Family", href: "/family", icon: "Users", module: "family", dot: true },
     ],
   },
   {
     label: "Intelligence",
     items: [
+      { label: "AI Predictions", href: "/predictions", icon: "Wand2", module: "predictions" },
       { label: "BudgetSense AI", href: "/chatbot", icon: "MessageCircle", module: "chatbot", badge: "Beta" },
     ],
   },
   {
     label: "Settings",
     items: [
-      { label: "Family", href: "/family", icon: "Users", module: "family", dot: true },
+      { label: "Reports", href: "/reports", icon: "BarChart3", module: "reports" },
       { label: "Settings", href: "/settings", icon: "Settings", module: "settings" },
     ],
   },

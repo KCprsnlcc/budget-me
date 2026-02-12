@@ -14,9 +14,9 @@ import {
   Settings,
   LogOut,
   Home,
-  Target,
-  Wallet,
   Flag,
+  Wallet,
+  ShoppingBag,
   UserPlus,
   Filter,
   Clock,
@@ -455,7 +455,7 @@ export default function FamilyPage() {
             <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex justify-between items-start mb-4">
                 <div className="text-slate-500 p-2 rounded-lg">
-                  <Users size={22} strokeWidth={1.5} />
+                  <Wallet size={22} strokeWidth={1.5} />
                 </div>
                 <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-700 border-emerald-100 px-2 py-1 rounded-full border">
                   +$500
@@ -468,7 +468,7 @@ export default function FamilyPage() {
             <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex justify-between items-start mb-4">
                 <div className="text-slate-500 p-2 rounded-lg">
-                  <Users size={22} strokeWidth={1.5} />
+                  <ShoppingBag size={22} strokeWidth={1.5} />
                 </div>
               </div>
               <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Total Spending</div>
@@ -478,7 +478,7 @@ export default function FamilyPage() {
             <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex justify-between items-start mb-4">
                 <div className="text-slate-500 p-2 rounded-lg">
-                  <Users size={22} strokeWidth={1.5} />
+                  <Flag size={22} strokeWidth={1.5} />
                 </div>
                 <div className="text-[10px] font-medium text-purple-700 border-purple-100 px-2 py-1 rounded-full border">
                   58%
@@ -659,7 +659,7 @@ export default function FamilyPage() {
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl border border-blue-100 flex items-center justify-center text-blue-600 transition-colors group-hover:scale-110">
+                  <div className="flex items-center justify-center text-slate-600 transition-colors group-hover:scale-110">
                     <Home size={24} />
                   </div>
                   <div>
@@ -667,7 +667,7 @@ export default function FamilyPage() {
                     <p className="text-[10px] text-slate-500">Created by {family.createdBy}</p>
                   </div>
                 </div>
-                <Badge className="text-[9px] flex items-center gap-1">
+                <Badge className="text-[9px] flex items-center gap-1 bg-slate-100 text-slate-600 border border-slate-200">
                   <Users size={12} />
                   {family.memberCount} members
                 </Badge>

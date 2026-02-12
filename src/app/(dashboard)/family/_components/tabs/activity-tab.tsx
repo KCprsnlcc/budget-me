@@ -170,18 +170,8 @@ export function ActivityTab({
             key={activity.id}
             className="flex items-start gap-3 p-4 bg-slate-50/50 hover:bg-slate-50 rounded-xl transition-colors border border-transparent hover:border-slate-200"
           >
-            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-              <div className={`${
-                activity.type === "transaction"
-                  ? "text-blue-700"
-                  : activity.type === "goal"
-                  ? "text-emerald-700"
-                  : activity.type === "member"
-                  ? "text-purple-700"
-                  : "text-slate-700"
-              }`}>
-                {getIcon(activity.type)}
-              </div>
+            <div className="flex items-center justify-center text-slate-600 flex-shrink-0">
+              {getIcon(activity.type)}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-1">

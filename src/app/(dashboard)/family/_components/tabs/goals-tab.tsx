@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShieldCheck, Filter, MoreHorizontal, Calendar, Users, TrendingUp, TrendingDown, Target, DollarSign, Eye, Edit, Plus, Info, ArrowLeft, ArrowRight } from "lucide-react";
+import { ShieldCheck, Filter, MoreHorizontal, Calendar, Users, TrendingUp, TrendingDown, Flag, DollarSign, Eye, Edit, Plus, Info, ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -50,15 +50,15 @@ export function GoalsTab({
   const getGoalIcon = (status: string) => {
     switch (status) {
       case "on-track":
-        return <ShieldCheck className="text-emerald-600" size={24} />;
+        return <ShieldCheck size={24} />;
       case "at-risk":
-        return <Target className="text-amber-600" size={24} />;
+        return <Flag size={24} />;
       case "completed":
-        return <TrendingUp className="text-blue-600" size={24} />;
+        return <TrendingUp size={24} />;
       case "paused":
-        return <Calendar className="text-slate-600" size={24} />;
+        return <Calendar size={24} />;
       default:
-        return <Target className="text-slate-600" size={24} />;
+        return <Flag size={24} />;
     }
   };
 
@@ -192,14 +192,14 @@ export function GoalsTab({
     return (
       <div className="text-center py-12">
         <div className="w-16 h-16 rounded-full border border-slate-200 flex items-center justify-center mx-auto mb-4">
-          <Target className="text-slate-400" size={32} />
+          <Flag className="text-slate-400" size={32} />
         </div>
         <h3 className="text-lg font-semibold text-slate-900 mb-2">No Goals Yet</h3>
         <p className="text-sm text-slate-500 mb-6">
           Start by creating your first family savings goal.
         </p>
         <Button onClick={onAddGoal}>
-          <Target size={16} className="mr-2" />
+          <Flag size={16} className="mr-2" />
           Create Goal
         </Button>
       </div>
@@ -249,7 +249,7 @@ export function GoalsTab({
             )}
           </div>
           <Button size="sm" onClick={onAddGoal}>
-            <Target size={14} className="mr-1" />
+            <Flag size={14} className="mr-1" />
             Add Goal
           </Button>
         </div>
@@ -270,7 +270,7 @@ export function GoalsTab({
               {/* Goal Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl border border-emerald-100 flex items-center justify-center text-emerald-600 transition-colors group-hover:scale-110">
+                  <div className="flex items-center justify-center text-slate-600 transition-colors group-hover:scale-110">
                     {getGoalIcon(goal.status)}
                   </div>
                   <div>

@@ -65,7 +65,7 @@ export function NavItem({ label, href, icon, badge, dot, onClick }: NavItemProps
       )}
       {label}
       {badge && (
-        <Badge variant="brand" className="ml-auto text-[10px] px-1.5 py-0.5">
+        <Badge variant="neutral" className="ml-auto text-[10px] px-1.5 py-0.5 text-emerald-600 !bg-transparent !border-transparent">
           {badge}
         </Badge>
       )}

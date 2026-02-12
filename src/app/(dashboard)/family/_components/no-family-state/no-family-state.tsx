@@ -109,7 +109,7 @@ export function NoFamilyState({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                 {NO_FAMILY_FEATURES.map((feature, index) => (
                   <div key={index} className="space-y-4">
-                    <div className="w-12 h-12 rounded-lg border border-slate-100 bg-white shadow-sm flex items-center justify-center mx-auto text-emerald-500">
+                    <div className="flex items-center justify-center text-slate-600 mx-auto">
                       {feature.icon === "Widget" && <Home size={24} />}
                       {feature.icon === "Target" && <Check size={24} />}
                       {feature.icon === "ShieldCheck" && <Users size={24} />}
@@ -172,7 +172,7 @@ export function NoFamilyState({
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center bg-white text-slate-400 group-hover:text-emerald-500 group-hover:border-emerald-200 transition-colors">
+                          <div className="flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition-colors">
                             <Users size={20} />
                           </div>
                           <div>
@@ -210,7 +210,7 @@ export function NoFamilyState({
                 invitations.map((invitation) => (
                   <Card key={invitation.id} className="p-6 rounded-xl border border-slate-200 bg-white shadow-sm space-y-5 mb-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full border border-emerald-100 bg-emerald-50 flex items-center justify-center text-emerald-600">
+                      <div className="flex items-center justify-center text-slate-600">
                         <Mail size={24} />
                       </div>
                       <div>
@@ -245,7 +245,7 @@ export function NoFamilyState({
                 ))
               ) : (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                  <div className="flex items-center justify-center text-slate-400 mx-auto mb-4">
                     <Mail className="text-slate-400" size={32} />
                   </div>
                   <h3 className="text-lg font-semibold text-slate-900 mb-2">No Pending Invitations</h3>

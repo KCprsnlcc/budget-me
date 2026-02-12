@@ -319,9 +319,6 @@ export default function PredictionsPage() {
                 className="pl-9 pr-4 py-1.5 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full lg:w-48"
               />
             </div>
-            <Button variant="outline" size="sm" className="h-8 w-8">
-              <Settings size={14} />
-            </Button>
           </div>
         </div>
         <div className="overflow-x-auto">
