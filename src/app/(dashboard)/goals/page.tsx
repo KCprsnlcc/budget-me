@@ -341,14 +341,37 @@ export default function GoalsPage() {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {summaryData.map((item) => (
-          <Card key={item.label} className="p-5">
-            <div className="text-[10px] text-slate-400 uppercase tracking-wider font-medium">{item.label}</div>
-            <div className="text-lg font-bold text-slate-900 mt-1">{item.value}</div>
-          </Card>
-        ))}
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {summaryData.slice(0, 3).map((item, index) => {
+          const icons = [Target, PiggyBank, TrendingUp];
+          const Icon = icons[index];
+          const colors = ["emerald", "blue", "amber"];
+          const color = colors[index];
+          
+          return (
+            <Card key={item.label} className={`p-5 hover:border-${color}-200 transition-colors group relative`}>
+              <div className="flex justify-between items-start mb-4">
+                <div className={`text-slate-500 bg-slate-50 p-2 rounded-lg group-hover:bg-${color}-50 group-hover:text-${color}-600 transition-colors`}>
+                  <Icon size={22} strokeWidth={1.5} />
+                </div>
+                {index === 0 && (
+                  <div className={`flex items-center gap-1 text-[10px] font-medium text-${color}-700 bg-${color}-50 px-2 py-1 rounded-full border border-${color}-100`}>
+                    <TrendingUp size={12} /> Active
+                  </div>
+                )}
+                {index === 2 && (
+                  <Badge variant="success">On Track</Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-1 mb-1">
+                <div className="text-slate-500 text-xs font-medium uppercase tracking-wide">{item.label}</div>
+                <Info size={12} className="text-slate-400 cursor-help" />
+              </div>
+              <div className="text-xl font-semibold text-slate-900 tracking-tight">{item.value}</div>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Charts Section */}
@@ -433,13 +456,22 @@ export default function GoalsPage() {
       {/* Filters */}
       <Card className="p-4">
         <div className="flex flex-col xl:flex-row items-center gap-3">
-          <div className="flex items-center gap-2 text-xs text-slate-500 w-full xl:w-auto">
-            <Filter size={16} />
-            <span className="font-medium">Filters</span>
+          {/* Scope Filter */}
+          <div className="flex bg-slate-100 p-1 rounded-lg w-full md:w-auto">
+            <Button variant="ghost" size="sm" className="flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md bg-white text-slate-900 shadow-sm">
+              All
+            </Button>
+            <Button variant="ghost" size="sm" className="flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md text-slate-500 hover:text-slate-700">
+              Personal
+            </Button>
+            <Button variant="ghost" size="sm" className="flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md text-slate-500 hover:text-slate-700">
+              Family
+            </Button>
           </div>
-          <div className="hidden xl:block h-4 w-px bg-slate-200"></div>
 
-          <div className="relative w-full xl:w-64">
+          <div className="h-4 w-px bg-slate-200 hidden xl:block"></div>
+
+          <div className="relative w-full md:w-64">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
@@ -448,7 +480,7 @@ export default function GoalsPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full md:w-auto flex-1">
             <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
               <option>All Priorities</option>
               <option>High</option>
@@ -456,15 +488,37 @@ export default function GoalsPage() {
               <option>Low</option>
             </select>
             <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>All Status</option>
+              <option>All Statuses</option>
               <option>In Progress</option>
               <option>Completed</option>
+              <option>Behind</option>
               <option>Overdue</option>
             </select>
-            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset Filters">
-              <RotateCcw size={14} />
-            </Button>
+            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
+              <option>All Categories</option>
+              <option>Emergency</option>
+              <option>Housing</option>
+              <option>Education</option>
+              <option>Travel</option>
+              <option>Transport</option>
+            </select>
+            {/* Date Range Picker Mockup */}
+            <div className="relative w-full">
+              <Calendar size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Select dates"
+                className="h-8 pl-8 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
+                readOnly
+                value="Jan 1 - Dec 31"
+              />
+            </div>
           </div>
+
+          <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center">
+            <RotateCcw size={14} />
+            Reset
+          </Button>
         </div>
       </Card>
 
