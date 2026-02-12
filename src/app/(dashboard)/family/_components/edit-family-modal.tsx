@@ -165,35 +165,6 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily }: EditFamilyMod
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                  Family Type
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  {Object.entries(FAMILY_TYPES).map(([key, type]) => (
-                    <label key={key} className="cursor-pointer">
-                      <input
-                        type="radio"
-                        name="edit-family-visibility"
-                        value={key}
-                        checked={formData.visibility === key}
-                        onChange={(e) => updateFormData("visibility", e.target.value as any)}
-                        className="sr-only peer"
-                      />
-                      <Card className="p-3 text-center border-2 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50">
-                        <div className="text-xs font-semibold">{type.title}</div>
-                        <div className="w-5 h-5 rounded-full border-2 border-slate-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500 flex items-center justify-center mx-auto mt-2">
-                          <Check
-                            size={12}
-                            className="text-white opacity-0 peer-checked:opacity-100"
-                          />
-                        </div>
-                      </Card>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
               <Card className="p-4 bg-blue-50 border-blue-100">
                 <div className="flex gap-3">
                   <Info className="text-blue-500 shrink-0" size={16} />

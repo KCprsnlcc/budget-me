@@ -358,7 +358,10 @@ export default function BudgetsPage() {
 
           {/* Budget Allocation Chart */}
           <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
-            <h3 className="text-sm font-semibold text-slate-900 mb-6">Allocation</h3>
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-slate-900">Allocation</h3>
+              <p className="text-xs text-slate-500 mt-0.5 font-light">Budget distribution across categories</p>
+            </div>
             <div className="flex items-center gap-6 mb-6">
               {/* Donut Chart */}
               <div className="w-32 h-32 mx-auto rounded-full flex-shrink-0 relative"

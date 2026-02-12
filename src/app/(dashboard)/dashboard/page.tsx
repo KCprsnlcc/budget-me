@@ -586,8 +586,9 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Budget Progress */}
         <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6">
             <h3 className="text-sm font-semibold text-slate-800">Budget Progress</h3>
+            <p className="text-xs text-slate-500 mt-0.5 font-light">Track spending against budget limits</p>
           </div>
 
           <div className="space-y-5">
@@ -626,8 +627,9 @@ export default function DashboardPage() {
 
         {/* Recent Transactions */}
         <Card className="p-6 flex flex-col">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6">
             <h3 className="text-sm font-semibold text-slate-800">Recent Transactions</h3>
+            <p className="text-xs text-slate-500 mt-0.5 font-light">Latest income and expense activities</p>
           </div>
 
           <div className="space-y-4 flex-1">

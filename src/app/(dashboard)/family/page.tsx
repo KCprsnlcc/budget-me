@@ -10,6 +10,7 @@ import {
   Edit,
   MoreHorizontal,
   Mail,
+  RefreshCw,
   Settings,
   LogOut,
   Home,
@@ -21,6 +22,7 @@ import {
   Clock,
   ChevronDown,
   UserCheck,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -112,7 +114,7 @@ const FAMILY_DATA: Family = {
   currency: "PHP",
   members: FAMILY_MEMBERS,
   createdAt: "2025-01-15",
-  createdBy: "john@budgetme.app",
+  createdBy: "john@budgetme.site",
 };
 
 const SHARED_GOALS: SharedGoal[] = [
@@ -171,7 +173,7 @@ const ACTIVITIES: ActivityItem[] = [
     type: "transaction",
     action: "added a transaction of",
     memberName: "Sarah",
-    memberEmail: "sarah@budgetme.app",
+    memberEmail: "sarah@budgetme.site",
     details: "Household Shared Budget",
     amount: 85.00,
     target: "Groceries",
@@ -182,7 +184,7 @@ const ACTIVITIES: ActivityItem[] = [
     type: "goal",
     action: "contributed",
     memberName: "Emma",
-    memberEmail: "emma@budgetme.app",
+    memberEmail: "emma@budgetme.site",
     details: "Personal Contribution",
     amount: 100.00,
     target: "Family Vacation",
@@ -193,7 +195,7 @@ const ACTIVITIES: ActivityItem[] = [
     type: "member",
     action: "invited",
     memberName: "John",
-    memberEmail: "john@budgetme.app",
+    memberEmail: "john@budgetme.site",
     details: "Invitation Sent",
     target: "mike@email.com",
     timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
@@ -237,7 +239,7 @@ const INVITATIONS: Invitation[] = [
     id: "inv-1",
     familyName: "Doe Family Budget",
     inviterName: "Sarah Doe",
-    inviterEmail: "sarah@budgetme.app",
+    inviterEmail: "sarah@budgetme.site",
     message: "Join our family budget to track expenses together!",
     invitedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     status: "pending",
@@ -323,6 +325,12 @@ export default function FamilyPage() {
 
   const handleLeaveFamily = useCallback(() => {
     setLeaveFamilyModalOpen(true);
+  }, []);
+
+  const handleRefreshFamilies = useCallback(() => {
+    console.log("Refreshing families list");
+    // Simulate refreshing the families list
+    // In a real app, this would fetch fresh data from the API
   }, []);
 
   return (
@@ -488,7 +496,10 @@ export default function FamilyPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Expense Categories */}
             <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
-              <h3 className="text-sm font-semibold text-slate-900 mb-4">Family Expense Categories</h3>
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-slate-900">Family Expense Categories</h3>
+                <p className="text-xs text-slate-500 mt-0.5 font-light">Spending breakdown by category</p>
+              </div>
               <div className="flex items-center justify-center h-64">
                 <div className="relative w-48 h-48 rounded-full shadow-inner"
                   style={{ background: 'conic-gradient(#10b981 0% 35%, #3b82f6 35% 59%, #8b5cf6 59% 77%, #f59e0b 77% 92%, #94a3b8 92% 100%)' }}>
@@ -613,8 +624,70 @@ export default function FamilyPage() {
               onFilter={(filter) => setActiveGoalFilter(filter)}
               activeFilter={activeGoalFilter}
               onAddGoal={() => console.log("Add goal")}
+              onContributeGoal={(goalId) => console.log("Contribute to goal:", goalId)}
+              onViewGoal={(goalId) => console.log("View goal details:", goalId)}
             />
           )}
+        </div>
+      </Card>
+
+      {/* Discover Families Section */}
+      <Card className="p-6 mb-8 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900">Discover Families</h3>
+            <p className="text-xs text-slate-500 mt-1 font-light">Find and join other public family groups in your network</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="text-xs h-9 px-4">
+              <ArrowRight size={14} />
+              View More
+            </Button>
+            <Button size="sm" onClick={handleRefreshFamilies} className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600">
+              <RefreshCw size={14} className="mr-1" />
+              Refresh
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {publicFamilies.map((family) => (
+            <Card
+              key={family.id}
+              className="p-5 hover:shadow-md transition-all group h-full cursor-pointer"
+              onClick={() => handleJoinFamily(family.id)}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl border border-blue-100 flex items-center justify-center text-blue-600 transition-colors group-hover:scale-110">
+                    <Home size={24} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-900">{family.name}</h4>
+                    <p className="text-[10px] text-slate-500">Created by {family.createdBy}</p>
+                  </div>
+                </div>
+                <Badge className="text-[9px] flex items-center gap-1">
+                  <Users size={12} />
+                  {family.memberCount} members
+                </Badge>
+              </div>
+              <p className="text-xs text-slate-600 mb-4 font-light leading-relaxed">
+                "Managing our household expenses and savings goals together for our new home."
+              </p>
+              <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                <span className="text-[9px] text-slate-400">
+                  Public • Created Jan 15
+                </span>
+                <Button
+                  size="sm"
+                  className="text-xs py-1.5 bg-emerald-500 hover:bg-emerald-600"
+                >
+                  Request Join
+                </Button>
+              </div>
+            </Card>
+          ))}
         </div>
       </Card>
 

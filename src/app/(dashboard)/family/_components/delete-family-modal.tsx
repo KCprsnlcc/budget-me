@@ -3,7 +3,12 @@
 import React, { useState } from "react";
 import { X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@/components/ui/modal";
 
 interface DeleteFamilyModalProps {
   open: boolean;
@@ -32,22 +37,30 @@ export function DeleteFamilyModal({ open, onClose, onConfirm }: DeleteFamilyModa
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-sm mx-4 bg-white rounded-xl shadow-xl">
-        <div className="p-6 text-center">
-          <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center mx-auto mb-4">
-            <Trash2 size={24} />
+    <Modal open={open} onClose={handleClose} className="max-w-md">
+      {/* Header */}
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
+        <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+          Delete Family Group
+        </span>
+      </ModalHeader>
+
+      {/* Body */}
+      <ModalBody className="px-5 py-8">
+        <div className="text-center animate-txn-in">
+          {/* Warning Icon */}
+          <div className="w-16 h-16 rounded-full text-rose-500 flex items-center justify-center mx-auto mb-6 border border-rose-200">
+            <Trash2 size={28} />
           </div>
-          
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">
-            Delete Family Group?
-          </h3>
-          
-          <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+
+          {/* Warning Message */}
+          <h2 className="text-lg font-bold text-slate-900 mb-3">Delete Family Group?</h2>
+          <p className="text-sm text-slate-500 mb-6 max-w-xs mx-auto leading-relaxed">
             All shared budgets, goals, and contributions will be lost. This action cannot be undone.
           </p>
 
-          <div className="text-left mb-6">
+          {/* Confirmation Input */}
+          <div className="text-left mb-6 max-w-sm mx-auto">
             <label className="block text-xs font-medium text-slate-700 mb-1.5">
               Type <span className="font-bold text-rose-600">DELETE</span> to confirm
             </label>
@@ -59,25 +72,24 @@ export function DeleteFamilyModal({ open, onClose, onConfirm }: DeleteFamilyModa
               placeholder="DELETE"
             />
           </div>
-
-          <div className="flex gap-3 justify-center">
-            <Button
-              variant="outline"
-              onClick={handleClose}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirm}
-              disabled={confirmationText !== "DELETE"}
-              className="flex-1 bg-rose-600 hover:bg-rose-700 shadow-sm shadow-rose-100"
-            >
-              Delete
-            </Button>
-          </div>
         </div>
-      </div>
-    </div>
+      </ModalBody>
+
+      {/* Footer */}
+      <ModalFooter className="px-6 py-4">
+        <Button variant="outline" size="sm" className="flex-1" onClick={handleClose}>
+          <X size={14} /> Cancel
+        </Button>
+        <Button 
+          variant="destructive" 
+          size="sm" 
+          className="flex-1" 
+          onClick={handleConfirm}
+          disabled={confirmationText !== "DELETE"}
+        >
+          <Trash2 size={14} /> Delete Family
+        </Button>
+      </ModalFooter>
+    </Modal>
   );
 }

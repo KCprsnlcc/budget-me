@@ -106,12 +106,7 @@ export function ViewGoalModal({
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
       {/* Header */}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5">
-        <div className="flex items-center gap-3">
-          <div className="p-1.5 rounded-lg text-emerald-600">
-            <Flag size={18} />
-          </div>
-          <h3 className="text-sm font-semibold text-slate-900">{goal.name}</h3>
-        </div>
+        <h3 className="text-sm font-semibold text-slate-900">{goal.name}</h3>
         <div className="flex items-center gap-3">
           <span className="text-[10px] text-slate-400 font-medium tracking-wide">
             Step {step} of 2

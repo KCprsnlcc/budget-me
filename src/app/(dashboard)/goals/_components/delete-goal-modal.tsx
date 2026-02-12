@@ -53,12 +53,7 @@ export function DeleteGoalModal({ open, onClose, goal }: DeleteGoalModalProps) {
     <Modal open={open} onClose={handleClose} className="max-w-[400px]">
       {/* Header */}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5">
-        <div className="flex items-center gap-3">
-          <div className="p-1.5 rounded-lg text-red-600">
-            <Trash2 size={18} />
-          </div>
-          <h3 className="text-sm font-semibold text-slate-900">Delete Goal</h3>
-        </div>
+        <h3 className="text-sm font-semibold text-slate-900">Delete Goal</h3>
       </ModalHeader>
 
       {/* Body */}
@@ -77,14 +72,9 @@ export function DeleteGoalModal({ open, onClose, goal }: DeleteGoalModalProps) {
 
           {/* Goal Summary */}
           <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg text-emerald-600">
-                <Flag size={16} />
-              </div>
-              <div className="flex-1">
-                <h4 className="text-sm font-semibold text-slate-900">{goal.name}</h4>
-                <p className="text-xs text-slate-500 capitalize">{goal.category} goal</p>
-              </div>
+            <div className="mb-3">
+              <h4 className="text-sm font-semibold text-slate-900">{goal.name}</h4>
+              <p className="text-xs text-slate-500 capitalize">{goal.category} goal</p>
             </div>
             
             <div className="space-y-2 text-xs">

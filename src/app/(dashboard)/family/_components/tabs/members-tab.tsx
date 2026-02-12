@@ -105,13 +105,13 @@ export function MembersTab({
         <div className="lg:col-span-2 space-y-6">
           {pendingRequests.length > 0 && (
             <Card className="p-6 border-blue-100 hover:shadow-md transition-all group cursor-pointer">
-              <h3 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                <UserCheck className="text-blue-600" size={18} />
-                Pending Join Requests
-                <Badge className="bg-blue-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                  {pendingRequests.length}
-                </Badge>
-              </h3>
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-slate-900">
+                  Pending Join Requests
+                   ({pendingRequests.length})
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5 font-light">Review and approve family member requests</p>
+              </div>
               <div className="space-y-3">
                 {pendingRequests.map((request) => (
                   <Card key={request.id} className="p-4 bg-white shadow-sm border-blue-100">
@@ -157,20 +157,17 @@ export function MembersTab({
 
           {/* Current Family Members List */}
           <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4">
               <h3 className="text-sm font-semibold text-slate-900">
                 Family Members ({members.length})
               </h3>
-              <Button variant="ghost" size="sm" onClick={handleEditFamilyClick}>
-                <Settings size={16} className="mr-2" />
-                Family Settings
-              </Button>
+              <p className="text-xs text-slate-500 mt-0.5 font-light">Manage current family members and their roles</p>
             </div>
             <div className="space-y-4">
               {members.map((member) => {
                 const RoleIcon = getRoleIcon(member.role);
                 const isOwner = member.role === "Owner";
-                const isCurrentUser = member.email === "john@budgetme.app"; // TODO: Get from auth context
+                const isCurrentUser = member.email === "john@budgetme.site"; // TODO: Get from auth context
 
                 return (
                   <div
@@ -250,14 +247,11 @@ export function MembersTab({
         <div className="space-y-6">
           {/* Role Management interface */}
           <Card className="p-6 overflow-hidden">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                <Shield className="text-purple-600" size={18} />
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-slate-900">
                 Role Management
               </h3>
-              <Button variant="ghost" size="sm" className="text-[10px] font-medium text-slate-400 hover:text-purple-600">
-                Info
-              </Button>
+              <p className="text-xs text-slate-500 mt-0.5 font-light">Assign and manage member permissions</p>
             </div>
             <div className="space-y-4">
               {members
@@ -300,10 +294,12 @@ export function MembersTab({
 
           {/* Info Card */}
           <Card className="p-6 border-emerald-100 hover:shadow-md transition-all group cursor-pointer">
-            <h4 className="text-sm font-semibold text-emerald-900 flex items-center gap-2 mb-2">
-              <Info size={18} />
-              About Roles
-            </h4>
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-slate-900">
+                About Roles
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5 font-light">Understanding family member permissions</p>
+            </div>
             <ul className="space-y-3">
               <li className="text-[10px] text-emerald-800 leading-relaxed">
                 <span className="font-bold">Owner:</span> Complete control, can delete the family group.
@@ -319,67 +315,6 @@ export function MembersTab({
               </li>
             </ul>
           </Card>
-        </div>
-      </div>
-
-      {/* Discover Families Section */}
-      <div className="mt-8 pt-8 border-t border-slate-100">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-sm font-semibold text-slate-900">Discover Families</h3>
-            <p className="text-[10px] text-slate-500 mt-1 font-light">
-              Find and join other public family groups in your network.
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-[10px] font-medium text-slate-400 hover:text-emerald-600 flex items-center gap-1"
-            onClick={onRefreshFamilies}
-          >
-            <RefreshCw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
-            Refresh
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {publicFamilies.map((family) => (
-            <Card
-              key={family.id}
-              className="p-5 hover:shadow-md transition-all group cursor-pointer"
-              onClick={() => onJoinFamily(family.id)}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl border border-blue-100 flex items-center justify-center text-blue-600 transition-colors group-hover:scale-110">
-                    <Home size={24} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900">{family.name}</h4>
-                    <p className="text-[10px] text-slate-500">Created by {family.createdBy}</p>
-                  </div>
-                </div>
-                <Badge className="text-[9px] flex items-center gap-1">
-                  <Users size={12} />
-                  {family.memberCount} members
-                </Badge>
-              </div>
-              <p className="text-xs text-slate-600 mb-4 font-light leading-relaxed">
-                "Managing our household expenses and savings goals together for our new home."
-              </p>
-              <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                <span className="text-[9px] text-slate-400">
-                  Public • Created Jan 15
-                </span>
-                <Button
-                  size="sm"
-                  className="text-xs py-1.5 bg-emerald-500 hover:bg-emerald-600"
-                >
-                  Request Join
-                </Button>
-              </div>
-            </Card>
-          ))}
         </div>
       </div>
 
