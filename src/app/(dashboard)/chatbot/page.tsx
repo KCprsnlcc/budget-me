@@ -277,7 +277,7 @@ export default function ChatbotPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto h-[calc(100vh-140px)] min-h-[600px] space-y-6 animate-fade-in">
+    <div className="max-w-7xl mx-auto h-[calc(100vh-140px)] min-h-[600px] space-y-6 animate-fade-in">
       {/* Messenger Container */}
       <Card className="flex h-full overflow-hidden rounded-xl border border-slate-200/60 shadow-sm">
         {/* Main Chat Area */}
@@ -427,7 +427,7 @@ export default function ChatbotPage() {
           {/* Input Area */}
           <div className="p-3 bg-white border-t border-slate-100 relative z-20 flex-shrink-0">
             <div className="mx-auto max-w-3xl">
-              <div className="relative flex items-end gap-2 bg-slate-50 border border-slate-200/60 rounded-3xl p-2 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/20 transition-all shadow-sm">
+              <div className="relative flex items-end gap-2 bg-slate-50 border border-slate-200/60 rounded-3xl p-2 focus-within:border-slate-300 transition-all shadow-sm">
                 {/* Attachment Button */}
                 <button className="p-2 text-slate-400 hover:text-emerald-500 rounded-full transition-colors flex-shrink-0">
                   <Paperclip size={20} />
@@ -440,7 +440,7 @@ export default function ChatbotPage() {
                   onKeyDown={handleKeyDown}
                   placeholder="Message BudgetSense..."
                   rows={1}
-                  className="w-full bg-transparent border-none text-sm text-slate-600 placeholder-slate-400 focus:outline-none resize-none py-2.5 max-h-32 leading-relaxed"
+                  className="w-full bg-transparent border-none text-sm text-slate-600 placeholder-slate-400 focus:outline-none resize-none py-1.5 max-h-32 leading-relaxed"
                 />
 
                 {/* Send Button */}
