@@ -60,7 +60,7 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
 
   
   return (
-    <header className="h-14 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 sticky top-0">
+    <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 sticky top-0">
       <div className="flex items-center gap-2 md:gap-4">
         {/* Mobile menu */}
         <button

@@ -11,7 +11,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <nav className="fixed w-full z-50 top-0 border-b border-slate-100 bg-white/80 backdrop-blur-md">
+    <nav className="fixed w-full z-50 top-0 border-b border-slate-100 bg-white">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-6">
