@@ -2,7 +2,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
-  variant?: "light" | "dark" | "icon";
+  variant?: "light" | "dark" | "icon" | "landing";
   className?: string;
   size?: "sm" | "md" | "lg";
 }
@@ -11,6 +11,7 @@ const LOGO_MAP = {
   light: "/logos/BudgetMe-logo.svg",
   dark: "/logos/BudgetMe-logo.svg",
   icon: "/logos/BudgetMe-logo.svg",
+  landing: "/logos/light-no-bg-logo-2.svg",
 } as const;
 
 const SIZE_MAP = {

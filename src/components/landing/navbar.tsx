@@ -16,7 +16,7 @@ export function Navbar() {
         {/* Logo */}
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <Logo size="md" />
+            <Logo variant="landing" size="md" />
           </Link>
 
           {/* Desktop Nav */}

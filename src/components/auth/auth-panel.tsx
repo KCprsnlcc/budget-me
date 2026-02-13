@@ -113,7 +113,7 @@ export function AuthPanel({
           {page === "register" ? (
             <>
               <div className="mb-6 flex items-center gap-2">
-                <Logo size="md" />
+                <Logo variant="landing" size="md" />
               </div>
               <div className="mx-auto w-full max-w-[300px]">
                 <h1 className="mb-1 text-xl font-medium tracking-tight text-slate-900">
@@ -126,7 +126,7 @@ export function AuthPanel({
             </>
           ) : (
             <div className="flex items-center gap-2">
-              <Logo size="md" />
+              <Logo variant="landing" size="md" />
             </div>
           )}
           {header}
