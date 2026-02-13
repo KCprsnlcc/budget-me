@@ -31,11 +31,8 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
         }`}
       >
         {/* Header */}
-        <div className="h-14 flex items-center px-4 border-b border-slate-200/50 gap-3">
-          <Logo variant="icon" size="sm" className="w-6 h-6" />
-          <span className="font-medium text-slate-800 tracking-tight text-sm">
-            BudgetMe
-          </span>
+        <div className="h-14 flex items-center px-4 border-b border-slate-200/50">
+          <Logo variant="landing" size="md" />
           <button
             className="ml-auto text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
             onClick={onClose}

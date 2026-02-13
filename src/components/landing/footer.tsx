@@ -10,7 +10,7 @@ export function Footer() {
           {/* Branding */}
           <div className="col-span-full lg:col-span-4 lg:pr-12">
             <a href="#" className="inline-block mb-2 ml-2 opacity-90 hover:opacity-100 transition-opacity">
-              <Logo size="lg" />
+              <Logo variant="landing" size="lg" />
             </a>
             <p className="text-slate-400 text-[13px] text-center leading-relaxed max-w-[240px]">
               The refined platform for professional financial clarity and growth.
