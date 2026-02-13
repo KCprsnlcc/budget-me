@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, ArrowLeft, Search, FileX } from "lucide-react";
+import { Home, ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/shared/logo";
 
@@ -79,18 +79,6 @@ export default function NotFound() {
       {/* Main Content */}
       <main className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-16">
         <div className="max-w-2xl mx-auto text-center">
-          {/* 404 Icon */}
-          <div className="mb-8 flex justify-center">
-            <div className="relative">
-              <div className="w-24 h-24 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center animate-pulse">
-                <FileX size={48} className="text-red-500" />
-              </div>
-              {/* Decorative dots */}
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full bg-red-400 animate-bounce" />
-              <div className="absolute -bottom-1 -left-3 w-2 h-2 rounded-full bg-red-300 animate-bounce delay-150" />
-            </div>
-          </div>
-
           {/* Error Code */}
           <div className="mb-4">
             <span className="text-8xl md:text-9xl font-bold text-slate-100 select-none tracking-tighter">
@@ -99,15 +87,15 @@ export default function NotFound() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-slate-900 tracking-tight mb-5 leading-[1.2]">
-            Page Not Found
+          <h1 className="text-4xl md:text-5xl lg:text-5xl font-semibold text-slate-900 tracking-tight mb-5 leading-[1.2]">
+            <span className="text-emerald-500">Page Not Found</span>
           </h1>
 
           {/* Subheadline */}
-          <p className="text-[13px] md:text-sm text-slate-600 max-w-md mx-auto mb-8 leading-relaxed">
-            The page you're looking for seems to have wandered off. 
+          <p className="text-[13px] md:text-sm text-slate-700 max-w-xl mx-auto mb-8 leading-relaxed">
+            The page you're looking for doesn't exist or has been moved.{" "}
             <br className="hidden md:block" />
-            Don't worry, we'll help you get back on track.
+            Let's get you back on track with your financial planning.
           </p>
 
           {/* Action Buttons */}
