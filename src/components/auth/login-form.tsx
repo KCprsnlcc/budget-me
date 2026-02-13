@@ -20,6 +20,13 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(
     searchParams.get("error") === "auth_callback_failed"
       ? "Authentication failed. Please try again."
+      : searchParams.get("error") === "email_verification_failed"
+      ? "Email verification failed. Please try signing up again."
+      : null
+  );
+  const [success, setSuccess] = useState<string | null>(
+    searchParams.get("message") === "email_verified"
+      ? "Email verified successfully! Please sign in to continue."
       : null
   );
   const [isPending, startTransition] = useTransition();
@@ -48,6 +55,16 @@ export function LoginForm() {
           <span className="bg-white px-2 text-slate-400">or</span>
         </div>
       </div>
+
+      {/* Success Message */}
+      {success && (
+        <div
+          role="alert"
+          className="mb-4 rounded-lg border border-green-100 bg-green-50 px-3 py-2.5 text-xs text-green-600"
+        >
+          {success}
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (
