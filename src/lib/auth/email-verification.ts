@@ -4,9 +4,9 @@ export async function handleEmailVerification(token: string) {
   const supabase = await createClient();
   
   try {
-    // Try to verify the OTP directly
+    // Try to verify the OTP using token_hash
     const { error } = await supabase.auth.verifyOtp({
-      token,
+      token_hash: token,
       type: "signup",
     });
     
