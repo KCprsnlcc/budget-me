@@ -57,16 +57,25 @@ export function ResetPasswordForm() {
 
     startTransition(async () => {
       const supabase = createClient();
-      const { error } = await supabase.auth.verifyOtp({
+      
+      // First verify the token
+      const { error: verifyError } = await supabase.auth.verifyOtp({
         token_hash,
         type: "recovery",
-        options: {
-          password,
-        },
       });
 
-      if (error) {
-        setError(error.message);
+      if (verifyError) {
+        setError(verifyError.message);
+        return;
+      }
+
+      // If verification successful, update the user's password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password,
+      });
+
+      if (updateError) {
+        setError(updateError.message);
         return;
       }
 
