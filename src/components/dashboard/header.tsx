@@ -1,9 +1,12 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Menu, ChevronRight, Calendar, Download } from "lucide-react";
+import { Menu, ChevronRight, Calendar, Download, LogOut, User, ChevronDown } from "lucide-react";
 import { Logo } from "@/components/shared/logo";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/auth/auth-context";
+import { useState, useEffect, useRef, useTransition } from "react";
 
 const PAGE_TITLES: Record<string, { category: string; title: string }> = {
   "/dashboard": { category: "Platform", title: "Dashboard" },
@@ -24,8 +27,38 @@ interface HeaderProps {
 
 export function Header({ onMobileMenuOpen }: HeaderProps) {
   const pathname = usePathname();
+  const { user, signOut } = useAuth();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSigningOut, startSignOut] = useTransition();
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const pageMeta = PAGE_TITLES[pathname] || { category: "Platform", title: "Dashboard" };
 
+  // Close dropdown when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isUserMenuOpen]);
+
+  
   return (
     <header className="h-14 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 sticky top-0">
       <div className="flex items-center gap-2 md:gap-4">
@@ -74,6 +107,78 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
           <Download size={16} />
           <span className="hidden md:inline text-[11px]">Export</span>
         </Button>
+
+        {/* User Menu */}
+        {user && (
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors min-h-[44px] cursor-pointer"
+              aria-label="User menu"
+              aria-expanded={isUserMenuOpen}
+            >
+              <UserAvatar user={user} size="md" />
+              <div className="hidden md:block text-left">
+                <div className="text-xs font-medium text-slate-700 truncate max-w-[120px]">
+                  {user.user_metadata?.full_name || user.email || "User"}
+                </div>
+                <div className="text-[10px] text-slate-500 truncate max-w-[120px]">
+                  {user.email}
+                </div>
+              </div>
+              <ChevronDown size={14} className="text-slate-400" />
+            </button>
+
+            {/* Dropdown */}
+            {isUserMenuOpen && (
+              <>
+                {/* Backdrop */}
+                <div
+                  className="fixed inset-0 z-30"
+                  onClick={() => setIsUserMenuOpen(false)}
+                />
+                {/* Menu */}
+                <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg border border-slate-200 shadow-lg z-40 py-1">
+                  <div className="px-3 py-2 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <UserAvatar user={user} size="sm" />
+                      <div className="text-left">
+                        <div className="text-xs font-medium text-slate-700 truncate">
+                          {user.user_metadata?.full_name || user.email || "User"}
+                        </div>
+                        <div className="text-[10px] text-slate-500 truncate">
+                          {user.email}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      startSignOut(async () => {
+                        await signOut();
+                      });
+                    }}
+                    disabled={isSigningOut}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSigningOut ? (
+                      <>
+                        <div className="w-3 h-3 border border-slate-600 border-t-transparent rounded-full animate-spin" />
+                        Signing out...
+                      </>
+                    ) : (
+                      <>
+                        <LogOut size={14} />
+                        Sign out
+                      </>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

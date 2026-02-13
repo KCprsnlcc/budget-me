@@ -8,6 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -35,6 +36,7 @@ export function AuthProvider({
   initialUser: User | null;
   initialSession: Session | null;
 }) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(initialUser);
   const [session, setSession] = useState<Session | null>(initialSession);
   const [isLoading, setIsLoading] = useState(!initialUser && !initialSession);
@@ -49,7 +51,10 @@ export function AuthProvider({
     setUser(null);
     setSession(null);
     setIsLoading(false);
-  }, []);
+    // Redirect to login page using Next.js router
+    router.push("/login");
+    router.refresh();
+  }, [router]);
 
   useEffect(() => {
     const supabase = createClient();

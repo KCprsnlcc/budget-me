@@ -40,3 +40,18 @@ export const getUserWithProfile = cache(async () => {
 
   return { user, profile };
 });
+
+/**
+ * Get user profile with avatar URL
+ */
+export const getUserProfile = cache(async (userId: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("avatar_url, full_name")
+    .eq("id", userId)
+    .single();
+  
+  if (error || !data) return null;
+  return data;
+});
