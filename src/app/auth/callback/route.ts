@@ -27,6 +27,13 @@ export async function GET(request: Request) {
       }
     }
 
+    // Handle password recovery - redirect to reset password page
+    if (type === "recovery") {
+      if (token) {
+        return NextResponse.redirect(`${origin}/reset-password?token_hash=${token}&type=${type}`);
+      }
+    }
+
     // Try standard code exchange for OAuth and other flows
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     

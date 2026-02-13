@@ -73,20 +73,45 @@ const testimonialsData = {
         "Highly recommended for students! The templates helped me manage my allowance and even save for a new laptop effortlessly.",
     },
   ],
+  "reset-password": [
+    {
+      name: "Marcus Alexander Roldan",
+      username: "@marcus.alexander",
+      image: "/profiles/marcus.alexander.webp",
+      content:
+        "BudgetMe helped me save enough for a down payment on my house in just 18 months. The goal tracking feature is fantastic!",
+    },
+    {
+      name: "Edward Baulita",
+      username: "@edward.bau",
+      image: "/profiles/edward.bau.webp",
+      content:
+        "As a freelancer with irregular income, BudgetMe has been a game-changer. The visualization tools help me see months ahead.",
+    },
+    {
+      name: "Kenneth Buela",
+      username: "@kenneth.b",
+      image: "/profiles/kenneth.b.webp",
+      content:
+        "The AI-powered insights have completely changed how I think about my spending habits. It predicted patterns I hadn't noticed.",
+    },
+  ],
 } as const;
 
-type PageType = "login" | "register" | "forgot";
+type PageType = "login" | "register" | "forgot" | "reset-password";
 
 const SVG_TRANSFORM: Record<PageType, string> = {
   login: "scale-y-[-1]",
   register: "scale-x-[-1]",
   forgot: "rotate-180",
+  "reset-password": "rotate-90",
 };
 
 const FOOTER_TEXT: Record<PageType, string> = {
   login: "By continuing, you agree to BudgetMe\u2019s",
   register: "By creating an account, you agree to BudgetMe\u2019s",
   forgot: "By continuing, you agree to BudgetMe\u2019s",
+  "reset-password": "By continuing, you agree to BudgetMe\u2019s",
 };
 
 interface AuthPanelProps {

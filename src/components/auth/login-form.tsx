@@ -27,6 +27,8 @@ export function LoginForm() {
   const [success, setSuccess] = useState<string | null>(
     searchParams.get("message") === "email_verified"
       ? "Email verified successfully! Please sign in to continue."
+      : searchParams.get("message") === "password_reset"
+      ? "Password reset successfully! Please sign in with your new password."
       : null
   );
   const [isPending, startTransition] = useTransition();
