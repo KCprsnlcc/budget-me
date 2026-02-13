@@ -1,15 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SocialAuthButtons } from "./social-auth-buttons";
+import { createClient } from "@/lib/supabase/client";
 
 export function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || "/dashboard";
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(
+    searchParams.get("error") === "auth_callback_failed"
+      ? "Authentication failed. Please try again."
+      : null
+  );
+  const [isPending, startTransition] = useTransition();
 
   return (
     <div>
@@ -36,8 +49,37 @@ export function LoginForm() {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div
+          role="alert"
+          className="mb-4 rounded-lg border border-red-100 bg-red-50 px-3 py-2.5 text-xs text-red-600"
+        >
+          {error}
+        </div>
+      )}
+
       {/* Form */}
-      <form className="space-y-4">
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setError(null);
+          startTransition(async () => {
+            const supabase = createClient();
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+            if (signInError) {
+              setError(signInError.message);
+              return;
+            }
+            router.push(redirectTo);
+            router.refresh();
+          });
+        }}
+      >
         <div className="space-y-1.5">
           <Label htmlFor="email">Email address</Label>
           <Input
@@ -45,6 +87,11 @@ export function LoginForm() {
             type="email"
             placeholder="you@example.com"
             autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={isPending}
+            className="min-h-[44px] focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
           />
         </div>
 
@@ -55,7 +102,7 @@ export function LoginForm() {
             </Label>
             <Link
               href="/forgot-password"
-              className="text-[10px] font-medium text-slate-500 hover:text-emerald-600 transition-colors"
+              className="text-[10px] font-medium text-slate-500 hover:text-emerald-600 focus:text-emerald-600 focus:outline-none focus:underline transition-colors"
             >
               Forgot password?
             </Link>
@@ -66,11 +113,16 @@ export function LoginForm() {
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={isPending}
+              className="min-h-[44px] focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors cursor-pointer"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none focus:text-emerald-600 transition-colors cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2.5"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -97,8 +149,15 @@ export function LoginForm() {
           </label>
         </div>
 
-        <Button type="submit" variant="auth">
-          Sign in
+        <Button type="submit" variant="auth" disabled={isPending} className="min-h-[44px]">
+          {isPending ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Signing in...
+            </span>
+          ) : (
+            "Sign in"
+          )}
         </Button>
       </form>
 
