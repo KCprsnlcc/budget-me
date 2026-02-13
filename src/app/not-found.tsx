@@ -19,7 +19,7 @@ export default function NotFound() {
       />
 
       {/* Beam Background */}
-      <div className="pointer-events-none absolute inset-0 h-full w-full -z-10 bg-white">
+      <div className="pointer-events-none absolute inset-0 h-full w-full bg-white">
         {/* Grid Pattern */}
         <div
           className="absolute inset-0 opacity-40"
@@ -34,7 +34,7 @@ export default function NotFound() {
 
         {/* SVG Beams */}
         <svg
-          className="absolute h-full w-full"
+          className="absolute h-full w-full -rotate-45 scale-125"
           fill="none"
           viewBox="0 0 696 316"
           xmlns="http://www.w3.org/2000/svg"
@@ -42,11 +42,11 @@ export default function NotFound() {
         >
           <defs>
             <linearGradient id="beam-gradient-404-0" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ef4444" stopOpacity={0} />
-              <stop offset="20%" stopColor="#ef4444" stopOpacity={1} />
-              <stop offset="50%" stopColor="#dc2626" stopOpacity={1} />
-              <stop offset="80%" stopColor="#f87171" stopOpacity={1} />
-              <stop offset="100%" stopColor="#f87171" stopOpacity={0} />
+              <stop offset="0%" stopColor="#10b981" stopOpacity={0} />
+              <stop offset="20%" stopColor="#10b981" stopOpacity={1} />
+              <stop offset="50%" stopColor="#059669" stopOpacity={1} />
+              <stop offset="80%" stopColor="#34d399" stopOpacity={1} />
+              <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
             </linearGradient>
             <linearGradient id="beam-gradient-404-1" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#64748b" stopOpacity={0} />
@@ -81,7 +81,7 @@ export default function NotFound() {
         <div className="max-w-2xl mx-auto text-center">
           {/* Error Code */}
           <div className="mb-4">
-            <span className="text-8xl md:text-9xl font-bold text-slate-100 select-none tracking-tighter">
+            <span className="text-8xl md:text-9xl font-bold text-slate-900 select-none tracking-tighter">
               404
             </span>
           </div>
