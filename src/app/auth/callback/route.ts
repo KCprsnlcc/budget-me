@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     if (type === "signup") {
       // For email verification, redirect to our dedicated verification page
       if (token) {
-        return NextResponse.redirect(`${origin}/auth/verify?token=${token}&type=${type}`);
+        return NextResponse.redirect(`${origin}/verify?token=${token}&type=${type}`);
       }
       
       // If no token, try standard flow
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
     // If PKCE failed but it's email verification, redirect to verification page
     if (type === "signup" && (error.message?.includes("code challenge") || error.message?.includes("bad_code_verifier"))) {
       if (token) {
-        return NextResponse.redirect(`${origin}/auth/verify?token=${token}&type=${type}`);
+        return NextResponse.redirect(`${origin}/verify?token=${token}&type=${type}`);
       }
       
       // Even if no token, the email was likely confirmed server-side
