@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { AppShell } from "@/components/shared/app-shell";
 import { AuthProvider } from "@/components/auth/auth-context";
 import { getUser, getSession } from "@/lib/supabase/auth";
@@ -41,6 +42,7 @@ export default async function RootLayout({
         <AuthProvider initialUser={user} initialSession={session}>
           <AppShell>{children}</AppShell>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
