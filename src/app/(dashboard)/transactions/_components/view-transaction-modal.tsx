@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Modal,
   ModalHeader,
@@ -12,11 +12,14 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   ArrowRight,
-  ShoppingCart,
   Edit,
+  Loader2,
+  FileText,
 } from "lucide-react";
 import { Stepper } from "./stepper";
 import type { TransactionType } from "./types";
+import { useAuth } from "@/components/auth/auth-context";
+import { fetchSimilarTransactions, fetchCategoryStats } from "../_lib/transaction-service";
 
 const STEPS = ["Overview", "Analysis"];
 
@@ -33,10 +36,18 @@ export function ViewTransactionModal({
   transaction,
   onEdit,
 }: ViewTransactionModalProps) {
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
+
+  // Analysis data
+  const [similar, setSimilar] = useState<{ description: string | null; date: string; amount: number; category_icon?: React.ComponentType<any> }[]>([]);
+  const [stats, setStats] = useState<{ average: number; monthlyTotal: number; count: number } | null>(null);
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false);
 
   const reset = useCallback(() => {
     setStep(1);
+    setSimilar([]);
+    setStats(null);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -44,10 +55,26 @@ export function ViewTransactionModal({
     onClose();
   }, [reset, onClose]);
 
+  // Fetch analysis data when moving to step 2
+  useEffect(() => {
+    if (step !== 2 || !transaction || !user) return;
+    const catId = transaction.expense_category_id ?? transaction.income_category_id;
+    const now = new Date();
+    setLoadingAnalysis(true);
+    Promise.all([
+      fetchSimilarTransactions(user.id, catId, transaction.type, transaction.id, 3),
+      fetchCategoryStats(user.id, catId, transaction.type, now.getMonth() + 1, now.getFullYear()),
+    ]).then(([sim, st]) => {
+      setSimilar(sim);
+      setStats(st);
+    }).finally(() => setLoadingAnalysis(false));
+  }, [step, transaction, user]);
+
   if (!transaction) return null;
 
-  const isIncome = transaction.amount > 0;
-  const absAmount = Math.abs(transaction.amount).toFixed(2);
+  const isIncome = transaction.type === "income" || transaction.type === "cash_in";
+  const absAmount = transaction.amount.toFixed(2);
+  const catName = transaction.category_name ?? transaction.type;
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
@@ -91,17 +118,17 @@ export function ViewTransactionModal({
             {/* Transaction Details */}
             <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
               <div className="p-5 space-y-0 divide-y divide-slate-100">
-                <DetailRow label="Date & Time" value={transaction.date} />
-                <DetailRow label="Account" value={transaction.account || "—"} />
+                <DetailRow label="Date" value={new Date(transaction.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} />
+                <DetailRow label="Account" value={transaction.account_name ? `${transaction.account_name}${transaction.account_number_masked ? ` ${transaction.account_number_masked}` : ""}` : "\u2014"} />
                 <DetailRow label="Category">
-                  <Badge variant="success">{transaction.category}</Badge>
+                  <Badge variant={isIncome ? "info" : "success"}>{catName}</Badge>
                 </DetailRow>
                 <DetailRow label="Status">
                   <Badge variant={transaction.status === "completed" ? "success" : "warning"}>
                     {transaction.status}
                   </Badge>
                 </DetailRow>
-                <DetailRow label="Description" value={transaction.name} />
+                <DetailRow label="Description" value={transaction.description ?? "\u2014"} />
               </div>
             </div>
 
@@ -127,85 +154,84 @@ export function ViewTransactionModal({
         {/* STEP 2: Analysis */}
         {step === 2 && (
           <div className="space-y-6 animate-txn-in">
-            {/* Spending Insights */}
-            <div>
-              <h3 className="text-[15px] font-bold text-slate-900 mb-3">
-                Spending Insights
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
-                    Category Avg
-                  </div>
-                  <div className="text-lg font-bold text-slate-900">$72.50</div>
-                  <div className="text-[10px] text-slate-500 mt-1">
-                    This transaction is{" "}
-                    <span className={isIncome ? "text-emerald-600 font-semibold" : "text-amber-600 font-semibold"}>
-                      {isIncome ? "above" : "19% above"} avg
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
-                    Monthly Total
-                  </div>
-                  <div className="text-lg font-bold text-slate-900">$342.80</div>
-                  <div className="text-[10px] text-slate-500 mt-1">
-                    <span className="text-emerald-600 font-semibold">4 transactions</span> this month
-                  </div>
-                </div>
+            {loadingAnalysis ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 size={20} className="animate-spin text-emerald-500" />
+                <span className="ml-2 text-sm text-slate-500">Loading insights...</span>
               </div>
-            </div>
-
-            {/* Similar Transactions */}
-            <div>
-              <h3 className="text-[15px] font-bold text-slate-900 mb-3">
-                Similar Transactions
-              </h3>
-              <div className="space-y-2">
-                {[
-                  { name: "Whole Foods", date: "Oct 18, 2023", amount: "-$124.00" },
-                  { name: "Trader Joe's", date: "Oct 15, 2023", amount: "-$45.50" },
-                  { name: "Whole Foods", date: "Oct 8, 2023", amount: "-$67.89" },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 border border-slate-100">
-                        <ShoppingCart size={14} />
+            ) : (
+              <>
+                {/* Spending Insights */}
+                <div>
+                  <h3 className="text-[15px] font-bold text-slate-900 mb-3">
+                    Spending Insights
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                      <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+                        Category Avg
                       </div>
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900">{item.name}</div>
-                        <div className="text-[10px] text-slate-400">{item.date}</div>
+                      <div className="text-lg font-bold text-slate-900">
+                        ${stats?.average.toFixed(2) ?? "0.00"}
+                      </div>
+                      {stats && stats.average > 0 && (
+                        <div className="text-[10px] text-slate-500 mt-1">
+                          This transaction is{" "}
+                          <span className={transaction.amount > stats.average ? "text-amber-600 font-semibold" : "text-emerald-600 font-semibold"}>
+                            {transaction.amount > stats.average
+                              ? `${(((transaction.amount - stats.average) / stats.average) * 100).toFixed(0)}% above`
+                              : `${(((stats.average - transaction.amount) / stats.average) * 100).toFixed(0)}% below`} avg
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                      <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+                        Monthly Total
+                      </div>
+                      <div className="text-lg font-bold text-slate-900">
+                        ${stats?.monthlyTotal.toFixed(2) ?? "0.00"}
+                      </div>
+                      <div className="text-[10px] text-slate-500 mt-1">
+                        <span className="text-emerald-600 font-semibold">{stats?.count ?? 0} transactions</span> this month
                       </div>
                     </div>
-                    <div className="text-sm font-bold text-slate-900">{item.amount}</div>
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
 
-            {/* Monthly Trend */}
-            <div>
-              <h3 className="text-[15px] font-bold text-slate-900 mb-3">Monthly Trend</h3>
-              <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                <div className="flex justify-between text-[10px] text-slate-500 mb-2">
-                  <span>October</span>
-                  <span>+$323.81 vs avg</span>
+                {/* Similar Transactions */}
+                <div>
+                  <h3 className="text-[15px] font-bold text-slate-900 mb-3">
+                    Similar Transactions
+                  </h3>
+                  {similar.length === 0 ? (
+                    <p className="text-xs text-slate-400 text-center py-4">No similar transactions found.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {similar.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-lg border border-slate-100">
+                              {item.category_icon ? <item.category_icon size={16} /> : <FileText size={16} />}
+                            </div>
+                            <div>
+                              <div className="text-sm font-semibold text-slate-900">{item.description ?? "\u2014"}</div>
+                              <div className="text-[10px] text-slate-400">
+                                {new Date(item.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-sm font-bold text-slate-900">${item.amount.toFixed(2)}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div className="h-16 flex items-end justify-between gap-1">
-                  {[75, 50, 66, 100, 60, 33].map((h, i) => (
-                    <div
-                      key={i}
-                      className={`w-2 rounded-t-sm ${i === 3 ? "bg-emerald-500" : "bg-slate-300"}`}
-                      style={{ height: `${h}%` }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         )}
       </ModalBody>

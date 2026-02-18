@@ -19,9 +19,20 @@ import {
   PiggyBank,
   ClipboardCheck,
   PenSquare,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { Stepper } from "./stepper";
-import type { TransactionType, TxnKind, TxnFormState } from "./types";
+import type { TransactionType, TxnKind, TxnFormState, AccountOption, CategoryOption, BudgetOption, GoalOption } from "./types";
+import { useAuth } from "@/components/auth/auth-context";
+import {
+  updateTransaction,
+  fetchAccounts,
+  fetchExpenseCategories,
+  fetchIncomeCategories,
+  fetchBudgets,
+  fetchGoals,
+} from "../_lib/transaction-service";
 
 const STEPS = ["Type", "Details", "Review"];
 
@@ -35,38 +46,74 @@ interface EditTransactionModalProps {
   open: boolean;
   onClose: () => void;
   transaction: TransactionType | null;
+  onSuccess?: () => void;
 }
 
 function txToFormState(tx: TransactionType | null): TxnFormState {
   if (!tx) {
-    return { type: "", amount: "", date: "", category: "", budget: "", goal: "", account: "", description: "" };
+    return { type: "", amount: "", date: "", income_category_id: "", expense_category_id: "", budget: "", goal: "", account: "", description: "" };
   }
-  const isIncome = tx.amount > 0;
   return {
-    type: (isIncome ? "income" : "expense") as TxnKind,
-    amount: Math.abs(tx.amount).toFixed(2),
-    date: "2023-10-24",
-    category: tx.category.toLowerCase(),
-    budget: "monthly",
-    goal: "",
-    account: tx.account?.includes("Chase") ? "chase" : tx.account?.includes("Checking") ? "checking" : "",
-    description: tx.name,
+    type: tx.type,
+    amount: tx.amount.toFixed(2),
+    date: tx.date,
+    income_category_id: tx.income_category_id ?? "",
+    expense_category_id: tx.expense_category_id ?? "",
+    budget: "",
+    goal: tx.goal_id ?? "",
+    account: tx.account_id ?? "",
+    description: tx.description ?? "",
   };
 }
 
-export function EditTransactionModal({ open, onClose, transaction }: EditTransactionModalProps) {
+export function EditTransactionModal({ open, onClose, transaction, onSuccess }: EditTransactionModalProps) {
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<TxnFormState>(() => txToFormState(transaction));
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Lookup data
+  const [accounts, setAccounts] = useState<AccountOption[]>([]);
+  const [expenseCategories, setExpenseCategories] = useState<CategoryOption[]>([]);
+  const [incomeCategories, setIncomeCategories] = useState<CategoryOption[]>([]);
+  const [budgets, setBudgets] = useState<BudgetOption[]>([]);
+  const [goals, setGoals] = useState<GoalOption[]>([]);
+
+  // Fetch dropdown data when modal opens
+  useEffect(() => {
+    if (!open || !user) return;
+    const uid = user.id;
+    Promise.all([
+      fetchAccounts(uid),
+      fetchExpenseCategories(uid),
+      fetchIncomeCategories(uid),
+      fetchBudgets(uid),
+      fetchGoals(uid),
+    ]).then(([a, ec, ic, b, g]) => {
+      setAccounts(a);
+      setExpenseCategories(ec);
+      setIncomeCategories(ic);
+      setBudgets(b);
+      setGoals(g);
+    });
+  }, [open, user]);
 
   useEffect(() => {
     if (open && transaction) {
       setForm(txToFormState(transaction));
       setStep(1);
+      setSaveError(null);
     }
   }, [open, transaction]);
 
+  const categories = form.type === "income" ? incomeCategories : expenseCategories;
+  const categoryFieldKey = form.type === "income" ? "income_category_id" as const : "expense_category_id" as const;
+  const categoryValue = form.type === "income" ? form.income_category_id : form.expense_category_id;
+
   const handleClose = useCallback(() => {
     setStep(1);
+    setSaveError(null);
     onClose();
   }, [onClose]);
 
@@ -75,13 +122,27 @@ export function EditTransactionModal({ open, onClose, transaction }: EditTransac
     (step === 2 && form.amount !== "" && form.date !== "" && form.account !== "") ||
     step === 3;
 
+  const handleSubmit = useCallback(async () => {
+    if (!transaction) return;
+    setSaving(true);
+    setSaveError(null);
+    const { error } = await updateTransaction(transaction.id, form);
+    setSaving(false);
+    if (error) {
+      setSaveError(error);
+      return;
+    }
+    handleClose();
+    onSuccess?.();
+  }, [transaction, form, handleClose, onSuccess]);
+
   const handleNext = useCallback(() => {
     if (step >= 3) {
-      handleClose();
+      handleSubmit();
       return;
     }
     setStep((s) => s + 1);
-  }, [step, handleClose]);
+  }, [step, handleSubmit]);
 
   const handleBack = useCallback(() => {
     if (step <= 1) return;
@@ -94,6 +155,11 @@ export function EditTransactionModal({ open, onClose, transaction }: EditTransac
     },
     []
   );
+
+  // Helper: look up display names for review step
+  const accountName = accounts.find((a) => a.id === form.account)?.account_name ?? "\u2014";
+  const catName = categories.find((c) => c.id === categoryValue)?.category_name ?? "\u2014";
+  const goalName = goals.find((g) => g.id === form.goal)?.goal_name ?? "\u2014";
 
   if (!transaction) return null;
 
@@ -219,20 +285,17 @@ export function EditTransactionModal({ open, onClose, transaction }: EditTransac
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                    Category
+                    Category {form.type === "income" || form.type === "expense" ? <span className="text-slate-400">*</span> : null}
                   </label>
                   <select
-                    value={form.category}
-                    onChange={(e) => updateField("category", e.target.value)}
+                    value={categoryValue}
+                    onChange={(e) => updateField(categoryFieldKey, e.target.value)}
                     className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
                   >
                     <option value="">Select category...</option>
-                    <option value="groceries">Groceries</option>
-                    <option value="transport">Transport</option>
-                    <option value="entertainment">Entertainment</option>
-                    <option value="utilities">Utilities</option>
-                    <option value="salary">Salary</option>
-                    <option value="other">Other</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ""}{c.category_name}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -245,8 +308,9 @@ export function EditTransactionModal({ open, onClose, transaction }: EditTransac
                     className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
                   >
                     <option value="">No budget</option>
-                    <option value="monthly">Monthly Budget</option>
-                    <option value="holiday">Holiday Trip</option>
+                    {budgets.map((b) => (
+                      <option key={b.id} value={b.id}>{b.budget_name}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -264,8 +328,9 @@ export function EditTransactionModal({ open, onClose, transaction }: EditTransac
                     className="w-full pl-9 pr-4 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
                   >
                     <option value="">No Goal</option>
-                    <option value="emergency">Emergency Fund (50%)</option>
-                    <option value="car">New Car (20%)</option>
+                    {goals.map((g) => (
+                      <option key={g.id} value={g.id}>{g.goal_name}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -281,9 +346,9 @@ export function EditTransactionModal({ open, onClose, transaction }: EditTransac
                   className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
                 >
                   <option value="">Select account...</option>
-                  <option value="chase">Chase Sapphire</option>
-                  <option value="checking">Checking</option>
-                  <option value="savings">Savings</option>
+                  {accounts.map((a) => (
+                    <option key={a.id} value={a.id}>{a.account_name}</option>
+                  ))}
                 </select>
               </div>
 
@@ -335,13 +400,23 @@ export function EditTransactionModal({ open, onClose, transaction }: EditTransac
               <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
                 <div className="p-5 space-y-0 divide-y divide-slate-100">
                   <ReviewRow label="Date" value={form.date ? new Date(form.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"} />
-                  <ReviewRow label="Category" value={form.category ? form.category.charAt(0).toUpperCase() + form.category.slice(1) : "—"} />
-                  <ReviewRow label="Account" value={form.account ? form.account.charAt(0).toUpperCase() + form.account.slice(1) : "—"} />
-                  <ReviewRow label="Goal" value={form.goal || "—"} />
+                  <ReviewRow label="Category" value={catName} />
+                  <ReviewRow label="Account" value={accountName} />
+                  <ReviewRow label="Goal" value={goalName} />
                   <ReviewRow label="Description" value={form.description || "No description provided."} italic={!form.description} />
                 </div>
               </div>
 
+              {/* Error Notice */}
+              {saveError && (
+                <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
+                  <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+                  <div>
+                    <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
+                    <p className="text-[11px] leading-relaxed opacity-85">{saveError}</p>
+                  </div>
+                </div>
+              )}
               {/* Success Notice */}
               <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-emerald-50 border border-emerald-100 text-emerald-900 items-start">
                 <CheckCircle size={16} className="flex-shrink-0 mt-px" />
@@ -369,11 +444,11 @@ export function EditTransactionModal({ open, onClose, transaction }: EditTransac
         <Button
           size="sm"
           onClick={handleNext}
-          disabled={!canContinue}
+          disabled={!canContinue || saving}
           className="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50"
         >
           {step === 3 ? (
-            <>Save Changes <Check size={14} /></>
+            saving ? (<><Loader2 size={14} className="animate-spin" /> Saving...</>) : (<>Save Changes <Check size={14} /></>)
           ) : (
             <>Continue <ArrowRight size={14} /></>
           )}

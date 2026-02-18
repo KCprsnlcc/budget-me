@@ -1,20 +1,14 @@
 "use client";
 
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useMemo } from "react";
 import {
   Search,
   Filter,
   Plus,
   MoreHorizontal,
   Download,
-  ShoppingBag,
-  Utensils,
-  Car,
-  Home,
-  Bolt,
-  Music,
-  Briefcase,
   Wallet,
+  ShoppingBag,
   TrendingUp,
   ArrowUp,
   ArrowDown,
@@ -25,6 +19,11 @@ import {
   RotateCcw,
   Table as TableIcon,
   Grid3X3,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Inbox,
+  FileText,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +40,7 @@ import { AddTransactionModal } from "./_components/add-transaction-modal";
 import { ViewTransactionModal } from "./_components/view-transaction-modal";
 import { EditTransactionModal } from "./_components/edit-transaction-modal";
 import { DeleteTransactionModal } from "./_components/delete-transaction-modal";
+import { useTransactions } from "./_lib/use-transactions";
 import type { TransactionType } from "./_components/types";
 
 type SummaryType = {
@@ -49,82 +49,36 @@ type SummaryType = {
   change: string;
   trend: "up" | "down";
   icon?: React.ComponentType<any>;
-  iconBg?: string;
-  iconColor?: string;
 };
 
-const CATEGORY_ICONS: Record<string, React.ElementType> = {
-  Shopping: ShoppingBag,
-  "Food & Dining": Utensils,
-  Groceries: Utensils,
-  Transportation: Car,
-  Transport: Car,
-  Housing: Home,
-  Utilities: Bolt,
-  Entertainment: Music,
-  Income: Briefcase,
-};
-
-const ENHANCED_TRANSACTIONS: TransactionType[] = [
-  { id: 1, name: "Whole Foods Market", category: "Groceries", date: "Oct 24, 2:30 PM", amount: -86.42, status: "completed", account: "Chase •••• 4242" },
-  { id: 2, name: "Tech Corp Salary", category: "Income", date: "Oct 24, 9:00 AM", amount: 2450.00, status: "completed", account: "Checking •••• 8890" },
-  { id: 3, name: "Uber Trip", category: "Transport", date: "Oct 23, 7:15 PM", amount: -14.50, status: "completed", account: "Chase •••• 4242" },
-  { id: 4, name: "Netflix", category: "Entertainment", date: "Oct 22, 12:00 AM", amount: -15.99, status: "completed", account: "Chase •••• 4242" },
-  { id: 5, name: "Electric Bill", category: "Utilities", date: "Oct 21, 5:00 PM", amount: -142.00, status: "pending", account: "Chase •••• 4242" },
-  { id: 6, name: "Grocery Store", category: "Food & Dining", date: "Oct 20, 3:30 PM", amount: -67.50, status: "completed", account: "Chase •••• 4242" },
-  { id: 7, name: "Freelance Payment", category: "Income", date: "Oct 19, 2:00 PM", amount: 850.00, status: "completed", account: "Checking •••• 8890" },
-  { id: 8, name: "Gas Station", category: "Transportation", date: "Oct 18, 8:00 AM", amount: -55.20, status: "completed", account: "Chase •••• 4242" },
-  { id: 9, name: "Restaurant", category: "Food & Dining", date: "Oct 17, 7:30 PM", amount: -45.00, status: "completed", account: "Chase •••• 4242" },
-  { id: 10, name: "Amazon Purchase", category: "Shopping", date: "Oct 16, 11:00 AM", amount: -89.99, status: "completed", account: "Chase •••• 4242" },
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
 
-const SUMMARY: SummaryType[] = [
-  {
-    label: "Monthly Income",
-    value: "$8,240.00",
-    change: "+12%",
-    trend: "up",
-    icon: Wallet,
-    iconBg: "bg-emerald-50",
-    iconColor: "text-emerald-600",
-  },
-  {
-    label: "Monthly Expenses",
-    value: "$3,405.50",
-    change: "+5.4%",
-    trend: "up",
-    icon: ShoppingBag,
-    iconBg: "bg-amber-50",
-    iconColor: "text-amber-600",
-  },
-  {
-    label: "Net Balance",
-    value: "$4,834.50",
-    change: "",
-    trend: "up",
-    icon: TrendingUp,
-    iconBg: "bg-slate-50",
-    iconColor: "text-slate-600",
-  },
-  {
-    label: "Savings Rate",
-    value: "58.6%",
-    change: "",
-    trend: "up",
-    icon: PiggyBank,
-    iconBg: "bg-blue-50",
-    iconColor: "text-blue-600",
-  },
-];
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
 
-const CHART_DATA = [
-  { month: "May", income: 45, expense: 35 },
-  { month: "Jun", income: 55, expense: 40 },
-  { month: "Jul", income: 48, expense: 42 },
-  { month: "Aug", income: 65, expense: 45 },
-  { month: "Sep", income: 72, expense: 38 },
-  { month: "Oct", income: 82, expense: 34 },
-] as const;
+function formatCurrency(n: number): string {
+  return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatCompact(n: number): string {
+  if (n >= 1000) return "$" + (n / 1000).toFixed(1) + "k";
+  return "$" + n.toFixed(0);
+}
+
+function accountLabel(tx: TransactionType): string {
+  if (!tx.account_name) return "—";
+  if (tx.account_number_masked) return `${tx.account_name} ${tx.account_number_masked}`;
+  return tx.account_name;
+}
+
+function isIncomeType(tx: TransactionType): boolean {
+  return tx.type === "income" || tx.type === "cash_in";
+}
 
 // Memoized components for better performance
 const SummaryCard = memo(({ item }: { item: SummaryType }) => {
@@ -164,26 +118,26 @@ const TransactionCard = memo(({
   onEdit: (tx: TransactionType) => void;
   onDelete: (tx: TransactionType) => void;
 }) => {
-  const isIncome = tx.amount > 0;
-  const Icon = CATEGORY_ICONS[tx.category];
+  const isIncome = isIncomeType(tx);
+  const catName = tx.category_name ?? tx.type;
   
   return (
     <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
-          <div className="text-slate-500 p-2 rounded-lg">
-            <Icon size={20} strokeWidth={1.5} />
+          <div className="text-lg p-2 rounded-lg">
+            {tx.category_icon ? <tx.category_icon size={20} /> : <FileText size={20} />}
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-slate-900">{tx.name}</h4>
-            <p className="text-xs text-slate-500">{tx.account}</p>
+            <h4 className="text-sm font-semibold text-slate-900">{tx.description ?? "Untitled"}</h4>
+            <p className="text-xs text-slate-500">{accountLabel(tx)}</p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <Badge variant={tx.category === "Income" ? "info" : "success"} className="text-xs">
-            {tx.category}
+          <Badge variant={isIncome ? "info" : "success"} className="text-xs">
+            {catName}
           </Badge>
-          <span className="text-xs text-slate-400">{tx.date}</span>
+          <span className="text-xs text-slate-400">{formatDate(tx.date)}</span>
         </div>
       </div>
       
@@ -192,7 +146,7 @@ const TransactionCard = memo(({
           <span className={`text-lg font-semibold ${
             isIncome ? "text-emerald-600" : "text-slate-900"
           }`}>
-            {isIncome ? "+" : ""}{Math.abs(tx.amount).toFixed(2)}
+            {isIncome ? "+" : "-"}${tx.amount.toFixed(2)}
           </span>
         </div>
         
@@ -225,19 +179,19 @@ const TransactionRow = memo(({
   onEdit: (tx: TransactionType) => void;
   onDelete: (tx: TransactionType) => void;
 }) => {
-  const isIncome = tx.amount > 0;
+  const isIncome = isIncomeType(tx);
   return (
     <TableRow className="group hover:bg-slate-50/80 transition-colors">
-      <TableCell className="px-6 py-4 text-slate-400">{tx.date}</TableCell>
-      <TableCell className="px-6 py-4 font-medium text-slate-900">{tx.name}</TableCell>
+      <TableCell className="px-6 py-4 text-slate-400">{formatDate(tx.date)}</TableCell>
+      <TableCell className="px-6 py-4 font-medium text-slate-900">{tx.description ?? "—"}</TableCell>
       <TableCell className="px-6 py-4">
-        <Badge variant={tx.category === "Income" ? "info" : "success"}>
-          {tx.category}
+        <Badge variant={isIncome ? "info" : "success"}>
+          {tx.category_name ?? tx.type}
         </Badge>
       </TableCell>
-      <TableCell className="px-6 py-4 text-slate-500">{tx.account}</TableCell>
+      <TableCell className="px-6 py-4 text-slate-500">{accountLabel(tx)}</TableCell>
       <TableCell className="px-6 py-4 text-right font-medium text-slate-900">
-        {isIncome ? "+" : ""}${Math.abs(tx.amount).toFixed(2)}
+        {isIncome ? "+" : "-"}${tx.amount.toFixed(2)}
       </TableCell>
       <TableCell className="px-6 py-4">
         <div className="flex items-center justify-center gap-1">
@@ -266,6 +220,42 @@ export default function TransactionsPage() {
   const [selectedTx, setSelectedTx] = useState<TransactionType | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
+  const {
+    transactions,
+    summary,
+    categoryBreakdown,
+    monthlyTrend,
+    accounts,
+    expenseCategories,
+    incomeCategories,
+    goals,
+    month, setMonth,
+    year, setYear,
+    typeFilter, setTypeFilter,
+    accountFilter, setAccountFilter,
+    categoryFilter, setCategoryFilter,
+    goalFilter, setGoalFilter,
+    search,
+    setSearch,
+    resetFilters,
+    resetFiltersToAll,
+    loading,
+    error,
+    refetch,
+    // Pagination
+    currentPage,
+    pageSize,
+    setPageSize,
+    handlePageSizeChange,
+    totalPages,
+    totalCount,
+    hasNextPage,
+    hasPreviousPage,
+    goToPage,
+    nextPage,
+    previousPage,
+  } = useTransactions();
+
   const handleView = useCallback((tx: TransactionType) => {
     setSelectedTx(tx);
     setViewModalOpen(true);
@@ -288,6 +278,57 @@ export default function TransactionsPage() {
       setEditModalOpen(true);
     }, 150);
   }, []);
+
+  // Build summary cards from real data
+  const summaryItems: SummaryType[] = useMemo(() => {
+    if (!summary) return [];
+    const changeFmt = (n: number | null) =>
+      n !== null ? `${n >= 0 ? "+" : ""}${n.toFixed(1)}%` : "";
+    return [
+      { label: "Monthly Income", value: formatCurrency(summary.monthlyIncome), change: changeFmt(summary.incomeChange), trend: (summary.incomeChange ?? 0) >= 0 ? "up" as const : "down" as const, icon: Wallet },
+      { label: "Monthly Expenses", value: formatCurrency(summary.monthlyExpenses), change: changeFmt(summary.expenseChange), trend: (summary.expenseChange ?? 0) >= 0 ? "up" as const : "down" as const, icon: ShoppingBag },
+      { label: "Net Balance", value: formatCurrency(summary.netBalance), change: "", trend: summary.netBalance >= 0 ? "up" as const : "down" as const, icon: TrendingUp },
+      { label: "Savings Rate", value: `${summary.savingsRate.toFixed(1)}%`, change: "", trend: summary.savingsRate >= 0 ? "up" as const : "down" as const, icon: PiggyBank },
+    ];
+  }, [summary]);
+
+  // Normalize chart data to percentages for bar heights
+  const chartData = useMemo(() => {
+    if (!monthlyTrend.length) return [];
+    const max = Math.max(...monthlyTrend.map((d) => Math.max(d.income, d.expense)), 1);
+    return monthlyTrend.map((d) => ({
+      month: d.month,
+      income: (d.income / max) * 100,
+      expense: (d.expense / max) * 100,
+    }));
+  }, [monthlyTrend]);
+
+  // Build conic-gradient for category donut
+  const categoryTotal = useMemo(
+    () => categoryBreakdown.reduce((sum, c) => sum + c.amount, 0),
+    [categoryBreakdown]
+  );
+  const categoryGradient = useMemo(() => {
+    if (!categoryBreakdown.length) return "conic-gradient(#e2e8f0 0% 100%)";
+    let acc = 0;
+    const stops = categoryBreakdown.map((c) => {
+      const start = acc;
+      acc += (c.amount / categoryTotal) * 100;
+      return `${c.color} ${start}% ${acc}%`;
+    });
+    return `conic-gradient(${stops.join(", ")})`;
+  }, [categoryBreakdown, categoryTotal]);
+
+  // Combine expense + income categories for the filter dropdown
+  const allCategories = useMemo(
+    () => [
+      ...expenseCategories.map((c) => ({ ...c, kind: "expense" as const })),
+      ...incomeCategories.map((c) => ({ ...c, kind: "income" as const })),
+    ],
+    [expenseCategories, incomeCategories]
+  );
+
+  const currentYear = new Date().getFullYear();
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
@@ -346,7 +387,7 @@ export default function TransactionsPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {SUMMARY.map((item) => (
+        {summaryItems.map((item) => (
           <SummaryCard key={item.label} item={item} />
         ))}
       </div>
@@ -380,7 +421,7 @@ export default function TransactionsPage() {
               <div className="w-full h-px bg-slate-100/50" />
               <div className="w-full h-px bg-slate-100/50" />
             </div>
-            {CHART_DATA.map((d) => (
+            {chartData.map((d) => (
               <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
                 <div
                   className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:opacity-100"
@@ -394,8 +435,8 @@ export default function TransactionsPage() {
             ))}
           </div>
           <div className="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
-            {CHART_DATA.map((d) => (
-              <span key={d.month} className={d.month === 'Oct' ? 'text-slate-600' : ''}>
+            {chartData.map((d, i) => (
+              <span key={d.month} className={i === chartData.length - 1 ? "text-slate-600" : ""}>
                 {d.month}
               </span>
             ))}
@@ -403,10 +444,12 @@ export default function TransactionsPage() {
         </Card>
 
         {/* Expense Categories */}
-        {/* Expense Categories */}
         <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-sm font-semibold text-slate-900">Categories</h3>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">Categories</h3>
+              <p className="text-xs text-slate-500 mt-1 font-light">Monthly expense breakdown.</p>
+            </div>
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <MoreHorizontal size={16} className="text-slate-400" />
             </Button>
@@ -414,43 +457,27 @@ export default function TransactionsPage() {
 
           <div className="flex items-center gap-6 mb-6">
             <div className="w-32 h-32 mx-auto rounded-full flex-shrink-0 relative"
-                 style={{ background: 'conic-gradient(#10b981 0% 35%, #f59e0b 35% 65%, #64748b 65% 85%, #cbd5e1 85% 100%)' }}>
+                 style={{ background: categoryGradient }}>
               <div className="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
                 <span className="text-xs text-slate-400 font-medium">Total</span>
-                <span className="text-sm font-bold text-slate-900">$3.4k</span>
+                <span className="text-sm font-bold text-slate-900">{formatCompact(categoryTotal)}</span>
               </div>
             </div>
           </div>
 
           <div className="space-y-3 flex-1">
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-slate-600">Food</span>
+            {categoryBreakdown.slice(0, 5).map((cat) => (
+              <div key={cat.name} className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
+                  <span className="text-slate-600">{cat.name}</span>
+                </div>
+                <span className="font-medium text-slate-900">{formatCurrency(cat.amount)}</span>
               </div>
-              <span className="font-medium text-slate-900">$1,191</span>
-            </div>
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-amber-500" />
-                <span className="text-slate-600">Housing</span>
-              </div>
-              <span className="font-medium text-slate-900">$1,021</span>
-            </div>
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-slate-500" />
-                <span className="text-slate-600">Transport</span>
-              </div>
-              <span className="font-medium text-slate-900">$681</span>
-            </div>
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-slate-300" />
-                <span className="text-slate-600">Other</span>
-              </div>
-              <span className="font-medium text-slate-900">$511</span>
-            </div>
+            ))}
+            {categoryBreakdown.length === 0 && (
+              <p className="text-xs text-slate-400 text-center py-4">No expense data this month.</p>
+            )}
           </div>
         </Card>
       </div>
@@ -469,86 +496,171 @@ export default function TransactionsPage() {
             <input
               type="text"
               placeholder="Search transactions..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
             />
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>October</option>
-              <option>September</option>
-              <option>August</option>
+            <select
+              value={month}
+              onChange={(e) => setMonth(e.target.value === "all" ? "all" : Number(e.target.value))}
+              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
+            >
+              <option value="all">All Months</option>
+              {MONTH_NAMES.map((name, i) => (
+                <option key={name} value={i + 1}>{name}</option>
+              ))}
             </select>
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>2023</option>
-              <option>2022</option>
+            <select
+              value={year}
+              onChange={(e) => setYear(e.target.value === "all" ? "all" : Number(e.target.value))}
+              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
+            >
+              <option value="all">All Years</option>
+              {Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
             </select>
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>All Types</option>
-              <option>Income</option>
-              <option>Expense</option>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
+            >
+              <option value="">All Types</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+              <option value="contribution">Contribution</option>
+              <option value="transfer">Transfer</option>
+              <option value="cash_in">Cash In</option>
             </select>
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>All Accounts</option>
-              <option>Chase Sapphire</option>
-              <option>Checking</option>
+            <select
+              value={accountFilter}
+              onChange={(e) => setAccountFilter(e.target.value)}
+              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
+            >
+              <option value="">All Accounts</option>
+              {accounts.map((a) => (
+                <option key={a.id} value={a.id}>{a.account_name}</option>
+              ))}
             </select>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-2 xl:flex items-center gap-2 w-full xl:w-auto">
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>All Categories</option>
-              <option>Groceries</option>
-              <option>Transport</option>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
+            >
+              <option value="">All Categories</option>
+              {allCategories.map((c) => (
+                <option key={c.id} value={c.id}>{c.category_name}</option>
+              ))}
             </select>
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>All Goals</option>
-              <option>Emergency Fund</option>
-              <option>New Car</option>
+            <select
+              value={goalFilter}
+              onChange={(e) => setGoalFilter(e.target.value)}
+              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
+            >
+              <option value="">All Goals</option>
+              {goals.map((g) => (
+                <option key={g.id} value={g.id}>{g.goal_name}</option>
+              ))}
             </select>
           </div>
 
           <div className="flex-1"></div>
           <div className="flex items-center gap-2 w-full xl:w-auto">
-            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset Filters">
-              <RotateCcw size={14} />
+            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset to Current Month" onClick={resetFilters}>
+              <RotateCcw size={14} /> Current
             </Button>
-            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center">
-              <Download size={14} /> Export
+            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={resetFiltersToAll}>
+              <RotateCcw size={14} /> All Time
             </Button>
           </div>
         </div>
       </Card>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 size={24} className="animate-spin text-emerald-500" />
+          <span className="ml-3 text-sm text-slate-500">Loading transactions...</span>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <Card className="p-8 text-center">
+          <p className="text-sm text-red-500 mb-3">{error}</p>
+          <Button variant="outline" size="sm" onClick={refetch}>
+            <RotateCcw size={14} /> Retry
+          </Button>
+        </Card>
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && transactions.length === 0 && (
+        <Card className="p-12 text-center">
+          <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
+          <h3 className="text-sm font-semibold text-slate-700 mb-1">No transactions found</h3>
+          <p className="text-xs text-slate-400 mb-4">
+            {search ? "Try adjusting your search or filters." : "Add your first transaction to get started."}
+          </p>
+          {!search && (
+            <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => setAddModalOpen(true)}>
+              <Plus size={14} /> Add Transaction
+            </Button>
+          )}
+        </Card>
+      )}
+
       {/* Transactions Display */}
-      {viewMode === 'table' ? (
-        <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
-                  <div className="flex items-center gap-1">
-                    Date <MoreHorizontal size={12} className="rotate-90" />
-                  </div>
-                </TableHead>
-                <TableHead className="px-6 py-3">Description</TableHead>
-                <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
-                  <div className="flex items-center gap-1">
-                    Category <MoreHorizontal size={12} className="rotate-90" />
-                  </div>
-                </TableHead>
-                <TableHead className="px-6 py-3">Account</TableHead>
-                <TableHead className="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
-                  <div className="flex items-center gap-1 justify-end">
-                    Amount <MoreHorizontal size={12} className="rotate-90" />
-                  </div>
-                </TableHead>
-                <TableHead className="px-6 py-3 text-center">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {ENHANCED_TRANSACTIONS.map((tx) => (
-                <TransactionRow
+      {!loading && !error && transactions.length > 0 && (
+        <>
+          {viewMode === 'table' ? (
+            <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
+                      <div className="flex items-center gap-1">
+                        Date <MoreHorizontal size={12} className="rotate-90" />
+                      </div>
+                    </TableHead>
+                    <TableHead className="px-6 py-3">Description</TableHead>
+                    <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
+                      <div className="flex items-center gap-1">
+                        Category <MoreHorizontal size={12} className="rotate-90" />
+                      </div>
+                    </TableHead>
+                    <TableHead className="px-6 py-3">Account</TableHead>
+                    <TableHead className="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
+                      <div className="flex items-center gap-1 justify-end">
+                        Amount <MoreHorizontal size={12} className="rotate-90" />
+                      </div>
+                    </TableHead>
+                    <TableHead className="px-6 py-3 text-center">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions.map((tx) => (
+                    <TransactionRow
+                      key={tx.id}
+                      tx={tx}
+                      onView={handleView}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {transactions.map((tx) => (
+                <TransactionCard
                   key={tx.id}
                   tx={tx}
                   onView={handleView}
@@ -556,20 +668,82 @@ export default function TransactionsPage() {
                   onDelete={handleDelete}
                 />
               ))}
-            </TableBody>
-          </Table>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {ENHANCED_TRANSACTIONS.map((tx) => (
-            <TransactionCard
-              key={tx.id}
-              tx={tx}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Pagination */}
+      {!loading && !error && transactions.length > 0 && (
+        <div className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-lg">
+          <div className="text-sm text-slate-600">
+            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} transactions
+          </div>
+          <div className="flex items-center gap-4">
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={previousPage}
+                  disabled={!hasPreviousPage}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronLeft size={16} />
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => goToPage(pageNum)}
+                        className="h-8 w-8 p-0 text-xs"
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={nextPage}
+                  disabled={!hasNextPage}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronRight size={16} />
+                </Button>
+              </div>
+            )}
+            <div className="text-sm text-slate-600 flex items-center gap-2">
+              <span>Show</span>
+              <select
+                value={pageSize === Number.MAX_SAFE_INTEGER ? "all" : pageSize}
+                onChange={(e) => handlePageSizeChange(e.target.value === "all" ? "all" : parseInt(e.target.value))}
+                className="text-sm border border-slate-200 rounded px-2 py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value="all">All</option>
+              </select>
+              <span>per page</span>
+            </div>
+          </div>
         </div>
       )}
 
@@ -577,6 +751,7 @@ export default function TransactionsPage() {
       <AddTransactionModal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
+        onSuccess={refetch}
       />
       <ViewTransactionModal
         open={viewModalOpen}
@@ -588,11 +763,13 @@ export default function TransactionsPage() {
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         transaction={selectedTx}
+        onSuccess={refetch}
       />
       <DeleteTransactionModal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         transaction={selectedTx}
+        onSuccess={refetch}
       />
     </div>
   );
