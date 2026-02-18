@@ -8,7 +8,7 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Trash2, AlertTriangle, X } from "lucide-react";
+import { X } from "lucide-react";
 import type { TransactionType } from "./types";
 
 interface DeleteTransactionModalProps {
@@ -48,11 +48,6 @@ export function DeleteTransactionModal({
       {/* Body */}
       <ModalBody className="px-5 py-8">
         <div className="text-center animate-txn-in">
-          {/* Warning Icon */}
-          <div className="w-16 h-16 rounded-full text-rose-500 flex items-center justify-center mx-auto mb-6 border border-rose-200">
-            <Trash2 size={28} />
-          </div>
-
           {/* Warning Message */}
           <h2 className="text-lg font-bold text-slate-900 mb-3">Delete Transaction?</h2>
           <p className="text-sm text-slate-500 mb-6 max-w-xs mx-auto leading-relaxed">
@@ -80,8 +75,7 @@ export function DeleteTransactionModal({
           </div>
 
           {/* Final Warning */}
-          <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-amber-50 border border-amber-100 text-amber-900 items-start mx-auto max-w-sm mt-6 text-left">
-            <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+          <div className="p-3 rounded-lg text-xs bg-amber-50 border border-amber-100 text-amber-900 mx-auto max-w-sm mt-6">
             <div>
               <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Irreversible Action</h4>
               <p className="text-[11px] leading-relaxed opacity-85">
@@ -95,10 +89,10 @@ export function DeleteTransactionModal({
       {/* Footer */}
       <ModalFooter className="px-6 py-4">
         <Button variant="outline" size="sm" className="flex-1" onClick={handleClose}>
-          <X size={14} /> Cancel
+          Cancel
         </Button>
         <Button variant="destructive" size="sm" className="flex-1" onClick={handleDelete}>
-          <Trash2 size={14} /> Delete Transaction
+          Delete Transaction
         </Button>
       </ModalFooter>
     </Modal>

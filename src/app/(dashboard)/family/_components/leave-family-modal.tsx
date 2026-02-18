@@ -43,29 +43,37 @@ export function LeaveFamilyModal({ open, onClose, onConfirm }: LeaveFamilyModalP
       {/* Body */}
       <ModalBody className="px-5 py-8">
         <div className="text-center animate-txn-in">
-          {/* Warning Icon */}
-          <div className="w-16 h-16 rounded-full text-amber-500 flex items-center justify-center mx-auto mb-6 border border-amber-200">
-            <LogOut size={28} />
-          </div>
-
           {/* Warning Message */}
           <h2 className="text-lg font-bold text-slate-900 mb-3">Leave Family Group?</h2>
           <p className="text-sm text-slate-500 mb-6 max-w-xs mx-auto leading-relaxed">
-            You will lose access to all shared budgets, goals, and history. You'll need a new invitation to rejoin.
+            Are you sure you want to leave this family group? You will lose access to all shared budgets, goals, and history. You'll need a new invitation to rejoin.
           </p>
 
-          {/* Warning Details */}
-          <div className="bg-amber-50 border border-amber-100 rounded-lg p-4 mx-auto max-w-sm">
-            <div className="flex gap-3">
-              <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={16} />
-              <div className="text-left">
-                <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">
-                  Are you sure you want to leave?
-                </h4>
-                <p className="text-[11px] text-amber-700 leading-relaxed">
-                  Your contributions to shared goals will remain visible, but shared budgets will be removed from your dashboard.
-                </p>
+          {/* Family Details */}
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mx-auto max-w-sm">
+            <div className="p-5 space-y-0 divide-y divide-slate-100">
+              <div className="flex justify-between items-center py-2.5">
+                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Action</span>
+                <span className="text-sm font-bold text-slate-900">Leave Family Group</span>
               </div>
+              <div className="flex justify-between items-center py-2.5">
+                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Impact</span>
+                <span className="text-sm font-semibold text-rose-600">Loss of Access</span>
+              </div>
+              <div className="flex justify-between items-center py-2.5">
+                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Rejoin Required</span>
+                <span className="text-sm font-semibold text-slate-700">New Invitation Needed</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Final Warning */}
+          <div className="p-3 rounded-lg text-xs bg-amber-50 border border-amber-100 text-amber-900 mx-auto max-w-sm mt-6">
+            <div>
+              <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Irreversible Action</h4>
+              <p className="text-[11px] leading-relaxed opacity-85">
+                Your contributions to shared goals will remain visible, but shared budgets will be removed from your dashboard.
+              </p>
             </div>
           </div>
         </div>
@@ -74,10 +82,10 @@ export function LeaveFamilyModal({ open, onClose, onConfirm }: LeaveFamilyModalP
       {/* Footer */}
       <ModalFooter className="px-6 py-4">
         <Button variant="outline" size="sm" className="flex-1" onClick={handleClose}>
-          <X size={14} /> Cancel
+          Cancel
         </Button>
         <Button variant="destructive" size="sm" className="flex-1" onClick={handleConfirm}>
-          <LogOut size={14} /> Leave Family
+          Leave Family
         </Button>
       </ModalFooter>
     </Modal>

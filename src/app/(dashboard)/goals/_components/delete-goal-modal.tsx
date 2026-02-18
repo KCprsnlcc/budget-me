@@ -8,11 +8,7 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import {
-  AlertTriangle,
-  Trash2,
-  Flag,
-} from "lucide-react";
+import { X } from "lucide-react";
 import type { GoalType } from "./types";
 import { formatCurrency, formatDate, getGoalProgress } from "./constants";
 
@@ -50,89 +46,71 @@ export function DeleteGoalModal({ open, onClose, goal }: DeleteGoalModalProps) {
   const progress = getGoalProgress(goal.current, goal.target);
 
   return (
-    <Modal open={open} onClose={handleClose} className="max-w-[400px]">
+    <Modal open={open} onClose={handleClose} className="max-w-md">
       {/* Header */}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5">
-        <h3 className="text-sm font-semibold text-slate-900">Delete Goal</h3>
+        <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+          Delete Goal
+        </span>
       </ModalHeader>
 
       {/* Body */}
-      <ModalBody className="px-5 py-5">
-        <div className="space-y-4">
+      <ModalBody className="px-5 py-8">
+        <div className="text-center animate-txn-in">
           {/* Warning Message */}
-          <div className="p-4 rounded-lg bg-red-50 border border-red-100 text-red-700 flex items-start gap-3">
-            <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
+          <h2 className="text-lg font-bold text-slate-900 mb-3">Delete Goal?</h2>
+          <p className="text-sm text-slate-500 mb-6 max-w-xs mx-auto leading-relaxed">
+            Are you sure you want to delete this goal? This action cannot be undone and will permanently remove the goal and all associated progress from your records.
+          </p>
+
+          {/* Goal Details */}
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mx-auto max-w-sm">
+            <div className="p-5 space-y-0 divide-y divide-slate-100">
+              <div className="flex justify-between items-center py-2.5">
+                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Goal Name</span>
+                <span className="text-sm font-bold text-slate-900">{goal.name}</span>
+              </div>
+              <div className="flex justify-between items-center py-2.5">
+                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Category</span>
+                <span className="text-sm font-semibold text-slate-700 capitalize">{goal.category}</span>
+              </div>
+              <div className="flex justify-between items-center py-2.5">
+                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Progress</span>
+                <span className="text-sm font-bold text-slate-900">{progress}%</span>
+              </div>
+              <div className="flex justify-between items-center py-2.5">
+                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Current Amount</span>
+                <span className="text-sm font-bold text-slate-900">{formatCurrency(goal.current)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2.5">
+                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Target Amount</span>
+                <span className="text-sm font-bold text-slate-900">{formatCurrency(goal.target)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2.5">
+                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Deadline</span>
+                <span className="text-sm font-semibold text-slate-700">{formatDate(goal.deadline)}</span>
+              </div>
+            </div>
+          </div>
+          {/* Final Warning */}
+          <div className="p-3 rounded-lg text-xs bg-amber-50 border border-amber-100 text-amber-900 mx-auto max-w-sm mt-6">
             <div>
-              <div className="font-medium text-sm">Permanent Action</div>
-              <div className="text-xs opacity-90 mt-1">
-                This action cannot be undone. All goal data and progress will be permanently deleted.
-              </div>
+              <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Irreversible Action</h4>
+              <p className="text-[11px] leading-relaxed opacity-85">
+                This goal and all associated progress will be permanently deleted and cannot be recovered.
+              </p>
             </div>
-          </div>
-
-          {/* Goal Summary */}
-          <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-            <div className="mb-3">
-              <h4 className="text-sm font-semibold text-slate-900">{goal.name}</h4>
-              <p className="text-xs text-slate-500 capitalize">{goal.category} goal</p>
-            </div>
-            
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Progress:</span>
-                <span className="font-medium text-slate-900">{progress}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Current:</span>
-                <span className="font-medium text-slate-900">{formatCurrency(goal.current)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Target:</span>
-                <span className="font-medium text-slate-900">{formatCurrency(goal.target)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Deadline:</span>
-                <span className="font-medium text-slate-900">{formatDate(goal.deadline)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Confirmation Text */}
-          <div className="text-center">
-            <p className="text-sm text-slate-600 mb-2">
-              Are you sure you want to delete this goal?
-            </p>
-            <p className="text-xs text-slate-400">
-              Type <span className="font-mono bg-slate-100 px-1 py-0.5 rounded">delete</span> to confirm
-            </p>
           </div>
         </div>
       </ModalBody>
 
       {/* Footer */}
-      <ModalFooter className="flex justify-between">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleClose}
-          disabled={isDeleting}
-        >
+      <ModalFooter className="px-6 py-4">
+        <Button variant="outline" size="sm" className="flex-1" onClick={handleClose}>
           Cancel
         </Button>
-        <Button
-          size="sm"
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="bg-red-500 hover:bg-red-600"
-        >
-          {isDeleting ? (
-            <>Deleting...</>
-          ) : (
-            <>
-              <Trash2 size={14} className="mr-1" />
-              Delete Goal
-            </>
-          )}
+        <Button variant="destructive" size="sm" className="flex-1" onClick={handleDelete}>
+          Delete Goal
         </Button>
       </ModalFooter>
     </Modal>

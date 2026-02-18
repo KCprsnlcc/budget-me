@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Menu, ChevronRight, Calendar, Download, LogOut, User, ChevronDown } from "lucide-react";
+import { Menu, ChevronRight, LogOut, User, ChevronDown } from "lucide-react";
 import { Logo } from "@/components/shared/logo";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
@@ -86,28 +86,6 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2 md:gap-3">
-        {/* Date Filters */}
-        <div className="hidden lg:flex items-center bg-slate-50 border border-slate-200 rounded-lg p-0.5">
-          <button className="px-2.5 py-1 text-[10px] font-medium text-slate-500 hover:text-slate-900 rounded-md hover:bg-white transition-all cursor-pointer">
-            All
-          </button>
-          <button className="px-2.5 py-1 text-[10px] font-medium text-slate-900 bg-white shadow-sm border border-slate-200 rounded-md transition-all cursor-pointer">
-            Month
-          </button>
-          <div className="h-3 w-px bg-slate-200 mx-1" />
-          <button className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-medium text-slate-500 hover:text-slate-900 rounded-md hover:bg-white transition-all cursor-pointer">
-            <Calendar size={12} />
-          </button>
-        </div>
-
-        <div className="h-4 w-px bg-slate-200 mx-1 hidden sm:block" />
-
-        {/* Export */}
-        <Button variant="outline" size="sm" className="text-emerald-700 bg-emerald-50/50 border-emerald-200/60 hover:bg-emerald-50 hover:border-emerald-200">
-          <Download size={16} />
-          <span className="hidden md:inline text-[11px]">Export</span>
-        </Button>
-
         {/* User Menu */}
         {user && (
           <div className="relative" ref={userMenuRef}>
