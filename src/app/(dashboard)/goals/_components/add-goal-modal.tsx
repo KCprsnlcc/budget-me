@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useAuth } from "@/components/auth/auth-context";
+import { createGoal } from "../_lib/goal-service";
 import { cn } from "@/lib/utils";
 import {
   Modal,
@@ -24,6 +26,8 @@ import {
   Users,
   Info,
   CheckCircle,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { Stepper } from "./stepper";
 import type { GoalFormState, GoalPriority, GoalCategory } from "./types";
@@ -50,15 +54,20 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 interface AddGoalModalProps {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export function AddGoalModal({ open, onClose }: AddGoalModalProps) {
+export function AddGoalModal({ open, onClose, onSuccess }: AddGoalModalProps) {
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<GoalFormState>({ ...INITIAL_GOAL_FORM_STATE });
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const reset = useCallback(() => {
     setStep(1);
     setForm({ ...INITIAL_GOAL_FORM_STATE });
+    setSaveError(null);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -71,14 +80,27 @@ export function AddGoalModal({ open, onClose }: AddGoalModalProps) {
     (step === 2 && form.name !== "" && form.target !== "" && form.deadline !== "" && form.monthlyContribution !== "") ||
     step === 3;
 
+  const handleSubmit = useCallback(async () => {
+    if (!user) return;
+    setSaving(true);
+    setSaveError(null);
+    const { error } = await createGoal(user.id, form);
+    setSaving(false);
+    if (error) {
+      setSaveError(error);
+      return;
+    }
+    handleClose();
+    onSuccess?.();
+  }, [user, form, handleClose, onSuccess]);
+
   const handleNext = useCallback(() => {
     if (step >= 3) {
-      // TODO: Implement actual goal creation logic
-      handleClose();
+      handleSubmit();
       return;
     }
     setStep((s) => s + 1);
-  }, [step, handleClose]);
+  }, [step, handleSubmit]);
 
   const handleBack = useCallback(() => {
     if (step <= 1) return;
@@ -324,6 +346,16 @@ export function AddGoalModal({ open, onClose }: AddGoalModalProps) {
               )}
             </div>
 
+            {saveError && (
+              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
+                <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+                <div>
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
+                  <p className="text-[11px] leading-relaxed opacity-85">{saveError}</p>
+                </div>
+              </div>
+            )}
+
             <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-start gap-3">
               <CheckCircle size={16} className="flex-shrink-0 mt-0.5" />
               <div>
@@ -352,11 +384,14 @@ export function AddGoalModal({ open, onClose }: AddGoalModalProps) {
         <Button
           size="sm"
           onClick={handleNext}
-          disabled={!canContinue}
+          disabled={!canContinue || saving}
           className="bg-emerald-500 hover:bg-emerald-600"
         >
-          {step === 3 ? "Create Goal" : "Continue"}
-          <ArrowRight size={14} className="ml-1" />
+          {step === 3 ? (
+            saving ? (<><Loader2 size={14} className="animate-spin mr-1" /> Creating...</>) : (<>Create Goal <ArrowRight size={14} className="ml-1" /></>)
+          ) : (
+            <>Continue <ArrowRight size={14} className="ml-1" /></>
+          )}
         </Button>
       </ModalFooter>
     </Modal>

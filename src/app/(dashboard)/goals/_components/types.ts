@@ -4,7 +4,9 @@ export type GoalCategory = "emergency" | "housing" | "education" | "travel" | "t
 
 export interface GoalType {
   id: string;
+  user_id: string;
   name: string;
+  description: string | null;
   target: number;
   current: number;
   priority: GoalPriority;
@@ -12,8 +14,12 @@ export interface GoalType {
   category: GoalCategory;
   deadline: string;
   monthlyContribution: number;
-  isFamily?: boolean;
+  isFamily: boolean;
+  family_id: string | null;
+  notes: string | null;
   icon?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface GoalFormState {
@@ -29,6 +35,7 @@ export interface GoalFormState {
 export interface GoalModalProps {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 export interface AddGoalModalProps extends GoalModalProps {}

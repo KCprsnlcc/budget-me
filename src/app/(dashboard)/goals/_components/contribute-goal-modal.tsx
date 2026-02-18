@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { contributeToGoal } from "../_lib/goal-service";
 import { cn } from "@/lib/utils";
 import {
   Modal,
@@ -16,6 +17,8 @@ import {
   Calendar,
   CheckCircle,
   Info,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { Stepper } from "./stepper";
 import type { GoalType } from "./types";
@@ -32,15 +35,19 @@ interface ContributeGoalModalProps {
   open: boolean;
   onClose: () => void;
   goal: GoalType | null;
+  onSuccess?: () => void;
 }
 
-export function ContributeGoalModal({ open, onClose, goal }: ContributeGoalModalProps) {
+export function ContributeGoalModal({ open, onClose, goal, onSuccess }: ContributeGoalModalProps) {
   const [step, setStep] = useState(1);
   const [amount, setAmount] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const reset = useCallback(() => {
     setStep(1);
     setAmount("");
+    setSaveError(null);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -52,14 +59,29 @@ export function ContributeGoalModal({ open, onClose, goal }: ContributeGoalModal
     (step === 1 && amount !== "" && parseFloat(amount) > 0) ||
     step === 2;
 
+  const handleSubmit = useCallback(async () => {
+    if (!goal) return;
+    const parsed = parseFloat(amount);
+    if (isNaN(parsed) || parsed <= 0) return;
+    setSaving(true);
+    setSaveError(null);
+    const { error } = await contributeToGoal(goal.id, parsed);
+    setSaving(false);
+    if (error) {
+      setSaveError(error);
+      return;
+    }
+    handleClose();
+    onSuccess?.();
+  }, [goal, amount, handleClose, onSuccess]);
+
   const handleNext = useCallback(() => {
     if (step >= 2) {
-      // TODO: Implement actual contribution logic
-      handleClose();
+      handleSubmit();
       return;
     }
     setStep((s) => s + 1);
-  }, [step, handleClose]);
+  }, [step, handleSubmit]);
 
   const handleBack = useCallback(() => {
     if (step <= 1) return;
@@ -235,6 +257,16 @@ export function ContributeGoalModal({ open, onClose, goal }: ContributeGoalModal
               )}
             </div>
 
+            {saveError && (
+              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
+                <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+                <div>
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
+                  <p className="text-[11px] leading-relaxed opacity-85">{saveError}</p>
+                </div>
+              </div>
+            )}
+
             <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-start gap-3">
               <CheckCircle size={16} className="flex-shrink-0 mt-0.5" />
               <div>
@@ -262,14 +294,11 @@ export function ContributeGoalModal({ open, onClose, goal }: ContributeGoalModal
         <Button
           size="sm"
           onClick={handleNext}
-          disabled={!canContinue}
+          disabled={!canContinue || saving}
           className="bg-emerald-500 hover:bg-emerald-600"
         >
           {step === 2 ? (
-            <>
-              <Plus size={14} className="mr-1" />
-              Contribute
-            </>
+            saving ? (<><Loader2 size={14} className="animate-spin mr-1" /> Contributing...</>) : (<><Plus size={14} className="mr-1" /> Contribute</>)
           ) : (
             <>Continue</>
           )}

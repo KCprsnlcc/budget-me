@@ -23,6 +23,8 @@ import {
   Info,
   Table,
   Grid3X3,
+  Loader2,
+  Inbox,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,81 +39,8 @@ import {
 } from "./_components";
 import type { GoalType } from "./_components/types";
 import { getGoalProgress, formatCurrency, formatDate } from "./_components/constants";
+import { useGoals } from "./_lib/use-goals";
 
-const GOALS: GoalType[] = [
-  {
-    id: "1",
-    name: "Emergency Fund",
-    target: 15000,
-    current: 15000,
-    priority: "high",
-    status: "completed",
-    category: "emergency",
-    deadline: "2025-01-15",
-    monthlyContribution: 500,
-    isFamily: false,
-    icon: "shield-check",
-  },
-  {
-    id: "2",
-    name: "House Down Payment",
-    target: 60000,
-    current: 32000,
-    priority: "high",
-    status: "in_progress",
-    category: "housing",
-    deadline: "2027-12-31",
-    monthlyContribution: 1200,
-    isFamily: true,
-    icon: "home-2",
-  },
-  {
-    id: "3",
-    name: "Education Fund",
-    target: 25000,
-    current: 8500,
-    priority: "medium",
-    status: "in_progress",
-    category: "education",
-    deadline: "2028-09-01",
-    monthlyContribution: 400,
-    isFamily: false,
-    icon: "graduation-cap",
-  },
-  {
-    id: "4",
-    name: "Dream Vacation",
-    target: 5000,
-    current: 2800,
-    priority: "medium",
-    status: "behind",
-    category: "travel",
-    deadline: "2026-06-01",
-    monthlyContribution: 300,
-    isFamily: false,
-    icon: "airplane",
-  },
-  {
-    id: "5",
-    name: "New Car",
-    target: 35000,
-    current: 5200,
-    priority: "medium",
-    status: "in_progress",
-    category: "transport",
-    deadline: "2028-03-31",
-    monthlyContribution: 800,
-    isFamily: false,
-    icon: "car",
-  },
-];
-
-const SUMMARY = [
-  { label: "Active Goals", value: "4" },
-  { label: "Total Saved", value: "$63,500" },
-  { label: "Monthly Contributions", value: "$3,200" },
-  { label: "Completed", value: "1" },
-];
 
 const GOAL_ICONS: Record<string, React.ElementType> = {
   "shield-check": Flag,
@@ -238,6 +167,8 @@ const GoalCard = memo(({
 GoalCard.displayName = "GoalCard";
 
 export default function GoalsPage() {
+  const { goals, allGoals, summary, search, setSearch, statusFilter, setStatusFilter, priorityFilter, setPriorityFilter, categoryFilter, setCategoryFilter, scopeFilter, setScopeFilter, resetFilters, loading, error, refetch } = useGoals();
+
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -282,32 +213,49 @@ export default function GoalsPage() {
     }, 150);
   }, []);
 
-  const activeGoals = useMemo(() => GOALS.filter(goal => goal.status !== "completed"), []);
-  const totalSaved = useMemo(() => GOALS.reduce((sum, goal) => sum + goal.current, 0), []);
-  const monthlyContributions = useMemo(() => GOALS.filter(goal => goal.status !== "completed").reduce((sum, goal) => sum + goal.monthlyContribution, 0), []);
-  const completedGoals = useMemo(() => GOALS.filter(goal => goal.status === "completed").length, []);
-
   const summaryData = useMemo(() => [
-    { label: "Active Goals", value: activeGoals.length.toString() },
-    { label: "Total Saved", value: formatCurrency(totalSaved) },
-    { label: "Monthly Contributions", value: formatCurrency(monthlyContributions) },
-    { label: "Completed", value: completedGoals.toString() },
-  ], [activeGoals.length, totalSaved, monthlyContributions, completedGoals]);
+    { label: "Active Goals", value: (summary?.activeGoals ?? 0).toString() },
+    { label: "Total Saved", value: formatCurrency(summary?.totalSaved ?? 0) },
+    { label: "Monthly Contributions", value: formatCurrency(summary?.monthlyContributions ?? 0) },
+    { label: "Completed", value: (summary?.completedGoals ?? 0).toString() },
+  ], [summary]);
 
-  const chartData = useMemo(() => [
-    { month: "Aug", target: 75, saved: 65 },
-    { month: "Sep", target: 70, saved: 55 },
-    { month: "Oct", target: 80, saved: 75 },
-    { month: "Nov", target: 85, saved: 90 },
-    { month: "Dec", target: 80, saved: 60 },
-    { month: "Jan", target: 75, saved: 45 },
-  ], []);
+  const chartData = useMemo(() => {
+    const totalTarget = allGoals.reduce((s, g) => s + g.target, 0);
+    const totalSaved = allGoals.reduce((s, g) => s + g.current, 0);
+    const savedPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
+    const now = new Date();
+    const months: { month: string; target: number; saved: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const label = d.toLocaleDateString("en-US", { month: "short" });
+      const factor = (6 - i) / 6;
+      months.push({
+        month: label,
+        target: Math.round(80 * factor + 20),
+        saved: Math.round(savedPct * factor),
+      });
+    }
+    return months;
+  }, [allGoals]);
 
-  const goalHealthData = useMemo(() => [
-    { name: "Completed", value: completedGoals, color: "bg-emerald-500" },
-    { name: "In Progress", value: activeGoals.length, color: "bg-blue-500" },
-    { name: "Overdue", value: 0, color: "bg-amber-500" },
-  ], [activeGoals.length, completedGoals]);
+  const goalHealthData = useMemo(() => {
+    const completed = allGoals.filter(g => g.status === "completed").length;
+    const inProgress = allGoals.filter(g => g.status === "in_progress").length;
+    const overdue = allGoals.filter(g => g.status === "overdue" || g.status === "behind").length;
+    return [
+      { name: "Completed", value: completed, color: "bg-emerald-500" },
+      { name: "In Progress", value: inProgress, color: "bg-blue-500" },
+      { name: "Overdue", value: overdue, color: "bg-amber-500" },
+    ];
+  }, [allGoals]);
+
+  const goalHealthGradient = useMemo(() => {
+    const total = allGoals.length || 1;
+    const cPct = Math.round((goalHealthData[0]?.value ?? 0) / total * 100);
+    const ipPct = Math.round((goalHealthData[1]?.value ?? 0) / total * 100);
+    return `conic-gradient(#10b981 0% ${cPct}%, #3b82f6 ${cPct}% ${cPct + ipPct}%, #f59e0b ${cPct + ipPct}% 100%)`;
+  }, [allGoals.length, goalHealthData]);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
@@ -456,10 +404,10 @@ export default function GoalsPage() {
 
           <div className="flex items-center justify-center mb-6 relative">
             <div className="w-32 h-32 rounded-full relative"
-                 style={{ background: 'conic-gradient(#10b981 0% 25%, #3b82f6 25% 75%, #f59e0b 75% 100%)' }}>
+                 style={{ background: goalHealthGradient }}>
               <div className="absolute inset-0 m-auto w-24 h-24 bg-white rounded-full flex flex-col items-center justify-center">
                 <span className="text-xs text-slate-400">Total</span>
-                <span className="text-xl font-bold text-slate-900">{GOALS.length}</span>
+                <span className="text-xl font-bold text-slate-900">{allGoals.length}</span>
               </div>
             </div>
           </div>
@@ -471,7 +419,7 @@ export default function GoalsPage() {
                   <div className={`w-2 h-2 rounded-full ${item.color}`} />
                   <span className="text-slate-600">{item.name}</span>
                 </div>
-                <span className="font-medium text-slate-900">{item.value} ({Math.round((item.value / GOALS.length) * 100)}%)</span>
+                <span className="font-medium text-slate-900">{item.value} ({Math.round((item.value / (allGoals.length || 1)) * 100)}%)</span>
               </div>
             ))}
           </div>
@@ -483,13 +431,13 @@ export default function GoalsPage() {
         <div className="flex flex-col xl:flex-row items-center gap-3">
           {/* Scope Filter */}
           <div className="flex bg-slate-100 p-1 rounded-lg w-full md:w-auto">
-            <Button variant="ghost" size="sm" className="flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md bg-white text-slate-900 shadow-sm">
+            <Button variant="ghost" size="sm" className={`flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md transition-colors ${scopeFilter === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`} onClick={() => setScopeFilter("all")}>
               All
             </Button>
-            <Button variant="ghost" size="sm" className="flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md text-slate-500 hover:text-slate-700">
+            <Button variant="ghost" size="sm" className={`flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md transition-colors ${scopeFilter === "personal" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`} onClick={() => setScopeFilter("personal")}>
               Personal
             </Button>
-            <Button variant="ghost" size="sm" className="flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md text-slate-500 hover:text-slate-700">
+            <Button variant="ghost" size="sm" className={`flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md transition-colors ${scopeFilter === "family" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`} onClick={() => setScopeFilter("family")}>
               Family
             </Button>
           </div>
@@ -501,31 +449,33 @@ export default function GoalsPage() {
             <input
               type="text"
               placeholder="Search goals..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
             />
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full md:w-auto flex-1">
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>All Priorities</option>
-              <option>High</option>
-              <option>Medium</option>
-              <option>Low</option>
+            <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
+              <option value="">All Priorities</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
             </select>
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>All Statuses</option>
-              <option>In Progress</option>
-              <option>Completed</option>
-              <option>Behind</option>
-              <option>Overdue</option>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
+              <option value="">All Statuses</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="behind">Behind</option>
+              <option value="overdue">Overdue</option>
             </select>
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>All Categories</option>
-              <option>Emergency</option>
-              <option>Housing</option>
-              <option>Education</option>
-              <option>Travel</option>
-              <option>Transport</option>
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
+              <option value="">All Categories</option>
+              <option value="emergency">Emergency</option>
+              <option value="housing">Housing</option>
+              <option value="education">Education</option>
+              <option value="travel">Travel</option>
+              <option value="transport">Transport</option>
             </select>
             {/* Date Range Picker Mockup */}
             <div className="relative w-full">
@@ -540,7 +490,7 @@ export default function GoalsPage() {
             </div>
           </div>
 
-          <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center">
+          <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" onClick={resetFilters}>
             <RotateCcw size={14} />
             Reset
           </Button>
@@ -548,7 +498,26 @@ export default function GoalsPage() {
       </Card>
 
       {/* Goals Display */}
-      {viewMode === 'table' ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader2 size={32} className="animate-spin text-emerald-500 mb-3" />
+          <p className="text-sm text-slate-500">Loading goals...</p>
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center py-20">
+          <p className="text-sm text-red-600 mb-2">{error}</p>
+          <Button variant="outline" size="sm" onClick={refetch}>Retry</Button>
+        </div>
+      ) : goals.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20">
+          <Inbox size={48} className="text-slate-300 mb-3" />
+          <h3 className="text-sm font-medium text-slate-600 mb-1">No goals found</h3>
+          <p className="text-xs text-slate-400 mb-4">Create your first financial goal to get started</p>
+          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => setAddModalOpen(true)}>
+            <Plus size={16} /> Create Goal
+          </Button>
+        </div>
+      ) : viewMode === 'table' ? (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -565,7 +534,7 @@ export default function GoalsPage() {
                 </tr>
               </thead>
               <tbody className="text-xs divide-y divide-slate-50">
-                {GOALS.map((goal) => {
+                {goals.map((goal) => {
                   const progress = getGoalProgress(goal.current, goal.target);
                   const remaining = goal.target - goal.current;
                   const Icon = GOAL_ICONS[goal.icon || "target"] || Flag;
@@ -647,7 +616,7 @@ export default function GoalsPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {GOALS.map((goal) => (
+          {goals.map((goal) => (
             <GoalCard
               key={goal.id}
               goal={goal}
@@ -664,6 +633,7 @@ export default function GoalsPage() {
       <AddGoalModal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
+        onSuccess={refetch}
       />
       <ViewGoalModal
         open={viewModalOpen}
@@ -676,16 +646,19 @@ export default function GoalsPage() {
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         goal={selectedGoal}
+        onSuccess={refetch}
       />
       <DeleteGoalModal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         goal={selectedGoal}
+        onSuccess={refetch}
       />
       <ContributeGoalModal
         open={contributeModalOpen}
         onClose={() => setContributeModalOpen(false)}
         goal={selectedGoal}
+        onSuccess={refetch}
       />
     </div>
   );

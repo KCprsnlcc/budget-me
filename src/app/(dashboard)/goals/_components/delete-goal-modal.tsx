@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { deleteGoal } from "../_lib/goal-service";
 import {
   Modal,
   ModalHeader,
@@ -8,7 +9,7 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import type { GoalType } from "./types";
 import { formatCurrency, formatDate, getGoalProgress } from "./constants";
 
@@ -16,30 +17,32 @@ interface DeleteGoalModalProps {
   open: boolean;
   onClose: () => void;
   goal: GoalType | null;
+  onSuccess?: () => void;
 }
 
-export function DeleteGoalModal({ open, onClose, goal }: DeleteGoalModalProps) {
+export function DeleteGoalModal({ open, onClose, goal, onSuccess }: DeleteGoalModalProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleClose = useCallback(() => {
     setIsDeleting(false);
+    setDeleteError(null);
     onClose();
   }, [onClose]);
 
   const handleDelete = useCallback(async () => {
     if (!goal) return;
-    
     setIsDeleting(true);
-    
-    try {
-      // TODO: Implement actual goal deletion logic
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      handleClose();
-    } catch (error) {
-      console.error("Failed to delete goal:", error);
-      setIsDeleting(false);
+    setDeleteError(null);
+    const { error } = await deleteGoal(goal.id);
+    setIsDeleting(false);
+    if (error) {
+      setDeleteError(error);
+      return;
     }
-  }, [goal, handleClose]);
+    handleClose();
+    onSuccess?.();
+  }, [goal, handleClose, onSuccess]);
 
   if (!goal) return null;
 
@@ -92,6 +95,17 @@ export function DeleteGoalModal({ open, onClose, goal }: DeleteGoalModalProps) {
               </div>
             </div>
           </div>
+          {/* Error Notice */}
+          {deleteError && (
+            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 mx-auto max-w-sm mt-4 items-start">
+              <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+              <div>
+                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
+                <p className="text-[11px] leading-relaxed opacity-85">{deleteError}</p>
+              </div>
+            </div>
+          )}
+
           {/* Final Warning */}
           <div className="p-3 rounded-lg text-xs bg-amber-50 border border-amber-100 text-amber-900 mx-auto max-w-sm mt-6">
             <div>
@@ -106,11 +120,11 @@ export function DeleteGoalModal({ open, onClose, goal }: DeleteGoalModalProps) {
 
       {/* Footer */}
       <ModalFooter className="px-6 py-4">
-        <Button variant="outline" size="sm" className="flex-1" onClick={handleClose}>
+        <Button variant="outline" size="sm" className="flex-1" onClick={handleClose} disabled={isDeleting}>
           Cancel
         </Button>
-        <Button variant="destructive" size="sm" className="flex-1" onClick={handleDelete}>
-          Delete Goal
+        <Button variant="destructive" size="sm" className="flex-1" onClick={handleDelete} disabled={isDeleting}>
+          {isDeleting ? (<><Loader2 size={14} className="animate-spin" /> Deleting...</>) : "Delete Goal"}
         </Button>
       </ModalFooter>
     </Modal>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { useAuth } from "@/components/auth/auth-context";
+import { updateGoal } from "../_lib/goal-service";
 import { cn } from "@/lib/utils";
 import {
   Modal,
@@ -24,6 +26,7 @@ import {
   Info,
   AlertTriangle,
   Check,
+  Loader2,
 } from "lucide-react";
 import { Stepper } from "./stepper";
 import type { GoalFormState, GoalType, GoalPriority, GoalCategory } from "./types";
@@ -66,16 +69,21 @@ interface EditGoalModalProps {
   open: boolean;
   onClose: () => void;
   goal: GoalType | null;
+  onSuccess?: () => void;
 }
 
-export function EditGoalModal({ open, onClose, goal }: EditGoalModalProps) {
+export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalProps) {
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<GoalFormState>(() => goalToFormState(goal));
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && goal) {
       setForm(goalToFormState(goal));
       setStep(1);
+      setSaveError(null);
     }
   }, [open, goal]);
 
@@ -89,14 +97,27 @@ export function EditGoalModal({ open, onClose, goal }: EditGoalModalProps) {
     (step === 2 && form.name !== "" && form.target !== "" && form.deadline !== "" && form.monthlyContribution !== "") ||
     step === 3;
 
+  const handleSubmit = useCallback(async () => {
+    if (!goal) return;
+    setSaving(true);
+    setSaveError(null);
+    const { error } = await updateGoal(goal.id, form);
+    setSaving(false);
+    if (error) {
+      setSaveError(error);
+      return;
+    }
+    handleClose();
+    onSuccess?.();
+  }, [goal, form, handleClose, onSuccess]);
+
   const handleNext = useCallback(() => {
     if (step >= 3) {
-      // TODO: Implement actual goal update logic
-      handleClose();
+      handleSubmit();
       return;
     }
     setStep((s) => s + 1);
-  }, [step, handleClose]);
+  }, [step, handleSubmit]);
 
   const handleBack = useCallback(() => {
     if (step <= 1) return;
@@ -344,6 +365,16 @@ export function EditGoalModal({ open, onClose, goal }: EditGoalModalProps) {
               )}
             </div>
 
+            {saveError && (
+              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
+                <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+                <div>
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
+                  <p className="text-[11px] leading-relaxed opacity-85">{saveError}</p>
+                </div>
+              </div>
+            )}
+
             <div className="p-3 rounded-lg bg-amber-50 border border-amber-100 text-amber-700 flex items-start gap-3">
               <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
               <div>
@@ -372,11 +403,14 @@ export function EditGoalModal({ open, onClose, goal }: EditGoalModalProps) {
         <Button
           size="sm"
           onClick={handleNext}
-          disabled={!canContinue}
+          disabled={!canContinue || saving}
           className="bg-emerald-500 hover:bg-emerald-600"
         >
-          {step === 3 ? "Save Changes" : "Continue"}
-          <ArrowRight size={14} className="ml-1" />
+          {step === 3 ? (
+            saving ? (<><Loader2 size={14} className="animate-spin mr-1" /> Saving...</>) : (<>Save Changes <ArrowRight size={14} className="ml-1" /></>)
+          ) : (
+            <>Continue <ArrowRight size={14} className="ml-1" /></>
+          )}
         </Button>
       </ModalFooter>
     </Modal>
