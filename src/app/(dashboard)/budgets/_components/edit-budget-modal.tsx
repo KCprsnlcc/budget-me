@@ -9,6 +9,8 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import { DateSelector } from "@/components/ui/date-selector";
+import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
 import {
   ArrowLeft,
   ArrowRight,
@@ -17,6 +19,24 @@ import {
   Info,
   AlertTriangle,
   Loader2,
+  Home,
+  Car,
+  Utensils,
+  ShoppingCart as ShoppingCartIcon,
+  Zap,
+  Heart,
+  Film,
+  Package,
+  BookOpen,
+  Shield,
+  DollarSign,
+  Laptop,
+  TrendingUp as TrendingUpIcon,
+  Building,
+  Rocket,
+  Gift,
+  Banknote,
+  FileText,
 } from "lucide-react";
 import { Stepper } from "./stepper";
 import type { BudgetFormState, BudgetType, BudgetPeriod, CategoryOption } from "./types";
@@ -26,6 +46,38 @@ import { useAuth } from "@/components/auth/auth-context";
 import { updateBudget, fetchExpenseCategories } from "../_lib/budget-service";
 
 const STEPS = ["Period", "Details", "Review"];
+
+// Helper function to convert emojis to Lucide icons
+function getLucideIcon(emoji: string): React.ComponentType<any> {
+  const iconMap: Record<string, React.ComponentType<any>> = {
+    // Expense Categories
+    "🏠": Home,
+    "🚗": Car,
+    "🍽️": Utensils,
+    "🛒": ShoppingCartIcon,
+    "💡": Zap,
+    "⚕️": Heart,
+    "🎬": Film,
+    "🛍️": Package,
+    "📚": BookOpen,
+    "🛡️": Shield,
+    
+    // Income Categories
+    "💰": DollarSign,
+    "💻": Laptop,
+    "📈": TrendingUpIcon,
+    "🏢": Building,
+    "💼": FileText,
+    "🚀": Rocket,
+    "🎁": Gift,
+    "💵": Banknote,
+    
+    // Default/fallback
+    "📋": FileText,
+  };
+  
+  return iconMap[emoji] || FileText;
+}
 
 function budgetToFormState(budget: BudgetType | null): BudgetFormState {
   if (!budget) {
@@ -233,39 +285,37 @@ export function EditBudgetModal({ open, onClose, budget, onSuccess }: EditBudget
 
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">Category</label>
-                  <select
+                  <SearchableDropdown
                     value={form.category_id}
-                    onChange={(e) => updateField("category_id", e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
-                  >
-                    <option value="">Select category...</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.category_name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(value) => updateField("category_id", value)}
+                    options={categories.map((cat) => ({
+                      value: cat.id,
+                      label: cat.category_name,
+                      icon: cat.icon ? getLucideIcon(cat.icon) : undefined,
+                    }))}
+                    placeholder="Select category..."
+                    allowEmpty={true}
+                    emptyLabel="Select category..."
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">Start Date</label>
-                  <input
-                    type="date"
+                  <DateSelector
                     value={form.start_date}
-                    onChange={(e) => updateField("start_date", e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                    onChange={(value) => updateField("start_date", value)}
+                    placeholder="Select start date"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">End Date</label>
-                  <input
-                    type="date"
+                  <DateSelector
                     value={form.end_date}
-                    onChange={(e) => updateField("end_date", e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                    onChange={(value) => updateField("end_date", value)}
+                    placeholder="Select end date"
                   />
                 </div>
               </div>

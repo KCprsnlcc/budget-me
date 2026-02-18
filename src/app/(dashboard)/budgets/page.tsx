@@ -62,6 +62,8 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
+const currentYear = new Date().getFullYear();
+
 const BudgetRow = memo(({
   budget,
   onView,
