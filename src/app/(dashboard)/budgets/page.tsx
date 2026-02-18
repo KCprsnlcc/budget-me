@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, memo, useMemo } from "react";
 import {
   Plus,
   TrendingUp,
@@ -19,11 +19,33 @@ import {
   Table,
   Grid3X3,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Home,
+  Car,
+  Utensils,
+  ShoppingCart as ShoppingCartIcon,
+  Zap,
+  Heart,
+  Film,
+  Package,
+  BookOpen,
+  Shield,
+  DollarSign,
+  Laptop,
+  TrendingUp as TrendingUpIcon,
+  Building,
+  Rocket,
+  Gift,
+  Banknote,
+  FileText,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
 import {
   AddBudgetModal,
   ViewBudgetModal,
@@ -99,6 +121,38 @@ const BudgetRow = memo(({
 
 BudgetRow.displayName = "BudgetRow";
 
+// Helper function to convert emojis to Lucide icons
+function getLucideIcon(emoji: string): React.ComponentType<any> {
+  const iconMap: Record<string, React.ComponentType<any>> = {
+    // Expense Categories
+    "🏠": Home,
+    "🚗": Car,
+    "🍽️": Utensils,
+    "🛒": ShoppingCartIcon,
+    "💡": Zap,
+    "⚕️": Heart,
+    "🎬": Film,
+    "🛍️": Package,
+    "📚": BookOpen,
+    "🛡️": Shield,
+    
+    // Income Categories
+    "💰": DollarSign,
+    "💻": Laptop,
+    "📈": TrendingUpIcon,
+    "🏢": Building,
+    "💼": Briefcase,
+    "🚀": Rocket,
+    "🎁": Gift,
+    "💵": Banknote,
+    
+    // Default/fallback
+    "📋": FileText,
+  };
+  
+  return iconMap[emoji] || FileText;
+}
+
 export default function BudgetsPage() {
   const {
     budgets,
@@ -111,9 +165,22 @@ export default function BudgetsPage() {
     categoryFilter, setCategoryFilter,
     search, setSearch,
     resetFilters,
+    resetFiltersToAll,
     loading,
     error,
     refetch,
+    // Pagination
+    currentPage,
+    pageSize,
+    setPageSize,
+    handlePageSizeChange,
+    totalPages,
+    totalCount,
+    hasNextPage,
+    hasPreviousPage,
+    goToPage,
+    nextPage,
+    previousPage,
   } = useBudgets();
 
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -447,43 +514,13 @@ export default function BudgetsPage() {
       {/* Filters */}
       <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col xl:flex-row items-center gap-3">
-          {/* Scope Filter */}
-          <div className="flex bg-slate-100 p-1 rounded-lg w-full md:w-auto">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md ${
-                !statusFilter ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-              }`}
-              onClick={() => setStatusFilter("")}
-            >
-              All
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md ${
-                statusFilter === "active" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-              }`}
-              onClick={() => setStatusFilter("active")}
-            >
-              Active
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md ${
-                statusFilter === "paused" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-              }`}
-              onClick={() => setStatusFilter("paused")}
-            >
-              Paused
-            </Button>
+          <div className="flex items-center gap-2 text-xs text-slate-500 w-full xl:w-auto">
+            <Filter size={16} />
+            <span className="font-medium">Filters</span>
           </div>
+          <div className="hidden xl:block h-4 w-px bg-slate-200"></div>
 
-          <div className="h-4 w-px bg-slate-200 hidden xl:block"></div>
-
-          <div className="relative w-full md:w-64">
+          <div className="relative w-full xl:w-64">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
@@ -494,33 +531,60 @@ export default function BudgetsPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-2 w-full md:w-auto flex-1">
-            <select
+          <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
+            <SearchableDropdown
+              value={statusFilter}
+              onChange={(value) => setStatusFilter(value)}
+              options={[
+                { value: "active", label: "Active" },
+                { value: "paused", label: "Paused" },
+                { value: "completed", label: "Completed" },
+                { value: "archived", label: "Archived" },
+              ]}
+              placeholder="Select status"
+              className="w-full"
+              allowEmpty={true}
+              emptyLabel="All Status"
+              hideSearch={true}
+            />
+            <SearchableDropdown
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-            >
-              <option value="">All Categories</option>
-              {expenseCategories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.category_name}</option>
-              ))}
-            </select>
-            <select
+              onChange={(value) => setCategoryFilter(value)}
+              options={expenseCategories.map((cat) => ({
+                value: cat.id,
+                label: cat.category_name,
+                icon: cat.icon ? getLucideIcon(cat.icon) : undefined,
+              }))}
+              placeholder="All Categories"
+              className="w-full"
+              allowEmpty={true}
+              emptyLabel="All Categories"
+              hideSearch={true}
+            />
+            <SearchableDropdown
               value={periodFilter}
-              onChange={(e) => setPeriodFilter(e.target.value)}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-            >
-              <option value="">All Periods</option>
-              {BUDGET_PERIODS.map((p) => (
-                <option key={p.key} value={p.key}>{p.label}</option>
-              ))}
-            </select>
+              onChange={(value) => setPeriodFilter(value)}
+              options={BUDGET_PERIODS.map((p) => ({
+                value: p.key,
+                label: p.label,
+              }))}
+              placeholder="All Periods"
+              className="w-full"
+              allowEmpty={true}
+              emptyLabel="All Periods"
+              hideSearch={true}
+            />
           </div>
 
-          <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" onClick={resetFilters}>
-            <RotateCcw size={14} />
-            Reset
-          </Button>
+          <div className="flex-1"></div>
+          <div className="flex items-center gap-2 w-full xl:w-auto">
+            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset to Current" onClick={resetFilters}>
+              <RotateCcw size={14} /> Current
+            </Button>
+            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={resetFiltersToAll}>
+              <RotateCcw size={14} /> All Time
+            </Button>
+          </div>
         </div>
       </Card>
 
@@ -659,6 +723,80 @@ export default function BudgetsPage() {
             ))}
           </div>
         </>
+      )}
+
+      {/* Pagination */}
+      {!loading && !error && budgets.length > 0 && (
+        <div className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-lg">
+          <div className="text-sm text-slate-600">
+            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} budgets
+          </div>
+          <div className="flex items-center gap-4">
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={previousPage}
+                  disabled={!hasPreviousPage}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronLeft size={16} />
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => goToPage(pageNum)}
+                        className="h-8 w-8 p-0 text-xs"
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={nextPage}
+                  disabled={!hasNextPage}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronRight size={16} />
+                </Button>
+              </div>
+            )}
+            <div className="text-sm text-slate-600 flex items-center gap-2">
+              <span>Show</span>
+              <select
+                value={pageSize === Number.MAX_SAFE_INTEGER ? "all" : pageSize}
+                onChange={(e) => handlePageSizeChange(e.target.value === "all" ? "all" : parseInt(e.target.value))}
+                className="text-sm border border-slate-200 rounded px-2 py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value="all">All</option>
+              </select>
+              <span>per page</span>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Modals */}

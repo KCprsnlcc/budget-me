@@ -61,14 +61,40 @@ export type BudgetFilters = {
 
 export async function fetchBudgetsList(
   userId: string,
-  filters: BudgetFilters = {}
-): Promise<{ data: BudgetType[]; error: string | null }> {
+  filters: BudgetFilters = {},
+  page: number = 1,
+  pageSize: number = 10
+): Promise<{ data: BudgetType[]; error: string | null; totalCount: number }> {
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  // First get total count
+  let countQuery = supabase
+    .from("budgets")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  if (filters.status) {
+    countQuery = countQuery.eq("status", filters.status);
+  }
+  if (filters.period) {
+    countQuery = countQuery.eq("period", filters.period);
+  }
+  if (filters.categoryId) {
+    countQuery = countQuery.eq("category_id", filters.categoryId);
+  }
+
+  const { count: totalCount, error: countError } = await countQuery;
+  if (countError) return { data: [], error: countError.message, totalCount: 0 };
+
+  // Then get the data
   let query = supabase
     .from("budgets")
     .select(BUDGET_SELECT)
     .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .range(from, to);
 
+  // Apply filters
   if (filters.status) {
     query = query.eq("status", filters.status);
   }
@@ -79,9 +105,10 @@ export async function fetchBudgetsList(
     query = query.eq("category_id", filters.categoryId);
   }
 
-  const { data, error } = await query;
-  if (error) return { data: [], error: error.message };
-  return { data: (data ?? []).map(mapRow), error: null };
+  const { data, error } = await query.order("created_at", { ascending: false });
+
+  if (error) return { data: [], error: error.message, totalCount: totalCount ?? 0 };
+  return { data: data?.map(mapRow) ?? [], error: null, totalCount: totalCount ?? 0 };
 }
 
 // ---------------------------------------------------------------------------

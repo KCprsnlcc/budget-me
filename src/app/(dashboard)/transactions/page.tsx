@@ -594,18 +594,20 @@ export default function TransactionsPage() {
               onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
               options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
               placeholder="All Months"
-              className="h-8 w-full"
+              className="w-full"
               allowEmpty={true}
               emptyLabel="All Months"
+              hideSearch={true}
             />
             <SearchableDropdown
               value={year === "all" ? "" : year.toString()}
               onChange={(value) => setYear(value === "" ? "all" : Number(value))}
               options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
               placeholder="All Years"
-              className="h-8 w-full"
+              className="w-full"
               allowEmpty={true}
               emptyLabel="All Years"
+              hideSearch={true}
             />
             <SearchableDropdown
               value={typeFilter}
@@ -618,9 +620,10 @@ export default function TransactionsPage() {
                 { value: "cash_in", label: "Cash In" },
               ]}
               placeholder="All Types"
-              className="h-8 w-full"
+              className="w-full"
               allowEmpty={true}
               emptyLabel="All Types"
+              hideSearch={true}
             />
                       </div>
 
@@ -634,9 +637,10 @@ export default function TransactionsPage() {
                 icon: c.icon ? getLucideIcon(c.icon) : undefined,
               }))}
               placeholder="All Categories"
-              className="h-8 w-full"
+              className="w-full"
               allowEmpty={true}
               emptyLabel="All Categories"
+              hideSearch={true}
             />
                       </div>
 

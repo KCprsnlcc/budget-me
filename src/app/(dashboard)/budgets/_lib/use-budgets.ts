@@ -31,6 +31,11 @@ export function useBudgets() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [search, setSearch] = useState("");
 
+  // ----- Pagination state -----
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+
   // ----- Data state -----
   const [budgets, setBudgets] = useState<BudgetType[]>([]);
   const [monthlyTrend, setMonthlyTrend] = useState<BudgetMonthlyTrendPoint[]>([]);
@@ -66,18 +71,19 @@ export function useBudgets() {
 
     try {
       const [budgetsResult, trendResult] = await Promise.all([
-        fetchBudgetsList(userId, filters),
+        fetchBudgetsList(userId, filters, currentPage, pageSize),
         fetchBudgetMonthlyTrend(userId, 6),
       ]);
       setBudgets(budgetsResult.data);
       setMonthlyTrend(trendResult);
+      setTotalCount(budgetsResult.totalCount);
       if (budgetsResult.error) setError(budgetsResult.error);
     } catch (err: any) {
       setError(err?.message ?? "Failed to load budgets.");
     } finally {
       setLoading(false);
     }
-  }, [userId, filters]);
+  }, [userId, filters, currentPage, pageSize]);
 
   useEffect(() => {
     fetchData();
@@ -120,6 +126,53 @@ export function useBudgets() {
     setPeriodFilter("");
     setCategoryFilter("");
     setSearch("");
+    setCurrentPage(1);
+  }, []);
+
+  const resetFiltersToAll = useCallback(() => {
+    setStatusFilter("");
+    setPeriodFilter("");
+    setCategoryFilter("");
+    setSearch("");
+    setCurrentPage(1);
+  }, []);
+
+  // Pagination helpers
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const hasNextPage = currentPage < totalPages;
+  const hasPreviousPage = currentPage > 1;
+
+  const goToPage = useCallback((page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  }, [totalPages]);
+
+  const nextPage = useCallback(() => {
+    if (hasNextPage) {
+      setCurrentPage(prev => prev + 1);
+    }
+  }, [hasNextPage]);
+
+  const previousPage = useCallback(() => {
+    if (hasPreviousPage) {
+      setCurrentPage(prev => prev - 1);
+    }
+  }, [hasPreviousPage]);
+
+  // Reset page when filters change or page size changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, periodFilter, categoryFilter, pageSize]);
+
+  // Handle page size change
+  const handlePageSizeChange = useCallback((newSize: number | "all") => {
+    if (newSize === "all") {
+      setPageSize(Number.MAX_SAFE_INTEGER);
+    } else {
+      setPageSize(newSize);
+    }
+    setCurrentPage(1);
   }, []);
 
   return {
@@ -140,9 +193,22 @@ export function useBudgets() {
     search,
     setSearch,
     resetFilters,
+    resetFiltersToAll,
     // State
     loading,
     error,
     refetch,
+    // Pagination
+    currentPage,
+    pageSize,
+    setPageSize,
+    handlePageSizeChange,
+    totalPages,
+    totalCount,
+    hasNextPage,
+    hasPreviousPage,
+    goToPage,
+    nextPage,
+    previousPage,
   };
 }
