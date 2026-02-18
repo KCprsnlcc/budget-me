@@ -288,6 +288,7 @@ export default function TransactionsPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedTx, setSelectedTx] = useState<TransactionType | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [hoveredBar, setHoveredBar] = useState<{month: string, type: 'income' | 'expense', value: number} | null>(null);
 
   const {
     transactions,
@@ -367,6 +368,8 @@ export default function TransactionsPage() {
       month: d.month,
       income: (d.income / max) * 100,
       expense: (d.expense / max) * 100,
+      incomeValue: d.income,
+      expenseValue: d.expense,
     }));
   }, [monthlyTrend]);
 
@@ -489,15 +492,31 @@ export default function TransactionsPage() {
               <div className="w-full h-px bg-slate-100/50" />
             </div>
             {chartData.map((d) => (
-              <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
+              <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
                 <div
-                  className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:opacity-100"
+                  className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
                   style={{ height: `${d.income}%` }}
+                  onMouseEnter={() => setHoveredBar({ month: d.month, type: 'income', value: d.incomeValue })}
+                  onMouseLeave={() => setHoveredBar(null)}
                 />
                 <div
-                  className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100"
+                  className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
                   style={{ height: `${d.expense}%` }}
+                  onMouseEnter={() => setHoveredBar({ month: d.month, type: 'expense', value: d.expenseValue })}
+                  onMouseLeave={() => setHoveredBar(null)}
                 />
+                
+                {/* Tooltip */}
+                {hoveredBar && hoveredBar.month === d.month && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
+                    <div className="font-medium text-slate-700">{hoveredBar.month}</div>
+                    <div className="flex items-center gap-1">
+                      <div className={`w-2 h-2 rounded-full ${hoveredBar.type === 'income' ? 'bg-slate-300' : 'bg-emerald-500'}`} />
+                      <span className="capitalize">{hoveredBar.type}: {formatCurrency(hoveredBar.value)}</span>
+                    </div>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
