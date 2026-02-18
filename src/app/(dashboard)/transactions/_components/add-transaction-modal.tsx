@@ -8,6 +8,8 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import { DateSelector } from "@/components/ui/date-selector";
+import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
 import {
   ArrowLeft,
   ArrowRight,
@@ -20,6 +22,31 @@ import {
   ClipboardCheck,
   PenSquare,
   Loader2,
+  Home,
+  Car,
+  Utensils,
+  ShoppingCart,
+  Zap,
+  Heart,
+  Film,
+  Package,
+  BookOpen,
+  Shield,
+  DollarSign,
+  Laptop,
+  TrendingUp,
+  Building,
+  Briefcase,
+  Rocket,
+  Gift,
+  Banknote,
+  FileText,
+  CreditCard,
+  Wallet,
+  Building2,
+  Landmark,
+  Wrench,
+  Smartphone,
 } from "lucide-react";
 import { Stepper } from "./stepper";
 import type { TxnKind, TxnFormState, AccountOption, CategoryOption, BudgetOption, GoalOption } from "./types";
@@ -46,6 +73,52 @@ interface AddTransactionModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+}
+
+// Helper function to convert emojis to Lucide icons
+function getLucideIcon(emoji: string): React.ComponentType<any> {
+  const iconMap: Record<string, React.ComponentType<any>> = {
+    // Expense Categories
+    "🏠": Home,
+    "🚗": Car,
+    "🍽️": Utensils,
+    "🛒": ShoppingCart,
+    "💡": Zap,
+    "⚕️": Heart,
+    "🎬": Film,
+    "🛍️": Package,
+    "📚": BookOpen,
+    "🛡️": Shield,
+    
+    // Income Categories
+    "💰": DollarSign,
+    "💻": Laptop,
+    "📈": TrendingUp,
+    "🏢": Building,
+    "💼": Briefcase,
+    "🚀": Rocket,
+    "🎁": Gift,
+    "💵": Banknote,
+    
+    // Default/fallback
+    "📋": FileText,
+  };
+  
+  return iconMap[emoji] || FileText;
+}
+
+// Helper function to get account icon
+function getAccountIcon(accountName: string): React.ComponentType<any> {
+  const name = accountName.toLowerCase();
+  if (name.includes("bank") || name.includes("checking") || name.includes("savings")) return Building2;
+  if (name.includes("credit") || name.includes("card")) return CreditCard;
+  if (name.includes("cash") || name.includes("wallet")) return Wallet;
+  if (name.includes("investment") || name.includes("brokerage")) return TrendingUp;
+  if (name.includes("loan") || name.includes("mortgage")) return Landmark;
+  if (name.includes("utility") || name.includes("phone") || name.includes("internet")) return Zap;
+  if (name.includes("car") || name.includes("auto")) return Car;
+  if (name.includes("home") || name.includes("house")) return Home;
+  return FileText;
 }
 
 export function AddTransactionModal({ open, onClose, onSuccess }: AddTransactionModalProps) {
@@ -246,11 +319,11 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                   Date <span className="text-slate-400">*</span>
                 </label>
-                <input
-                  type="date"
+                <DateSelector
                   value={form.date}
-                  onChange={(e) => updateField("date", e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+                  onChange={(value) => updateField("date", value)}
+                  placeholder="Select date"
+                  className="w-full"
                 />
               </div>
 
@@ -260,31 +333,34 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
                   <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                     Category {form.type === "income" || form.type === "expense" ? <span className="text-slate-400">*</span> : null}
                   </label>
-                  <select
+                  <SearchableDropdown
                     value={categoryValue}
-                    onChange={(e) => updateField(categoryFieldKey, e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                  >
-                    <option value="">Select category...</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ""}{c.category_name}</option>
-                    ))}
-                  </select>
+                    onChange={(value) => updateField(categoryFieldKey, value)}
+                    options={categories.map((c) => ({
+                      value: c.id,
+                      label: c.category_name,
+                      icon: c.icon ? getLucideIcon(c.icon) : undefined,
+                    }))}
+                    placeholder="Select category..."
+                    className="w-full"
+                    allowEmpty={false}
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                     Budget
                   </label>
-                  <select
+                  <SearchableDropdown
                     value={form.budget}
-                    onChange={(e) => updateField("budget", e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                  >
-                    <option value="">No budget</option>
-                    {budgets.map((b) => (
-                      <option key={b.id} value={b.id}>{b.budget_name}</option>
-                    ))}
-                  </select>
+                    onChange={(value) => updateField("budget", value)}
+                    options={budgets.map((b) => ({
+                      value: b.id,
+                      label: b.budget_name,
+                    }))}
+                    placeholder="No budget"
+                    className="w-full"
+                    emptyLabel="No budget"
+                  />
                 </div>
               </div>
 
@@ -293,19 +369,18 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                   Goal Contribution
                 </label>
-                <div className="relative">
-                  <PiggyBank size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <select
-                    value={form.goal}
-                    onChange={(e) => updateField("goal", e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                  >
-                    <option value="">No Goal</option>
-                    {goals.map((g) => (
-                      <option key={g.id} value={g.id}>{g.goal_name}</option>
-                    ))}
-                  </select>
-                </div>
+                <SearchableDropdown
+                  value={form.goal}
+                  onChange={(value) => updateField("goal", value)}
+                  options={goals.map((g) => ({
+                    value: g.id,
+                    label: g.goal_name,
+                    icon: PiggyBank,
+                  }))}
+                  placeholder="No Goal"
+                  className="w-full"
+                  emptyLabel="No Goal"
+                />
               </div>
 
               {/* Account */}
@@ -313,16 +388,18 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                   Account <span className="text-slate-400">*</span>
                 </label>
-                <select
+                <SearchableDropdown
                   value={form.account}
-                  onChange={(e) => updateField("account", e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                >
-                  <option value="">Select account...</option>
-                  {accounts.map((a) => (
-                    <option key={a.id} value={a.id}>{a.account_name}</option>
-                  ))}
-                </select>
+                  onChange={(value) => updateField("account", value)}
+                  options={accounts.map((a) => ({
+                    value: a.id,
+                    label: a.account_name,
+                    icon: getAccountIcon(a.account_name),
+                  }))}
+                  placeholder="Select account..."
+                  className="w-full"
+                  allowEmpty={false}
+                />
               </div>
 
               {/* Description */}
