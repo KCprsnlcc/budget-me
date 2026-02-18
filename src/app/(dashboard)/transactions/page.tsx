@@ -24,10 +24,33 @@ import {
   Loader2,
   Inbox,
   FileText,
+  Home,
+  Car,
+  Utensils,
+  ShoppingCart,
+  Zap,
+  Heart,
+  Film,
+  Package,
+  BookOpen,
+  Shield,
+  DollarSign,
+  Laptop,
+  TrendingUp as TrendingUpIcon,
+  Building,
+  Briefcase,
+  Rocket,
+  Gift,
+  Banknote,
+  CreditCard,
+  Wallet as WalletIcon,
+  Building2,
+  Landmark,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
 import {
   Table,
   TableHeader,
@@ -78,6 +101,52 @@ function accountLabel(tx: TransactionType): string {
 
 function isIncomeType(tx: TransactionType): boolean {
   return tx.type === "income" || tx.type === "cash_in";
+}
+
+// Helper function to convert emojis to Lucide icons
+function getLucideIcon(emoji: string): React.ComponentType<any> {
+  const iconMap: Record<string, React.ComponentType<any>> = {
+    // Expense Categories
+    "🏠": Home,
+    "🚗": Car,
+    "🍽️": Utensils,
+    "🛒": ShoppingCart,
+    "💡": Zap,
+    "⚕️": Heart,
+    "🎬": Film,
+    "🛍️": Package,
+    "📚": BookOpen,
+    "🛡️": Shield,
+    
+    // Income Categories
+    "💰": DollarSign,
+    "💻": Laptop,
+    "📈": TrendingUpIcon,
+    "🏢": Building,
+    "💼": Briefcase,
+    "🚀": Rocket,
+    "🎁": Gift,
+    "💵": Banknote,
+    
+    // Default/fallback
+    "📋": FileText,
+  };
+  
+  return iconMap[emoji] || FileText;
+}
+
+// Helper function to get account icon
+function getAccountIcon(accountName: string): React.ComponentType<any> {
+  const name = accountName.toLowerCase();
+  if (name.includes("bank") || name.includes("checking") || name.includes("savings")) return Building2;
+  if (name.includes("credit") || name.includes("card")) return CreditCard;
+  if (name.includes("cash") || name.includes("wallet")) return WalletIcon;
+  if (name.includes("investment") || name.includes("brokerage")) return TrendingUpIcon;
+  if (name.includes("loan") || name.includes("mortgage")) return Landmark;
+  if (name.includes("utility") || name.includes("phone") || name.includes("internet")) return Zap;
+  if (name.includes("car") || name.includes("auto")) return Car;
+  if (name.includes("home") || name.includes("house")) return Home;
+  return FileText;
 }
 
 // Memoized components for better performance
@@ -232,9 +301,7 @@ export default function TransactionsPage() {
     month, setMonth,
     year, setYear,
     typeFilter, setTypeFilter,
-    accountFilter, setAccountFilter,
     categoryFilter, setCategoryFilter,
-    goalFilter, setGoalFilter,
     search,
     setSearch,
     resetFilters,
@@ -503,72 +570,56 @@ export default function TransactionsPage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
-            <select
-              value={month}
-              onChange={(e) => setMonth(e.target.value === "all" ? "all" : Number(e.target.value))}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-            >
-              <option value="all">All Months</option>
-              {MONTH_NAMES.map((name, i) => (
-                <option key={name} value={i + 1}>{name}</option>
-              ))}
-            </select>
-            <select
-              value={year}
-              onChange={(e) => setYear(e.target.value === "all" ? "all" : Number(e.target.value))}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-            >
-              <option value="all">All Years</option>
-              {Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-            <select
+            <SearchableDropdown
+              value={month === "all" ? "" : month.toString()}
+              onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
+              options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
+              placeholder="All Months"
+              className="h-8 w-full"
+              allowEmpty={true}
+              emptyLabel="All Months"
+            />
+            <SearchableDropdown
+              value={year === "all" ? "" : year.toString()}
+              onChange={(value) => setYear(value === "" ? "all" : Number(value))}
+              options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
+              placeholder="All Years"
+              className="h-8 w-full"
+              allowEmpty={true}
+              emptyLabel="All Years"
+            />
+            <SearchableDropdown
               value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-            >
-              <option value="">All Types</option>
-              <option value="income">Income</option>
-              <option value="expense">Expense</option>
-              <option value="contribution">Contribution</option>
-              <option value="transfer">Transfer</option>
-              <option value="cash_in">Cash In</option>
-            </select>
-            <select
-              value={accountFilter}
-              onChange={(e) => setAccountFilter(e.target.value)}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-            >
-              <option value="">All Accounts</option>
-              {accounts.map((a) => (
-                <option key={a.id} value={a.id}>{a.account_name}</option>
-              ))}
-            </select>
-          </div>
+              onChange={(value) => setTypeFilter(value)}
+              options={[
+                { value: "income", label: "Income" },
+                { value: "expense", label: "Expense" },
+                { value: "contribution", label: "Contribution" },
+                { value: "transfer", label: "Transfer" },
+                { value: "cash_in", label: "Cash In" },
+              ]}
+              placeholder="All Types"
+              className="h-8 w-full"
+              allowEmpty={true}
+              emptyLabel="All Types"
+            />
+                      </div>
 
           <div className="grid grid-cols-2 md:grid-cols-2 xl:flex items-center gap-2 w-full xl:w-auto">
-            <select
+            <SearchableDropdown
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-            >
-              <option value="">All Categories</option>
-              {allCategories.map((c) => (
-                <option key={c.id} value={c.id}>{c.category_name}</option>
-              ))}
-            </select>
-            <select
-              value={goalFilter}
-              onChange={(e) => setGoalFilter(e.target.value)}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-            >
-              <option value="">All Goals</option>
-              {goals.map((g) => (
-                <option key={g.id} value={g.id}>{g.goal_name}</option>
-              ))}
-            </select>
-          </div>
+              onChange={(value) => setCategoryFilter(value)}
+              options={allCategories.map((c) => ({
+                value: c.id,
+                label: c.category_name,
+                icon: c.icon ? getLucideIcon(c.icon) : undefined,
+              }))}
+              placeholder="All Categories"
+              className="h-8 w-full"
+              allowEmpty={true}
+              emptyLabel="All Categories"
+            />
+                      </div>
 
           <div className="flex-1"></div>
           <div className="flex items-center gap-2 w-full xl:w-auto">

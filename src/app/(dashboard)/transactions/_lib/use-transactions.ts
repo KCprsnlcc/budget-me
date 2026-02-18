@@ -34,9 +34,7 @@ export function useTransactions() {
   const [month, setMonth] = useState<number | "all">(now.getMonth() + 1);
   const [year, setYear] = useState<number | "all">(now.getFullYear());
   const [typeFilter, setTypeFilter] = useState("");
-  const [accountFilter, setAccountFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [goalFilter, setGoalFilter] = useState("");
   const [search, setSearch] = useState("");
 
   // ----- Pagination state -----
@@ -67,11 +65,9 @@ export function useTransactions() {
       month,
       year,
       type: typeFilter || undefined,
-      accountId: accountFilter || undefined,
       categoryId: categoryFilter || undefined,
-      goalId: goalFilter || undefined,
     }),
-    [month, year, typeFilter, accountFilter, categoryFilter, goalFilter]
+    [month, year, typeFilter, categoryFilter]
   );
 
   // ----- Fetch lookups once -----
@@ -161,9 +157,7 @@ export function useTransactions() {
     setMonth(now.getMonth() + 1);
     setYear(now.getFullYear());
     setTypeFilter("");
-    setAccountFilter("");
     setCategoryFilter("");
-    setGoalFilter("");
     setSearch("");
     setCurrentPage(1);
   }, []);
@@ -172,9 +166,7 @@ export function useTransactions() {
     setMonth("all");
     setYear("all");
     setTypeFilter("");
-    setAccountFilter("");
     setCategoryFilter("");
-    setGoalFilter("");
     setSearch("");
     setCurrentPage(1);
   }, []);
@@ -205,7 +197,7 @@ export function useTransactions() {
   // Reset page when filters change or page size changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [month, year, typeFilter, accountFilter, categoryFilter, goalFilter, pageSize]);
+  }, [month, year, typeFilter, categoryFilter, pageSize]);
 
   // Handle page size change
   const handlePageSizeChange = useCallback((newSize: number | "all") => {
@@ -236,12 +228,8 @@ export function useTransactions() {
     setYear,
     typeFilter,
     setTypeFilter,
-    accountFilter,
-    setAccountFilter,
     categoryFilter,
     setCategoryFilter,
-    goalFilter,
-    setGoalFilter,
     search,
     setSearch,
     resetFilters,
