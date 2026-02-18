@@ -26,6 +26,9 @@ export function useBudgets() {
   const userId = user?.id ?? "";
 
   // ----- Filter state -----
+  const now = new Date();
+  const [month, setMonth] = useState<number | "all">(now.getMonth() + 1);
+  const [year, setYear] = useState<number | "all">(now.getFullYear());
   const [statusFilter, setStatusFilter] = useState("");
   const [periodFilter, setPeriodFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -50,11 +53,13 @@ export function useBudgets() {
   // ----- Build filters object -----
   const filters: BudgetFilters = useMemo(
     () => ({
+      month,
+      year,
       status: statusFilter || undefined,
       period: periodFilter || undefined,
       categoryId: categoryFilter || undefined,
     }),
-    [statusFilter, periodFilter, categoryFilter]
+    [month, year, statusFilter, periodFilter, categoryFilter]
   );
 
   // ----- Fetch lookups once -----
@@ -122,6 +127,8 @@ export function useBudgets() {
 
   // ----- Reset filters -----
   const resetFilters = useCallback(() => {
+    setMonth(now.getMonth() + 1);
+    setYear(now.getFullYear());
     setStatusFilter("");
     setPeriodFilter("");
     setCategoryFilter("");
@@ -130,6 +137,8 @@ export function useBudgets() {
   }, []);
 
   const resetFiltersToAll = useCallback(() => {
+    setMonth("all");
+    setYear("all");
     setStatusFilter("");
     setPeriodFilter("");
     setCategoryFilter("");
@@ -163,7 +172,7 @@ export function useBudgets() {
   // Reset page when filters change or page size changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, periodFilter, categoryFilter, pageSize]);
+  }, [month, year, statusFilter, periodFilter, categoryFilter, pageSize]);
 
   // Handle page size change
   const handlePageSizeChange = useCallback((newSize: number | "all") => {
@@ -184,6 +193,8 @@ export function useBudgets() {
     // Lookups
     expenseCategories,
     // Filters
+    month, setMonth,
+    year, setYear,
     statusFilter,
     setStatusFilter,
     periodFilter,

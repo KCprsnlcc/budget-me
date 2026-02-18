@@ -57,6 +57,11 @@ import { deriveBudgetHealth } from "./_components/types";
 import { BUDGET_PERIODS } from "./_components/constants";
 import { useBudgets } from "./_lib/use-budgets";
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
 const BudgetRow = memo(({
   budget,
   onView,
@@ -160,6 +165,8 @@ export default function BudgetsPage() {
     categoryAllocation,
     monthlyTrend,
     expenseCategories,
+    month, setMonth,
+    year, setYear,
     statusFilter, setStatusFilter,
     periodFilter, setPeriodFilter,
     categoryFilter, setCategoryFilter,
@@ -236,6 +243,8 @@ export default function BudgetsPage() {
   // Build donut gradient from real category allocation
   const donutGradient = (() => {
     if (categoryAllocation.length === 0) return "conic-gradient(#e2e8f0 0% 100%)";
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
     const total = categoryAllocation.reduce((s, c) => s + c.amount, 0);
     if (total === 0) return "conic-gradient(#e2e8f0 0% 100%)";
     let acc = 0;
@@ -532,6 +541,26 @@ export default function BudgetsPage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
+            <SearchableDropdown
+              value={month === "all" ? "" : month.toString()}
+              onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
+              options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
+              placeholder="All Months"
+              className="w-full"
+              allowEmpty={true}
+              emptyLabel="All Months"
+              hideSearch={true}
+            />
+            <SearchableDropdown
+              value={year === "all" ? "" : year.toString()}
+              onChange={(value) => setYear(value === "" ? "all" : Number(value))}
+              options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
+              placeholder="All Years"
+              className="w-full"
+              allowEmpty={true}
+              emptyLabel="All Years"
+              hideSearch={true}
+            />
             <SearchableDropdown
               value={statusFilter}
               onChange={(value) => setStatusFilter(value)}

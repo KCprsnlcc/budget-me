@@ -53,6 +53,8 @@ function mapRow(row: Record<string, any>): BudgetType {
 // ---------------------------------------------------------------------------
 
 export type BudgetFilters = {
+  month?: number | "all";
+  year?: number | "all";
   status?: string;
   period?: string;
   categoryId?: string;
@@ -74,6 +76,12 @@ export async function fetchBudgetsList(
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId);
 
+  if (filters.month && filters.month !== "all") {
+    countQuery = countQuery.eq("extract(month from start_date)", filters.month);
+  }
+  if (filters.year && filters.year !== "all") {
+    countQuery = countQuery.eq("extract(year from start_date)", filters.year);
+  }
   if (filters.status) {
     countQuery = countQuery.eq("status", filters.status);
   }
@@ -95,6 +103,12 @@ export async function fetchBudgetsList(
     .range(from, to);
 
   // Apply filters
+  if (filters.month && filters.month !== "all") {
+    query = query.eq("extract(month from start_date)", filters.month);
+  }
+  if (filters.year && filters.year !== "all") {
+    query = query.eq("extract(year from start_date)", filters.year);
+  }
   if (filters.status) {
     query = query.eq("status", filters.status);
   }
