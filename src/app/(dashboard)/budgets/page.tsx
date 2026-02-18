@@ -1,32 +1,24 @@
 "use client";
 
-import { useState, useCallback, useMemo, memo } from "react";
+import { useState, useCallback, memo } from "react";
 import {
   Plus,
   TrendingUp,
-  TrendingDown,
   AlertTriangle,
   MoreHorizontal,
-  Utensils,
   ShoppingBag,
-  Car,
-  Home,
-  Toolbox,
-  Music,
-  Heart,
   Briefcase,
   Eye,
   Edit,
   Trash2,
   Wallet,
   PiggyBank,
-  Filter,
   Search,
   RotateCcw,
   Download,
-  Info,
   Table,
   Grid3X3,
+  Loader2,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,27 +31,9 @@ import {
   DeleteBudgetModal,
 } from "./_components";
 import type { BudgetType } from "./_components/types";
-
-const BUDGETS: BudgetType[] = [
-  { id: "1", name: "Food & Dining", amount: 600, spent: 420, period: "monthly", category: "food", startDate: "2026-01-01", status: "on-track", icon: "utensils" },
-  { id: "2", name: "Transportation", amount: 200, spent: 185, period: "monthly", category: "transportation", startDate: "2026-01-01", status: "caution", icon: "car" },
-  { id: "3", name: "Entertainment", amount: 150, spent: 148, period: "monthly", category: "entertainment", startDate: "2026-01-01", status: "at-risk", icon: "music" },
-  { id: "4", name: "Shopping", amount: 400, spent: 230, period: "monthly", category: "other", startDate: "2026-01-01", status: "on-track", icon: "shopping-bag" },
-  { id: "5", name: "Housing", amount: 1800, spent: 1800, period: "monthly", category: "housing", startDate: "2026-01-01", status: "at-risk", icon: "home" },
-  { id: "6", name: "Utilities", amount: 350, spent: 220, period: "monthly", category: "utilities", startDate: "2026-01-01", status: "on-track", icon: "toolbox" },
-  { id: "7", name: "Healthcare", amount: 200, spent: 85, period: "monthly", category: "healthcare", startDate: "2026-01-01", status: "on-track", icon: "heart" },
-  { id: "8", name: "Personal", amount: 250, spent: 120, period: "monthly", category: "other", startDate: "2026-01-01", status: "on-track", icon: "briefcase" },
-];
-
-const CATEGORY_ICONS = {
-  food: Utensils,
-  transportation: Car,
-  entertainment: Music,
-  housing: Home,
-  utilities: Toolbox,
-  healthcare: Heart,
-  other: Briefcase,
-};
+import { deriveBudgetHealth } from "./_components/types";
+import { BUDGET_PERIODS } from "./_components/constants";
+import { useBudgets } from "./_lib/use-budgets";
 
 const BudgetRow = memo(({
   budget,
@@ -72,24 +46,25 @@ const BudgetRow = memo(({
   onEdit: (budget: BudgetType) => void;
   onDelete: (budget: BudgetType) => void;
 }) => {
-  const Icon = CATEGORY_ICONS[budget.category];
-  const percentage = Math.round((budget.spent / budget.amount) * 100);
+  const percentage = budget.amount > 0 ? Math.round((budget.spent / budget.amount) * 100) : 0;
   const remaining = budget.amount - budget.spent;
+  const health = deriveBudgetHealth(budget.spent, budget.amount);
+  const periodLabel = BUDGET_PERIODS.find((p) => p.key === budget.period)?.label ?? budget.period;
 
   return (
     <Card className="bg-white group rounded-xl border border-slate-200/60 shadow-sm p-5 hover:shadow-md transition-all cursor-pointer">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg text-slate-600">
-            <Icon size={20} />
+            <Briefcase size={20} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">{budget.name}</h3>
-            <p className="text-[10px] text-slate-500 capitalize">{budget.period} • Jan 2026</p>
+            <h3 className="text-sm font-semibold text-slate-900">{budget.budget_name}</h3>
+            <p className="text-[10px] text-slate-500 capitalize">{periodLabel} • {budget.expense_category_name ?? budget.category_name ?? "Uncategorized"}</p>
           </div>
         </div>
-        <Badge variant={budget.status === "on-track" ? "success" : budget.status === "caution" ? "warning" : "danger"}>
-          {budget.status === "on-track" ? "On Track" : budget.status === "caution" ? "Caution" : "At Risk"}
+        <Badge variant={health === "on-track" ? "success" : health === "caution" ? "warning" : "danger"}>
+          {health === "on-track" ? "On Track" : health === "caution" ? "Caution" : "At Risk"}
         </Badge>
       </div>
       <div className="space-y-2">
@@ -97,12 +72,12 @@ const BudgetRow = memo(({
           <span className="text-slate-500">Spent</span>
           <span className="font-medium text-slate-900">${budget.spent.toLocaleString()} / ${budget.amount.toLocaleString()}</span>
         </div>
-        <ProgressBar value={budget.spent} max={budget.amount} color={budget.status === "on-track" ? "success" : budget.status === "caution" ? "warning" : "danger"} />
+        <ProgressBar value={budget.spent} max={budget.amount} color={health === "on-track" ? "success" : health === "caution" ? "warning" : "danger"} />
         <div className="flex justify-between text-[10px]">
           <span className="text-slate-400">
             {remaining >= 0 ? `Remaining: $${remaining.toLocaleString()}` : `Over by: $${Math.abs(remaining).toLocaleString()}`}
           </span>
-          <span className={`font-medium ${budget.status === "on-track" ? "text-emerald-600" : budget.status === "caution" ? "text-amber-600" : "text-red-600"}`}>
+          <span className={`font-medium ${health === "on-track" ? "text-emerald-600" : health === "caution" ? "text-amber-600" : "text-red-600"}`}>
             {percentage}%
           </span>
         </div>
@@ -125,12 +100,29 @@ const BudgetRow = memo(({
 BudgetRow.displayName = "BudgetRow";
 
 export default function BudgetsPage() {
+  const {
+    budgets,
+    summary,
+    categoryAllocation,
+    monthlyTrend,
+    expenseCategories,
+    statusFilter, setStatusFilter,
+    periodFilter, setPeriodFilter,
+    categoryFilter, setCategoryFilter,
+    search, setSearch,
+    resetFilters,
+    loading,
+    error,
+    refetch,
+  } = useBudgets();
+
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<BudgetType | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [hoveredBar, setHoveredBar] = useState<{ month: string; type: 'budget' | 'spent'; value: number } | null>(null);
 
   const handleView = useCallback((budget: BudgetType) => {
     setSelectedBudget(budget);
@@ -155,57 +147,85 @@ export default function BudgetsPage() {
     }, 150);
   }, []);
 
-  const summary = useMemo(() => {
-    const totalBudget = BUDGETS.reduce((sum, budget) => sum + budget.amount, 0);
-    const totalSpent = BUDGETS.reduce((sum, budget) => sum + budget.spent, 0);
-    const remaining = totalBudget - totalSpent;
-    
-    return [
-      { 
-        label: "Total Budget", 
-        value: `$${totalBudget.toLocaleString()}`,
-        icon: Wallet,
-        trend: "+5%",
-        color: "emerald"
-      },
-      { 
-        label: "Total Spent", 
-        value: `$${totalSpent.toLocaleString()}`,
-        icon: ShoppingBag,
-        trend: "+12%",
-        color: "amber"
-      },
-      { 
-        label: "Remaining", 
-        value: `$${remaining.toLocaleString()}`,
-        icon: PiggyBank,
-        status: "Healthy",
-        color: "blue"
-      },
-    ];
-  }, []);
+  const overallPercentage = summary.totalBudget > 0
+    ? Math.round((summary.totalSpent / summary.totalBudget) * 100)
+    : 0;
 
-  const overallPercentage = useMemo(() => {
-    const totalBudget = BUDGETS.reduce((sum, budget) => sum + budget.amount, 0);
-    const totalSpent = BUDGETS.reduce((sum, budget) => sum + budget.spent, 0);
-    return Math.round((totalSpent / totalBudget) * 100);
-  }, []);
+  const overallHealth = deriveBudgetHealth(summary.totalSpent, summary.totalBudget);
 
-  const chartData = useMemo(() => [
-    { month: "Aug", budget: 75, spent: 65 },
-    { month: "Sep", budget: 70, spent: 55 },
-    { month: "Oct", budget: 80, spent: 75 },
-    { month: "Nov", budget: 85, spent: 90 },
-    { month: "Dec", budget: 80, spent: 60 },
-    { month: "Jan", budget: 75, spent: 45 },
-  ], []);
+  // Normalize chart data to percentages for bar heights
+  const chartData = useMemo(() => {
+    if (!monthlyTrend.length) return [];
+    const max = Math.max(...monthlyTrend.map((d) => Math.max(d.budget, d.spent)), 1);
+    return monthlyTrend.map((d) => ({
+      month: d.month,
+      budget: (d.budget / max) * 100,
+      spent: (d.spent / max) * 100,
+      budgetValue: d.budget,
+      spentValue: d.spent,
+    }));
+  }, [monthlyTrend]);
 
-  const categoryData = useMemo(() => [
-    { name: "Housing", value: 40, color: "bg-emerald-500" },
-    { name: "Food", value: 30, color: "bg-amber-500" },
-    { name: "Entertainment", value: 15, color: "bg-red-500" },
-    { name: "Others", value: 15, color: "bg-slate-500" },
-  ], []);
+  // Build donut gradient from real category allocation
+  const donutGradient = (() => {
+    if (categoryAllocation.length === 0) return "conic-gradient(#e2e8f0 0% 100%)";
+    const total = categoryAllocation.reduce((s, c) => s + c.amount, 0);
+    if (total === 0) return "conic-gradient(#e2e8f0 0% 100%)";
+    let acc = 0;
+    const stops = categoryAllocation.map((c) => {
+      const start = acc;
+      acc += (c.amount / total) * 100;
+      return `${c.color} ${start}% ${acc}%`;
+    });
+    return `conic-gradient(${stops.join(", ")})`;
+  })();
+
+  const summaryCards = [
+    {
+      label: "Total Budget",
+      value: `$${summary.totalBudget.toLocaleString()}`,
+      icon: Wallet,
+      badge: `${summary.budgetCount} budgets`,
+      color: "emerald",
+    },
+    {
+      label: "Total Spent",
+      value: `$${summary.totalSpent.toLocaleString()}`,
+      icon: ShoppingBag,
+      badge: `${overallPercentage}% used`,
+      color: "amber",
+    },
+    {
+      label: "Remaining",
+      value: `$${summary.remaining.toLocaleString()}`,
+      icon: PiggyBank,
+      badge: overallHealth === "on-track" ? "Healthy" : overallHealth === "caution" ? "Caution" : "At Risk",
+      color: "blue",
+    },
+  ];
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto flex flex-col items-center justify-center py-32 gap-4 animate-fade-in">
+        <Loader2 size={32} className="animate-spin text-emerald-500" />
+        <p className="text-sm text-slate-500">Loading budgets...</p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto flex flex-col items-center justify-center py-32 gap-4 animate-fade-in">
+        <AlertTriangle size={32} className="text-red-400" />
+        <p className="text-sm text-red-600">{error}</p>
+        <Button variant="outline" size="sm" onClick={refetch}>
+          <RotateCcw size={14} className="mr-1" /> Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
@@ -264,7 +284,7 @@ export default function BudgetsPage() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {summary.map((item) => {
+        {summaryCards.map((item) => {
           const Icon = item.icon;
           return (
             <Card key={item.label} className="p-5 hover:shadow-md transition-all group cursor-pointer">
@@ -272,18 +292,19 @@ export default function BudgetsPage() {
                 <div className="text-slate-500 p-2 rounded-lg">
                   <Icon size={22} strokeWidth={1.5} />
                 </div>
-                {item.trend && (
+                {item.label === "Remaining" ? (
+                  <Badge variant={overallHealth === "on-track" ? "success" : overallHealth === "caution" ? "warning" : "danger"}>
+                    {item.badge}
+                  </Badge>
+                ) : (
                   <div className={`flex items-center gap-1 text-[10px] font-medium ${
                     item.color === "emerald" ? "text-emerald-700 border-emerald-100" : 
                     item.color === "blue" ? "text-blue-700 border-blue-100" :
                     item.color === "amber" ? "text-amber-700 border-amber-100" :
                     "text-slate-700 border-slate-100"
                   } px-2 py-1 rounded-full border`}>
-                    <TrendingUp size={12} /> {item.trend}
+                    <TrendingUp size={12} /> {item.badge}
                   </div>
-                )}
-                {item.status && (
-                  <Badge variant="success">{item.status}</Badge>
                 )}
               </div>
               <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">{item.label}</div>
@@ -325,8 +346,7 @@ export default function BudgetsPage() {
               </div>
             </div>
 
-            {/* Chart Visual */}
-            <div className="h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50 relative">
+            <div className="relative h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50">
               <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                 <div className="w-full h-px bg-slate-100/50" />
                 <div className="w-full h-px bg-slate-100/50" />
@@ -334,23 +354,39 @@ export default function BudgetsPage() {
                 <div className="w-full h-px bg-slate-100/50" />
                 <div className="w-full h-px bg-slate-100/50" />
               </div>
-              {chartData.map((data) => (
-                <div key={data.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
+              {chartData.map((d) => (
+                <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
                   <div
-                    className="w-3 sm:w-5 bg-slate-200 rounded-t-[2px] transition-all hover:opacity-100"
-                    style={{ height: `${data.budget}%` }}
+                    className="w-3 sm:w-5 bg-slate-200 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
+                    style={{ height: `${d.budget}%` }}
+                    onMouseEnter={() => setHoveredBar({ month: d.month, type: 'budget', value: d.budgetValue })}
+                    onMouseLeave={() => setHoveredBar(null)}
                   />
                   <div
-                    className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100"
-                    style={{ height: `${data.spent}%` }}
+                    className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
+                    style={{ height: `${d.spent}%` }}
+                    onMouseEnter={() => setHoveredBar({ month: d.month, type: 'spent', value: d.spentValue })}
+                    onMouseLeave={() => setHoveredBar(null)}
                   />
+                  
+                  {/* Tooltip */}
+                  {hoveredBar && hoveredBar.month === d.month && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
+                      <div className="font-medium text-slate-700">{hoveredBar.month}</div>
+                      <div className="flex items-center gap-1">
+                        <div className={`w-2 h-2 rounded-full ${hoveredBar.type === 'budget' ? 'bg-slate-200' : 'bg-emerald-500'}`} />
+                        <span className="capitalize">{hoveredBar.type}: ${hoveredBar.value.toLocaleString()}</span>
+                      </div>
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
             <div className="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
-              {chartData.map((data) => (
-                <span key={data.month} className={data.month === 'Jan' ? 'text-slate-600' : ''}>
-                  {data.month}
+              {chartData.map((d, i) => (
+                <span key={d.month} className={i === chartData.length - 1 ? "text-slate-600" : ""}>
+                  {d.month}
                 </span>
               ))}
             </div>
@@ -365,23 +401,28 @@ export default function BudgetsPage() {
             <div className="flex items-center gap-6 mb-6">
               {/* Donut Chart */}
               <div className="w-32 h-32 mx-auto rounded-full flex-shrink-0 relative"
-                   style={{ background: 'conic-gradient(#10b981 0% 40%, #f59e0b 40% 70%, #ef4444 70% 85%, #64748b 85% 100%)' }}>
+                   style={{ background: donutGradient }}>
                 <div className="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
                   <span className="text-xs text-slate-400 font-medium">Total</span>
-                  <span className="text-sm font-bold text-slate-900">$4.5k</span>
+                  <span className="text-sm font-bold text-slate-900">
+                    ${summary.totalBudget >= 1000 ? `${(summary.totalBudget / 1000).toFixed(1)}k` : summary.totalBudget.toLocaleString()}
+                  </span>
                 </div>
               </div>
             </div>
-            <div className="space-y-3 flex-1">
-              {categoryData.map((category) => (
-                <div key={category.name} className="flex items-center justify-between text-xs p-1 hover:bg-slate-50 rounded transition-colors cursor-pointer group">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${category.color}`} />
-                    <span className="text-slate-600 group-hover:text-slate-900">{category.name}</span>
+            <div className="space-y-3 flex-1 max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300 pr-1">
+              {categoryAllocation.map((category) => {
+                const pct = summary.totalBudget > 0 ? Math.round((category.amount / summary.totalBudget) * 100) : 0;
+                return (
+                  <div key={category.name} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: category.color }} />
+                      <span className="text-slate-600">{category.name}</span>
+                    </div>
+                    <span className="font-medium text-slate-900">{pct}%</span>
                   </div>
-                  <span className="font-medium text-slate-900">{category.value}%</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </Card>
         </div>
@@ -394,10 +435,12 @@ export default function BudgetsPage() {
             <h3 className="text-sm font-semibold text-slate-900">Overall Budget Health</h3>
             <p className="text-xs text-slate-500 mt-0.5">You have spent {overallPercentage}% of your total budget across all categories.</p>
           </div>
-          <Badge variant="success">Healthy</Badge>
+          <Badge variant={overallHealth === "on-track" ? "success" : overallHealth === "caution" ? "warning" : "danger"}>
+            {overallHealth === "on-track" ? "Healthy" : overallHealth === "caution" ? "Caution" : "At Risk"}
+          </Badge>
         </div>
         <div className="w-full bg-slate-100 rounded-full h-3 mt-2 overflow-hidden">
-          <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${overallPercentage}%` }} />
+          <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${Math.min(overallPercentage, 100)}%` }} />
         </div>
       </Card>
 
@@ -406,14 +449,35 @@ export default function BudgetsPage() {
         <div className="flex flex-col xl:flex-row items-center gap-3">
           {/* Scope Filter */}
           <div className="flex bg-slate-100 p-1 rounded-lg w-full md:w-auto">
-            <Button variant="ghost" size="sm" className="flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md bg-white text-slate-900 shadow-sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md ${
+                !statusFilter ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              }`}
+              onClick={() => setStatusFilter("")}
+            >
               All
             </Button>
-            <Button variant="ghost" size="sm" className="flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md text-slate-500 hover:text-slate-700">
-              Personal
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md ${
+                statusFilter === "active" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              }`}
+              onClick={() => setStatusFilter("active")}
+            >
+              Active
             </Button>
-            <Button variant="ghost" size="sm" className="flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md text-slate-500 hover:text-slate-700">
-              Family
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md ${
+                statusFilter === "paused" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              }`}
+              onClick={() => setStatusFilter("paused")}
+            >
+              Paused
             </Button>
           </div>
 
@@ -424,43 +488,36 @@ export default function BudgetsPage() {
             <input
               type="text"
               placeholder="Search budgets..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
             />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full md:w-auto flex-1">
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>All Categories</option>
-              <option>Food & Dining</option>
-              <option>Transportation</option>
-              <option>Entertainment</option>
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-2 w-full md:w-auto flex-1">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
+            >
+              <option value="">All Categories</option>
+              {expenseCategories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.category_name}</option>
+              ))}
             </select>
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>All Statuses</option>
-              <option>On Track</option>
-              <option>Caution</option>
-              <option>At Risk</option>
+            <select
+              value={periodFilter}
+              onChange={(e) => setPeriodFilter(e.target.value)}
+              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
+            >
+              <option value="">All Periods</option>
+              {BUDGET_PERIODS.map((p) => (
+                <option key={p.key} value={p.key}>{p.label}</option>
+              ))}
             </select>
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>Monthly</option>
-              <option>Weekly</option>
-              <option>Quarterly</option>
-              <option>Yearly</option>
-            </select>
-            {/* Date Range Picker Mockup */}
-            <div className="relative w-full">
-              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Select dates"
-                className="h-8 pl-8 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-                readOnly
-                value="Jan 1 - Jan 31"
-              />
-            </div>
           </div>
 
-          <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center">
+          <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" onClick={resetFilters}>
             <RotateCcw size={14} />
             Reset
           </Button>
@@ -468,7 +525,16 @@ export default function BudgetsPage() {
       </Card>
 
       {/* Budgets Display */}
-      {viewMode === 'table' ? (
+      {budgets.length === 0 ? (
+        <Card className="p-12 text-center">
+          <Briefcase size={40} className="mx-auto text-slate-300 mb-4" />
+          <h3 className="text-sm font-semibold text-slate-900 mb-1">No budgets found</h3>
+          <p className="text-xs text-slate-500 mb-4">Create your first budget to start tracking spending.</p>
+          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => setAddModalOpen(true)}>
+            <Plus size={16} /> Create Budget
+          </Button>
+        </Card>
+      ) : viewMode === 'table' ? (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -485,26 +551,27 @@ export default function BudgetsPage() {
                 </tr>
               </thead>
               <tbody className="text-xs divide-y divide-slate-50">
-                {BUDGETS.map((budget) => {
+                {budgets.map((budget) => {
                   const remaining = budget.amount - budget.spent;
-                  const percentage = Math.round((budget.spent / budget.amount) * 100);
-                  const Icon = CATEGORY_ICONS[budget.category];
+                  const percentage = budget.amount > 0 ? Math.round((budget.spent / budget.amount) * 100) : 0;
+                  const health = deriveBudgetHealth(budget.spent, budget.amount);
+                  const periodLabel = BUDGET_PERIODS.find((p) => p.key === budget.period)?.label ?? budget.period;
                   return (
                     <tr key={budget.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="text-slate-500 p-2 rounded-lg">
-                            <Icon size={16} strokeWidth={1.5} />
+                            <Briefcase size={16} strokeWidth={1.5} />
                           </div>
                           <div>
-                            <div className="font-medium text-slate-900">{budget.name}</div>
-                            <div className="text-[9px] text-slate-400">{budget.period}</div>
+                            <div className="font-medium text-slate-900">{budget.budget_name}</div>
+                            <div className="text-[9px] text-slate-400">{periodLabel}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <Badge variant="neutral" className="text-xs">
-                          {budget.category}
+                          {budget.expense_category_name ?? budget.category_name ?? "Uncategorized"}
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-right font-medium text-slate-900">
@@ -524,11 +591,11 @@ export default function BudgetsPage() {
                       <td className="px-6 py-4">
                         <div className="flex justify-center">
                           <Badge variant={
-                            budget.status === "on-track" ? "success" : 
-                            budget.status === "caution" ? "warning" : "danger"
+                            health === "on-track" ? "success" : 
+                            health === "caution" ? "warning" : "danger"
                           } className="text-xs">
-                            {budget.status === "on-track" ? "On Track" : 
-                             budget.status === "caution" ? "Caution" : "At Risk"}
+                            {health === "on-track" ? "On Track" : 
+                             health === "caution" ? "Caution" : "At Risk"}
                           </Badge>
                         </div>
                       </td>
@@ -538,7 +605,7 @@ export default function BudgetsPage() {
                             <ProgressBar 
                               value={budget.spent} 
                               max={budget.amount} 
-                              color={budget.status === "on-track" ? "success" : budget.status === "caution" ? "warning" : "danger"} 
+                              color={health === "on-track" ? "success" : health === "caution" ? "warning" : "danger"} 
                             />
                             <div className="text-[9px] text-slate-400 text-center mt-1">{percentage}%</div>
                           </div>
@@ -568,7 +635,7 @@ export default function BudgetsPage() {
         <>
           {/* Budget Cards Grid (Desktop) */}
           <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {BUDGETS.map((budget) => (
+            {budgets.map((budget) => (
               <BudgetRow
                 key={budget.id}
                 budget={budget}
@@ -581,7 +648,7 @@ export default function BudgetsPage() {
 
           {/* Budget Cards Grid (Mobile) */}
           <div className="md:hidden space-y-4">
-            {BUDGETS.map((budget) => (
+            {budgets.map((budget) => (
               <BudgetRow
                 key={budget.id}
                 budget={budget}
@@ -598,6 +665,7 @@ export default function BudgetsPage() {
       <AddBudgetModal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
+        onSuccess={refetch}
       />
       <ViewBudgetModal
         open={viewModalOpen}
@@ -609,11 +677,13 @@ export default function BudgetsPage() {
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         budget={selectedBudget}
+        onSuccess={refetch}
       />
       <DeleteBudgetModal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         budget={selectedBudget}
+        onSuccess={refetch}
       />
     </div>
   );

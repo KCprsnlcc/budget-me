@@ -16,10 +16,14 @@ import {
   Check,
   Info,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { Stepper } from "./stepper";
-import type { BudgetFormState, BudgetType, BudgetPeriod, BudgetCategory } from "./types";
-import { INITIAL_BUDGET_FORM_STATE, BUDGET_PERIODS, BUDGET_CATEGORIES, formatCurrency, formatDate } from "./constants";
+import type { BudgetFormState, BudgetType, BudgetPeriod, CategoryOption } from "./types";
+import { INITIAL_BUDGET_FORM_STATE } from "./types";
+import { BUDGET_PERIODS, formatCurrency, formatDate } from "./constants";
+import { useAuth } from "@/components/auth/auth-context";
+import { updateBudget, fetchExpenseCategories } from "../_lib/budget-service";
 
 const STEPS = ["Period", "Details", "Review"];
 
@@ -29,10 +33,12 @@ function budgetToFormState(budget: BudgetType | null): BudgetFormState {
   }
   return {
     period: budget.period,
-    name: budget.name,
+    budget_name: budget.budget_name,
     amount: budget.amount.toString(),
-    category: budget.category,
-    startDate: budget.startDate,
+    category_id: budget.category_id ?? "",
+    start_date: budget.start_date,
+    end_date: budget.end_date,
+    description: budget.description ?? "",
   };
 }
 
@@ -40,37 +46,65 @@ interface EditBudgetModalProps {
   open: boolean;
   onClose: () => void;
   budget: BudgetType | null;
+  onSuccess?: () => void;
 }
 
-export function EditBudgetModal({ open, onClose, budget }: EditBudgetModalProps) {
+export function EditBudgetModal({ open, onClose, budget, onSuccess }: EditBudgetModalProps) {
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<BudgetFormState>(() => budgetToFormState(budget));
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Lookup data
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+
+  // Fetch dropdown data when modal opens
+  useEffect(() => {
+    if (!open || !user) return;
+    fetchExpenseCategories(user.id).then(setCategories);
+  }, [open, user]);
 
   useEffect(() => {
     if (open && budget) {
       setForm(budgetToFormState(budget));
       setStep(1);
+      setSaveError(null);
     }
   }, [open, budget]);
 
   const handleClose = useCallback(() => {
     setStep(1);
+    setSaveError(null);
     onClose();
   }, [onClose]);
 
   const canContinue =
     (step === 1 && form.period !== null) ||
-    (step === 2 && form.name !== "" && form.amount !== "" && form.startDate !== "") ||
+    (step === 2 && form.budget_name !== "" && form.amount !== "" && form.start_date !== "" && form.end_date !== "") ||
     step === 3;
+
+  const handleSubmit = useCallback(async () => {
+    if (!budget) return;
+    setSaving(true);
+    setSaveError(null);
+    const { error } = await updateBudget(budget.id, form);
+    setSaving(false);
+    if (error) {
+      setSaveError(error);
+      return;
+    }
+    handleClose();
+    onSuccess?.();
+  }, [budget, form, handleClose, onSuccess]);
 
   const handleNext = useCallback(() => {
     if (step >= 3) {
-      // TODO: Implement actual budget update logic
-      handleClose();
+      handleSubmit();
       return;
     }
     setStep((s) => s + 1);
-  }, [step, handleClose]);
+  }, [step, handleSubmit]);
 
   const handleBack = useCallback(() => {
     if (step <= 1) return;
@@ -87,6 +121,9 @@ export function EditBudgetModal({ open, onClose, budget }: EditBudgetModalProps)
   const selectPeriod = useCallback((period: BudgetPeriod) => {
     updateField("period", period);
   }, [updateField]);
+
+  // Helper: look up category name for review step
+  const catName = categories.find((c) => c.id === form.category_id)?.category_name ?? "—";
 
   if (!budget) return null;
 
@@ -114,7 +151,7 @@ export function EditBudgetModal({ open, onClose, budget }: EditBudgetModalProps)
           <div className="space-y-4 animate-txn-in">
             <div>
               <h4 className="text-sm font-semibold text-slate-900 mb-2">Budget Period</h4>
-              <p className="text-xs text-slate-500">Current: {budget.period}</p>
+              <p className="text-xs text-slate-500">Current: {BUDGET_PERIODS.find((p) => p.key === budget.period)?.label ?? budget.period}</p>
             </div>
 
             <div className="grid grid-cols-1 gap-3">
@@ -172,8 +209,8 @@ export function EditBudgetModal({ open, onClose, budget }: EditBudgetModalProps)
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">Budget Name</label>
                 <input
                   type="text"
-                  value={form.name}
-                  onChange={(e) => updateField("name", e.target.value)}
+                  value={form.budget_name}
+                  onChange={(e) => updateField("budget_name", e.target.value)}
                   className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                   placeholder="e.g., Monthly Groceries"
                 />
@@ -197,27 +234,40 @@ export function EditBudgetModal({ open, onClose, budget }: EditBudgetModalProps)
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">Category</label>
                   <select
-                    value={form.category}
-                    onChange={(e) => updateField("category", e.target.value as BudgetCategory)}
+                    value={form.category_id}
+                    onChange={(e) => updateField("category_id", e.target.value)}
                     className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                   >
-                    {BUDGET_CATEGORIES.map((cat) => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
+                    <option value="">Select category...</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.category_name}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Start Date</label>
-                <input
-                  type="date"
-                  value={form.startDate}
-                  onChange={(e) => updateField("startDate", e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Start Date</label>
+                  <input
+                    type="date"
+                    value={form.start_date}
+                    onChange={(e) => updateField("start_date", e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">End Date</label>
+                  <input
+                    type="date"
+                    value={form.end_date}
+                    onChange={(e) => updateField("end_date", e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                  />
+                </div>
               </div>
 
               <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-blue-700 flex items-start gap-3">
@@ -244,7 +294,7 @@ export function EditBudgetModal({ open, onClose, budget }: EditBudgetModalProps)
             <div className="space-y-3">
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Budget Name</div>
-                <div className="text-sm font-semibold text-slate-900">{form.name || "Untitled Budget"}</div>
+                <div className="text-sm font-semibold text-slate-900">{form.budget_name || "Untitled Budget"}</div>
               </div>
 
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
@@ -254,9 +304,7 @@ export function EditBudgetModal({ open, onClose, budget }: EditBudgetModalProps)
 
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Category</div>
-                <div className="text-sm font-semibold text-slate-900">
-                  {BUDGET_CATEGORIES.find((cat) => cat.value === form.category)?.label || "Other"}
-                </div>
+                <div className="text-sm font-semibold text-slate-900">{catName}</div>
               </div>
 
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
@@ -268,9 +316,24 @@ export function EditBudgetModal({ open, onClose, budget }: EditBudgetModalProps)
 
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Start Date</div>
-                <div className="text-sm font-semibold text-slate-900">{formatDate(form.startDate)}</div>
+                <div className="text-sm font-semibold text-slate-900">{form.start_date ? formatDate(form.start_date) : "—"}</div>
+              </div>
+
+              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">End Date</div>
+                <div className="text-sm font-semibold text-slate-900">{form.end_date ? formatDate(form.end_date) : "—"}</div>
               </div>
             </div>
+
+            {saveError && (
+              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
+                <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+                <div>
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
+                  <p className="text-[11px] leading-relaxed opacity-85">{saveError}</p>
+                </div>
+              </div>
+            )}
 
             <div className="p-3 rounded-lg bg-amber-50 border border-amber-100 text-amber-700 flex items-start gap-3">
               <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
@@ -300,11 +363,13 @@ export function EditBudgetModal({ open, onClose, budget }: EditBudgetModalProps)
         <Button
           size="sm"
           onClick={handleNext}
-          disabled={!canContinue}
+          disabled={!canContinue || saving}
           className="bg-emerald-500 hover:bg-emerald-600"
         >
-          {step === 3 ? "Save Changes" : "Continue"}
-          <ArrowRight size={14} className="ml-1" />
+          {step === 3 ? (
+            saving ? (<><Loader2 size={14} className="animate-spin" /> Saving...</>) : "Save Changes"
+          ) : "Continue"}
+          {step < 3 && <ArrowRight size={14} className="ml-1" />}
         </Button>
       </ModalFooter>
     </Modal>

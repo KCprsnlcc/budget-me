@@ -1,28 +1,12 @@
-import type { BudgetFormState, BudgetPeriod, BudgetCategory } from "./types";
+import type { BudgetPeriod } from "./types";
 
-export const INITIAL_BUDGET_FORM_STATE: BudgetFormState = {
-  period: "monthly",
-  name: "",
-  amount: "",
-  category: "food",
-  startDate: "2026-01-01",
-};
-
-export const BUDGET_PERIODS: { key: BudgetPeriod; label: string; description: string; icon: string }[] = [
-  { key: "monthly", label: "Monthly", description: "Resets on the 1st of each month", icon: "calendar" },
-  { key: "weekly", label: "Weekly", description: "Resets every Monday", icon: "calendar-week" },
-  { key: "quarterly", label: "Quarterly", description: "Resets every 3 months", icon: "calendar-quarter" },
-  { key: "yearly", label: "Yearly", description: "Resets annually", icon: "calendar-year" },
-];
-
-export const BUDGET_CATEGORIES: { value: BudgetCategory; label: string }[] = [
-  { value: "food", label: "Food & Dining" },
-  { value: "transportation", label: "Transportation" },
-  { value: "entertainment", label: "Entertainment" },
-  { value: "housing", label: "Housing" },
-  { value: "utilities", label: "Utilities" },
-  { value: "healthcare", label: "Healthcare" },
-  { value: "other", label: "Other" },
+export const BUDGET_PERIODS: { key: BudgetPeriod; label: string; description: string }[] = [
+  { key: "day", label: "Daily", description: "Resets every day" },
+  { key: "week", label: "Weekly", description: "Resets every Monday" },
+  { key: "month", label: "Monthly", description: "Resets on the 1st of each month" },
+  { key: "quarter", label: "Quarterly", description: "Resets every 3 months" },
+  { key: "year", label: "Yearly", description: "Resets annually" },
+  { key: "custom", label: "Custom", description: "Custom date range" },
 ];
 
 export const formatCurrency = (amount: number | string): string => {
@@ -42,35 +26,49 @@ export const formatDate = (dateString: string): string => {
   });
 };
 
-export const getDaysRemaining = (startDate: string, period: BudgetPeriod): number => {
+export const getDaysRemaining = (startDate: string, period: BudgetPeriod, endDate?: string): number => {
+  // For custom periods or if endDate is provided, use endDate directly
+  if (endDate) {
+    const end = new Date(endDate + "T23:59:59");
+    const now = new Date();
+    const diffTime = end.getTime() - now.getTime();
+    return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  }
+
   const start = new Date(startDate);
   const now = new Date();
   
   let nextReset = new Date(start);
   
   switch (period) {
-    case "weekly":
+    case "day":
+      nextReset.setDate(start.getDate() + 1);
+      while (nextReset <= now) {
+        nextReset.setDate(nextReset.getDate() + 1);
+      }
+      break;
+    case "week":
       const daysUntilMonday = (8 - start.getDay()) % 7 || 7;
       nextReset.setDate(start.getDate() + daysUntilMonday);
       while (nextReset <= now) {
         nextReset.setDate(nextReset.getDate() + 7);
       }
       break;
-    case "monthly":
+    case "month":
       nextReset.setMonth(start.getMonth() + 1);
       nextReset.setDate(1);
       while (nextReset <= now) {
         nextReset.setMonth(nextReset.getMonth() + 1);
       }
       break;
-    case "quarterly":
+    case "quarter":
       nextReset.setMonth(start.getMonth() + 3);
       nextReset.setDate(1);
       while (nextReset <= now) {
         nextReset.setMonth(nextReset.getMonth() + 3);
       }
       break;
-    case "yearly":
+    case "year":
       nextReset.setFullYear(start.getFullYear() + 1);
       nextReset.setMonth(0);
       nextReset.setDate(1);
@@ -78,6 +76,8 @@ export const getDaysRemaining = (startDate: string, period: BudgetPeriod): numbe
         nextReset.setFullYear(nextReset.getFullYear() + 1);
       }
       break;
+    case "custom":
+      return 0;
   }
   
   const diffTime = nextReset.getTime() - now.getTime();

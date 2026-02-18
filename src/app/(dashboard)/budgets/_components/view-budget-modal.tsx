@@ -15,31 +15,18 @@ import {
   TrendingUp,
   TrendingDown,
   Info,
-  Utensils,
-  Car,
-  Music,
-  Home,
-  Zap,
-  Heart,
   Briefcase,
 } from "lucide-react";
 import { Stepper } from "./stepper";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import type { BudgetType } from "./types";
+import { deriveBudgetHealth } from "./types";
 import { formatCurrency, formatDate, getDaysRemaining } from "./constants";
+import { BUDGET_PERIODS } from "./constants";
 
 const STEPS = ["Overview", "Analysis"];
 
-const CATEGORY_ICONS = {
-  food: Utensils,
-  transportation: Car,
-  entertainment: Music,
-  housing: Home,
-  utilities: Zap,
-  healthcare: Heart,
-  other: Briefcase,
-};
 
 interface ViewBudgetModalProps {
   open: boolean;
@@ -90,9 +77,10 @@ export function ViewBudgetModal({
   if (!budget) return null;
 
   const remaining = budget.amount - budget.spent;
-  const percentage = Math.round((budget.spent / budget.amount) * 100);
-  const daysRemaining = getDaysRemaining(budget.startDate, budget.period);
-  const IconComponent = CATEGORY_ICONS[budget.category];
+  const percentage = budget.amount > 0 ? Math.round((budget.spent / budget.amount) * 100) : 0;
+  const daysRemaining = getDaysRemaining(budget.start_date, budget.period, budget.end_date);
+  const healthStatus = deriveBudgetHealth(budget.spent, budget.amount);
+  const categoryLabel = budget.expense_category_name ?? budget.category_name ?? "Uncategorized";
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
@@ -100,9 +88,9 @@ export function ViewBudgetModal({
       <ModalHeader onClose={handleClose} className="px-5 py-3.5">
         <div className="flex items-center gap-3">
           <div className="p-1.5 rounded-lg text-emerald-600">
-            <IconComponent size={18} />
+            <Briefcase size={18} />
           </div>
-          <h3 className="text-sm font-semibold text-slate-900">{budget.name}</h3>
+          <h3 className="text-sm font-semibold text-slate-900">{budget.budget_name}</h3>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[10px] text-slate-400 font-medium tracking-wide">
@@ -138,21 +126,21 @@ export function ViewBudgetModal({
                 <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                   <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Status</div>
                   <div className="text-sm font-semibold text-slate-900">
-                    <Badge variant={budget.status === "on-track" ? "success" : budget.status === "caution" ? "warning" : "danger"}>
-                      {budget.status === "on-track" ? "On Track" : budget.status === "caution" ? "Caution" : "At Risk"}
+                    <Badge variant={healthStatus === "on-track" ? "success" : healthStatus === "caution" ? "warning" : "danger"}>
+                      {healthStatus === "on-track" ? "On Track" : healthStatus === "caution" ? "Caution" : "At Risk"}
                     </Badge>
                   </div>
                 </div>
 
                 <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                   <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Period</div>
-                  <div className="text-sm font-semibold text-slate-900 capitalize">{budget.period}</div>
+                  <div className="text-sm font-semibold text-slate-900 capitalize">{BUDGET_PERIODS.find((p) => p.key === budget.period)?.label ?? budget.period}</div>
                 </div>
 
                 <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Reset Date</div>
+                  <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Start Date</div>
                   <div className="text-sm font-semibold text-slate-900">
-                    {formatDate(budget.startDate)}
+                    {formatDate(budget.start_date)}
                   </div>
                 </div>
 
@@ -227,7 +215,7 @@ export function ViewBudgetModal({
             <div className="space-y-3">
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Budget Name</div>
-                <div className="text-sm font-semibold text-slate-900">{budget.name}</div>
+                <div className="text-sm font-semibold text-slate-900">{budget.budget_name}</div>
               </div>
 
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
@@ -247,19 +235,19 @@ export function ViewBudgetModal({
 
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Period</div>
-                <div className="text-sm font-semibold text-slate-900 capitalize">{budget.period}</div>
+                <div className="text-sm font-semibold text-slate-900 capitalize">{BUDGET_PERIODS.find((p) => p.key === budget.period)?.label ?? budget.period}</div>
               </div>
 
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Start Date</div>
-                <div className="text-sm font-semibold text-slate-900">{formatDate(budget.startDate)}</div>
+                <div className="text-sm font-semibold text-slate-900">{formatDate(budget.start_date)}</div>
               </div>
 
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Status</div>
                 <div className="text-sm font-semibold text-slate-900">
-                  <Badge variant={budget.status === "on-track" ? "success" : budget.status === "caution" ? "warning" : "danger"}>
-                    {budget.status === "on-track" ? "On Track" : budget.status === "caution" ? "Caution" : "At Risk"}
+                  <Badge variant={healthStatus === "on-track" ? "success" : healthStatus === "caution" ? "warning" : "danger"}>
+                    {healthStatus === "on-track" ? "On Track" : healthStatus === "caution" ? "Caution" : "At Risk"}
                   </Badge>
                 </div>
               </div>
@@ -273,7 +261,7 @@ export function ViewBudgetModal({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                      <span className="text-xs text-slate-600">{budget.name}</span>
+                      <span className="text-xs text-slate-600">{budget.budget_name}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-16 bg-slate-200 rounded-full h-1.5">

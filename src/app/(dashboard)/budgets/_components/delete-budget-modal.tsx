@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   Modal,
   ModalHeader,
@@ -8,29 +8,45 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import type { BudgetType } from "./types";
 import { formatCurrency } from "./constants";
+import { deleteBudget } from "../_lib/budget-service";
 
 interface DeleteBudgetModalProps {
   open: boolean;
   onClose: () => void;
   budget: BudgetType | null;
+  onSuccess?: () => void;
 }
 
 export function DeleteBudgetModal({
   open,
   onClose,
   budget,
+  onSuccess,
 }: DeleteBudgetModalProps) {
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const handleClose = useCallback(() => {
+    setDeleteError(null);
     onClose();
   }, [onClose]);
 
-  const handleDelete = useCallback(() => {
-    // TODO: Implement actual delete logic
+  const handleDelete = useCallback(async () => {
+    if (!budget) return;
+    setDeleting(true);
+    setDeleteError(null);
+    const { error } = await deleteBudget(budget.id);
+    setDeleting(false);
+    if (error) {
+      setDeleteError(error);
+      return;
+    }
     handleClose();
-  }, [handleClose]);
+    onSuccess?.();
+  }, [budget, handleClose, onSuccess]);
 
   if (!budget) return null;
 
@@ -57,7 +73,7 @@ export function DeleteBudgetModal({
           <div className="mx-auto max-w-sm space-y-3">
             <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
               <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Budget to Delete</div>
-              <div className="text-sm font-semibold text-slate-900">{budget.name}</div>
+              <div className="text-sm font-semibold text-slate-900">{budget.budget_name}</div>
             </div>
 
             <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
@@ -70,6 +86,17 @@ export function DeleteBudgetModal({
               <div className="text-sm font-semibold text-slate-900 capitalize">{budget.period}</div>
             </div>
           </div>
+
+          {/* Error Notice */}
+          {deleteError && (
+            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 mx-auto max-w-sm mt-4 items-start">
+              <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+              <div>
+                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
+                <p className="text-[11px] leading-relaxed opacity-85">{deleteError}</p>
+              </div>
+            </div>
+          )}
 
           {/* Final Warning */}
           <div className="p-3 rounded-lg bg-amber-50 border border-amber-100 text-amber-700 mx-auto max-w-sm mt-6">
@@ -89,6 +116,7 @@ export function DeleteBudgetModal({
           variant="outline"
           size="sm"
           onClick={handleClose}
+          disabled={deleting}
           className="flex-1 flex items-center justify-center gap-2"
         >
           Cancel
@@ -96,9 +124,10 @@ export function DeleteBudgetModal({
         <Button
           size="sm"
           onClick={handleDelete}
+          disabled={deleting}
           className="flex-1 flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 ml-3"
         >
-          Delete Budget
+          {deleting ? (<><Loader2 size={14} className="animate-spin" /> Deleting...</>) : "Delete Budget"}
         </Button>
       </ModalFooter>
     </Modal>
