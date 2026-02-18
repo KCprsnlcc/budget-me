@@ -12,7 +12,7 @@ interface DropdownOption {
   color?: string;
 }
 
-interface SearchableDropdownProps {
+interface FilterDropdownProps {
   value: string;
   onChange: (value: string) => void;
   options: DropdownOption[];
@@ -24,7 +24,7 @@ interface SearchableDropdownProps {
   hideSearch?: boolean;
 }
 
-export function SearchableDropdown({ 
+export function FilterDropdown({ 
   value, 
   onChange, 
   options, 
@@ -33,8 +33,8 @@ export function SearchableDropdown({
   className,
   allowEmpty = true,
   emptyLabel = "All",
-  hideSearch = false
-}: SearchableDropdownProps) {
+  hideSearch = true
+}: FilterDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);

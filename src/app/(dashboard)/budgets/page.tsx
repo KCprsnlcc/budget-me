@@ -45,7 +45,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
+import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import {
   AddBudgetModal,
   ViewBudgetModal,
@@ -543,7 +543,7 @@ export default function BudgetsPage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
-            <SearchableDropdown
+            <FilterDropdown
               value={month === "all" ? "" : month.toString()}
               onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
               options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
@@ -553,7 +553,7 @@ export default function BudgetsPage() {
               emptyLabel="All Months"
               hideSearch={true}
             />
-            <SearchableDropdown
+            <FilterDropdown
               value={year === "all" ? "" : year.toString()}
               onChange={(value) => setYear(value === "" ? "all" : Number(value))}
               options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
@@ -563,7 +563,7 @@ export default function BudgetsPage() {
               emptyLabel="All Years"
               hideSearch={true}
             />
-            <SearchableDropdown
+            <FilterDropdown
               value={statusFilter}
               onChange={(value) => setStatusFilter(value)}
               options={[
@@ -578,7 +578,7 @@ export default function BudgetsPage() {
               emptyLabel="All Status"
               hideSearch={true}
             />
-            <SearchableDropdown
+            <FilterDropdown
               value={categoryFilter}
               onChange={(value) => setCategoryFilter(value)}
               options={expenseCategories.map((cat) => ({
@@ -592,7 +592,7 @@ export default function BudgetsPage() {
               emptyLabel="All Categories"
               hideSearch={true}
             />
-            <SearchableDropdown
+            <FilterDropdown
               value={periodFilter}
               onChange={(value) => setPeriodFilter(value)}
               options={BUDGET_PERIODS.map((p) => ({

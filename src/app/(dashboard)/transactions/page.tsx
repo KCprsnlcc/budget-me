@@ -50,7 +50,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
+import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import {
   Table,
   TableHeader,
@@ -589,7 +589,7 @@ export default function TransactionsPage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
-            <SearchableDropdown
+            <FilterDropdown
               value={month === "all" ? "" : month.toString()}
               onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
               options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
@@ -599,7 +599,7 @@ export default function TransactionsPage() {
               emptyLabel="All Months"
               hideSearch={true}
             />
-            <SearchableDropdown
+            <FilterDropdown
               value={year === "all" ? "" : year.toString()}
               onChange={(value) => setYear(value === "" ? "all" : Number(value))}
               options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
@@ -609,7 +609,7 @@ export default function TransactionsPage() {
               emptyLabel="All Years"
               hideSearch={true}
             />
-            <SearchableDropdown
+            <FilterDropdown
               value={typeFilter}
               onChange={(value) => setTypeFilter(value)}
               options={[
@@ -628,7 +628,7 @@ export default function TransactionsPage() {
                       </div>
 
           <div className="grid grid-cols-2 md:grid-cols-2 xl:flex items-center gap-2 w-full xl:w-auto">
-            <SearchableDropdown
+            <FilterDropdown
               value={categoryFilter}
               onChange={(value) => setCategoryFilter(value)}
               options={allCategories.map((c) => ({
