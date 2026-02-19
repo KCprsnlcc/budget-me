@@ -51,12 +51,31 @@ export function useDashboard() {
     "there";
 
   // ----- Greeting based on time of day -----
-  const getGreeting = (): string => {
+  const [greeting, setGreeting] = useState(() => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
     if (hour < 17) return "Good afternoon";
     return "Good evening";
-  };
+  });
+
+  // Update greeting every minute to keep it current
+  useEffect(() => {
+    const updateGreeting = () => {
+      const hour = new Date().getHours();
+      let newGreeting: string;
+      if (hour < 12) newGreeting = "Good morning";
+      else if (hour < 17) newGreeting = "Good afternoon";
+      else newGreeting = "Good evening";
+      
+      setGreeting(prev => prev !== newGreeting ? newGreeting : prev);
+    };
+
+    // Update immediately and then every minute
+    updateGreeting();
+    const interval = setInterval(updateGreeting, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   // ----- Fetch all dashboard data -----
   const fetchData = useCallback(async () => {
@@ -188,7 +207,7 @@ export function useDashboard() {
     insights,
     // User info
     userName,
-    greeting: getGreeting(),
+    greeting,
     // State
     loading,
     insightsLoading,
