@@ -43,11 +43,11 @@ import type { InsightItem } from "./_lib/dashboard-service";
 // ---------------------------------------------------------------------------
 
 function formatCurrency(n: number): string {
-  return n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
+  return n.toLocaleString("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 2 });
 }
 
 function formatCompact(n: number): string {
-  if (Math.abs(n) >= 1000) return `$${(n / 1000).toFixed(1)}k`;
+  if (Math.abs(n) >= 1000) return `₱` + (n / 1000).toFixed(1) + "k";
   return formatCurrency(n);
 }
 

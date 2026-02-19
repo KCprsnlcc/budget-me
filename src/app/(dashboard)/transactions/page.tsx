@@ -87,12 +87,12 @@ function formatDate(dateStr: string): string {
 }
 
 function formatCurrency(n: number): string {
-  return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return "₱" + n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function formatCompact(n: number): string {
-  if (n >= 1000) return "$" + (n / 1000).toFixed(1) + "k";
-  return "$" + n.toFixed(0);
+  if (n >= 1000) return "₱" + (n / 1000).toFixed(1) + "k";
+  return "₱" + n.toFixed(0);
 }
 
 function accountLabel(tx: TransactionType): string {
@@ -217,7 +217,7 @@ const TransactionCard = memo(({
           <span className={`text-lg font-semibold ${
             isIncome ? "text-emerald-600" : "text-slate-900"
           }`}>
-            {isIncome ? "+" : "-"}${tx.amount.toFixed(2)}
+            {isIncome ? "+" : "-"}₱{tx.amount.toFixed(2)}
           </span>
         </div>
         

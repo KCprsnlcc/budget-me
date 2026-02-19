@@ -101,12 +101,12 @@ const BudgetRow = memo(({
       <div className="space-y-2">
         <div className="flex justify-between text-xs">
           <span className="text-slate-500">Spent</span>
-          <span className="font-medium text-slate-900">${budget.spent.toLocaleString()} / ${budget.amount.toLocaleString()}</span>
+          <span className="font-medium text-slate-900">₱{budget.spent.toLocaleString()} / ₱{budget.amount.toLocaleString()}</span>
         </div>
         <ProgressBar value={budget.spent} max={budget.amount} color={health === "on-track" ? "success" : health === "caution" ? "warning" : "danger"} />
         <div className="flex justify-between text-[10px]">
           <span className="text-slate-400">
-            {remaining >= 0 ? `Remaining: $${remaining.toLocaleString()}` : `Over by: $${Math.abs(remaining).toLocaleString()}`}
+            {remaining >= 0 ? `Remaining: ₱${remaining.toLocaleString()}` : `Over by: ₱${Math.abs(remaining).toLocaleString()}`}
           </span>
           <span className={`font-medium ${health === "on-track" ? "text-emerald-600" : health === "caution" ? "text-amber-600" : "text-red-600"}`}>
             {percentage}%
@@ -263,21 +263,21 @@ export default function BudgetsPage() {
   const summaryCards = [
     {
       label: "Total Budget",
-      value: `$${summary.totalBudget.toLocaleString()}`,
+      value: `₱${summary.totalBudget.toLocaleString()}`,
       icon: Wallet,
       badge: `${summary.budgetCount} budgets`,
       color: "emerald",
     },
     {
       label: "Total Spent",
-      value: `$${summary.totalSpent.toLocaleString()}`,
+      value: `₱${summary.totalSpent.toLocaleString()}`,
       icon: ShoppingBag,
       badge: `${overallPercentage}% used`,
       color: "amber",
     },
     {
       label: "Remaining",
-      value: `$${summary.remaining.toLocaleString()}`,
+      value: `₱${summary.remaining.toLocaleString()}`,
       icon: PiggyBank,
       badge: overallHealth === "on-track" ? "Healthy" : overallHealth === "caution" ? "Caution" : "At Risk",
       color: "blue",
@@ -570,7 +570,7 @@ export default function BudgetsPage() {
                           <div className="font-medium text-slate-700">{hoveredBar.month}</div>
                           <div className="flex items-center gap-1">
                             <div className={`w-2 h-2 rounded-full ${hoveredBar.type === 'budget' ? 'bg-slate-200' : 'bg-emerald-500'}`} />
-                            <span className="capitalize">{hoveredBar.type}: ${hoveredBar.value.toLocaleString()}</span>
+                            <span className="capitalize">{hoveredBar.type}: ₱{hoveredBar.value.toLocaleString()}</span>
                           </div>
                           <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
                         </div>
@@ -617,7 +617,7 @@ export default function BudgetsPage() {
                     <div className="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
                       <span className="text-xs text-slate-400 font-medium">Total</span>
                       <span className="text-sm font-bold text-slate-900">
-                        ${summary.totalBudget >= 1000 ? `${(summary.totalBudget / 1000).toFixed(1)}k` : summary.totalBudget.toLocaleString()}
+                        ₱{summary.totalBudget >= 1000 ? `${(summary.totalBudget / 1000).toFixed(1)}k` : summary.totalBudget.toLocaleString()}
                       </span>
                     </div>
                   </div>

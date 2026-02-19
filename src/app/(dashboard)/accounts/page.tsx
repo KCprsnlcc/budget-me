@@ -91,7 +91,7 @@ export default function AccountsPage() {
             <Eye size={16} />
           </button>
         </div>
-        <div className="text-3xl font-bold mb-1">$64,962.50</div>
+        <div className="text-3xl font-bold mb-1">₱64,962.50</div>
         <div className="flex items-center gap-1 text-emerald-400 text-xs font-medium">
           <ArrowUpRight size={14} />
           +4.2% this month
@@ -130,7 +130,7 @@ export default function AccountsPage() {
 
               <div className="mb-3">
                 <div className={`text-xl font-bold ${isNegative ? "text-red-600" : "text-slate-900"}`}>
-                  {isNegative ? "-" : ""}${Math.abs(account.balance).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  {isNegative ? "-" : ""}₱{Math.abs(account.balance).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
                 </div>
               </div>
 

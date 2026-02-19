@@ -93,7 +93,7 @@ const ANOMALY_ALERTS: AnomalyAlert[] = [
     id: "2", 
     type: "duplicate-transaction",
     title: "Duplicate Transaction",
-    description: "Possible duplicate charge detected: Netflix subscription ($15.99) charged twice.",
+    description: "Possible duplicate charge detected: Netflix subscription (₱15.99) charged twice.",
     severity: "low",
     timestamp: "5 hours ago",
     amount: 15.99,
@@ -107,7 +107,7 @@ const AI_INSIGHTS: AIInsight[] = [
     id: "1",
     type: "savings-opportunity",
     title: "Savings Opportunity",
-    description: "You could save $120/month by reducing dining out expenses by 25%. This would increase your savings rate to 65%.",
+    description: "You could save ₱120/month by reducing dining out expenses by 25%. This would increase your savings rate to 65%.",
     impact: "high",
     category: "Spending Analysis",
     potentialSavings: 120,
@@ -122,7 +122,7 @@ const AI_INSIGHTS: AIInsight[] = [
     description: "Based on your spending patterns, consider increasing your \"Groceries\" budget by $50 to avoid overspending.",
     impact: "medium",
     category: "Budget Planning",
-    recommendation: "Increase grocery budget allocation by $50 per month",
+    recommendation: "Increase grocery budget allocation by ₱50 per month",
     timeHorizon: "Next month",
     confidence: 0.92,
   },
@@ -133,7 +133,7 @@ const AI_INSIGHTS: AIInsight[] = [
     description: "Your entertainment spending has increased by 35% over the last 3 months. Consider setting a stricter limit.",
     impact: "medium",
     category: "Trend Analysis",
-    recommendation: "Set entertainment spending limit at $200/month",
+    recommendation: "Set entertainment spending limit at ₱200/month",
     timeHorizon: "Immediate",
     confidence: 0.78,
   },
@@ -141,7 +141,7 @@ const AI_INSIGHTS: AIInsight[] = [
     id: "4",
     type: "savings-opportunity",
     title: "Subscription Optimization",
-    description: "Review your recurring subscriptions - you could save $45/month by canceling unused services.",
+    description: "Review your recurring subscriptions - you could save ₱45/month by canceling unused services.",
     impact: "high",
     category: "Subscription Analysis",
     potentialSavings: 45,
@@ -672,7 +672,7 @@ export default function ReportsPage() {
                   <span className="text-[10px] text-slate-500">{anomaly.category}</span>
                   {anomaly.amount && (
                     <span className="text-[10px] font-medium text-slate-700">
-                      ${typeof anomaly.amount === 'number' ? anomaly.amount.toFixed(2) : anomaly.amount}
+                      ₱{typeof anomaly.amount === 'number' ? anomaly.amount.toFixed(2) : anomaly.amount}
                     </span>
                   )}
                 </div>
@@ -738,7 +738,7 @@ export default function ReportsPage() {
                 {insight.potentialSavings && (
                   <div className="flex items-center gap-4 text-[10px] text-slate-500">
                     <span className="font-semibold uppercase tracking-wider">Potential Savings:</span>
-                    <span className="text-emerald-600 font-bold">${insight.potentialSavings}/mo</span>
+                    <span className="text-emerald-600 font-bold">₱{insight.potentialSavings}/mo</span>
                   </div>
                 )}
               </div>
@@ -788,7 +788,7 @@ export default function ReportsPage() {
                     }}>
                       <div className="absolute inset-0 m-auto w-28 h-28 bg-white rounded-full flex flex-col items-center justify-center shadow-inner">
                         <span className="text-xs text-slate-500">Total</span>
-                        <span className="text-xl font-bold text-slate-900">${SPENDING_DATA.total.toLocaleString()}</span>
+                        <span className="text-xl font-bold text-slate-900">₱{SPENDING_DATA.total.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -801,7 +801,7 @@ export default function ReportsPage() {
                           <div
                             className="w-3 sm:w-5 rounded-t-[2px] transition-all hover:opacity-100"
                             style={{ height: `${cat.percentage}%`, backgroundColor: cat.color }}
-                            title={`${cat.name}: $${cat.amount} (${cat.percentage}%)`}
+                            title={`${cat.name}: ₱${cat.amount} (${cat.percentage}%)`}
                           />
                         </div>
                       ))}
@@ -1018,7 +1018,7 @@ export default function ReportsPage() {
                     }}>
                       <div className="absolute inset-0 m-auto w-28 h-28 bg-white rounded-full flex flex-col items-center justify-center shadow-inner">
                         <span className="text-xs text-slate-500">Net Savings</span>
-                        <span className="text-xl font-bold text-slate-900">${INCOME_EXPENSE_DATA.totals.netSavings.toLocaleString()}</span>
+                        <span className="text-xl font-bold text-slate-900">₱{INCOME_EXPENSE_DATA.totals.netSavings.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -1037,7 +1037,7 @@ export default function ReportsPage() {
                     }}>
                       <div className="absolute inset-0 m-auto w-28 h-28 bg-white rounded-full flex flex-col items-center justify-center shadow-inner">
                         <span className="text-xs text-slate-500">Total Savings</span>
-                        <span className="text-xl font-bold text-slate-900">${SAVINGS_DATA.total.toLocaleString()}</span>
+                        <span className="text-xl font-bold text-slate-900">₱{SAVINGS_DATA.total.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -1049,7 +1049,7 @@ export default function ReportsPage() {
                         return (
                           <div key={item.name} className="flex flex-col items-center flex-1 justify-end h-full group cursor-pointer">
                             <div className="text-xs text-slate-500 mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              ${item.amount.toLocaleString()}
+                              ₱{item.amount.toLocaleString()}
                             </div>
                             <div
                               className="w-12 sm:w-16 rounded-t transition-all hover:opacity-80"
@@ -1103,7 +1103,7 @@ export default function ReportsPage() {
                             </div>
                             {/* Value label */}
                             <div className="absolute w-full flex justify-center" style={{ bottom: `${height + 5}%` }}>
-                              <span className="text-[9px] text-emerald-600 font-medium">${(d.savings / 1000).toFixed(1)}k</span>
+                              <span className="text-[9px] text-emerald-600 font-medium">₱{(d.savings / 1000).toFixed(1)}k</span>
                             </div>
                             {/* Connecting line */}
                             {next && nextHeight !== null && (
@@ -1139,11 +1139,11 @@ export default function ReportsPage() {
                         <div className="text-[10px] text-slate-500">Savings Rate</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-bold text-slate-700">${(SAVINGS_DATA.total / 1000).toFixed(1)}k</div>
+                        <div className="text-lg font-bold text-slate-700">₱{(SAVINGS_DATA.total / 1000).toFixed(1)}k</div>
                         <div className="text-[10px] text-slate-500">Total Saved</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-bold text-blue-600">${(SAVINGS_DATA.funds[0].amount / 1000).toFixed(1)}k</div>
+                        <div className="text-lg font-bold text-blue-600">₱{(SAVINGS_DATA.funds[0].amount / 1000).toFixed(1)}k</div>
                         <div className="text-[10px] text-slate-500">Emergency Fund</div>
                       </div>
                     </div>
@@ -1263,7 +1263,7 @@ export default function ReportsPage() {
                           />
                         </div>
                         <div className="text-xs text-slate-400 mt-1">
-                          ${goal.current.toLocaleString()} of ${goal.target.toLocaleString()}
+                          ₱{goal.current.toLocaleString()} of ₱{goal.target.toLocaleString()}
                         </div>
                       </div>
                     ))}
@@ -1278,12 +1278,12 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-3 gap-4 mb-6">
                   <div className="bg-slate-50 rounded-lg p-4 text-center">
                     <div className="text-xs text-slate-500 mb-1">Predicted Expenses</div>
-                    <div className="text-xl font-bold text-slate-800">${PREDICTIONS_DATA.nextMonth.expenses.toLocaleString()}</div>
+                    <div className="text-xl font-bold text-slate-800">₱{PREDICTIONS_DATA.nextMonth.expenses.toLocaleString()}</div>
                     <div className="text-[10px] text-amber-600 mt-1">+5% from avg</div>
                   </div>
                   <div className="bg-emerald-50 rounded-lg p-4 text-center">
                     <div className="text-xs text-slate-500 mb-1">Expected Savings</div>
-                    <div className="text-xl font-bold text-emerald-600">${PREDICTIONS_DATA.nextMonth.savings.toLocaleString()}</div>
+                    <div className="text-xl font-bold text-emerald-600">₱{PREDICTIONS_DATA.nextMonth.savings.toLocaleString()}</div>
                     <div className="text-[10px] text-emerald-600 mt-1">On track</div>
                   </div>
                   <div className="bg-blue-50 rounded-lg p-4 text-center">
@@ -1338,7 +1338,7 @@ export default function ReportsPage() {
                   <div className="text-xs text-slate-500 mb-2">3-Month Forecast</div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-600">Projected Savings:</span>
-                    <span className="font-medium text-emerald-600">${PREDICTIONS_DATA.threeMonth.savings.toLocaleString()}</span>
+                    <span className="font-medium text-emerald-600">₱{PREDICTIONS_DATA.threeMonth.savings.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm mt-1">
                     <span className="text-slate-600">Forecast Confidence:</span>
@@ -1411,7 +1411,7 @@ export default function ReportsPage() {
                 {SPENDING_DATA.categories.map((cat, idx) => (
                   <tr key={cat.name} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-3 font-medium">{cat.name}</td>
-                    <td className="px-6 py-3 text-right">${cat.amount}</td>
+                    <td className="px-6 py-3 text-right">₱{cat.amount}</td>
                     <td className="px-6 py-3 text-right">{cat.percentage}%</td>
                     <td className="px-6 py-3 text-right">{Math.floor(Math.random() * 50) + 5}</td>
                     <td className="px-6 py-3 text-right">

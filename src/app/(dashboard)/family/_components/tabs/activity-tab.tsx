@@ -201,7 +201,7 @@ export function ActivityTab({
                   {activity.action}
                   {activity.amount && (
                     <span className="font-bold text-slate-900">
-                      ${activity.amount.toLocaleString()}
+                      ₱{activity.amount.toLocaleString()}
                     </span>
                   )}
                   {activity.target && (

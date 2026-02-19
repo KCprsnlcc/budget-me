@@ -35,9 +35,9 @@ export const GOAL_STATUSES = [
 
 export const formatCurrency = (amount: string | number): string => {
   const num = typeof amount === "string" ? parseFloat(amount) || 0 : amount;
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-PH", {
     style: "currency",
-    currency: "USD",
+    currency: "PHP",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(num);

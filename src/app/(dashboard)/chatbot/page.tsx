@@ -49,16 +49,16 @@ const INITIAL_MESSAGES: MessageType[] = [
   {
     id: "3",
     role: "assistant",
-    content: `Here are your recent subscription charges I found in your transactions history:\n\n| Service | Date | Amount |\n|---------|------|--------|\n| Netflix | Oct 21, 2024 | $15.99 |\n| Spotify | Oct 18, 2024 | $9.99 |\n| Adobe Creative | Oct 15, 2024 | $54.99 |\n\n**Total: $80.97 / month**`,
+    content: `Here are your recent subscription charges I found in your transactions history:\n\n| Service | Date | Amount |\n|---------|------|--------|\n| Netflix | Oct 21, 2024 | ₱15.99 |\n| Spotify | Oct 18, 2024 | ₱9.99 |\n| Adobe Creative | Oct 15, 2024 | ₱54.99 |\n\n**Total: ₱80.97 / month**`,
     timestamp: "10:32 AM",
     model: "gpt-oss-20b",
   },
 ];
 
 const SUBSCRIPTION_DATA = [
-  { service: "Netflix", date: "Oct 21, 2024", amount: "$15.99", icon: "play", color: "red" },
-  { service: "Spotify", date: "Oct 18, 2024", amount: "$9.99", icon: "music", color: "green" },
-  { service: "Adobe Creative", date: "Oct 15, 2024", amount: "$54.99", icon: "palette", color: "blue" },
+  { service: "Netflix", date: "Oct 21, 2024", amount: "₱15.99", icon: "play", color: "red" },
+  { service: "Spotify", date: "Oct 18, 2024", amount: "₱9.99", icon: "music", color: "green" },
+  { service: "Adobe Creative", date: "Oct 15, 2024", amount: "₱54.99", icon: "palette", color: "blue" },
 ];
 
 export default function ChatbotPage() {

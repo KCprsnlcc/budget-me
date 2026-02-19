@@ -80,23 +80,23 @@ const ANOMALIES = [
   {
     type: "warning",
     title: "Duplicate Netflix Charge",
-    description: "Two charges of $15.99 detected from Netflix on Feb 7",
-    amount: "$15.99",
+    description: "Two charges of ₱15.99 detected from Netflix on Feb 7",
+    amount: "₱15.99",
     action: "Review",
   },
   {
     type: "info",
     title: "New Recurring Payment",
     description: "Monthly charge from Adobe Creative Cloud detected",
-    amount: "$54.99",
+    amount: "₱54.99",
     action: "Categorize",
   },
 ];
 
 const SAVINGS_OPPORTUNITIES = [
-  { title: "Switch to annual Spotify plan", potential: "$24/year", confidence: 95 },
-  { title: "Reduce dining out frequency by 20%", potential: "$120/month", confidence: 78 },
-  { title: "Bundle insurance policies", potential: "$45/month", confidence: 65 },
+  { title: "Switch to annual Spotify plan", potential: "₱24/year", confidence: 95 },
+  { title: "Reduce dining out frequency by 20%", potential: "₱120/month", confidence: 78 },
+  { title: "Bundle insurance policies", potential: "₱45/month", confidence: 65 },
 ];
 
 export default function PredictionsPage() {
@@ -401,7 +401,7 @@ export default function PredictionsPage() {
             </div>
           </div>
           <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Monthly Income</div>
-          <div className="text-xl font-semibold text-slate-900 tracking-tight">$8,240.00</div>
+          <div className="text-xl font-semibold text-slate-900 tracking-tight">₱8,240.00</div>
         </Card>
 
         {/* Monthly Expenses Card */}
@@ -416,7 +416,7 @@ export default function PredictionsPage() {
             </div>
           </div>
           <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Monthly Expenses</div>
-          <div className="text-xl font-semibold text-slate-900 tracking-tight">$3,405.50</div>
+          <div className="text-xl font-semibold text-slate-900 tracking-tight">₱3,405.50</div>
         </Card>
 
         {/* Net Balance Card */}
@@ -427,7 +427,7 @@ export default function PredictionsPage() {
             </div>
           </div>
           <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Net Balance</div>
-          <div className="text-xl font-semibold text-slate-900 tracking-tight">$4,834.50</div>
+          <div className="text-xl font-semibold text-slate-900 tracking-tight">₱4,834.50</div>
         </Card>
 
         {/* Savings Rate Card */}
