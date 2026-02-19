@@ -11,9 +11,9 @@ export const BUDGET_PERIODS: { key: BudgetPeriod; label: string; description: st
 
 export const formatCurrency = (amount: number | string): string => {
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-PH", {
     style: "currency",
-    currency: "USD",
+    currency: "PHP",
   }).format(num);
 };
 
