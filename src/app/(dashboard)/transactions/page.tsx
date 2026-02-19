@@ -596,88 +596,114 @@ export default function TransactionsPage() {
             </div>
           </div>
 
-          <div className="relative h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50">
-            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-              <div className="w-full h-px bg-slate-100/50" />
-              <div className="w-full h-px bg-slate-100/50" />
-              <div className="w-full h-px bg-slate-100/50" />
-              <div className="w-full h-px bg-slate-100/50" />
-              <div className="w-full h-px bg-slate-100/50" />
-            </div>
-            {chartData.map((d) => (
-              <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
-                <div
-                  className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
-                  style={{ height: `${d.income}%` }}
-                  onMouseEnter={() => setHoveredBar({ month: d.month, type: 'income', value: d.incomeValue })}
-                  onMouseLeave={() => setHoveredBar(null)}
-                />
-                <div
-                  className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
-                  style={{ height: `${d.expense}%` }}
-                  onMouseEnter={() => setHoveredBar({ month: d.month, type: 'expense', value: d.expenseValue })}
-                  onMouseLeave={() => setHoveredBar(null)}
-                />
-                
-                {/* Tooltip */}
-                {hoveredBar && hoveredBar.month === d.month && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
-                    <div className="font-medium text-slate-700">{hoveredBar.month}</div>
-                    <div className="flex items-center gap-1">
-                      <div className={`w-2 h-2 rounded-full ${hoveredBar.type === 'income' ? 'bg-slate-300' : 'bg-emerald-500'}`} />
-                      <span className="capitalize">{hoveredBar.type}: {formatCurrency(hoveredBar.value)}</span>
-                    </div>
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+          {chartData.length > 0 ? (
+              <>
+                <div className="relative h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50">
+                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                    <div className="w-full h-px bg-slate-100/50" />
+                    <div className="w-full h-px bg-slate-100/50" />
+                    <div className="w-full h-px bg-slate-100/50" />
+                    <div className="w-full h-px bg-slate-100/50" />
+                    <div className="w-full h-px bg-slate-100/50" />
                   </div>
-                )}
+                  {chartData.map((d) => (
+                    <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
+                      <div
+                        className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
+                        style={{ height: `${d.income}%` }}
+                        onMouseEnter={() => setHoveredBar({ month: d.month, type: 'income', value: d.incomeValue })}
+                        onMouseLeave={() => setHoveredBar(null)}
+                      />
+                      <div
+                        className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
+                        style={{ height: `${d.expense}%` }}
+                        onMouseEnter={() => setHoveredBar({ month: d.month, type: 'expense', value: d.expenseValue })}
+                        onMouseLeave={() => setHoveredBar(null)}
+                      />
+                      
+                      {/* Tooltip */}
+                      {hoveredBar && hoveredBar.month === d.month && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
+                          <div className="font-medium text-slate-700">{hoveredBar.month}</div>
+                          <div className="flex items-center gap-1">
+                            <div className={`w-2 h-2 rounded-full ${hoveredBar.type === 'income' ? 'bg-slate-300' : 'bg-emerald-500'}`} />
+                            <span className="capitalize">{hoveredBar.type}: {formatCurrency(hoveredBar.value)}</span>
+                          </div>
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
+                  {chartData.map((d, i) => (
+                    <span key={d.month} className={i === chartData.length - 1 ? "text-slate-600" : ""}>
+                      {d.month}
+                    </span>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-60 text-center">
+                <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
+                  <TrendingUp size={24} />
+                </div>
+                <h4 className="text-sm font-medium text-slate-800 mb-1">No Transaction Data</h4>
+                <p className="text-xs text-slate-400 max-w-sm mb-4">
+                  Add transactions over multiple months to see your income vs expenses trend.
+                </p>
+                <Button size="sm" variant="outline" onClick={() => setAddModalOpen(true)}>
+                  Add Transaction
+                </Button>
               </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
-            {chartData.map((d, i) => (
-              <span key={d.month} className={i === chartData.length - 1 ? "text-slate-600" : ""}>
-                {d.month}
-              </span>
-            ))}
-          </div>
+            )}
         </Card>
 
         {/* Expense Categories */}
         <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900">Categories</h3>
-              <p className="text-xs text-slate-500 mt-1 font-light">Monthly expense breakdown.</p>
-            </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal size={16} className="text-slate-400" />
-            </Button>
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-slate-900">Categories</h3>
+            <p className="text-xs text-slate-500 mt-1 font-light">Monthly expense breakdown.</p>
           </div>
 
-          <div className="flex items-center gap-6 mb-6">
-            <div className="w-32 h-32 mx-auto rounded-full flex-shrink-0 relative"
-                 style={{ background: categoryGradient }}>
-              <div className="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
-                <span className="text-xs text-slate-400 font-medium">Total</span>
-                <span className="text-sm font-bold text-slate-900">{formatCompact(categoryTotal)}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3 flex-1">
-            {categoryBreakdown.slice(0, 5).map((cat) => (
-              <div key={cat.name} className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
-                  <span className="text-slate-600">{cat.name}</span>
+          {categoryBreakdown.length > 0 ? (
+              <>
+                <div className="flex items-center gap-6 mb-6">
+                  <div className="w-32 h-32 mx-auto rounded-full flex-shrink-0 relative"
+                       style={{ background: categoryGradient }}>
+                    <div className="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                      <span className="text-xs text-slate-400 font-medium">Total</span>
+                      <span className="text-sm font-bold text-slate-900">{formatCompact(categoryTotal)}</span>
+                    </div>
+                  </div>
                 </div>
-                <span className="font-medium text-slate-900">{formatCurrency(cat.amount)}</span>
+
+                <div className="space-y-3 flex-1">
+                  {categoryBreakdown.slice(0, 5).map((cat) => (
+                    <div key={cat.name} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
+                        <span className="text-slate-600">{cat.name}</span>
+                      </div>
+                      <span className="font-medium text-slate-900">{formatCurrency(cat.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
+                  <ShoppingCart size={24} />
+                </div>
+                <h4 className="text-sm font-medium text-slate-800 mb-1">No Category Data</h4>
+                <p className="text-xs text-slate-400 max-w-sm mb-4">
+                  Add expense transactions to see your spending breakdown by category.
+                </p>
+                <Button size="sm" variant="outline" onClick={() => setAddModalOpen(true)}>
+                  Add Transaction
+                </Button>
               </div>
-            ))}
-            {categoryBreakdown.length === 0 && (
-              <p className="text-xs text-slate-400 text-center py-4">No expense data this month.</p>
             )}
-          </div>
         </Card>
       </div>
 

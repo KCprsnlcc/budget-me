@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import { generateInsights, InsightData, InsightsTransaction, InsightsBudget } from "./insights-service";
+import { generateSpendingTrends, SpendingTrend as TrendServiceSpendingTrend } from "./trends-service";
 
 const supabase = createClient();
 
@@ -60,6 +61,8 @@ export type SpendingTrend = {
   previousAmount: number;
   change: number;
   trend: "up" | "down" | "neutral";
+  insight?: string;
+  recommendation?: string;
 };
 
 export type PendingInvitation = {
@@ -107,52 +110,28 @@ export async function fetchDashboardSummary(
   // Aggregate all-time data
   let totalIncome = 0;
   let totalExpenses = 0;
-  const monthlyData = new Map<string, { income: number; expenses: number }>();
   
   for (const row of allData ?? []) {
     const amt = Number(row.amount);
-    const date = new Date(row.date);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-    
-    if (!monthlyData.has(monthKey)) {
-      monthlyData.set(monthKey, { income: 0, expenses: 0 });
-    }
-    const monthData = monthlyData.get(monthKey)!;
     
     if (row.type === "income" || row.type === "cash_in") {
       totalIncome += amt;
-      monthData.income += amt;
     } else if (row.type === "expense") {
       totalExpenses += amt;
-      monthData.expenses += amt;
     }
   }
 
-  // Get latest and previous month for change calculations
-  const sortedMonths = Array.from(monthlyData.keys()).sort();
-  const latestMonth = sortedMonths[sortedMonths.length - 1];
-  const previousMonth = sortedMonths.length > 1 ? sortedMonths[sortedMonths.length - 2] : null;
-  
-  const latestData = monthlyData.get(latestMonth) || { income: 0, expenses: 0 };
-  const prevData = previousMonth ? monthlyData.get(previousMonth) || { income: 0, expenses: 0 } : { income: 0, expenses: 0 };
-  
   const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
-  const prevSavingsRate = prevData.income > 0 ? ((prevData.income - prevData.expenses) / prevData.income) * 100 : 0;
-  const prevBalance = prevData.income - prevData.expenses;
-  const curBalance = latestData.income - latestData.expenses;
-
-  const pctChange = (cur: number, prev: number): number | null =>
-    prev > 0 ? ((cur - prev) / prev) * 100 : null;
 
   return {
     totalBalance,
-    monthlyIncome: latestData.income,
-    monthlyExpenses: latestData.expenses,
+    monthlyIncome: totalIncome,
+    monthlyExpenses: totalExpenses,
     savingsRate,
-    balanceChange: prevBalance !== 0 ? ((curBalance - prevBalance) / Math.abs(prevBalance)) * 100 : null,
-    incomeChange: pctChange(latestData.income, prevData.income),
-    expenseChange: pctChange(latestData.expenses, prevData.expenses),
-    savingsRateChange: prevSavingsRate !== 0 ? savingsRate - prevSavingsRate : null,
+    balanceChange: null, // No meaningful change calculation for all-time data
+    incomeChange: null, // No meaningful change calculation for all-time data
+    expenseChange: null, // No meaningful change calculation for all-time data
+    savingsRateChange: null, // No meaningful change calculation for all-time data
   };
 }
 
@@ -324,73 +303,25 @@ export async function fetchSpendingTrends(
   // Fetch all-time expense transactions with categories
   const { data } = await supabase
     .from("transactions")
-    .select("amount, date, expense_categories ( category_name )")
+    .select("amount, date, type, category, expense_categories ( category_name )")
     .eq("user_id", userId)
     .eq("type", "expense")
     .eq("status", "completed")
     .order("date", { ascending: false });
 
-  // Group transactions by month and category
-  const monthlyCategoryData = new Map<string, Map<string, number>>();
-  
-  for (const row of data ?? []) {
-    const txDate = new Date(row.date);
-    const monthKey = `${txDate.getFullYear()}-${String(txDate.getMonth() + 1).padStart(2, "0")}`;
+  // Transform to trends service format
+  const trendsTransactions = (data ?? []).map(row => {
     const cat = row.expense_categories as Record<string, any> | null;
-    const categoryName = cat?.category_name ?? "Uncategorized";
-    
-    if (!monthlyCategoryData.has(monthKey)) {
-      monthlyCategoryData.set(monthKey, new Map());
-    }
-    const monthData = monthlyCategoryData.get(monthKey)!;
-    monthData.set(categoryName, (monthData.get(categoryName) ?? 0) + Number(row.amount));
-  }
-
-  // Get sorted months
-  const sortedMonths = Array.from(monthlyCategoryData.keys()).sort();
-  
-  if (sortedMonths.length < 2) {
-    return [];
-  }
-
-  // Compare the two most recent months
-  const recentMonth = sortedMonths[sortedMonths.length - 1];
-  const previousMonth = sortedMonths[sortedMonths.length - 2];
-  
-  const recentSpending = monthlyCategoryData.get(recentMonth) || new Map();
-  const previousSpending = monthlyCategoryData.get(previousMonth) || new Map();
-
-  // Calculate trends
-  const trends: SpendingTrend[] = [];
-  const allCategories = new Set([
-    ...Array.from(recentSpending.keys()),
-    ...Array.from(previousSpending.keys())
-  ]);
-  
-  allCategories.forEach((category) => {
-    const currentAmount = recentSpending.get(category) ?? 0;
-    const previousAmount = previousSpending.get(category) ?? 0;
-    
-    if (currentAmount === 0 && previousAmount === 0) return;
-    
-    let change = 0;
-    if (previousAmount > 0) {
-      change = ((currentAmount - previousAmount) / previousAmount) * 100;
-    } else if (currentAmount > 0) {
-      change = 100;
-    }
-    
-    let trend: SpendingTrend["trend"] = "neutral";
-    if (Math.abs(change) < 1) trend = "neutral";
-    else if (change > 0) trend = "up";
-    else trend = "down";
-    
-    trends.push({ category, currentAmount, previousAmount, change, trend });
+    return {
+      date: row.date,
+      amount: Number(row.amount),
+      type: "expense" as const,
+      category: cat?.category_name ?? "Uncategorized",
+    };
   });
-  
-  // Sort by absolute spending amount, take top N
-  trends.sort((a, b) => b.currentAmount - a.currentAmount);
-  return trends.slice(0, limit);
+
+  // Use the new trends service with sophisticated analysis
+  return generateSpendingTrends(trendsTransactions, limit);
 }
 
 // ---------------------------------------------------------------------------

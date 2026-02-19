@@ -539,50 +539,67 @@ export default function BudgetsPage() {
               </div>
             </div>
 
-            <div className="relative h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50">
-              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-                <div className="w-full h-px bg-slate-100/50" />
-                <div className="w-full h-px bg-slate-100/50" />
-                <div className="w-full h-px bg-slate-100/50" />
-                <div className="w-full h-px bg-slate-100/50" />
-                <div className="w-full h-px bg-slate-100/50" />
-              </div>
-              {chartData.map((d) => (
-                <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
-                  <div
-                    className="w-3 sm:w-5 bg-slate-200 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
-                    style={{ height: `${d.budget}%` }}
-                    onMouseEnter={() => setHoveredBar({ month: d.month, type: 'budget', value: d.budgetValue })}
-                    onMouseLeave={() => setHoveredBar(null)}
-                  />
-                  <div
-                    className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
-                    style={{ height: `${d.spent}%` }}
-                    onMouseEnter={() => setHoveredBar({ month: d.month, type: 'spent', value: d.spentValue })}
-                    onMouseLeave={() => setHoveredBar(null)}
-                  />
-                  
-                  {/* Tooltip */}
-                  {hoveredBar && hoveredBar.month === d.month && (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
-                      <div className="font-medium text-slate-700">{hoveredBar.month}</div>
-                      <div className="flex items-center gap-1">
-                        <div className={`w-2 h-2 rounded-full ${hoveredBar.type === 'budget' ? 'bg-slate-200' : 'bg-emerald-500'}`} />
-                        <span className="capitalize">{hoveredBar.type}: ${hoveredBar.value.toLocaleString()}</span>
-                      </div>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+            {chartData.length > 0 ? (
+              <>
+                <div className="relative h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50">
+                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                    <div className="w-full h-px bg-slate-100/50" />
+                    <div className="w-full h-px bg-slate-100/50" />
+                    <div className="w-full h-px bg-slate-100/50" />
+                    <div className="w-full h-px bg-slate-100/50" />
+                    <div className="w-full h-px bg-slate-100/50" />
+                  </div>
+                  {chartData.map((d) => (
+                    <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
+                      <div
+                        className="w-3 sm:w-5 bg-slate-200 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
+                        style={{ height: `${d.budget}%` }}
+                        onMouseEnter={() => setHoveredBar({ month: d.month, type: 'budget', value: d.budgetValue })}
+                        onMouseLeave={() => setHoveredBar(null)}
+                      />
+                      <div
+                        className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
+                        style={{ height: `${d.spent}%` }}
+                        onMouseEnter={() => setHoveredBar({ month: d.month, type: 'spent', value: d.spentValue })}
+                        onMouseLeave={() => setHoveredBar(null)}
+                      />
+                      
+                      {/* Tooltip */}
+                      {hoveredBar && hoveredBar.month === d.month && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
+                          <div className="font-medium text-slate-700">{hoveredBar.month}</div>
+                          <div className="flex items-center gap-1">
+                            <div className={`w-2 h-2 rounded-full ${hoveredBar.type === 'budget' ? 'bg-slate-200' : 'bg-emerald-500'}`} />
+                            <span className="capitalize">{hoveredBar.type}: ${hoveredBar.value.toLocaleString()}</span>
+                          </div>
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
-              {chartData.map((d, i) => (
-                <span key={d.month} className={i === chartData.length - 1 ? "text-slate-600" : ""}>
-                  {d.month}
-                </span>
-              ))}
-            </div>
+                <div className="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
+                  {chartData.map((d, i) => (
+                    <span key={d.month} className={i === chartData.length - 1 ? "text-slate-600" : ""}>
+                      {d.month}
+                    </span>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-60 text-center">
+                <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
+                  <TrendingUp size={24} />
+                </div>
+                <h4 className="text-sm font-medium text-slate-800 mb-1">No Budget Data</h4>
+                <p className="text-xs text-slate-400 max-w-sm mb-4">
+                  Create budgets to track your spending against limits and see your budget vs spent trends.
+                </p>
+                <Button size="sm" variant="outline" onClick={() => setAddModalOpen(true)}>
+                  Create Budget
+                </Button>
+              </div>
+            )}
           </Card>
 
           {/* Budget Allocation Chart */}
@@ -591,32 +608,49 @@ export default function BudgetsPage() {
               <h3 className="text-sm font-semibold text-slate-900">Allocation</h3>
               <p className="text-xs text-slate-500 mt-0.5 font-light">Budget distribution across categories</p>
             </div>
-            <div className="flex items-center gap-6 mb-6">
-              {/* Donut Chart */}
-              <div className="w-32 h-32 mx-auto rounded-full flex-shrink-0 relative"
-                   style={{ background: donutGradient }}>
-                <div className="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
-                  <span className="text-xs text-slate-400 font-medium">Total</span>
-                  <span className="text-sm font-bold text-slate-900">
-                    ${summary.totalBudget >= 1000 ? `${(summary.totalBudget / 1000).toFixed(1)}k` : summary.totalBudget.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-3 flex-1 max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300 pr-1">
-              {categoryAllocation.map((category) => {
-                const pct = summary.totalBudget > 0 ? Math.round((category.amount / summary.totalBudget) * 100) : 0;
-                return (
-                  <div key={category.name} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: category.color }} />
-                      <span className="text-slate-600">{category.name}</span>
+            {categoryAllocation.length > 0 ? (
+              <>
+                <div className="flex items-center gap-6 mb-6">
+                  {/* Donut Chart */}
+                  <div className="w-32 h-32 mx-auto rounded-full flex-shrink-0 relative"
+                       style={{ background: donutGradient }}>
+                    <div className="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                      <span className="text-xs text-slate-400 font-medium">Total</span>
+                      <span className="text-sm font-bold text-slate-900">
+                        ${summary.totalBudget >= 1000 ? `${(summary.totalBudget / 1000).toFixed(1)}k` : summary.totalBudget.toLocaleString()}
+                      </span>
                     </div>
-                    <span className="font-medium text-slate-900">{pct}%</span>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+                <div className="space-y-3 flex-1 max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300 pr-1">
+                  {categoryAllocation.map((category) => {
+                    const pct = summary.totalBudget > 0 ? Math.round((category.amount / summary.totalBudget) * 100) : 0;
+                    return (
+                      <div key={category.name} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: category.color }} />
+                          <span className="text-slate-600">{category.name}</span>
+                        </div>
+                        <span className="font-medium text-slate-900">{pct}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
+                  <PiggyBank size={24} />
+                </div>
+                <h4 className="text-sm font-medium text-slate-800 mb-1">No Budget Allocation</h4>
+                <p className="text-xs text-slate-400 max-w-sm mb-4">
+                  Create budgets for different categories to see how your budget is distributed across spending areas.
+                </p>
+                <Button size="sm" variant="outline" onClick={() => setAddModalOpen(true)}>
+                  Create Budget
+                </Button>
+              </div>
+            )}
           </Card>
         </div>
       </div>

@@ -41,6 +41,7 @@ export function useDashboard() {
   // ----- Loading / error -----
   const [loading, setLoading] = useState(true);
   const [insightsLoading, setInsightsLoading] = useState(false);
+  const [trendsLoading, setTrendsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // ----- Derived: user display name -----
@@ -153,6 +154,28 @@ export function useDashboard() {
     }
   }, [userId]);
 
+  // ----- Refresh spending trends only -----
+  const refreshSpendingTrends = useCallback(async () => {
+    if (!userId) return;
+    setTrendsLoading(true);
+    
+    try {
+      // Add cache-busting by including timestamp
+      const cacheBuster = Date.now();
+      const trendsResult = await fetchSpendingTrends(userId, 4);
+      
+      // Force state update even if data is the same by adding timestamp
+      setSpendingTrends(trendsResult.map(trend => ({
+        ...trend,
+        _cacheBust: cacheBuster
+      })));
+    } catch (err) {
+      console.error('Failed to refresh spending trends:', err);
+    } finally {
+      setTrendsLoading(false);
+    }
+  }, [userId]);
+
   return {
     // Data
     summary,
@@ -169,9 +192,11 @@ export function useDashboard() {
     // State
     loading,
     insightsLoading,
+    trendsLoading,
     error,
     refetch,
     refreshInsights,
+    refreshSpendingTrends,
     // Actions
     handleAcceptInvitation,
     handleDeclineInvitation,

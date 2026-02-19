@@ -189,9 +189,11 @@ export default function DashboardPage() {
     greeting,
     loading,
     insightsLoading,
+    trendsLoading,
     error,
     refetch,
     refreshInsights,
+    refreshSpendingTrends,
     handleAcceptInvitation,
     handleDeclineInvitation,
   } = useDashboard();
@@ -202,6 +204,11 @@ export default function DashboardPage() {
   // Handle refresh insights with loading state (only refresh insights, not whole dashboard)
   const handleRefreshInsights = async () => {
     refreshInsights();
+  };
+
+  // Handle refresh spending trends with loading state (only refresh trends, not whole dashboard)
+  const handleRefreshSpendingTrends = async () => {
+    refreshSpendingTrends();
   };
 
   // Toggle insight expand functionality (exact function from old implementation)
@@ -553,9 +560,12 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Budget Progress Skeleton */}
             <Card className="p-6 flex flex-col">
-              <div className="mb-6">
-                <Skeleton width={150} height={16} className="mb-2" />
-                <Skeleton width={200} height={12} />
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <Skeleton width={150} height={16} className="mb-2" />
+                  <Skeleton width={200} height={12} />
+                </div>
+                <Skeleton width={60} height={24} borderRadius={4} />
               </div>
 
               <div className="space-y-5">
@@ -582,9 +592,12 @@ export default function DashboardPage() {
 
             {/* Recent Transactions Skeleton */}
             <Card className="p-6 flex flex-col">
-              <div className="mb-6">
-                <Skeleton width={180} height={16} className="mb-2" />
-                <Skeleton width={200} height={12} />
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <Skeleton width={180} height={16} className="mb-2" />
+                  <Skeleton width={200} height={12} />
+                </div>
+                <Skeleton width={60} height={24} borderRadius={4} />
               </div>
 
               <div className="space-y-4 flex-1">
@@ -856,7 +869,7 @@ export default function DashboardPage() {
         <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
           <div className="mb-6">
             <h3 className="text-sm font-semibold text-slate-900">Categories</h3>
-            <p className="text-xs text-slate-500 mt-0.5 font-light">Monthly expense breakdown</p>
+            <p className="text-xs text-slate-500 mt-0.5 font-light">All-time expense breakdown</p>
           </div>
           <div className="flex items-center gap-6 mb-6">
             {/* Donut Chart */}
@@ -882,7 +895,7 @@ export default function DashboardPage() {
               );
             })}
             {categoryBreakdown.length === 0 && (
-              <p className="text-xs text-slate-400 text-center py-4">No expense data this month.</p>
+              <p className="text-xs text-slate-400 text-center py-4">No expense data found.</p>
             )}
           </div>
         </Card>
@@ -890,11 +903,37 @@ export default function DashboardPage() {
 
       {/* Spending Trends */}
       <div>
-        <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <BarChart3 size={16} className="text-slate-400" />
-          Spending Trends
-        </h3>
-        {spendingTrends.length > 0 ? (
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+            <BarChart3 size={16} className="text-slate-400" />
+            Spending Trends
+          </h3>
+          <Button 
+            variant="ghost" 
+            size="xs" 
+            className="text-slate-400 hover:text-slate-600" 
+            onClick={handleRefreshSpendingTrends}
+            disabled={trendsLoading}
+          >
+            <RefreshCw size={12} className={trendsLoading ? 'animate-spin' : ''} /> 
+            {trendsLoading ? 'Refreshing...' : 'Refresh'}
+          </Button>
+        </div>
+        {trendsLoading ? (
+          // Skeleton loader for spending trends
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-xl border border-slate-200/60 p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <Skeleton width={60} height={12} />
+                  <Skeleton circle width={16} height={16} />
+                </div>
+                <Skeleton width="80%" height={16} className="mb-1" />
+                <Skeleton width="60%" height={12} />
+              </div>
+            ))}
+          </div>
+        ) : spendingTrends.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {spendingTrends.map((trend) => {
               const vis = getTrendVisuals(trend.trend);
@@ -946,9 +985,20 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Budget Progress */}
         <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-slate-800">Budget Progress</h3>
-            <p className="text-xs text-slate-500 mt-0.5 font-light">Track spending against budget limits</p>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-800">Budget Progress</h3>
+              <p className="text-xs text-slate-500 mt-0.5 font-light">Track spending against budget limits</p>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="xs" 
+              className="text-slate-400 hover:text-slate-600" 
+              onClick={() => window.location.href = '/budgets'}
+            >
+              <FileText size={12} /> 
+              Manage
+            </Button>
           </div>
 
           <div className="space-y-5">
@@ -1003,9 +1053,20 @@ export default function DashboardPage() {
 
         {/* Recent Transactions */}
         <Card className="p-6 flex flex-col">
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-slate-800">Recent Transactions</h3>
-            <p className="text-xs text-slate-500 mt-0.5 font-light">Monthly expense breakdown</p>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-800">Recent Transactions</h3>
+              <p className="text-xs text-slate-500 mt-0.5 font-light">Monthly expense breakdown</p>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="xs" 
+              className="text-slate-400 hover:text-slate-600" 
+              onClick={() => window.location.href = '/transactions'}
+            >
+              <Receipt size={12} /> 
+              Manage
+            </Button>
           </div>
 
           <div className="space-y-4 flex-1 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
