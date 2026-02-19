@@ -113,7 +113,7 @@ export function useTransactions() {
     } finally {
       setLoading(false);
     }
-  }, [userId, filters, month, year, currentPage]);
+  }, [userId, filters, month, year, currentPage, pageSize]);
 
   useEffect(() => {
     fetchData();
@@ -172,7 +172,7 @@ export function useTransactions() {
   }, []);
 
   // Pagination helpers
-  const totalPages = Math.ceil(totalCount / pageSize);
+  const totalPages = pageSize === Number.MAX_SAFE_INTEGER ? 1 : Math.ceil(totalCount / pageSize);
   const hasNextPage = currentPage < totalPages;
   const hasPreviousPage = currentPage > 1;
 
