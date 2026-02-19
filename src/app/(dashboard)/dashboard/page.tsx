@@ -144,7 +144,7 @@ type InsightType = {
   borderColor: string;
   labelColor: string;
   actionColor: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<any> | string;
   iconColor: string;
 };
 
@@ -175,31 +175,6 @@ const StatCard = memo(({ stat }: { stat: StatType }) => {
 
 StatCard.displayName = "StatCard";
 
-const InsightCard = memo(({ insight }: { insight: InsightType }) => {
-  const IconCmp = insight.icon;
-  return (
-    <div
-      className={`bg-white rounded-xl border-l-4 ${insight.borderColor} shadow-sm p-4 hover:shadow-md transition-all group cursor-pointer`}
-    >
-      <div className="flex justify-between items-start mb-2">
-        <div className={`text-[10px] font-bold ${insight.labelColor} uppercase tracking-wider`}>
-          {insight.label}
-        </div>
-        <IconCmp size={16} className={insight.iconColor} />
-      </div>
-      <h4 className="text-sm font-bold text-slate-800 mb-1">{insight.title}</h4>
-      <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
-        {insight.description}
-      </p>
-                <Button variant="ghost" size="xs" className={insight.actionColor}>
-                  {insight.action} <ArrowRight size={12} />
-                </Button>
-    </div>
-  );
-});
-
-InsightCard.displayName = "InsightCard";
-
 export default function DashboardPage() {
   const {
     summary,
@@ -213,13 +188,80 @@ export default function DashboardPage() {
     userName,
     greeting,
     loading,
+    insightsLoading,
     error,
     refetch,
+    refreshInsights,
     handleAcceptInvitation,
     handleDeclineInvitation,
   } = useDashboard();
 
   const [hoveredBar, setHoveredBar] = useState<{ month: string; type: 'income' | 'expense'; value: number } | null>(null);
+  const [expandedInsight, setExpandedInsight] = useState<string | null>(null);
+
+  // Handle refresh insights with loading state (only refresh insights, not whole dashboard)
+  const handleRefreshInsights = async () => {
+    refreshInsights();
+  };
+
+  // Toggle insight expand functionality (exact function from old implementation)
+  const handleToggleInsightExpand = (insightTitle: string) => {
+    setExpandedInsight(expandedInsight === insightTitle ? null : insightTitle);
+  };
+
+  // Get insight style based on type (exact function from old implementation)
+  const getInsightStyle = (type: string) => {
+    switch (type) {
+      case 'success':
+        return {
+          bgColor: 'bg-emerald-50',
+          iconBg: 'bg-emerald-500',
+          textColor: 'text-emerald-700',
+          borderColor: 'border-emerald-200',
+          icon: 'fa-check-circle'
+        };
+      case 'warning':
+        return {
+          bgColor: 'bg-amber-50',
+          iconBg: 'bg-amber-500',
+          textColor: 'text-amber-700',
+          borderColor: 'border-amber-200',
+          icon: 'fa-exclamation-triangle'
+        };
+      case 'danger':
+        return {
+          bgColor: 'bg-rose-50',
+          iconBg: 'bg-rose-500',
+          textColor: 'text-rose-700',
+          borderColor: 'border-rose-200',
+          icon: 'fa-exclamation-circle'
+        };
+      default:
+        return {
+          bgColor: 'bg-blue-50',
+          iconBg: 'bg-blue-500',
+          textColor: 'text-blue-700',
+          borderColor: 'border-blue-200',
+          icon: 'fa-info-circle'
+        };
+    }
+  };
+
+  // Get additional context message based on insight type (exact function from old implementation)
+  const getInsightContextMessage = (type: string) => {
+    switch (type) {
+      case 'success':
+        return "Keep up the good work! Maintaining this habit will help you reach your financial goals faster.";
+      case 'warning':
+        return "Consider reviewing your budget to address this issue before it affects your financial health.";
+      case 'danger':
+        return "This requires immediate attention. Visit the Budget section to make adjustments to your spending plan.";
+      case 'info':
+        return "This information can help you make better financial decisions going forward.";
+      default:
+        return "Use this information to make better financial decisions.";
+    }
+  };
 
   // Build stats from real summary data
   const stats: StatType[] = useMemo(() => {
@@ -277,11 +319,67 @@ export default function DashboardPage() {
         borderColor: vis.borderColor,
         labelColor: vis.labelColor,
         actionColor: vis.actionColor,
-        icon: vis.icon,
+        icon: ins.icon || vis.icon, // Use icon from insights service if available
         iconColor: vis.iconColor,
       };
     });
   }, [insights]);
+
+  // InsightCard component with access to state variables
+  const InsightCard = memo(({ insight }: { insight: InsightType }) => {
+    const isExpanded = expandedInsight === insight.title;
+    const style = getInsightStyle(insight.type);
+    
+    // Handle both string icons (from insights service) and React component icons
+    const renderIcon = () => {
+      if (typeof insight.icon === 'string') {
+        // Use Iconify for string icon names (e.g., "lucide:alert-triangle")
+        return <Icon icon={insight.icon} width={16} height={16} className={insight.iconColor} />;
+      } else {
+        // Use React component icon
+        const IconCmp = insight.icon;
+        return <IconCmp size={16} className={insight.iconColor} />;
+      }
+    };
+    
+    return (
+      <div
+        className={`bg-white rounded-xl border-l-4 ${insight.borderColor} shadow-sm p-4 hover:shadow-md transition-all group cursor-pointer ${insightsLoading ? 'opacity-50' : ''}`}
+      >
+        <div className="flex justify-between items-start mb-2">
+          <div className={`text-[10px] font-bold ${insight.labelColor} uppercase tracking-wider`}>
+            {insight.label}
+          </div>
+          {renderIcon()}
+        </div>
+        <h4 className="text-sm font-bold text-slate-800 mb-1">{insight.title}</h4>
+        <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
+          {insight.description}
+        </p>
+        
+        {/* Expanded content - exact implementation from old FinancialInsights */}
+        {isExpanded && (
+          <div className="mt-3 text-sm text-slate-600 animate__animated animate__fadeIn">
+            <p className="text-xs leading-relaxed">
+              {getInsightContextMessage(insight.type)}
+            </p>
+          </div>
+        )}
+        
+        {/* Action button with expand/collapse functionality - exact implementation from old FinancialInsights */}
+        <Button 
+          variant="ghost" 
+          size="xs" 
+          className={insight.actionColor}
+          onClick={() => handleToggleInsightExpand(insight.title)}
+        >
+          {isExpanded ? 'Show less' : 'Learn more'} <ArrowRight size={12} />
+        </Button>
+      </div>
+    );
+  });
+
+  InsightCard.displayName = "InsightCard";
 
   // Normalize chart data to percentages for bar heights
   const chartData = useMemo(() => {
@@ -594,11 +692,33 @@ export default function DashboardPage() {
             <Icon icon="material-symbols:insights" width={16} height={16} className="text-emerald-500" />
             Financial Insights
           </h3>
-          <Button variant="ghost" size="xs" className="text-slate-400 hover:text-slate-600" onClick={refetch}>
-            <RefreshCw size={12} /> Refresh
+          <Button 
+            variant="ghost" 
+            size="xs" 
+            className="text-slate-400 hover:text-slate-600" 
+            onClick={handleRefreshInsights}
+            disabled={insightsLoading}
+          >
+            <RefreshCw size={12} className={insightsLoading ? 'animate-spin' : ''} /> 
+            {insightsLoading ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
-        {insightCards.length > 0 ? (
+        {insightsLoading ? (
+          // Skeleton loader for insights
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-xl border border-slate-200/60 p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <Skeleton width={60} height={12} />
+                  <Skeleton circle width={16} height={16} />
+                </div>
+                <Skeleton width="80%" height={16} className="mb-1" />
+                <Skeleton width="100%" height={12} className="mb-3" />
+                <Skeleton width={60} height={10} />
+              </div>
+            ))}
+          </div>
+        ) : insightCards.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {insightCards.map((insight) => (
               <InsightCard key={insight.title} insight={insight} />
@@ -611,13 +731,13 @@ export default function DashboardPage() {
                 <Icon icon="material-symbols:insights" width={24} height={24} />
               </div>
               <div>
-                <h4 className="text-sm font-medium text-slate-800 mb-1">No Insights Available</h4>
+                <h4 className="text-sm font-medium text-slate-800 mb-1">No Insights Yet</h4>
                 <p className="text-xs text-slate-400 max-w-sm">
-                  Start adding transactions and budgets to see personalized financial insights based on your overall financial data.
+                  As you add more transactions over time, we'll analyze your financial patterns and provide personalized insights to help you improve your financial health.
                 </p>
               </div>
               <Button size="sm" variant="outline" onClick={() => window.location.href = '/transactions'}>
-                Add Transactions
+                Add More Transactions
               </Button>
             </div>
           </Card>

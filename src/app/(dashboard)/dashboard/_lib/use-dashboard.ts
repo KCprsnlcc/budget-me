@@ -40,6 +40,7 @@ export function useDashboard() {
 
   // ----- Loading / error -----
   const [loading, setLoading] = useState(true);
+  const [insightsLoading, setInsightsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // ----- Derived: user display name -----
@@ -130,6 +131,28 @@ export function useDashboard() {
     fetchData();
   }, [fetchData]);
 
+  // ----- Refresh insights only -----
+  const refreshInsights = useCallback(async () => {
+    if (!userId) return;
+    setInsightsLoading(true);
+    
+    try {
+      // Add cache-busting by including timestamp in a way that forces fresh data
+      const cacheBuster = Date.now();
+      const insightsResult = await fetchInsights(userId);
+      
+      // Force state update even if data is the same by adding timestamp
+      setInsights(insightsResult.map(insight => ({
+        ...insight,
+        _cacheBust: cacheBuster
+      })));
+    } catch (err) {
+      console.error('Failed to refresh insights:', err);
+    } finally {
+      setInsightsLoading(false);
+    }
+  }, [userId]);
+
   return {
     // Data
     summary,
@@ -145,8 +168,10 @@ export function useDashboard() {
     greeting: getGreeting(),
     // State
     loading,
+    insightsLoading,
     error,
     refetch,
+    refreshInsights,
     // Actions
     handleAcceptInvitation,
     handleDeclineInvitation,

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { generateInsights, InsightData, InsightsTransaction, InsightsBudget } from "./insights-service";
 
 const supabase = createClient();
 
@@ -72,6 +73,8 @@ export type InsightItem = {
   type: "warning" | "success" | "info" | "danger";
   title: string;
   description: string;
+  icon?: string;
+  _refreshId?: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -470,113 +473,82 @@ export async function declineInvitation(
 }
 
 // ---------------------------------------------------------------------------
-// INSIGHTS — Generate data-driven financial insights
+// INSIGHTS — Generate comprehensive financial insights (ALL 19+ algorithms)
 // ---------------------------------------------------------------------------
 
 export async function fetchInsights(
   userId: string
 ): Promise<InsightItem[]> {
-  // Fetch all-time transactions and budgets for insights
+  // Fetch all-time transactions with full details for comprehensive insights
   const { data: transactions } = await supabase
     .from("transactions")
-    .select("type, amount, expense_categories ( category_name ), notes, date")
+    .select("id, type, amount, notes, date, category, expense_category_id, income_category_id")
     .eq("user_id", userId)
     .eq("status", "completed")
     .order("date", { ascending: false });
 
+  // Fetch active budgets with full details
   const { data: budgets } = await supabase
     .from("budget_details")
-    .select("budget_name, category_name, amount, spent, percentage_used")
+    .select("id, budget_name, expense_category_name, amount, spent, percentage_used")
     .eq("user_id", userId)
     .eq("status", "active");
 
-  const insights: InsightItem[] = [];
-  const txRows = transactions ?? [];
-  
-  // Calculate all-time aggregates
+  // Calculate all-time aggregates for insights
   let totalIncome = 0;
   let totalExpenses = 0;
+  const txRows = transactions ?? [];
+  
   for (const row of txRows) {
     const amt = Number(row.amount);
     if (row.type === "income" || row.type === "cash_in") totalIncome += amt;
     else if (row.type === "expense") totalExpenses += amt;
   }
+  
   const overallSavingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
 
-  // 1. Over-budget categories
-  const overBudget = (budgets ?? []).filter(
-    (b: any) => Number(b.percentage_used ?? 0) >= 100
+  // Transform to proper types for insights service
+  const typedTransactions: InsightsTransaction[] = txRows.map(row => ({
+    ...row,
+    amount: Number(row.amount),
+    type: row.type as "income" | "expense" | "contribution" | "transfer" | "cash_in",
+  }));
+
+  const typedBudgets: InsightsBudget[] = (budgets ?? []).map((b: any) => ({
+    id: b.id || "",
+    budget_name: b.budget_name || "",
+    expense_category_name: b.expense_category_name || "",
+    amount: Number(b.amount) || 0,
+    spent: Number(b.spent) || 0,
+    percentage_used: Number(b.percentage_used) || 0,
+  }));
+
+  // Generate comprehensive insights using ALL 19+ algorithms from old implementation
+  const insightsData = generateInsights(
+    typedTransactions,
+    typedBudgets,
+    totalIncome,
+    totalExpenses,
+    overallSavingsRate
   );
-  if (overBudget.length > 0) {
-    insights.push({
-      type: "warning",
-      title: `Over budget in ${overBudget.length} ${overBudget.length === 1 ? "category" : "categories"}`,
-      description: `You've exceeded your budget in ${overBudget.map((b: any) => b.category_name || b.budget_name).join(", ")}.`,
-    });
-  }
 
-  // 2. Overall savings rate insight
-  if (overallSavingsRate >= 30) {
-    insights.push({
-      type: "success",
-      title: "Outstanding overall savings rate!",
-      description: `You're saving ${overallSavingsRate.toFixed(1)}% of your total income. Keep it up!`,
-    });
-  } else if (overallSavingsRate >= 20) {
-    insights.push({
-      type: "success",
-      title: "Great overall savings rate",
-      description: `Saving ${overallSavingsRate.toFixed(1)}% of total income meets the recommended 20% target.`,
-    });
-  } else if (overallSavingsRate > 0 && overallSavingsRate < 10) {
-    insights.push({
-      type: "warning",
-      title: "Low overall savings rate",
-      description: `Only saving ${overallSavingsRate.toFixed(1)}% of total income. Aim for at least 20%.`,
-    });
-  } else if (totalExpenses > totalIncome && totalIncome > 0) {
-    insights.push({
-      type: "danger",
-      title: "Overall expenses exceed income",
-      description: `Total expenses exceed income by $${(totalExpenses - totalIncome).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.`,
-    });
-  }
+  // Add some randomness to insight selection and timestamp for variety
+  const shuffledInsights = [...insightsData].sort(() => Math.random() - 0.5);
+  const topInsights = shuffledInsights.slice(0, 4);
+  
+  // Add timestamp to ensure refresh detection
+  const timestamp = new Date().toISOString();
 
-  // 3. Category concentration (all-time)
-  const catMap = new Map<string, number>();
-  for (const row of txRows) {
-    if (row.type !== "expense") continue;
-    const cat = row.expense_categories as Record<string, any> | null;
-    const name = cat?.category_name ?? "Uncategorized";
-    catMap.set(name, (catMap.get(name) ?? 0) + Number(row.amount));
-  }
-  if (catMap.size > 1 && totalExpenses > 0) {
-    const sorted = Array.from(catMap.entries()).sort((a, b) => b[1] - a[1]);
-    const topPct = (sorted[0][1] / totalExpenses) * 100;
-    if (topPct > 40) {
-      insights.push({
-        type: "info",
-        title: `High spending in ${sorted[0][0]}`,
-        description: `${sorted[0][0]} accounts for ${topPct.toFixed(0)}% of your total expenses.`,
-      });
-    }
-  }
+  // Map to InsightItem format with proper types and icons
+  const mappedInsights = topInsights.map((insight, index) => ({
+    type: insight.type,
+    title: insight.title,
+    description: insight.description,
+    icon: insight.icon,
+    // Add timestamp to force re-render (not displayed but changes object reference)
+    _refreshId: `${timestamp}-${index}`,
+  }));
 
-  // 4. Transaction volume insight
-  if (txRows.length > 1000) {
-    insights.push({
-      type: "success",
-      title: "High transaction volume",
-      description: `You've tracked ${txRows.length} transactions. Consider reviewing for optimization opportunities.`,
-    });
-  } else if (txRows.length < 50 && txRows.length > 0) {
-    insights.push({
-      type: "info",
-      title: "Growing transaction history",
-      description: `You've tracked ${txRows.length} transactions. Keep adding more for better insights.`,
-    });
-  }
-
-  // Return top 4 insights
-  return insights.slice(0, 4);
+  // Return top 4 insights only
+  return mappedInsights;
 }
