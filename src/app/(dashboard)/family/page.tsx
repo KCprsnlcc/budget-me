@@ -77,6 +77,7 @@ export default function FamilyPage() {
     pendingRequests,
     publicFamilies,
     invitations,
+    joinRequests,
     overviewStats,
     currentUserRole,
     isOwner,
@@ -255,22 +256,28 @@ export default function FamilyPage() {
     );
   }
 
+  // No family state - ALWAYS redirect/show no-family state component
+  if (familyState === "no-family") {
+    return (
+      <NoFamilyState 
+        onCreateFamily={handleOpenCreateFamily}
+        onJoinFamily={handleJoinFamily}
+        onCheckInvitations={refetch}
+        publicFamilies={publicFamilies}
+        invitations={invitations}
+        joinRequests={joinRequests}
+        isLoading={mutating}
+        onRespondToInvitation={handleRespondToInvitation}
+        onSendJoinRequest={handleSendJoinRequest}
+      />
+    );
+  }
+
+  // User has a family - render family dashboard
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
-      {familyState === "no-family" ? (
-        <NoFamilyState 
-          onCreateFamily={handleOpenCreateFamily}
-          onJoinFamily={handleJoinFamily}
-          onCheckInvitations={refetch}
-          publicFamilies={publicFamilies}
-          invitations={invitations}
-          isLoading={mutating}
-          onRespondToInvitation={handleRespondToInvitation}
-        />
-      ) : (
-        <>
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">
             Family Dashboard
@@ -725,8 +732,6 @@ export default function FamilyPage() {
         onClose={() => setLeaveFamilyModalOpen(false)}
         onConfirm={handleLeaveFamily}
       />
-        </>
-      )}
     </div>
   );
 }

@@ -12,6 +12,7 @@ import {
   fetchUserInvitations,
   fetchFamilyOverview,
   fetchSentInvitations,
+  fetchUserJoinRequests,
   createFamily,
   updateFamily,
   deleteFamily,
@@ -59,6 +60,7 @@ export function useFamily() {
   const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
   const [publicFamilies, setPublicFamilies] = useState<PublicFamily[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [joinRequests, setJoinRequests] = useState<any[]>([]);
   const [overviewStats, setOverviewStats] = useState<FamilyOverviewStats | null>(null);
   const [sentInvitations, setSentInvitations] = useState<SentInvitation[]>([]);
 
@@ -114,13 +116,15 @@ export function useFamily() {
         setOverviewStats(null);
 
         // Fetch public families and invitations in parallel
-        const [pubResult, invResult] = await Promise.all([
+        const [pubResult, invResult, joinReqResult] = await Promise.all([
           fetchPublicFamilies(userId),
           fetchUserInvitations(userEmail),
+          fetchUserJoinRequests(userId),
         ]);
 
         setPublicFamilies(pubResult.data);
         setInvitations(invResult.data);
+        setJoinRequests(joinReqResult.data);
         setLoading(false);
         return;
       }
@@ -157,13 +161,15 @@ export function useFamily() {
         setFamilyData({ ...family });
       }
 
-      // Also fetch public families + invitations in background
-      const [pubResult, invResult] = await Promise.all([
+      // Also fetch public families + invitations + join requests in background
+      const [pubResult, invResult, joinReqResult] = await Promise.all([
         fetchPublicFamilies(userId),
         fetchUserInvitations(userEmail),
+        fetchUserJoinRequests(userId),
       ]);
       setPublicFamilies(pubResult.data);
       setInvitations(invResult.data);
+      setJoinRequests(joinReqResult.data);
     } catch (err: any) {
       setError(err.message ?? "An unexpected error occurred.");
       setFamilyState("error");
@@ -292,6 +298,13 @@ export function useFamily() {
       if (!userId) return { error: "Not authenticated." };
       setMutating(true);
       const result = await sendJoinRequest(targetFamilyId, userId, message);
+      
+      // Refresh join requests after sending
+      if (!result.error) {
+        const joinReqResult = await fetchUserJoinRequests(userId);
+        setJoinRequests(joinReqResult.data);
+      }
+      
       setMutating(false);
       return { error: result.error };
     },
@@ -398,6 +411,7 @@ export function useFamily() {
     pendingRequests,
     publicFamilies,
     invitations,
+    joinRequests,
     sentInvitations,
     overviewStats,
     currentUserRole,

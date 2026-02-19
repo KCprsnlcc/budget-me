@@ -34,7 +34,7 @@ export function UserAvatar({ user, size = "md", className = "", showName = false
           .from("profiles")
           .select("avatar_url, full_name")
           .eq("id", user.id)
-          .single();
+          .maybeSingle(); // Use maybeSingle() to handle missing profiles gracefully
         
         if (error) {
           console.error("Failed to fetch user profile:", error);

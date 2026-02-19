@@ -32,7 +32,7 @@ export const getUserWithProfile = cache(async () => {
 
   const [userResult, profileResult] = await Promise.all([
     supabase.auth.getUser(),
-    supabase.from("profiles").select("*").single(),
+    supabase.from("profiles").select("*").maybeSingle(), // Use maybeSingle() to handle missing profiles gracefully
   ]);
 
   const user = userResult.data?.user ?? null;
@@ -50,7 +50,7 @@ export const getUserProfile = cache(async (userId: string) => {
     .from("profiles")
     .select("avatar_url, full_name")
     .eq("id", userId)
-    .single();
+    .maybeSingle(); // Use maybeSingle() to handle missing profiles gracefully
   
   if (error || !data) return null;
   return data;

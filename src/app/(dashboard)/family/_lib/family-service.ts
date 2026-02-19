@@ -164,13 +164,12 @@ function mapJoinRequestRow(row: any): JoinRequest {
 }
 
 function mapPublicFamilyRow(row: any): PublicFamily {
-  const creatorProfile = row.profiles ?? {};
   return {
     id: row.id,
     name: row.family_name,
     description: row.description ?? "",
     memberCount: row._memberCount ?? 0,
-    createdBy: creatorProfile.full_name ?? "Unknown",
+    createdBy: row._createdByName ?? "Unknown",
     createdAt: row.created_at,
     isPublic: true,
   };
@@ -420,12 +419,7 @@ export async function fetchPublicFamilies(
 
   let query = supabase
     .from("families")
-    .select(
-      `
-      *,
-      profiles!families_created_by_fkey ( full_name )
-    `
-    )
+    .select("*")
     .eq("is_public", true)
     .eq("status", "active")
     .order("created_at", { ascending: false })
@@ -438,7 +432,7 @@ export async function fetchPublicFamilies(
   const { data, error } = await query;
   if (error) return { data: [], error: error.message };
 
-  // Get member counts
+  // Get member counts for each family
   const familyIds = (data ?? []).map((f: any) => f.id);
   const { data: memberCounts } = await supabase
     .from("family_members")
@@ -451,8 +445,21 @@ export async function fetchPublicFamilies(
     countMap[m.family_id] = (countMap[m.family_id] || 0) + 1;
   });
 
+  // Get creator names separately to avoid FK join issues
+  const creatorIds = (data ?? []).map((f: any) => f.created_by);
+  const { data: creatorProfiles } = await supabase
+    .from("profiles")
+    .select("id, full_name")
+    .in("id", creatorIds);
+
+  const creatorMap: Record<string, string> = {};
+  (creatorProfiles ?? []).forEach((p: any) => {
+    creatorMap[p.id] = p.full_name ?? "Unknown";
+  });
+
   const families = (data ?? []).map((row: any) => {
     row._memberCount = countMap[row.id] ?? 0;
+    row._createdByName = creatorMap[row.created_by] ?? "Unknown";
     return mapPublicFamilyRow(row);
   });
 
@@ -861,6 +868,67 @@ export async function respondToJoinRequest(
   }
 
   return { error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch user's pending join requests                          */
+/* ------------------------------------------------------------------ */
+
+export async function fetchUserJoinRequests(
+  userId: string
+): Promise<{ data: any[]; error: string | null }> {
+  const { data, error } = await supabase
+    .from("family_join_requests")
+    .select(`
+      family_id,
+      status,
+      created_at,
+      families!family_join_requests_family_id_fkey (
+        family_name,
+        description,
+        created_by
+      )
+    `)
+    .eq("user_id", userId)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) return { data: [], error: error.message };
+  
+  // Get member counts for each family
+  const familyIds = (data ?? []).map((req: any) => req.family_id);
+  const { data: memberCounts } = await supabase
+    .from("family_members")
+    .select("family_id")
+    .in("family_id", familyIds)
+    .eq("status", "active");
+
+  const countMap: Record<string, number> = {};
+  (memberCounts ?? []).forEach((m: any) => {
+    countMap[m.family_id] = (countMap[m.family_id] || 0) + 1;
+  });
+
+  // Get creator names
+  const creatorIds = (data ?? []).map((req: any) => req.families?.created_by).filter(Boolean);
+  const { data: creatorProfiles } = await supabase
+    .from("profiles")
+    .select("id, full_name")
+    .in("id", creatorIds);
+
+  const creatorMap: Record<string, string> = {};
+  (creatorProfiles ?? []).forEach((p: any) => {
+    creatorMap[p.id] = p.full_name ?? "Unknown";
+  });
+
+  // Enrich the data
+  const enrichedData = (data ?? []).map((req: any) => ({
+    ...req,
+    memberCount: countMap[req.family_id] ?? 0,
+    createdBy: creatorMap[req.families?.created_by] ?? "Unknown",
+    requestedAt: req.created_at,
+  }));
+
+  return { data: enrichedData, error: null };
 }
 
 /* ------------------------------------------------------------------ */
