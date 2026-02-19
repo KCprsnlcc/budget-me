@@ -584,7 +584,7 @@ export default function TransactionsPage() {
               placeholder="Search transactions..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
             />
           </div>
 
@@ -594,7 +594,7 @@ export default function TransactionsPage() {
               onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
               options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
               placeholder="All Months"
-              className="w-full"
+              className="w-full text-slate-900"
               allowEmpty={true}
               emptyLabel="All Months"
               hideSearch={true}
@@ -604,7 +604,7 @@ export default function TransactionsPage() {
               onChange={(value) => setYear(value === "" ? "all" : Number(value))}
               options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
               placeholder="All Years"
-              className="w-full"
+              className="w-full text-slate-900"
               allowEmpty={true}
               emptyLabel="All Years"
               hideSearch={true}
@@ -640,9 +640,9 @@ export default function TransactionsPage() {
               className="w-full"
               allowEmpty={true}
               emptyLabel="All Categories"
-              hideSearch={true}
+              hideSearch={false}
             />
-                      </div>
+          </div>
 
           <div className="flex-1"></div>
           <div className="flex items-center gap-2 w-full xl:w-auto">

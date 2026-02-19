@@ -65,7 +65,8 @@ export type GoalFilters = {
   status?: string;
   priority?: string;
   category?: string;
-  scope?: "all" | "personal" | "family";
+  month?: number | "all";
+  year?: number | "all";
 };
 
 export async function fetchGoalsForPage(
@@ -87,10 +88,11 @@ export async function fetchGoalsForPage(
   if (filters.category) {
     query = query.eq("category", filters.category);
   }
-  if (filters.scope === "personal") {
-    query = query.eq("is_family_goal", false);
-  } else if (filters.scope === "family") {
-    query = query.eq("is_family_goal", true);
+  if (filters.month && filters.month !== "all") {
+    query = query.eq("extract(month from created_at)", filters.month);
+  }
+  if (filters.year && filters.year !== "all") {
+    query = query.eq("extract(year from created_at)", filters.year);
   }
 
   const { data, error } = await query;

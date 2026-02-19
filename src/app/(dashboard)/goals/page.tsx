@@ -30,6 +30,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import {
   AddGoalModal,
   ViewGoalModal,
@@ -40,6 +41,11 @@ import {
 import type { GoalType } from "./_components/types";
 import { getGoalProgress, formatCurrency, formatDate } from "./_components/constants";
 import { useGoals } from "./_lib/use-goals";
+
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
 
 
 const GOAL_ICONS: Record<string, React.ElementType> = {
@@ -167,7 +173,8 @@ const GoalCard = memo(({
 GoalCard.displayName = "GoalCard";
 
 export default function GoalsPage() {
-  const { goals, allGoals, summary, search, setSearch, statusFilter, setStatusFilter, priorityFilter, setPriorityFilter, categoryFilter, setCategoryFilter, scopeFilter, setScopeFilter, resetFilters, loading, error, refetch } = useGoals();
+  const currentYear = new Date().getFullYear();
+  const { goals, allGoals, summary, search, setSearch, statusFilter, setStatusFilter, priorityFilter, setPriorityFilter, categoryFilter, setCategoryFilter, month, setMonth, year, setYear, resetFilters, resetFiltersToAll, loading, error, refetch } = useGoals();
 
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -429,71 +436,84 @@ export default function GoalsPage() {
       {/* Filters */}
       <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col xl:flex-row items-center gap-3">
-          {/* Scope Filter */}
-          <div className="flex bg-slate-100 p-1 rounded-lg w-full md:w-auto">
-            <Button variant="ghost" size="sm" className={`flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md transition-colors ${scopeFilter === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`} onClick={() => setScopeFilter("all")}>
-              All
-            </Button>
-            <Button variant="ghost" size="sm" className={`flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md transition-colors ${scopeFilter === "personal" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`} onClick={() => setScopeFilter("personal")}>
-              Personal
-            </Button>
-            <Button variant="ghost" size="sm" className={`flex-1 md:flex-none px-3 py-1 text-xs font-medium rounded-md transition-colors ${scopeFilter === "family" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`} onClick={() => setScopeFilter("family")}>
-              Family
-            </Button>
+          <div className="flex items-center gap-2 text-xs text-slate-500 w-full xl:w-auto">
+            <Filter size={16} />
+            <span className="font-medium">Filters</span>
           </div>
+          <div className="hidden xl:block h-4 w-px bg-slate-200"></div>
 
-          <div className="h-4 w-px bg-slate-200 hidden xl:block"></div>
-
-          <div className="relative w-full md:w-64">
+          <div className="relative w-full xl:w-64">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search goals..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
             />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full md:w-auto flex-1">
-            <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option value="">All Priorities</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option value="">All Statuses</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="behind">Behind</option>
-              <option value="overdue">Overdue</option>
-            </select>
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option value="">All Categories</option>
-              <option value="emergency">Emergency</option>
-              <option value="housing">Housing</option>
-              <option value="education">Education</option>
-              <option value="travel">Travel</option>
-              <option value="transport">Transport</option>
-            </select>
-            {/* Date Range Picker Mockup */}
-            <div className="relative w-full">
-              <Calendar size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Select dates"
-                className="h-8 pl-8 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-                readOnly
-                value="Jan 1 - Dec 31"
-              />
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
+            <FilterDropdown
+              value={month === "all" ? "" : month.toString()}
+              onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
+              options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
+              placeholder="All Months"
+              className="w-full text-slate-900"
+              allowEmpty={true}
+              emptyLabel="All Months"
+              hideSearch={true}
+            />
+            <FilterDropdown
+              value={year === "all" ? "" : year.toString()}
+              onChange={(value) => setYear(value === "" ? "all" : Number(value))}
+              options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
+              placeholder="All Years"
+              className="w-full text-slate-900"
+              allowEmpty={true}
+              emptyLabel="All Years"
+              hideSearch={true}
+            />
+            <FilterDropdown
+              value={priorityFilter}
+              onChange={(value) => setPriorityFilter(value)}
+              options={[
+                { value: "high", label: "High" },
+                { value: "medium", label: "Medium" },
+                { value: "low", label: "Low" },
+              ]}
+              placeholder="All Priorities"
+              className="w-full"
+              allowEmpty={true}
+              emptyLabel="All Priorities"
+              hideSearch={true}
+            />
+            <FilterDropdown
+              value={statusFilter}
+              onChange={(value) => setStatusFilter(value)}
+              options={[
+                { value: "in_progress", label: "In Progress" },
+                { value: "completed", label: "Completed" },
+                { value: "behind", label: "Behind" },
+                { value: "overdue", label: "Overdue" },
+              ]}
+              placeholder="All Statuses"
+              className="w-full"
+              allowEmpty={true}
+              emptyLabel="All Statuses"
+              hideSearch={true}
+            />
           </div>
 
-          <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" onClick={resetFilters}>
-            <RotateCcw size={14} />
-            Reset
-          </Button>
+          <div className="flex-1"></div>
+          <div className="flex items-center gap-2 w-full xl:w-auto">
+            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset to Current Month" onClick={resetFilters}>
+              <RotateCcw size={14} /> Current
+            </Button>
+            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={resetFiltersToAll}>
+              <RotateCcw size={14} /> All Time
+            </Button>
+          </div>
         </div>
       </Card>
 

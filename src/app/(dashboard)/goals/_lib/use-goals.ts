@@ -18,8 +18,9 @@ export function useGoals() {
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [scopeFilter, setScopeFilter] = useState<"all" | "personal" | "family">("all");
   const [search, setSearch] = useState("");
+  const [month, setMonth] = useState<number | "all">("all");
+  const [year, setYear] = useState<number | "all">("all");
 
   // ----- Data state -----
   const [goals, setGoals] = useState<GoalType[]>([]);
@@ -35,9 +36,10 @@ export function useGoals() {
       status: statusFilter || undefined,
       priority: priorityFilter || undefined,
       category: categoryFilter || undefined,
-      scope: scopeFilter,
+      month,
+      year,
     }),
-    [statusFilter, priorityFilter, categoryFilter, scopeFilter]
+    [statusFilter, priorityFilter, categoryFilter, month, year]
   );
 
   // ----- Fetch main data when filters change -----
@@ -86,11 +88,22 @@ export function useGoals() {
 
   // ----- Reset filters -----
   const resetFilters = useCallback(() => {
+    const now = new Date();
     setStatusFilter("");
     setPriorityFilter("");
     setCategoryFilter("");
-    setScopeFilter("all");
     setSearch("");
+    setMonth(now.getMonth() + 1);
+    setYear(now.getFullYear());
+  }, []);
+
+  const resetFiltersToAll = useCallback(() => {
+    setStatusFilter("");
+    setPriorityFilter("");
+    setCategoryFilter("");
+    setSearch("");
+    setMonth("all");
+    setYear("all");
   }, []);
 
   return {
@@ -105,11 +118,12 @@ export function useGoals() {
     setPriorityFilter,
     categoryFilter,
     setCategoryFilter,
-    scopeFilter,
-    setScopeFilter,
     search,
     setSearch,
+    month, setMonth,
+    year, setYear,
     resetFilters,
+    resetFiltersToAll,
     // State
     loading,
     error,
