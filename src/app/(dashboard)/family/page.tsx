@@ -23,6 +23,7 @@ import {
   ChevronDown,
   UserCheck,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -131,8 +132,8 @@ export default function FamilyPage() {
   if (loading || familyState === "loading") {
     return (
       <div className="max-w-6xl mx-auto flex items-center justify-center py-24 animate-fade-in">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500 border-t-transparent" />
-        <span className="ml-3 text-sm text-slate-600">Loading family data...</span>
+        <Loader2 size={24} className="animate-spin text-emerald-500" />
+        <span className="ml-3 text-sm text-slate-500">Loading family data...</span>
       </div>
     );
   }

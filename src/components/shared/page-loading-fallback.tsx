@@ -5,24 +5,27 @@ import { useEffect, useState } from "react";
 
 export function PageLoadingFallback() {
   const [progress, setProgress] = useState(0);
+  const [shouldHide, setShouldHide] = useState(false);
 
   useEffect(() => {
-    // Start at 0 and quickly ramp to ~90% while Suspense resolves
-    // This gives visual feedback that something is happening
-    // The component unmounts when the real page is ready (Suspense resolves)
     let frame: number;
     let start: number | null = null;
+    let timeoutId: NodeJS.Timeout;
 
     const animate = (timestamp: number) => {
       if (!start) start = timestamp;
       const elapsed = timestamp - start;
 
-      // Ease-out curve: fast start, slows as it approaches 90%
-      // Never reaches 100% — that happens when Suspense resolves and this unmounts
-      const target = Math.min(90, (elapsed / 10) * (1 - elapsed / 20000));
+      // Progress animation: ramp up to 100%
+      const target = Math.min(100, (elapsed / 8) * (1 - elapsed / 15000));
       setProgress(Math.max(0, target));
 
-      if (target < 90) {
+      // When we reach 100%, hide the component after a short delay
+      if (target >= 100) {
+        timeoutId = setTimeout(() => {
+          setShouldHide(true);
+        }, 300); // Small delay to show 100% briefly
+      } else {
         frame = requestAnimationFrame(animate);
       }
     };
@@ -31,12 +34,18 @@ export function PageLoadingFallback() {
 
     return () => {
       cancelAnimationFrame(frame);
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, []);
 
+  // Don't render anything if we should hide
+  if (shouldHide) {
+    return null;
+  }
+
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-white"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-300"
       aria-live="polite"
       aria-label="Loading page"
     >

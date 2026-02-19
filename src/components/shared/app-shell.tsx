@@ -1,16 +1,13 @@
 "use client";
 
-import { PageLoader } from "@/components/shared/page-loader";
-import { HydrationProvider } from "@/components/shared/loading-context";
+import { ConditionalPageLoader } from "@/components/shared/conditional-page-loader";
 import { LenisSmoothScrollProvider } from "@/components/shared/lenis-provider";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <HydrationProvider>
-      <LenisSmoothScrollProvider>
-        <PageLoader />
-        {children}
-      </LenisSmoothScrollProvider>
-    </HydrationProvider>
+    <LenisSmoothScrollProvider>
+      <ConditionalPageLoader />
+      {children}
+    </LenisSmoothScrollProvider>
   );
 }

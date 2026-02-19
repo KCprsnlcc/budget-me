@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShieldCheck, Filter, MoreHorizontal, Calendar, Users, TrendingUp, TrendingDown, Flag, DollarSign, Eye, Edit, Plus, Info, ArrowLeft, ArrowRight } from "lucide-react";
+import { ShieldCheck, Filter, MoreHorizontal, Calendar, Users, TrendingUp, TrendingDown, Flag, DollarSign, Eye, Edit, Plus, Info, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -182,8 +182,8 @@ export function GoalsTab({
   if (isLoading && goals.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500 border-t-transparent"></div>
-        <span className="ml-2 text-sm text-slate-600">Loading goals...</span>
+        <Loader2 size={20} className="animate-spin text-emerald-500" />
+        <span className="ml-2 text-sm text-slate-500">Loading goals...</span>
       </div>
     );
   }

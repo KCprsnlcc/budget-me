@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Crown, Shield, Eye, Edit, MoreHorizontal, UserCheck, Clock, Settings, LogOut, Trash2, Users, RefreshCw, Search, Filter, Info, Home } from "lucide-react";
+import { Crown, Shield, Eye, Edit, MoreHorizontal, UserCheck, Clock, Settings, LogOut, Trash2, Users, RefreshCw, Search, Filter, Info, Home, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -112,8 +112,8 @@ export function MembersTab({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500 border-t-transparent"></div>
-        <span className="ml-3 text-sm text-slate-600">Loading family members...</span>
+        <Loader2 size={20} className="animate-spin text-emerald-500" />
+        <span className="ml-2 text-sm text-slate-500">Loading family members...</span>
       </div>
     );
   }
