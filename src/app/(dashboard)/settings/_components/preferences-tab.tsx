@@ -1,6 +1,6 @@
 "use client";
 
-import { DollarSign, Info } from "lucide-react";
+import { PhilippinePeso, Info } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { LANGUAGES } from "./constants";
 
@@ -12,7 +12,7 @@ export function PreferencesTab() {
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg text-slate-600">
-              <DollarSign size={20} />
+              <PhilippinePeso size={20} />
             </div>
             <div>
               <h3 className="text-sm font-semibold text-slate-900">Philippine Peso</h3>

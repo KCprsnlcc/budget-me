@@ -15,7 +15,7 @@ import {
   TrendingUp,
   TrendingDown,
   Calendar,
-  DollarSign,
+  PhilippinePeso,
   ArrowRight,
   ArrowLeft,
   CheckCircle,
@@ -45,7 +45,7 @@ const TYPE_ICONS = {
   "unusual-spending": TrendingUp,
   "duplicate-transaction": AlertTriangle,
   "budget-overspend": TrendingDown,
-  "income-anomaly": DollarSign,
+  "income-anomaly": PhilippinePeso,
 };
 
 export function AnomalyDetailsModal({
@@ -158,7 +158,7 @@ export function AnomalyDetailsModal({
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Amount</div>
                 <div className="text-sm font-semibold text-slate-900">
-                  {anomalyData.amount ? `$${anomalyData.amount.toFixed(2)}` : "N/A"}
+                  {anomalyData.amount ? `₱${anomalyData.amount.toFixed(2)}` : "N/A"}
                 </div>
               </div>
 
@@ -213,7 +213,7 @@ export function AnomalyDetailsModal({
                       <div className="text-[10px] text-slate-500">{transaction.date}</div>
                     </div>
                     <div className={`text-sm font-medium ${transaction.amount < 0 ? "text-red-600" : "text-emerald-600"}`}>
-                      {transaction.amount < 0 ? "-" : "+"}${Math.abs(transaction.amount).toFixed(2)}
+                      {transaction.amount < 0 ? "-" : "+"}₱{Math.abs(transaction.amount).toFixed(2)}
                     </div>
                   </div>
                 ))}
@@ -233,7 +233,7 @@ export function AnomalyDetailsModal({
                         <div className="text-[10px] text-slate-500">{data.isAnomalous ? "Anomalous" : "Normal"}</div>
                       </div>
                     </div>
-                    <div className="text-sm font-medium text-slate-900">${data.amount.toFixed(2)}</div>
+                    <div className="text-sm font-medium text-slate-900">₱{data.amount.toFixed(2)}</div>
                   </div>
                 ))}
               </div>

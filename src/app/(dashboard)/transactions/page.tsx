@@ -36,7 +36,7 @@ import {
   Package,
   BookOpen,
   Shield,
-  DollarSign,
+  PhilippinePeso,
   Laptop,
   TrendingUp as TrendingUpIcon,
   Building,
@@ -121,7 +121,7 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
     "🛡️": Shield,
     
     // Income Categories
-    "💰": DollarSign,
+    "💰": PhilippinePeso,
     "💻": Laptop,
     "📈": TrendingUpIcon,
     "🏢": Building,
@@ -262,7 +262,7 @@ const TransactionRow = memo(({
       </TableCell>
       <TableCell className="px-6 py-4 text-slate-500">{accountLabel(tx)}</TableCell>
       <TableCell className="px-6 py-4 text-right font-medium text-slate-900">
-        {isIncome ? "+" : "-"}${tx.amount.toFixed(2)}
+        {isIncome ? "+" : "-"}₱{tx.amount.toFixed(2)}
       </TableCell>
       <TableCell className="px-6 py-4">
         <div className="flex items-center justify-center gap-1">

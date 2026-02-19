@@ -119,7 +119,7 @@ const AI_INSIGHTS: AIInsight[] = [
     id: "2", 
     type: "budget-recommendation", 
     title: "Budget Adjustment",
-    description: "Based on your spending patterns, consider increasing your \"Groceries\" budget by $50 to avoid overspending.",
+    description: "Based on your spending patterns, consider increasing your \"Groceries\" budget by ₱50 to avoid overspending.",
     impact: "medium",
     category: "Budget Planning",
     recommendation: "Increase grocery budget allocation by ₱50 per month",

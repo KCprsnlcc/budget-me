@@ -76,7 +76,7 @@ export function DeleteTransactionModal({
               <div className="flex justify-between items-center py-2.5">
                 <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Amount</span>
                 <span className="text-sm font-bold text-slate-900">
-                  {isIncome ? "+" : "-"}${absAmount}
+                  {isIncome ? "+" : "-"}₱{absAmount}
                 </span>
               </div>
               <div className="flex justify-between items-center py-2.5">

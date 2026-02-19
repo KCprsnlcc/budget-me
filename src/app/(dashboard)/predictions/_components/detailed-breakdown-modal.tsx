@@ -15,7 +15,7 @@ import {
   TrendingUp,
   TrendingDown,
   Calendar,
-  DollarSign,
+  PhilippinePeso,
   Wrench,
   Brain,
   CheckCircle,

@@ -33,7 +33,7 @@ import {
   Package,
   BookOpen,
   Shield,
-  DollarSign,
+  PhilippinePeso,
   Laptop,
   TrendingUp,
   Building,
@@ -90,9 +90,10 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
     "🛍️": Package,
     "📚": BookOpen,
     "🛡️": Shield,
+    "🎯": Flag, // Goal Contribution
     
     // Income Categories
-    "💰": DollarSign,
+    "💰": PhilippinePeso,
     "💻": Laptop,
     "📈": TrendingUp,
     "🏢": Building,
@@ -229,10 +230,47 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
     []
   );
 
+  // Helper: auto-select contribution category when goal is selected for contribution type
+  const handleGoalSelectWithCategory = useCallback((value: string) => {
+    // First update the goal field
+    updateField("goal", value);
+    
+    // Only auto-select category if transaction type is contribution
+    if (form.type === "contribution" && value) {
+      // Try to find "Goal Contribution" category first
+      let contributionCategory = expenseCategories.find(cat => 
+        cat.category_name.toLowerCase() === "goal contribution" ||
+        cat.category_name.toLowerCase() === "contribution"
+      );
+      
+      // If not found, try "Investments" category
+      if (!contributionCategory) {
+        contributionCategory = expenseCategories.find(cat => 
+          cat.category_name.toLowerCase() === "investments"
+        );
+      }
+      
+      // If still not found, try categories containing "goal", "saving", or "investment"
+      if (!contributionCategory) {
+        contributionCategory = expenseCategories.find(cat => 
+          cat.category_name.toLowerCase().includes("goal") ||
+          cat.category_name.toLowerCase().includes("saving") ||
+          cat.category_name.toLowerCase().includes("investment")
+        );
+      }
+      
+      // If found, auto-select the category and clear budget
+      if (contributionCategory) {
+        updateField("expense_category_id", contributionCategory.id);
+        updateField("budget", ""); // Clear budget for contributions
+      }
+    }
+  }, [form.type, expenseCategories, updateField]);
+
   // Helper: look up display names for review step
-  const accountName = accounts.find((a) => a.id === form.account)?.account_name ?? "\u2014";
-  const catName = categories.find((c) => c.id === categoryValue)?.category_name ?? "\u2014";
-  const goalName = goals.find((g) => g.id === form.goal)?.goal_name ?? "\u2014";
+  const accountName = accounts.find((a) => a.id === form.account)?.account_name ?? "—";
+  const catName = categories.find((c) => c.id === categoryValue)?.category_name ?? "—";
+  const goalName = goals.find((g) => g.id === form.goal)?.goal_name ?? "—";
 
   if (!transaction) return null;
 
@@ -329,7 +367,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                   Amount <span className="text-slate-400">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">$</span>
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">₱</span>
                   <input
                     type="number"
                     step="0.01"
@@ -368,10 +406,16 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                       label: c.category_name,
                       icon: c.icon ? getLucideIcon(c.icon) : undefined,
                     }))}
-                    placeholder="Select category..."
+                    placeholder={form.type === "contribution" ? "Auto-selected from goal" : "Select category..."}
                     className="w-full"
                     allowEmpty={false}
+                    disabled={form.type === "contribution"}
                   />
+                  {form.type === "contribution" && (
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Category is automatically selected based on the goal chosen
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
@@ -398,7 +442,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                 </label>
                 <SearchableDropdown
                   value={form.goal}
-                  onChange={(value) => updateField("goal", value)}
+                  onChange={handleGoalSelectWithCategory}
                   options={goals.map((g) => ({
                     value: g.id,
                     label: g.goal_name,
@@ -466,7 +510,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                     form.type === "income" ? "text-emerald-500" : "text-red-500"
                   }`}
                 >
-                  {form.type === "income" ? "+" : "-"}${parseFloat(form.amount || "0").toFixed(2)}
+                  {form.type === "income" ? "+" : "-"}₱{parseFloat(form.amount || "0").toFixed(2)}
                 </div>
                 <span className="text-xs font-semibold px-2 py-1 rounded bg-slate-100 text-slate-500 uppercase tracking-wider inline-block mt-2">
                   {form.type ? form.type.charAt(0).toUpperCase() + form.type.slice(1) : "—"}

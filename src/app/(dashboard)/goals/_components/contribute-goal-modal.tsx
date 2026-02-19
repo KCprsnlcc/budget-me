@@ -148,7 +148,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess }: Contribu
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1.5">Contribution Amount</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₱</span>
                 <input
                   type="number"
                   value={amount}
@@ -183,7 +183,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess }: Contribu
                     onClick={() => setAmount(quickAmount.toString())}
                     className="p-2 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 transition-all"
                   >
-                    ${quickAmount}
+                    ₱{quickAmount}
                   </button>
                 ))}
               </div>

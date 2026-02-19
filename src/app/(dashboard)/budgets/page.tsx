@@ -32,7 +32,7 @@ import {
   Package,
   BookOpen,
   Shield,
-  DollarSign,
+  PhilippinePeso,
   Laptop,
   TrendingUp as TrendingUpIcon,
   Building,
@@ -146,7 +146,7 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
     "🛡️": Shield,
     
     // Income Categories
-    "💰": DollarSign,
+    "💰": PhilippinePeso,
     "💻": Laptop,
     "📈": TrendingUpIcon,
     "🏢": Building,
@@ -819,16 +819,16 @@ export default function BudgetsPage() {
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-right font-medium text-slate-900">
-                        ${budget.amount.toLocaleString()}
+                        ₱{budget.amount.toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-right text-slate-600">
-                        ${budget.spent.toLocaleString()}
+                        ₱{budget.spent.toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <span className={remaining >= 0 ? "text-emerald-600" : "text-red-600"}>
                           {remaining >= 0 ? 
-                            `$${remaining.toLocaleString()}` : 
-                            `-$${Math.abs(remaining).toLocaleString()}`
+                            `₱${remaining.toLocaleString()}` : 
+                            `-₱${Math.abs(remaining).toLocaleString()}`
                           }
                         </span>
                       </td>

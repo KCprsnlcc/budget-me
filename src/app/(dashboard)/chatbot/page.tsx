@@ -247,7 +247,7 @@ export default function ChatbotPage() {
             </div>
             <div className="p-2.5 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
               <span className="text-[10px] text-slate-400 font-medium px-2">
-                Total: $80.97 / month
+                Total: ₱80.97 / month
               </span>
               <button className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-slate-500 hover:text-emerald-500 hover:bg-white border border-transparent hover:border-slate-200 rounded transition-all">
                 Copy Table

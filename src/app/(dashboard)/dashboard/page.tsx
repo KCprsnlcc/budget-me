@@ -20,7 +20,7 @@ import {
   Gamepad2,
   ShoppingCart,
   Clapperboard,
-  DollarSign,
+  PhilippinePeso,
   BarChart3,
   ArrowUp,
   ArrowDown,
@@ -70,9 +70,9 @@ function formatDate(dateStr: string): string {
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
   "🏠": Receipt, "🚗": Bus, "🍽️": ChefHat, "🛒": ShoppingCart,
   "💡": Receipt, "⚕️": Receipt, "🎬": Clapperboard, "🛍️": ShoppingCart,
-  "📚": Receipt, "🛡️": Receipt, "💰": DollarSign, "💻": Receipt,
+  "📚": Receipt, "🛡️": Receipt, "💰": PhilippinePeso, "💻": Receipt,
   "📈": TrendingUp, "🏢": Receipt, "💼": Receipt, "🚀": Receipt,
-  "🎁": Receipt, "💵": DollarSign, "📋": FileText,
+  "🎁": Receipt, "💵": PhilippinePeso, "📋": FileText,
 };
 
 function getCategoryIcon(emoji: string | null): React.ComponentType<any> {
@@ -955,7 +955,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${vis.iconColor}`}>
-                    <DollarSign size={20} />
+                    <PhilippinePeso size={20} />
                   </div>
                 </Card>
               );

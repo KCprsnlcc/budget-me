@@ -29,7 +29,7 @@ import {
   Package,
   BookOpen,
   Shield,
-  DollarSign,
+  PhilippinePeso,
   Laptop,
   TrendingUp as TrendingUpIcon,
   Building,
@@ -63,7 +63,7 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
     "🛡️": Shield,
     
     // Income Categories
-    "💰": DollarSign,
+    "💰": PhilippinePeso,
     "💻": Laptop,
     "📈": TrendingUpIcon,
     "🏢": Building,
@@ -272,7 +272,7 @@ export function EditBudgetModal({ open, onClose, budget, onSuccess }: EditBudget
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">Budget Amount</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₱</span>
                     <input
                       type="number"
                       value={form.amount}

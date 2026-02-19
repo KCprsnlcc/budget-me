@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Home, FileText, DollarSign, Info, ArrowRight, ArrowLeft, Check, Trash2 } from "lucide-react";
+import { Home, FileText, PhilippinePeso, Info, ArrowRight, ArrowLeft, Check, Trash2 } from "lucide-react";
 import { Stepper } from "./stepper";
 import { FAMILY_TYPES, DEFAULT_CURRENCY, MODAL_STEPS } from "./constants";
 import type { EditFamilyData, ModalStep, Family } from "./types";
@@ -181,7 +181,7 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
                   Currency
                 </label>
                 <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
-                  <DollarSign className="text-emerald-600" size={16} />
+                  <PhilippinePeso className="text-emerald-600" size={16} />
                   <span className="text-sm font-medium text-slate-700">{DEFAULT_CURRENCY}</span>
                   <span className="text-[9px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded ml-auto">
                     Default

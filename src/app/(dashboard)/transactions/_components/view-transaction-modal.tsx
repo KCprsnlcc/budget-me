@@ -108,7 +108,7 @@ export function ViewTransactionModal({
                   isIncome ? "text-emerald-500" : "text-red-500"
                 }`}
               >
-                {isIncome ? "+" : "-"}${absAmount}
+                {isIncome ? "+" : "-"}₱{absAmount}
               </div>
               <span className="text-xs font-semibold px-2 py-1 rounded bg-slate-100 text-slate-500 uppercase tracking-wider inline-block mt-2">
                 {isIncome ? "Income" : "Expense"}
@@ -172,7 +172,7 @@ export function ViewTransactionModal({
                         Category Avg
                       </div>
                       <div className="text-lg font-bold text-slate-900">
-                        ${stats?.average.toFixed(2) ?? "0.00"}
+                        ₱{stats?.average.toFixed(2) ?? "0.00"}
                       </div>
                       {stats && stats.average > 0 && (
                         <div className="text-[10px] text-slate-500 mt-1">
@@ -190,7 +190,7 @@ export function ViewTransactionModal({
                         Monthly Total
                       </div>
                       <div className="text-lg font-bold text-slate-900">
-                        ${stats?.monthlyTotal.toFixed(2) ?? "0.00"}
+                        ₱{stats?.monthlyTotal.toFixed(2) ?? "0.00"}
                       </div>
                       <div className="text-[10px] text-slate-500 mt-1">
                         <span className="text-emerald-600 font-semibold">{stats?.count ?? 0} transactions</span> this month
@@ -224,7 +224,7 @@ export function ViewTransactionModal({
                               </div>
                             </div>
                           </div>
-                          <div className="text-sm font-bold text-slate-900">${item.amount.toFixed(2)}</div>
+                          <div className="text-sm font-bold text-slate-900">₱{item.amount.toFixed(2)}</div>
                         </div>
                       ))}
                     </div>

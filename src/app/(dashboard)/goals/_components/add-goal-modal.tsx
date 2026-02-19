@@ -215,7 +215,7 @@ export function AddGoalModal({ open, onClose, onSuccess }: AddGoalModalProps) {
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">Target Amount</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₱</span>
                     <input
                       type="number"
                       value={form.target}
@@ -229,7 +229,7 @@ export function AddGoalModal({ open, onClose, onSuccess }: AddGoalModalProps) {
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">Monthly Contribution</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₱</span>
                     <input
                       type="number"
                       value={form.monthlyContribution}

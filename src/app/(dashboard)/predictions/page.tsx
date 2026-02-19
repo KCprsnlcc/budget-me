@@ -11,7 +11,7 @@ import {
   ArrowDown,
   Brain,
   Sparkles,
-  DollarSign,
+  PhilippinePeso,
   ShoppingBag,
   Utensils,
   Car,
