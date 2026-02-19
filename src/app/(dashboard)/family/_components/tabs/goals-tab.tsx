@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShieldCheck, Filter, MoreHorizontal, Calendar, Users, TrendingUp, TrendingDown, Flag, DollarSign, Eye, Edit, Plus, Info, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { ShieldCheck, Filter, MoreHorizontal, Calendar, Users, TrendingUp, TrendingDown, Flag, DollarSign, Eye, Edit, Plus, Info, ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import {
   Modal,
   ModalHeader,
@@ -179,12 +181,86 @@ export function GoalsTab({
     return goal.status === activeFilter;
   });
 
-  if (isLoading && goals.length === 0) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 size={20} className="animate-spin text-emerald-500" />
-        <span className="ml-2 text-sm text-slate-500">Loading goals...</span>
-      </div>
+      <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+        <div className="space-y-6">
+          {/* Header Skeleton */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Skeleton width={150} height={16} className="mb-2" />
+              <Skeleton width={250} height={12} />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton width={80} height={32} borderRadius={6} />
+              <Skeleton width={90} height={32} borderRadius={6} />
+            </div>
+          </div>
+
+          {/* Goals Grid Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="p-6">
+                {/* Goal Header Skeleton */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton width={24} height={24} borderRadius={4} />
+                    <div>
+                      <Skeleton width={120} height={16} className="mb-1" />
+                      <Skeleton width={150} height={10} />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Skeleton width={70} height={20} borderRadius={10} />
+                    <Skeleton width={24} height={24} borderRadius={6} />
+                  </div>
+                </div>
+
+                {/* Progress Section Skeleton */}
+                <div className="space-y-3 mb-6">
+                  <div className="flex justify-between">
+                    <Skeleton width={80} height={12} />
+                    <Skeleton width={150} height={12} />
+                  </div>
+                  <Skeleton height={8} borderRadius={4} />
+                  <div className="border border-slate-100 p-2 rounded-lg flex justify-between">
+                    <Skeleton width={120} height={10} />
+                    <Skeleton width={80} height={10} />
+                  </div>
+                </div>
+
+                {/* Member Contributions Skeleton */}
+                <div className="border-t border-slate-100 pt-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <Skeleton width={100} height={12} />
+                    <Skeleton width={50} height={10} />
+                  </div>
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, j) => (
+                      <div key={j} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <Skeleton width={24} height={24} borderRadius="50%" />
+                          <Skeleton width={80} height={10} />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Skeleton width={60} height={10} />
+                          <Skeleton width={50} height={10} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quick Actions Skeleton */}
+                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
+                  <Skeleton width="50%" height={28} borderRadius={6} />
+                  <Skeleton width="50%" height={28} borderRadius={6} />
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </SkeletonTheme>
     );
   }
 

@@ -11,6 +11,7 @@ import {
   fetchPublicFamilies,
   fetchUserInvitations,
   fetchFamilyOverview,
+  fetchSentInvitations,
   createFamily,
   updateFamily,
   deleteFamily,
@@ -21,7 +22,10 @@ import {
   respondToJoinRequest,
   updateMemberRole,
   contributeToGoal,
+  removeMember,
+  transferOwnership,
   type FamilyOverviewStats,
+  type SentInvitation,
 } from "./family-service";
 import type {
   Family,
@@ -56,6 +60,7 @@ export function useFamily() {
   const [publicFamilies, setPublicFamilies] = useState<PublicFamily[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [overviewStats, setOverviewStats] = useState<FamilyOverviewStats | null>(null);
+  const [sentInvitations, setSentInvitations] = useState<SentInvitation[]>([]);
 
   // ----- Loading / error -----
   const [loading, setLoading] = useState(true);
@@ -127,13 +132,14 @@ export function useFamily() {
       setFamilyCreatedBy(family.createdBy);
 
       // Step 2: Fetch all family data in parallel
-      const [membersResult, goalsResult, activityResult, requestsResult, overviewResult] =
+      const [membersResult, goalsResult, activityResult, requestsResult, overviewResult, sentInvResult] =
         await Promise.all([
           fetchFamilyMembers(family.id, family.createdBy),
           fetchFamilyGoals(family.id),
           fetchFamilyActivity(family.id, 20, 0),
           fetchJoinRequests(family.id),
           fetchFamilyOverview(family.id),
+          fetchSentInvitations(family.id),
         ]);
 
       setMembers(membersResult.data);
@@ -143,6 +149,7 @@ export function useFamily() {
       setActivityOffset(activityResult.data.length);
       setPendingRequests(requestsResult.data);
       setOverviewStats(overviewResult.data);
+      setSentInvitations(sentInvResult.data);
 
       // Also update family with members
       if (family) {
@@ -325,14 +332,14 @@ export function useFamily() {
       newRole: string
     ): Promise<{ error: string | null }> => {
       setMutating(true);
-      const result = await updateMemberRole(memberId, newRole);
+      const result = await updateMemberRole(memberId, newRole, userId || undefined);
       setMutating(false);
       if (!result.error) {
         await fetchData();
       }
       return { error: result.error };
     },
-    [fetchData]
+    [userId, fetchData]
   );
 
   const handleContributeToGoal = useCallback(
@@ -352,6 +359,34 @@ export function useFamily() {
     [userId, fetchData]
   );
 
+  const handleRemoveMember = useCallback(
+    async (memberId: string): Promise<{ error: string | null }> => {
+      if (!userId) return { error: "Not authenticated." };
+      setMutating(true);
+      const result = await removeMember(memberId, userId);
+      setMutating(false);
+      if (!result.error) {
+        await fetchData();
+      }
+      return { error: result.error };
+    },
+    [userId, fetchData]
+  );
+
+  const handleTransferOwnership = useCallback(
+    async (newOwnerUserId: string): Promise<{ error: string | null }> => {
+      if (!userId || !familyId) return { error: "Missing data." };
+      setMutating(true);
+      const result = await transferOwnership(familyId, newOwnerUserId, userId);
+      setMutating(false);
+      if (!result.error) {
+        await fetchData();
+      }
+      return { error: result.error };
+    },
+    [userId, familyId, fetchData]
+  );
+
   return {
     // State
     familyState,
@@ -363,6 +398,7 @@ export function useFamily() {
     pendingRequests,
     publicFamilies,
     invitations,
+    sentInvitations,
     overviewStats,
     currentUserRole,
     isOwner,
@@ -388,5 +424,7 @@ export function useFamily() {
     handleDeclineRequest,
     handleUpdateRole,
     handleContributeToGoal,
+    handleRemoveMember,
+    handleTransferOwnership,
   };
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Users,
   Plus,
@@ -23,12 +24,13 @@ import {
   ChevronDown,
   UserCheck,
   ArrowRight,
-  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import {
   InviteMemberModal,
   CreateFamilyModal,
@@ -57,6 +59,13 @@ import type {
 import { useFamily } from "./_lib/use-family";
 
 export default function FamilyPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  
+  // Get active tab from URL query params, default to "overview"
+  const activeTab = (searchParams.get("tab") as ActiveTab) || "overview";
+  
   // Real Supabase data via useFamily hook
   const {
     familyState,
@@ -92,7 +101,6 @@ export default function FamilyPage() {
   } = useFamily();
 
   // UI tab state
-  const [activeTab, setActiveTab] = useState<ActiveTab>("overview");
   const [activeGoalFilter, setActiveGoalFilter] = useState("all");
   
   // Modal states
@@ -101,6 +109,28 @@ export default function FamilyPage() {
   const [editFamilyModalOpen, setEditFamilyModalOpen] = useState(false);
   const [deleteFamilyModalOpen, setDeleteFamilyModalOpen] = useState(false);
   const [leaveFamilyModalOpen, setLeaveFamilyModalOpen] = useState(false);
+  const [tabSwitching, setTabSwitching] = useState(false);
+
+  // Handle tab navigation with URL-based routing
+  const handleTabChange = useCallback((tab: ActiveTab) => {
+    if (tab === activeTab) return;
+    
+    setTabSwitching(true);
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams);
+      if (tab === "overview") {
+        params.delete("tab");
+      } else {
+        params.set("tab", tab);
+      }
+      router.push(`?${params.toString()}`, { scroll: false });
+    });
+    
+    // Simulate brief loading delay for tab switch (like Financial Insights refresh)
+    setTimeout(() => {
+      setTabSwitching(false);
+    }, 600);
+  }, [router, searchParams, activeTab]);
 
   // Handlers that open modals
   const handleOpenCreateFamily = useCallback(() => {
@@ -128,13 +158,86 @@ export default function FamilyPage() {
     await handleSendJoinRequest(targetFamilyId);
   }, [handleSendJoinRequest]);
 
-  // Loading state
+  // Loading state - comprehensive skeleton
   if (loading || familyState === "loading") {
     return (
-      <div className="max-w-6xl mx-auto flex items-center justify-center py-24 animate-fade-in">
-        <Loader2 size={24} className="animate-spin text-emerald-500" />
-        <span className="ml-3 text-sm text-slate-500">Loading family data...</span>
-      </div>
+      <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+        <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+          {/* Header Skeleton */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <Skeleton width={250} height={32} className="mb-2" />
+              <Skeleton width={350} height={16} />
+            </div>
+            <div className="flex items-center gap-3">
+              <Skeleton width={100} height={36} borderRadius={6} />
+              <Skeleton width={120} height={36} borderRadius={6} />
+            </div>
+          </div>
+
+          {/* Tab Navigation Skeleton */}
+          <Card className="overflow-hidden">
+            <div className="flex border-b border-slate-200/60">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} width={100} height={48} className="flex-1" />
+              ))}
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Summary Cards Skeleton */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i} className="p-5">
+                    <div className="flex justify-between items-start mb-4">
+                      <Skeleton width={40} height={40} borderRadius={8} />
+                    </div>
+                    <Skeleton width={100} height={12} className="mb-2" />
+                    <Skeleton width={80} height={24} />
+                    <Skeleton width={120} height={10} className="mt-2" />
+                  </Card>
+                ))}
+              </div>
+
+              {/* Charts Section Skeleton */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card className="p-6">
+                  <Skeleton width={180} height={16} className="mb-6" />
+                  <div className="flex items-center justify-center h-64">
+                    <Skeleton width={192} height={192} borderRadius="50%" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-6">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <Skeleton width={60} height={10} />
+                        <Skeleton width={30} height={10} />
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                <Card className="p-6 lg:col-span-2">
+                  <div className="flex items-center justify-between mb-8">
+                    <div>
+                      <Skeleton width={200} height={16} className="mb-2" />
+                      <Skeleton width={150} height={12} />
+                    </div>
+                    <div className="flex gap-4">
+                      <Skeleton width={60} height={12} />
+                      <Skeleton width={60} height={12} />
+                    </div>
+                  </div>
+                  <Skeleton height={240} borderRadius={8} />
+                  <div className="flex justify-between mt-4">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <Skeleton key={i} width={30} height={12} />
+                    ))}
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </SkeletonTheme>
     );
   }
 
@@ -217,9 +320,9 @@ export default function FamilyPage() {
       <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
         <div className="flex border-b border-slate-200/60 overflow-x-auto">
           <button 
-            onClick={() => setActiveTab(FAMILY_TABS.OVERVIEW)}
+            onClick={() => handleTabChange("overview")}
             className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === FAMILY_TABS.OVERVIEW 
+              activeTab === "overview"
                 ? "text-emerald-600 border-emerald-500" 
                 : "text-slate-500 hover:text-slate-700 border-transparent"
             }`}
@@ -227,9 +330,9 @@ export default function FamilyPage() {
             Overview
           </button>
           <button 
-            onClick={() => setActiveTab(FAMILY_TABS.MEMBERS)}
+            onClick={() => handleTabChange("members")}
             className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === FAMILY_TABS.MEMBERS 
+              activeTab === "members"
                 ? "text-emerald-600 border-emerald-500" 
                 : "text-slate-500 hover:text-slate-700 border-transparent"
             }`}
@@ -237,9 +340,9 @@ export default function FamilyPage() {
             Members
           </button>
           <button 
-            onClick={() => setActiveTab(FAMILY_TABS.ACTIVITY)}
+            onClick={() => handleTabChange("activity")}
             className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === FAMILY_TABS.ACTIVITY 
+              activeTab === "activity"
                 ? "text-emerald-600 border-emerald-500" 
                 : "text-slate-500 hover:text-slate-700 border-transparent"
             }`}
@@ -247,9 +350,9 @@ export default function FamilyPage() {
             Activity
           </button>
           <button 
-            onClick={() => setActiveTab(FAMILY_TABS.GOALS)}
+            onClick={() => handleTabChange("goals")}
             className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === FAMILY_TABS.GOALS 
+              activeTab === "goals"
                 ? "text-emerald-600 border-emerald-500" 
                 : "text-slate-500 hover:text-slate-700 border-transparent"
             }`}
@@ -260,7 +363,63 @@ export default function FamilyPage() {
 
         <div className="p-6">
           {/* Tab Content */}
-          {activeTab === FAMILY_TABS.OVERVIEW && (
+          {activeTab === "overview" && (
+            tabSwitching ? (
+              <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+                <div className="space-y-6">
+                  {/* Summary Cards Skeleton */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <Card key={i} className="p-5">
+                        <div className="flex justify-between items-start mb-4">
+                          <Skeleton width={40} height={40} borderRadius={8} />
+                        </div>
+                        <Skeleton width={100} height={12} className="mb-2" />
+                        <Skeleton width={80} height={24} />
+                        <Skeleton width={120} height={10} className="mt-2" />
+                      </Card>
+                    ))}
+                  </div>
+
+                  {/* Charts Section Skeleton */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <Card className="p-6">
+                      <Skeleton width={180} height={16} className="mb-6" />
+                      <div className="flex items-center justify-center h-64">
+                        <Skeleton width={192} height={192} borderRadius="50%" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mt-6">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <div key={i} className="flex items-center justify-between">
+                            <Skeleton width={60} height={10} />
+                            <Skeleton width={30} height={10} />
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+
+                    <Card className="p-6 lg:col-span-2">
+                      <div className="flex items-center justify-between mb-8">
+                        <div>
+                          <Skeleton width={200} height={16} className="mb-2" />
+                          <Skeleton width={150} height={12} />
+                        </div>
+                        <div className="flex gap-4">
+                          <Skeleton width={60} height={12} />
+                          <Skeleton width={60} height={12} />
+                        </div>
+                      </div>
+                      <Skeleton height={240} borderRadius={8} />
+                      <div className="flex justify-between mt-4">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <Skeleton key={i} width={30} height={12} />
+                        ))}
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+              </SkeletonTheme>
+            ) : (
             <div className="space-y-6">
               {/* Financial Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -430,9 +589,9 @@ export default function FamilyPage() {
             </Card>
           </div>
             </div>
-            )}
+          ))}
           
-          {activeTab === FAMILY_TABS.MEMBERS && (
+          {activeTab === "members" && (
             <MembersTab
               familyData={familyData}
               members={members}
@@ -450,25 +609,27 @@ export default function FamilyPage() {
               onUpdateFamily={handleUpdateFamily}
               onDeleteFamilyConfirm={handleDeleteFamily}
               onLeaveFamilyConfirm={handleLeaveFamily}
+              isLoading={tabSwitching}
             />
           )}
           
-          {activeTab === FAMILY_TABS.ACTIVITY && (
+          {activeTab === "activity" && (
             <ActivityTab
               activities={activities}
               onLoadMore={loadMoreActivities}
               hasMore={hasMoreActivities}
-              isLoading={activitiesLoading}
+              isLoading={activitiesLoading || tabSwitching}
             />
           )}
           
-          {activeTab === FAMILY_TABS.GOALS && (
+          {activeTab === "goals" && (
             <GoalsTab
               goals={goals}
               onFilter={(filter) => setActiveGoalFilter(filter)}
               activeFilter={activeGoalFilter}
               onContributeGoal={(goalId) => handleContributeToGoal(goalId, 0)}
               onViewGoal={(goalId) => {}}
+              isLoading={tabSwitching}
             />
           )}
         </div>

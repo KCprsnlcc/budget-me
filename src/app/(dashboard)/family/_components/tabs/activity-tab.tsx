@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Wallet, Flag, UserPlus, Filter, MoreHorizontal, Clock, ChevronDown, Search, RotateCcw, Download, Loader2 } from "lucide-react";
+import { Wallet, Flag, UserPlus, Filter, MoreHorizontal, Clock, ChevronDown, Search, RotateCcw, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import { ACTIVITY_TYPES, ACTIVITY_FILTERS, ACTIVITY_ICONS } from "../constants";
 import type { ActivityItem } from "../types";
 
@@ -76,12 +78,42 @@ export function ActivityTab({
     return activity.type === activeFilter;
   });
 
-  if (loading && activities.length === 0) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 size={20} className="animate-spin text-emerald-500" />
-        <span className="ml-2 text-sm text-slate-500">Loading activity...</span>
-      </div>
+      <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+        <div className="space-y-4">
+          {/* Header Skeleton */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Skeleton width={150} height={16} className="mb-2" />
+              <Skeleton width={200} height={12} />
+            </div>
+            <Skeleton width={100} height={32} borderRadius={6} />
+          </div>
+
+          {/* Activity List Skeleton */}
+          <Card className="p-6">
+            <div className="space-y-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex items-start gap-4 p-3 rounded-lg border border-slate-100">
+                  <Skeleton width={40} height={40} borderRadius="50%" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <Skeleton width={120} height={14} />
+                      <Skeleton width={60} height={10} />
+                    </div>
+                    <Skeleton width="80%" height={12} className="mb-2" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton width={70} height={18} borderRadius={10} />
+                      <Skeleton width={50} height={10} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      </SkeletonTheme>
     );
   }
 

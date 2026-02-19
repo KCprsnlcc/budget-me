@@ -1,24 +1,27 @@
 "use client";
 
 import React, { useState } from "react";
-import { Crown, Shield, Eye, Edit, MoreHorizontal, UserCheck, Clock, Settings, LogOut, Trash2, Users, RefreshCw, Search, Filter, Info, Home, Loader2 } from "lucide-react";
+import { Crown, Shield, Eye, Edit, MoreHorizontal, UserCheck, Clock, Settings, LogOut, Trash2, Users, RefreshCw, Search, Filter, Info, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import { EditFamilyModal, DeleteFamilyModal, LeaveFamilyModal } from "../index";
 import { ROLE_ICONS } from "../constants";
 import type { FamilyMember, JoinRequest, PublicFamily, Family, EditFamilyData, InviteMemberData } from "../types";
 import { useAuth } from "@/components/auth/auth-context";
+import { formatRelativeTime } from "../../_lib/family-service";
 
 interface MembersTabProps {
   familyData: Family | null;
   members: FamilyMember[];
   pendingRequests: JoinRequest[];
   publicFamilies?: PublicFamily[];
-  onUpdateRole: (memberId: string, role: string) => void;
-  onApproveRequest: (requestId: string) => void;
-  onDeclineRequest: (requestId: string) => void;
+  onUpdateRole: (memberId: string, role: string) => Promise<{ error: string | null }> | void;
+  onApproveRequest: (requestId: string) => Promise<{ error: string | null }> | void;
+  onDeclineRequest: (requestId: string) => Promise<{ error: string | null }> | void;
   onEditFamily: () => void;
   onDeleteFamily: () => void;
   onLeaveFamily: () => void;
@@ -56,6 +59,8 @@ export function MembersTab({
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
   const [roleChanges, setRoleChanges] = useState<Record<string, string>>({});
+  const [savingRoles, setSavingRoles] = useState(false);
+  const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
 
   // Create icon mapping from string constants
   const getRoleIcon = (role: string) => {
@@ -72,11 +77,34 @@ export function MembersTab({
     setRoleChanges(prev => ({ ...prev, [memberId]: newRole }));
   };
 
-  const handleSaveRoles = () => {
-    Object.entries(roleChanges).forEach(([memberId, role]) => {
-      onUpdateRole(memberId, role);
-    });
-    setRoleChanges({});
+  const handleSaveRoles = async () => {
+    setSavingRoles(true);
+    const entries = Object.entries(roleChanges);
+    const errors: string[] = [];
+
+    for (const [memberId, role] of entries) {
+      const result = await onUpdateRole(memberId, role);
+      if (result && result.error) {
+        errors.push(result.error);
+      }
+    }
+
+    setSavingRoles(false);
+    if (errors.length === 0) {
+      setRoleChanges({});
+    }
+  };
+
+  const handleApprove = async (requestId: string) => {
+    setProcessingRequestId(requestId);
+    await onApproveRequest(requestId);
+    setProcessingRequestId(null);
+  };
+
+  const handleDecline = async (requestId: string) => {
+    setProcessingRequestId(requestId);
+    await onDeclineRequest(requestId);
+    setProcessingRequestId(null);
   };
 
   const handleEditFamilyClick = () => {
@@ -111,10 +139,91 @@ export function MembersTab({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 size={20} className="animate-spin text-emerald-500" />
-        <span className="ml-2 text-sm text-slate-500">Loading family members...</span>
-      </div>
+      <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column Skeleton */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Pending Requests Card Skeleton */}
+              <Card className="p-6">
+                <Skeleton width={200} height={16} className="mb-2" />
+                <Skeleton width={250} height={12} className="mb-6" />
+                <div className="space-y-4">
+                  {Array.from({ length: 2 }).map((_, i) => (
+                    <div key={i} className="p-4 border border-slate-100 rounded-lg">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <Skeleton width={40} height={40} borderRadius="50%" />
+                          <div>
+                            <Skeleton width={120} height={14} className="mb-1" />
+                            <Skeleton width={150} height={10} />
+                          </div>
+                        </div>
+                      </div>
+                      <Skeleton width="100%" height={40} borderRadius={6} className="mb-4" />
+                      <div className="flex items-center gap-2">
+                        <Skeleton width="50%" height={32} borderRadius={6} />
+                        <Skeleton width="50%" height={32} borderRadius={6} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Members List Card Skeleton */}
+              <Card className="p-6">
+                <Skeleton width={150} height={16} className="mb-2" />
+                <Skeleton width={200} height={12} className="mb-6" />
+                <div className="space-y-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 border border-slate-100 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <Skeleton width={40} height={40} borderRadius="50%" />
+                        <div>
+                          <Skeleton width={120} height={14} className="mb-1" />
+                          <Skeleton width={100} height={10} />
+                        </div>
+                      </div>
+                      <Skeleton width={80} height={20} borderRadius={10} />
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="space-y-6">
+              {/* Role Management Skeleton */}
+              <Card className="p-6">
+                <Skeleton width={120} height={16} className="mb-2" />
+                <Skeleton width={180} height={12} className="mb-6" />
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex items-center justify-between gap-3 p-3 border border-slate-100 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Skeleton width={32} height={32} borderRadius="50%" />
+                        <Skeleton width={100} height={12} />
+                      </div>
+                      <Skeleton width={80} height={24} borderRadius={4} />
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* About Roles Skeleton */}
+              <Card className="p-6">
+                <Skeleton width={100} height={16} className="mb-2" />
+                <Skeleton width={180} height={12} className="mb-6" />
+                <div className="space-y-3">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} width="100%" height={20} />
+                  ))}
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </SkeletonTheme>
     );
   }
 
@@ -143,7 +252,7 @@ export function MembersTab({
                         <div>
                           <p className="text-sm font-medium text-slate-900">{request.name}</p>
                           <p className="text-[10px] text-slate-500 font-light">
-                            {request.email} • Requested 2 days ago
+                            {request.email} • Requested {formatRelativeTime(request.requestedAt)}
                           </p>
                         </div>
                       </div>
@@ -155,17 +264,33 @@ export function MembersTab({
                       <Button
                         size="sm"
                         className="flex-1 bg-emerald-500 hover:bg-emerald-600"
-                        onClick={() => onApproveRequest(request.id)}
+                        onClick={() => handleApprove(request.id)}
+                        disabled={processingRequestId === request.id}
                       >
-                        <UserCheck size={14} className="mr-1" />
+                        {processingRequestId === request.id ? (
+                        <span className="flex items-center">
+                          <Skeleton width={14} height={14} borderRadius="50%" className="mr-1" />
+                          Processing...
+                        </span>
+                      ) : (
+                          <UserCheck size={14} className="mr-1" />
+                        )}
                         Approve as Member
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onDeclineRequest(request.id)}
+                        onClick={() => handleDecline(request.id)}
+                        disabled={processingRequestId === request.id}
                       >
-                        <Trash2 size={14} className="mr-1" />
+                        {processingRequestId === request.id ? (
+                        <span className="flex items-center">
+                          <Skeleton width={14} height={14} borderRadius="50%" className="mr-1" />
+                          Processing...
+                        </span>
+                      ) : (
+                          <Trash2 size={14} className="mr-1" />
+                        )}
                         Decline
                       </Button>
                     </div>
@@ -337,9 +462,16 @@ export function MembersTab({
                     ))}
                 </div>
                 {Object.keys(roleChanges).length > 0 && (
-                  <Button className="w-full text-xs justify-center py-2.5" onClick={handleSaveRoles}>
-                    <Crown className="text-amber-500 mr-2" size={14} />
-                    Save Role Changes
+                  <Button className="w-full text-xs justify-center py-2.5" onClick={handleSaveRoles} disabled={savingRoles}>
+                    {savingRoles ? (
+                      <span className="flex items-center">
+                        <Skeleton width={14} height={14} borderRadius="50%" className="mr-2" />
+                        Saving...
+                      </span>
+                    ) : (
+                      <Crown className="text-amber-500 mr-2" size={14} />
+                    )}
+                    {savingRoles ? "Saving..." : "Save Role Changes"}
                   </Button>
                 )}
               </>

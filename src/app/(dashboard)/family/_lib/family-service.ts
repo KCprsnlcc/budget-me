@@ -194,7 +194,7 @@ function mapInvitationRow(row: any): Invitation {
 /*  Helpers                                                           */
 /* ------------------------------------------------------------------ */
 
-function formatRelativeTime(dateStr: string): string {
+export function formatRelativeTime(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -588,6 +588,35 @@ export async function leaveFamily(
   familyId: string,
   userId: string
 ): Promise<{ error: string | null }> {
+  // Prevent the family owner from leaving without transferring ownership
+  const { data: family, error: famErr } = await supabase
+    .from("families")
+    .select("created_by")
+    .eq("id", familyId)
+    .single();
+
+  if (famErr) return { error: "Family not found." };
+
+  if (family.created_by === userId) {
+    return {
+      error:
+        "Family owners cannot leave the family. Transfer ownership to another member first.",
+    };
+  }
+
+  // Verify user is an active member
+  const { data: membership, error: memErr } = await supabase
+    .from("family_members")
+    .select("id")
+    .eq("family_id", familyId)
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (memErr || !membership) {
+    return { error: "You are not an active member of this family." };
+  }
+
   const { error } = await supabase
     .from("family_members")
     .update({ status: "removed", updated_at: new Date().toISOString() })
@@ -607,8 +636,72 @@ export async function sendInvitation(
   userId: string,
   form: InviteMemberData
 ): Promise<{ error: string | null }> {
-  if (!form.email.trim()) {
+  const email = form.email.trim().toLowerCase();
+
+  if (!email) {
     return { error: "Email is required." };
+  }
+
+  // Basic email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { error: "Please enter a valid email address." };
+  }
+
+  // Self-invite check
+  const { data: selfProfile } = await supabase
+    .from("profiles")
+    .select("email")
+    .eq("id", userId)
+    .single();
+
+  if (selfProfile?.email?.toLowerCase() === email) {
+    return { error: "You cannot invite yourself." };
+  }
+
+  // Check if email user is already a member of this family
+  const { data: existingMembers } = await supabase
+    .from("family_members")
+    .select("user_id, status")
+    .eq("family_id", familyId)
+    .in("status", ["active", "pending"]);
+
+  if (existingMembers && existingMembers.length > 0) {
+    const memberUserIds = existingMembers.map((m: any) => m.user_id);
+    const { data: memberProfiles } = await supabase
+      .from("profiles")
+      .select("email")
+      .in("id", memberUserIds);
+
+    const alreadyMember = (memberProfiles ?? []).some(
+      (p: any) => p.email?.toLowerCase() === email
+    );
+    if (alreadyMember) {
+      return { error: "This user is already a member of your family." };
+    }
+  }
+
+  // Check for existing pending invitation for same email + family
+  const { data: existingInvitation } = await supabase
+    .from("family_invitations")
+    .select("id, expires_at")
+    .eq("family_id", familyId)
+    .eq("email", email)
+    .eq("status", "pending")
+    .maybeSingle();
+
+  if (existingInvitation) {
+    const isExpired = existingInvitation.expires_at
+      ? new Date(existingInvitation.expires_at) < new Date()
+      : false;
+    if (!isExpired) {
+      return { error: "A pending invitation already exists for this email." };
+    }
+    // Expired invitation exists — mark it expired so we can send a new one
+    await supabase
+      .from("family_invitations")
+      .update({ status: "expired" })
+      .eq("id", existingInvitation.id);
   }
 
   // Generate a simple token
@@ -617,7 +710,7 @@ export async function sendInvitation(
   const { error } = await supabase.from("family_invitations").insert({
     family_id: familyId,
     invited_by: userId,
-    email: form.email.trim().toLowerCase(),
+    email,
     role: form.role,
     message: form.message?.trim() || null,
     invitation_token: token,
@@ -644,6 +737,21 @@ export async function respondToInvitation(
     .single();
 
   if (fetchErr) return { error: fetchErr.message };
+
+  // Validate invitation is still pending
+  if (invitation.status !== "pending") {
+    return { error: "This invitation has already been responded to." };
+  }
+
+  // Check if invitation has expired
+  if (invitation.expires_at && new Date(invitation.expires_at) < new Date()) {
+    // Mark as expired
+    await supabase
+      .from("family_invitations")
+      .update({ status: "expired" })
+      .eq("id", invitationId);
+    return { error: "This invitation has expired." };
+  }
 
   const { error: updateErr } = await supabase
     .from("family_invitations")
@@ -761,7 +869,8 @@ export async function respondToJoinRequest(
 
 export async function updateMemberRole(
   memberId: string,
-  newRole: string
+  newRole: string,
+  requestingUserId?: string
 ): Promise<{ error: string | null }> {
   const roleMap: Record<string, string> = {
     Admin: "admin",
@@ -771,18 +880,43 @@ export async function updateMemberRole(
 
   const dbRole = roleMap[newRole] ?? "member";
 
-  const { error } = await supabase
+  // Fetch member record to get user_id and family_id for the RPC
+  const { data: member, error: fetchErr } = await supabase
     .from("family_members")
-    .update({
-      role: dbRole,
-      can_create_goals: dbRole === "admin",
-      can_view_budgets: dbRole !== "viewer" || true,
-      can_contribute_goals: dbRole !== "viewer",
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", memberId);
+    .select("user_id, family_id")
+    .eq("id", memberId)
+    .single();
 
-  if (error) return { error: error.message };
+  if (fetchErr || !member) {
+    return { error: "Member not found." };
+  }
+
+  // Use the RPC function for permission-enforced role reassignment
+  if (requestingUserId) {
+    const { error: rpcErr } = await supabase.rpc("reassign_member_role", {
+      p_family_id: member.family_id,
+      p_member_user_id: member.user_id,
+      p_new_role: dbRole,
+      p_requesting_user_id: requestingUserId,
+    });
+
+    if (rpcErr) return { error: rpcErr.message };
+  } else {
+    // Fallback: direct update when no requesting user context
+    const { error } = await supabase
+      .from("family_members")
+      .update({
+        role: dbRole,
+        can_create_goals: dbRole === "admin",
+        can_view_budgets: true,
+        can_contribute_goals: dbRole !== "viewer",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", memberId);
+
+    if (error) return { error: error.message };
+  }
+
   return { error: null };
 }
 
@@ -896,4 +1030,149 @@ export async function fetchFamilyOverview(
     },
     error: null,
   };
+}
+
+/* ------------------------------------------------------------------ */
+/*  DELETE — Remove a family member (admin/owner action)              */
+/* ------------------------------------------------------------------ */
+
+export async function removeMember(
+  memberId: string,
+  requestingUserId: string
+): Promise<{ error: string | null }> {
+  // Fetch the target member record
+  const { data: member, error: fetchErr } = await supabase
+    .from("family_members")
+    .select("user_id, family_id, status")
+    .eq("id", memberId)
+    .single();
+
+  if (fetchErr || !member) {
+    return { error: "Member not found." };
+  }
+
+  if (member.status !== "active") {
+    return { error: "This member is not currently active." };
+  }
+
+  // Prevent self-removal (use leave family instead)
+  if (member.user_id === requestingUserId) {
+    return { error: "You cannot remove yourself. Use the leave family option instead." };
+  }
+
+  // Check family ownership
+  const { data: family, error: famErr } = await supabase
+    .from("families")
+    .select("created_by")
+    .eq("id", member.family_id)
+    .single();
+
+  if (famErr || !family) {
+    return { error: "Family not found." };
+  }
+
+  // Cannot remove the family owner
+  if (member.user_id === family.created_by) {
+    return { error: "Cannot remove the family owner. Transfer ownership first." };
+  }
+
+  // Check that the requesting user has permission (owner or admin)
+  const isOwner = family.created_by === requestingUserId;
+  if (!isOwner) {
+    const { data: reqMember } = await supabase
+      .from("family_members")
+      .select("role")
+      .eq("family_id", member.family_id)
+      .eq("user_id", requestingUserId)
+      .eq("status", "active")
+      .single();
+
+    if (!reqMember || reqMember.role !== "admin") {
+      return { error: "Only family owners and admins can remove members." };
+    }
+  }
+
+  const { error } = await supabase
+    .from("family_members")
+    .update({ status: "removed", updated_at: new Date().toISOString() })
+    .eq("id", memberId);
+
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  UPDATE — Transfer family ownership                                */
+/* ------------------------------------------------------------------ */
+
+export async function transferOwnership(
+  familyId: string,
+  newOwnerUserId: string,
+  currentOwnerUserId: string
+): Promise<{ error: string | null }> {
+  // Use the RPC function for atomic ownership transfer
+  const { error } = await supabase.rpc("transfer_family_ownership", {
+    p_family_id: familyId,
+    p_new_owner_user_id: newOwnerUserId,
+    p_current_owner_user_id: currentOwnerUserId,
+  });
+
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch sent (outgoing) invitations for a family             */
+/* ------------------------------------------------------------------ */
+
+export interface SentInvitation {
+  id: string;
+  email: string;
+  role: string;
+  message: string | null;
+  status: "pending" | "accepted" | "declined" | "expired";
+  sentAt: string;
+  expiresAt: string | null;
+  inviterName: string;
+}
+
+export async function fetchSentInvitations(
+  familyId: string
+): Promise<{ data: SentInvitation[]; error: string | null }> {
+  const { data, error } = await supabase
+    .from("family_invitations")
+    .select("*")
+    .eq("family_id", familyId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) return { data: [], error: error.message };
+
+  // Collect unique invited_by IDs and batch-fetch profile names
+  const inviterIds = [
+    ...new Set((data ?? []).map((r: any) => r.invited_by).filter(Boolean)),
+  ];
+  let profileMap: Record<string, string> = {};
+  if (inviterIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .in("id", inviterIds);
+    for (const p of profiles ?? []) {
+      profileMap[p.id] = p.full_name ?? "Unknown";
+    }
+  }
+
+  const invitations: SentInvitation[] = (data ?? []).map((row: any) => ({
+    id: row.id,
+    email: row.email,
+    role: row.role,
+    message: row.message,
+    status: row.status as SentInvitation["status"],
+    sentAt: row.created_at,
+    expiresAt: row.expires_at,
+    inviterName: profileMap[row.invited_by] ?? "Unknown",
+  }));
+
+  return { data: invitations, error: null };
 }
