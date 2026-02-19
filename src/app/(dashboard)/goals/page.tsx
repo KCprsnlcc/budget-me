@@ -183,6 +183,7 @@ export default function GoalsPage() {
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<GoalType | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('grid');
+  const [hoveredBar, setHoveredBar] = useState<{month: string, type: 'target' | 'saved', value: number} | null>(null);
 
   const handleView = useCallback((goal: GoalType) => {
     setSelectedGoal(goal);
@@ -232,15 +233,21 @@ export default function GoalsPage() {
     const totalSaved = allGoals.reduce((s, g) => s + g.current, 0);
     const savedPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
     const now = new Date();
-    const months: { month: string; target: number; saved: number }[] = [];
+    const months: { month: string; target: number; saved: number; targetValue: number; savedValue: number }[] = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const label = d.toLocaleDateString("en-US", { month: "short" });
       const factor = (6 - i) / 6;
+      const targetHeight = Math.round(80 * factor + 20);
+      const savedHeight = Math.round(savedPct * factor);
+      const targetVal = Math.round(totalTarget * (targetHeight / 100));
+      const savedVal = Math.round(totalSaved * (savedHeight / 100));
       months.push({
         month: label,
-        target: Math.round(80 * factor + 20),
-        saved: Math.round(savedPct * factor),
+        target: targetHeight,
+        saved: savedHeight,
+        targetValue: targetVal,
+        savedValue: savedVal,
       });
     }
     return months;
@@ -385,13 +392,29 @@ export default function GoalsPage() {
             {chartData.map((data) => (
               <div key={data.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
                 <div
-                  className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:bg-slate-400"
+                  className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
                   style={{ height: `${data.target}%` }}
+                  onMouseEnter={() => setHoveredBar({ month: data.month, type: 'target', value: data.targetValue })}
+                  onMouseLeave={() => setHoveredBar(null)}
                 />
                 <div
-                  className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:bg-emerald-600"
+                  className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
                   style={{ height: `${data.saved}%` }}
+                  onMouseEnter={() => setHoveredBar({ month: data.month, type: 'saved', value: data.savedValue })}
+                  onMouseLeave={() => setHoveredBar(null)}
                 />
+                
+                {/* Tooltip */}
+                {hoveredBar && hoveredBar.month === data.month && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
+                    <div className="font-medium text-slate-700">{hoveredBar.month}</div>
+                    <div className="flex items-center gap-1">
+                      <div className={`w-2 h-2 rounded-full ${hoveredBar.type === 'target' ? 'bg-slate-300' : 'bg-emerald-500'}`} />
+                      <span className="capitalize">{hoveredBar.type}: {formatCurrency(hoveredBar.value)}</span>
+                    </div>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

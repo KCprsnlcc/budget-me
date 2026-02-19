@@ -11,6 +11,8 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import { DateSelector } from "@/components/ui/date-selector";
+import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
 import {
   ArrowLeft,
   ArrowRight,
@@ -261,26 +263,25 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">Priority</label>
-                  <select
+                  <SearchableDropdown
                     value={form.priority}
-                    onChange={(e) => updateField("priority", e.target.value as GoalPriority)}
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
-                  >
-                    {GOAL_PRIORITIES.map((priority) => (
-                      <option key={priority.key} value={priority.key}>
-                        {priority.label}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(value) => updateField("priority", value as GoalPriority)}
+                    options={GOAL_PRIORITIES.map((priority) => ({
+                      value: priority.key,
+                      label: priority.label,
+                    }))}
+                    placeholder="Select priority"
+                    allowEmpty={false}
+                    hideSearch={true}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1.5">Deadline</label>
-                  <input
-                    type="date"
+                  <DateSelector
                     value={form.deadline}
-                    onChange={(e) => updateField("deadline", e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                    onChange={(value) => updateField("deadline", value)}
+                    placeholder="Select date"
                   />
                 </div>
               </div>
