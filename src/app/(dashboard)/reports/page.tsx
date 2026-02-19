@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, memo, useEffect } from "react";
 import {
   BarChart3,
   Download,
@@ -36,6 +36,8 @@ import {
   AnomalyDetailsModal,
 } from "./_components";
 import type { AnomalyAlert, AIInsight, ReportSettings, AnomalyDetails } from "./_components/types";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 // Sample data matching the prototype
 const SUMMARY_CARDS = [
@@ -277,6 +279,152 @@ export default function ReportsPage() {
     categories: ["housing", "food", "transport", "utilities", "other"],
     accounts: ["checking", "chase"],
   });
+  const [loading, setLoading] = useState(true);
+
+  // Simulate loading state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000); // 1 second loading time
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Loading state
+  if (loading) {
+    return (
+      <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+        <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+          {/* Page Header Skeleton */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <Skeleton width={200} height={32} className="mb-2" />
+              <Skeleton width={300} height={16} />
+            </div>
+            <div className="flex gap-3">
+              <Skeleton width={100} height={36} borderRadius={4} />
+              <Skeleton width={100} height={36} borderRadius={4} />
+              <Skeleton width={120} height={36} borderRadius={4} />
+            </div>
+          </div>
+
+          {/* Summary Cards Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="p-5">
+                <div className="flex justify-between items-start mb-4">
+                  <Skeleton width={40} height={40} borderRadius={8} />
+                  <Skeleton width={80} height={20} borderRadius={10} />
+                </div>
+                <Skeleton width={100} height={16} className="mb-2" />
+                <Skeleton width={120} height={24} />
+                <Skeleton width={150} height={12} />
+              </Card>
+            ))}
+          </div>
+
+          {/* Report Settings Panel Skeleton */}
+          <Card className="p-5">
+            <div className="mb-4">
+              <Skeleton width={150} height={16} className="mb-2" />
+              <Skeleton width={200} height={12} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i}>
+                  <Skeleton width={80} height={12} className="mb-2" />
+                  <Skeleton width="100%" height={32} borderRadius={4} />
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Anomaly Alerts Section Skeleton */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <Skeleton width={150} height={16} className="mb-2" />
+                <Skeleton width={200} height={12} />
+              </div>
+              <Skeleton width={120} height={20} borderRadius={10} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <Card key={i} className="p-4 border-l-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <Skeleton width={80} height={10} />
+                    <Skeleton width={16} height={16} borderRadius={4} />
+                  </div>
+                  <Skeleton width="80%" height={16} className="mb-3" />
+                  <Skeleton width="60%" height={12} className="mb-3" />
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <Skeleton width={60} height={10} />
+                      <Skeleton width={40} height={10} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Skeleton width={50} height={20} borderRadius={4} />
+                      <Skeleton width={60} height={20} borderRadius={4} />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </Card>
+
+          {/* AI Financial Insights Section Skeleton */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <Skeleton width={150} height={16} className="mb-2" />
+                <Skeleton width={250} height={12} />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="p-5 h-full">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Skeleton width={40} height={40} borderRadius={8} />
+                    <Skeleton width={120} height={12} />
+                  </div>
+                  <div className="space-y-2 mb-4">
+                    <Skeleton width="100%" height={14} />
+                    <Skeleton width="90%" height={14} />
+                    <Skeleton width="85%" height={14} />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Skeleton width={80} height={10} />
+                      <Skeleton width="60%" height={10} />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Skeleton width={60} height={10} />
+                      <Skeleton width={40} height={10} />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Skeleton width={80} height={10} />
+                      <Skeleton width={50} height={10} />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </Card>
+
+          {/* Charts Section Skeleton */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <Skeleton width={150} height={16} className="mb-2" />
+                <Skeleton width={200} height={12} />
+              </div>
+            </div>
+            <Skeleton height={500} borderRadius={8} />
+          </Card>
+        </div>
+      </SkeletonTheme>
+    );
+  }
 
   const handleExport = useCallback((options: any) => {
     console.log("Exporting with options:", options);

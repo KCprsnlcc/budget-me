@@ -29,6 +29,8 @@ import {
 } from "./_components";
 import type { MessageType, ExportFormat, MessageRole } from "./_components/types";
 import { AI_MODELS, DEFAULT_SUGGESTIONS } from "./_components/types";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 const INITIAL_MESSAGES: MessageType[] = [
   {
@@ -66,8 +68,18 @@ export default function ChatbotPage() {
   const [clearChatModalOpen, setClearChatModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Simulate loading state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 900); // 0.9 seconds loading time
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const currentModel = AI_MODELS.find((m) => m.id === selectedModel) || AI_MODELS[0];
 
@@ -177,7 +189,7 @@ export default function ChatbotPage() {
       const lines = content.split("\n");
       const tableStart = lines.findIndex((line) => line.includes("| Service |"));
       const tableEnd = lines.findIndex((line, i) => i > tableStart && !line.startsWith("|"));
-      const endIdx = tableEnd === -1 ? lines.length : tableEnd;
+      const endIdx = tableEnd === -1 ? lines.length : tableStart;
 
       return (
         <div className="space-y-4">
@@ -275,6 +287,112 @@ export default function ChatbotPage() {
       </div>
     );
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+        <div className="max-w-7xl mx-auto h-[calc(100vh-140px)] min-h-[600px] space-y-6 animate-fade-in">
+          {/* Messenger Container Skeleton */}
+          <Card className="flex h-full overflow-hidden rounded-xl border border-slate-200/60 shadow-sm">
+            {/* Main Chat Area Skeleton */}
+            <main className="flex-1 flex flex-col min-w-0 bg-white relative">
+              {/* Header Skeleton */}
+              <header className="h-16 flex items-center justify-between px-6 bg-white/80 backdrop-blur-sm flex-shrink-0 z-10 border-b border-slate-100">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 flex items-center justify-center">
+                      <Skeleton width={28} height={28} borderRadius={4} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Skeleton width={120} height={14} />
+                        <Skeleton width={30} height={12} borderRadius={2} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Model Selector Skeleton */}
+                  <Skeleton width={140} height={32} borderRadius={4} />
+                  <div className="h-8 w-px bg-slate-200 mx-1" />
+                  {/* Clear Chat Button Skeleton */}
+                  <Skeleton width={40} height={40} borderRadius={8} />
+                  {/* Export Chat Button Skeleton */}
+                  <Skeleton width={40} height={40} borderRadius={8} />
+                </div>
+              </header>
+
+              {/* Messages Area Skeleton */}
+              <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+                {/* Welcome Message Skeleton */}
+                <div className="mx-auto max-w-3xl flex justify-start">
+                  <div className="flex gap-3">
+                    <Skeleton width={32} height={32} borderRadius={50} />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton width="80%" height={14} />
+                      <Skeleton width="100%" height={14} />
+                      <Skeleton width="90%" height={14} />
+                      <Skeleton width="70%" height={14} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* User Message Skeleton */}
+                <div className="mx-auto max-w-3xl flex justify-end">
+                  <div className="max-w-[85%] space-y-2">
+                    <Skeleton width="100%" height={14} />
+                  </div>
+                  <Skeleton width={32} height={32} borderRadius={50} />
+                </div>
+
+                {/* Assistant Response Skeleton */}
+                <div className="mx-auto max-w-3xl flex justify-start">
+                  <div className="flex gap-3">
+                    <Skeleton width={32} height={32} borderRadius={50} />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton width="100%" height={14} />
+                      <Skeleton width="90%" height={14} />
+                      <Skeleton width="85%" height={14} />
+                      <Skeleton width="80%" height={14} />
+                      <Skeleton width="75%" height={14} />
+                      <Skeleton width="70%" height={14} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Input Area Skeleton */}
+              <div className="p-3 bg-white border-t border-slate-100 relative z-20 flex-shrink-0">
+                <div className="mx-auto max-w-3xl">
+                  <div className="relative flex items-end gap-2 bg-slate-50 border border-slate-200/60 rounded-3xl p-2">
+                    {/* Attachment Button Skeleton */}
+                    <Skeleton width={40} height={40} borderRadius={50} />
+                    
+                    {/* Textarea Skeleton */}
+                    <div className="flex-1">
+                      <Skeleton height={32} borderRadius={4} />
+                    </div>
+
+                    {/* Send Button Skeleton */}
+                    <Skeleton width={40} height={40} borderRadius={50} />
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-center gap-1.5">
+                    <Skeleton width={100} height={10} />
+                    <Skeleton width={10} height={10} />
+                    <Skeleton width={60} height={10} />
+                    <Skeleton width={50} height={10} />
+                  </div>
+                </div>
+              </div>
+            </main>
+          </Card>
+        </div>
+      </SkeletonTheme>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto h-[calc(100vh-140px)] min-h-[600px] space-y-6 animate-fade-in">

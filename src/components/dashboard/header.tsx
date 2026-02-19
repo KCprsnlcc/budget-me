@@ -7,6 +7,8 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/auth-context";
 import { useState, useEffect, useRef, useTransition } from "react";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 const PAGE_TITLES: Record<string, { category: string; title: string }> = {
   "/dashboard": { category: "Platform", title: "Dashboard" },
@@ -32,6 +34,16 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
   const [isSigningOut, startSignOut] = useTransition();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const pageMeta = PAGE_TITLES[pathname] || { category: "Platform", title: "Dashboard" };
+  const [loading, setLoading] = useState(true);
+
+  // Simulate loading state on component mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 600); // 0.6 seconds loading time
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
@@ -57,6 +69,33 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
       document.removeEventListener('keydown', handleEscape);
     };
   }, [isUserMenuOpen]);
+
+  if (!user || loading) {
+    return (
+      <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+        <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 sticky top-0 animate-fade-in">
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* Mobile menu */}
+            <Skeleton width={32} height={32} borderRadius={8} />
+            
+            {/* Breadcrumb */}
+            <nav className="flex items-center text-xs text-slate-500 overflow-hidden">
+              <Skeleton width={16} height={16} className="h-4 w-auto shrink-0" />
+              <Skeleton width={12} height={12} className="mx-1 md:mx-2 text-slate-400 hidden sm:block" />
+              <Skeleton width={100} height={14} className="hidden sm:block" />
+              <Skeleton width={12} height={12} className="mx-1 md:mx-2 text-slate-400" />
+              <Skeleton width={120} height={14} />
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* User Menu Skeleton */}
+            <Skeleton width={120} height={36} borderRadius={8} />
+          </div>
+        </header>
+      </SkeletonTheme>
+    );
+  }
 
   
   return (
@@ -141,10 +180,12 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSigningOut ? (
-                      <>
-                        <div className="w-3 h-3 border border-slate-600 border-t-transparent rounded-full animate-spin" />
-                        Signing out...
-                      </>
+                      <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+                        <>
+                          <Skeleton width={12} height={12} circle />
+                          Signing out...
+                        </>
+                      </SkeletonTheme>
                     ) : (
                       <>
                         <LogOut size={14} />

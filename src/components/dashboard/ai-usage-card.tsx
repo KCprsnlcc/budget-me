@@ -1,5 +1,7 @@
 import { BarChart3 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 export function AIUsageCard() {
   return (

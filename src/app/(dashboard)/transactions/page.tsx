@@ -1,5 +1,7 @@
 "use client";
 
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 import { memo, useState, useCallback, useMemo } from "react";
 import {
   Search,
@@ -400,6 +402,117 @@ export default function TransactionsPage() {
 
   const currentYear = new Date().getFullYear();
 
+  // Loading state
+  if (loading) {
+    return (
+      <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+        <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+          {/* Header Skeleton */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <Skeleton width={200} height={32} className="mb-2" />
+              <Skeleton width={300} height={16} />
+            </div>
+            <div className="flex gap-3">
+              <Skeleton width={100} height={36} />
+              <Skeleton width={120} height={36} />
+              <Skeleton width={140} height={36} />
+            </div>
+          </div>
+
+          {/* Summary Stats Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="p-5">
+                <div className="flex justify-between items-start mb-4">
+                  <Skeleton width={40} height={40} borderRadius={8} />
+                  <Skeleton width={80} height={20} borderRadius={10} />
+                </div>
+                <Skeleton width={100} height={16} className="mb-2" />
+                <Skeleton width={120} height={24} />
+              </Card>
+            ))}
+          </div>
+
+          {/* Charts Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="lg:col-span-2 p-6">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <Skeleton width={150} height={16} className="mb-2" />
+                  <Skeleton width={120} height={12} />
+                </div>
+                <div className="flex gap-3">
+                  <Skeleton width={60} height={12} />
+                  <Skeleton width={60} height={12} />
+                </div>
+              </div>
+              <Skeleton height={240} />
+            </Card>
+            <Card className="p-6">
+              <Skeleton width={100} height={16} className="mb-2" />
+              <Skeleton width={140} height={12} className="mb-6" />
+              <Skeleton width={128} height={128} borderRadius="50%" className="mx-auto mb-6" />
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex justify-between">
+                    <Skeleton width={80} height={12} />
+                    <Skeleton width={40} height={12} />
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          {/* Filters Skeleton */}
+          <Card className="p-4">
+            <div className="flex flex-col xl:flex-row items-center gap-3">
+              <Skeleton width={60} height={16} />
+              <Skeleton width={200} height={36} />
+              <Skeleton width={600} height={36} className="flex-1" />
+              <Skeleton width={80} height={32} />
+              <Skeleton width={80} height={32} />
+            </div>
+          </Card>
+
+          {/* Transaction Cards Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="p-5">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton width={40} height={40} borderRadius={8} />
+                    <div>
+                      <Skeleton width={120} height={16} className="mb-1" />
+                      <Skeleton width={80} height={10} />
+                    </div>
+                  </div>
+                  <Skeleton width={60} height={20} borderRadius={10} />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Skeleton width={40} height={12} />
+                    <Skeleton width={100} height={12} />
+                  </div>
+                  <Skeleton height={8} borderRadius={4} />
+                  <div className="flex justify-between">
+                    <Skeleton width={80} height={10} />
+                    <Skeleton width={30} height={10} />
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-50 flex justify-center gap-3">
+                  <Skeleton width={32} height={32} borderRadius={4} />
+                  <Skeleton width={32} height={32} borderRadius={4} />
+                  <Skeleton width={32} height={32} borderRadius={4} />
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </SkeletonTheme>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
       {/* Header */}
@@ -655,14 +768,6 @@ export default function TransactionsPage() {
           </div>
         </div>
       </Card>
-
-      {/* Loading State */}
-      {loading && (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 size={24} className="animate-spin text-emerald-500" />
-          <span className="ml-3 text-sm text-slate-500">Loading transactions...</span>
-        </div>
-      )}
 
       {/* Error State */}
       {error && !loading && (

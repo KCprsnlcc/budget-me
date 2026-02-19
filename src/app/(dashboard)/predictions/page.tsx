@@ -42,7 +42,9 @@ import {
   HistoryModal,
   DetailedBreakdownModal 
 } from "./_components";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 const PREDICTIONS = [
   {
@@ -101,6 +103,16 @@ export default function PredictionsPage() {
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [detailedBreakdownModalOpen, setDetailedBreakdownModalOpen] = useState(false);
   const [detailedInsights, setDetailedInsights] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Simulate loading state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1200); // 1.2 seconds loading time
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleHistory = useCallback(() => {
     setHistoryModalOpen(true);
@@ -120,6 +132,235 @@ export default function PredictionsPage() {
     // This would typically call an API to generate new predictions
     // and update the state with the new data
   }, []);
+
+  // Loading state
+  if (loading) {
+    return (
+      <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+        <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+          {/* Page Header Skeleton */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <Skeleton width={200} height={32} />
+                <Skeleton width={100} height={20} />
+              </div>
+              <Skeleton width={300} height={16} />
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Skeleton width={180} height={36} borderRadius={4} />
+              <Skeleton width={120} height={36} borderRadius={4} />
+            </div>
+          </div>
+
+          {/* Prediction Summary Cards Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="p-5">
+                <div className="flex justify-between items-start mb-4">
+                  <Skeleton width={40} height={40} borderRadius={8} />
+                  <Skeleton width={80} height={20} borderRadius={10} />
+                </div>
+                <Skeleton width={100} height={16} className="mb-2" />
+                <Skeleton width={120} height={24} />
+              </Card>
+            ))}
+          </div>
+
+          {/* Interactive Prediction Chart Skeleton */}
+          <Card className="p-6 mb-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+              <div>
+                <Skeleton width={250} height={16} className="mb-2" />
+                <Skeleton width={200} height={12} />
+              </div>
+              <div className="flex flex-wrap items-center gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <Skeleton width={12} height={12} circle />
+                    <Skeleton width={120} height={12} />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <Skeleton height={240} />
+            <div className="flex justify-between mt-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} width={40} height={12} />
+              ))}
+            </div>
+            <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-100">
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <Skeleton width={80} height={10} />
+                  <Skeleton width={50} height={12} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton width={80} height={10} />
+                  <Skeleton width={60} height={12} />
+                </div>
+              </div>
+              <Skeleton width={180} height={24} borderRadius={4} />
+            </div>
+          </Card>
+
+          {/* Category Predictions Table Skeleton */}
+          <Card className="overflow-hidden mb-8">
+            <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <Skeleton width={200} height={16} className="mb-2" />
+                <Skeleton width={180} height={12} />
+              </div>
+              <Skeleton width={200} height={32} borderRadius={4} />
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-100">
+                    {['Category', 'Historical Avg.', 'Predicted', 'Change', 'Trend', 'Confidence'].map((header, i) => (
+                      <th key={i} className="px-6 py-4">
+                        <Skeleton width={80} height={12} />
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <tr key={i} className="border-b border-slate-50">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <Skeleton width={32} height={32} borderRadius={8} />
+                          <Skeleton width={100} height={14} />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Skeleton width={80} height={12} />
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Skeleton width={80} height={12} />
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Skeleton width={100} height={12} />
+                      </td>
+                      <td className="px-6 py-4">
+                        <Skeleton width={80} height={16} borderRadius={8} />
+                      </td>
+                      <td className="px-6 py-4">
+                        <Skeleton width={60} height={12} />
+                        <Skeleton width={48} height={4} borderRadius={2} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          {/* Expense Type Forecast and Transaction Behavior Insight Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Expense Type Forecast Skeleton */}
+            <Card className="p-6">
+              <div className="mb-4">
+                <Skeleton width={180} height={16} className="mb-2" />
+                <Skeleton width={160} height={12} />
+              </div>
+              <div className="space-y-4">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                    <div className="flex justify-between items-center mb-2">
+                      <Skeleton width={120} height={12} />
+                      <Skeleton width={60} height={12} />
+                    </div>
+                    <Skeleton height={6} borderRadius={3} />
+                    <div className="flex justify-between items-center mt-2">
+                      <Skeleton width={60} height={10} />
+                      <Skeleton width={80} height={10} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Transaction Behavior Insight Skeleton */}
+            <Card className="lg:col-span-2 overflow-hidden">
+              <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+                <div className="mb-2">
+                  <Skeleton width={220} height={16} className="mb-2" />
+                  <Skeleton width={200} height={12} />
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-100">
+                      <th className="px-4 py-3">
+                        <Skeleton width={120} height={12} />
+                      </th>
+                      <th className="px-4 py-3 text-right">
+                        <Skeleton width={80} height={12} />
+                      </th>
+                      <th className="px-4 py-3 text-right">
+                        <Skeleton width={80} height={12} />
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <tr key={i} className="border-b border-slate-50">
+                        <td className="px-4 py-3">
+                          <Skeleton width={100} height={12} />
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <Skeleton width={80} height={12} />
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <Skeleton width={80} height={12} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+
+          {/* AI Financial Intelligence Skeleton */}
+          <Card className="p-6 mb-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <Skeleton width={200} height={16} className="mb-2" />
+                <Skeleton width={250} height={12} />
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton width={100} height={36} borderRadius={4} />
+                <Skeleton width={120} height={36} borderRadius={4} />
+              </div>
+            </div>
+
+            {/* Initial Grid: Key Highlights Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="p-5 h-full">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Skeleton width={40} height={40} borderRadius={8} />
+                    <Skeleton width={150} height={12} />
+                  </div>
+                  <div className="space-y-2 mb-4">
+                    <Skeleton width="100%" height={14} />
+                    <Skeleton width="90%" height={14} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Skeleton width={16} height={16} borderRadius={4} />
+                    <Skeleton width={150} height={10} />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </Card>
+        </div>
+      </SkeletonTheme>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">

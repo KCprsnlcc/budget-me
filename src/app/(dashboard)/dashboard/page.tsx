@@ -31,7 +31,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 // Type definitions for better type safety
 type StatType = {
@@ -373,6 +375,217 @@ const InsightCard = memo(({ insight }: { insight: InsightType }) => {
 InsightCard.displayName = "InsightCard";
 
 export default function DashboardPage() {
+  const [loading, setLoading] = useState(true);
+
+  // Simulate loading state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500); // 1.5 seconds loading time
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Loading state
+  if (loading) {
+    return (
+      <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+        <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+          {/* Welcome Header Skeleton */}
+          <div className="flex flex-col gap-6">
+            <div>
+              <Skeleton width={120} height={12} className="mb-2" />
+              <Skeleton width={250} height={32} className="mb-2" />
+              <Skeleton width={300} height={16} />
+            </div>
+
+            {/* Pending Invitation Skeleton */}
+            <Card className="p-5">
+              <div className="flex items-center gap-4">
+                <Skeleton width={40} height={40} borderRadius={50} />
+                <div className="flex-1">
+                  <Skeleton width={150} height={16} className="mb-2" />
+                  <Skeleton width={400} height={12} />
+                </div>
+                <div className="flex gap-3">
+                  <Skeleton width={60} height={32} borderRadius={4} />
+                  <Skeleton width={100} height={32} borderRadius={4} />
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Financial Insights Skeleton */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Skeleton width={16} height={16} />
+                <Skeleton width={150} height={16} />
+              </div>
+              <Skeleton width={80} height={24} borderRadius={4} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="p-4">
+                  <div className="flex justify-between items-start mb-4">
+                    <Skeleton width={40} height={40} borderRadius={8} />
+                    <Skeleton width={60} height={20} borderRadius={10} />
+                  </div>
+                  <Skeleton width={100} height={12} className="mb-2" />
+                  <Skeleton width={120} height={24} />
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Stats Grid Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="p-5">
+                <div className="flex justify-between items-start mb-4">
+                  <Skeleton width={40} height={40} borderRadius={8} />
+                  <Skeleton width={80} height={20} borderRadius={10} />
+                </div>
+                <Skeleton width={100} height={16} className="mb-2" />
+                <Skeleton width={120} height={24} />
+              </Card>
+            ))}
+          </div>
+
+          {/* Charts + Categories Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Income vs Expenses Chart Skeleton */}
+            <Card className="lg:col-span-2 p-6">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <Skeleton width={150} height={16} className="mb-2" />
+                  <Skeleton width={120} height={12} />
+                </div>
+                <div className="flex gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <Skeleton width={8} height={8} circle />
+                    <Skeleton width={50} height={12} />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Skeleton width={8} height={8} circle />
+                    <Skeleton width={60} height={12} />
+                  </div>
+                </div>
+              </div>
+              <Skeleton height={240} />
+            </Card>
+
+            {/* Expense Categories Skeleton */}
+            <Card className="p-6 flex flex-col">
+              <div className="flex justify-between items-center mb-6">
+                <Skeleton width={100} height={16} />
+                <Skeleton width={32} height={32} borderRadius={4} />
+              </div>
+
+              <div className="flex items-center gap-6 mb-6">
+                <Skeleton width={128} height={128} borderRadius="50%" className="mx-auto" />
+              </div>
+
+              <div className="space-y-3 flex-1">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Skeleton width={8} height={8} circle />
+                      <Skeleton width={60} height={12} />
+                    </div>
+                    <Skeleton width={80} height={12} />
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          {/* Spending Trends Skeleton */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Skeleton width={16} height={16} />
+              <Skeleton width={150} height={16} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <Skeleton width={80} height={12} className="mb-1" />
+                      <Skeleton width={80} height={16} />
+                      <Skeleton width={60} height={12} className="mt-1" />
+                    </div>
+                    <Skeleton width={40} height={40} borderRadius={50} />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Budget Progress & Recent Transactions Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Budget Progress Skeleton */}
+            <Card className="p-6 flex flex-col">
+              <div className="mb-6">
+                <Skeleton width={150} height={16} className="mb-2" />
+                <Skeleton width={200} height={12} />
+              </div>
+
+              <div className="space-y-5">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center gap-3">
+                        <Skeleton width={32} height={32} borderRadius={8} />
+                        <div>
+                          <Skeleton width={80} height={12} />
+                          <Skeleton width={60} height={10} />
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Skeleton width={40} height={12} />
+                        <Skeleton width={60} height={16} borderRadius={10} />
+                      </div>
+                    </div>
+                    <Skeleton height={6} borderRadius={3} />
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Recent Transactions Skeleton */}
+            <Card className="p-6 flex flex-col">
+              <div className="mb-6">
+                <Skeleton width={180} height={16} className="mb-2" />
+                <Skeleton width={200} height={12} />
+              </div>
+
+              <div className="space-y-4 flex-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between p-2">
+                    <div className="flex items-center gap-3">
+                      <Skeleton width={20} height={20} borderRadius={4} />
+                      <div>
+                        <Skeleton width={100} height={12} />
+                        <Skeleton width={80} height={10} />
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Skeleton width={60} height={12} />
+                      <Skeleton width={80} height={10} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          <div className="h-8" />
+        </div>
+      </SkeletonTheme>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
       {/* Welcome Header */}

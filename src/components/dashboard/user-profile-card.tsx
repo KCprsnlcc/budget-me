@@ -4,6 +4,8 @@ import { LogOut } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-context";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { useTransition } from "react";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 export function UserProfileCard() {
   const { user, signOut } = useAuth();
@@ -30,7 +32,9 @@ export function UserProfileCard() {
           aria-label="Sign out"
         >
           {isSigningOut ? (
-            <div className="w-4 h-4 border border-slate-600 border-t-transparent rounded-full animate-spin" />
+            <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+              <Skeleton width={16} height={16} circle />
+            </SkeletonTheme>
           ) : (
             <LogOut size={18} />
           )}
