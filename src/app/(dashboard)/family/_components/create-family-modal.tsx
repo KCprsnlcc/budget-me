@@ -19,7 +19,7 @@ const STEPS = ["Details", "Review"];
 interface CreateFamilyModalProps {
   open: boolean;
   onClose: () => void;
-  onCreateFamily?: () => void;
+  onCreateFamily?: (form: CreateFamilyData) => Promise<{ error: string | null }>;
 }
 
 export function CreateFamilyModal({ open, onClose, onCreateFamily }: CreateFamilyModalProps) {
@@ -44,18 +44,26 @@ export function CreateFamilyModal({ open, onClose, onCreateFamily }: CreateFamil
     (currentStep === 1 && formData.name !== "") ||
     currentStep === 2;
 
-  const handleNext = useCallback(() => {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleNext = useCallback(async () => {
     if (currentStep >= 2) {
-      // Handle submit
-      console.log("Creating family:", formData);
-      handleClose();
       if (onCreateFamily) {
-        onCreateFamily();
+        setSubmitting(true);
+        setSubmitError(null);
+        const result = await onCreateFamily(formData);
+        setSubmitting(false);
+        if (result.error) {
+          setSubmitError(result.error);
+          return;
+        }
       }
+      handleClose();
       return;
     }
     setCurrentStep((s) => (s + 1) as ModalStep);
-  }, [currentStep, handleClose, onCreateFamily]);
+  }, [currentStep, handleClose, onCreateFamily, formData]);
 
   const handleBack = useCallback(() => {
     if (currentStep <= 1) return;

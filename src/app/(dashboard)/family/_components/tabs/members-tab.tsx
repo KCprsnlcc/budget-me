@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { EditFamilyModal, DeleteFamilyModal, LeaveFamilyModal } from "../index";
 import { ROLE_ICONS } from "../constants";
-import type { FamilyMember, JoinRequest, PublicFamily, Family } from "../types";
+import type { FamilyMember, JoinRequest, PublicFamily, Family, EditFamilyData, InviteMemberData } from "../types";
+import { useAuth } from "@/components/auth/auth-context";
 
 interface MembersTabProps {
   familyData: Family | null;
@@ -23,6 +24,10 @@ interface MembersTabProps {
   onLeaveFamily: () => void;
   onJoinFamily: (familyId: string) => void;
   onRefreshFamilies: () => void;
+  onSendInvitation?: (form: InviteMemberData) => Promise<{ error: string | null }>;
+  onUpdateFamily?: (form: EditFamilyData) => Promise<{ error: string | null }>;
+  onDeleteFamilyConfirm?: () => Promise<{ error: string | null }>;
+  onLeaveFamilyConfirm?: () => Promise<{ error: string | null }>;
   isLoading?: boolean;
 }
 
@@ -39,8 +44,14 @@ export function MembersTab({
   onLeaveFamily,
   onJoinFamily,
   onRefreshFamilies,
+  onSendInvitation,
+  onUpdateFamily,
+  onDeleteFamilyConfirm,
+  onLeaveFamilyConfirm,
   isLoading = false,
 }: MembersTabProps) {
+  const { user } = useAuth();
+  const currentUserEmail = user?.email ?? "";
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
@@ -98,12 +109,21 @@ export function MembersTab({
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500 border-t-transparent"></div>
+        <span className="ml-3 text-sm text-slate-600">Loading family members...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Pending Join Requests Section */}
         <div className="lg:col-span-2 space-y-6">
-          {pendingRequests.length > 0 && (
+          {pendingRequests.length > 0 ? (
             <Card className="p-6 border-blue-100 hover:shadow-md transition-all group cursor-pointer">
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-slate-900">
@@ -153,6 +173,21 @@ export function MembersTab({
                 ))}
               </div>
             </Card>
+          ) : (
+            <Card className="p-6 border-slate-100">
+              <div className="text-center py-8">
+                <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                  <UserCheck className="text-slate-400" size={32} />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">No Pending Requests</h3>
+                <p className="text-sm text-slate-500 mb-6">
+                  There are no pending join requests for your family group.
+                </p>
+                <div className="text-xs text-slate-400">
+                  When someone requests to join your family, they'll appear here for your review.
+                </div>
+              </div>
+            </Card>
           )}
 
           {/* Current Family Members List */}
@@ -163,83 +198,98 @@ export function MembersTab({
               </h3>
               <p className="text-xs text-slate-500 mt-0.5 font-light">Manage current family members and their roles</p>
             </div>
-            <div className="space-y-4">
-              {members.map((member) => {
-                const RoleIcon = getRoleIcon(member.role);
-                const isOwner = member.role === "Owner";
-                const isCurrentUser = member.email === "john@budgetme.site"; // TODO: Get from auth context
+            {members.length > 0 ? (
+              <div className="space-y-4">
+                {members.map((member) => {
+                  const RoleIcon = getRoleIcon(member.role);
+                  const isOwner = member.role === "Owner";
+                  const isCurrentUser = member.email === currentUserEmail;
 
-                return (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between p-4 border border-slate-100 rounded-xl group hover:shadow-md transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm border ${
-                            member.role === "Owner"
-                              ? "border-emerald-100 text-emerald-700"
-                              : member.role === "Admin"
-                              ? "border-blue-100 text-blue-700"
-                              : member.role === "Member"
-                              ? "border-purple-100 text-purple-700"
-                              : "border-slate-100 text-slate-700"
-                          }`}
-                        >
-                          {member.initials}
-                        </div>
-                        {isOwner && (
-                          <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white" />
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium text-slate-900">{member.name}</p>
+                  return (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-4 border border-slate-100 rounded-xl group hover:shadow-md transition-all cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <div
+                            className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm border ${
+                              member.role === "Owner"
+                                ? "border-emerald-100 text-emerald-700"
+                                : member.role === "Admin"
+                                ? "border-blue-100 text-blue-700"
+                                : member.role === "Member"
+                                ? "border-purple-100 text-purple-700"
+                                : "border-slate-100 text-slate-700"
+                            }`}
+                          >
+                            {member.initials}
+                          </div>
                           {isOwner && (
-                            <Crown className="text-amber-500" size={14} />
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white" />
                           )}
                         </div>
-                        <p className="text-[10px] text-slate-500 font-light">
-                          {member.email} • Joined {member.joinedAt || "Jan 2025"}
-                        </p>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium text-slate-900">{member.name}</p>
+                            {isOwner && (
+                              <Crown className="text-amber-500" size={14} />
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-500 font-light">
+                            {member.email} • Joined {member.joinedAt || "Jan 2025"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge
+                          variant={
+                            member.role === "Owner"
+                              ? "success"
+                              : member.role === "Admin"
+                              ? "info"
+                              : member.role === "Member"
+                              ? "neutral"
+                              : "brand"
+                          }
+                        >
+                          {member.role}
+                        </Badge>
+                        <div className="flex items-center gap-2">
+                          {isCurrentUser && (
+                            <span className="text-xs text-slate-400 font-light">You</span>
+                          )}
+                          {isCurrentUser && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-[10px] text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1"
+                              onClick={handleLeaveFamilyClick}
+                            >
+                              <LogOut size={12} />
+                              Leave
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Badge
-                        variant={
-                          member.role === "Owner"
-                            ? "success"
-                            : member.role === "Admin"
-                            ? "info"
-                            : member.role === "Member"
-                            ? "neutral"
-                            : "brand"
-                        }
-                      >
-                        {member.role}
-                      </Badge>
-                      <div className="flex items-center gap-2">
-                        {isCurrentUser && (
-                          <span className="text-xs text-slate-400 font-light">You</span>
-                        )}
-                        {isCurrentUser && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-[10px] text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1"
-                            onClick={handleLeaveFamilyClick}
-                          >
-                            <LogOut size={12} />
-                            Leave
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                  <Users className="text-slate-400" size={32} />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">No Family Members Yet</h3>
+                <p className="text-sm text-slate-500 mb-6">
+                  Your family group doesn't have any members yet.
+                </p>
+                <div className="text-xs text-slate-400">
+                  Invite family members to start collaborating on budgets and goals together.
+                </div>
+              </div>
+            )}
           </Card>
         </div>
 
@@ -253,42 +303,59 @@ export function MembersTab({
               </h3>
               <p className="text-xs text-slate-500 mt-0.5 font-light">Assign and manage member permissions</p>
             </div>
-            <div className="space-y-4">
-              {members
-                .filter(m => m.role !== "Owner")
-                .map((member) => (
-                  <div key={member.id} className="flex items-center justify-between gap-3 p-3 border border-slate-100 rounded-lg hover:shadow-md transition-all cursor-pointer">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-[10px] flex-shrink-0 border ${
-                          member.role === "Admin"
-                            ? "border-blue-100 text-blue-700"
-                            : member.role === "Member"
-                            ? "border-purple-100 text-purple-700"
-                            : "border-slate-100 text-slate-700"
-                        }`}
-                      >
-                        {member.initials}
+            {members.filter(m => m.role !== "Owner").length > 0 ? (
+              <>
+                <div className="space-y-4">
+                  {members
+                    .filter(m => m.role !== "Owner")
+                    .map((member) => (
+                      <div key={member.id} className="flex items-center justify-between gap-3 p-3 border border-slate-100 rounded-lg hover:shadow-md transition-all cursor-pointer">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-[10px] flex-shrink-0 border ${
+                              member.role === "Admin"
+                                ? "border-blue-100 text-blue-700"
+                                : member.role === "Member"
+                                ? "border-purple-100 text-purple-700"
+                                : "border-slate-100 text-slate-700"
+                            }`}
+                          >
+                            {member.initials}
+                          </div>
+                          <span className="text-xs font-medium text-slate-900 truncate">{member.name}</span>
+                        </div>
+                        <select
+                          value={roleChanges[member.id] || member.role}
+                          onChange={(e) => handleRoleChange(member.id, e.target.value)}
+                          className="text-[10px] border border-slate-200 rounded-lg px-2 py-1 bg-white focus:ring-1 focus:ring-emerald-500 outline-none"
+                        >
+                          <option value="Admin">Admin</option>
+                          <option value="Member">Member</option>
+                          <option value="Viewer">Viewer</option>
+                        </select>
                       </div>
-                      <span className="text-xs font-medium text-slate-900 truncate">{member.name}</span>
-                    </div>
-                    <select
-                      value={roleChanges[member.id] || member.role}
-                      onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                      className="text-[10px] border border-slate-200 rounded-lg px-2 py-1 bg-white focus:ring-1 focus:ring-emerald-500 outline-none"
-                    >
-                      <option value="Admin">Admin</option>
-                      <option value="Member">Member</option>
-                      <option value="Viewer">Viewer</option>
-                    </select>
-                  </div>
-                ))}
-            </div>
-            {Object.keys(roleChanges).length > 0 && (
-              <Button className="w-full text-xs justify-center py-2.5" onClick={handleSaveRoles}>
-                <Crown className="text-amber-500 mr-2" size={14} />
-                Save Role Changes
-              </Button>
+                    ))}
+                </div>
+                {Object.keys(roleChanges).length > 0 && (
+                  <Button className="w-full text-xs justify-center py-2.5" onClick={handleSaveRoles}>
+                    <Crown className="text-amber-500 mr-2" size={14} />
+                    Save Role Changes
+                  </Button>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                  <Settings className="text-slate-400" size={32} />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">No Members to Manage</h3>
+                <p className="text-sm text-slate-500 mb-6">
+                  There are no family members whose roles can be changed.
+                </p>
+                <div className="text-xs text-slate-400">
+                  Only non-owner members can have their roles modified.
+                </div>
+              </div>
             )}
           </Card>
 
@@ -323,14 +390,18 @@ export function MembersTab({
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         onDeleteFamily={handleDeleteFamilyClick}
+        onUpdateFamily={onUpdateFamily}
+        familyData={familyData}
       />
       <DeleteFamilyModal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
+        onConfirm={onDeleteFamilyConfirm}
       />
       <LeaveFamilyModal
         open={leaveModalOpen}
         onClose={() => setLeaveModalOpen(false)}
+        onConfirm={onLeaveFamilyConfirm}
       />
     </div>
   );

@@ -13,7 +13,7 @@ import {
 interface LeaveFamilyModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm?: () => void;
+  onConfirm?: () => Promise<{ error: string | null }>;
 }
 
 export function LeaveFamilyModal({ open, onClose, onConfirm }: LeaveFamilyModalProps) {
@@ -21,10 +21,10 @@ export function LeaveFamilyModal({ open, onClose, onConfirm }: LeaveFamilyModalP
     onClose();
   };
 
-  const handleConfirm = () => {
-    console.log("Leaving family group");
+  const handleConfirm = async () => {
     if (onConfirm) {
-      onConfirm();
+      const result = await onConfirm();
+      if (result?.error) return;
     }
     handleClose();
   };

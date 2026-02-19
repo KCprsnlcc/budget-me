@@ -12,7 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Home, FileText, DollarSign, Info, ArrowRight, ArrowLeft, Check, Trash2 } from "lucide-react";
 import { Stepper } from "./stepper";
 import { FAMILY_TYPES, DEFAULT_CURRENCY, MODAL_STEPS } from "./constants";
-import type { EditFamilyData, ModalStep } from "./types";
+import type { EditFamilyData, ModalStep, Family } from "./types";
 
 const STEPS = ["Details", "Review"];
 
@@ -20,15 +20,28 @@ interface EditFamilyModalProps {
   open: boolean;
   onClose: () => void;
   onDeleteFamily?: () => void;
+  onUpdateFamily?: (form: EditFamilyData) => Promise<{ error: string | null }>;
+  familyData?: Family | null;
 }
 
-export function EditFamilyModal({ open, onClose, onDeleteFamily }: EditFamilyModalProps) {
+export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily, familyData }: EditFamilyModalProps) {
   const [currentStep, setCurrentStep] = useState<ModalStep>(1);
   const [formData, setFormData] = useState<EditFamilyData>({
-    name: "Doe Family Budget",
-    description: "Our shared family finances and savings goals.",
-    visibility: "private",
+    name: familyData?.name ?? "",
+    description: familyData?.description ?? "",
+    visibility: familyData?.type ?? "private",
   });
+
+  // Sync form data when familyData changes
+  React.useEffect(() => {
+    if (familyData && open) {
+      setFormData({
+        name: familyData.name,
+        description: familyData.description ?? "",
+        visibility: familyData.type,
+      });
+    }
+  }, [familyData, open]);
 
   const reset = useCallback(() => {
     setCurrentStep(1);
@@ -41,15 +54,26 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily }: EditFamilyMod
 
   const canContinue = currentStep === 1 || currentStep === 2;
 
-  const handleNext = useCallback(() => {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleNext = useCallback(async () => {
     if (currentStep >= 2) {
-      // Handle submit
-      console.log("Updating family:", formData);
+      if (onUpdateFamily) {
+        setSubmitting(true);
+        setSubmitError(null);
+        const result = await onUpdateFamily(formData);
+        setSubmitting(false);
+        if (result.error) {
+          setSubmitError(result.error);
+          return;
+        }
+      }
       handleClose();
       return;
     }
     setCurrentStep((s) => (s + 1) as ModalStep);
-  }, [currentStep, handleClose]);
+  }, [currentStep, handleClose, onUpdateFamily, formData]);
 
   const handleBack = useCallback(() => {
     if (currentStep <= 1) return;

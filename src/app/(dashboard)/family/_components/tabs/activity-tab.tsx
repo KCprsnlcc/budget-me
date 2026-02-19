@@ -95,6 +95,27 @@ export function ActivityTab({
         <p className="text-sm text-slate-500 mb-6">
           There hasn't been any activity in your family yet.
         </p>
+        <div className="text-xs text-slate-400">
+          Start by adding transactions, creating goals, or inviting family members to see activity here.
+        </div>
+      </div>
+    );
+  }
+
+  if (!loading && filteredActivities.length === 0 && activities.length > 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+          <Filter className="text-slate-400" size={32} />
+        </div>
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">No {activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Activity</h3>
+        <p className="text-sm text-slate-500 mb-6">
+          There are no {activeFilter} activities matching your filter.
+        </p>
+        <Button variant="outline" onClick={() => setActiveFilter("all")}>
+          <Filter size={14} className="mr-2" />
+          Show All Activity
+        </Button>
       </div>
     );
   }

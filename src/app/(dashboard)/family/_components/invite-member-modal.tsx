@@ -19,9 +19,10 @@ const STEPS = ["Details", "Review"];
 interface InviteMemberModalProps {
   open: boolean;
   onClose: () => void;
+  onSendInvitation?: (form: InviteMemberData) => Promise<{ error: string | null }>;
 }
 
-export function InviteMemberModal({ open, onClose }: InviteMemberModalProps) {
+export function InviteMemberModal({ open, onClose, onSendInvitation }: InviteMemberModalProps) {
   const [currentStep, setCurrentStep] = useState<ModalStep>(1);
   const [formData, setFormData] = useState<InviteMemberData>({
     email: "",
@@ -43,15 +44,26 @@ export function InviteMemberModal({ open, onClose }: InviteMemberModalProps) {
     (currentStep === 1 && formData.email !== "") ||
     currentStep === 2;
 
-  const handleNext = useCallback(() => {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleNext = useCallback(async () => {
     if (currentStep >= 2) {
-      // Handle submit
-      console.log("Inviting member:", formData);
+      if (onSendInvitation) {
+        setSubmitting(true);
+        setSubmitError(null);
+        const result = await onSendInvitation(formData);
+        setSubmitting(false);
+        if (result.error) {
+          setSubmitError(result.error);
+          return;
+        }
+      }
       handleClose();
       return;
     }
     setCurrentStep((s) => (s + 1) as ModalStep);
-  }, [currentStep, handleClose]);
+  }, [currentStep, handleClose, onSendInvitation, formData]);
 
   const handleBack = useCallback(() => {
     if (currentStep <= 1) return;

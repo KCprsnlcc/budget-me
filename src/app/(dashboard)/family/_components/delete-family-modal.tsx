@@ -13,7 +13,7 @@ import {
 interface DeleteFamilyModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm?: () => void;
+  onConfirm?: () => Promise<{ error: string | null }>;
 }
 
 export function DeleteFamilyModal({ open, onClose, onConfirm }: DeleteFamilyModalProps) {
@@ -24,11 +24,15 @@ export function DeleteFamilyModal({ open, onClose, onConfirm }: DeleteFamilyModa
     onClose();
   };
 
-  const handleConfirm = () => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleConfirm = async () => {
     if (confirmationText === "DELETE") {
-      console.log("Deleting family group");
       if (onConfirm) {
-        onConfirm();
+        setSubmitting(true);
+        const result = await onConfirm();
+        setSubmitting(false);
+        if (result?.error) return;
       }
       handleClose();
     }

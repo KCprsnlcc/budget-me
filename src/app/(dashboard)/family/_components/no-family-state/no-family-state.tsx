@@ -16,6 +16,7 @@ interface NoFamilyStateProps {
   publicFamilies?: PublicFamily[];
   invitations?: Invitation[];
   isLoading?: boolean;
+  onRespondToInvitation?: (invitationId: string, accept: boolean) => Promise<{ error: string | null }>;
 }
 
 export function NoFamilyState({
@@ -25,6 +26,7 @@ export function NoFamilyState({
   publicFamilies = [],
   invitations = [],
   isLoading = false,
+  onRespondToInvitation,
 }: NoFamilyStateProps) {
   const [activeTab, setActiveTab] = useState<NoFamilyTab>("create");
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -229,14 +231,14 @@ export function NoFamilyState({
                       <Button
                         size="sm"
                         className="flex-1 bg-emerald-500 hover:bg-emerald-600"
-                        onClick={() => onCheckInvitations()}
+                        onClick={() => onRespondToInvitation ? onRespondToInvitation(invitation.id, true) : onCheckInvitations()}
                       >
                         Accept
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onCheckInvitations()}
+                        onClick={() => onRespondToInvitation ? onRespondToInvitation(invitation.id, false) : onCheckInvitations()}
                       >
                         Decline
                       </Button>

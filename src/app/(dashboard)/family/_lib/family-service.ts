@@ -1,0 +1,899 @@
+import { createClient } from "@/lib/supabase/client";
+import type {
+  Family,
+  FamilyMember,
+  SharedGoal,
+  GoalContribution,
+  ActivityItem,
+  JoinRequest,
+  PublicFamily,
+  Invitation,
+  CreateFamilyData,
+  EditFamilyData,
+  InviteMemberData,
+} from "../_components/types";
+
+const supabase = createClient();
+
+/* ------------------------------------------------------------------ */
+/*  Row → Client-type mappers                                         */
+/* ------------------------------------------------------------------ */
+
+function mapFamilyRow(row: any): Family {
+  return {
+    id: row.id,
+    name: row.family_name,
+    description: row.description ?? "",
+    type: row.is_public ? "public" : "private",
+    currency: row.currency_pref ?? "PHP",
+    members: [], // populated separately
+    createdAt: row.created_at,
+    createdBy: row.created_by,
+  };
+}
+
+function mapMemberRow(row: any): FamilyMember {
+  const profile = row.profiles ?? {};
+  const fullName = profile.full_name || profile.email || "Unknown";
+  const initials = fullName
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  // Determine display role: creator of the family is "Owner"
+  const dbRole: string = row.role ?? "member";
+  let displayRole: "Owner" | "Admin" | "Member" | "Viewer";
+  if (row._isOwner) {
+    displayRole = "Owner";
+  } else if (dbRole === "admin") {
+    displayRole = "Admin";
+  } else if (dbRole === "viewer") {
+    displayRole = "Viewer";
+  } else {
+    displayRole = "Member";
+  }
+
+  const statusMap: Record<string, "active" | "pending" | "inactive"> = {
+    active: "active",
+    pending: "pending",
+    inactive: "inactive",
+    removed: "inactive",
+  };
+
+  return {
+    id: row.id,
+    name: fullName,
+    email: profile.email ?? "",
+    initials,
+    role: displayRole,
+    status: statusMap[row.status] ?? "active",
+    lastActive: profile.last_login
+      ? formatRelativeTime(profile.last_login)
+      : "Unknown",
+    permissions: getRolePermissions(displayRole),
+    spending: 0,
+    budget: 0,
+    joinedAt: row.joined_at
+      ? new Date(row.joined_at).toLocaleDateString("en-US", {
+          month: "short",
+          year: "numeric",
+        })
+      : undefined,
+    avatar: profile.avatar_url ?? undefined,
+  };
+}
+
+function mapGoalRow(row: any): SharedGoal {
+  const contributions: GoalContribution[] = (row.goal_contributions ?? []).map(
+    (c: any) => ({
+      id: c.id,
+      memberId: c.user_id,
+      memberName: c.profiles?.full_name ?? "Unknown",
+      amount: Number(c.amount),
+      date: c.contribution_date ?? c.created_at,
+    })
+  );
+
+  // Map DB status to UI status
+  let uiStatus: SharedGoal["status"];
+  const dbStatus = row.status ?? "in_progress";
+  if (dbStatus === "completed") {
+    uiStatus = "completed";
+  } else if (dbStatus === "paused") {
+    uiStatus = "paused";
+  } else {
+    // Determine on-track vs at-risk by progress vs time
+    const progress = row.target_amount > 0
+      ? Number(row.current_amount) / Number(row.target_amount)
+      : 0;
+    if (row.target_date) {
+      const now = new Date();
+      const target = new Date(row.target_date);
+      const created = new Date(row.created_at);
+      const totalDays = (target.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+      const elapsed = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+      const timeProgress = totalDays > 0 ? elapsed / totalDays : 1;
+      uiStatus = progress >= timeProgress * 0.7 ? "on-track" : "at-risk";
+    } else {
+      uiStatus = progress >= 0.5 ? "on-track" : "at-risk";
+    }
+  }
+
+  return {
+    id: row.id,
+    name: row.goal_name,
+    saved: Number(row.current_amount),
+    target: Number(row.target_amount),
+    members: row._memberCount ?? 0,
+    createdAt: row.created_at,
+    targetDate: row.target_date ?? undefined,
+    status: uiStatus,
+    createdBy: row.profiles?.full_name ?? "Unknown",
+    contributions,
+  };
+}
+
+function mapActivityRow(row: any): ActivityItem {
+  const profile = row.profiles ?? {};
+  return {
+    id: row.id,
+    type: mapActivityType(row.activity_type),
+    action: row.description ?? "",
+    memberName: profile.full_name ?? "Unknown",
+    memberEmail: profile.email ?? "",
+    details: row.description ?? "",
+    amount: row.amount ? Number(row.amount) : undefined,
+    target: row.metadata?.target ?? undefined,
+    timestamp: row.created_at,
+    metadata: row.metadata ?? undefined,
+  };
+}
+
+function mapJoinRequestRow(row: any): JoinRequest {
+  const profile = row.profiles ?? {};
+  return {
+    id: row.id,
+    name: profile.full_name ?? "Unknown",
+    email: profile.email ?? "",
+    message: row.message ?? "",
+    requestedAt: row.created_at,
+    status: row.status as JoinRequest["status"],
+  };
+}
+
+function mapPublicFamilyRow(row: any): PublicFamily {
+  const creatorProfile = row.profiles ?? {};
+  return {
+    id: row.id,
+    name: row.family_name,
+    description: row.description ?? "",
+    memberCount: row._memberCount ?? 0,
+    createdBy: creatorProfile.full_name ?? "Unknown",
+    createdAt: row.created_at,
+    isPublic: true,
+  };
+}
+
+function mapInvitationRow(row: any): Invitation {
+  const family = row.families ?? {};
+  const inviter = row.profiles ?? {};
+  return {
+    id: row.id,
+    familyName: family.family_name ?? "Unknown Family",
+    inviterName: inviter.full_name ?? "Unknown",
+    inviterEmail: inviter.email ?? "",
+    message: row.message ?? undefined,
+    invitedAt: row.created_at,
+    status: row.status as Invitation["status"],
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                           */
+/* ------------------------------------------------------------------ */
+
+function formatRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 30) return `${Math.floor(diffDays / 30)}mo ago`;
+  if (diffDays > 0) return `${diffDays}d ago`;
+  if (diffHours > 0) return `${diffHours}h ago`;
+  return "Now";
+}
+
+function getRolePermissions(role: string): string[] {
+  switch (role) {
+    case "Owner":
+      return ["Full Access"];
+    case "Admin":
+      return ["View", "Edit", "Budget", "Manage Members"];
+    case "Member":
+      return ["View", "Add Transactions", "Edit Own"];
+    case "Viewer":
+      return ["View Only"];
+    default:
+      return ["View Only"];
+  }
+}
+
+function mapActivityType(
+  dbType: string
+): "transaction" | "goal" | "member" | "budget" {
+  switch (dbType) {
+    case "transaction":
+      return "transaction";
+    case "goal":
+    case "goal_contribution":
+      return "goal";
+    case "member_joined":
+    case "member_left":
+    case "member_invited":
+    case "member":
+      return "member";
+    case "budget":
+    case "budget_created":
+    case "budget_updated":
+      return "budget";
+    default:
+      return "member";
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch user's family membership                             */
+/* ------------------------------------------------------------------ */
+
+export async function fetchUserFamily(
+  userId: string
+): Promise<{ data: Family | null; membership: any | null; error: string | null }> {
+  // Find the user's active family membership
+  const { data: membership, error: memErr } = await supabase
+    .from("family_members")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .limit(1)
+    .maybeSingle();
+
+  if (memErr) return { data: null, membership: null, error: memErr.message };
+  if (!membership) return { data: null, membership: null, error: null };
+
+  // Fetch the family
+  const { data: familyRow, error: famErr } = await supabase
+    .from("families")
+    .select("*")
+    .eq("id", membership.family_id)
+    .eq("status", "active")
+    .single();
+
+  if (famErr) return { data: null, membership: null, error: famErr.message };
+
+  const family = mapFamilyRow(familyRow);
+  return { data: family, membership, error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch family members with profiles                         */
+/* ------------------------------------------------------------------ */
+
+export async function fetchFamilyMembers(
+  familyId: string,
+  familyCreatedBy: string
+): Promise<{ data: FamilyMember[]; error: string | null }> {
+  const { data, error } = await supabase
+    .from("family_members")
+    .select(
+      `
+      *,
+      profiles!family_members_user_id_fkey (
+        full_name, email, avatar_url, last_login
+      )
+    `
+    )
+    .eq("family_id", familyId)
+    .in("status", ["active", "pending"])
+    .order("created_at", { ascending: true });
+
+  if (error) return { data: [], error: error.message };
+
+  const members = (data ?? []).map((row: any) => {
+    // Tag owner based on families.created_by
+    row._isOwner = row.user_id === familyCreatedBy;
+    return mapMemberRow(row);
+  });
+
+  return { data: members, error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch family goals with contributions                      */
+/* ------------------------------------------------------------------ */
+
+export async function fetchFamilyGoals(
+  familyId: string
+): Promise<{ data: SharedGoal[]; error: string | null }> {
+  const { data, error } = await supabase
+    .from("goals")
+    .select(
+      `
+      *,
+      profiles!goals_user_id_fkey ( full_name ),
+      goal_contributions (
+        id, user_id, amount, contribution_date, created_at,
+        profiles!goal_contributions_user_id_fkey ( full_name )
+      )
+    `
+    )
+    .eq("family_id", familyId)
+    .eq("is_family_goal", true)
+    .order("created_at", { ascending: false });
+
+  if (error) return { data: [], error: error.message };
+
+  // Get member count per goal (contributors)
+  const goals = (data ?? []).map((row: any) => {
+    const uniqueContributors = new Set(
+      (row.goal_contributions ?? []).map((c: any) => c.user_id)
+    );
+    row._memberCount = uniqueContributors.size;
+    return mapGoalRow(row);
+  });
+
+  return { data: goals, error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch family activity log                                  */
+/* ------------------------------------------------------------------ */
+
+export async function fetchFamilyActivity(
+  familyId: string,
+  limit: number = 20,
+  offset: number = 0
+): Promise<{ data: ActivityItem[]; error: string | null; hasMore: boolean }> {
+  const { data, error, count } = await supabase
+    .from("family_activity_log")
+    .select(
+      `
+      *,
+      profiles!family_activity_log_user_id_fkey ( full_name, email )
+    `,
+      { count: "exact" }
+    )
+    .eq("family_id", familyId)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) return { data: [], error: error.message, hasMore: false };
+
+  const activities = (data ?? []).map(mapActivityRow);
+  const totalCount = count ?? 0;
+  return { data: activities, error: null, hasMore: offset + limit < totalCount };
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch pending join requests for a family                   */
+/* ------------------------------------------------------------------ */
+
+export async function fetchJoinRequests(
+  familyId: string
+): Promise<{ data: JoinRequest[]; error: string | null }> {
+  const { data, error } = await supabase
+    .from("family_join_requests")
+    .select(
+      `
+      *,
+      profiles!family_join_requests_user_id_fkey ( full_name, email )
+    `
+    )
+    .eq("family_id", familyId)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) return { data: [], error: error.message };
+  return { data: (data ?? []).map(mapJoinRequestRow), error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch public families (for discovery / join tab)           */
+/* ------------------------------------------------------------------ */
+
+export async function fetchPublicFamilies(
+  userId: string
+): Promise<{ data: PublicFamily[]; error: string | null }> {
+  // Fetch public families that the user is NOT already a member of
+  const { data: userMemberships } = await supabase
+    .from("family_members")
+    .select("family_id")
+    .eq("user_id", userId)
+    .in("status", ["active", "pending"]);
+
+  const memberFamilyIds = (userMemberships ?? []).map(
+    (m: any) => m.family_id
+  );
+
+  let query = supabase
+    .from("families")
+    .select(
+      `
+      *,
+      profiles!families_created_by_fkey ( full_name )
+    `
+    )
+    .eq("is_public", true)
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  if (memberFamilyIds.length > 0) {
+    query = query.not("id", "in", `(${memberFamilyIds.join(",")})`);
+  }
+
+  const { data, error } = await query;
+  if (error) return { data: [], error: error.message };
+
+  // Get member counts
+  const familyIds = (data ?? []).map((f: any) => f.id);
+  const { data: memberCounts } = await supabase
+    .from("family_members")
+    .select("family_id")
+    .in("family_id", familyIds)
+    .eq("status", "active");
+
+  const countMap: Record<string, number> = {};
+  (memberCounts ?? []).forEach((m: any) => {
+    countMap[m.family_id] = (countMap[m.family_id] || 0) + 1;
+  });
+
+  const families = (data ?? []).map((row: any) => {
+    row._memberCount = countMap[row.id] ?? 0;
+    return mapPublicFamilyRow(row);
+  });
+
+  return { data: families, error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch pending invitations for the current user             */
+/* ------------------------------------------------------------------ */
+
+export async function fetchUserInvitations(
+  userEmail: string
+): Promise<{ data: Invitation[]; error: string | null }> {
+  const { data, error } = await supabase
+    .from("family_invitations")
+    .select(
+      `
+      *,
+      families!family_invitations_family_id_fkey ( family_name ),
+      profiles!family_invitations_invited_by_fkey ( full_name, email )
+    `
+    )
+    .eq("email", userEmail)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) return { data: [], error: error.message };
+  return { data: (data ?? []).map(mapInvitationRow), error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  CREATE — Create a new family                                      */
+/* ------------------------------------------------------------------ */
+
+export async function createFamily(
+  userId: string,
+  form: CreateFamilyData
+): Promise<{ data: Family | null; error: string | null }> {
+  if (!form.name.trim()) {
+    return { data: null, error: "Family name is required." };
+  }
+
+  const { data: familyRow, error: createErr } = await supabase
+    .from("families")
+    .insert({
+      family_name: form.name.trim(),
+      description: form.description?.trim() || null,
+      is_public: form.type === "public",
+      created_by: userId,
+      currency_pref: "PHP",
+      status: "active",
+    })
+    .select("*")
+    .single();
+
+  if (createErr) return { data: null, error: createErr.message };
+
+  // Add creator as admin member (Owner is derived from created_by)
+  const { error: memberErr } = await supabase.from("family_members").insert({
+    family_id: familyRow.id,
+    user_id: userId,
+    role: "admin",
+    status: "active",
+    can_create_goals: true,
+    can_view_budgets: true,
+    can_contribute_goals: true,
+    joined_at: new Date().toISOString(),
+  });
+
+  if (memberErr) return { data: null, error: memberErr.message };
+
+  return { data: mapFamilyRow(familyRow), error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  UPDATE — Edit family details                                      */
+/* ------------------------------------------------------------------ */
+
+export async function updateFamily(
+  familyId: string,
+  form: EditFamilyData
+): Promise<{ data: Family | null; error: string | null }> {
+  if (!form.name.trim()) {
+    return { data: null, error: "Family name is required." };
+  }
+
+  const { data, error } = await supabase
+    .from("families")
+    .update({
+      family_name: form.name.trim(),
+      description: form.description?.trim() || null,
+      is_public: form.visibility === "public",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", familyId)
+    .select("*")
+    .single();
+
+  if (error) return { data: null, error: error.message };
+  return { data: mapFamilyRow(data), error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  DELETE — Delete a family                                          */
+/* ------------------------------------------------------------------ */
+
+export async function deleteFamily(
+  familyId: string
+): Promise<{ error: string | null }> {
+  // Delete members first (cascade might handle this, but be explicit)
+  await supabase.from("family_members").delete().eq("family_id", familyId);
+  await supabase.from("family_invitations").delete().eq("family_id", familyId);
+  await supabase
+    .from("family_join_requests")
+    .delete()
+    .eq("family_id", familyId);
+  await supabase.from("family_activity_log").delete().eq("family_id", familyId);
+
+  const { error } = await supabase
+    .from("families")
+    .delete()
+    .eq("id", familyId);
+
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  DELETE — Leave a family (remove own membership)                   */
+/* ------------------------------------------------------------------ */
+
+export async function leaveFamily(
+  familyId: string,
+  userId: string
+): Promise<{ error: string | null }> {
+  const { error } = await supabase
+    .from("family_members")
+    .update({ status: "removed", updated_at: new Date().toISOString() })
+    .eq("family_id", familyId)
+    .eq("user_id", userId);
+
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  CREATE — Send an invitation                                       */
+/* ------------------------------------------------------------------ */
+
+export async function sendInvitation(
+  familyId: string,
+  userId: string,
+  form: InviteMemberData
+): Promise<{ error: string | null }> {
+  if (!form.email.trim()) {
+    return { error: "Email is required." };
+  }
+
+  // Generate a simple token
+  const token = crypto.randomUUID();
+
+  const { error } = await supabase.from("family_invitations").insert({
+    family_id: familyId,
+    invited_by: userId,
+    email: form.email.trim().toLowerCase(),
+    role: form.role,
+    message: form.message?.trim() || null,
+    invitation_token: token,
+    status: "pending",
+  });
+
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  UPDATE — Accept / Decline invitation                              */
+/* ------------------------------------------------------------------ */
+
+export async function respondToInvitation(
+  invitationId: string,
+  userId: string,
+  accept: boolean
+): Promise<{ error: string | null }> {
+  const { data: invitation, error: fetchErr } = await supabase
+    .from("family_invitations")
+    .select("*")
+    .eq("id", invitationId)
+    .single();
+
+  if (fetchErr) return { error: fetchErr.message };
+
+  const { error: updateErr } = await supabase
+    .from("family_invitations")
+    .update({
+      status: accept ? "accepted" : "declined",
+      responded_at: new Date().toISOString(),
+    })
+    .eq("id", invitationId);
+
+  if (updateErr) return { error: updateErr.message };
+
+  if (accept) {
+    // Add user as member
+    const { error: memberErr } = await supabase.from("family_members").insert({
+      family_id: invitation.family_id,
+      user_id: userId,
+      role: invitation.role ?? "member",
+      status: "active",
+      can_create_goals: invitation.role === "admin",
+      can_view_budgets: true,
+      can_contribute_goals: true,
+      invited_by: invitation.invited_by,
+      invited_at: invitation.created_at,
+      joined_at: new Date().toISOString(),
+    });
+
+    if (memberErr) return { error: memberErr.message };
+  }
+
+  return { error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  CREATE — Send a join request for a public family                  */
+/* ------------------------------------------------------------------ */
+
+export async function sendJoinRequest(
+  familyId: string,
+  userId: string,
+  message?: string
+): Promise<{ error: string | null }> {
+  // Check if request already exists
+  const { data: existing } = await supabase
+    .from("family_join_requests")
+    .select("id")
+    .eq("family_id", familyId)
+    .eq("user_id", userId)
+    .eq("status", "pending")
+    .maybeSingle();
+
+  if (existing) {
+    return { error: "You already have a pending request for this family." };
+  }
+
+  const { error } = await supabase.from("family_join_requests").insert({
+    family_id: familyId,
+    user_id: userId,
+    message: message?.trim() || null,
+    status: "pending",
+  });
+
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  UPDATE — Approve / Decline a join request                         */
+/* ------------------------------------------------------------------ */
+
+export async function respondToJoinRequest(
+  requestId: string,
+  reviewerId: string,
+  approve: boolean
+): Promise<{ error: string | null }> {
+  const { data: request, error: fetchErr } = await supabase
+    .from("family_join_requests")
+    .select("*")
+    .eq("id", requestId)
+    .single();
+
+  if (fetchErr) return { error: fetchErr.message };
+
+  const { error: updateErr } = await supabase
+    .from("family_join_requests")
+    .update({
+      status: approve ? "approved" : "declined",
+      reviewed_by: reviewerId,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq("id", requestId);
+
+  if (updateErr) return { error: updateErr.message };
+
+  if (approve) {
+    const { error: memberErr } = await supabase.from("family_members").insert({
+      family_id: request.family_id,
+      user_id: request.user_id,
+      role: "member",
+      status: "active",
+      can_create_goals: false,
+      can_view_budgets: true,
+      can_contribute_goals: true,
+      joined_at: new Date().toISOString(),
+    });
+
+    if (memberErr) return { error: memberErr.message };
+  }
+
+  return { error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  UPDATE — Change member role                                       */
+/* ------------------------------------------------------------------ */
+
+export async function updateMemberRole(
+  memberId: string,
+  newRole: string
+): Promise<{ error: string | null }> {
+  const roleMap: Record<string, string> = {
+    Admin: "admin",
+    Member: "member",
+    Viewer: "viewer",
+  };
+
+  const dbRole = roleMap[newRole] ?? "member";
+
+  const { error } = await supabase
+    .from("family_members")
+    .update({
+      role: dbRole,
+      can_create_goals: dbRole === "admin",
+      can_view_budgets: dbRole !== "viewer" || true,
+      can_contribute_goals: dbRole !== "viewer",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", memberId);
+
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  CREATE — Contribute to a goal                                     */
+/* ------------------------------------------------------------------ */
+
+export async function contributeToGoal(
+  goalId: string,
+  userId: string,
+  amount: number
+): Promise<{ error: string | null }> {
+  if (amount <= 0) return { error: "Amount must be greater than zero." };
+
+  // Insert contribution
+  const { error: contribErr } = await supabase
+    .from("goal_contributions")
+    .insert({
+      goal_id: goalId,
+      user_id: userId,
+      amount,
+      contribution_date: new Date().toISOString().split("T")[0],
+    });
+
+  if (contribErr) return { error: contribErr.message };
+
+  // Update goal current_amount
+  const { data: goal } = await supabase
+    .from("goals")
+    .select("current_amount, target_amount")
+    .eq("id", goalId)
+    .single();
+
+  if (goal) {
+    const newAmount = Number(goal.current_amount) + amount;
+    const updates: Record<string, any> = {
+      current_amount: newAmount,
+      updated_at: new Date().toISOString(),
+    };
+    if (newAmount >= Number(goal.target_amount)) {
+      updates.status = "completed";
+      updates.completed_date = new Date().toISOString().split("T")[0];
+    }
+
+    await supabase.from("goals").update(updates).eq("id", goalId);
+  }
+
+  return { error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch overview stats for family dashboard                  */
+/* ------------------------------------------------------------------ */
+
+export interface FamilyOverviewStats {
+  totalMembers: number;
+  activeMembers: number;
+  pendingMembers: number;
+  totalGoals: number;
+  goalsProgress: number;
+  totalGoalsSaved: number;
+  totalGoalsTarget: number;
+}
+
+export async function fetchFamilyOverview(
+  familyId: string
+): Promise<{ data: FamilyOverviewStats | null; error: string | null }> {
+  // Members count
+  const { data: memberData } = await supabase
+    .from("family_members")
+    .select("status")
+    .eq("family_id", familyId)
+    .in("status", ["active", "pending"]);
+
+  const active = (memberData ?? []).filter(
+    (m: any) => m.status === "active"
+  ).length;
+  const pending = (memberData ?? []).filter(
+    (m: any) => m.status === "pending"
+  ).length;
+
+  // Goals stats
+  const { data: goalsData } = await supabase
+    .from("goals")
+    .select("current_amount, target_amount, status")
+    .eq("family_id", familyId)
+    .eq("is_family_goal", true);
+
+  const totalGoalsSaved = (goalsData ?? []).reduce(
+    (sum: number, g: any) => sum + Number(g.current_amount),
+    0
+  );
+  const totalGoalsTarget = (goalsData ?? []).reduce(
+    (sum: number, g: any) => sum + Number(g.target_amount),
+    0
+  );
+  const goalsProgress =
+    totalGoalsTarget > 0
+      ? Math.round((totalGoalsSaved / totalGoalsTarget) * 100)
+      : 0;
+
+  return {
+    data: {
+      totalMembers: active + pending,
+      activeMembers: active,
+      pendingMembers: pending,
+      totalGoals: (goalsData ?? []).length,
+      goalsProgress,
+      totalGoalsSaved,
+      totalGoalsTarget,
+    },
+    error: null,
+  };
+}

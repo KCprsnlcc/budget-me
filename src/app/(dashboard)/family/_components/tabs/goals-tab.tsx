@@ -198,9 +198,32 @@ export function GoalsTab({
         <p className="text-sm text-slate-500 mb-6">
           Start by creating your first family savings goal.
         </p>
-        <Button onClick={onAddGoal}>
-          <Flag size={16} className="mr-2" />
-          Create Goal
+        {onAddGoal && (
+          <Button onClick={onAddGoal}>
+            <Flag size={16} className="mr-2" />
+            Create Goal
+          </Button>
+        )}
+        <div className="text-xs text-slate-400 mt-4">
+          Set shared financial objectives that your family can work towards together.
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoading && filteredGoals.length === 0 && goals.length > 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+          <Filter className="text-slate-400" size={32} />
+        </div>
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">No {activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Goals</h3>
+        <p className="text-sm text-slate-500 mb-6">
+          There are no goals with status "{activeFilter}".
+        </p>
+        <Button variant="outline" onClick={() => onFilter("all")}>
+          <Filter size={14} className="mr-2" />
+          Show All Goals
         </Button>
       </div>
     );
