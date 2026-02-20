@@ -230,9 +230,15 @@ export async function createTransaction(
   };
 
   if (form.type === "income") {
-    insert.income_category_id = form.income_category_id || null;
+    if (form.income_category_id) {
+      insert.income_category_id = form.income_category_id;
+    }
+    // else: constraint will fail - category is required for income
   } else if (form.type === "expense") {
-    insert.expense_category_id = form.expense_category_id || null;
+    if (form.expense_category_id) {
+      insert.expense_category_id = form.expense_category_id;
+    }
+    // else: constraint will fail - category is required for expense
   }
 
   const { data, error } = await supabase
@@ -278,9 +284,15 @@ export async function updateTransaction(
   };
 
   if (form.type === "income") {
-    update.income_category_id = form.income_category_id || null;
+    if (form.income_category_id) {
+      update.income_category_id = form.income_category_id;
+    }
+    // expense_category_id remains null from initialization
   } else if (form.type === "expense") {
-    update.expense_category_id = form.expense_category_id || null;
+    if (form.expense_category_id) {
+      update.expense_category_id = form.expense_category_id;
+    }
+    // income_category_id remains null from initialization
   }
 
   const { data, error } = await supabase
