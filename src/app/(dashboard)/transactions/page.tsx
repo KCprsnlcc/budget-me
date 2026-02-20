@@ -404,8 +404,8 @@ export default function TransactionsPage() {
 
   const currentYear = new Date().getFullYear();
 
-  // Loading state
-  if (loading) {
+  // Loading state - only show full page skeleton on initial load, not filter changes
+  if (loading && !tableLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
