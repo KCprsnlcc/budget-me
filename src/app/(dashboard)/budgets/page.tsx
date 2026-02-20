@@ -867,40 +867,36 @@ export default function BudgetsPage() {
             </div>
           )}
         </Card>
+      ) : tableLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <BudgetFilterGridSkeleton items={pageSize} />
+        </div>
       ) : (
         <>
           {/* Budget Cards Grid (Desktop) */}
           <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {tableLoading ? (
-              <BudgetFilterGridSkeleton items={pageSize} />
-            ) : (
-              budgets.map((budget) => (
-                <BudgetRow
-                  key={budget.id}
-                  budget={budget}
-                  onView={handleView}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ))
-            )}
+            {budgets.map((budget) => (
+              <BudgetRow
+                key={budget.id}
+                budget={budget}
+                onView={handleView}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
           </div>
 
           {/* Budget Cards Grid (Mobile) */}
           <div className="md:hidden space-y-4">
-            {tableLoading ? (
-              <BudgetFilterGridSkeleton items={pageSize} />
-            ) : (
-              budgets.map((budget) => (
-                <BudgetRow
-                  key={budget.id}
-                  budget={budget}
-                  onView={handleView}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ))
-            )}
+            {budgets.map((budget) => (
+              <BudgetRow
+                key={budget.id}
+                budget={budget}
+                onView={handleView}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
           </div>
         </>
       )}

@@ -82,9 +82,42 @@ export function TransactionFilterGridSkeleton({ items = 6 }: { items?: number })
   return <FilterGridSkeleton items={items} />;
 }
 
-// Budget-specific grid skeleton (same as FilterGridSkeleton but named for clarity)
+// Budget-specific grid skeleton (matches initial page load design)
 export function BudgetFilterGridSkeleton({ items = 6 }: { items?: number }) {
-  return <FilterGridSkeleton items={items} />;
+  return (
+    <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+      {Array.from({ length: items }).map((_, i) => (
+        <div key={i} className="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Skeleton width={40} height={40} borderRadius={8} />
+              <div>
+                <Skeleton width={120} height={16} className="mb-1" />
+                <Skeleton width={80} height={10} />
+              </div>
+            </div>
+            <Skeleton width={60} height={20} borderRadius={10} />
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <Skeleton width={40} height={12} />
+              <Skeleton width={100} height={12} />
+            </div>
+            <Skeleton height={8} borderRadius={4} />
+            <div className="flex justify-between">
+              <Skeleton width={80} height={10} />
+              <Skeleton width={30} height={10} />
+            </div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-slate-50 flex justify-center gap-3">
+            <Skeleton width={32} height={32} borderRadius={4} />
+            <Skeleton width={32} height={32} borderRadius={4} />
+            <Skeleton width={32} height={32} borderRadius={4} />
+          </div>
+        </div>
+      ))}
+    </SkeletonTheme>
+  );
 }
 
 // Goal-specific grid skeleton (different layout for goals)
