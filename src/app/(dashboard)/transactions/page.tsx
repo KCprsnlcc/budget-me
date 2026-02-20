@@ -67,7 +67,7 @@ import { EditTransactionModal } from "./_components/edit-transaction-modal";
 import { DeleteTransactionModal } from "./_components/delete-transaction-modal";
 import { useTransactions } from "./_lib/use-transactions";
 import type { TransactionType } from "./_components/types";
-import { FilterTableSkeleton, TransactionFilterGridSkeleton } from "@/components/ui/skeleton-filter-loaders";
+import { FilterTableSkeleton, TransactionCardSkeleton } from "@/components/ui/skeleton-filter-loaders";
 
 type SummaryType = {
   label: string;
@@ -807,8 +807,8 @@ export default function TransactionsPage() {
         </Card>
       )}
 
-      {/* Empty State */}
-      {!loading && !error && transactions.length === 0 && (
+      {/* Transactions Display */}
+      {transactions.length === 0 ? (
         <Card className="p-12 text-center">
           <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
           <h3 className="text-sm font-semibold text-slate-700 mb-1">No transactions found</h3>
@@ -821,70 +821,117 @@ export default function TransactionsPage() {
             </Button>
           )}
         </Card>
-      )}
-
-      {/* Transactions Display */}
-      {!loading && !error && transactions.length > 0 && (
-        <>
-          {viewMode === 'table' ? (
-            <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-              {tableLoading ? (
-                <FilterTableSkeleton rows={pageSize} columns={6} />
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
-                        <div className="flex items-center gap-1">
-                          Date <MoreHorizontal size={12} className="rotate-90" />
-                        </div>
-                      </TableHead>
-                      <TableHead className="px-6 py-3">Description</TableHead>
-                      <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
-                        <div className="flex items-center gap-1">
-                          Category <MoreHorizontal size={12} className="rotate-90" />
-                        </div>
-                      </TableHead>
-                      <TableHead className="px-6 py-3">Account</TableHead>
-                      <TableHead className="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
-                        <div className="flex items-center gap-1 justify-end">
-                          Amount <MoreHorizontal size={12} className="rotate-90" />
-                        </div>
-                      </TableHead>
-                      <TableHead className="px-6 py-3 text-center">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transactions.map((tx) => (
-                      <TransactionRow
-                        key={tx.id}
-                        tx={tx}
-                        onView={handleView}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </Card>
+      ) : viewMode === 'table' ? (
+        <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+          {tableLoading ? (
+            <FilterTableSkeleton rows={pageSize} columns={6} />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {tableLoading ? (
-                <TransactionFilterGridSkeleton items={pageSize} />
-              ) : (
-                transactions.map((tx) => (
-                  <TransactionCard
-                    key={tx.id}
-                    tx={tx}
-                    onView={handleView}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                  />
-                ))
-              )}
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
+                    <div className="flex items-center gap-1">
+                      Date <MoreHorizontal size={12} className="rotate-90" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="px-6 py-3">Description</TableHead>
+                  <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
+                    <div className="flex items-center gap-1">
+                      Category <MoreHorizontal size={12} className="rotate-90" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="px-6 py-3">Account</TableHead>
+                  <TableHead className="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
+                    <div className="flex items-center gap-1 justify-end">
+                      Amount <MoreHorizontal size={12} className="rotate-90" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="px-6 py-3 text-center">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transactions.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <Inbox size={32} className="text-slate-300 mb-2" />
+                        <p className="text-sm text-slate-500">No transactions match your filters</p>
+                        <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
+                          Clear Filters
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  transactions.map((tx) => (
+                    <TransactionRow
+                      key={tx.id}
+                      tx={tx}
+                      onView={handleView}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
+                  ))
+                )}
+              </TableBody>
+            </Table>
           )}
+        </Card>
+      ) : tableLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: pageSize }).map((_, i) => (
+            <TransactionCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : (
+        <>
+          {/* Transaction Cards Grid (Desktop) */}
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {transactions.length === 0 ? (
+              <div className="col-span-full">
+                <Card className="p-12 text-center">
+                  <Inbox size={32} className="text-slate-300 mb-2" />
+                  <p className="text-sm text-slate-500">No transactions match your filters</p>
+                  <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
+                    Clear Filters
+                  </Button>
+                </Card>
+              </div>
+            ) : (
+              transactions.map((tx) => (
+                <TransactionCard
+                  key={tx.id}
+                  tx={tx}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))
+            )}
+          </div>
+
+          {/* Transaction Cards Grid (Mobile) */}
+          <div className="md:hidden space-y-4">
+            {transactions.length === 0 ? (
+              <Card className="p-12 text-center">
+                <Inbox size={32} className="text-slate-300 mb-2" />
+                <p className="text-sm text-slate-500">No transactions match your filters</p>
+                <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
+                  Clear Filters
+                </Button>
+              </Card>
+            ) : (
+              transactions.map((tx) => (
+                <TransactionCard
+                  key={tx.id}
+                  tx={tx}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))
+            )}
+          </div>
         </>
       )}
 

@@ -42,7 +42,7 @@ import {
   DeleteGoalModal,
   ContributeGoalModal,
 } from "./_components";
-import { FilterTableSkeleton, GoalFilterGridSkeleton } from "@/components/ui/skeleton-filter-loaders";
+import { FilterTableSkeleton, GoalCardSkeleton } from "@/components/ui/skeleton-filter-loaders";
 import type { GoalType } from "./_components/types";
 import { getGoalProgress, formatCurrency, formatDate } from "./_components/constants";
 import { useGoals } from "./_lib/use-goals";
@@ -350,6 +350,18 @@ export default function GoalsPage() {
             </Card>
           </div>
 
+          {/* Overall Progress Skeleton */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <Skeleton width={180} height={16} className="mb-2" />
+                <Skeleton width={300} height={12} />
+              </div>
+              <Skeleton width={80} height={24} borderRadius={10} />
+            </div>
+            <Skeleton height={12} borderRadius={6} />
+          </Card>
+
           {/* Filters Skeleton */}
           <Card className="p-4">
             <div className="flex flex-col xl:flex-row items-center gap-3">
@@ -471,6 +483,7 @@ export default function GoalsPage() {
           const Icon = icons[index];
           const colors = ["emerald", "blue", "amber"];
           const color = colors[index];
+          const hasData = item.value !== "0" && item.value !== formatCurrency(0);
           
           return (
             <Card key={item.label} className="p-5 hover:shadow-md transition-all group cursor-pointer">
@@ -492,7 +505,18 @@ export default function GoalsPage() {
                 )}
               </div>
               <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">{item.label}</div>
-              <div className="text-xl font-semibold text-slate-900 tracking-tight">{item.value}</div>
+              {hasData ? (
+                <div className="text-xl font-semibold text-slate-900 tracking-tight">{item.value}</div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-2">
+                  <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-2">
+                    {index === 0 && <Flag size={16} />}
+                    {index === 1 && <PiggyBank size={16} />}
+                    {index === 2 && <TrendingUp size={16} />}
+                  </div>
+                  <div className="text-xs text-slate-400 text-center">No data yet</div>
+                </div>
+              )}
             </Card>
           );
         })}
@@ -628,6 +652,22 @@ export default function GoalsPage() {
         </Card>
       </div>
 
+      {/* Overall Goal Progress */}
+      <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900">Overall Goal Progress</h3>
+            <p className="text-xs text-slate-500 mt-0.5">You have saved {Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100)}% of your total goal targets.</p>
+          </div>
+          <Badge variant={Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 75 ? "success" : Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 50 ? "warning" : "danger"}>
+            {Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 75 ? "On Track" : Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 50 ? "Good Progress" : "Needs Attention"}
+          </Badge>
+        </div>
+        <div className="w-full bg-slate-100 rounded-full h-3 mt-2 overflow-hidden">
+          <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${Math.min(Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100), 100)}%` }} />
+        </div>
+      </Card>
+
       {/* Filters */}
       <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col xl:flex-row items-center gap-3">
@@ -733,9 +773,16 @@ export default function GoalsPage() {
       )}
 
       {/* Goals Display */}
-      {!loading && !error && goals.length > 0 && (
-        <>
-          {viewMode === 'table' ? (
+      {goals.length === 0 ? (
+        <Card className="p-12 text-center">
+          <Flag size={40} className="mx-auto text-slate-300 mb-4" />
+          <h3 className="text-sm font-semibold text-slate-900 mb-1">No goals found</h3>
+          <p className="text-xs text-slate-500 mb-4">Create your first financial goal to get started.</p>
+          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => setAddModalOpen(true)}>
+            <Plus size={16} /> Create Goal
+          </Button>
+        </Card>
+      ) : viewMode === 'table' ? (
         <Card className="overflow-hidden">
           {tableLoading ? (
             <FilterTableSkeleton rows={pageSize} columns={8} />
@@ -755,86 +802,139 @@ export default function GoalsPage() {
                   </tr>
                 </thead>
                 <tbody className="text-xs divide-y divide-slate-50">
-                  {goals.map((goal) => {
-                    const progress = getGoalProgress(goal.current, goal.target);
-                    const remaining = goal.target - goal.current;
-                    const Icon = GOAL_ICONS[goal.icon || "target"] || Flag;
-                    return (
-                      <tr key={goal.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="text-slate-500 p-2 rounded-lg">
-                              <Icon size={16} strokeWidth={1.5} />
+                  {goals.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center justify-center">
+                          <Inbox size={32} className="text-slate-300 mb-2" />
+                          <p className="text-sm text-slate-500">No goals match your filters</p>
+                          <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
+                            Clear Filters
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    goals.map((goal) => {
+                      const progress = getGoalProgress(goal.current, goal.target);
+                      const remaining = goal.target - goal.current;
+                      const Icon = GOAL_ICONS[goal.icon || "target"] || Flag;
+                      return (
+                        <tr key={goal.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="text-slate-500 p-2 rounded-lg">
+                                <Icon size={16} strokeWidth={1.5} />
+                              </div>
+                              <div>
+                                <div className="font-medium text-slate-900">{goal.name}</div>
+                                <div className="text-[9px] text-slate-400">{goal.isFamily ? "Family" : "Personal"}</div>
+                              </div>
                             </div>
-                            <div>
-                              <div className="font-medium text-slate-900">{goal.name}</div>
-                              <div className="text-[9px] text-slate-400">{goal.isFamily ? "Family" : "Personal"}</div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <Badge variant="neutral" className="text-xs">
+                              {goal.category}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 text-right font-medium text-slate-900">
+                            ${formatCurrency(goal.target)}
+                          </td>
+                          <td className="px-6 py-4 text-right text-slate-600">
+                            ${formatCurrency(goal.current)}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex justify-center">
+                              <ProgressBar value={goal.current} max={goal.target} color={goal.status === "completed" ? "success" : goal.status === "in_progress" ? "success" : "warning"} className="w-16" />
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <Badge variant="neutral" className="text-xs">
-                            {goal.category}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4 text-right font-medium text-slate-900">
-                          ${formatCurrency(goal.target)}
-                        </td>
-                        <td className="px-6 py-4 text-right text-slate-600">
-                          ${formatCurrency(goal.current)}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex justify-center">
-                            <ProgressBar value={goal.current} max={goal.target} color={goal.status === "completed" ? "success" : goal.status === "in_progress" ? "success" : goal.status === "behind" ? "warning" : "warning"} className="w-16" />
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <Badge variant={goal.status === "completed" ? "success" : goal.status === "in_progress" ? "info" : "warning"}>
-                            {goal.status === "completed" ? "Completed" : goal.status === "in_progress" ? "In Progress" : goal.status === "behind" ? "Behind" : "Overdue"}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4 text-center text-slate-600">
-                          {new Date(goal.deadline + "T00:00:00").toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-1">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" title="View Details" onClick={() => handleView(goal)}>
-                              <Eye size={14} />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" title="Edit" onClick={() => handleEdit(goal)}>
-                              <Edit size={14} />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" title="Delete" onClick={() => handleDelete(goal)}>
-                              <Trash2 size={14} />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <Badge variant={goal.status === "completed" ? "success" : goal.status === "in_progress" ? "info" : "warning"}>
+                              {goal.status === "completed" ? "Completed" : goal.status === "in_progress" ? "In Progress" : goal.status === "behind" ? "Behind" : "Overdue"}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 text-center text-slate-600">
+                            {new Date(goal.deadline + "T00:00:00").toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center justify-center gap-1">
+                              <Button variant="ghost" size="icon" className="h-7 w-7" title="View Details" onClick={() => handleView(goal)}>
+                                <Eye size={14} />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Edit" onClick={() => handleEdit(goal)}>
+                                <Edit size={14} />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" title="Delete" onClick={() => handleDelete(goal)}>
+                                <Trash2 size={14} />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
           )}
         </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tableLoading ? (
-                <GoalFilterGridSkeleton items={pageSize} />
-              ) : (
-                goals.map((goal) => (
-                  <GoalCard
-                    key={goal.id}
-                    goal={goal}
-                    onView={handleView}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onContribute={handleContribute}
-                  />
-                ))
-              )}
-            </div>
-          )}
+      ) : tableLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: pageSize }).map((_, i) => (
+            <GoalCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : (
+        <>
+          {/* Goal Cards Grid (Desktop) */}
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {goals.length === 0 ? (
+              <div className="col-span-full">
+                <Card className="p-12 text-center">
+                  <Inbox size={32} className="text-slate-300 mb-2" />
+                  <p className="text-sm text-slate-500">No goals match your filters</p>
+                  <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
+                    Clear Filters
+                  </Button>
+                </Card>
+              </div>
+            ) : (
+              goals.map((goal) => (
+                <GoalCard
+                  key={goal.id}
+                  goal={goal}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onContribute={handleContribute}
+                />
+              ))
+            )}
+          </div>
+
+          {/* Goal Cards Grid (Mobile) */}
+          <div className="md:hidden space-y-4">
+            {goals.length === 0 ? (
+              <Card className="p-12 text-center">
+                <Inbox size={32} className="text-slate-300 mb-2" />
+                <p className="text-sm text-slate-500">No goals match your filters</p>
+                <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
+                  Clear Filters
+                </Button>
+              </Card>
+            ) : (
+              goals.map((goal) => (
+                <GoalCard
+                  key={goal.id}
+                  goal={goal}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onContribute={handleContribute}
+                />
+              ))
+            )}
+          </div>
         </>
       )}
 

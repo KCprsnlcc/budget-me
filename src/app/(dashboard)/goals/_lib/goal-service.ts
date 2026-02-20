@@ -90,12 +90,8 @@ export async function fetchGoalsForPage(
   if (filters.category) {
     query = query.eq("category", filters.category);
   }
-  if (filters.month && filters.month !== "all") {
-    query = query.eq("date_part('month', created_at)", filters.month);
-  }
-  if (filters.year && filters.year !== "all") {
-    query = query.eq("date_part('year', created_at)", filters.year);
-  }
+  // Remove date_part filtering as it causes database errors
+  // Date filtering will be handled client-side if needed
 
   // Get total count for pagination (apply same filters as main query)
   let countQuery = supabase
@@ -113,12 +109,7 @@ export async function fetchGoalsForPage(
   if (filters.category) {
     countQuery = countQuery.eq("category", filters.category);
   }
-  if (filters.month && filters.month !== "all") {
-    countQuery = countQuery.eq("date_part('month', created_at)", filters.month);
-  }
-  if (filters.year && filters.year !== "all") {
-    countQuery = countQuery.eq("date_part('year', created_at)", filters.year);
-  }
+  // Remove date_part filtering from count query as well
 
   const { count } = await countQuery;
 

@@ -90,18 +90,39 @@ export function useGoals() {
     }
   }, [filters, currentPage, pageSize]);
 
-  // ----- Client-side search filtering (instant, no re-query) -----
+  // ----- Client-side search and date filtering (instant, no re-query) -----
   const filteredGoals = useMemo(() => {
-    if (!search.trim()) return goals;
-    const q = search.toLowerCase();
-    return goals.filter(
-      (g) =>
-        g.name.toLowerCase().includes(q) ||
-        g.category.toLowerCase().includes(q) ||
-        (g.description ?? "").toLowerCase().includes(q) ||
-        (g.notes ?? "").toLowerCase().includes(q)
-    );
-  }, [goals, search]);
+    let filtered = goals;
+    
+    // Apply search filtering
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      filtered = filtered.filter(
+        (g) =>
+          g.name.toLowerCase().includes(q) ||
+          g.category.toLowerCase().includes(q) ||
+          (g.description ?? "").toLowerCase().includes(q) ||
+          (g.notes ?? "").toLowerCase().includes(q)
+      );
+    }
+    
+    // Apply date filtering
+    if (month !== "all") {
+      filtered = filtered.filter((g) => {
+        const goalDate = new Date(g.deadline + "T00:00:00");
+        return goalDate.getMonth() + 1 === month;
+      });
+    }
+    
+    if (year !== "all") {
+      filtered = filtered.filter((g) => {
+        const goalDate = new Date(g.deadline + "T00:00:00");
+        return goalDate.getFullYear() === year;
+      });
+    }
+    
+    return filtered;
+  }, [goals, search, month, year]);
 
   // ----- Refetch (passed to modals as onSuccess) -----
   const refetch = useCallback(() => {
