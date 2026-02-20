@@ -133,7 +133,7 @@ function txToFormState(tx: TransactionType | null): TxnFormState {
     date: tx.date,
     income_category_id: tx.income_category_id ?? "",
     expense_category_id: tx.expense_category_id ?? "",
-    budget: "",
+    budget: tx.budget_id ?? "",
     goal: tx.goal_id ?? "",
     account: tx.account_id ?? "",
     description: tx.description ?? "",
@@ -200,7 +200,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
     if (!transaction) return;
     setSaving(true);
     setSaveError(null);
-    const { error } = await updateTransaction(transaction.id, form);
+    const { error } = await updateTransaction(transaction.id, form, transaction);
     setSaving(false);
     if (error) {
       setSaveError(error);
@@ -393,7 +393,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
               </div>
 
               {/* Category + Budget */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className={`grid gap-4 ${form.type === "expense" ? "grid-cols-2" : "grid-cols-1"}`}>
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                     Category {form.type === "income" || form.type === "expense" ? <span className="text-slate-400">*</span> : null}
@@ -417,22 +417,24 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                     </p>
                   )}
                 </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                    Budget
-                  </label>
-                  <SearchableDropdown
-                    value={form.budget}
-                    onChange={(value) => updateField("budget", value)}
-                    options={budgets.map((b) => ({
-                      value: b.id,
-                      label: b.budget_name,
-                    }))}
-                    placeholder="No budget"
-                    className="w-full"
-                    emptyLabel="No budget"
-                  />
-                </div>
+                {form.type === "expense" && (
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
+                      Budget
+                    </label>
+                    <SearchableDropdown
+                      value={form.budget}
+                      onChange={(value) => updateField("budget", value)}
+                      options={budgets.map((b) => ({
+                        value: b.id,
+                        label: b.budget_name,
+                      }))}
+                      placeholder="No budget"
+                      className="w-full"
+                      emptyLabel="No budget"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Goal */}
@@ -524,9 +526,28 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                   <ReviewRow label="Category" value={catName} />
                   <ReviewRow label="Account" value={accountName} />
                   <ReviewRow label="Goal" value={goalName} />
+                  {form.type === "expense" && form.budget && (
+                    <ReviewRow label="Budget" value={budgets.find(b => b.id === form.budget)?.budget_name || "—"} />
+                  )}
                   <ReviewRow label="Description" value={form.description || "No description provided."} italic={!form.description} />
                 </div>
               </div>
+
+              {/* Budget Impact Notice */}
+              {form.type === "expense" && form.budget && (
+                <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-blue-50 border border-blue-100 text-blue-900 items-start">
+                  <TrendingUp size={16} className="flex-shrink-0 mt-px" />
+                  <div>
+                    <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Budget Impact</h4>
+                    <p className="text-[11px] leading-relaxed opacity-85">
+                      This expense will update your <strong>{budgets.find(b => b.id === form.budget)?.budget_name}</strong> budget progress by ₱{parseFloat(form.amount || "0").toFixed(2)}.
+                      {transaction?.budget_id !== form.budget && transaction?.budget_id && (
+                        <> Previous budget will be recalculated.</>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Error Notice */}
               {saveError && (

@@ -89,6 +89,7 @@ function mapRow(row: Record<string, any>): TransactionType {
     income_category_id: row.income_category_id,
     expense_category_id: row.expense_category_id,
     goal_id: row.goal_id,
+    budget_id: row.budget_id,
     status: row.status,
     is_recurring: row.is_recurring ?? false,
     created_at: row.created_at,
@@ -226,6 +227,7 @@ export async function createTransaction(
     description: form.description || null,
     account_id: form.account || null,
     goal_id: form.goal || null,
+    budget_id: form.budget || null,
     status: "completed",
   };
 
@@ -256,6 +258,12 @@ export async function createTransaction(
     .single();
 
   if (error) return { data: null, error: error.message };
+
+  // Update budget spent amount if this is an expense with a budget
+  if (form.type === "expense" && form.budget && data) {
+    await updateBudgetSpent(form.budget, amount);
+  }
+
   return { data: mapRow(data), error: null };
 }
 
@@ -265,7 +273,8 @@ export async function createTransaction(
 
 export async function updateTransaction(
   txId: string,
-  form: TxnFormState
+  form: TxnFormState,
+  originalTx?: TransactionType
 ): Promise<{ data: TransactionType | null; error: string | null }> {
   const amount = parseFloat(form.amount);
   if (isNaN(amount) || amount <= 0) {
@@ -279,6 +288,7 @@ export async function updateTransaction(
     description: form.description || null,
     account_id: form.account || null,
     goal_id: form.goal || null,
+    budget_id: form.budget || null,
     income_category_id: null,
     expense_category_id: null,
   };
@@ -311,6 +321,25 @@ export async function updateTransaction(
     .single();
 
   if (error) return { data: null, error: error.message };
+
+  // Handle budget recalculations
+  const oldBudgetId = originalTx?.budget_id;
+  const newBudgetId = form.budget || null;
+  const wasExpense = originalTx?.type === "expense";
+  const isNowExpense = form.type === "expense";
+
+  // If budget changed or transaction type changed affecting expense status
+  if (oldBudgetId !== newBudgetId || wasExpense !== isNowExpense) {
+    // Recalculate old budget if it existed and was an expense
+    if (oldBudgetId && wasExpense) {
+      await recalculateBudgetSpent(oldBudgetId);
+    }
+    // Recalculate new budget if it exists and is now an expense
+    if (newBudgetId && isNowExpense && newBudgetId !== oldBudgetId) {
+      await recalculateBudgetSpent(newBudgetId);
+    }
+  }
+
   return { data: mapRow(data), error: null };
 }
 
@@ -319,13 +348,20 @@ export async function updateTransaction(
 // ---------------------------------------------------------------------------
 
 export async function deleteTransaction(
-  txId: string
+  txId: string,
+  budgetId?: string
 ): Promise<{ error: string | null }> {
   const { error } = await supabase
     .from("transactions")
     .delete()
     .eq("id", txId);
   if (error) return { error: error.message };
+  
+  // Recalculate budget spent if this transaction had a budget
+  if (budgetId) {
+    await recalculateBudgetSpent(budgetId);
+  }
+  
   return { error: null };
 }
 
@@ -653,4 +689,50 @@ export async function fetchCategoryStats(
   const average = all && all.length > 0 ? total / all.length : 0;
 
   return { average, monthlyTotal, count };
+}
+
+// ---------------------------------------------------------------------------
+// BUDGET UPDATE HELPERS
+// ---------------------------------------------------------------------------
+
+async function updateBudgetSpent(budgetId: string, amount: number): Promise<void> {
+  if (!budgetId || amount <= 0) return;
+  
+  // Fetch current spent amount
+  const { data: budget } = await supabase
+    .from("budgets")
+    .select("spent")
+    .eq("id", budgetId)
+    .single();
+  
+  if (!budget) return;
+  
+  const currentSpent = Number(budget.spent) || 0;
+  const newSpent = currentSpent + amount;
+  
+  // Update the budget with new spent amount
+  await supabase
+    .from("budgets")
+    .update({ spent: newSpent })
+    .eq("id", budgetId);
+}
+
+export async function recalculateBudgetSpent(budgetId: string): Promise<void> {
+  if (!budgetId) return;
+  
+  // Sum all expense transactions for this budget
+  const { data: transactions } = await supabase
+    .from("transactions")
+    .select("amount")
+    .eq("budget_id", budgetId)
+    .eq("type", "expense")
+    .eq("status", "completed");
+  
+  const totalSpent = (transactions ?? []).reduce((sum, tx) => sum + Number(tx.amount), 0);
+  
+  // Update budget with recalculated spent amount
+  await supabase
+    .from("budgets")
+    .update({ spent: totalSpent })
+    .eq("id", budgetId);
 }

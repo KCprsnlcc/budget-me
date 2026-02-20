@@ -8,7 +8,7 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { Loader2, AlertTriangle, TrendingUp } from "lucide-react";
 import type { TransactionType } from "./types";
 import { deleteTransaction } from "../_lib/transaction-service";
 
@@ -37,7 +37,7 @@ export function DeleteTransactionModal({
     if (!transaction) return;
     setDeleting(true);
     setDeleteError(null);
-    const { error } = await deleteTransaction(transaction.id);
+    const { error } = await deleteTransaction(transaction.id, transaction.budget_id ?? undefined);
     setDeleting(false);
     if (error) {
       setDeleteError(error);
@@ -91,6 +91,19 @@ export function DeleteTransactionModal({
               </div>
             </div>
           </div>
+
+          {/* Budget Restoration Notice */}
+          {transaction.type === "expense" && transaction.budget_id && (
+            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-green-50 border border-green-100 text-green-900 mx-auto max-w-sm mt-4 items-start">
+              <TrendingUp size={16} className="flex-shrink-0 mt-px" />
+              <div>
+                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Budget Will Be Restored</h4>
+                <p className="text-[11px] leading-relaxed opacity-85">
+                  ₱{absAmount} will be restored from your budget progress when this expense is deleted.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Error Notice */}
           {deleteError && (

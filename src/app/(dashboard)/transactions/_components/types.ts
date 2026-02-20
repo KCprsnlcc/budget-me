@@ -13,6 +13,7 @@ export type TransactionType = {
   income_category_id: string | null;
   expense_category_id: string | null;
   goal_id: string | null;
+  budget_id: string | null;
   status: string;
   is_recurring: boolean;
   created_at: string;
