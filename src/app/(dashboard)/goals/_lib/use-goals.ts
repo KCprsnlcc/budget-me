@@ -22,7 +22,10 @@ export function useGoals() {
   const [month, setMonth] = useState<number | "all">("all");
   const [year, setYear] = useState<number | "all">("all");
 
-  // ----- Data state -----
+  // ----- Pagination state -----
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
   const [goals, setGoals] = useState<GoalType[]>([]);
   const [summary, setSummary] = useState<GoalSummary | null>(null);
 
@@ -50,11 +53,12 @@ export function useGoals() {
 
     try {
       const [goalsResult, summaryResult] = await Promise.all([
-        fetchGoalsForPage(userId, filters),
+        fetchGoalsForPage(userId, filters, currentPage, pageSize),
         fetchGoalSummary(userId),
       ]);
 
       setGoals(goalsResult.data);
+      setTotalCount(goalsResult.count ?? 0);
       if (goalsResult.error) setError(goalsResult.error);
       setSummary(summaryResult);
     } catch (err: any) {
@@ -62,7 +66,7 @@ export function useGoals() {
     } finally {
       setLoading(false);
     }
-  }, [userId, filters]);
+  }, [userId, filters, currentPage, pageSize]);
 
   useEffect(() => {
     fetchData();
@@ -95,6 +99,7 @@ export function useGoals() {
     setSearch("");
     setMonth(now.getMonth() + 1);
     setYear(now.getFullYear());
+    setCurrentPage(1);
   }, []);
 
   const resetFiltersToAll = useCallback(() => {
@@ -104,6 +109,45 @@ export function useGoals() {
     setSearch("");
     setMonth("all");
     setYear("all");
+    setCurrentPage(1);
+  }, []);
+
+  // Pagination helpers
+  const totalPages = pageSize === Number.MAX_SAFE_INTEGER ? 1 : Math.ceil(totalCount / pageSize);
+  const hasNextPage = currentPage < totalPages;
+  const hasPreviousPage = currentPage > 1;
+
+  const goToPage = useCallback((page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  }, [totalPages]);
+
+  const nextPage = useCallback(() => {
+    if (hasNextPage) {
+      setCurrentPage(prev => prev + 1);
+    }
+  }, [hasNextPage]);
+
+  const previousPage = useCallback(() => {
+    if (hasPreviousPage) {
+      setCurrentPage(prev => prev - 1);
+    }
+  }, [hasPreviousPage]);
+
+  // Reset page when filters change or page size changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, priorityFilter, categoryFilter, month, year, pageSize]);
+
+  // Handle page size change
+  const handlePageSizeChange = useCallback((newSize: number | "all") => {
+    if (newSize === "all") {
+      setPageSize(Number.MAX_SAFE_INTEGER);
+    } else {
+      setPageSize(newSize);
+    }
+    setCurrentPage(1);
   }, []);
 
   return {
@@ -128,5 +172,17 @@ export function useGoals() {
     loading,
     error,
     refetch,
+    // Pagination
+    currentPage,
+    pageSize,
+    setPageSize,
+    handlePageSizeChange,
+    totalPages,
+    totalCount,
+    hasNextPage,
+    hasPreviousPage,
+    goToPage,
+    nextPage,
+    previousPage,
   };
 }

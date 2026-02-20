@@ -27,6 +27,8 @@ import {
   Grid3X3,
   Loader2,
   Inbox,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -176,7 +178,20 @@ GoalCard.displayName = "GoalCard";
 
 export default function GoalsPage() {
   const currentYear = new Date().getFullYear();
-  const { goals, allGoals, summary, search, setSearch, statusFilter, setStatusFilter, priorityFilter, setPriorityFilter, categoryFilter, setCategoryFilter, month, setMonth, year, setYear, resetFilters, resetFiltersToAll, loading, error, refetch } = useGoals();
+  const { goals, allGoals, summary, search, setSearch, statusFilter, setStatusFilter, priorityFilter, setPriorityFilter, categoryFilter, setCategoryFilter, month, setMonth, year, setYear, resetFilters, resetFiltersToAll, loading, error, refetch,
+    // Pagination
+    currentPage,
+    pageSize,
+    setPageSize,
+    handlePageSizeChange,
+    totalPages,
+    totalCount,
+    hasNextPage,
+    hasPreviousPage,
+    goToPage,
+    nextPage,
+    previousPage,
+  } = useGoals();
 
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -832,6 +847,80 @@ export default function GoalsPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Pagination */}
+      {!loading && !error && goals.length > 0 && (
+        <div className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-lg">
+          <div className="text-sm text-slate-600">
+            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} goals
+          </div>
+          <div className="flex items-center gap-4">
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={previousPage}
+                  disabled={!hasPreviousPage}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronLeft size={16} />
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => goToPage(pageNum)}
+                        className="h-8 w-8 p-0 text-xs"
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={nextPage}
+                  disabled={!hasNextPage}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronRight size={16} />
+                </Button>
+              </div>
+            )}
+            <div className="text-sm text-slate-600 flex items-center gap-2">
+              <span>Show</span>
+              <select
+                value={pageSize === Number.MAX_SAFE_INTEGER ? "all" : pageSize}
+                onChange={(e) => handlePageSizeChange(e.target.value === "all" ? "all" : parseInt(e.target.value))}
+                className="text-sm border border-slate-200 rounded px-2 py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value="all">All</option>
+              </select>
+              <span>per page</span>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Modals */}
