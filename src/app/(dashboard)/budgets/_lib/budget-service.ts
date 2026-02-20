@@ -77,10 +77,10 @@ export async function fetchBudgetsList(
     .eq("user_id", userId);
 
   if (filters.month && filters.month !== "all") {
-    countQuery = countQuery.eq("extract(month from start_date)", filters.month);
+    countQuery = countQuery.eq("date_part('month', start_date)", filters.month);
   }
   if (filters.year && filters.year !== "all") {
-    countQuery = countQuery.eq("extract(year from start_date)", filters.year);
+    countQuery = countQuery.eq("date_part('year', start_date)", filters.year);
   }
   if (filters.status) {
     countQuery = countQuery.eq("status", filters.status);
@@ -104,10 +104,10 @@ export async function fetchBudgetsList(
 
   // Apply filters
   if (filters.month && filters.month !== "all") {
-    query = query.eq("extract(month from start_date)", filters.month);
+    query = query.eq("date_part('month', start_date)", filters.month);
   }
   if (filters.year && filters.year !== "all") {
-    query = query.eq("extract(year from start_date)", filters.year);
+    query = query.eq("date_part('year', start_date)", filters.year);
   }
   if (filters.status) {
     query = query.eq("status", filters.status);

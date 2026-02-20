@@ -91,10 +91,10 @@ export async function fetchGoalsForPage(
     query = query.eq("category", filters.category);
   }
   if (filters.month && filters.month !== "all") {
-    query = query.eq("extract(month from created_at)", filters.month);
+    query = query.eq("date_part('month', created_at)", filters.month);
   }
   if (filters.year && filters.year !== "all") {
-    query = query.eq("extract(year from created_at)", filters.year);
+    query = query.eq("date_part('year', created_at)", filters.year);
   }
 
   // Get total count for pagination (apply same filters as main query)
@@ -114,10 +114,10 @@ export async function fetchGoalsForPage(
     countQuery = countQuery.eq("category", filters.category);
   }
   if (filters.month && filters.month !== "all") {
-    countQuery = countQuery.eq("extract(month from created_at)", filters.month);
+    countQuery = countQuery.eq("date_part('month', created_at)", filters.month);
   }
   if (filters.year && filters.year !== "all") {
-    countQuery = countQuery.eq("extract(year from created_at)", filters.year);
+    countQuery = countQuery.eq("date_part('year', created_at)", filters.year);
   }
 
   const { count } = await countQuery;
