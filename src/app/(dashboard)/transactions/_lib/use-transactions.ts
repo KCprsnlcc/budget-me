@@ -57,6 +57,7 @@ export function useTransactions() {
 
   // ----- Loading / error -----
   const [loading, setLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // ----- Build filters object -----
@@ -89,9 +90,14 @@ export function useTransactions() {
   }, [userId]);
 
   // ----- Fetch main data when filters change -----
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isFilterChange = false) => {
     if (!userId) return;
-    setLoading(true);
+    
+    if (isFilterChange) {
+      setTableLoading(true);
+    } else {
+      setLoading(true);
+    }
     setError(null);
 
     try {
@@ -105,19 +111,31 @@ export function useTransactions() {
       setTransactions(txResult.data);
       setTotalCount(txResult.count ?? 0);
       if (txResult.error) setError(txResult.error);
-      setSummary(summaryResult);
-      setCategoryBreakdown(breakdownResult);
-      setMonthlyTrend(trendResult);
+      
+      // Only update summary/charts on initial load or major filter changes
+      if (!isFilterChange || (month !== "all" || year !== "all")) {
+        setSummary(summaryResult);
+        setCategoryBreakdown(breakdownResult);
+        setMonthlyTrend(trendResult);
+      }
     } catch (err: any) {
       setError(err?.message ?? "Failed to load transactions.");
     } finally {
       setLoading(false);
+      setTableLoading(false);
     }
   }, [userId, filters, month, year, currentPage, pageSize]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // ----- Separate effect for filter changes to avoid full refresh -----
+  useEffect(() => {
+    if (transactions.length > 0) {
+      fetchData(true);
+    }
+  }, [filters, currentPage, pageSize]);
 
   // ----- Client-side search filtering (instant, no re-query) -----
   const filteredTransactions = useMemo(() => {
@@ -151,6 +169,11 @@ export function useTransactions() {
       setGoals(gls);
     });
   }, [fetchData, userId]);
+
+  // ----- Refetch only table data (for filter changes) -----
+  const refetchTable = useCallback(() => {
+    fetchData(true);
+  }, [fetchData]);
 
   // ----- Reset filters -----
   const resetFilters = useCallback(() => {
@@ -236,8 +259,10 @@ export function useTransactions() {
     resetFiltersToAll,
     // State
     loading,
+    tableLoading,
     error,
     refetch,
+    refetchTable,
     // Pagination
     currentPage,
     pageSize,

@@ -53,6 +53,7 @@ import {
   DeleteBudgetModal,
 } from "./_components";
 import type { BudgetType } from "./_components/types";
+import { FilterTableSkeleton, BudgetFilterGridSkeleton } from "@/components/ui/skeleton-filter-loaders";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { deriveBudgetHealth } from "./_components/types";
@@ -178,6 +179,7 @@ export default function BudgetsPage() {
     resetFilters,
     resetFiltersToAll,
     loading,
+    tableLoading,
     error,
     refetch,
     // Pagination
@@ -780,133 +782,131 @@ export default function BudgetsPage() {
         </Card>
       ) : viewMode === 'table' ? (
         <Card className="overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
-                  <th className="px-6 py-4">Budget Name</th>
-                  <th className="px-6 py-4">Category</th>
-                  <th className="px-6 py-4 text-right">Budget</th>
-                  <th className="px-6 py-4 text-right">Spent</th>
-                  <th className="px-6 py-4 text-right">Remaining</th>
-                  <th className="px-6 py-4 text-center">Status</th>
-                  <th className="px-6 py-4 text-center">Progress</th>
-                  <th className="px-6 py-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="text-xs divide-y divide-slate-50">
-                {budgets.map((budget) => {
-                  const remaining = budget.amount - budget.spent;
-                  const percentage = budget.amount > 0 ? Math.round((budget.spent / budget.amount) * 100) : 0;
-                  const health = deriveBudgetHealth(budget.spent, budget.amount);
-                  const periodLabel = BUDGET_PERIODS.find((p) => p.key === budget.period)?.label ?? budget.period;
-                  return (
-                    <tr key={budget.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="text-slate-500 p-2 rounded-lg">
-                            <Briefcase size={16} strokeWidth={1.5} />
+          {tableLoading ? (
+            <FilterTableSkeleton rows={pageSize} columns={8} />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+                    <th className="px-6 py-4">Budget Name</th>
+                    <th className="px-6 py-4">Category</th>
+                    <th className="px-6 py-4 text-right">Budget</th>
+                    <th className="px-6 py-4 text-right">Spent</th>
+                    <th className="px-6 py-4 text-right">Remaining</th>
+                    <th className="px-6 py-4 text-center">Status</th>
+                    <th className="px-6 py-4 text-center">Progress</th>
+                    <th className="px-6 py-4 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="text-xs divide-y divide-slate-50">
+                  {budgets.map((budget) => {
+                    const remaining = budget.amount - budget.spent;
+                    const percentage = budget.amount > 0 ? Math.round((budget.spent / budget.amount) * 100) : 0;
+                    const health = deriveBudgetHealth(budget.spent, budget.amount);
+                    const periodLabel = BUDGET_PERIODS.find((p) => p.key === budget.period)?.label ?? budget.period;
+                    return (
+                      <tr key={budget.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="text-slate-500 p-2 rounded-lg">
+                              <Briefcase size={16} strokeWidth={1.5} />
+                            </div>
+                            <div>
+                              <div className="font-medium text-slate-900">{budget.budget_name}</div>
+                              <div className="text-[9px] text-slate-400">{periodLabel}</div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="font-medium text-slate-900">{budget.budget_name}</div>
-                            <div className="text-[9px] text-slate-400">{periodLabel}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge variant="neutral" className="text-xs">
-                          {budget.expense_category_name ?? budget.category_name ?? "Uncategorized"}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 text-right font-medium text-slate-900">
-                        ₱{budget.amount.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 text-right text-slate-600">
-                        ₱{budget.spent.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <span className={remaining >= 0 ? "text-emerald-600" : "text-red-600"}>
-                          {remaining >= 0 ? 
-                            `₱${remaining.toLocaleString()}` : 
-                            `-₱${Math.abs(remaining).toLocaleString()}`
-                          }
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center">
-                          <Badge variant={
-                            health === "on-track" ? "success" : 
-                            health === "caution" ? "warning" : "danger"
-                          } className="text-xs">
-                            {health === "on-track" ? "On Track" : 
-                             health === "caution" ? "Caution" : "At Risk"}
+                        </td>
+                        <td className="px-6 py-4">
+                          <Badge variant="neutral" className="text-xs">
+                            {budget.expense_category_name ?? budget.category_name ?? "Uncategorized"}
                           </Badge>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center">
-                          <div className="w-16">
-                            <ProgressBar 
-                              value={budget.spent} 
-                              max={budget.amount} 
-                              color={health === "on-track" ? "success" : health === "caution" ? "warning" : "danger"} 
-                            />
-                            <div className="text-[9px] text-slate-400 text-center mt-1">{percentage}%</div>
+                        </td>
+                        <td className="px-6 py-4 text-right font-medium text-slate-900">
+                          ₱{budget.amount.toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 text-right font-medium text-slate-900">
+                          ₱{budget.spent.toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <span className={`font-medium ${
+                            remaining >= 0 ? "text-emerald-600" : "text-red-600"
+                          }`}>
+                            ₱{Math.abs(remaining).toLocaleString()}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <Badge variant={health === "on-track" ? "success" : health === "caution" ? "warning" : "danger"}>
+                            {health === "on-track" ? "On Track" : health === "caution" ? "Caution" : "At Risk"}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <div className="flex items-center justify-center">
+                            <ProgressBar value={budget.spent} max={budget.amount} color={health === "on-track" ? "success" : health === "caution" ? "warning" : "danger"} className="w-20" />
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-center gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => handleView(budget)}>
-                            <Eye size={16} />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => handleEdit(budget)}>
-                            <Edit size={16} />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => handleDelete(budget)}>
-                            <Trash2 size={16} />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-center gap-1">
+                            <Button variant="ghost" size="icon" className="h-7 w-7" title="View Details" onClick={() => handleView(budget)}>
+                              <Eye size={14} />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" title="Edit" onClick={() => handleEdit(budget)}>
+                              <Edit size={14} />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" title="Delete" onClick={() => handleDelete(budget)}>
+                              <Trash2 size={14} />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </Card>
       ) : (
         <>
           {/* Budget Cards Grid (Desktop) */}
           <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {budgets.map((budget) => (
-              <BudgetRow
-                key={budget.id}
-                budget={budget}
-                onView={handleView}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
+            {tableLoading ? (
+              <BudgetFilterGridSkeleton items={pageSize} />
+            ) : (
+              budgets.map((budget) => (
+                <BudgetRow
+                  key={budget.id}
+                  budget={budget}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))
+            )}
           </div>
 
           {/* Budget Cards Grid (Mobile) */}
           <div className="md:hidden space-y-4">
-            {budgets.map((budget) => (
-              <BudgetRow
-                key={budget.id}
-                budget={budget}
-                onView={handleView}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
+            {tableLoading ? (
+              <BudgetFilterGridSkeleton items={pageSize} />
+            ) : (
+              budgets.map((budget) => (
+                <BudgetRow
+                  key={budget.id}
+                  budget={budget}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))
+            )}
           </div>
         </>
       )}
 
       {/* Pagination */}
-      {!loading && !error && budgets.length > 0 && (
+      {!loading && !tableLoading && !error && budgets.length > 0 && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-lg">
           <div className="text-sm text-slate-600">
             Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} budgets

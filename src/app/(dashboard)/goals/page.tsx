@@ -42,6 +42,7 @@ import {
   DeleteGoalModal,
   ContributeGoalModal,
 } from "./_components";
+import { FilterTableSkeleton, GoalFilterGridSkeleton } from "@/components/ui/skeleton-filter-loaders";
 import type { GoalType } from "./_components/types";
 import { getGoalProgress, formatCurrency, formatDate } from "./_components/constants";
 import { useGoals } from "./_lib/use-goals";
@@ -50,7 +51,6 @@ const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
-
 
 const GOAL_ICONS: Record<string, React.ElementType> = {
   "shield-check": Flag,
@@ -178,7 +178,7 @@ GoalCard.displayName = "GoalCard";
 
 export default function GoalsPage() {
   const currentYear = new Date().getFullYear();
-  const { goals, allGoals, summary, search, setSearch, statusFilter, setStatusFilter, priorityFilter, setPriorityFilter, categoryFilter, setCategoryFilter, month, setMonth, year, setYear, resetFilters, resetFiltersToAll, loading, error, refetch,
+  const { goals, allGoals, summary, search, setSearch, statusFilter, setStatusFilter, priorityFilter, setPriorityFilter, categoryFilter, setCategoryFilter, month, setMonth, year, setYear, resetFilters, resetFiltersToAll, loading, tableLoading, error, refetch,
     // Pagination
     currentPage,
     pageSize,
@@ -737,120 +737,109 @@ export default function GoalsPage() {
         <>
           {viewMode === 'table' ? (
         <Card className="overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
-                  <th className="px-6 py-4">Goal Name</th>
-                  <th className="px-6 py-4">Category</th>
-                  <th className="px-6 py-4 text-right">Target</th>
-                  <th className="px-6 py-4 text-right">Current</th>
-                  <th className="px-6 py-4 text-right">Progress</th>
-                  <th className="px-6 py-4 text-center">Status</th>
-                  <th className="px-6 py-4 text-center">Deadline</th>
-                  <th className="px-6 py-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="text-xs divide-y divide-slate-50">
-                {goals.map((goal) => {
-                  const progress = getGoalProgress(goal.current, goal.target);
-                  const remaining = goal.target - goal.current;
-                  const Icon = GOAL_ICONS[goal.icon || "target"] || Flag;
-                  return (
-                    <tr key={goal.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="text-slate-500 p-2 rounded-lg">
-                            <Icon size={16} strokeWidth={1.5} />
+          {tableLoading ? (
+            <FilterTableSkeleton rows={pageSize} columns={8} />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+                    <th className="px-6 py-4">Goal Name</th>
+                    <th className="px-6 py-4">Category</th>
+                    <th className="px-6 py-4 text-right">Target</th>
+                    <th className="px-6 py-4 text-right">Current</th>
+                    <th className="px-6 py-4 text-right">Progress</th>
+                    <th className="px-6 py-4 text-center">Status</th>
+                    <th className="px-6 py-4 text-center">Deadline</th>
+                    <th className="px-6 py-4 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="text-xs divide-y divide-slate-50">
+                  {goals.map((goal) => {
+                    const progress = getGoalProgress(goal.current, goal.target);
+                    const remaining = goal.target - goal.current;
+                    const Icon = GOAL_ICONS[goal.icon || "target"] || Flag;
+                    return (
+                      <tr key={goal.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="text-slate-500 p-2 rounded-lg">
+                              <Icon size={16} strokeWidth={1.5} />
+                            </div>
+                            <div>
+                              <div className="font-medium text-slate-900">{goal.name}</div>
+                              <div className="text-[9px] text-slate-400">{goal.isFamily ? "Family" : "Personal"}</div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="font-medium text-slate-900">{goal.name}</div>
-                            <div className="text-[9px] text-slate-400">{goal.isFamily ? "Family" : "Personal"}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge variant="neutral" className="text-xs">
-                          {goal.category}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 text-right font-medium text-slate-900">
-                        ${formatCurrency(goal.target)}
-                      </td>
-                      <td className="px-6 py-4 text-right text-slate-600">
-                        ${formatCurrency(goal.current)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center">
-                          <div className="w-16">
-                            <ProgressBar 
-                              value={goal.current} 
-                              max={goal.target} 
-                              color={progress >= 100 ? "success" : progress >= 75 ? "warning" : "danger"} 
-                            />
-                            <div className="text-[9px] text-slate-400 text-center mt-1">{progress}%</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center">
-                          <Badge variant={
-                            goal.status === "completed" ? "success" : 
-                            goal.status === "in_progress" ? "info" : "warning"
-                          } className="text-xs">
-                            {goal.status === "completed" ? "Completed" : 
-                             goal.status === "in_progress" ? "In Progress" : goal.status === "behind" ? "Behind" : goal.status === "overdue" ? "Overdue" : "In Progress"}
+                        </td>
+                        <td className="px-6 py-4">
+                          <Badge variant="neutral" className="text-xs">
+                            {goal.category}
                           </Badge>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center">
-                          <span className={`text-xs ${
-                            new Date(goal.deadline) < new Date() ? "text-red-600" : "text-slate-600"
-                          }`}>
-                            {formatDate(goal.deadline)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-center gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => handleView(goal)}>
-                            <Eye size={16} />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => handleEdit(goal)}>
-                            <Edit size={16} />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => handleDelete(goal)}>
-                            <Trash2 size={16} />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right font-medium text-slate-900">
+                          ${formatCurrency(goal.target)}
+                        </td>
+                        <td className="px-6 py-4 text-right text-slate-600">
+                          ${formatCurrency(goal.current)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center">
+                            <ProgressBar value={goal.current} max={goal.target} color={goal.status === "completed" ? "success" : goal.status === "in_progress" ? "success" : goal.status === "behind" ? "warning" : "warning"} className="w-16" />
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <Badge variant={goal.status === "completed" ? "success" : goal.status === "in_progress" ? "info" : "warning"}>
+                            {goal.status === "completed" ? "Completed" : goal.status === "in_progress" ? "In Progress" : goal.status === "behind" ? "Behind" : "Overdue"}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 text-center text-slate-600">
+                          {new Date(goal.deadline + "T00:00:00").toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-center gap-1">
+                            <Button variant="ghost" size="icon" className="h-7 w-7" title="View Details" onClick={() => handleView(goal)}>
+                              <Eye size={14} />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" title="Edit" onClick={() => handleEdit(goal)}>
+                              <Edit size={14} />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" title="Delete" onClick={() => handleDelete(goal)}>
+                              <Trash2 size={14} />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {goals.map((goal) => (
-                <GoalCard
-                  key={goal.id}
-                  goal={goal}
-                  onView={handleView}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onContribute={handleContribute}
-                />
-              ))}
+              {tableLoading ? (
+                <GoalFilterGridSkeleton items={pageSize} />
+              ) : (
+                goals.map((goal) => (
+                  <GoalCard
+                    key={goal.id}
+                    goal={goal}
+                    onView={handleView}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onContribute={handleContribute}
+                  />
+                ))
+              )}
             </div>
           )}
         </>
       )}
 
       {/* Pagination */}
-      {!loading && !error && goals.length > 0 && (
+      {!loading && !tableLoading && !error && goals.length > 0 && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-lg">
           <div className="text-sm text-slate-600">
             Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} goals

@@ -48,6 +48,7 @@ export function useBudgets() {
 
   // ----- Loading / error -----
   const [loading, setLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // ----- Build filters object -----
@@ -69,9 +70,14 @@ export function useBudgets() {
   }, [userId]);
 
   // ----- Fetch main data when filters change -----
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isFilterChange = false) => {
     if (!userId) return;
-    setLoading(true);
+    
+    if (isFilterChange) {
+      setTableLoading(true);
+    } else {
+      setLoading(true);
+    }
     setError(null);
 
     try {
@@ -80,19 +86,31 @@ export function useBudgets() {
         fetchBudgetMonthlyTrend(userId, 6),
       ]);
       setBudgets(budgetsResult.data);
-      setMonthlyTrend(trendResult);
       setTotalCount(budgetsResult.totalCount);
       if (budgetsResult.error) setError(budgetsResult.error);
+      
+      // Only update trend data on initial load or major filter changes
+      if (!isFilterChange || (month !== "all" || year !== "all")) {
+        setMonthlyTrend(trendResult);
+      }
     } catch (err: any) {
       setError(err?.message ?? "Failed to load budgets.");
     } finally {
       setLoading(false);
+      setTableLoading(false);
     }
-  }, [userId, filters, currentPage, pageSize]);
+  }, [userId, filters, currentPage, pageSize, month, year]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // ----- Separate effect for filter changes to avoid full refresh -----
+  useEffect(() => {
+    if (budgets.length > 0) {
+      fetchData(true);
+    }
+  }, [filters, currentPage, pageSize]);
 
   // ----- Client-side search filtering (instant, no re-query) -----
   const filteredBudgets = useMemo(() => {
@@ -124,6 +142,11 @@ export function useBudgets() {
     if (!userId) return;
     fetchExpenseCategories(userId).then(setExpenseCategories);
   }, [fetchData, userId]);
+
+  // ----- Refetch only table data (for filter changes) -----
+  const refetchTable = useCallback(() => {
+    fetchData(true);
+  }, [fetchData]);
 
   // ----- Reset filters -----
   const resetFilters = useCallback(() => {
@@ -207,8 +230,10 @@ export function useBudgets() {
     resetFiltersToAll,
     // State
     loading,
+    tableLoading,
     error,
     refetch,
+    refetchTable,
     // Pagination
     currentPage,
     pageSize,

@@ -67,6 +67,7 @@ import { EditTransactionModal } from "./_components/edit-transaction-modal";
 import { DeleteTransactionModal } from "./_components/delete-transaction-modal";
 import { useTransactions } from "./_lib/use-transactions";
 import type { TransactionType } from "./_components/types";
+import { FilterTableSkeleton, TransactionFilterGridSkeleton } from "@/components/ui/skeleton-filter-loaders";
 
 type SummaryType = {
   label: string;
@@ -310,6 +311,7 @@ export default function TransactionsPage() {
     resetFilters,
     resetFiltersToAll,
     loading,
+    tableLoading,
     error,
     refetch,
     // Pagination
@@ -826,60 +828,68 @@ export default function TransactionsPage() {
         <>
           {viewMode === 'table' ? (
             <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
-                      <div className="flex items-center gap-1">
-                        Date <MoreHorizontal size={12} className="rotate-90" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="px-6 py-3">Description</TableHead>
-                    <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
-                      <div className="flex items-center gap-1">
-                        Category <MoreHorizontal size={12} className="rotate-90" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="px-6 py-3">Account</TableHead>
-                    <TableHead className="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
-                      <div className="flex items-center gap-1 justify-end">
-                        Amount <MoreHorizontal size={12} className="rotate-90" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="px-6 py-3 text-center">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.map((tx) => (
-                    <TransactionRow
-                      key={tx.id}
-                      tx={tx}
-                      onView={handleView}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
+              {tableLoading ? (
+                <FilterTableSkeleton rows={pageSize} columns={6} />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
+                        <div className="flex items-center gap-1">
+                          Date <MoreHorizontal size={12} className="rotate-90" />
+                        </div>
+                      </TableHead>
+                      <TableHead className="px-6 py-3">Description</TableHead>
+                      <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
+                        <div className="flex items-center gap-1">
+                          Category <MoreHorizontal size={12} className="rotate-90" />
+                        </div>
+                      </TableHead>
+                      <TableHead className="px-6 py-3">Account</TableHead>
+                      <TableHead className="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
+                        <div className="flex items-center gap-1 justify-end">
+                          Amount <MoreHorizontal size={12} className="rotate-90" />
+                        </div>
+                      </TableHead>
+                      <TableHead className="px-6 py-3 text-center">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {transactions.map((tx) => (
+                      <TransactionRow
+                        key={tx.id}
+                        tx={tx}
+                        onView={handleView}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {transactions.map((tx) => (
-                <TransactionCard
-                  key={tx.id}
-                  tx={tx}
-                  onView={handleView}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ))}
+              {tableLoading ? (
+                <TransactionFilterGridSkeleton items={pageSize} />
+              ) : (
+                transactions.map((tx) => (
+                  <TransactionCard
+                    key={tx.id}
+                    tx={tx}
+                    onView={handleView}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                ))
+              )}
             </div>
           )}
         </>
       )}
 
       {/* Pagination */}
-      {!loading && !error && transactions.length > 0 && (
+      {!loading && !tableLoading && !error && transactions.length > 0 && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-lg">
           <div className="text-sm text-slate-600">
             Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} transactions

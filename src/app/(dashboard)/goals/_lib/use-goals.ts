@@ -31,6 +31,7 @@ export function useGoals() {
 
   // ----- Loading / error -----
   const [loading, setLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // ----- Build filters object -----
@@ -46,9 +47,14 @@ export function useGoals() {
   );
 
   // ----- Fetch main data when filters change -----
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isFilterChange = false) => {
     if (!userId) return;
-    setLoading(true);
+    
+    if (isFilterChange) {
+      setTableLoading(true);
+    } else {
+      setLoading(true);
+    }
     setError(null);
 
     try {
@@ -60,17 +66,29 @@ export function useGoals() {
       setGoals(goalsResult.data);
       setTotalCount(goalsResult.count ?? 0);
       if (goalsResult.error) setError(goalsResult.error);
-      setSummary(summaryResult);
+      
+      // Only update summary on initial load or major filter changes
+      if (!isFilterChange || (month !== "all" || year !== "all")) {
+        setSummary(summaryResult);
+      }
     } catch (err: any) {
       setError(err?.message ?? "Failed to load goals.");
     } finally {
       setLoading(false);
+      setTableLoading(false);
     }
-  }, [userId, filters, currentPage, pageSize]);
+  }, [userId, filters, currentPage, pageSize, month, year]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // ----- Separate effect for filter changes to avoid full refresh -----
+  useEffect(() => {
+    if (goals.length > 0) {
+      fetchData(true);
+    }
+  }, [filters, currentPage, pageSize]);
 
   // ----- Client-side search filtering (instant, no re-query) -----
   const filteredGoals = useMemo(() => {
@@ -88,6 +106,11 @@ export function useGoals() {
   // ----- Refetch (passed to modals as onSuccess) -----
   const refetch = useCallback(() => {
     fetchData();
+  }, [fetchData]);
+
+  // ----- Refetch only table data (for filter changes) -----
+  const refetchTable = useCallback(() => {
+    fetchData(true);
   }, [fetchData]);
 
   // ----- Reset filters -----
@@ -170,8 +193,10 @@ export function useGoals() {
     resetFiltersToAll,
     // State
     loading,
+    tableLoading,
     error,
     refetch,
+    refetchTable,
     // Pagination
     currentPage,
     pageSize,
