@@ -71,8 +71,10 @@ export type GoalFilters = {
 
 export async function fetchGoalsForPage(
   userId: string,
-  filters: GoalFilters = {}
-): Promise<{ data: GoalType[]; error: string | null }> {
+  filters: GoalFilters = {},
+  page: number = 1,
+  pageSize: number = 20
+): Promise<{ data: GoalType[]; error: string | null; count: number | null }> {
   let query = supabase
     .from("goals")
     .select("*")
@@ -95,9 +97,39 @@ export async function fetchGoalsForPage(
     query = query.eq("extract(year from created_at)", filters.year);
   }
 
+  // Get total count for pagination (apply same filters as main query)
+  let countQuery = supabase
+    .from("goals")
+    .select("count", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  // Apply the same filters to count query
+  if (filters.status) {
+    countQuery = countQuery.eq("status", filters.status);
+  }
+  if (filters.priority) {
+    countQuery = countQuery.eq("priority", filters.priority);
+  }
+  if (filters.category) {
+    countQuery = countQuery.eq("category", filters.category);
+  }
+  if (filters.month && filters.month !== "all") {
+    countQuery = countQuery.eq("extract(month from created_at)", filters.month);
+  }
+  if (filters.year && filters.year !== "all") {
+    countQuery = countQuery.eq("extract(year from created_at)", filters.year);
+  }
+
+  const { count } = await countQuery;
+
+  // Add pagination to main query
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  query = query.range(from, to);
+
   const { data, error } = await query;
-  if (error) return { data: [], error: error.message };
-  return { data: (data ?? []).map(mapRow), error: null };
+  if (error) return { data: [], error: error.message, count: null };
+  return { data: (data ?? []).map(mapRow), error: null, count: count ?? 0 };
 }
 
 // ---------------------------------------------------------------------------
