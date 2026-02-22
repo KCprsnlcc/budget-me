@@ -18,7 +18,6 @@ import {
   Shield,
   Sliders,
   ArrowUpRight,
-  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MODULE_CARDS } from "@/lib/constants";
@@ -59,13 +58,6 @@ export function ModulesShowcase() {
           <p className="text-slate-500 max-w-2xl mx-auto mb-8 text-sm md:text-base">
             Explore the modular architecture built for sophisticated financial planning.
           </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Button variant="outline">View all modules</Button>
-            <Button variant="outline">
-              <Play size={16} />
-              Interactive demo
-            </Button>
-          </div>
         </div>
 
         {/* Grid */}
