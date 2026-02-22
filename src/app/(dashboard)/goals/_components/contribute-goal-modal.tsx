@@ -181,7 +181,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess }: Contribu
                     key={idx}
                     type="button"
                     onClick={() => setAmount(quickAmount.toString())}
-                    className="p-2 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 transition-all"
+                    className="p-2 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 hover:border-slate-300 transition-all"
                   >
                     ₱{quickAmount}
                   </button>

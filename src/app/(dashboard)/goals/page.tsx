@@ -88,7 +88,7 @@ const GoalCard = memo(({
             <Icon size={20} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 group-hover:text-emerald-600 transition-colors">
+            <h3 className="text-sm font-semibold text-slate-900 transition-colors">
               {goal.name}
             </h3>
             <div className="flex items-center gap-2 mt-0.5">
@@ -102,7 +102,7 @@ const GoalCard = memo(({
               {goal.isFamily && (
                 <span className="px-1.5 py-0.5 rounded text-[9px] font-medium text-indigo-600 border border-indigo-100"
                       title="Family Goal">
-                  <Users size={10} /> Family
+                  Family
                 </span>
               )}
             </div>

@@ -30,9 +30,8 @@ export function useTransactions() {
   const userId = user?.id ?? "";
 
   // ----- Filter state -----
-  const now = new Date();
-  const [month, setMonth] = useState<number | "all">(now.getMonth() + 1);
-  const [year, setYear] = useState<number | "all">(now.getFullYear());
+  const [month, setMonth] = useState<number | "all">("all");
+  const [year, setYear] = useState<number | "all">("all");
   const [typeFilter, setTypeFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [search, setSearch] = useState("");
@@ -177,6 +176,7 @@ export function useTransactions() {
 
   // ----- Reset filters -----
   const resetFilters = useCallback(() => {
+    const now = new Date();
     setMonth(now.getMonth() + 1);
     setYear(now.getFullYear());
     setTypeFilter("");

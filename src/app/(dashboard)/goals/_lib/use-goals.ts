@@ -136,13 +136,12 @@ export function useGoals() {
 
   // ----- Reset filters -----
   const resetFilters = useCallback(() => {
-    const now = new Date();
     setStatusFilter("");
     setPriorityFilter("");
     setCategoryFilter("");
     setSearch("");
-    setMonth(now.getMonth() + 1);
-    setYear(now.getFullYear());
+    setMonth("all");
+    setYear("all");
     setCurrentPage(1);
   }, []);
 
