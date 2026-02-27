@@ -773,16 +773,7 @@ export default function GoalsPage() {
       )}
 
       {/* Goals Display */}
-      {goals.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Flag size={40} className="mx-auto text-slate-300 mb-4" />
-          <h3 className="text-sm font-semibold text-slate-900 mb-1">No goals found</h3>
-          <p className="text-xs text-slate-500 mb-4">Create your first financial goal to get started.</p>
-          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => setAddModalOpen(true)}>
-            <Plus size={16} /> Create Goal
-          </Button>
-        </Card>
-      ) : viewMode === 'table' ? (
+      {viewMode === 'table' ? (
         <Card className="overflow-hidden">
           {tableLoading ? (
             <FilterTableSkeleton rows={pageSize} columns={8} />

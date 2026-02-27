@@ -4,10 +4,11 @@ export const INITIAL_GOAL_FORM_STATE = {
   name: "",
   target: "",
   priority: "medium" as GoalPriority,
-  category: "other" as GoalCategory,
+  category: "general" as GoalCategory,
   deadline: "",
   monthlyContribution: "",
   isFamily: false,
+  isPublic: false,
 };
 
 export const GOAL_PRIORITIES = [
@@ -18,12 +19,13 @@ export const GOAL_PRIORITIES = [
 
 export const GOAL_CATEGORIES = [
   { key: "emergency" as GoalCategory, label: "Emergency Fund", icon: "shield-check" },
-  { key: "housing" as GoalCategory, label: "Housing", icon: "home-2" },
+  { key: "vacation" as GoalCategory, label: "Vacation", icon: "airplane" },
+  { key: "house" as GoalCategory, label: "Housing", icon: "home-2" },
+  { key: "car" as GoalCategory, label: "Transportation", icon: "car" },
   { key: "education" as GoalCategory, label: "Education", icon: "graduation-cap" },
-  { key: "travel" as GoalCategory, label: "Travel", icon: "airplane" },
-  { key: "transport" as GoalCategory, label: "Transportation", icon: "car" },
-  { key: "electronics" as GoalCategory, label: "Electronics", icon: "laptop" },
-  { key: "other" as GoalCategory, label: "Other", icon: "target" },
+  { key: "retirement" as GoalCategory, label: "Retirement", icon: "target" },
+  { key: "debt" as GoalCategory, label: "Debt Payoff", icon: "trending-up" },
+  { key: "general" as GoalCategory, label: "General", icon: "flag" },
 ];
 
 export const GOAL_STATUSES = [

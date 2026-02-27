@@ -13,6 +13,10 @@ import {
   fetchFamilyOverview,
   fetchSentInvitations,
   fetchUserJoinRequests,
+  fetchFamilyExpenseCategories,
+  fetchFamilyBudgetVsActual,
+  fetchFamilyGoalsSavingsProgress,
+  fetchFamilyGoalsHealth,
   createFamily,
   updateFamily,
   deleteFamily,
@@ -27,6 +31,10 @@ import {
   transferOwnership,
   type FamilyOverviewStats,
   type SentInvitation,
+  type FamilyCategoryBreakdown,
+  type FamilyMonthlyChartPoint,
+  type FamilyGoalsSavingsPoint,
+  type FamilyGoalsHealthItem,
 } from "./family-service";
 import type {
   Family,
@@ -63,6 +71,12 @@ export function useFamily() {
   const [joinRequests, setJoinRequests] = useState<any[]>([]);
   const [overviewStats, setOverviewStats] = useState<FamilyOverviewStats | null>(null);
   const [sentInvitations, setSentInvitations] = useState<SentInvitation[]>([]);
+  const [expenseCategories, setExpenseCategories] = useState<FamilyCategoryBreakdown[]>([]);
+  const [budgetVsActual, setBudgetVsActual] = useState<FamilyMonthlyChartPoint[]>([]);
+  const [totalExpenses, setTotalExpenses] = useState<number>(0);
+  const [goalsSavingsProgress, setGoalsSavingsProgress] = useState<FamilyGoalsSavingsPoint[]>([]);
+  const [goalsHealth, setGoalsHealth] = useState<FamilyGoalsHealthItem[]>([]);
+  const [totalGoals, setTotalGoals] = useState<number>(0);
 
   // ----- Loading / error -----
   const [loading, setLoading] = useState(true);
@@ -136,7 +150,7 @@ export function useFamily() {
       setFamilyCreatedBy(family.createdBy);
 
       // Step 2: Fetch all family data in parallel
-      const [membersResult, goalsResult, activityResult, requestsResult, overviewResult, sentInvResult] =
+      const [membersResult, goalsResult, activityResult, requestsResult, overviewResult, sentInvResult, expenseCatResult, budgetVsActualResult, goalsSavingsResult, goalsHealthResult] =
         await Promise.all([
           fetchFamilyMembers(family.id, family.createdBy),
           fetchFamilyGoals(family.id),
@@ -144,6 +158,10 @@ export function useFamily() {
           fetchJoinRequests(family.id),
           fetchFamilyOverview(family.id),
           fetchSentInvitations(family.id),
+          fetchFamilyExpenseCategories(family.id),
+          fetchFamilyBudgetVsActual(family.id, 6),
+          fetchFamilyGoalsSavingsProgress(family.id, 6),
+          fetchFamilyGoalsHealth(family.id),
         ]);
 
       setMembers(membersResult.data);
@@ -154,6 +172,12 @@ export function useFamily() {
       setPendingRequests(requestsResult.data);
       setOverviewStats(overviewResult.data);
       setSentInvitations(sentInvResult.data);
+      setExpenseCategories(expenseCatResult.data);
+      setBudgetVsActual(budgetVsActualResult.data);
+      setTotalExpenses(expenseCatResult.total);
+      setGoalsSavingsProgress(goalsSavingsResult.data);
+      setGoalsHealth(goalsHealthResult.data);
+      setTotalGoals(goalsHealthResult.total);
 
       // Also update family with members
       if (family) {
@@ -414,6 +438,12 @@ export function useFamily() {
     joinRequests,
     sentInvitations,
     overviewStats,
+    expenseCategories,
+    budgetVsActual,
+    totalExpenses,
+    goalsSavingsProgress,
+    goalsHealth,
+    totalGoals,
     currentUserRole,
     isOwner,
 

@@ -1,6 +1,6 @@
 export type GoalPriority = "high" | "medium" | "low";
 export type GoalStatus = "in_progress" | "completed" | "overdue" | "behind";
-export type GoalCategory = "emergency" | "housing" | "education" | "travel" | "transport" | "electronics" | "other";
+export type GoalCategory = "emergency" | "vacation" | "house" | "car" | "education" | "retirement" | "debt" | "general";
 
 export interface GoalType {
   id: string;
@@ -30,6 +30,7 @@ export interface GoalFormState {
   deadline: string;
   monthlyContribution: string;
   isFamily: boolean;
+  isPublic: boolean;
 }
 
 export interface GoalModalProps {

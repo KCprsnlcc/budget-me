@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-context";
+import { useFamily } from "../../family/_lib/use-family";
 import { updateGoal } from "../_lib/goal-service";
 import { cn } from "@/lib/utils";
 import {
@@ -29,6 +30,8 @@ import {
   AlertTriangle,
   Check,
   Loader2,
+  TrendingUp,
+  Flag,
 } from "lucide-react";
 import { Stepper } from "./stepper";
 import type { GoalFormState, GoalType, GoalPriority, GoalCategory } from "./types";
@@ -44,12 +47,13 @@ const STEPS = ["Category", "Details", "Review"];
 
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
   emergency: Shield,
-  housing: Home,
+  vacation: Plane,
+  house: Home,
+  car: Car,
   education: GraduationCap,
-  travel: Plane,
-  transport: Car,
-  electronics: Laptop,
-  other: Gift,
+  retirement: TrendingUp,
+  debt: ArrowRight,
+  general: Flag,
 };
 
 function goalToFormState(goal: GoalType | null): GoalFormState {
@@ -76,10 +80,14 @@ interface EditGoalModalProps {
 
 export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalProps) {
   const { user } = useAuth();
+  const { familyData, familyState } = useFamily();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<GoalFormState>(() => goalToFormState(goal));
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  const hasFamily = familyState === "has-family" && familyData;
+  const familyName = familyData?.name || "";
 
   useEffect(() => {
     if (open && goal) {
@@ -286,19 +294,44 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
+              <div className={`flex items-center gap-3 p-3 rounded-lg border ${!hasFamily ? 'bg-slate-100 border-slate-200' : 'bg-slate-50 border-slate-200'}`}>
                 <input
                   type="checkbox"
                   id="isFamily"
                   checked={form.isFamily}
                   onChange={(e) => updateField("isFamily", e.target.checked)}
-                  className="w-4 h-4 text-emerald-500 border-slate-300 rounded focus:ring-emerald-500"
+                  disabled={!hasFamily}
+                  className="w-4 h-4 text-emerald-500 border-slate-300 rounded focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
-                <label htmlFor="isFamily" className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                <label htmlFor="isFamily" className={`flex items-center gap-2 text-sm ${!hasFamily ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 cursor-pointer'}`}>
                   <Users size={16} />
                   This is a family goal
                 </label>
               </div>
+
+              {form.isFamily && hasFamily && (
+                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-start gap-3">
+                  <Users size={16} className="flex-shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-medium text-sm">Family Goal</div>
+                    <div className="text-xs opacity-90">
+                      This goal will be shared with your family: <span className="font-semibold">{familyName}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!hasFamily && (
+                <div className="p-3 rounded-lg bg-amber-50 border border-amber-100 text-amber-700 flex items-start gap-3">
+                  <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-medium text-sm">No Family Available</div>
+                    <div className="text-xs opacity-90">
+                      You need to join or create a family to create family goals
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-blue-700 flex items-start gap-3">
                 <Info size={16} className="flex-shrink-0 mt-0.5" />

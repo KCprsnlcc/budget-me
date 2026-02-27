@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useFamily } from "../../family/_lib/use-family";
 import { cn } from "@/lib/utils";
 import {
   Modal,
@@ -23,6 +24,7 @@ import {
   Plus,
   Info,
   CheckCircle,
+  Globe,
 } from "lucide-react";
 import { Stepper } from "./stepper";
 import type { GoalType } from "./types";
@@ -53,6 +55,7 @@ export function ViewGoalModal({
   onContribute,
 }: ViewGoalModalProps) {
   const [step, setStep] = useState(1);
+  const { familyData, familyState } = useFamily();
 
   const reset = useCallback(() => {
     setStep(1);
@@ -265,11 +268,56 @@ export function ViewGoalModal({
                 <div className="text-sm font-semibold text-slate-900 capitalize">{goal.priority}</div>
               </div>
 
-              {goal.isFamily && (
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Goal Type</div>
-                  <div className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                    <Users size={14} /> Family Goal
+              {(goal.isFamily || goal.is_public) && (
+                <div className={`p-4 rounded-lg border ${goal.isFamily ? 'bg-emerald-50 border-emerald-100' : 'bg-blue-50 border-blue-100'}`}>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.05em] mb-2 text-slate-600">Goal Type</div>
+                  <div className="text-sm font-semibold flex items-center gap-2 mb-3">
+                    {goal.isFamily ? (
+                      <>
+                        <Users size={14} className="text-emerald-600" />
+                        <span className="text-emerald-700">Family Goal</span>
+                      </>
+                    ) : (
+                      <>
+                        <Globe size={14} className="text-blue-600" />
+                        <span className="text-blue-700">Public Goal</span>
+                      </>
+                    )}
+                  </div>
+                  
+                  {goal.isFamily && (
+                    <div className="space-y-2">
+                      {familyState === "has-family" && familyData ? (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-slate-600">Family Name:</span>
+                            <span className="text-xs font-semibold text-emerald-700">{familyData.name}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-slate-600">Members:</span>
+                            <span className="text-xs font-semibold text-emerald-700">{familyData.members?.length || 0}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-slate-600">Your Role:</span>
+                            <span className="text-xs font-semibold text-emerald-700 capitalize">
+                              {familyData.createdBy === goal.user_id ? 'Owner' : 'Member'}
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-xs text-amber-600">
+                          Family details not available
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="text-xs mt-3 pt-2 border-t border-emerald-200/50 opacity-90">
+                    {goal.isFamily ? (
+                      <>Shared with family members for collaborative tracking and contributions</>
+                    ) : (
+                      <>Visible to the public community for inspiration</>
+                    )}
                   </div>
                 </div>
               )}

@@ -1101,6 +1101,275 @@ export async function fetchFamilyOverview(
 }
 
 /* ------------------------------------------------------------------ */
+/*  Types for family dashboard charts                                 */
+/* ------------------------------------------------------------------ */
+
+export interface FamilyCategoryBreakdown {
+  name: string;
+  color: string;
+  amount: number;
+  percentage: number;
+}
+
+export interface FamilyMonthlyChartPoint {
+  month: string;
+  budget: number;
+  actual: number;
+}
+
+export interface FamilyGoalsSavingsPoint {
+  month: string;
+  target: number;
+  saved: number;
+  targetValue: number;
+  savedValue: number;
+}
+
+export interface FamilyGoalsHealthItem {
+  name: string;
+  value: number;
+  color: string;
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch family expense categories (donut chart data)         */
+/* ------------------------------------------------------------------ */
+
+export async function fetchFamilyExpenseCategories(
+  familyId: string
+): Promise<{ data: FamilyCategoryBreakdown[]; total: number; error: string | null }> {
+  // Get all active family members
+  const { data: members } = await supabase
+    .from("family_members")
+    .select("user_id")
+    .eq("family_id", familyId)
+    .eq("status", "active");
+
+  const userIds = (members ?? []).map((m: any) => m.user_id);
+  if (userIds.length === 0) {
+    return { data: [], total: 0, error: null };
+  }
+
+  // Fetch expense transactions for all family members
+  const { data: transactions } = await supabase
+    .from("transactions")
+    .select("amount, expense_categories ( category_name, color )")
+    .in("user_id", userIds)
+    .eq("type", "expense")
+    .eq("status", "completed");
+
+  // Aggregate by category
+  const map = new Map<string, { color: string; amount: number }>();
+  for (const row of transactions ?? []) {
+    const cat = row.expense_categories as Record<string, any> | null;
+    const name = cat?.category_name ?? "Uncategorized";
+    const color = cat?.color ?? "#94a3b8";
+    const existing = map.get(name);
+    if (existing) {
+      existing.amount += Number(row.amount);
+    } else {
+      map.set(name, { color, amount: Number(row.amount) });
+    }
+  }
+
+  const total = Array.from(map.values()).reduce((sum, v) => sum + v.amount, 0);
+
+  const data: FamilyCategoryBreakdown[] = Array.from(map.entries())
+    .map(([name, v]) => ({
+      name,
+      color: v.color,
+      amount: v.amount,
+      percentage: total > 0 ? Math.round((v.amount / total) * 100) : 0,
+    }))
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 5); // Top 5 categories
+
+  return { data, total, error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch family budget vs actual spending (6-month chart)    */
+/* ------------------------------------------------------------------ */
+
+export async function fetchFamilyBudgetVsActual(
+  familyId: string,
+  months: number = 6
+): Promise<{ data: FamilyMonthlyChartPoint[]; error: string | null }> {
+  // Get all active family members
+  const { data: members } = await supabase
+    .from("family_members")
+    .select("user_id")
+    .eq("family_id", familyId)
+    .eq("status", "active");
+
+  const userIds = (members ?? []).map((m: any) => m.user_id);
+  if (userIds.length === 0) {
+    // Return empty data for each month
+    const now = new Date();
+    const emptyData: FamilyMonthlyChartPoint[] = [];
+    for (let i = months - 1; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      emptyData.push({
+        month: d.toLocaleDateString("en-US", { month: "short" }),
+        budget: 0,
+        actual: 0,
+      });
+    }
+    return { data: emptyData, error: null };
+  }
+
+  const now = new Date();
+  const points: FamilyMonthlyChartPoint[] = [];
+
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const m = d.getMonth() + 1;
+    const y = d.getFullYear();
+    const start = `${y}-${String(m).padStart(2, "0")}-01`;
+    const endDate = new Date(y, m, 0);
+    const end = `${y}-${String(m).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}`;
+
+    // Fetch all family transactions for this month
+    const { data } = await supabase
+      .from("transactions")
+      .select("type, amount")
+      .in("user_id", userIds)
+      .eq("status", "completed")
+      .gte("date", start)
+      .lte("date", end);
+
+    let budget = 0; // Income treated as "budget" for family context
+    let actual = 0; // Expenses
+
+    for (const row of data ?? []) {
+      const amt = Number(row.amount);
+      if (row.type === "income" || row.type === "cash_in") {
+        budget += amt;
+      } else if (row.type === "expense") {
+        actual += amt;
+      }
+    }
+
+    const label = d.toLocaleDateString("en-US", { month: "short" });
+    points.push({ month: label, budget, actual });
+  }
+
+  return { data: points, error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch family goals savings progress (6-month chart)         */
+/* ------------------------------------------------------------------ */
+
+export async function fetchFamilyGoalsSavingsProgress(
+  familyId: string,
+  months: number = 6
+): Promise<{ data: FamilyGoalsSavingsPoint[]; error: string | null }> {
+  // Get all active family members
+  const { data: members } = await supabase
+    .from("family_members")
+    .select("user_id")
+    .eq("family_id", familyId)
+    .eq("status", "active");
+
+  const userIds = (members ?? []).map((m: any) => m.user_id);
+  if (userIds.length === 0) {
+    return { data: [], error: null };
+  }
+
+  // Fetch all family goals from active family members only
+  const { data: goals } = await supabase
+    .from("goals")
+    .select("target_amount, current_amount, created_at")
+    .in("user_id", userIds)
+    .eq("is_family_goal", true)
+    .eq("is_public", false); // Ensure we don't get any public goals
+
+  // Calculate totals (similar to goals page)
+  const totalTarget = (goals ?? []).reduce((s, g) => s + Number(g.target_amount), 0);
+  const totalSaved = (goals ?? []).reduce((s, g) => s + Number(g.current_amount), 0);
+  const savedPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
+  
+  const now = new Date();
+  const points: FamilyGoalsSavingsPoint[] = [];
+
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const label = d.toLocaleDateString("en-US", { month: "short" });
+    
+    // Use the same progressive calculation as goals page
+    const factor = (months - i) / months;
+    const targetHeight = Math.round(80 * factor + 20);
+    const savedHeight = Math.round(savedPct * factor);
+    const targetVal = Math.round(totalTarget * (targetHeight / 100));
+    const savedVal = Math.round(totalSaved * (savedHeight / 100));
+    
+    points.push({
+      month: label,
+      target: targetHeight,
+      saved: savedHeight,
+      targetValue: targetVal,
+      savedValue: savedVal,
+    });
+  }
+
+  return { data: points, error: null };
+}
+
+/* ------------------------------------------------------------------ */
+/*  READ — Fetch family goals health (donut chart data)                  */
+/* ------------------------------------------------------------------ */
+
+export async function fetchFamilyGoalsHealth(
+  familyId: string
+): Promise<{ data: FamilyGoalsHealthItem[]; total: number; error: string | null }> {
+  // Get all active family members
+  const { data: members } = await supabase
+    .from("family_members")
+    .select("user_id")
+    .eq("family_id", familyId)
+    .eq("status", "active");
+
+  const userIds = (members ?? []).map((m: any) => m.user_id);
+  if (userIds.length === 0) {
+    return { data: [], total: 0, error: null };
+  }
+
+  // Fetch all family goals from active family members only
+  const { data: goals } = await supabase
+    .from("goals")
+    .select("status")
+    .in("user_id", userIds)
+    .eq("is_family_goal", true)
+    .eq("is_public", false); // Ensure we don't get any public goals
+
+  // Count goals by status
+  const statusCounts = {
+    completed: 0,
+    in_progress: 0,
+    behind: 0,
+    overdue: 0,
+  };
+
+  for (const goal of goals ?? []) {
+    if (goal.status in statusCounts) {
+      statusCounts[goal.status as keyof typeof statusCounts]++;
+    }
+  }
+
+  const total = (goals ?? []).length;
+  
+  const healthData: FamilyGoalsHealthItem[] = [
+    { name: "Completed", value: statusCounts.completed, color: "#10b981" },
+    { name: "In Progress", value: statusCounts.in_progress, color: "#3b82f6" },
+    { name: "Behind", value: statusCounts.behind, color: "#f59e0b" },
+    { name: "Overdue", value: statusCounts.overdue, color: "#ef4444" },
+  ].filter(item => item.value > 0); // Only show statuses that have goals
+
+  return { data: healthData, total, error: null };
+}
+
+/* ------------------------------------------------------------------ */
 /*  DELETE — Remove a family member (admin/owner action)              */
 /* ------------------------------------------------------------------ */
 
