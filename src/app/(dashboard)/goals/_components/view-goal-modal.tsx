@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useFamily } from "../../family/_lib/use-family";
+import { useAuth } from "@/components/auth/auth-context";
 import { cn } from "@/lib/utils";
 import {
   Modal,
@@ -55,7 +56,8 @@ export function ViewGoalModal({
   onContribute,
 }: ViewGoalModalProps) {
   const [step, setStep] = useState(1);
-  const { familyData, familyState } = useFamily();
+  const { user } = useAuth();
+  const { familyData, familyState, currentUserRole, isOwner, members } = useFamily();
 
   const reset = useCallback(() => {
     setStep(1);
@@ -294,13 +296,9 @@ export function ViewGoalModal({
                             <span className="text-xs font-semibold text-emerald-700">{familyData.name}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-xs text-slate-600">Members:</span>
-                            <span className="text-xs font-semibold text-emerald-700">{familyData.members?.length || 0}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
                             <span className="text-xs text-slate-600">Your Role:</span>
                             <span className="text-xs font-semibold text-emerald-700 capitalize">
-                              {familyData.createdBy === goal.user_id ? 'Owner' : 'Member'}
+                              {isOwner ? 'Owner' : (currentUserRole || 'Member')}
                             </span>
                           </div>
                         </>

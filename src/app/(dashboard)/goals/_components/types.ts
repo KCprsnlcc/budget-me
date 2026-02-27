@@ -15,6 +15,7 @@ export interface GoalType {
   deadline: string;
   monthlyContribution: number;
   isFamily: boolean;
+  is_public: boolean;
   family_id: string | null;
   notes: string | null;
   icon?: string;

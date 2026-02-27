@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { useFamily } from "../../family/_lib/use-family";
+import { getGoalPermissions, canCreateFamilyGoals, canEditGoal, FamilyRoleFromHook } from "../_lib/permissions";
 import { updateGoal } from "../_lib/goal-service";
 import { cn } from "@/lib/utils";
 import {
@@ -68,6 +69,7 @@ function goalToFormState(goal: GoalType | null): GoalFormState {
     deadline: goal.deadline,
     monthlyContribution: goal.monthlyContribution.toString(),
     isFamily: goal.isFamily || false,
+    isPublic: goal.is_public || false,
   };
 }
 
@@ -80,7 +82,7 @@ interface EditGoalModalProps {
 
 export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalProps) {
   const { user } = useAuth();
-  const { familyData, familyState } = useFamily();
+  const { familyData, familyState, currentUserRole, isOwner } = useFamily();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<GoalFormState>(() => goalToFormState(goal));
   const [saving, setSaving] = useState(false);
@@ -88,6 +90,11 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
 
   const hasFamily = familyState === "has-family" && familyData;
   const familyName = familyData?.name || "";
+  
+  // Check permissions
+  const permissions = getGoalPermissions(currentUserRole, isOwner, goal?.user_id, user?.id);
+  const canCreateFamilyGoalsBool = canCreateFamilyGoals(currentUserRole, isOwner);
+  const canEditThisGoal = goal ? canEditGoal(goal, currentUserRole, isOwner, user?.id) : false;
 
   useEffect(() => {
     if (open && goal) {
@@ -109,6 +116,13 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
 
   const handleSubmit = useCallback(async () => {
     if (!goal) return;
+    
+    // Double-check permissions before submitting
+    if (!canEditThisGoal) {
+      setSaveError("You don't have permission to edit this goal");
+      return;
+    }
+    
     setSaving(true);
     setSaveError(null);
     const { error } = await updateGoal(goal.id, form);
@@ -119,7 +133,7 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
     }
     handleClose();
     onSuccess?.();
-  }, [goal, form, handleClose, onSuccess]);
+  }, [goal, form, canEditThisGoal, handleClose, onSuccess]);
 
   const handleNext = useCallback(() => {
     if (step >= 3) {
@@ -294,28 +308,39 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
                 </div>
               </div>
 
-              <div className={`flex items-center gap-3 p-3 rounded-lg border ${!hasFamily ? 'bg-slate-100 border-slate-200' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`flex items-center gap-3 p-3 rounded-lg border ${!hasFamily || !canCreateFamilyGoalsBool ? 'bg-slate-100 border-slate-200' : 'bg-slate-50 border-slate-200'}`}>
                 <input
                   type="checkbox"
                   id="isFamily"
                   checked={form.isFamily}
                   onChange={(e) => updateField("isFamily", e.target.checked)}
-                  disabled={!hasFamily}
+                  disabled={!hasFamily || !canCreateFamilyGoalsBool}
                   className="w-4 h-4 text-emerald-500 border-slate-300 rounded focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
-                <label htmlFor="isFamily" className={`flex items-center gap-2 text-sm ${!hasFamily ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 cursor-pointer'}`}>
+                <label htmlFor="isFamily" className={`flex items-center gap-2 text-sm ${!hasFamily || !canCreateFamilyGoalsBool ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 cursor-pointer'}`}>
                   <Users size={16} />
                   This is a family goal
                 </label>
               </div>
 
-              {form.isFamily && hasFamily && (
+              {form.isFamily && hasFamily && canCreateFamilyGoalsBool && (
                 <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-start gap-3">
                   <Users size={16} className="flex-shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-medium text-sm">Family Goal</div>
-                    <div className="text-xs opacity-90">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm mb-2">Family Goal Permissions</div>
+                    <div className="text-xs opacity-90 mb-2">
                       This goal will be shared with your family: <span className="font-semibold">{familyName}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {permissions.canEdit && (
+                        <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">Can Edit</span>
+                      )}
+                      {permissions.canDelete && (
+                        <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">Can Delete</span>
+                      )}
+                      {permissions.canContribute && (
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">Can Contribute</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -328,6 +353,18 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
                     <div className="font-medium text-sm">No Family Available</div>
                     <div className="text-xs opacity-90">
                       You need to join or create a family to create family goals
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {hasFamily && !canCreateFamilyGoalsBool && (
+                <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-700 flex items-start gap-3">
+                  <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-medium text-sm">Insufficient Permissions</div>
+                    <div className="text-xs opacity-90">
+                      Your role as <span className="font-semibold capitalize">{currentUserRole}</span> does not allow creating family goals. Only Owners and Admins can create family goals.
                     </div>
                   </div>
                 </div>

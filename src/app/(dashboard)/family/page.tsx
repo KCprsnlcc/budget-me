@@ -119,7 +119,7 @@ export default function FamilyPage() {
   const greeting = getGreeting();
   const familyName = familyData?.name || "Family";
   const [activeGoalFilter, setActiveGoalFilter] = useState("all");
-  const [hoveredBar, setHoveredBar] = useState<{ month: string; type: 'budget' | 'actual'; value: number } | null>(null);
+  const [hoveredBar, setHoveredBar] = useState<{ month: string; type: 'budget' | 'actual' | 'target' | 'saved'; value: number } | null>(null);
   
   // Modal states
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
