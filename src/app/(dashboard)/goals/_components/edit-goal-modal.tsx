@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { DateSelector } from "@/components/ui/date-selector";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   ArrowLeft,
   ArrowRight,
@@ -308,20 +309,14 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
                 </div>
               </div>
 
-              <div className={`flex items-center gap-3 p-3 rounded-lg border ${!hasFamily || !canCreateFamilyGoalsBool ? 'bg-slate-100 border-slate-200' : 'bg-slate-50 border-slate-200'}`}>
-                <input
-                  type="checkbox"
-                  id="isFamily"
-                  checked={form.isFamily}
-                  onChange={(e) => updateField("isFamily", e.target.checked)}
-                  disabled={!hasFamily || !canCreateFamilyGoalsBool}
-                  className="w-4 h-4 text-emerald-500 border-slate-300 rounded focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-                <label htmlFor="isFamily" className={`flex items-center gap-2 text-sm ${!hasFamily || !canCreateFamilyGoalsBool ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 cursor-pointer'}`}>
-                  <Users size={16} />
-                  This is a family goal
-                </label>
-              </div>
+              <Checkbox
+                id="isFamily"
+                checked={form.isFamily || false}
+                onChange={(checked) => updateField("isFamily", checked)}
+                disabled={!hasFamily || !canCreateFamilyGoalsBool}
+                label="This is a family goal"
+                icon={<Users size={16} />}
+              />
 
               {form.isFamily && hasFamily && canCreateFamilyGoalsBool && (
                 <div className="p-3 rounded-lg border border-emerald-100 text-emerald-700 flex items-start gap-3">
