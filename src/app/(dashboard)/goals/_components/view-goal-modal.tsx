@@ -23,20 +23,22 @@ import {
   Users,
   Edit,
   Plus,
+  Trash2,
   Info,
   CheckCircle,
   Globe,
 } from "lucide-react";
 import { Stepper } from "./stepper";
 import type { GoalType } from "./types";
-import { 
-  GOAL_PRIORITIES, 
-  GOAL_CATEGORIES, 
-  formatCurrency, 
-  formatDate, 
+import {
+  GOAL_PRIORITIES,
+  GOAL_CATEGORIES,
+  formatCurrency,
+  formatDate,
   getDaysRemaining,
-  getGoalProgress 
+  getGoalProgress
 } from "./constants";
+import { getGoalPermissions, canEditGoal as canEditGoalFn, canDeleteGoal as canDeleteGoalFn } from "../_lib/permissions";
 
 const STEPS = ["Overview", "Analysis"];
 
@@ -46,6 +48,7 @@ interface ViewGoalModalProps {
   goal: GoalType | null;
   onEdit?: (goal: GoalType) => void;
   onContribute?: (goal: GoalType) => void;
+  onDelete?: (goal: GoalType) => void;
 }
 
 export function ViewGoalModal({
@@ -54,6 +57,7 @@ export function ViewGoalModal({
   goal,
   onEdit,
   onContribute,
+  onDelete,
 }: ViewGoalModalProps) {
   const [step, setStep] = useState(1);
   const { user } = useAuth();
@@ -99,7 +103,21 @@ export function ViewGoalModal({
     }
   }, [goal, onContribute, handleClose]);
 
+  const handleDeleteClick = useCallback(() => {
+    if (goal && onDelete) {
+      handleClose();
+      setTimeout(() => {
+        onDelete(goal);
+      }, 150);
+    }
+  }, [goal, onDelete, handleClose]);
+
   if (!goal) return null;
+
+  // Compute permissions for this goal
+  const permissions = getGoalPermissions(currentUserRole, isOwner, goal.user_id, user?.id);
+  const canEdit = canEditGoalFn(goal, currentUserRole, isOwner, user?.id);
+  const canDelete = canDeleteGoalFn(goal, currentUserRole, isOwner, user?.id);
 
   const progress = getGoalProgress(goal.current, goal.target);
   const remaining = goal.target - goal.current;
@@ -119,11 +137,10 @@ export function ViewGoalModal({
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
-      <Stepper steps={STEPS} currentStep={step} />
-
       {/* Body */}
       <ModalBody className="px-5 py-5">
+        {/* Stepper */}
+        <Stepper steps={STEPS} currentStep={step} />
         {/* STEP 1: Overview */}
         {step === 1 && (
           <div className="space-y-4 animate-txn-in">
@@ -148,7 +165,7 @@ export function ViewGoalModal({
                 <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                   <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Status</div>
                   <div className="text-sm font-semibold text-slate-900">
-                    <Badge variant={goal.status === "completed" ? "success" : goal.status === "in_progress" ? "info" : "warning"}>
+                    <Badge variant={goal.status === "completed" ? "success" : goal.status === "in_progress" ? "info" : "warning"} className="!bg-transparent">
                       {goal.status === "completed" ? "Completed" : goal.status === "in_progress" ? "In Progress" : "Overdue"}
                     </Badge>
                   </div>
@@ -180,6 +197,40 @@ export function ViewGoalModal({
                 </div>
               </div>
             </div>
+
+            {/* Family Context Section */}
+            {goal.isFamily && (
+              <div className="p-3 rounded-lg border border-emerald-100 bg-emerald-50/50 flex items-start gap-3">
+                <Users size={16} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <div className="font-medium text-sm text-emerald-800 mb-1.5">Family Goal</div>
+                  <div className="space-y-1">
+                    <div className="text-xs text-emerald-700">
+                      Family: <span className="font-semibold">{familyData?.name || "Unknown"}</span>
+                    </div>
+                    <div className="text-xs text-emerald-700">
+                      Your Role: <span className="font-semibold capitalize">{isOwner ? "Owner" : (currentUserRole || "N/A")}</span>
+                    </div>
+                  </div>
+                  <div className="text-xs text-emerald-600/80 mt-2">
+                    Shared with family members for collaborative tracking and contributions
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Public Goal Context */}
+            {goal.is_public && !goal.isFamily && (
+              <div className="p-3 rounded-lg border border-blue-100 bg-blue-50/50 flex items-start gap-3">
+                <Globe size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <div className="font-medium text-sm text-blue-800 mb-1">Public Goal</div>
+                  <div className="text-xs text-blue-600/80">
+                    Visible to the public community for inspiration
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -233,45 +284,45 @@ export function ViewGoalModal({
 
             {/* Goal Details */}
             <div className="space-y-3">
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="p-4 rounded-lg border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Goal Name</div>
                 <div className="text-sm font-semibold text-slate-900">{goal.name}</div>
               </div>
 
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="p-4 rounded-lg border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Category</div>
                 <div className="text-sm font-semibold text-slate-900">
                   {categoryInfo?.label || "Other"}
                 </div>
               </div>
 
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="p-4 rounded-lg border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Target Amount</div>
                 <div className="text-sm font-semibold text-slate-900">{formatCurrency(goal.target)}</div>
               </div>
 
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="p-4 rounded-lg border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Current Progress</div>
                 <div className="text-sm font-semibold text-slate-900">{formatCurrency(goal.current)}</div>
               </div>
 
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="p-4 rounded-lg border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Monthly Contribution</div>
                 <div className="text-sm font-semibold text-slate-900">{formatCurrency(goal.monthlyContribution)}</div>
               </div>
 
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="p-4 rounded-lg border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Deadline</div>
                 <div className="text-sm font-semibold text-slate-900">{formatDate(goal.deadline)}</div>
               </div>
 
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="p-4 rounded-lg border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Priority</div>
                 <div className="text-sm font-semibold text-slate-900 capitalize">{goal.priority}</div>
               </div>
 
               {(goal.isFamily || goal.is_public) && (
-                <div className={`p-4 rounded-lg border ${goal.isFamily ? 'bg-emerald-50 border-emerald-100' : 'bg-blue-50 border-blue-100'}`}>
+                <div className={`p-4 rounded-lg border ${goal.isFamily ? 'border-emerald-100 text-emerald-700' : 'border-blue-100 text-blue-700'}`}>
                   <div className="text-[11px] font-semibold uppercase tracking-[0.05em] mb-2 text-slate-600">Goal Type</div>
                   <div className="text-sm font-semibold flex items-center gap-2 mb-3">
                     {goal.isFamily ? (
@@ -286,30 +337,7 @@ export function ViewGoalModal({
                       </>
                     )}
                   </div>
-                  
-                  {goal.isFamily && (
-                    <div className="space-y-2">
-                      {familyState === "has-family" && familyData ? (
-                        <>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-slate-600">Family Name:</span>
-                            <span className="text-xs font-semibold text-emerald-700">{familyData.name}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-slate-600">Your Role:</span>
-                            <span className="text-xs font-semibold text-emerald-700 capitalize">
-                              {isOwner ? 'Owner' : (currentUserRole || 'Member')}
-                            </span>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-xs text-amber-600">
-                          Family details not available
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
+
                   <div className="text-xs mt-3 pt-2 border-t border-emerald-200/50 opacity-90">
                     {goal.isFamily ? (
                       <>Shared with family members for collaborative tracking and contributions</>
@@ -324,7 +352,7 @@ export function ViewGoalModal({
             {/* Projected Completion */}
             <div>
               <h4 className="text-xs font-semibold text-slate-900 mb-3">Projected Completion</h4>
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+              <div className="p-3 rounded-lg border border-slate-100">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -369,18 +397,7 @@ export function ViewGoalModal({
           Back
         </Button>
         <div className="flex gap-2">
-          {onEdit && (
-            <Button variant="outline" size="sm" onClick={handleEditClick}>
-              <Edit size={14} className="mr-1" />
-              Edit
-            </Button>
-          )}
-          {onContribute && goal.status !== "completed" && (
-            <Button variant="outline" size="sm" onClick={handleContributeClick}>
-              <Plus size={14} className="mr-1" />
-              Contribute
-            </Button>
-          )}
+          {/* Action buttons removed per user request */}
         </div>
         <Button
           size="sm"

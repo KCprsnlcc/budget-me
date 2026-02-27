@@ -88,12 +88,14 @@ export function useFamily() {
 
   // ----- Current user's role in the family -----
   const currentUserRole = useMemo(() => {
-    if (!userId || members.length === 0) return null;
+    if (!userId) return null;
+    if (familyCreatedBy === userId) return "Owner";
+    if (members.length === 0) return null;
     const me = members.find(
-      (m) => m.email === userEmail || m.id === userId
+      (m) => m.email?.toLowerCase() === userEmail.toLowerCase()
     );
     return me?.role ?? null;
-  }, [userId, userEmail, members]);
+  }, [userId, userEmail, members, familyCreatedBy]);
 
   const isOwner = useMemo(() => {
     return familyCreatedBy === userId;
@@ -322,13 +324,13 @@ export function useFamily() {
       if (!userId) return { error: "Not authenticated." };
       setMutating(true);
       const result = await sendJoinRequest(targetFamilyId, userId, message);
-      
+
       // Refresh join requests after sending
       if (!result.error) {
         const joinReqResult = await fetchUserJoinRequests(userId);
         setJoinRequests(joinReqResult.data);
       }
-      
+
       setMutating(false);
       return { error: result.error };
     },

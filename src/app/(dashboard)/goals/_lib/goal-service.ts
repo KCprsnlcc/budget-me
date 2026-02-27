@@ -7,30 +7,32 @@ const supabase = createClient();
 // Helpers
 // ---------------------------------------------------------------------------
 
-const CATEGORY_ICON_MAP: Record<string, string> = {
+const CATEGORY_ICONS: Record<string, string> = {
   emergency: "shield-check",
-  housing: "home-2",
+  vacation: "airplane",
+  house: "home-2",
+  car: "car",
   education: "graduation-cap",
-  travel: "airplane",
-  transport: "car",
-  electronics: "laptop",
-  other: "target",
+  retirement: "trending-up",
+  debt: "arrow-right",
+  general: "flag",
 };
 
 function normalizeCategory(dbCategory: string | null): GoalCategory {
-  if (!dbCategory || dbCategory === "general") return "other";
+  if (!dbCategory) return "general";
   const valid: GoalCategory[] = [
     "emergency",
-    "housing",
+    "vacation",
+    "house",
+    "car",
     "education",
-    "travel",
-    "transport",
-    "electronics",
-    "other",
+    "retirement",
+    "debt",
+    "general",
   ];
   return valid.includes(dbCategory as GoalCategory)
     ? (dbCategory as GoalCategory)
-    : "other";
+    : "general";
 }
 
 /** Map a raw DB row to the UI GoalType. */
@@ -49,9 +51,10 @@ function mapRow(row: Record<string, any>): GoalType {
     deadline: row.target_date ?? "",
     monthlyContribution: Number(row.auto_contribute_amount ?? 0),
     isFamily: row.is_family_goal ?? false,
+    is_public: row.is_public ?? false,
     family_id: row.family_id ?? null,
     notes: row.notes ?? null,
-    icon: CATEGORY_ICON_MAP[category] ?? "target",
+    icon: CATEGORY_ICONS[category] ?? "target",
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -147,6 +150,7 @@ export async function createGoal(
     category: form.category,
     target_date: form.deadline || null,
     is_family_goal: form.isFamily,
+    is_public: form.isPublic ?? false,
     auto_contribute_amount: monthlyContribution,
     status: "in_progress",
   };
@@ -183,6 +187,7 @@ export async function updateGoal(
     category: form.category,
     target_date: form.deadline || null,
     is_family_goal: form.isFamily,
+    is_public: form.isPublic ?? false,
     auto_contribute_amount: monthlyContribution,
   };
 

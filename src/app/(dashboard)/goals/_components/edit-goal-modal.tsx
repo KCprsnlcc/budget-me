@@ -36,12 +36,12 @@ import {
 } from "lucide-react";
 import { Stepper } from "./stepper";
 import type { GoalFormState, GoalType, GoalPriority, GoalCategory } from "./types";
-import { 
-  INITIAL_GOAL_FORM_STATE, 
-  GOAL_PRIORITIES, 
-  GOAL_CATEGORIES, 
-  formatCurrency, 
-  formatDate 
+import {
+  INITIAL_GOAL_FORM_STATE,
+  GOAL_PRIORITIES,
+  GOAL_CATEGORIES,
+  formatCurrency,
+  formatDate
 } from "./constants";
 
 const STEPS = ["Category", "Details", "Review"];
@@ -90,7 +90,7 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
 
   const hasFamily = familyState === "has-family" && familyData;
   const familyName = familyData?.name || "";
-  
+
   // Check permissions
   const permissions = getGoalPermissions(currentUserRole, isOwner, goal?.user_id, user?.id);
   const canCreateFamilyGoalsBool = canCreateFamilyGoals(currentUserRole, isOwner);
@@ -116,13 +116,13 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
 
   const handleSubmit = useCallback(async () => {
     if (!goal) return;
-    
+
     // Double-check permissions before submitting
     if (!canEditThisGoal) {
       setSaveError("You don't have permission to edit this goal");
       return;
     }
-    
+
     setSaving(true);
     setSaveError(null);
     const { error } = await updateGoal(goal.id, form);
@@ -324,7 +324,7 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
               </div>
 
               {form.isFamily && hasFamily && canCreateFamilyGoalsBool && (
-                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-start gap-3">
+                <div className="p-3 rounded-lg border border-emerald-100 text-emerald-700 flex items-start gap-3">
                   <Users size={16} className="flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
                     <div className="font-medium text-sm mb-2">Family Goal Permissions</div>
@@ -333,13 +333,13 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {permissions.canEdit && (
-                        <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">Can Edit</span>
+                        <span className="px-2 py-1 border border-emerald-200 text-emerald-700 rounded-full text-xs">Can Edit</span>
                       )}
                       {permissions.canDelete && (
-                        <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">Can Delete</span>
+                        <span className="px-2 py-1 border border-red-200 text-red-700 rounded-full text-xs">Can Delete</span>
                       )}
                       {permissions.canContribute && (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">Can Contribute</span>
+                        <span className="px-2 py-1 border border-blue-200 text-blue-700 rounded-full text-xs">Can Contribute</span>
                       )}
                     </div>
                   </div>
@@ -347,7 +347,7 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
               )}
 
               {!hasFamily && (
-                <div className="p-3 rounded-lg bg-amber-50 border border-amber-100 text-amber-700 flex items-start gap-3">
+                <div className="p-3 rounded-lg border border-amber-100 text-amber-700 flex items-start gap-3">
                   <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
                   <div>
                     <div className="font-medium text-sm">No Family Available</div>
@@ -359,7 +359,7 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
               )}
 
               {hasFamily && !canCreateFamilyGoalsBool && (
-                <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-700 flex items-start gap-3">
+                <div className="p-3 rounded-lg border border-red-100 text-red-700 flex items-start gap-3">
                   <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
                   <div>
                     <div className="font-medium text-sm">Insufficient Permissions</div>
@@ -370,7 +370,7 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
                 </div>
               )}
 
-              <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-blue-700 flex items-start gap-3">
+              <div className="p-3 rounded-lg border border-blue-100 text-blue-700 flex items-start gap-3">
                 <Info size={16} className="flex-shrink-0 mt-0.5" />
                 <div>
                   <div className="font-medium text-sm">Goal Impact</div>

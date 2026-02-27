@@ -74,7 +74,7 @@ export function getGoalPermissions(
       break;
 
     case "viewer":
-      // Viewer: Read-only access
+      // Viewer: Can manage personal goals only, read-only for family goals
       permissions.canAdd = false;
       permissions.canEdit = false;
       permissions.canDelete = false;
@@ -82,11 +82,12 @@ export function getGoalPermissions(
       break;
   }
 
-  // Special case: Member can edit/delete their own personal goals (not family goals)
-  if (normalizedRole === "member" && goalOwnerId && currentUserId) {
+  // Special case: Member and Viewer can edit/delete their own personal goals (not family goals)
+  if ((normalizedRole === "member" || normalizedRole === "viewer") && goalOwnerId && currentUserId) {
     if (goalOwnerId === currentUserId) {
       permissions.canEdit = true;
       permissions.canDelete = true;
+      permissions.canAdd = true;
     }
   }
 
