@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Wallet, Flag, UserPlus, Filter, MoreHorizontal, Clock, ChevronDown, Search, RotateCcw, Download } from "lucide-react";
+import { Wallet, Flag, UserPlus, Filter, Clock, Search, RotateCcw, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { ACTIVITY_TYPES, ACTIVITY_FILTERS, ACTIVITY_ICONS } from "../constants";
 import type { ActivityItem } from "../types";
 
 interface ActivityTabProps {
@@ -173,7 +172,7 @@ export function ActivityTab({
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
-            <select 
+            <select
               value={activeFilter}
               onChange={(e) => setActiveFilter(e.target.value)}
               className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"

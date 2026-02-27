@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { EditFamilyModal, DeleteFamilyModal, LeaveFamilyModal } from "../index";
+
 import { ROLE_ICONS } from "../constants";
 import type { FamilyMember, JoinRequest, PublicFamily, Family, EditFamilyData, InviteMemberData } from "../types";
 import { useAuth } from "@/components/auth/auth-context";
@@ -55,9 +55,7 @@ export function MembersTab({
 }: MembersTabProps) {
   const { user } = useAuth();
   const currentUserEmail = user?.email ?? "";
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [leaveModalOpen, setLeaveModalOpen] = useState(false);
+
   const [roleChanges, setRoleChanges] = useState<Record<string, string>>({});
   const [savingRoles, setSavingRoles] = useState(false);
   const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
@@ -107,18 +105,7 @@ export function MembersTab({
     setProcessingRequestId(null);
   };
 
-  const handleEditFamilyClick = () => {
-    setEditModalOpen(true);
-  };
 
-  const handleDeleteFamilyClick = () => {
-    setEditModalOpen(false);
-    setDeleteModalOpen(true);
-  };
-
-  const handleLeaveFamilyClick = () => {
-    setLeaveModalOpen(true);
-  };
 
   if (!familyData) {
     return (
@@ -237,7 +224,7 @@ export function MembersTab({
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-slate-900">
                   Pending Join Requests
-                   ({pendingRequests.length})
+                  ({pendingRequests.length})
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5 font-light">Review and approve family member requests</p>
               </div>
@@ -268,11 +255,11 @@ export function MembersTab({
                         disabled={processingRequestId === request.id}
                       >
                         {processingRequestId === request.id ? (
-                        <span className="flex items-center">
-                          <Skeleton width={14} height={14} borderRadius="50%" className="mr-1" />
-                          Processing...
-                        </span>
-                      ) : (
+                          <span className="flex items-center">
+                            <Skeleton width={14} height={14} borderRadius="50%" className="mr-1" />
+                            Processing...
+                          </span>
+                        ) : (
                           <UserCheck size={14} className="mr-1" />
                         )}
                         Approve as Member
@@ -284,11 +271,11 @@ export function MembersTab({
                         disabled={processingRequestId === request.id}
                       >
                         {processingRequestId === request.id ? (
-                        <span className="flex items-center">
-                          <Skeleton width={14} height={14} borderRadius="50%" className="mr-1" />
-                          Processing...
-                        </span>
-                      ) : (
+                          <span className="flex items-center">
+                            <Skeleton width={14} height={14} borderRadius="50%" className="mr-1" />
+                            Processing...
+                          </span>
+                        ) : (
                           <Trash2 size={14} className="mr-1" />
                         )}
                         Decline
@@ -338,15 +325,14 @@ export function MembersTab({
                       <div className="flex items-center gap-3">
                         <div className="relative">
                           <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm border ${
-                              member.role === "Owner"
+                            className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm border ${member.role === "Owner"
                                 ? "border-emerald-100 text-emerald-700"
                                 : member.role === "Admin"
-                                ? "border-blue-100 text-blue-700"
-                                : member.role === "Member"
-                                ? "border-purple-100 text-purple-700"
-                                : "border-slate-100 text-slate-700"
-                            }`}
+                                  ? "border-blue-100 text-blue-700"
+                                  : member.role === "Member"
+                                    ? "border-purple-100 text-purple-700"
+                                    : "border-slate-100 text-slate-700"
+                              }`}
                           >
                             {member.initials}
                           </div>
@@ -372,10 +358,10 @@ export function MembersTab({
                             member.role === "Owner"
                               ? "success"
                               : member.role === "Admin"
-                              ? "info"
-                              : member.role === "Member"
-                              ? "neutral"
-                              : "brand"
+                                ? "info"
+                                : member.role === "Member"
+                                  ? "neutral"
+                                  : "brand"
                           }
                         >
                           {member.role}
@@ -389,7 +375,7 @@ export function MembersTab({
                               variant="ghost"
                               size="sm"
                               className="text-[10px] text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1"
-                              onClick={handleLeaveFamilyClick}
+                              onClick={onLeaveFamily}
                             >
                               <LogOut size={12} />
                               Leave
@@ -437,13 +423,12 @@ export function MembersTab({
                       <div key={member.id} className="flex items-center justify-between gap-3 p-3 border border-slate-100 rounded-lg hover:shadow-md transition-all cursor-pointer">
                         <div className="flex items-center gap-3 min-w-0">
                           <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-[10px] flex-shrink-0 border ${
-                              member.role === "Admin"
+                            className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-[10px] flex-shrink-0 border ${member.role === "Admin"
                                 ? "border-blue-100 text-blue-700"
                                 : member.role === "Member"
-                                ? "border-purple-100 text-purple-700"
-                                : "border-slate-100 text-slate-700"
-                            }`}
+                                  ? "border-purple-100 text-purple-700"
+                                  : "border-slate-100 text-slate-700"
+                              }`}
                           >
                             {member.initials}
                           </div>
@@ -517,24 +502,7 @@ export function MembersTab({
         </div>
       </div>
 
-      {/* Modals */}
-      <EditFamilyModal
-        open={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        onDeleteFamily={handleDeleteFamilyClick}
-        onUpdateFamily={onUpdateFamily}
-        familyData={familyData}
-      />
-      <DeleteFamilyModal
-        open={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onConfirm={onDeleteFamilyConfirm}
-      />
-      <LeaveFamilyModal
-        open={leaveModalOpen}
-        onClose={() => setLeaveModalOpen(false)}
-        onConfirm={onLeaveFamilyConfirm}
-      />
+
     </div>
   );
 }

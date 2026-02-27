@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShieldCheck, Filter, MoreHorizontal, Calendar, Users, TrendingUp, TrendingDown, Flag, PhilippinePeso, Eye, Edit, Plus, Info, ArrowLeft, ArrowRight } from "lucide-react";
+import { ShieldCheck, Filter, MoreHorizontal, Calendar, TrendingUp, TrendingDown, Flag, Info, CheckCircle, AlertTriangle, Loader2, Plus, ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,8 +14,8 @@ import {
   ModalBody,
   ModalFooter,
 } from "@/components/ui/modal";
-import { GOAL_STATUSES, GOAL_FILTERS } from "../constants";
-import type { SharedGoal, GoalContribution } from "../types";
+import { GOAL_FILTERS } from "../constants";
+import type { SharedGoal } from "../types";
 import { Stepper } from "../stepper";
 
 interface GoalsTabProps {
@@ -25,7 +25,7 @@ interface GoalsTabProps {
   onEditGoal?: (goalId: string) => void;
   onDeleteGoal?: (goalId: string) => void;
   onAddGoal?: () => void;
-  onContributeGoal?: (goalId: string) => void;
+  onContributeGoal?: (goalId: string, amount: number) => void;
   onViewGoal?: (goalId: string) => void;
   isLoading?: boolean;
 }
@@ -123,9 +123,8 @@ export function GoalsTab({
 
   const handleContributeNext = () => {
     if (contributeStep >= 2) {
-      // TODO: Implement actual contribution logic
       if (selectedGoal && onContributeGoal) {
-        onContributeGoal(selectedGoal.id);
+        onContributeGoal(selectedGoal.id, parseFloat(contributeAmount));
       }
       handleContributeModalClose();
       return;
@@ -337,9 +336,8 @@ export function GoalsTab({
                       onFilter(filter);
                       setShowFilters(false);
                     }}
-                    className={`w-full text-left px-3 py-2 text-xs rounded-md hover:bg-slate-50 transition-colors ${
-                      activeFilter === filter ? "border-emerald-100 text-emerald-600" : "text-slate-600"
-                    }`}
+                    className={`w-full text-left px-3 py-2 text-xs rounded-md hover:bg-slate-50 transition-colors ${activeFilter === filter ? "border-emerald-100 text-emerald-600" : "text-slate-600"
+                      }`}
                   >
                     {filter === "all" ? "All" : filter.charAt(0).toUpperCase() + filter.slice(1)}
                   </button>
@@ -415,7 +413,7 @@ export function GoalsTab({
                     {daysRemaining !== null
                       ? `${daysRemaining} days remaining until target date`
                       : "No deadline set"
-                  }
+                    }
                   </span>
                   <span className="text-[10px] font-medium text-slate-700">
                     {goal.targetDate ? new Date(goal.targetDate).toLocaleDateString() : "No date"}
@@ -511,10 +509,10 @@ export function GoalsTab({
           </ModalHeader>
 
           {/* Stepper */}
-          <Stepper 
-            currentStep={contributeStep} 
-            totalSteps={2} 
-            labels={["Amount", "Review"]} 
+          <Stepper
+            currentStep={contributeStep}
+            totalSteps={2}
+            labels={["Amount", "Review"]}
           />
 
           {/* Body */}
@@ -533,7 +531,7 @@ export function GoalsTab({
                     <h4 className="text-sm font-semibold text-slate-900">{selectedGoal.name}</h4>
                     <p className="text-xs text-slate-500">{Math.round(calculateProgress(selectedGoal.saved, selectedGoal.target))}% complete</p>
                   </div>
-                  
+
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between">
                       <span className="text-slate-500">Current Progress:</span>
@@ -660,10 +658,10 @@ export function GoalsTab({
           </ModalHeader>
 
           {/* Stepper */}
-          <Stepper 
-            currentStep={viewStep} 
-            totalSteps={2} 
-            labels={["Overview", "Analysis"]} 
+          <Stepper
+            currentStep={viewStep}
+            totalSteps={2}
+            labels={["Overview", "Analysis"]}
           />
 
           {/* Body */}

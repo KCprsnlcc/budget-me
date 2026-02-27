@@ -77,9 +77,9 @@ function mapMemberRow(row: any): FamilyMember {
     budget: 0,
     joinedAt: row.joined_at
       ? new Date(row.joined_at).toLocaleDateString("en-US", {
-          month: "short",
-          year: "numeric",
-        })
+        month: "short",
+        year: "numeric",
+      })
       : undefined,
     avatar: profile.avatar_url ?? undefined,
   };
@@ -287,23 +287,31 @@ export async function fetchFamilyMembers(
 ): Promise<{ data: FamilyMember[]; error: string | null }> {
   const { data, error } = await supabase
     .from("family_members")
-    .select(
-      `
-      *,
-      profiles!family_members_user_id_fkey (
-        full_name, email, avatar_url, last_login
-      )
-    `
-    )
+    .select("*")
     .eq("family_id", familyId)
     .in("status", ["active", "pending"])
     .order("created_at", { ascending: true });
 
   if (error) return { data: [], error: error.message };
 
+  const userIds = [
+    ...new Set((data ?? []).map((r: any) => r.user_id).filter(Boolean)),
+  ];
+  let profileMap: Record<string, any> = {};
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, email, avatar_url, last_login")
+      .in("id", userIds);
+    for (const p of profiles ?? []) {
+      profileMap[p.id] = p;
+    }
+  }
+
   const members = (data ?? []).map((row: any) => {
     // Tag owner based on families.created_by
     row._isOwner = row.user_id === familyCreatedBy;
+    row.profiles = profileMap[row.user_id] ?? {};
     return mapMemberRow(row);
   });
 
@@ -322,10 +330,8 @@ export async function fetchFamilyGoals(
     .select(
       `
       *,
-      profiles!goals_user_id_fkey ( full_name ),
       goal_contributions (
-        id, user_id, amount, contribution_date, created_at,
-        profiles!goal_contributions_user_id_fkey ( full_name )
+        id, user_id, amount, contribution_date, created_at
       )
     `
     )
@@ -335,8 +341,35 @@ export async function fetchFamilyGoals(
 
   if (error) return { data: [], error: error.message };
 
+  const userIds = new Set<string>();
+  for (const row of data ?? []) {
+    if (row.user_id) userIds.add(row.user_id);
+    for (const c of row.goal_contributions ?? []) {
+      if (c.user_id) userIds.add(c.user_id);
+    }
+  }
+
+  let profileMap: Record<string, any> = {};
+  if (userIds.size > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .in("id", Array.from(userIds));
+    for (const p of profiles ?? []) {
+      profileMap[p.id] = p;
+    }
+  }
+
   // Get member count per goal (contributors)
   const goals = (data ?? []).map((row: any) => {
+    row.profiles = profileMap[row.user_id] ?? {};
+    if (row.goal_contributions) {
+      row.goal_contributions = row.goal_contributions.map((c: any) => {
+        c.profiles = profileMap[c.user_id] ?? {};
+        return c;
+      });
+    }
+
     const uniqueContributors = new Set(
       (row.goal_contributions ?? []).map((c: any) => c.user_id)
     );
@@ -359,10 +392,7 @@ export async function fetchFamilyActivity(
   const { data, error, count } = await supabase
     .from("family_activity_log")
     .select(
-      `
-      *,
-      profiles!family_activity_log_user_id_fkey ( full_name, email )
-    `,
+      "*",
       { count: "exact" }
     )
     .eq("family_id", familyId)
@@ -371,7 +401,25 @@ export async function fetchFamilyActivity(
 
   if (error) return { data: [], error: error.message, hasMore: false };
 
-  const activities = (data ?? []).map(mapActivityRow);
+  const userIds = [
+    ...new Set((data ?? []).map((r: any) => r.user_id).filter(Boolean)),
+  ];
+  let profileMap: Record<string, any> = {};
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", userIds);
+    for (const p of profiles ?? []) {
+      profileMap[p.id] = p;
+    }
+  }
+
+  const activities = (data ?? []).map((row: any) => {
+    row.profiles = profileMap[row.user_id] ?? {};
+    return mapActivityRow(row);
+  });
+
   const totalCount = count ?? 0;
   return { data: activities, error: null, hasMore: offset + limit < totalCount };
 }
@@ -385,18 +433,33 @@ export async function fetchJoinRequests(
 ): Promise<{ data: JoinRequest[]; error: string | null }> {
   const { data, error } = await supabase
     .from("family_join_requests")
-    .select(
-      `
-      *,
-      profiles!family_join_requests_user_id_fkey ( full_name, email )
-    `
-    )
+    .select("*")
     .eq("family_id", familyId)
     .eq("status", "pending")
     .order("created_at", { ascending: false });
 
   if (error) return { data: [], error: error.message };
-  return { data: (data ?? []).map(mapJoinRequestRow), error: null };
+
+  const userIds = [
+    ...new Set((data ?? []).map((r: any) => r.user_id).filter(Boolean)),
+  ];
+  let profileMap: Record<string, any> = {};
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", userIds);
+    for (const p of profiles ?? []) {
+      profileMap[p.id] = p;
+    }
+  }
+
+  const requests = (data ?? []).map((row: any) => {
+    row.profiles = profileMap[row.user_id] ?? {};
+    return mapJoinRequestRow(row);
+  });
+
+  return { data: requests, error: null };
 }
 
 /* ------------------------------------------------------------------ */
@@ -894,7 +957,7 @@ export async function fetchUserJoinRequests(
     .order("created_at", { ascending: false });
 
   if (error) return { data: [], error: error.message };
-  
+
   // Get member counts for each family
   const familyIds = (data ?? []).map((req: any) => req.family_id);
   const { data: memberCounts } = await supabase
@@ -1289,21 +1352,21 @@ export async function fetchFamilyGoalsSavingsProgress(
   const totalTarget = (goals ?? []).reduce((s, g) => s + Number(g.target_amount), 0);
   const totalSaved = (goals ?? []).reduce((s, g) => s + Number(g.current_amount), 0);
   const savedPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
-  
+
   const now = new Date();
   const points: FamilyGoalsSavingsPoint[] = [];
 
   for (let i = months - 1; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const label = d.toLocaleDateString("en-US", { month: "short" });
-    
+
     // Use the same progressive calculation as goals page
     const factor = (months - i) / months;
     const targetHeight = Math.round(80 * factor + 20);
     const savedHeight = Math.round(savedPct * factor);
     const targetVal = Math.round(totalTarget * (targetHeight / 100));
     const savedVal = Math.round(totalSaved * (savedHeight / 100));
-    
+
     points.push({
       month: label,
       target: targetHeight,
@@ -1358,7 +1421,7 @@ export async function fetchFamilyGoalsHealth(
   }
 
   const total = (goals ?? []).length;
-  
+
   const healthData: FamilyGoalsHealthItem[] = [
     { name: "Completed", value: statusCounts.completed, color: "#10b981" },
     { name: "In Progress", value: statusCounts.in_progress, color: "#3b82f6" },
