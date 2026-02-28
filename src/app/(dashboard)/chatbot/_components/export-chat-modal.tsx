@@ -8,13 +8,14 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, FileCode, FileJson, X } from "lucide-react";
+import { Download, FileText, FileCode, FileJson, Loader2 } from "lucide-react";
 import type { ExportFormat } from "./types";
 
 interface ExportChatModalProps {
   open: boolean;
   onClose: () => void;
   onExport: (format: ExportFormat) => void;
+  isLoading?: boolean;
 }
 
 const EXPORT_OPTIONS: { format: ExportFormat; label: string; desc: string; icon: React.ElementType }[] = [
@@ -23,17 +24,18 @@ const EXPORT_OPTIONS: { format: ExportFormat; label: string; desc: string; icon:
   { format: "json", label: "JSON", desc: "Raw data format for developers", icon: FileJson },
 ];
 
-export function ExportChatModal({ open, onClose, onExport }: ExportChatModalProps) {
+export function ExportChatModal({ open, onClose, onExport, isLoading = false }: ExportChatModalProps) {
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>("pdf");
 
   const handleClose = useCallback(() => {
+    if (isLoading) return;
     onClose();
-  }, [onClose]);
+  }, [onClose, isLoading]);
 
   const handleExport = useCallback(() => {
+    if (isLoading) return;
     onExport(selectedFormat);
-    handleClose();
-  }, [selectedFormat, onExport, handleClose]);
+  }, [selectedFormat, onExport, isLoading]);
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-md">
@@ -104,11 +106,18 @@ export function ExportChatModal({ open, onClose, onExport }: ExportChatModalProp
 
       {/* Footer */}
       <ModalFooter className="px-6 py-4">
-        <Button variant="outline" size="sm" className="flex-1 hover:bg-transparent" onClick={handleClose}>
+        <Button variant="outline" size="sm" className="flex-1 hover:bg-transparent" onClick={handleClose} disabled={isLoading}>
           Cancel
         </Button>
-        <Button size="sm" className="flex-1 bg-emerald-500 hover:bg-emerald-500" onClick={handleExport}>
-          Export
+        <Button size="sm" className="flex-1 bg-emerald-500 hover:bg-emerald-500" onClick={handleExport} disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 size={14} className="animate-spin mr-2" />
+              Exporting...
+            </>
+          ) : (
+            "Export"
+          )}
         </Button>
       </ModalFooter>
     </Modal>

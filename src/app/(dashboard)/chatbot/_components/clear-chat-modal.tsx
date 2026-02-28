@@ -8,23 +8,25 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Trash2, AlertTriangle, X } from "lucide-react";
+import { Trash2, AlertTriangle, Loader2 } from "lucide-react";
 
 interface ClearChatModalProps {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  isLoading?: boolean;
 }
 
-export function ClearChatModal({ open, onClose, onConfirm }: ClearChatModalProps) {
+export function ClearChatModal({ open, onClose, onConfirm, isLoading = false }: ClearChatModalProps) {
   const handleClose = useCallback(() => {
+    if (isLoading) return;
     onClose();
-  }, [onClose]);
+  }, [onClose, isLoading]);
 
   const handleConfirm = useCallback(() => {
+    if (isLoading) return;
     onConfirm();
-    handleClose();
-  }, [onConfirm, handleClose]);
+  }, [onConfirm, isLoading]);
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-md">
@@ -64,11 +66,18 @@ export function ClearChatModal({ open, onClose, onConfirm }: ClearChatModalProps
 
       {/* Footer */}
       <ModalFooter className="px-6 py-4">
-        <Button variant="outline" size="sm" className="flex-1 hover:bg-transparent" onClick={handleClose}>
+        <Button variant="outline" size="sm" className="flex-1 hover:bg-transparent" onClick={handleClose} disabled={isLoading}>
           Cancel
         </Button>
-        <Button variant="destructive" size="sm" className="flex-1 hover:bg-red-500" onClick={handleConfirm}>
-          Clear Chat
+        <Button variant="destructive" size="sm" className="flex-1 hover:bg-red-500" onClick={handleConfirm} disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 size={14} className="animate-spin mr-2" />
+              Clearing...
+            </>
+          ) : (
+            "Clear Chat"
+          )}
         </Button>
       </ModalFooter>
     </Modal>

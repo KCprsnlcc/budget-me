@@ -53,3 +53,35 @@ export const DEFAULT_SUGGESTIONS: ChatSuggestion[] = [
 ];
 
 export type ExportFormat = "pdf" | "markdown" | "json";
+
+// Extended types for backend integration
+export interface ChatSession {
+  id: string;
+  userId: string;
+  messages: MessageType[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SendMessageResult {
+  success: boolean;
+  message?: MessageType;
+  error?: string;
+}
+
+export interface ExportResult {
+  success: boolean;
+  data?: string;
+  filename?: string;
+  error?: string;
+}
+
+export type ModelLoadingState = "idle" | "loading" | "streaming" | "error";
+
+export interface ChatState {
+  messages: MessageType[];
+  isLoading: boolean;
+  loadingState: ModelLoadingState;
+  error: string | null;
+  selectedModel: string;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useTransition } from "react";
 import {
   Send,
   Bot,
@@ -17,6 +17,8 @@ import {
   Copy,
   Check,
   Share,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,62 +30,85 @@ import {
   ExportChatModal,
 } from "./_components";
 import type { MessageType, ExportFormat, MessageRole } from "./_components/types";
-import { AI_MODELS, DEFAULT_SUGGESTIONS } from "./_components/types";
+import { DEFAULT_SUGGESTIONS } from "./_components/types";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
+import { useAuth } from "@/components/auth/auth-context";
+import {
+  sendMessageToAI,
+  fetchChatHistory,
+  clearChatHistory,
+  exportChat,
+  fetchAvailableModels,
+  AVAILABLE_MODELS,
+  getDefaultModel,
+  type SendMessageResult,
+} from "./_lib/chatbot-service";
 
-const INITIAL_MESSAGES: MessageType[] = [
-  {
-    id: "1",
-    role: "assistant",
-    content: `Hello John! 👋\n\nI'm your personal financial assistant. I've analyzed your recent transactions and I noticed your **food spending** is trending down this month.\n\nHow can I help you today?`,
-    timestamp: "10:30 AM",
-    model: "gpt-oss-20b",
-  },
-  {
-    id: "2",
-    role: "user",
-    content: "Can you show me my recent subscription charges?",
-    timestamp: "10:32 AM",
-  },
-  {
-    id: "3",
-    role: "assistant",
-    content: `Here are your recent subscription charges I found in your transactions history:\n\n| Service | Date | Amount |\n|---------|------|--------|\n| Netflix | Oct 21, 2024 | ₱15.99 |\n| Spotify | Oct 18, 2024 | ₱9.99 |\n| Adobe Creative | Oct 15, 2024 | ₱54.99 |\n\n**Total: ₱80.97 / month**`,
-    timestamp: "10:32 AM",
-    model: "gpt-oss-20b",
-  },
-];
-
-const SUBSCRIPTION_DATA = [
-  { service: "Netflix", date: "Oct 21, 2024", amount: "₱15.99", icon: "play", color: "red" },
-  { service: "Spotify", date: "Oct 18, 2024", amount: "₱9.99", icon: "music", color: "green" },
-  { service: "Adobe Creative", date: "Oct 15, 2024", amount: "₱54.99", icon: "palette", color: "blue" },
-];
+// Welcome message for new conversations
+const WELCOME_MESSAGE: MessageType = {
+  id: "welcome",
+  role: "assistant",
+  content: `Hello John! 👋\n\nI'm your personal financial assistant. I've analyzed your recent transactions and I noticed your **food spending** is trending down this month.\n\nHow can I help you today?`,
+  timestamp: "10:30 AM",
+  model: "gpt-oss-20b",
+};
 
 export default function ChatbotPage() {
-  const [messages, setMessages] = useState<MessageType[]>(INITIAL_MESSAGES);
+  const { user, isLoading: authLoading } = useAuth();
+  const [messages, setMessages] = useState<MessageType[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
-  const [selectedModel, setSelectedModel] = useState("gpt-oss-20b");
+  const [selectedModel, setSelectedModel] = useState(getDefaultModel().id);
+  const [models, setModels] = useState(AVAILABLE_MODELS);
   const [clearChatModalOpen, setClearChatModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Simulate loading state
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 900); // 0.9 seconds loading time
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const currentModel = AI_MODELS.find((m) => m.id === selectedModel) || AI_MODELS[0];
+  const currentModel = models.find((m) => m.id === selectedModel) || models[0];
 
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+
+  // Fetch available models and chat history on mount
+  useEffect(() => {
+    const initializeChat = async () => {
+      if (!user?.id) return;
+
+      try {
+        // Fetch available models
+        const { data: availableModels, error: modelsError } = await fetchAvailableModels();
+        if (!modelsError && availableModels.length > 0) {
+          setModels(availableModels);
+          // Set default model
+          const defaultModel = availableModels.find((m) => m.isDefault) || availableModels[0];
+          setSelectedModel(defaultModel.id);
+        }
+
+        // Fetch chat history (graceful degradation if table doesn't exist)
+        const { data: history, error: historyError } = await fetchChatHistory(user.id);
+        if (!historyError && history && history.length > 0) {
+          // Filter out any messages with empty content
+          const validMessages = history.filter(msg => msg.content && msg.content.trim() !== "");
+          setMessages(validMessages);
+        }
+      } catch (err) {
+        // Silent fail - keep welcome message
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!authLoading && user) {
+      initializeChat();
+    } else if (!authLoading && !user) {
+      setLoading(false);
+    }
+  }, [user, authLoading]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -101,55 +126,101 @@ export default function ChatbotPage() {
     }
   }, [input]);
 
-  const handleSend = useCallback(() => {
-    if (!input.trim()) return;
+  const handleSend = useCallback(async () => {
+    if (!input.trim() || isSending || !user?.id) return;
 
-    const newMessage: MessageType = {
-      id: Date.now().toString(),
+    const trimmedInput = input.trim();
+    
+    // Create user message with unique ID
+    const userMessageId = `user-${Date.now()}-${Math.random()}`;
+    const userMessage: MessageType = {
+      id: userMessageId,
       role: "user",
-      content: input.trim(),
+      content: trimmedInput,
       timestamp: new Date().toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
       }),
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    // Optimistically add user message
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setIsSending(true);
+    setError(null);
 
-    // Simulate AI response with typing effect
-    setTimeout(() => {
-      const aiResponseId = (Date.now() + 1).toString();
-      const aiResponse: MessageType = {
-        id: aiResponseId,
-        role: "assistant",
-        content: "I understand. Let me analyze that for you and provide personalized insights based on your financial data.",
-        timestamp: new Date().toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-        }),
-        model: selectedModel,
-      };
-      setMessages((prev) => [...prev, aiResponse]);
-      setTypingMessageId(aiResponseId);
-    }, 1000);
-  }, [input, selectedModel]);
+    try {
+      // Prepare messages for API (including current context)
+      const contextMessages = [...messages, userMessage].slice(-10); // Keep last 10 messages for context
+      
+      const result: SendMessageResult = await sendMessageToAI(
+        contextMessages,
+        selectedModel,
+        user.id
+      );
+
+      if (!result.success) {
+        setError(result.error || "Failed to get AI response");
+        // Remove the user message on error so they can retry
+        setMessages((prev) => prev.filter((m) => m.id !== userMessageId));
+        return;
+      }
+
+      if (result.message) {
+        setMessages((prev) => [...prev, result.message!]);
+        setTypingMessageId(result.message.id);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to send message";
+      setError(errorMessage);
+      // Remove the user message on error so they can retry
+      setMessages((prev) => prev.filter((m) => m.id !== userMessageId));
+    } finally {
+      setIsSending(false);
+    }
+  }, [input, isSending, user, messages, selectedModel]);
 
   const handleSuggestionClick = useCallback((suggestion: string) => {
     setInput(suggestion);
     textareaRef.current?.focus();
   }, []);
 
-  const handleClearChat = useCallback(() => {
-    setMessages([]);
-    setTypingMessageId(null);
-  }, []);
+  const handleClearChat = useCallback(async () => {
+    if (!user?.id) return;
 
-  const handleExport = useCallback((format: ExportFormat) => {
-    // eslint-disable-next-line no-console
-    console.log(`Exporting chat as ${format}`);
-    // Implementation would go here
-  }, []);
+    startTransition(async () => {
+      try {
+        const { success, error: clearError } = await clearChatHistory(user.id);
+        if (!success && clearError) {
+          setError(clearError);
+          return;
+        }
+        
+        setMessages([WELCOME_MESSAGE]);
+        setTypingMessageId(null);
+        setError(null);
+      } catch (err) {
+        setError("Failed to clear chat history");
+      }
+    });
+  }, [user]);
+
+  const handleExport = useCallback(async (format: ExportFormat) => {
+    if (messages.length === 0) return;
+
+    startTransition(async () => {
+      try {
+        const result = await exportChat(messages, format, currentModel.name);
+        if (!result.success && result.error) {
+          setError(result.error);
+        } else {
+          setError(null);
+        }
+      } catch (err) {
+        setError("Failed to export chat");
+      }
+    });
+  }, [messages, currentModel.name]);
 
   const handleCopyMessage = useCallback((content: string, messageId: string) => {
     navigator.clipboard.writeText(content);
@@ -179,85 +250,188 @@ export default function ChatbotPage() {
     [handleSend]
   );
 
-  const renderMessageContent = (content: string, role: MessageRole, messageId: string) => {
+  const handleModelChange = useCallback((modelId: string) => {
+    setSelectedModel(modelId);
+    setError(null);
+  }, []);
+
+  const dismissError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  const renderMessageContent = (content: string | undefined, role: MessageRole, messageId: string) => {
     const isTyping = role === "assistant" && typingMessageId === messageId;
     
-    // Check if content contains table data
-    if (content.includes("| Service |")) {
-      const parts = content.split("| Service |");
-      const textPart = parts[0];
-      const lines = content.split("\n");
-      const tableStart = lines.findIndex((line) => line.includes("| Service |"));
-      const tableEnd = lines.findIndex((line, i) => i > tableStart && !line.startsWith("|"));
-      const endIdx = tableEnd === -1 ? lines.length : tableStart;
+    // Handle undefined content
+    const safeContent = content || "";
+    
+    // Helper function to render markdown text
+    const renderMarkdownText = (text: string, role: MessageRole) => {
+      const lines = text.split("\n");
+      return lines.map((line, index) => {
+        // Headers (###)
+        if (line.startsWith("### ")) {
+          return (
+            <h3 key={index} className={`font-bold text-base mt-4 mb-2 ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
+              {line.replace("### ", "")}
+            </h3>
+          );
+        }
+        
+        // Bullet points (-)
+        if (line.trim().startsWith("- ")) {
+          return (
+            <div key={index} className="flex items-start gap-2 mb-1">
+              <span className={`mt-1 ${role === "assistant" ? "text-emerald-500" : "text-emerald-300"}`}>•</span>
+              <span className="flex-1">{renderInlineMarkdown(line.replace(/^\s*-\s/, ""), role)}</span>
+            </div>
+          );
+        }
+        
+        // Numbered lists (1.)
+        if (/^\d+\.\s/.test(line.trim())) {
+          return (
+            <div key={index} className="flex items-start gap-2 mb-1">
+              <span className={`mt-1 font-semibold ${role === "assistant" ? "text-slate-600" : "text-slate-300"}`}>
+                {line.match(/^\d+/)?.[0]}.
+              </span>
+              <span className="flex-1">{renderInlineMarkdown(line.replace(/^\d+\.\s/, ""), role)}</span>
+            </div>
+          );
+        }
+        
+        // Regular text with inline markdown
+        return (
+          <div key={index} className="mb-2">
+            {renderInlineMarkdown(line, role)}
+          </div>
+        );
+      });
+    };
 
-      return (
-        <div className="space-y-4">
-          {textPart.trim() && (
-            <div className={`text-sm leading-relaxed ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
-              {isTyping ? (
-                <TypingEffect 
-                  text={textPart.trim()} 
-                  speed={15} 
-                  delay={200}
-                  onComplete={() => setTypingMessageId(null)}
-                />
-              ) : (
-                textPart.trim()
+    // Helper function for inline markdown (bold, italic)
+    const renderInlineMarkdown = (text: string, role: MessageRole) => {
+      // Bold text (**text**)
+      let processed = text.split("**").map((part, index) =>
+        index % 2 === 1 ? (
+          <strong key={index} className={`font-semibold ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
+            {part}
+          </strong>
+        ) : (
+          <span key={index}>{part}</span>
+        )
+      );
+      
+      return <>{processed}</>;
+    };
+    
+    // Enhanced markdown rendering for headers, lists, and tables
+    if (safeContent.includes("|") || safeContent.includes("###") || safeContent.includes("- ")) {
+      const lines = safeContent.split("\n");
+      
+      // Check for tables first
+      const tableLines = lines.filter(line => line.trim().startsWith("|"));
+      
+      if (tableLines.length >= 2) {
+        // Parse table data
+        const headers = tableLines[0].split("|").filter(cell => cell.trim()).map(cell => cell.trim());
+        const rows = tableLines.slice(1).map(line => 
+          line.split("|").filter(cell => cell.trim()).map(cell => cell.trim())
+        ).filter(row => row.length === headers.length);
+
+        return (
+          <div className="space-y-4">
+            {/* Text before table */}
+            {lines.slice(0, lines.findIndex(line => line.trim().startsWith("|"))).join("\n").trim() && (
+              <div className={`text-sm leading-relaxed ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
+                {isTyping ? (
+                  <TypingEffect 
+                    text={lines.slice(0, lines.findIndex(line => line.trim().startsWith("|"))).join("\n").trim()} 
+                    speed={5} 
+                    delay={200}
+                    onComplete={() => setTypingMessageId(null)}
+                  />
+                ) : (
+                  renderMarkdownText(lines.slice(0, lines.findIndex(line => line.trim().startsWith("|"))).join("\n").trim(), role)
+                )}
+              </div>
+            )}
+            
+            {/* Dynamic Table */}
+            <div className="overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-slate-50/50 border-b border-slate-100">
+                    <tr>
+                      {headers.map((header, index) => (
+                        <th 
+                          key={index} 
+                          className={`px-5 py-3 font-semibold text-slate-500 uppercase tracking-wider ${
+                            index === headers.length - 1 ? "text-right" : "text-left"
+                          }`}
+                        >
+                          {header}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {rows.map((row, rowIndex) => (
+                      <tr key={rowIndex} className="hover:bg-slate-50 transition-colors">
+                        {row.map((cell, cellIndex) => (
+                          <td 
+                            key={cellIndex} 
+                            className={`px-5 py-3 ${
+                              cellIndex === 0 ? "text-slate-700 font-medium" : "text-slate-500"
+                            } ${
+                              cellIndex === headers.length - 1 ? "text-right text-slate-900 font-semibold" : ""
+                            }`}
+                          >
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {rows.length > 0 && (
+                <div className="p-2.5 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                  <span className="text-[10px] text-slate-400 font-medium px-2">
+                    {rows.length} {rows.length === 1 ? "item" : "items"}
+                  </span>
+                  <button 
+                    onClick={() => navigator.clipboard.writeText(tableLines.join("\n"))}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-slate-500 hover:text-emerald-500 hover:bg-white border border-transparent hover:border-slate-200 rounded transition-all"
+                  >
+                    Copy Table
+                  </button>
+                </div>
               )}
             </div>
-          )}
-          <div className="overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead className="bg-slate-50/50 border-b border-slate-100">
-                  <tr>
-                    <th className="px-5 py-3 text-left font-semibold text-slate-500 uppercase tracking-wider">
-                      Service
-                    </th>
-                    <th className="px-5 py-3 text-left font-semibold text-slate-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-5 py-3 text-right font-semibold text-slate-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {SUBSCRIPTION_DATA.map((item) => (
-                    <tr key={item.service} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-5 py-3 text-slate-700 font-medium flex items-center gap-2">
-                        <div
-                          className={`w-6 h-6 rounded bg-${item.color}-50 text-${item.color}-500 flex items-center justify-center`}
-                        >
-                          {item.icon === "play" && <div className="w-3 h-3 rounded-full border-2 border-current" />}
-                          {item.icon === "music" && <div className="text-[8px]">♪</div>}
-                          {item.icon === "palette" && <div className="w-3 h-3 rounded bg-current" />}
-                        </div>
-                        {item.service}
-                      </td>
-                      <td className="px-5 py-3 text-slate-500">{item.date}</td>
-                      <td className="px-5 py-3 text-right text-slate-900 font-semibold">
-                        {item.amount}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="p-2.5 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
-              <span className="text-[10px] text-slate-400 font-medium px-2">
-                Total: ₱80.97 / month
-              </span>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-slate-500 hover:text-emerald-500 hover:bg-white border border-transparent hover:border-slate-200 rounded transition-all">
-                Copy Table
-              </button>
-            </div>
+            
+            {/* Text after table */}
+            {lines.slice(lines.findIndex(line => line.trim().startsWith("|")) + tableLines.length).join("\n").trim() && (
+              <div className={`text-sm leading-relaxed font-medium ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
+                {renderMarkdownText(lines.slice(lines.findIndex(line => line.trim().startsWith("|")) + tableLines.length).join("\n").trim(), role)}
+              </div>
+            )}
           </div>
-          {lines.slice(endIdx).join("\n").trim() && (
-            <div className={`text-sm leading-relaxed font-medium ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
-              {lines.slice(endIdx).join("\n").trim()}
-            </div>
+        );
+      }
+      
+      // Handle headers, lists, and other markdown without tables
+      return (
+        <div className={`text-sm leading-relaxed whitespace-pre-wrap ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
+          {isTyping ? (
+            <TypingEffect 
+              text={safeContent} 
+              speed={5} 
+              delay={200}
+              onComplete={() => setTypingMessageId(null)}
+            />
+          ) : (
+            renderMarkdownText(safeContent, role)
           )}
         </div>
       );
@@ -268,13 +442,13 @@ export default function ChatbotPage() {
       <div className={`text-sm leading-relaxed whitespace-pre-wrap ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
         {isTyping ? (
           <TypingEffect 
-            text={content} 
-            speed={15} 
+            text={safeContent} 
+            speed={5} 
             delay={200}
             onComplete={() => setTypingMessageId(null)}
           />
         ) : (
-          content.split("**").map((part, index) =>
+          safeContent.split("**").map((part, index) =>
             index % 2 === 1 ? (
               <strong key={index} className={`font-semibold ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
                 {part}
@@ -289,7 +463,7 @@ export default function ChatbotPage() {
   };
 
   // Loading state
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-7xl mx-auto h-[calc(100vh-140px)] min-h-[600px] space-y-6 animate-fade-in">
@@ -425,8 +599,8 @@ export default function ChatbotPage() {
               {/* Model Selector Dropdown */}
               <ModelSelectorDropdown
                 selectedModel={selectedModel}
-                onSelectModel={setSelectedModel}
-                models={AI_MODELS}
+                onSelectModel={handleModelChange}
+                models={models}
               />
 
               <div className="h-8 w-px bg-slate-200 mx-1" />
@@ -434,7 +608,8 @@ export default function ChatbotPage() {
               {/* Clear Chat Button */}
               <button
                 onClick={() => setClearChatModalOpen(true)}
-                className="p-2 text-slate-400 hover:text-red-500 rounded-lg transition-colors"
+                disabled={isPending}
+                className="p-2 text-slate-400 hover:text-red-500 rounded-lg transition-colors disabled:opacity-50"
                 title="Clear Chat"
               >
                 <Trash2 size={20} />
@@ -443,13 +618,30 @@ export default function ChatbotPage() {
               {/* Export Chat Button */}
               <button
                 onClick={() => setExportModalOpen(true)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg transition-colors"
+                disabled={isPending || messages.length === 0}
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg transition-colors disabled:opacity-50"
                 title="Export Chat"
               >
                 <Download size={20} />
               </button>
             </div>
           </header>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="bg-red-50 border-b border-red-100 px-6 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-red-700">
+                <AlertCircle size={16} />
+                <span className="text-sm">{error}</span>
+              </div>
+              <button 
+                onClick={dismissError}
+                className="text-red-500 hover:text-red-700 text-sm font-medium"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
 
           {/* Messages Container */}
           <div
@@ -462,7 +654,7 @@ export default function ChatbotPage() {
                 <p className="text-sm">Start a conversation with BudgetSense AI</p>
               </div>
             ) : (
-              messages.map((msg, index) => (
+              messages.filter(msg => msg.content && msg.content.trim() !== "").map((msg, index) => (
                 <div
                   key={msg.id}
                   className={`mx-auto max-w-3xl ${
@@ -485,7 +677,7 @@ export default function ChatbotPage() {
                     {/* Copy Button as Footer */}
                     <div className={`flex gap-2 ${msg.role === "assistant" ? "opacity-100 justify-start" : "opacity-0 justify-end"} group-hover:opacity-100 transition-all duration-200`}>
                       {/* Share Button - Only for Assistant Messages */}
-                      {msg.role === "assistant" && (
+                      {msg.role === "assistant" && msg.content && (
                         <button
                           onClick={() => handleShareMessage(msg.content)}
                           className="p-1.5 hover:opacity-80 transition-opacity"
@@ -495,8 +687,8 @@ export default function ChatbotPage() {
                         </button>
                       )}
                       
-                      <button
-                        onClick={() => handleCopyMessage(msg.content, msg.id)}
+                      <button 
+                        onClick={() => handleCopyMessage(msg.content || "", msg.id)}
                         className="p-1.5 hover:opacity-80 transition-opacity"
                         title="Copy message"
                       >
@@ -556,18 +748,23 @@ export default function ChatbotPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Message BudgetSense..."
+                  placeholder={isSending ? "AI is thinking..." : "Message BudgetSense..."}
                   rows={1}
-                  className="w-full bg-transparent border-none text-sm text-slate-600 placeholder-slate-400 focus:outline-none resize-none py-1.5 max-h-32 leading-relaxed"
+                  disabled={isSending}
+                  className="w-full bg-transparent border-none text-sm text-slate-600 placeholder-slate-400 focus:outline-none resize-none py-1.5 max-h-32 leading-relaxed disabled:opacity-50"
                 />
 
                 {/* Send Button */}
                 <button
                   onClick={handleSend}
-                  disabled={!input.trim()}
+                  disabled={!input.trim() || isSending}
                   className="p-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-full transition-all shadow-sm hover:shadow-md flex-shrink-0"
                 >
-                  <Send size={20} />
+                  {isSending ? (
+                    <Loader2 size={20} className="animate-spin" />
+                  ) : (
+                    <Send size={20} />
+                  )}
                 </button>
               </div>
 
@@ -578,7 +775,7 @@ export default function ChatbotPage() {
                 </span>
                 <div>|</div>
                 <span>Powered by</span>
-                <span className="opacity-70">OpenAI</span>
+                <span className="opacity-70">OpenRouter</span>
               </div>
             </div>
           </div>
@@ -590,12 +787,14 @@ export default function ChatbotPage() {
         open={clearChatModalOpen}
         onClose={() => setClearChatModalOpen(false)}
         onConfirm={handleClearChat}
+        isLoading={isPending}
       />
 
       <ExportChatModal
         open={exportModalOpen}
         onClose={() => setExportModalOpen(false)}
         onExport={handleExport}
+        isLoading={isPending}
       />
     </div>
   );
