@@ -30,6 +30,16 @@ export function UserAvatar({ user, size = "md", className = "", showName = false
     const fetchProfile = async () => {
       try {
         const supabase = createClient();
+        
+        // First check if user is authenticated
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log("No active session, skipping profile fetch");
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log("Fetching profile for user ID:", user.id);
         const { data, error } = await supabase
           .from("profiles")
           .select("avatar_url, full_name")
@@ -37,12 +47,20 @@ export function UserAvatar({ user, size = "md", className = "", showName = false
           .maybeSingle(); // Use maybeSingle() to handle missing profiles gracefully
         
         if (error) {
-          console.error("Failed to fetch user profile:", error);
+          console.error("Failed to fetch user profile:", {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
+          // Don't set profile, will fall back to user metadata
         } else {
+          console.log("Profile fetched successfully:", data);
           setProfile(data);
         }
       } catch (error) {
-        console.error("Failed to fetch user profile:", error);
+        console.error("Unexpected error fetching user profile:", error instanceof Error ? error.message : error);
+        // Don't set profile, will fall back to user metadata
       } finally {
         setIsLoading(false);
       }
