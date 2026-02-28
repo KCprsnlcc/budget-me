@@ -34,13 +34,13 @@ function mapFamilyRow(row: any): Family {
 
 function mapMemberRow(row: any): FamilyMember {
   const profile = row.profiles ?? {};
-  const fullName = profile.full_name || profile.email || "Unknown";
+  const fullName = profile.full_name || row.email || profile.email || "Unknown Member";
   const initials = fullName
     .split(" ")
-    .map((n: string) => n[0])
+    .map((n: string) => n ? n[0] : "")
     .join("")
     .toUpperCase()
-    .slice(0, 2);
+    .slice(0, 2) || "??";
 
   // Determine display role: creator of the family is "Owner"
   const dbRole: string = row.role ?? "member";
@@ -81,7 +81,7 @@ function mapMemberRow(row: any): FamilyMember {
         year: "numeric",
       })
       : undefined,
-    avatar: profile.avatar_url ?? undefined,
+    avatar: profile.avatar_url || undefined,
   };
 }
 
@@ -90,7 +90,8 @@ function mapGoalRow(row: any): SharedGoal {
     (c: any) => ({
       id: c.id,
       memberId: c.user_id,
-      memberName: c.profiles?.full_name ?? "Unknown",
+      memberName: c.profiles?.full_name || c.profiles?.email || "Unknown Member",
+      memberAvatar: c.profiles?.avatar_url || undefined,
       amount: Number(c.amount),
       date: c.contribution_date ?? c.created_at,
     })
@@ -130,7 +131,8 @@ function mapGoalRow(row: any): SharedGoal {
     createdAt: row.created_at,
     targetDate: row.target_date ?? undefined,
     status: uiStatus,
-    createdBy: row.profiles?.full_name ?? "Unknown",
+    createdBy: row.profiles?.full_name || row.profiles?.email || "Unknown Member",
+    creatorAvatar: row.profiles?.avatar_url || undefined,
     contributions,
   };
 }
@@ -141,26 +143,32 @@ function mapActivityRow(row: any): ActivityItem {
     id: row.id,
     type: mapActivityType(row.activity_type),
     action: row.description ?? "",
-    memberName: profile.full_name ?? "Unknown",
-    memberEmail: profile.email ?? "",
+    memberName: profile.full_name || profile.email || "Unknown Member",
+    memberEmail: profile.email || "",
+    memberAvatar: profile.avatar_url || undefined,
     details: row.description ?? "",
     amount: row.amount ? Number(row.amount) : undefined,
     target: row.metadata?.target ?? undefined,
     timestamp: row.created_at,
     metadata: row.metadata ?? undefined,
-  };
+  } as ActivityItem;
 }
 
 function mapJoinRequestRow(row: any): JoinRequest {
   const profile = row.profiles ?? {};
   return {
     id: row.id,
-    name: profile.full_name ?? "Unknown",
-    email: profile.email ?? "",
+    name: profile.full_name || profile.email || "Unknown Requester",
+    email: profile.email || "",
+    avatar: profile.avatar_url || undefined,
     message: row.message ?? "",
     requestedAt: row.created_at,
     status: row.status as JoinRequest["status"],
-  };
+    // Fields for 'sent' requests UI
+    createdBy: row.families?.profiles?.full_name || row.families?.profiles?.email || "Unknown",
+    createdByAvatar: row.families?.profiles?.avatar_url || undefined,
+    memberCount: 0, // Fallback
+  } as JoinRequest;
 }
 
 function mapPublicFamilyRow(row: any): PublicFamily {
@@ -181,8 +189,8 @@ function mapInvitationRow(row: any): Invitation {
   return {
     id: row.id,
     familyName: family.family_name ?? "Unknown Family",
-    inviterName: inviter.full_name ?? "Unknown",
-    inviterEmail: inviter.email ?? "",
+    inviterName: inviter.full_name || inviter.email || "Unknown Inviter",
+    inviterEmail: inviter.email || "",
     message: row.message ?? undefined,
     invitedAt: row.created_at,
     status: row.status as Invitation["status"],
@@ -353,7 +361,7 @@ export async function fetchFamilyGoals(
   if (userIds.size > 0) {
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, full_name")
+      .select("id, full_name, email, avatar_url")
       .in("id", Array.from(userIds));
     for (const p of profiles ?? []) {
       profileMap[p.id] = p;
@@ -408,7 +416,7 @@ export async function fetchFamilyActivity(
   if (userIds.length > 0) {
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, full_name, email")
+      .select("id, full_name, email, avatar_url")
       .in("id", userIds);
     for (const p of profiles ?? []) {
       profileMap[p.id] = p;
@@ -447,7 +455,7 @@ export async function fetchJoinRequests(
   if (userIds.length > 0) {
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, full_name, email")
+      .select("id, full_name, email, avatar_url")
       .in("id", userIds);
     for (const p of profiles ?? []) {
       profileMap[p.id] = p;
@@ -512,12 +520,12 @@ export async function fetchPublicFamilies(
   const creatorIds = (data ?? []).map((f: any) => f.created_by);
   const { data: creatorProfiles } = await supabase
     .from("profiles")
-    .select("id, full_name")
+    .select("id, full_name, email")
     .in("id", creatorIds);
 
   const creatorMap: Record<string, string> = {};
   (creatorProfiles ?? []).forEach((p: any) => {
-    creatorMap[p.id] = p.full_name ?? "Unknown";
+    creatorMap[p.id] = p.full_name || p.email || "Unknown";
   });
 
   const families = (data ?? []).map((row: any) => {

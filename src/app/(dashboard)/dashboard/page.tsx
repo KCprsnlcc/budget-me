@@ -158,10 +158,9 @@ const StatCard = memo(({ stat }: { stat: StatType }) => {
           <IconCmp size={22} strokeWidth={1.5} />
         </div>
         {stat.change && (
-          <div className={`flex items-center gap-1 text-[10px] font-medium ${
-            stat.trend === "up" ? "text-emerald-700 border-emerald-100" : 
-            "text-red-700 border-red-100"
-          } px-2 py-1 rounded-full border`}>
+          <div className={`flex items-center gap-1 text-[10px] font-medium ${stat.trend === "up" ? "text-emerald-700 border-emerald-100" :
+              "text-red-700 border-red-100"
+            } px-2 py-1 rounded-full border`}>
             {stat.trend === "up" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
             {stat.change}
           </div>
@@ -336,7 +335,7 @@ export default function DashboardPage() {
   const InsightCard = memo(({ insight }: { insight: InsightType }) => {
     const isExpanded = expandedInsight === insight.title;
     const style = getInsightStyle(insight.type);
-    
+
     // Handle both string icons (from insights service) and React component icons
     const renderIcon = () => {
       if (typeof insight.icon === 'string') {
@@ -348,7 +347,7 @@ export default function DashboardPage() {
         return <IconCmp size={16} className={insight.iconColor} />;
       }
     };
-    
+
     return (
       <div
         className={`bg-white rounded-xl border-l-4 ${insight.borderColor} shadow-sm p-4 hover:shadow-md transition-all group cursor-pointer ${insightsLoading ? 'opacity-50' : ''}`}
@@ -363,7 +362,7 @@ export default function DashboardPage() {
         <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
           {insight.description}
         </p>
-        
+
         {/* Expanded content - exact implementation from old FinancialInsights */}
         {isExpanded && (
           <div className="mt-3 text-sm text-slate-600 animate__animated animate__fadeIn">
@@ -372,11 +371,11 @@ export default function DashboardPage() {
             </p>
           </div>
         )}
-        
+
         {/* Action button with expand/collapse functionality - exact implementation from old FinancialInsights */}
-        <Button 
-          variant="ghost" 
-          size="xs" 
+        <Button
+          variant="ghost"
+          size="xs"
           className={insight.actionColor}
           onClick={() => handleToggleInsightExpand(insight.title)}
         >
@@ -705,14 +704,14 @@ export default function DashboardPage() {
             <Icon icon="material-symbols:insights" width={16} height={16} className="text-emerald-500" />
             Financial Insights
           </h3>
-          <Button 
-            variant="ghost" 
-            size="xs" 
-            className="text-slate-400 hover:text-slate-600" 
+          <Button
+            variant="ghost"
+            size="xs"
+            className="text-slate-400 hover:text-slate-600"
             onClick={handleRefreshInsights}
             disabled={insightsLoading}
           >
-            <RefreshCw size={12} className={insightsLoading ? 'animate-spin' : ''} /> 
+            <RefreshCw size={12} className={insightsLoading ? 'animate-spin' : ''} />
             {insightsLoading ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
@@ -803,7 +802,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-          
+
           {chartData.length > 0 ? (
             <>
               <div className="relative h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50">
@@ -826,7 +825,7 @@ export default function DashboardPage() {
                       onMouseEnter={() => setHoveredBar({ month: d.month, type: 'expense', value: d.expenseValue })}
                       onMouseLeave={() => setHoveredBar(null)}
                     />
-                    
+
                     {/* Tooltip */}
                     {hoveredBar && hoveredBar.month === d.month && (
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
@@ -874,7 +873,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-6 mb-6">
             {/* Donut Chart */}
             <div className="w-32 h-32 mx-auto rounded-full flex-shrink-0 relative"
-                 style={donutStyle}>
+              style={donutStyle}>
               <div className="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
                 <span className="text-xs text-slate-400 font-medium">Total</span>
                 <span className="text-sm font-bold text-slate-900">{formatCompact(categoryTotal)}</span>
@@ -908,14 +907,14 @@ export default function DashboardPage() {
             <BarChart3 size={16} className="text-slate-400" />
             Spending Trends
           </h3>
-          <Button 
-            variant="ghost" 
-            size="xs" 
-            className="text-slate-400 hover:text-slate-600" 
+          <Button
+            variant="ghost"
+            size="xs"
+            className="text-slate-400 hover:text-slate-600"
             onClick={handleRefreshSpendingTrends}
             disabled={trendsLoading}
           >
-            <RefreshCw size={12} className={trendsLoading ? 'animate-spin' : ''} /> 
+            <RefreshCw size={12} className={trendsLoading ? 'animate-spin' : ''} />
             {trendsLoading ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
@@ -943,11 +942,10 @@ export default function DashboardPage() {
                   <div>
                     <div className="text-[10px] text-slate-400 uppercase tracking-wide mb-0.5">{trend.category}</div>
                     <div className="text-sm font-bold text-slate-800">{formatCurrency(trend.currentAmount)}</div>
-                    <div className={`text-[10px] font-medium flex items-center gap-0.5 mt-1 ${
-                      trend.trend === 'down' ? 'text-emerald-600' :
-                      trend.trend === 'up' ? 'text-red-500' :
-                      'text-slate-400'
-                    }`}>
+                    <div className={`text-[10px] font-medium flex items-center gap-0.5 mt-1 ${trend.trend === 'down' ? 'text-emerald-600' :
+                        trend.trend === 'up' ? 'text-red-500' :
+                          'text-slate-400'
+                      }`}>
                       {trend.trend === 'down' && <ArrowDown size={12} />}
                       {trend.trend === 'up' && <ArrowUp size={12} />}
                       {trend.trend === 'neutral' && <MinusCircle size={12} />}
@@ -990,13 +988,13 @@ export default function DashboardPage() {
               <h3 className="text-sm font-semibold text-slate-800">Budget Progress</h3>
               <p className="text-xs text-slate-500 mt-0.5 font-light">Track spending against budget limits</p>
             </div>
-            <Button 
-              variant="ghost" 
-              size="xs" 
-              className="text-slate-400 hover:text-slate-600" 
+            <Button
+              variant="ghost"
+              size="xs"
+              className="text-slate-400 hover:text-slate-600"
               onClick={() => window.location.href = '/budgets'}
             >
-              <FileText size={12} /> 
+              <FileText size={12} />
               Manage
             </Button>
           </div>
@@ -1026,7 +1024,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                      <div 
+                      <div
                         className={`${vis.progressColor} h-full rounded-full transition-all duration-300`}
                         style={{ width: `${Math.min(item.percentage, 100)}%` }}
                       />
@@ -1058,13 +1056,13 @@ export default function DashboardPage() {
               <h3 className="text-sm font-semibold text-slate-800">Recent Transactions</h3>
               <p className="text-xs text-slate-500 mt-0.5 font-light">Monthly expense breakdown</p>
             </div>
-            <Button 
-              variant="ghost" 
-              size="xs" 
-              className="text-slate-400 hover:text-slate-600" 
+            <Button
+              variant="ghost"
+              size="xs"
+              className="text-slate-400 hover:text-slate-600"
               onClick={() => window.location.href = '/transactions'}
             >
-              <Receipt size={12} /> 
+              <Receipt size={12} />
               Manage
             </Button>
           </div>

@@ -367,9 +367,17 @@ export function GoalsTab({
               {/* Goal Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center text-slate-600 transition-colors group-hover:scale-110">
-                    {getGoalIcon(goal.status)}
-                  </div>
+                  {goal.creatorAvatar ? (
+                    <img
+                      src={goal.creatorAvatar}
+                      alt={goal.createdBy}
+                      className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center text-slate-600 transition-colors group-hover:scale-110">
+                      {getGoalIcon(goal.status)}
+                    </div>
+                  )}
                   <div>
                     <h4 className="text-base font-semibold text-slate-900">{goal.name}</h4>
                     <p className="text-[10px] text-slate-500">
@@ -433,9 +441,17 @@ export function GoalsTab({
                   {goal.contributions.slice(0, 3).map((contribution) => (
                     <div key={contribution.id} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[8px] font-medium text-slate-600">
-                          {contribution.memberName.split(' ').map(n => n[0]).join('')}
-                        </div>
+                        {contribution.memberAvatar ? (
+                          <img
+                            src={contribution.memberAvatar}
+                            alt={contribution.memberName}
+                            className="w-6 h-6 rounded-full object-cover border border-slate-100"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[8px] font-medium text-slate-600">
+                            {contribution.memberName.split(' ').map(n => n[0]).join('')}
+                          </div>
+                        )}
                         <span className="text-slate-700">{contribution.memberName}</span>
                       </div>
                       <div className="flex items-center gap-2">

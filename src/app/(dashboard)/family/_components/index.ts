@@ -1,5 +1,6 @@
 export { InviteMemberModal } from "./invite-member-modal";
 export { CreateFamilyModal } from "./create-family-modal";
+export { JoinFamilyModal } from "./join-family-modal";
 export { EditFamilyModal } from "./edit-family-modal";
 export { DeleteFamilyModal } from "./delete-family-modal";
 export { LeaveFamilyModal } from "./leave-family-modal";

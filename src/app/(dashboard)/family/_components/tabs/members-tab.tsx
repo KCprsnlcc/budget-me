@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Crown, Shield, Eye, Edit, MoreHorizontal, UserCheck, Clock, Settings, LogOut, Trash2, Users, RefreshCw, Search, Filter, Info, Home } from "lucide-react";
+import { Crown, Shield, Eye, Edit, MoreHorizontal, UserCheck, Clock, Settings, LogOut, Trash2, Users, RefreshCw, Search, Filter, Info, Home, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 import { ROLE_ICONS } from "../constants";
-import type { FamilyMember, JoinRequest, PublicFamily, Family, EditFamilyData, InviteMemberData } from "../types";
+import type { FamilyMember, JoinRequest, PublicFamily, Family, EditFamilyData, InviteMemberData, Invitation } from "../types";
 import { useAuth } from "@/components/auth/auth-context";
 import { formatRelativeTime } from "../../_lib/family-service";
 
@@ -31,6 +31,8 @@ interface MembersTabProps {
   onUpdateFamily?: (form: EditFamilyData) => Promise<{ error: string | null }>;
   onDeleteFamilyConfirm?: () => Promise<{ error: string | null }>;
   onLeaveFamilyConfirm?: () => Promise<{ error: string | null }>;
+  onRespondToInvitation?: (invitationId: string, accept: boolean) => Promise<{ error: string | null }>;
+  invitations?: Invitation[];
   isLoading?: boolean;
 }
 
@@ -51,6 +53,8 @@ export function MembersTab({
   onUpdateFamily,
   onDeleteFamilyConfirm,
   onLeaveFamilyConfirm,
+  onRespondToInvitation,
+  invitations = [],
   isLoading = false,
 }: MembersTabProps) {
   const { user } = useAuth();
@@ -233,9 +237,17 @@ export function MembersTab({
                   <Card key={request.id} className="p-4 bg-white shadow-sm border-blue-100">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full border border-blue-100 flex items-center justify-center text-blue-700 font-medium text-sm">
-                          {request.name.split(' ').map(n => n[0]).join('')}
-                        </div>
+                        {request.avatar ? (
+                          <img
+                            src={request.avatar}
+                            alt={request.name}
+                            className="w-10 h-10 rounded-full object-cover border border-blue-100"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full border border-blue-100 flex items-center justify-center text-blue-700 font-medium text-sm">
+                            {request.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                        )}
                         <div>
                           <p className="text-sm font-medium text-slate-900">{request.name}</p>
                           <p className="text-[10px] text-slate-500 font-light">
@@ -302,6 +314,71 @@ export function MembersTab({
             </Card>
           )}
 
+          {/* User Invitations Section - New Section */}
+          <Card className="p-6 border-emerald-100 hover:shadow-md transition-all group cursor-pointer">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-slate-900">
+                My Invitations
+                {invitations.length > 0 && ` (${invitations.length})`}
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5 font-light">Invitations to join other family groups</p>
+            </div>
+
+            {invitations.length > 0 ? (
+              <div className="space-y-3">
+                {invitations.map((invitation) => (
+                  <Card key={invitation.id} className="p-4 bg-white shadow-sm border-slate-200">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100 italic font-serif">
+                          {invitation.familyName.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">{invitation.familyName}</p>
+                          <p className="text-[10px] text-slate-500 font-light">
+                            From {invitation.inviterName} • {formatRelativeTime(invitation.invitedAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-emerald-500 hover:bg-emerald-600 text-xs px-3 h-8"
+                          onClick={() => onRespondToInvitation?.(invitation.id, true)}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs px-3 h-8"
+                          onClick={() => onRespondToInvitation?.(invitation.id, false)}
+                        >
+                          Decline
+                        </Button>
+                      </div>
+                    </div>
+                    {invitation.message && (
+                      <p className="text-xs text-slate-600 mb-0 italic px-3 py-2 border border-slate-100 bg-slate-50/50 rounded-lg">
+                        "{invitation.message}"
+                      </p>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3">
+                  <Mail className="text-slate-300" size={28} />
+                </div>
+                <h4 className="text-sm font-semibold text-slate-800 mb-1">No Pending Invitations</h4>
+                <p className="text-xs text-slate-500 px-8 leading-relaxed">
+                  When someone invites you to join their family dashboard, it will appear here.
+                </p>
+              </div>
+            )}
+          </Card>
+
           {/* Current Family Members List */}
           <Card className="p-6">
             <div className="mb-4">
@@ -324,18 +401,26 @@ export function MembersTab({
                     >
                       <div className="flex items-center gap-3">
                         <div className="relative">
-                          <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm border ${member.role === "Owner"
+                          {member.avatar ? (
+                            <img
+                              src={member.avatar}
+                              alt={member.name}
+                              className="w-10 h-10 rounded-full object-cover border border-slate-100"
+                            />
+                          ) : (
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm border ${member.role === "Owner"
                                 ? "border-emerald-100 text-emerald-700"
                                 : member.role === "Admin"
                                   ? "border-blue-100 text-blue-700"
                                   : member.role === "Member"
                                     ? "border-purple-100 text-purple-700"
                                     : "border-slate-100 text-slate-700"
-                              }`}
-                          >
-                            {member.initials}
-                          </div>
+                                }`}
+                            >
+                              {member.initials}
+                            </div>
+                          )}
                           {isOwner && (
                             <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white" />
                           )}
@@ -422,16 +507,24 @@ export function MembersTab({
                     .map((member) => (
                       <div key={member.id} className="flex items-center justify-between gap-3 p-3 border border-slate-100 rounded-lg hover:shadow-md transition-all cursor-pointer">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-[10px] flex-shrink-0 border ${member.role === "Admin"
+                          {member.avatar ? (
+                            <img
+                              src={member.avatar}
+                              alt={member.name}
+                              className="w-8 h-8 rounded-full object-cover border border-slate-100 flex-shrink-0"
+                            />
+                          ) : (
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-[10px] flex-shrink-0 border ${member.role === "Admin"
                                 ? "border-blue-100 text-blue-700"
                                 : member.role === "Member"
                                   ? "border-purple-100 text-purple-700"
                                   : "border-slate-100 text-slate-700"
-                              }`}
-                          >
-                            {member.initials}
-                          </div>
+                                }`}
+                            >
+                              {member.initials}
+                            </div>
+                          )}
                           <span className="text-xs font-medium text-slate-900 truncate">{member.name}</span>
                         </div>
                         <select
@@ -489,10 +582,10 @@ export function MembersTab({
                 <span className="font-bold">Owner:</span> Complete control, can delete the family group.
               </li>
               <li className="text-[10px] text-emerald-800 leading-relaxed">
-                <span className="font-bold">Admin:</span> Can invite members, manage roles, and create shared budgets.
+                <span className="font-bold">Admin:</span> Can invite members, manage roles, and create shared family goals.
               </li>
               <li className="text-[10px] text-emerald-800 leading-relaxed">
-                <span className="font-bold">Member:</span> Full access to shared features, budgets, and goals.
+                <span className="font-bold">Member:</span> Full access to shared features, and family goals.
               </li>
               <li className="text-[10px] text-emerald-800 leading-relaxed">
                 <span className="font-bold">Viewer:</span> Read-only access to all family information.

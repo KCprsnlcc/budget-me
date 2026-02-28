@@ -38,6 +38,7 @@ import {
   EditFamilyModal,
   DeleteFamilyModal,
   LeaveFamilyModal,
+  JoinFamilyModal,
   NoFamilyState,
   MembersTab,
   ActivityTab,
@@ -127,6 +128,8 @@ export default function FamilyPage() {
   const [editFamilyModalOpen, setEditFamilyModalOpen] = useState(false);
   const [deleteFamilyModalOpen, setDeleteFamilyModalOpen] = useState(false);
   const [leaveFamilyModalOpen, setLeaveFamilyModalOpen] = useState(false);
+  const [joinFamilyModalOpen, setJoinFamilyModalOpen] = useState(false);
+  const [selectedFamilyForJoin, setSelectedFamilyForJoin] = useState<PublicFamily | null>(null);
   const [tabSwitching, setTabSwitching] = useState(false);
 
   // Handle tab navigation with URL-based routing
@@ -172,9 +175,13 @@ export default function FamilyPage() {
   }, []);
 
   // Join family via request
-  const handleJoinFamily = useCallback(async (targetFamilyId: string) => {
-    await handleSendJoinRequest(targetFamilyId);
-  }, [handleSendJoinRequest]);
+  const handleJoinFamily = useCallback((familyId: string) => {
+    const family = publicFamilies.find(f => f.id === familyId);
+    if (family) {
+      setSelectedFamilyForJoin(family);
+      setJoinFamilyModalOpen(true);
+    }
+  }, [publicFamilies]);
 
   // Loading state - comprehensive skeleton
   if (loading || familyState === "loading") {
@@ -348,8 +355,8 @@ export default function FamilyPage() {
           <button
             onClick={() => handleTabChange("overview")}
             className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "overview"
-                ? "text-emerald-600 border-emerald-500"
-                : "text-slate-500 hover:text-slate-700 border-transparent"
+              ? "text-emerald-600 border-emerald-500"
+              : "text-slate-500 hover:text-slate-700 border-transparent"
               }`}
           >
             Overview
@@ -357,8 +364,8 @@ export default function FamilyPage() {
           <button
             onClick={() => handleTabChange("members")}
             className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "members"
-                ? "text-emerald-600 border-emerald-500"
-                : "text-slate-500 hover:text-slate-700 border-transparent"
+              ? "text-emerald-600 border-emerald-500"
+              : "text-slate-500 hover:text-slate-700 border-transparent"
               }`}
           >
             Members
@@ -366,8 +373,8 @@ export default function FamilyPage() {
           <button
             onClick={() => handleTabChange("activity")}
             className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "activity"
-                ? "text-emerald-600 border-emerald-500"
-                : "text-slate-500 hover:text-slate-700 border-transparent"
+              ? "text-emerald-600 border-emerald-500"
+              : "text-slate-500 hover:text-slate-700 border-transparent"
               }`}
           >
             Activity
@@ -375,8 +382,8 @@ export default function FamilyPage() {
           <button
             onClick={() => handleTabChange("goals")}
             className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "goals"
-                ? "text-emerald-600 border-emerald-500"
-                : "text-slate-500 hover:text-slate-700 border-transparent"
+              ? "text-emerald-600 border-emerald-500"
+              : "text-slate-500 hover:text-slate-700 border-transparent"
               }`}
           >
             Goals
@@ -664,6 +671,8 @@ export default function FamilyPage() {
               onUpdateFamily={handleUpdateFamily}
               onDeleteFamilyConfirm={handleDeleteFamily}
               onLeaveFamilyConfirm={handleLeaveFamily}
+              onRespondToInvitation={handleRespondToInvitation}
+              invitations={invitations}
               isLoading={tabSwitching}
             />
           )}
@@ -779,6 +788,12 @@ export default function FamilyPage() {
         open={leaveFamilyModalOpen}
         onClose={() => setLeaveFamilyModalOpen(false)}
         onConfirm={handleLeaveFamily}
+      />
+      <JoinFamilyModal
+        open={joinFamilyModalOpen}
+        onClose={() => setJoinFamilyModalOpen(false)}
+        family={selectedFamilyForJoin}
+        onSendRequest={handleSendJoinRequest}
       />
     </div>
   );

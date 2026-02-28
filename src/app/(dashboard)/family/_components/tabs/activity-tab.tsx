@@ -29,15 +29,15 @@ export function ActivityTab({
   const getIcon = (type: string) => {
     switch (type) {
       case "transaction":
-        return <Wallet size={20} />;
+        return Wallet;
       case "goal":
-        return <Flag size={20} />;
+        return Flag;
       case "member":
-        return <UserPlus size={20} />;
+        return UserPlus;
       case "budget":
-        return <Filter size={20} />;
+        return Filter;
       default:
-        return <Clock size={20} />;
+        return Clock;
     }
   };
 
@@ -222,8 +222,21 @@ export function ActivityTab({
             key={activity.id}
             className="flex items-start gap-3 p-4 bg-slate-50/50 hover:bg-slate-50 rounded-xl transition-colors border border-transparent hover:border-slate-200"
           >
-            <div className="flex items-center justify-center text-slate-600 flex-shrink-0">
-              {getIcon(activity.type)}
+            <div className="flex-shrink-0">
+              {activity.memberAvatar ? (
+                <img
+                  src={activity.memberAvatar}
+                  alt={activity.memberName}
+                  className="w-8 h-8 rounded-full object-cover border border-slate-200"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-medium text-xs border border-slate-200">
+                  {activity.memberName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center justify-center text-slate-400 flex-shrink-0 -ml-6 mt-5 bg-white rounded-full p-0.5 shadow-sm">
+              {React.createElement(getIcon(activity.type), { size: 12 })}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-1">

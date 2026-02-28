@@ -131,18 +131,16 @@ export function InviteMemberModal({ open, onClose, onSendInvitation }: InviteMem
                     <button
                       key={key}
                       onClick={() => updateFormData("role", key as "member" | "admin" | "viewer")}
-                      className={`p-3 rounded-lg border transition-all ${
-                        formData.role === key
+                      className={`p-3 rounded-lg border transition-all ${formData.role === key
                           ? "border-emerald-500 bg-emerald-50 text-emerald-700"
                           : "border-slate-200 hover:border-slate-300"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          formData.role === key
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${formData.role === key
                             ? "bg-emerald-100 text-emerald-600"
                             : "bg-slate-100 text-slate-600"
-                        }`}>
+                          }`}>
                           {key === "member" && <User size={16} />}
                           {key === "admin" && <Shield size={16} />}
                           {key === "viewer" && <Eye size={16} />}

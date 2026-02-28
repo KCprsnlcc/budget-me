@@ -34,6 +34,7 @@ export interface SharedGoal {
   targetDate?: string;
   status: "on-track" | "at-risk" | "completed" | "paused";
   createdBy: string;
+  creatorAvatar?: string;
   contributions: GoalContribution[];
 }
 
@@ -41,6 +42,7 @@ export interface GoalContribution {
   id: string;
   memberId: string;
   memberName: string;
+  memberAvatar?: string;
   amount: number;
   date: string;
 }
@@ -51,6 +53,7 @@ export interface ActivityItem {
   action: string;
   memberName: string;
   memberEmail: string;
+  memberAvatar?: string;
   details: string;
   amount?: number;
   target?: string;
@@ -62,9 +65,13 @@ export interface JoinRequest {
   id: string;
   name: string;
   email: string;
+  avatar?: string;
   message: string;
   requestedAt: string;
   status: "pending" | "approved" | "declined";
+  createdBy?: string;
+  createdByAvatar?: string;
+  memberCount?: number;
 }
 
 export interface PublicFamily {
@@ -73,6 +80,7 @@ export interface PublicFamily {
   description: string;
   memberCount: number;
   createdBy: string;
+  creatorAvatar?: string;
   createdAt: string;
   isPublic: boolean;
 }
