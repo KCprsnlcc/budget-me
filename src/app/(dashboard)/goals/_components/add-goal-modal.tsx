@@ -63,13 +63,14 @@ interface AddGoalModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  defaultFamilyGoal?: boolean;
 }
 
-export function AddGoalModal({ open, onClose, onSuccess }: AddGoalModalProps) {
+export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = false }: AddGoalModalProps) {
   const { user } = useAuth();
   const { familyData, familyState, currentUserRole, isOwner } = useFamily();
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState<GoalFormState>({ ...INITIAL_GOAL_FORM_STATE });
+  const [form, setForm] = useState<GoalFormState>({ ...INITIAL_GOAL_FORM_STATE, isFamily: defaultFamilyGoal });
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -82,9 +83,9 @@ export function AddGoalModal({ open, onClose, onSuccess }: AddGoalModalProps) {
 
   const reset = useCallback(() => {
     setStep(1);
-    setForm({ ...INITIAL_GOAL_FORM_STATE });
+    setForm({ ...INITIAL_GOAL_FORM_STATE, isFamily: defaultFamilyGoal });
     setSaveError(null);
-  }, []);
+  }, [defaultFamilyGoal]);
 
   const handleClose = useCallback(() => {
     reset();

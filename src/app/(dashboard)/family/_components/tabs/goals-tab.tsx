@@ -32,6 +32,7 @@ interface GoalsTabProps {
   onContributeGoal?: (goalId: string, amount: number) => void;
   onViewGoal?: (goalId: string) => void;
   isLoading?: boolean;
+  onRefreshGoals?: () => Promise<void>;
 }
 
 export function GoalsTab({
@@ -44,8 +45,10 @@ export function GoalsTab({
   onContributeGoal,
   onViewGoal,
   isLoading = false,
+  onRefreshGoals,
 }: GoalsTabProps) {
   const [showFilters, setShowFilters] = useState(false);
+  const [isGoalOperationLoading, setIsGoalOperationLoading] = useState(false);
   
   // Modal states
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -152,8 +155,8 @@ export function GoalsTab({
     };
   };
 
-  // Modal handlers
-  const handleAddGoal = () => {
+  // Modal handlers with refresh
+  const handleAddGoal = async () => {
     setAddModalOpen(true);
   };
 
@@ -177,6 +180,25 @@ export function GoalsTab({
     setDeleteModalOpen(true);
   };
 
+  // Refresh handler with loading state
+  const handleRefreshGoals = async () => {
+    console.log('handleRefreshGoals called');
+    if (onRefreshGoals) {
+      console.log('Setting loading to true');
+      setIsGoalOperationLoading(true);
+      try {
+        console.log('Calling onRefreshGoals');
+        await onRefreshGoals();
+        console.log('onRefreshGoals completed');
+      } finally {
+        console.log('Setting loading to false');
+        setIsGoalOperationLoading(false);
+      }
+    } else {
+      console.log('onRefreshGoals is undefined');
+    }
+  };
+
   const filteredGoals = goals.filter(goal => {
     if (activeFilter === "all") return true;
     if (activeFilter === "active") return goal.status === "on-track" || goal.status === "at-risk";
@@ -197,7 +219,7 @@ export function GoalsTab({
   
   const overallStatus = getOverallStatus();
 
-  if (isLoading) {
+  if (isLoading || isGoalOperationLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="space-y-6">
@@ -212,6 +234,24 @@ export function GoalsTab({
               <Skeleton width={90} height={32} borderRadius={6} />
             </div>
           </div>
+
+          {/* Overall Family Goal Progress Skeleton */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <Skeleton width={200} height={16} className="mb-2" />
+                <Skeleton width={300} height={12} />
+              </div>
+              <Skeleton width={80} height={20} borderRadius={10} />
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <Skeleton width={80} height={12} />
+                <Skeleton width={150} height={12} />
+              </div>
+              <Skeleton height={8} borderRadius={4} />
+            </div>
+          </Card>
 
           {/* Goals Grid Skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
@@ -452,7 +492,7 @@ export function GoalsTab({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg"
+                        className="p-2 text-slate-400 hover:text-slate-600 rounded-lg"
                         onClick={() => handleEditGoal(goal)}
                       >
                         <Edit size={16} />
@@ -460,7 +500,7 @@ export function GoalsTab({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                        className="p-2 text-slate-400 hover:text-red-600 rounded-lg"
                         onClick={() => handleDeleteGoal(goal)}
                       >
                         <Trash2 size={16} />
@@ -503,7 +543,7 @@ export function GoalsTab({
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="text-[10px] font-medium text-emerald-600 hover:underline"
+                      className="text-[10px] font-medium text-emerald-600"
                       onClick={() => handleViewGoal(goal)}
                     >
                       View All
@@ -547,7 +587,7 @@ export function GoalsTab({
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="text-[10px] text-emerald-600 hover:underline"
+                          className="text-[10px] text-emerald-600"
                           onClick={() => handleViewGoal(goal)}
                         >
                           +{goal.contributions.length - 3} more contributions
@@ -586,21 +626,20 @@ export function GoalsTab({
       <AddGoalModal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
-        onSuccess={() => {
+        onSuccess={async () => {
           setAddModalOpen(false);
-          onAddGoal?.();
+          await handleRefreshGoals();
         }}
+        defaultFamilyGoal={true}
       />
 
       <ContributeGoalModal
         open={contributeModalOpen}
         onClose={() => setContributeModalOpen(false)}
         goal={selectedGoal as GoalType}
-        onSuccess={() => {
+        onSuccess={async () => {
           setContributeModalOpen(false);
-          if (selectedGoal && onContributeGoal) {
-            // This will be handled by the modal itself
-          }
+          await handleRefreshGoals();
         }}
       />
 
@@ -632,9 +671,9 @@ export function GoalsTab({
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         goal={selectedGoal as GoalType}
-        onSuccess={() => {
+        onSuccess={async () => {
           setEditModalOpen(false);
-          onEditGoal?.(selectedGoal?.id || "");
+          await handleRefreshGoals();
         }}
       />
 
@@ -642,9 +681,9 @@ export function GoalsTab({
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         goal={selectedGoal as GoalType}
-        onSuccess={() => {
+        onSuccess={async () => {
           setDeleteModalOpen(false);
-          onDeleteGoal?.(selectedGoal?.id || "");
+          await handleRefreshGoals();
         }}
       />
     </>

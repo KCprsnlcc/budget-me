@@ -219,9 +219,37 @@ export function useFamily() {
   }, [userId, fetchData]);
 
   // ----- Refetch helper -----
-  const refetch = useCallback(() => {
-    fetchData();
+  const refetch = useCallback(async () => {
+    await fetchData();
   }, [fetchData]);
+
+  // ----- Goals-specific refresh helper -----
+  const refreshGoals = useCallback(async () => {
+    if (!familyId) return;
+    
+    try {
+      // Only fetch goals-related data
+      const [goalsResult, goalsSavingsResult, goalsHealthResult] = await Promise.all([
+        fetchFamilyGoals(familyId),
+        fetchFamilyGoalsSavingsProgress(familyId, 6),
+        fetchFamilyGoalsHealth(familyId),
+      ]);
+      
+      setGoals(goalsResult.data);
+      setGoalsSavingsProgress(goalsSavingsResult.data);
+      setGoalsHealth(goalsHealthResult.data);
+      
+      // Update overview stats that include goals
+      if (overviewStats) {
+        const updatedOverview = await fetchFamilyOverview(familyId);
+        if (!updatedOverview.error) {
+          setOverviewStats(updatedOverview.data);
+        }
+      }
+    } catch (err: any) {
+      console.error("Failed to refresh goals:", err);
+    }
+  }, [familyId, overviewStats]);
 
   // ----- Load more activities -----
   const loadMoreActivities = useCallback(async () => {
@@ -483,6 +511,7 @@ export function useFamily() {
 
     // Actions
     refetch,
+    refreshGoals,
     refreshDiscoverFamilies,
     loadMoreActivities,
     handleCreateFamily,

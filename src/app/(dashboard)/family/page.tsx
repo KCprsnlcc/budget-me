@@ -101,6 +101,7 @@ export default function FamilyPage() {
     hasMoreActivities,
     mutating,
     refetch,
+    refreshGoals,
     refreshDiscoverFamilies,
     loadMoreActivities,
     handleCreateFamily,
@@ -722,6 +723,7 @@ export default function FamilyPage() {
               onContributeGoal={(goalId, amount) => handleContributeToGoal(goalId, amount)}
               onViewGoal={(goalId) => { }}
               isLoading={tabSwitching}
+              onRefreshGoals={refreshGoals}
             />
           )}
         </div>
