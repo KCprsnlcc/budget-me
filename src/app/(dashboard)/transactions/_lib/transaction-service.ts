@@ -734,45 +734,13 @@ async function updateGoalProgressFromTransaction(
 ): Promise<void> {
   if (!goalId || amount <= 0) return;
   
-  // Fetch current goal state
-  const { data: goal } = await supabase
-    .from("goals")
-    .select("current_amount, target_amount, status")
-    .eq("id", goalId)
-    .single();
-  
-  if (!goal) return;
-  
-  const newAmount = Number(goal.current_amount) + amount;
-  const isCompleted = newAmount >= Number(goal.target_amount);
-  
-  // Update goal progress
-  const update: Record<string, any> = {
-    current_amount: newAmount,
-  };
-  
-  if (isCompleted && goal.status !== "completed") {
-    update.status = "completed";
-    update.completed_date = new Date().toISOString().split("T")[0];
-  }
-  
-  const { error: updateError } = await supabase
-    .from("goals")
-    .update(update)
-    .eq("id", goalId);
-  
-  if (updateError) {
-    console.error("Failed to update goal progress:", updateError);
-    return;
-  }
-  
-  // Create contribution record
+  // Create contribution record - the trigger will automatically update the goal progress
   const contribution = {
     goal_id: goalId,
     user_id: userId,
     amount: amount,
     contribution_date: new Date().toISOString().split("T")[0],
-    contribution_type: "transaction",
+    contribution_type: "manual", // Changed from "transaction" to "manual" to match constraint
     transaction_id: transactionId,
   };
   

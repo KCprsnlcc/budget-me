@@ -232,29 +232,7 @@ export async function contributeToGoal(
     return { data: null, error: "Contribution amount must be greater than zero." };
   }
 
-  // Fetch current state
-  const { data: current, error: fetchError } = await supabase
-    .from("goals")
-    .select("current_amount, target_amount, status")
-    .eq("id", goalId)
-    .single();
-
-  if (fetchError) return { data: null, error: fetchError.message };
-
-  const newAmount = Number(current.current_amount) + amount;
-  const isCompleted = newAmount >= Number(current.target_amount);
-
-  // Update goal progress
-  const update: Record<string, any> = {
-    current_amount: newAmount,
-  };
-
-  if (isCompleted && current.status !== "completed") {
-    update.status = "completed";
-    update.completed_date = new Date().toISOString().split("T")[0];
-  }
-
-  // Create contribution record for audit trail
+  // Create contribution record - the trigger will automatically update the goal progress
   const contribution = {
     goal_id: goalId,
     user_id: userId || null,
@@ -263,25 +241,23 @@ export async function contributeToGoal(
     contribution_type: "manual",
   };
 
-  // Execute both operations in a transaction-like manner
-  const { data: updatedGoal, error: updateError } = await supabase
-    .from("goals")
-    .update(update)
-    .eq("id", goalId)
-    .select("*")
-    .single();
-
-  if (updateError) return { data: null, error: updateError.message };
-
-  // Create audit record
+  // Insert contribution record - trigger will handle goal progress update
   const { error: contributionError } = await supabase
     .from("goal_contributions")
     .insert(contribution);
 
   if (contributionError) {
-    // Log error but don't fail the contribution
-    console.error("Failed to create contribution record:", contributionError);
+    return { data: null, error: contributionError.message };
   }
+
+  // Fetch the updated goal to return current state
+  const { data: updatedGoal, error: fetchError } = await supabase
+    .from("goals")
+    .select("*")
+    .eq("id", goalId)
+    .single();
+
+  if (fetchError) return { data: null, error: fetchError.message };
 
   return { data: mapRow(updatedGoal), error: null };
 }
