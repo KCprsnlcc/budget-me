@@ -237,8 +237,8 @@ export function DateSelector({
 
               {/* Week Days */}
               <div className="grid grid-cols-7 gap-1">
-                {weekDays.map((day) => (
-                  <div key={day} className="h-6 flex items-center justify-center text-[10px] font-medium text-slate-400">
+                {weekDays.map((day, index) => (
+                  <div key={`weekday-${index}`} className="h-6 flex items-center justify-center text-[10px] font-medium text-slate-400">
                     {day}
                   </div>
                 ))}

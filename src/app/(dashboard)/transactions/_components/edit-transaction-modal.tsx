@@ -197,10 +197,10 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
     step === 3;
 
   const handleSubmit = useCallback(async () => {
-    if (!transaction) return;
+    if (!transaction || !user) return;
     setSaving(true);
     setSaveError(null);
-    const { error } = await updateTransaction(transaction.id, form, transaction);
+    const { error } = await updateTransaction(transaction.id, form, transaction, user.id);
     setSaving(false);
     if (error) {
       setSaveError(error);
@@ -208,7 +208,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
     }
     handleClose();
     onSuccess?.();
-  }, [transaction, form, handleClose, onSuccess]);
+  }, [transaction, form, user, handleClose, onSuccess]);
 
   const handleNext = useCallback(() => {
     if (step >= 3) {

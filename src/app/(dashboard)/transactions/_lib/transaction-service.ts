@@ -264,6 +264,11 @@ export async function createTransaction(
     await updateBudgetSpent(form.budget, amount);
   }
 
+  // Update goal progress and create contribution if this transaction is linked to a goal
+  if (form.goal && data) {
+    await updateGoalProgressFromTransaction(form.goal, amount, userId, data.id);
+  }
+
   return { data: mapRow(data), error: null };
 }
 
@@ -274,7 +279,8 @@ export async function createTransaction(
 export async function updateTransaction(
   txId: string,
   form: TxnFormState,
-  originalTx?: TransactionType
+  originalTx?: TransactionType,
+  userId?: string
 ): Promise<{ data: TransactionType | null; error: string | null }> {
   const amount = parseFloat(form.amount);
   if (isNaN(amount) || amount <= 0) {
@@ -328,6 +334,10 @@ export async function updateTransaction(
   const wasExpense = originalTx?.type === "expense";
   const isNowExpense = form.type === "expense";
 
+  // Handle goal progress recalculations
+  const oldGoalId = originalTx?.goal_id;
+  const newGoalId = form.goal || null;
+
   // If budget changed or transaction type changed affecting expense status
   if (oldBudgetId !== newBudgetId || wasExpense !== isNowExpense) {
     // Recalculate old budget if it existed and was an expense
@@ -340,6 +350,21 @@ export async function updateTransaction(
     }
   }
 
+  // Handle goal progress updates
+  if (oldGoalId !== newGoalId) {
+    // Recalculate old goal if it existed
+    if (oldGoalId) {
+      await recalculateGoalProgress(oldGoalId);
+    }
+    // Update new goal if it exists and is different
+    if (newGoalId && newGoalId !== oldGoalId && userId) {
+      await updateGoalProgressFromTransaction(newGoalId, amount, userId, txId);
+    }
+  } else if (newGoalId && (originalTx?.amount !== amount)) {
+    // Same goal but amount changed - recalculate
+    await recalculateGoalProgress(newGoalId);
+  }
+
   return { data: mapRow(data), error: null };
 }
 
@@ -349,7 +374,8 @@ export async function updateTransaction(
 
 export async function deleteTransaction(
   txId: string,
-  budgetId?: string
+  budgetId?: string,
+  goalId?: string
 ): Promise<{ error: string | null }> {
   const { error } = await supabase
     .from("transactions")
@@ -360,6 +386,11 @@ export async function deleteTransaction(
   // Recalculate budget spent if this transaction had a budget
   if (budgetId) {
     await recalculateBudgetSpent(budgetId);
+  }
+  
+  // Recalculate goal progress if this transaction had a goal
+  if (goalId) {
+    await recalculateGoalProgress(goalId);
   }
   
   return { error: null };
@@ -689,6 +720,110 @@ export async function fetchCategoryStats(
   const average = all && all.length > 0 ? total / all.length : 0;
 
   return { average, monthlyTotal, count };
+}
+
+// ---------------------------------------------------------------------------
+// GOAL PROGRESS UPDATE HELPERS
+// ---------------------------------------------------------------------------
+
+async function updateGoalProgressFromTransaction(
+  goalId: string, 
+  amount: number, 
+  userId: string, 
+  transactionId: string
+): Promise<void> {
+  if (!goalId || amount <= 0) return;
+  
+  // Fetch current goal state
+  const { data: goal } = await supabase
+    .from("goals")
+    .select("current_amount, target_amount, status")
+    .eq("id", goalId)
+    .single();
+  
+  if (!goal) return;
+  
+  const newAmount = Number(goal.current_amount) + amount;
+  const isCompleted = newAmount >= Number(goal.target_amount);
+  
+  // Update goal progress
+  const update: Record<string, any> = {
+    current_amount: newAmount,
+  };
+  
+  if (isCompleted && goal.status !== "completed") {
+    update.status = "completed";
+    update.completed_date = new Date().toISOString().split("T")[0];
+  }
+  
+  const { error: updateError } = await supabase
+    .from("goals")
+    .update(update)
+    .eq("id", goalId);
+  
+  if (updateError) {
+    console.error("Failed to update goal progress:", updateError);
+    return;
+  }
+  
+  // Create contribution record
+  const contribution = {
+    goal_id: goalId,
+    user_id: userId,
+    amount: amount,
+    contribution_date: new Date().toISOString().split("T")[0],
+    contribution_type: "transaction",
+    transaction_id: transactionId,
+  };
+  
+  const { error: contributionError } = await supabase
+    .from("goal_contributions")
+    .insert(contribution);
+  
+  if (contributionError) {
+    console.error("Failed to create contribution record:", contributionError);
+  }
+}
+
+export async function recalculateGoalProgress(goalId: string): Promise<void> {
+  if (!goalId) return;
+  
+  // Fetch current goal state
+  const { data: goal } = await supabase
+    .from("goals")
+    .select("current_amount, target_amount, status")
+    .eq("id", goalId)
+    .single();
+  
+  if (!goal) return;
+  
+  // Sum all contribution amounts for this goal
+  const { data: contributions } = await supabase
+    .from("goal_contributions")
+    .select("amount")
+    .eq("goal_id", goalId);
+  
+  const totalContributed = (contributions ?? []).reduce((sum, contrib) => sum + Number(contrib.amount), 0);
+  
+  const isCompleted = totalContributed >= Number(goal.target_amount);
+  
+  // Update goal with recalculated progress
+  const update: Record<string, any> = {
+    current_amount: totalContributed,
+  };
+  
+  if (isCompleted && goal.status !== "completed") {
+    update.status = "completed";
+    update.completed_date = new Date().toISOString().split("T")[0];
+  } else if (!isCompleted && goal.status === "completed") {
+    update.status = "in_progress";
+    update.completed_date = null;
+  }
+  
+  await supabase
+    .from("goals")
+    .update(update)
+    .eq("id", goalId);
 }
 
 // ---------------------------------------------------------------------------

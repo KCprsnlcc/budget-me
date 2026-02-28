@@ -37,7 +37,11 @@ export function DeleteTransactionModal({
     if (!transaction) return;
     setDeleting(true);
     setDeleteError(null);
-    const { error } = await deleteTransaction(transaction.id, transaction.budget_id ?? undefined);
+    const { error } = await deleteTransaction(
+      transaction.id, 
+      transaction.budget_id ?? undefined,
+      transaction.goal_id ?? undefined
+    );
     setDeleting(false);
     if (error) {
       setDeleteError(error);
@@ -100,6 +104,19 @@ export function DeleteTransactionModal({
                 <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Budget Will Be Restored</h4>
                 <p className="text-[11px] leading-relaxed opacity-85">
                   ₱{absAmount} will be restored from your budget progress when this expense is deleted.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Goal Progress Restoration Notice */}
+          {transaction.goal_id && (
+            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-blue-50 border border-blue-100 text-blue-900 mx-auto max-w-sm mt-4 items-start">
+              <TrendingUp size={16} className="flex-shrink-0 mt-px" />
+              <div>
+                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Goal Progress Will Be Updated</h4>
+                <p className="text-[11px] leading-relaxed opacity-85">
+                  ₱{absAmount} will be removed from your goal progress and contribution history when this transaction is deleted.
                 </p>
               </div>
             </div>
