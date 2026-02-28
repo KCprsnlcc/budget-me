@@ -1,13 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
-import { Wallet, Flag, UserPlus, Filter, Clock, Search, RotateCcw, Download } from "lucide-react";
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { Wallet, Flag, UserPlus, Filter, Clock, Search, RotateCcw, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { FilterDropdown } from "@/components/ui/filter-dropdown";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import type { ActivityItem } from "../types";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
+
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
 
 interface ActivityTabProps {
   activities: ActivityItem[];
@@ -15,6 +24,8 @@ interface ActivityTabProps {
   hasMore: boolean;
   isLoading: boolean;
   loading?: boolean;
+  currentUser?: User | null;
+  familyId?: string | null;
 }
 
 export function ActivityTab({
@@ -23,10 +34,129 @@ export function ActivityTab({
   hasMore,
   isLoading,
   loading = false,
+  currentUser,
+  familyId,
 }: ActivityTabProps) {
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState("");
+  const [monthFilter, setMonthFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const [realtimeActivities, setRealtimeActivities] = useState<ActivityItem[]>([]);
+  
+  // Realtime subscription
+  useEffect(() => {
+    if (!familyId) return;
+    
+    const supabase = createClient();
+    const channel = supabase
+      .channel('activity-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'family_activity_log',
+          filter: `family_id=eq.${familyId}`,
+        },
+        async (payload) => {
+          // Fetch the new activity with profile data
+          const { data: newActivity } = await supabase
+            .from('family_activity_log')
+            .select(`
+              *,
+              profiles!family_activity_log_user_id_fkey (
+                full_name,
+                email,
+                avatar_url
+              )
+            `)
+            .eq('id', payload.new.id)
+            .single();
+          
+          if (newActivity) {
+            const profile = newActivity.profiles;
+            const fullName = profile?.full_name || profile?.email || "Unknown User";
+            
+            let activityType: "transaction" | "goal" | "member" | "budget";
+            if (newActivity.activity_type.includes("transaction")) {
+              activityType = "transaction";
+            } else if (newActivity.activity_type.includes("goal")) {
+              activityType = "goal";
+            } else if (newActivity.activity_type.includes("member") || newActivity.activity_type.includes("family")) {
+              activityType = "member";
+            } else {
+              activityType = "budget";
+            }
+            
+            const activity: ActivityItem = {
+              id: newActivity.id,
+              type: activityType,
+              action: newActivity.description,
+              memberName: fullName,
+              memberEmail: profile?.email || "",
+              memberAvatar: profile?.avatar_url || undefined,
+              details: newActivity.activity_type.replace(/_/g, " "),
+              amount: newActivity.amount ? Number(newActivity.amount) : undefined,
+              target: newActivity.target_name || undefined,
+              timestamp: newActivity.created_at,
+              metadata: newActivity.metadata || {},
+            };
+            
+            setRealtimeActivities(prev => [activity, ...prev].slice(0, 10)); // Keep only last 10 realtime activities
+          }
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [familyId]);
+  
+  // Combine activities with realtime activities
+  const allActivities = useMemo(() => {
+    return [...realtimeActivities, ...activities];
+  }, [realtimeActivities, activities]);
 
-  const getIcon = (type: string) => {
+  // Create mock user for avatar component
+  const createMockUser = useCallback((activity: ActivityItem): User => {
+    return {
+      id: activity.memberEmail,
+      email: activity.memberEmail,
+      user_metadata: {
+        full_name: activity.memberName,
+        avatar_url: activity.memberAvatar
+      },
+      app_metadata: {},
+      created_at: "",
+      aud: "authenticated"
+    } as User;
+  }, []);
+  
+  const formatTime = useCallback((timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffDays > 0) {
+      return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+    } else if (diffHours > 0) {
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    } else {
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      if (diffMinutes > 0) {
+        return `${diffMinutes} minute${diffMinutes > 1 ? "s" : ""} ago`;
+      }
+      return "Just now";
+    }
+  }, []);
+  
+  const getIcon = useCallback((type: string) => {
     switch (type) {
       case "transaction":
         return Wallet;
@@ -39,43 +169,131 @@ export function ActivityTab({
       default:
         return Clock;
     }
-  };
+  }, []);
+  
+  const getBadgeColor = useCallback((type: string) => {
+    return "bg-gray-100 text-gray-700 border-gray-300";
+  }, []);
 
-  const getBadgeColor = (type: string) => {
-    switch (type) {
-      case "transaction":
-        return "info";
-      case "goal":
-        return "success";
-      case "member":
-        return "secondary";
-      case "budget":
-        return "outline";
-      default:
-        return "outline";
+  // Ensure activity description includes user name
+  const getActivityDescription = useCallback((activity: ActivityItem) => {
+    // If the action already starts with the member name, return as-is
+    if (activity.action.startsWith(activity.memberName)) {
+      return activity.action;
     }
-  };
+    
+    // Otherwise, prepend the member name to the action
+    return `${activity.memberName} ${activity.action}`;
+  }, []);
 
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
+  // Filter and search logic
+  const filteredActivities = useMemo(() => {
+    let filtered = allActivities;
+    
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(activity => 
+        activity.memberName.toLowerCase().includes(query) ||
+        activity.action.toLowerCase().includes(query) ||
+        activity.details.toLowerCase().includes(query) ||
+        (activity.target && activity.target.toLowerCase().includes(query))
+      );
+    }
+    
+    // Type filter
+    if (activeFilter !== "" && activeFilter !== "all") {
+      filtered = filtered.filter(activity => activity.type === activeFilter);
+    }
+    
+    // Month and Year filter
+    if (monthFilter !== "all" || yearFilter !== "all") {
+      filtered = filtered.filter(activity => {
+        const activityDate = new Date(activity.timestamp);
+        const activityMonth = (activityDate.getMonth() + 1).toString(); // Convert to string for comparison
+        const activityYear = activityDate.getFullYear().toString();     // Convert to string for comparison
+        
+        const monthMatch = monthFilter === "all" || activityMonth === monthFilter;
+        const yearMatch = yearFilter === "all" || activityYear === yearFilter;
+        
+        return monthMatch && yearMatch;
+      });
+    }
+    
+    return filtered;
+  }, [allActivities, searchQuery, activeFilter, monthFilter, yearFilter]);
+  
+  // Keyboard navigation handlers
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, action: () => void) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      action();
+    }
+  }, []);
+  
+  // Export functionality
+  const handleExport = useCallback(() => {
+    const csvContent = [
+      ['Timestamp', 'Member', 'Action', 'Type', 'Amount', 'Target', 'Details'],
+      ...filteredActivities.map(activity => [
+        activity.timestamp,
+        activity.memberName,
+        activity.action,
+        activity.type,
+        activity.amount?.toString() || '',
+        activity.target || '',
+        activity.details
+      ])
+    ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `family-activity-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [filteredActivities]);
+
+  // Reset filters
+  const resetFilters = useCallback(() => {
+    setSearchQuery("");
+    setActiveFilter("");
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffHours / 24);
+    setMonthFilter((now.getMonth() + 1).toString()); // Current month
+    setYearFilter(now.getFullYear().toString()); // Current year
+  }, []);
 
-    if (diffDays > 0) {
-      return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-    } else if (diffHours > 0) {
-      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-    } else {
-      return "Just now";
-    }
-  };
+  const resetFiltersToAll = useCallback(() => {
+    setSearchQuery("");
+    setActiveFilter("");
+    setMonthFilter("all");
+    setYearFilter("all");
+  }, []);
 
-  const filteredActivities = activities.filter(activity => {
-    if (activeFilter === "all") return true;
-    return activity.type === activeFilter;
-  });
+  // Infinite scroll with Intersection Observer
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasMore || isLoading) return;
+    
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onLoadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    
+    observerRef.current.observe(loadMoreRef.current);
+    
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasMore, isLoading, onLoadMore]);
 
   if (loading) {
     return (
@@ -154,11 +372,16 @@ export function ActivityTab({
   return (
     <div className="space-y-6">
       {/* Filter Controls */}
-      <Card className="p-4">
+      <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col xl:flex-row items-center gap-3">
           <div className="flex items-center gap-2 text-xs text-slate-500 w-full xl:w-auto">
             <Filter size={16} />
             <span className="font-medium">Filters</span>
+            {(searchQuery || activeFilter !== "" || monthFilter !== "all" || yearFilter !== "all") && (
+              <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full">
+                {filteredActivities.length} results
+              </span>
+            )}
           </div>
           <div className="hidden xl:block h-4 w-px bg-slate-200"></div>
 
@@ -167,118 +390,191 @@ export function ActivityTab({
             <input
               type="text"
               placeholder="Search activities..."
-              className="w-full pl-9 pr-4 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
+              aria-label="Search activities"
+              role="searchbox"
             />
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
-            <select
+            <FilterDropdown
+              value={monthFilter === "all" ? "" : monthFilter.toString()}
+              onChange={(value) => setMonthFilter(value === "" ? "all" : value)}
+              options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
+              placeholder="All Months"
+              className="w-full text-slate-900"
+              allowEmpty={true}
+              emptyLabel="All Months"
+              hideSearch={true}
+            />
+            
+            <FilterDropdown
+              value={yearFilter === "all" ? "" : yearFilter.toString()}
+              onChange={(value) => setYearFilter(value === "" ? "all" : value)}
+              options={Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
+              placeholder="All Years"
+              className="w-full text-slate-900"
+              allowEmpty={true}
+              emptyLabel="All Years"
+              hideSearch={true}
+            />
+            
+            <FilterDropdown
               value={activeFilter}
-              onChange={(e) => setActiveFilter(e.target.value)}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-            >
-              <option value="all">All Types</option>
-              <option value="transaction">Transactions</option>
-              <option value="goal">Goals</option>
-              <option value="member">Members</option>
-              <option value="budget">Budgets</option>
-            </select>
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>All Members</option>
-              <option>John Doe</option>
-              <option>Sarah Doe</option>
-              <option>Emma Doe</option>
-              <option>Mike Johnson</option>
-            </select>
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>Last 7 Days</option>
-              <option>Last 30 Days</option>
-              <option>Last 3 Months</option>
-              <option>Last Year</option>
-            </select>
-            <select className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full">
-              <option>All Status</option>
-              <option>Completed</option>
-              <option>Pending</option>
-            </select>
+              onChange={(value) => setActiveFilter(value)}
+              options={[
+                { value: "all", label: "All Types" },
+                { value: "transaction", label: "Transactions" },
+                { value: "goal", label: "Goals" },
+                { value: "member", label: "Members" },
+                { value: "budget", label: "Budgets" }
+              ]}
+              placeholder="All Types"
+              className="w-full text-slate-900"
+              allowEmpty={true}
+              emptyLabel="All Types"
+              hideSearch={true}
+            />
           </div>
 
+          <div className="flex-1"></div>
           <div className="flex items-center gap-2 w-full xl:w-auto">
-            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset Filters">
-              <RotateCcw size={14} />
+            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset to Current Period" onClick={resetFilters}>
+              <RotateCcw size={14} /> Current
             </Button>
-            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center">
-              <Download size={14} />
-              Export
+            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={resetFiltersToAll}>
+              <RotateCcw size={14} /> All Time
             </Button>
           </div>
         </div>
       </Card>
 
       {/* Activity Feed */}
-      <div className="space-y-4">
-        {filteredActivities.map((activity) => (
-          <Card
-            key={activity.id}
-            className="flex items-start gap-3 p-4 bg-slate-50/50 hover:bg-slate-50 rounded-xl transition-colors border border-transparent hover:border-slate-200"
-          >
-            <div className="flex-shrink-0">
-              {activity.memberAvatar ? (
-                <img
-                  src={activity.memberAvatar}
-                  alt={activity.memberName}
-                  className="w-8 h-8 rounded-full object-cover border border-slate-200"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-medium text-xs border border-slate-200">
-                  {activity.memberName.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                </div>
-              )}
+      <div className="space-y-3">
+        {filteredActivities.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+              <Filter className="text-slate-400" size={32} />
             </div>
-            <div className="flex items-center justify-center text-slate-400 flex-shrink-0 -ml-6 mt-5 bg-white rounded-full p-0.5 shadow-sm">
-              {React.createElement(getIcon(activity.type), { size: 12 })}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs text-slate-700">
-                  <span className="font-semibold text-slate-900">{activity.memberName}</span>{" "}
-                  {activity.action}
-                  {activity.amount && (
-                    <span className="font-bold text-slate-900">
-                      ₱{activity.amount.toLocaleString()}
-                    </span>
-                  )}
-                  {activity.target && (
-                    <span className="font-medium text-emerald-600">{activity.target}</span>
-                  )}
-                  {activity.type === "goal" && " goal"}
-                </p>
-                <span className="text-[10px] text-slate-400">{formatTime(activity.timestamp)}</span>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              {searchQuery ? "No Matching Activities" : "No Activity Yet"}
+            </h3>
+            <p className="text-sm text-slate-500 mb-6">
+              {searchQuery 
+                ? "No activities match your search criteria."
+                : "There hasn't been any activity in your family yet."
+              }
+            </p>
+            {searchQuery || activeFilter !== "all" || monthFilter !== "all" || yearFilter !== "all" ? (
+              <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
+                Clear Filters
+              </Button>
+            ) : searchQuery && (
+              <Button variant="outline" onClick={() => setSearchQuery("")}>
+                <X size={14} className="mr-2" />
+                Clear Search
+              </Button>
+            )}
+            {!searchQuery && (
+              <div className="text-xs text-slate-400">
+                Start by adding transactions, creating goals, or inviting family members to see activity here.
               </div>
-              <div className="flex items-center gap-2">
-                <Badge className={getBadgeColor(activity.type) + " text-[9px] px-1.5 py-0"}>
-                  {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
-                </Badge>
-                <span className="text-[10px] text-slate-300">•</span>
-                <span className="text-[10px] text-slate-400">{activity.details}</span>
-              </div>
-            </div>
-          </Card>
-        ))}
-
-        {/* Load More */}
-        {hasMore && (
-          <div className="pt-4 text-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onLoadMore}
-              disabled={isLoading}
-              className="text-[10px] px-8 py-2"
-            >
-              {isLoading ? "Loading..." : "Load More Activity"}
-            </Button>
+            )}
           </div>
+        ) : (
+          <>
+            {filteredActivities.map((activity, index) => {
+              const isRealtime = index < realtimeActivities.length;
+              const Icon = getIcon(activity.type);
+              
+              return (
+                <Card
+                  key={activity.id}
+                  className={`flex items-start gap-3 p-4 bg-white hover:bg-slate-50 rounded-xl transition-all duration-200 border border-slate-200 hover:border-slate-300 hover:shadow-sm cursor-pointer ${
+                    isRealtime ? "ring-2 ring-emerald-500 ring-opacity-50 bg-emerald-50/30" : ""
+                  }`}
+                  role="article"
+                  aria-label={`Activity: ${getActivityDescription(activity)}`}
+                  tabIndex={0}
+                  onKeyDown={(e) => handleKeyDown(e, () => {
+                    // Optional: Add click handler for keyboard navigation
+                  })}
+                >
+                  <div className="flex-shrink-0">
+                    <UserAvatar 
+                      user={createMockUser(activity)} 
+                      size="lg"
+                      className="ring-2 ring-white shadow-sm"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-center text-slate-400 flex-shrink-0 -ml-6 mt-5 bg-white rounded-full p-1 shadow-sm border border-slate-100">
+                    <Icon size={12} />
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-slate-700 leading-relaxed">
+                          <span className="text-slate-600">{getActivityDescription(activity)}</span>
+                          {activity.type === "goal" && !activity.action.includes("goal") && (
+                            <span className="text-slate-500 ml-1">goal</span>
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                        {isRealtime && (
+                          <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full font-medium">
+                            New
+                          </span>
+                        )}
+                        <span className="text-xs text-slate-400 whitespace-nowrap">
+                          {formatTime(activity.timestamp)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Badge className={`${getBadgeColor(activity.type)} text-xs px-2 py-1 border font-medium`}>
+                        {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
+                      </Badge>
+                      <span className="text-xs text-slate-300">•</span>
+                      <span className="text-xs text-slate-500 capitalize">
+                        {activity.details}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+            
+            {/* Load More Trigger */}
+            {hasMore && (
+              <div 
+                ref={loadMoreRef}
+                className="pt-4 text-center"
+              >
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onLoadMore}
+                  disabled={isLoading}
+                  className="text-sm px-6 py-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600 mr-2"></div>
+                      Loading...
+                    </>
+                  ) : (
+                    "Load More Activity"
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

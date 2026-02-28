@@ -63,6 +63,9 @@ export function UserAvatar({ user, size = "md", className = "", showName = false
     : user.email?.slice(0, 2).toUpperCase() || "U";
 
   const displayName = profile?.full_name || user.user_metadata?.full_name || user.email || "User";
+  
+  // Use avatar from profile (database) first, then fallback to user_metadata
+  const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url;
 
   if (isLoading) {
     return (
@@ -73,11 +76,13 @@ export function UserAvatar({ user, size = "md", className = "", showName = false
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <div className="relative">
-        {profile?.avatar_url ? (
+        {avatarUrl ? (
           <img
-            src={profile.avatar_url}
+            src={avatarUrl}
             alt={`${displayName}'s avatar`}
             className={`${sizeClasses[size]} rounded-full object-cover border border-slate-200`}
+            loading="lazy"
+            decoding="async"
             onError={(e) => {
               // Fallback to initials if image fails to load
               const target = e.target as HTMLImageElement;
@@ -90,7 +95,7 @@ export function UserAvatar({ user, size = "md", className = "", showName = false
         ) : null}
         <div
           className={`${sizeClasses[size]} rounded-full bg-slate-100 flex items-center justify-center border border-slate-200 text-slate-600 font-medium ${
-            profile?.avatar_url ? "hidden" : "flex"
+            avatarUrl ? "hidden" : "flex"
           }`}
         >
           {initials}

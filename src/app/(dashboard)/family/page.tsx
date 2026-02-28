@@ -716,6 +716,8 @@ export default function FamilyPage() {
               onLoadMore={loadMoreActivities}
               hasMore={hasMoreActivities}
               isLoading={activitiesLoading || tabSwitching}
+              currentUser={user}
+              familyId={familyId}
             />
           )}
 
