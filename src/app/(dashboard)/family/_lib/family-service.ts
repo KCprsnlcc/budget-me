@@ -1022,6 +1022,23 @@ export async function fetchUserJoinRequests(
 }
 
 /* ------------------------------------------------------------------ */
+/*  DELETE — Delete all user's join requests                          */
+/* ------------------------------------------------------------------ */
+
+export async function deleteAllUserJoinRequests(
+  userId: string
+): Promise<{ error: string | null }> {
+  const { error } = await supabase
+    .from("family_join_requests")
+    .delete()
+    .eq("user_id", userId)
+    .eq("status", "pending");
+
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+/* ------------------------------------------------------------------ */
 /*  UPDATE — Change member role                                       */
 /* ------------------------------------------------------------------ */
 

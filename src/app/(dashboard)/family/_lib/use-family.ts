@@ -29,6 +29,7 @@ import {
   contributeToGoal,
   removeMember,
   transferOwnership,
+  deleteAllUserJoinRequests,
   type FamilyOverviewStats,
   type SentInvitation,
   type FamilyCategoryBreakdown,
@@ -150,6 +151,12 @@ export function useFamily() {
       setFamilyData(family);
       setFamilyId(family.id);
       setFamilyCreatedBy(family.createdBy);
+
+      // If user is the owner, delete all their existing join requests
+      if (family.createdBy === userId && joinRequests.length > 0) {
+        await deleteAllUserJoinRequests(userId);
+        setJoinRequests([]);
+      }
 
       // Step 2: Fetch all family data in parallel
       const [membersResult, goalsResult, activityResult, requestsResult, overviewResult, sentInvResult, expenseCatResult, budgetVsActualResult, goalsSavingsResult, goalsHealthResult] =

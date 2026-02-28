@@ -720,9 +720,10 @@ export default function FamilyPage() {
         </div>
       </Card>
 
-      {/* Discover Families Section */}
-      <Card className="p-6 mb-8">
-        <div className="mb-8">
+      {/* Discover Families Section - Hidden for Family Owners */}
+      {!isOwner && (
+        <Card className="p-6 mb-8">
+          <div className="mb-8">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="text-sm font-semibold text-slate-900">Discover Families</h3>
@@ -970,6 +971,7 @@ export default function FamilyPage() {
       )}
         </div>
       </Card>
+      )}
 
       {/* Modals */}
       <InviteMemberModal
