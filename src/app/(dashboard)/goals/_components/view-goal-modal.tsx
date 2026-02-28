@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useFamily } from "../../family/_lib/use-family";
 import { useAuth } from "@/components/auth/auth-context";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,7 @@ import {
   Globe,
 } from "lucide-react";
 import { Stepper } from "./stepper";
-import type { GoalType } from "./types";
+import type { GoalType, GoalContribution } from "./types";
 import {
   GOAL_PRIORITIES,
   GOAL_CATEGORIES,
@@ -39,6 +39,8 @@ import {
   getGoalProgress
 } from "./constants";
 import { getGoalPermissions, canEditGoal as canEditGoalFn, canDeleteGoal as canDeleteGoalFn } from "../_lib/permissions";
+import { fetchGoalContributors, fetchGoalContributions } from "../_lib/goal-service";
+import type { GoalContributor } from "../_lib/goal-service";
 
 const STEPS = ["Overview", "Analysis"];
 
@@ -60,8 +62,31 @@ export function ViewGoalModal({
   onDelete,
 }: ViewGoalModalProps) {
   const [step, setStep] = useState(1);
+  const [contributors, setContributors] = useState<GoalContributor[]>([]);
+  const [contributions, setContributions] = useState<GoalContribution[]>([]);
+  const [loadingContributors, setLoadingContributors] = useState(false);
   const { user } = useAuth();
   const { familyData, familyState, currentUserRole, isOwner, members } = useFamily();
+
+  // Fetch contributors and contributions when goal changes
+  useEffect(() => {
+    if (goal?.id) {
+      setLoadingContributors(true);
+      Promise.all([
+        fetchGoalContributors(goal.id, 10),
+        fetchGoalContributions(goal.id)
+      ]).then(([contributorsResult, contributionsResult]) => {
+        if (contributorsResult.data) {
+          setContributors(contributorsResult.data);
+        }
+        if (contributionsResult.data) {
+          setContributions(contributionsResult.data);
+        }
+      }).finally(() => {
+        setLoadingContributors(false);
+      });
+    }
+  }, [goal?.id]);
 
   const reset = useCallback(() => {
     setStep(1);
@@ -381,6 +406,75 @@ export function ViewGoalModal({
                 </div>
               </div>
             </div>
+            {/* Member Contributions Section */}
+            {(
+              <div className="mt-6">
+                <h4 className="text-xs font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                  <Users size={14} />
+                  {goal.isFamily ? "Member Contributions" : "Contributions"}
+                  {loadingContributors && <span className="text-[10px] text-slate-400">(Loading...)</span>}
+                </h4>
+                
+                {contributors.length > 0 ? (
+                  <div className="space-y-3">
+                    {contributors.map((contributor) => (
+                      <div key={contributor.user_id} className="p-3 rounded-lg border border-slate-100 bg-slate-50/50">
+                        <div className="flex items-center gap-3">
+                          {/* Avatar */}
+                          <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xs font-semibold overflow-hidden">
+                            {contributor.avatar_url ? (
+                              <img src={contributor.avatar_url} alt={contributor.full_name} className="h-full w-full object-cover" />
+                            ) : (
+                              contributor.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-slate-900">{contributor.full_name}</div>
+                            <div className="text-[10px] text-slate-500">
+                              Contributed {formatCurrency(contributor.total_contributed)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-lg border border-slate-100 bg-slate-50/50 text-center">
+                    <div className="text-sm text-slate-500">No contributions yet</div>
+                  </div>
+                )}
+                
+                {/* Contribution Audit Log */}
+                {contributions.length > 0 && (
+                  <div className="mt-4">
+                    <h5 className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Contribution History</h5>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {contributions.map((contribution) => (
+                        <div key={contribution.id} className="p-2 rounded border border-slate-100 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-[10px] font-semibold">
+                              {contribution.user_avatar ? (
+                                <img src={contribution.user_avatar} alt={contribution.user_name} className="h-full w-full object-cover rounded-full" />
+                              ) : (
+                                contribution.user_name.split(' ').map(n => n[0]).join('').toUpperCase()
+                              )}
+                            </div>
+                            <div>
+                              <div className="text-xs font-medium text-slate-900">{contribution.user_name}</div>
+                              <div className="text-[9px] text-slate-500">{formatDate(contribution.contribution_date)}</div>
+                            </div>
+                          </div>
+                          <div className="text-xs font-semibold text-emerald-600">
+                            +{formatCurrency(contribution.amount)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
         )}
       </ModalBody>

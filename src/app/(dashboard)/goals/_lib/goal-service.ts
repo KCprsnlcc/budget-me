@@ -325,6 +325,66 @@ export async function fetchGoalContributions(
 }
 
 // ---------------------------------------------------------------------------
+// FETCH GOAL CONTRIBUTORS (for list view - top contributors with avatars)
+// ---------------------------------------------------------------------------
+
+export interface GoalContributor {
+  user_id: string;
+  full_name: string;
+  avatar_url: string | null;
+  total_contributed: number;
+}
+
+export async function fetchGoalContributors(
+  goalId: string,
+  limit: number = 3
+): Promise<{ data: GoalContributor[]; error: string | null }> {
+  const { data, error } = await supabase
+    .from("goal_contributions")
+    .select(`
+      user_id,
+      amount,
+      profiles!goal_contributions_user_id_fkey (
+        full_name,
+        avatar_url
+      )
+    `)
+    .eq("goal_id", goalId)
+    .order("contribution_date", { ascending: false });
+
+  if (error) return { data: [], error: error.message };
+
+  // Aggregate contributions by user
+  const contributorMap = new Map<string, GoalContributor>();
+  
+  for (const row of data || []) {
+    const userId = row.user_id;
+    const existing = contributorMap.get(userId);
+    
+    // Handle profiles data - Supabase might return it as array or single object
+    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+    
+    if (existing) {
+      existing.total_contributed += Number(row.amount);
+    } else {
+      contributorMap.set(userId, {
+        user_id: userId,
+        full_name: profile?.full_name || "Unknown",
+        avatar_url: profile?.avatar_url || null,
+        total_contributed: Number(row.amount),
+      });
+    }
+  }
+
+  // Convert to array and sort by contribution amount
+  const contributors = Array.from(contributorMap.values())
+    .sort((a, b) => b.total_contributed - a.total_contributed)
+    .slice(0, limit);
+
+  return { data: contributors, error: null };
+}
+
+// ---------------------------------------------------------------------------
 // SUMMARY
 // ---------------------------------------------------------------------------
 

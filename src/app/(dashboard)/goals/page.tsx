@@ -2,7 +2,7 @@
 
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
-import { memo, useState, useCallback, useMemo } from "react";
+import { memo, useState, useCallback, useMemo, useEffect } from "react";
 import {
   Plus,
   Flag,
@@ -49,6 +49,7 @@ import { useGoals } from "./_lib/use-goals";
 import { useFamily } from "../family/_lib/use-family";
 import { useAuth } from "@/components/auth/auth-context";
 import { canEditGoal as canEditGoalFn, canDeleteGoal as canDeleteGoalFn, getGoalPermissions } from "./_lib/permissions";
+import { fetchGoalContributors } from "./_lib/goal-service";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -67,6 +68,8 @@ const GOAL_ICONS: Record<string, React.ElementType> = {
 
 const GoalCard = memo(({
   goal,
+  contributors,
+  contributorsLoading,
   onView,
   onEdit,
   onDelete,
@@ -76,6 +79,8 @@ const GoalCard = memo(({
   showContribute = true,
 }: {
   goal: GoalType;
+  contributors?: { user_id: string; full_name: string; avatar_url: string | null; total_contributed: number }[];
+  contributorsLoading?: boolean;
   onView: (goal: GoalType) => void;
   onEdit: (goal: GoalType) => void;
   onDelete: (goal: GoalType) => void;
@@ -147,6 +152,37 @@ const GoalCard = memo(({
         </div>
       </div>
 
+      {/* Contributor Avatars */}
+      {!contributorsLoading && contributors && contributors.length > 0 && (
+        <div className="mt-4 flex items-center gap-2">
+          <div className="flex -space-x-2">
+            {contributors.slice(0, 3).map((contributor) => (
+              <div key={contributor.user_id} className="h-7 w-7 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-semibold text-slate-600 overflow-hidden">
+                {contributor.avatar_url ? (
+                  <img src={contributor.avatar_url} alt={contributor.full_name} className="h-full w-full object-cover" />
+                ) : (
+                  contributor.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
+                )}
+              </div>
+            ))}
+          </div>
+          <span className="text-[10px] text-slate-500">
+            {contributors.length > 3 ? `+${contributors.length - 3} more` : `${contributors.length} contributor${contributors.length > 1 ? 's' : ''}`}
+          </span>
+        </div>
+      )}
+      
+      {/* Loading placeholder for contributors */}
+      {contributorsLoading && (
+        <div className="mt-4 flex items-center gap-2">
+          <div className="flex -space-x-2">
+            <div className="h-7 w-7 rounded-full border-2 border-white bg-slate-200 animate-pulse"></div>
+            <div className="h-7 w-7 rounded-full border-2 border-white bg-slate-200 animate-pulse"></div>
+          </div>
+          <span className="text-[10px] text-slate-400">Loading...</span>
+        </div>
+      )}
+
       <div className="mt-5 pt-4 border-t border-slate-50 flex items-center justify-between text-xs text-slate-400">
         <span className="flex items-center gap-1">
           <Calendar size={12} />
@@ -215,6 +251,10 @@ export default function GoalsPage() {
   const [selectedGoal, setSelectedGoal] = useState<GoalType | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('grid');
   const [hoveredBar, setHoveredBar] = useState<{ month: string, type: 'target' | 'saved', value: number } | null>(null);
+  
+  // State for goal contributors (avatars to display on goal cards)
+  const [goalContributors, setGoalContributors] = useState<Record<string, { user_id: string; full_name: string; avatar_url: string | null; total_contributed: number }[]>>({});
+  const [contributorsLoading, setContributorsLoading] = useState(false);
 
   const handleView = useCallback((goal: GoalType) => {
     setSelectedGoal(goal);
@@ -259,6 +299,32 @@ export default function GoalsPage() {
       setDeleteModalOpen(true);
     }, 150);
   }, []);
+
+  // Fetch contributors for each goal when goals change
+  useEffect(() => {
+    const fetchContributors = async () => {
+      setContributorsLoading(true);
+      const contributorsMap: Record<string, { user_id: string; full_name: string; avatar_url: string | null; total_contributed: number }[]> = {};
+      
+      for (const goal of goals) {
+        if (goal.current > 0) { // Only fetch if goal has contributions
+          const { data, error } = await fetchGoalContributors(goal.id, 3);
+          if (error) {
+            console.error(`Error fetching contributors for goal ${goal.id}:`, error);
+          } else if (data && data.length > 0) {
+            contributorsMap[goal.id] = data;
+          }
+        }
+      }
+      
+      setGoalContributors(contributorsMap);
+      setContributorsLoading(false);
+    };
+
+    if (goals.length > 0) {
+      fetchContributors();
+    }
+  }, [goals]);
 
   const summaryData = useMemo(() => [
     { label: "Active Goals", value: (summary?.activeGoals ?? 0).toString() },
@@ -874,8 +940,7 @@ export default function GoalsPage() {
                           </td>
                         </tr>
                       );
-                    })
-                  })
+                    })}
                 </tbody>
               </table>
             </div>
@@ -899,6 +964,8 @@ export default function GoalsPage() {
                   <GoalCard
                     key={goal.id}
                     goal={goal}
+                    contributors={goalContributors[goal.id]}
+                    contributorsLoading={contributorsLoading}
                     onView={handleView}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
@@ -921,6 +988,8 @@ export default function GoalsPage() {
                 <GoalCard
                   key={goal.id}
                   goal={goal}
+                  contributors={goalContributors[goal.id]}
+                  contributorsLoading={contributorsLoading}
                   onView={handleView}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
