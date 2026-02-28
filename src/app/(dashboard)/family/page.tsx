@@ -23,8 +23,10 @@ import {
   Clock,
   ChevronDown,
   UserCheck,
+  User,
   ArrowRight,
   TrendingUp,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -46,6 +48,7 @@ import {
 } from "./_components";
 import { FAMILY_TABS, ACTIVITY_FILTERS, GOAL_FILTERS } from "./_components/constants";
 import { useAuth } from "@/components/auth/auth-context";
+import { formatRelativeTime } from "./_lib/family-service";
 import type {
   FamilyMember,
   Family,
@@ -708,67 +711,170 @@ export default function FamilyPage() {
         </div>
       </Card>
 
-      {/* Discover Families Section */}
-      {publicFamilies.length > 0 && (
-        <Card className="p-6 mb-8 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900">Discover Families</h3>
-              <p className="text-xs text-slate-500 mt-1 font-light">Find and join other public family groups in your network</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="text-xs h-9 px-4">
-                <ArrowRight size={14} />
-                View More
-              </Button>
-              <Button size="sm" onClick={refetch} className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600">
-                <RefreshCw size={14} className="mr-1" />
-                Refresh
-              </Button>
-            </div>
+      {/* Join Section - Complete structure from no-family-state */}
+      <div className="space-y-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="relative mb-8">
+            <Search
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              size={18}
+            />
+            <input
+              type="text"
+              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none"
+              placeholder="Find by name or group ID..."
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {publicFamilies.map((family) => (
-              <Card
-                key={family.id}
-                className="p-5 hover:shadow-md transition-all group h-full cursor-pointer"
-                onClick={() => handleJoinFamily(family.id)}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center text-slate-600 transition-colors group-hover:scale-110">
-                      <Home size={24} />
+          {/* Your Join Requests Section */}
+          {joinRequests.length > 0 && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-slate-900">Your Join Requests ({joinRequests.length})</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {joinRequests.map((request) => (
+                  <Card key={request.family_id} className="p-4 border border-slate-200 bg-white">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        {request.createdByAvatar ? (
+                          <img
+                            src={request.createdByAvatar}
+                            alt={request.createdBy}
+                            className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200">
+                            <Users size={20} />
+                          </div>
+                        )}
+                        <div>
+                          <h4 className="text-sm font-medium text-slate-900">{request.families?.family_name}</h4>
+                          <p className="text-[10px] text-slate-500">
+                            Requested {formatRelativeTime(request.requestedAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="text-xs bg-white text-slate-600 border border-slate-300 hover:bg-slate-50 cursor-default"
+                        disabled
+                      >
+                        Pending
+                      </Button>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-slate-900">{family.name}</h4>
-                      <p className="text-[10px] text-slate-500">Created by {family.createdBy}</p>
+                    <p className="text-xs text-slate-600 mb-3 line-clamp-2">
+                      {request.families?.description || "No description available"}
+                    </p>
+                    <div className="flex items-center justify-between text-[10px] text-slate-500">
+                      <div className="flex items-center gap-1">
+                        <User size={12} />
+                        <span>{request.createdBy}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users size={12} />
+                        <span>{request.memberCount} members</span>
+                      </div>
                     </div>
-                  </div>
-                  <Badge className="text-[9px] flex items-center gap-1 bg-slate-100 text-slate-600 border border-slate-200">
-                    <Users size={12} />
-                    {family.memberCount} members
-                  </Badge>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Available Families Section */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1 mb-4">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Available Groups
+              </span>
+              <span className="text-[10px] text-emerald-500 font-medium">
+                {publicFamilies.filter(f => !joinRequests.some(req => req.family_id === f.id)).length} groups
+              </span>
+            </div>
+            {publicFamilies.filter(f => !joinRequests.some(req => req.family_id === f.id)).length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {publicFamilies.filter(f => !joinRequests.some(req => req.family_id === f.id)).map((family) => (
+                  <Card key={family.id} className="p-4 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition-colors">
+                          <Home size={16} />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-slate-900">{family.name}</h4>
+                          <p className="text-[10px] text-slate-500">
+                            {family.memberCount} active members
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="text-xs bg-emerald-500 hover:bg-emerald-600 text-white border-0 hover:shadow-md transition-shadow"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleJoinFamily(family.id);
+                        }}
+                      >
+                        Join
+                      </Button>
+                    </div>
+                    <p className="text-xs text-slate-600 mb-3 line-clamp-2">
+                      {family.description || "Join this family group to collaborate on finances"}
+                    </p>
+                    <div className="flex items-center justify-between text-[10px] text-slate-500">
+                      <div className="flex items-center gap-2">
+                        {family.creatorAvatar ? (
+                          <img
+                            src={family.creatorAvatar}
+                            alt={family.createdBy}
+                            className="w-5 h-5 rounded-full object-cover border border-slate-100"
+                          />
+                        ) : (
+                          <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[8px] font-medium text-slate-400 border border-slate-100">
+                            {family.createdBy.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                          </div>
+                        )}
+                        <span>Created by {family.createdBy}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 rounded-full border border-slate-100 text-slate-400">
+                        <div className="w-1 h-1 rounded-full bg-slate-300" />
+                        <span>Public group</span>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="flex items-center justify-center text-slate-400 mx-auto mb-4">
+                  <Search className="text-slate-400" size={32} />
                 </div>
-                <p className="text-xs text-slate-600 mb-4 font-light leading-relaxed">
-                  {family.description ? `"${family.description}"` : "A public family group open for new members."}
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">No More Groups Available</h3>
+                <p className="text-sm text-slate-500 mb-6">
+                  You've requested to join all available public groups. Wait for approval or create your own family.
                 </p>
-                <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                  <span className="text-[9px] text-slate-400">
-                    Public • Created {new Date(family.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                  </span>
-                  <Button
-                    size="sm"
-                    className="text-xs py-1.5 bg-emerald-500 hover:bg-emerald-600"
-                  >
-                    Request Join
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button onClick={handleOpenCreateFamily} className="bg-emerald-500 hover:bg-emerald-600">
+                    <Plus size={16} className="mr-2" />
+                    Create Family
+                  </Button>
+                  <Button variant="outline" onClick={refetch}>
+                    <RefreshCw size={16} className="mr-2" />
+                    Refresh
                   </Button>
                 </div>
-              </Card>
-            ))}
+              </div>
+            )}
           </div>
-        </Card>
-      )}
+
+          <div className="pt-8 mt-8 border-t border-slate-50 text-center">
+            <p className="text-[10px] text-slate-400 uppercase tracking-widest">
+              Can't find your group? Check the ID or ask your admin.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Modals */}
       <InviteMemberModal

@@ -140,6 +140,10 @@ export function MembersTab({
     }
   };
 
+  const handleCancelRoleChanges = () => {
+    setRoleChanges({});
+  };
+
   const handleApprove = async (requestId: string) => {
     setProcessingRequestId(requestId);
     await onApproveRequest(requestId);
@@ -652,19 +656,29 @@ export function MembersTab({
             {/* Save Role Changes Button */}
             {canManageRoles && Object.keys(roleChanges).length > 0 && (
               <div className="mt-6 pt-4 border-t border-slate-100">
-                <Button className="w-full text-xs justify-center py-2.5" onClick={handleSaveRoles} disabled={savingRoles}>
-                  {savingRoles ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
-                      Saving changes...
-                    </span>
-                  ) : (
-                    <span className="flex items-center">
-                      <Save className="mr-2 h-3.5 w-3.5 text-white" />
-                      Save Role Changes
-                    </span>
-                  )}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 text-xs justify-center py-2.5" 
+                    onClick={handleCancelRoleChanges}
+                    disabled={savingRoles}
+                  >
+                    Cancel
+                  </Button>
+                  <Button className="flex-1 text-xs justify-center py-2.5" onClick={handleSaveRoles} disabled={savingRoles}>
+                    {savingRoles ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+                        Saving...
+                      </span>
+                    ) : (
+                      <span className="flex items-center">
+                        <Save className="mr-2 h-3.5 w-3.5 text-white" />
+                        Save Changes
+                      </span>
+                    )}
+                  </Button>
+                </div>
               </div>
             )}
             
