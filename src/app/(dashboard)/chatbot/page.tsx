@@ -17,6 +17,9 @@ import {
   Share,
   AlertCircle,
   Loader2,
+  X,
+  FileText,
+  FileCode,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +75,11 @@ export default function ChatbotPage() {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | undefined>(undefined);
+  
+  // File upload state
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch available models and chat history on mount
   useEffect(() => {
@@ -185,8 +193,35 @@ export default function ChatbotPage() {
     }
   }, [input]);
 
+  // File upload handlers
+  const handleFileSelect = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // GPT can scan virtually all file types - no type restrictions
+    // Only limit by file size (max 25MB for better processing)
+    if (file.size > 25 * 1024 * 1024) {
+      setError('File size must be less than 25MB');
+      return;
+    }
+
+    setAttachedFile(file);
+    setError(null);
+  }, [setError]);
+
+  const handleRemoveFile = useCallback(() => {
+    setAttachedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }, []);
+
   const handleSend = useCallback(async () => {
-    if (!input.trim() || isSending || !user?.id) return;
+    if ((!input.trim() && !attachedFile) || isSending || !user?.id) return;
 
     const trimmedInput = input.trim();
     
@@ -195,16 +230,25 @@ export default function ChatbotPage() {
     const userMessage: MessageType = {
       id: userMessageId,
       role: "user",
-      content: trimmedInput,
+      content: trimmedInput || (attachedFile ? `Uploaded: ${attachedFile.name}` : ""),
       timestamp: new Date().toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
       }),
+      attachment: attachedFile ? {
+        name: attachedFile.name,
+        type: attachedFile.type,
+        size: attachedFile.size,
+      } : undefined,
     };
 
     // Optimistically add user message
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setAttachedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     setIsSending(true);
     setError(null);
 
@@ -216,6 +260,7 @@ export default function ChatbotPage() {
         content: userMessage.content,
         model: null, // User messages don't have a model
         suggestions: [],
+        attachment: userMessage.attachment || null,
         created_at: new Date().toISOString(),
       });
     } catch {
@@ -702,6 +747,20 @@ export default function ChatbotPage() {
                           : "bg-emerald-500 text-white rounded-[2rem] rounded-tr-sm px-6 py-3.5 shadow-sm"
                       }`}
                     >
+                      {/* File Attachment */}
+                      {msg.attachment && (
+                        <div className={`mb-2 p-2 rounded-lg ${msg.role === "user" ? "bg-emerald-600" : "bg-slate-100"}`}>
+                          <div className="flex items-center gap-2">
+                            <Paperclip size={16} className={msg.role === "user" ? "text-emerald-200" : "text-slate-500"} />
+                            <span className={`text-sm truncate ${msg.role === "user" ? "text-white" : "text-slate-700"}`}>
+                              {msg.attachment.name}
+                            </span>
+                            <span className={`text-xs ${msg.role === "user" ? "text-emerald-200" : "text-slate-500"}`}>
+                              ({(msg.attachment.size / 1024).toFixed(1)} KB)
+                            </span>
+                          </div>
+                        </div>
+                      )}
                       {renderMessageContent(msg.content, msg.role, msg.id)}
                     </div>
 
@@ -757,9 +816,60 @@ export default function ChatbotPage() {
           {/* Input Area */}
           <div className="p-3 bg-white border-t border-slate-100 relative z-20 flex-shrink-0">
             <div className="mx-auto max-w-3xl">
+              {/* Attached File Preview */}
+              {attachedFile && (
+                <div className="mb-2 flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
+                  <div className="flex-shrink-0 w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    {attachedFile.type.startsWith('image/') ? (
+                      <img 
+                        src={URL.createObjectURL(attachedFile)} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    ) : attachedFile.type.includes('pdf') ? (
+                      <FileText size={16} className="text-emerald-600" />
+                    ) : attachedFile.type.includes('word') || attachedFile.type.includes('document') ? (
+                      <FileText size={16} className="text-emerald-600" />
+                    ) : attachedFile.type.includes('excel') || attachedFile.type.includes('spreadsheet') ? (
+                      <FileText size={16} className="text-emerald-600" />
+                    ) : attachedFile.type.includes('powerpoint') || attachedFile.type.includes('presentation') ? (
+                      <FileText size={16} className="text-emerald-600" />
+                    ) : attachedFile.type.includes('text') || attachedFile.type.includes('code') ? (
+                      <FileCode size={16} className="text-emerald-600" />
+                    ) : (
+                      <Paperclip size={16} className="text-emerald-600" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-700 truncate">{attachedFile.name}</p>
+                    <p className="text-xs text-slate-500">{(attachedFile.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                  <button
+                    onClick={handleRemoveFile}
+                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                    disabled={isSending}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+
               <div className="relative flex items-end gap-2 bg-slate-50 border border-slate-200/60 rounded-3xl p-2 focus-within:border-slate-300 transition-all shadow-sm">
+                {/* Hidden File Input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  disabled={isSending || uploadingFile}
+                />
+
                 {/* Attachment Button */}
-                <button className="p-2 text-slate-400 hover:text-emerald-500 rounded-full transition-colors flex-shrink-0">
+                <button 
+                  onClick={handleFileSelect}
+                  disabled={isSending || uploadingFile}
+                  className="p-2 text-slate-400 hover:text-emerald-500 rounded-full transition-colors flex-shrink-0 disabled:opacity-50"
+                >
                   <Paperclip size={20} />
                 </button>
 
@@ -768,7 +878,7 @@ export default function ChatbotPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={isSending ? "AI is thinking..." : "Message BudgetSense..."}
+                  placeholder={isSending ? "AI is thinking..." : attachedFile ? "Add a message about this file..." : "Message BudgetSense..."}
                   rows={1}
                   disabled={isSending}
                   className="w-full bg-transparent border-none text-sm text-slate-600 placeholder-slate-400 focus:outline-none resize-none py-1.5 max-h-32 leading-relaxed disabled:opacity-50"
@@ -777,7 +887,7 @@ export default function ChatbotPage() {
                 {/* Send Button */}
                 <button
                   onClick={handleSend}
-                  disabled={!input.trim() || isSending}
+                  disabled={(!input.trim() && !attachedFile) || isSending}
                   className="p-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-full transition-all shadow-sm hover:shadow-md flex-shrink-0"
                 >
                   {isSending ? (

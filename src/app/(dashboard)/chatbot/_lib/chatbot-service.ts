@@ -358,6 +358,7 @@ export async function fetchChatHistory(userId: string): Promise<{ data: MessageT
       }),
       model: row.model,
       suggestions: row.suggestions || [],
+      attachment: row.attachment || undefined,
     }));
 
     return { data: messages, error: null };
@@ -446,15 +447,10 @@ export async function exportChat(
       }
 
       case "pdf": {
-        // For PDF, we'll generate HTML and open print dialog
+        // For PDF, generate HTML and download directly
         const html = generatePDFHtml(messages, modelName);
-        const printWindow = window.open("", "_blank");
-        if (printWindow) {
-          printWindow.document.write(html);
-          printWindow.document.close();
-          printWindow.print();
-        }
-        return { success: true, filename: `${filename}.pdf` };
+        downloadFile(`${filename}.html`, html, "text/html");
+        return { success: true, filename: `${filename}.html` };
       }
 
       default:

@@ -19,7 +19,7 @@ interface ExportChatModalProps {
 }
 
 const EXPORT_OPTIONS: { format: ExportFormat; label: string; desc: string; icon: React.ElementType }[] = [
-  { format: "pdf", label: "PDF Document", desc: "Formatted for easy reading and sharing", icon: FileText },
+  { format: "pdf", label: "HTML Document", desc: "Download as HTML file for easy viewing", icon: FileText },
   { format: "markdown", label: "Markdown", desc: "Plain text with formatting preserved", icon: FileCode },
   { format: "json", label: "JSON", desc: "Raw data format for developers", icon: FileJson },
 ];

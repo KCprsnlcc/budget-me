@@ -7,6 +7,12 @@ export type MessageType = {
   timestamp?: string;
   model?: string;
   suggestions?: string[];
+  attachment?: {
+    name: string;
+    type: string;
+    size: number;
+    url?: string;
+  };
 };
 
 export type AIModel = {
