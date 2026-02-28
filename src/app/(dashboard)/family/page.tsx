@@ -100,6 +100,11 @@ export default function FamilyPage() {
     activitiesLoading,
     hasMoreActivities,
     mutating,
+    activityCurrentPage,
+    activityPageSize,
+    activityTotalCount,
+    handleActivityPageChange,
+    handleActivityPageSizeChange,
     refetch,
     refreshGoals,
     refreshDiscoverFamilies,
@@ -713,11 +718,16 @@ export default function FamilyPage() {
           {activeTab === "activity" && (
             <ActivityTab
               activities={activities}
+              totalCount={activityTotalCount}
               onLoadMore={loadMoreActivities}
               hasMore={hasMoreActivities}
               isLoading={activitiesLoading || tabSwitching}
               currentUser={user}
               familyId={familyId}
+              currentPage={activityCurrentPage}
+              pageSize={activityPageSize}
+              onPageChange={handleActivityPageChange}
+              onPageSizeChange={handleActivityPageSizeChange}
             />
           )}
 

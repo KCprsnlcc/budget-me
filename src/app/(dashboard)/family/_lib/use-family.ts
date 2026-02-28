@@ -106,6 +106,11 @@ export function useFamily() {
   const [hasMoreActivities, setHasMoreActivities] = useState(false);
   const [activityOffset, setActivityOffset] = useState(0);
   const [mutating, setMutating] = useState(false);
+  
+  // ----- Pagination state -----
+  const [activityCurrentPage, setActivityCurrentPage] = useState(1);
+  const [activityPageSize, setActivityPageSize] = useState(10);
+  const [activityTotalCount, setActivityTotalCount] = useState(0);
 
   // ----- Current user's role in the family -----
   const currentUserRole = useMemo(() => {
@@ -183,7 +188,7 @@ export function useFamily() {
         await Promise.all([
           fetchFamilyMembers(family.id, family.createdBy),
           fetchFamilyGoals(family.id),
-          fetchFamilyActivityLog(family.id, 20, 0),
+          fetchFamilyActivityLog(family.id, activityPageSize, 0),
           fetchJoinRequests(family.id),
           fetchFamilyOverview(family.id),
           fetchSentInvitations(family.id),
@@ -198,6 +203,7 @@ export function useFamily() {
       setActivities(activityResult.data);
       setHasMoreActivities(activityResult.hasMore);
       setActivityOffset(activityResult.data.length);
+      setActivityTotalCount(activityResult.totalCount || 0);
       setPendingRequests(requestsResult.data);
       setOverviewStats(overviewResult.data);
       setSentInvitations(sentInvResult.data);
@@ -271,7 +277,33 @@ export function useFamily() {
     }
   }, [familyId, overviewStats]);
 
-  // ----- Load more activities -----
+  // ----- Pagination functions -----
+  const fetchActivitiesPage = useCallback(async (page: number, pageSize: number) => {
+    if (!familyId) return;
+    setActivitiesLoading(true);
+    const offset = (page - 1) * pageSize;
+    const result = await fetchFamilyActivityLog(familyId, pageSize, offset);
+    if (!result.error) {
+      setActivities(result.data);
+      setHasMoreActivities(result.hasMore);
+      setActivityOffset(result.data.length);
+      setActivityTotalCount(result.totalCount || 0);
+      setActivityCurrentPage(page);
+    }
+    setActivitiesLoading(false);
+  }, [familyId]);
+
+  const handleActivityPageChange = useCallback((page: number) => {
+    fetchActivitiesPage(page, activityPageSize);
+  }, [fetchActivitiesPage, activityPageSize]);
+
+  const handleActivityPageSizeChange = useCallback((size: number | "all") => {
+    const newPageSize = size === "all" ? Number.MAX_SAFE_INTEGER : size;
+    setActivityPageSize(newPageSize);
+    fetchActivitiesPage(1, newPageSize);
+  }, [fetchActivitiesPage]);
+
+  // ----- Load more activities (fallback for infinite scroll) -----
   const loadMoreActivities = useCallback(async () => {
     if (!familyId || activitiesLoading) return;
     setActivitiesLoading(true);
@@ -619,6 +651,13 @@ export function useFamily() {
     activitiesLoading,
     hasMoreActivities,
     mutating,
+
+    // Pagination
+    activityCurrentPage,
+    activityPageSize,
+    activityTotalCount,
+    handleActivityPageChange,
+    handleActivityPageSizeChange,
 
     // Actions
     refetch,

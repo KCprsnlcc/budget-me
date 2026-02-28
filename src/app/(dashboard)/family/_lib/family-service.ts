@@ -1945,7 +1945,7 @@ export async function fetchFamilyActivityLog(
   familyId: string,
   limit: number = 50,
   offset: number = 0
-): Promise<{ data: ActivityItem[]; error: string | null; hasMore: boolean }> {
+): Promise<{ data: ActivityItem[]; error: string | null; hasMore: boolean; totalCount?: number }> {
   // Use a raw query to properly join with profiles
   const { data: rawData, error } = await supabase
     .from("family_activity_log")
@@ -2026,5 +2026,5 @@ export async function fetchFamilyActivityLog(
 
   const hasMore = (count ?? 0) > offset + limit;
 
-  return { data: activities, error: null, hasMore };
+  return { data: activities, error: null, hasMore, totalCount: count ?? 0 };
 }

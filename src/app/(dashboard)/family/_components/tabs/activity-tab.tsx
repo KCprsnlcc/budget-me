@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import { Wallet, Flag, UserPlus, Filter, Clock, Search, RotateCcw, Download, X } from "lucide-react";
+import { Wallet, Flag, UserPlus, Filter, Clock, Search, RotateCcw, Download, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,28 +20,40 @@ const MONTH_NAMES = [
 
 interface ActivityTabProps {
   activities: ActivityItem[];
+  totalCount: number;
   onLoadMore: () => void;
   hasMore: boolean;
   isLoading: boolean;
   loading?: boolean;
   currentUser?: User | null;
   familyId?: string | null;
+  currentPage?: number;
+  pageSize?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (size: number | "all") => void;
 }
 
 export function ActivityTab({
   activities,
+  totalCount,
   onLoadMore,
   hasMore,
   isLoading,
   loading = false,
   currentUser,
   familyId,
+  currentPage = 1,
+  pageSize = 10,
+  onPageChange,
+  onPageSizeChange,
 }: ActivityTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("");
   const [monthFilter, setMonthFilter] = useState("all");
   const [yearFilter, setYearFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [internalCurrentPage, setInternalCurrentPage] = useState(currentPage);
+  const [internalPageSize, setInternalPageSize] = useState(pageSize);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [realtimeActivities, setRealtimeActivities] = useState<ActivityItem[]>([]);
@@ -273,27 +285,59 @@ export function ActivityTab({
     setYearFilter("all");
   }, []);
 
-  // Infinite scroll with Intersection Observer
-  useEffect(() => {
-    if (!loadMoreRef.current || !hasMore || isLoading) return;
-    
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          onLoadMore();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    
-    observerRef.current.observe(loadMoreRef.current);
-    
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
+  // Pagination helpers
+  const totalPages = internalPageSize === Number.MAX_SAFE_INTEGER ? 1 : Math.ceil(totalCount / internalPageSize);
+  const hasNextPage = internalCurrentPage < totalPages;
+  const hasPreviousPage = internalCurrentPage > 1;
+
+  const goToPage = useCallback((page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      if (onPageChange) {
+        onPageChange(page);
+      } else {
+        setInternalCurrentPage(page);
       }
-    };
-  }, [hasMore, isLoading, onLoadMore]);
+    }
+  }, [totalPages, onPageChange]);
+
+  const nextPage = useCallback(() => {
+    if (hasNextPage) {
+      goToPage(internalCurrentPage + 1);
+    }
+  }, [hasNextPage, internalCurrentPage, goToPage]);
+
+  const previousPage = useCallback(() => {
+    if (hasPreviousPage) {
+      goToPage(internalCurrentPage - 1);
+    }
+  }, [hasPreviousPage, internalCurrentPage, goToPage]);
+
+  const handlePageSizeChange = useCallback((newSize: number | "all") => {
+    if (newSize === "all") {
+      setInternalPageSize(Number.MAX_SAFE_INTEGER);
+    } else {
+      setInternalPageSize(newSize);
+    }
+    setInternalCurrentPage(1);
+    if (onPageSizeChange) {
+      onPageSizeChange(newSize);
+    }
+  }, [onPageSizeChange]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setInternalCurrentPage(1);
+  }, [searchQuery, activeFilter, monthFilter, yearFilter]);
+
+  // Sync with external page changes
+  useEffect(() => {
+    setInternalCurrentPage(currentPage);
+  }, [currentPage]);
+
+  // Sync with external page size changes
+  useEffect(() => {
+    setInternalPageSize(pageSize);
+  }, [pageSize]);
 
   if (loading) {
     return (
@@ -550,8 +594,8 @@ export function ActivityTab({
               );
             })}
             
-            {/* Load More Trigger */}
-            {hasMore && (
+            {/* Load More Trigger - Only show for infinite scroll fallback */}
+            {hasMore && !onPageChange && (
               <div 
                 ref={loadMoreRef}
                 className="pt-4 text-center"
@@ -575,6 +619,80 @@ export function ActivityTab({
               </div>
             )}
           </>
+        )}
+
+        {/* Pagination */}
+        {!loading && !isLoading && filteredActivities.length > 0 && onPageChange && (
+          <div className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-lg mt-6">
+            <div className="text-sm text-slate-600">
+              Showing {((internalCurrentPage - 1) * internalPageSize) + 1} to {Math.min(internalCurrentPage * internalPageSize, totalCount)} of {totalCount} activities
+            </div>
+            <div className="flex items-center gap-4">
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={previousPage}
+                    disabled={!hasPreviousPage}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronLeft size={16} />
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (internalCurrentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (internalCurrentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = internalCurrentPage - 2 + i;
+                      }
+
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={internalCurrentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => goToPage(pageNum)}
+                          className="h-8 w-8 p-0 text-xs"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={nextPage}
+                    disabled={!hasNextPage}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronRight size={16} />
+                  </Button>
+                </div>
+              )}
+              <div className="text-sm text-slate-600 flex items-center gap-2">
+                <span>Show</span>
+                <select
+                  value={internalPageSize === Number.MAX_SAFE_INTEGER ? "all" : internalPageSize}
+                  onChange={(e) => handlePageSizeChange(e.target.value === "all" ? "all" : parseInt(e.target.value))}
+                  className="text-sm border border-slate-200 rounded px-2 py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value="all">All</option>
+                </select>
+                <span>per page</span>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
