@@ -269,9 +269,9 @@ export async function sendMessageToAI(
 // Persist message to database (best effort)
 async function persistMessage(userId: string, message: MessageType): Promise<void> {
   try {
-    // Check if chat_messages table exists by attempting a minimal query
+    // Check if chatbot_messages table exists by attempting a minimal query
     const { error: tableCheckError } = await supabase
-      .from("chat_messages")
+      .from("chatbot_messages")
       .select("id")
       .limit(1);
 
@@ -281,7 +281,7 @@ async function persistMessage(userId: string, message: MessageType): Promise<voi
     }
 
     // Persist the message
-    await supabase.from("chat_messages").insert({
+    await supabase.from("chatbot_messages").insert({
       user_id: userId,
       role: message.role,
       content: message.content,
@@ -293,12 +293,49 @@ async function persistMessage(userId: string, message: MessageType): Promise<voi
   }
 }
 
+// Save welcome message to database
+export async function saveWelcomeMessage(userId: string, userName?: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const firstName = userName?.split(' ')[0] || 'there';
+    
+    // Import the welcome message generator
+    const { generateWelcomeMessage } = await import('./welcome-messages');
+    const { question, suggestions } = generateWelcomeMessage(firstName);
+    
+    const welcomeMessage = {
+      id: `welcome-${Date.now()}`,
+      role: "assistant" as const,
+      content: question,
+      timestamp: new Date().toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      }),
+      model: getDefaultModel().id,
+    };
+
+    // Save message with suggestions
+    await supabase.from("chatbot_messages").insert({
+      user_id: userId,
+      role: welcomeMessage.role,
+      content: welcomeMessage.content,
+      model: welcomeMessage.model,
+      suggestions: suggestions,
+      created_at: new Date().toISOString(),
+    });
+    
+    return { success: true };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to save welcome message";
+    return { success: false, error: errorMessage };
+  }
+}
+
 // Fetch chat history from database
 export async function fetchChatHistory(userId: string): Promise<{ data: MessageType[]; error: string | null }> {
   try {
-    // Check if chat_messages table exists
+    // Check if chatbot_messages table exists
     const { data, error } = await supabase
-      .from("chat_messages")
+      .from("chatbot_messages")
       .select("*")
       .eq("user_id", userId)
       .order("created_at", { ascending: true })
@@ -322,6 +359,7 @@ export async function fetchChatHistory(userId: string): Promise<{ data: MessageT
         minute: "2-digit",
       }),
       model: row.model,
+      suggestions: row.suggestions || [],
     }));
 
     return { data: messages, error: null };
@@ -333,9 +371,9 @@ export async function fetchChatHistory(userId: string): Promise<{ data: MessageT
 // Clear all chat messages for user
 export async function clearChatHistory(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    // Check if chat_messages table exists
+    // Check if chatbot_messages table exists
     const { error: tableCheckError } = await supabase
-      .from("chat_messages")
+      .from("chatbot_messages")
       .select("id")
       .limit(1);
 
@@ -345,7 +383,7 @@ export async function clearChatHistory(userId: string): Promise<{ success: boole
     }
 
     const { error } = await supabase
-      .from("chat_messages")
+      .from("chatbot_messages")
       .delete()
       .eq("user_id", userId);
 

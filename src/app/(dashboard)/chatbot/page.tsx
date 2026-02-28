@@ -11,9 +11,7 @@ import {
   Download,
   Paperclip,
   ShieldCheck,
-  PieChart,
   Lightbulb,
-  CheckSquare,
   Copy,
   Check,
   Share,
@@ -32,7 +30,6 @@ import {
   ExportChatModal,
 } from "./_components";
 import type { MessageType, ExportFormat, MessageRole } from "./_components/types";
-import { DEFAULT_SUGGESTIONS } from "./_components/types";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { useAuth } from "@/components/auth/auth-context";
@@ -44,21 +41,15 @@ import {
   fetchAvailableModels,
   AVAILABLE_MODELS,
   getDefaultModel,
+  saveWelcomeMessage,
   type SendMessageResult,
 } from "./_lib/chatbot-service";
+import { generateWelcomeMessage } from "./_lib/welcome-messages";
 
-// Welcome message for new conversations
-const WELCOME_MESSAGE: MessageType = {
-  id: "welcome",
-  role: "assistant",
-  content: `Hello John! 👋\n\nI'm your personal financial assistant. I've analyzed your recent transactions and I noticed your **food spending** is trending down this month.\n\nHow can I help you today?`,
-  timestamp: "10:30 AM",
-  model: "gpt-oss-20b",
-};
 
 export default function ChatbotPage() {
   const { user, isLoading: authLoading } = useAuth();
-  const [messages, setMessages] = useState<MessageType[]>([WELCOME_MESSAGE]);
+  const [messages, setMessages] = useState<MessageType[]>([]);
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState(getDefaultModel().id);
   const [models, setModels] = useState(AVAILABLE_MODELS);
@@ -75,6 +66,7 @@ export default function ChatbotPage() {
   const currentModel = models.find((m) => m.id === selectedModel) || models[0];
 
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([]);
 
   // Fetch available models and chat history on mount
   useEffect(() => {
@@ -91,15 +83,62 @@ export default function ChatbotPage() {
           setSelectedModel(defaultModel.id);
         }
 
-        // Fetch chat history (graceful degradation if table doesn't exist)
+        // Fetch chat history from Supabase
         const { data: history, error: historyError } = await fetchChatHistory(user.id);
         if (!historyError && history && history.length > 0) {
           // Filter out any messages with empty content
           const validMessages = history.filter(msg => msg.content && msg.content.trim() !== "");
           setMessages(validMessages);
+          
+          // Set suggestions from the first assistant message if it has them
+          const firstAssistantMessage = validMessages.find(msg => msg.role === "assistant");
+          if (firstAssistantMessage?.suggestions && firstAssistantMessage.suggestions.length > 0) {
+            setDynamicSuggestions(firstAssistantMessage.suggestions);
+          } else {
+            setDynamicSuggestions([]);
+          }
+        } else {
+          // No chat history, show and save personalized welcome message with dynamic suggestions
+          const userName = user.user_metadata?.full_name || user.email?.split('@')[0];
+          const { question, suggestions } = generateWelcomeMessage(userName);
+          
+          const welcomeMessage: MessageType = {
+            id: `welcome-${Date.now()}`,
+            role: "assistant",
+            content: question,
+            timestamp: new Date().toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+            }),
+            model: getDefaultModel().id,
+            suggestions: suggestions,
+          };
+          
+          setMessages([welcomeMessage]);
+          setDynamicSuggestions(suggestions);
+          
+          // Save welcome message to database
+          await saveWelcomeMessage(user.id, userName);
         }
       } catch (err) {
-        // Silent fail - keep welcome message
+        // On error, show welcome message
+        const userName = user.user_metadata?.full_name || user.email?.split('@')[0];
+        const { question, suggestions } = generateWelcomeMessage(userName);
+        
+        const welcomeMessage: MessageType = {
+          id: `welcome-${Date.now()}`,
+          role: "assistant",
+          content: question,
+          timestamp: new Date().toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+          }),
+          model: getDefaultModel().id,
+          suggestions: suggestions,
+        };
+        
+        setMessages([welcomeMessage]);
+        setDynamicSuggestions(suggestions);
       } finally {
         setLoading(false);
       }
@@ -107,10 +146,8 @@ export default function ChatbotPage() {
 
     if (!authLoading && user) {
       initializeChat();
-    } else if (!authLoading && !user) {
-      setLoading(false);
     }
-  }, [user, authLoading]);
+  }, [authLoading, user]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -198,7 +235,27 @@ export default function ChatbotPage() {
           return;
         }
         
-        setMessages([WELCOME_MESSAGE]);
+        // Reset with new randomized welcome message and suggestions
+        const userName = user.user_metadata?.full_name || user.email?.split('@')[0];
+        const { question, suggestions } = generateWelcomeMessage(userName);
+        
+        const welcomeMessage: MessageType = {
+          id: `welcome-${Date.now()}`,
+          role: "assistant",
+          content: question,
+          timestamp: new Date().toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+          }),
+          model: getDefaultModel().id,
+          suggestions: suggestions,
+        };
+        
+        setMessages([welcomeMessage]);
+        setDynamicSuggestions(suggestions);
+        
+        // Save welcome message to database
+        await saveWelcomeMessage(user.id, userName);
         setTypingMessageId(null);
         setError(null);
       } catch (err) {
@@ -386,7 +443,7 @@ export default function ChatbotPage() {
         {isTyping ? (
           <TypingEffect 
             text={safeContent} 
-            speed={5} 
+            speed={7} 
             delay={200}
             onComplete={() => setTypingMessageId(null)}
           />
@@ -640,30 +697,19 @@ export default function ChatbotPage() {
                       </button>
                     </div>
 
-                    {/* Suggestion Chips - Only for first assistant message */}
-                    {msg.role === "assistant" && index === 0 && (
+                    {/* Suggestion Chips - Only for first assistant message with dynamic suggestions */}
+                    {msg.role === "assistant" && index === 0 && dynamicSuggestions.length > 0 && (
                       <div className="flex flex-wrap gap-2 pt-1">
-                        {DEFAULT_SUGGESTIONS.map((suggestion) => {
-                          const Icon =
-                            suggestion.icon === "pie-chart"
-                              ? PieChart
-                              : suggestion.icon === "lightbulb"
-                                ? Lightbulb
-                                : CheckSquare;
-                          return (
-                            <button
-                              key={suggestion.id}
-                              onClick={() => handleSuggestionClick(suggestion.label)}
-                              className="px-5 py-2.5 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 rounded-full text-xs text-slate-600 transition-all shadow-sm flex items-center gap-2 group cursor-pointer"
-                            >
-                              <Icon
-                                size={14}
-                                className="text-slate-400"
-                              />
-                              {suggestion.label}
-                            </button>
-                          );
-                        })}
+                        {dynamicSuggestions.map((suggestion, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleSuggestionClick(suggestion)}
+                            className="px-5 py-2.5 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 rounded-full text-xs text-slate-600 transition-all shadow-sm flex items-center gap-2 group cursor-pointer"
+                          >
+                            <Lightbulb size={14} className="text-slate-400" />
+                            {suggestion}
+                          </button>
+                        ))}
                       </div>
                     )}
                   </div>

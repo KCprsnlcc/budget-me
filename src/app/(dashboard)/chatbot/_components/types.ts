@@ -6,6 +6,7 @@ export type MessageType = {
   content: string;
   timestamp?: string;
   model?: string;
+  suggestions?: string[];
 };
 
 export type AIModel = {
