@@ -812,20 +812,7 @@ export default function GoalsPage() {
                   </tr>
                 </thead>
                 <tbody className="text-xs divide-y divide-slate-50">
-                  {goals.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center">
-                        <div className="flex flex-col items-center justify-center">
-                          <Inbox size={32} className="text-slate-300 mb-2" />
-                          <p className="text-sm text-slate-500">No goals match your filters</p>
-                          <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
-                            Clear Filters
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    goals.map((goal) => {
+                  {goals.map((goal) => {
                       const progress = getGoalProgress(goal.current, goal.target);
                       const remaining = goal.target - goal.current;
                       const Icon = GOAL_ICONS[goal.icon || "target"] || Flag;
@@ -888,7 +875,7 @@ export default function GoalsPage() {
                         </tr>
                       );
                     })
-                  )}
+                  })
                 </tbody>
               </table>
             </div>
@@ -904,18 +891,7 @@ export default function GoalsPage() {
         <>
           {/* Goal Cards Grid (Desktop) */}
           <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {goals.length === 0 ? (
-              <div className="col-span-full">
-                <Card className="p-12 text-center">
-                  <Inbox size={32} className="text-slate-300 mb-2" />
-                  <p className="text-sm text-slate-500">No goals match your filters</p>
-                  <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
-                    Clear Filters
-                  </Button>
-                </Card>
-              </div>
-            ) : (
-              goals.map((goal) => {
+            {goals.map((goal) => {
                 const _canEdit = canEditGoalFn(goal, currentUserRole, isOwner, user?.id);
                 const _canDelete = canDeleteGoalFn(goal, currentUserRole, isOwner, user?.id);
                 const _perms = getGoalPermissions(currentUserRole, isOwner, goal.user_id, user?.id);
@@ -932,9 +908,8 @@ export default function GoalsPage() {
                     showContribute={_perms.canContribute}
                   />
                 );
-              })
-            )}
-          </div>
+              })}
+            </div>
 
           {/* Goal Cards Grid (Mobile) */}
           <div className="md:hidden space-y-4">

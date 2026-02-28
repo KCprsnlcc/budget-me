@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import type { GoalType, GoalFormState, GoalCategory } from "../_components/types";
+import type { GoalType, GoalFormState, GoalCategory, GoalContribution } from "../_components/types";
 
 const supabase = createClient();
 
@@ -151,6 +151,7 @@ export async function createGoal(
     target_date: form.deadline || null,
     is_family_goal: form.isFamily,
     is_public: form.isPublic ?? false,
+    family_id: form.family_id || null,
     auto_contribute_amount: monthlyContribution,
     status: "in_progress",
   };
@@ -188,6 +189,7 @@ export async function updateGoal(
     target_date: form.deadline || null,
     is_family_goal: form.isFamily,
     is_public: form.isPublic ?? false,
+    family_id: form.family_id || null,
     auto_contribute_amount: monthlyContribution,
   };
 
@@ -223,7 +225,8 @@ export async function deleteGoal(
 
 export async function contributeToGoal(
   goalId: string,
-  amount: number
+  amount: number,
+  userId?: string
 ): Promise<{ data: GoalType | null; error: string | null }> {
   if (amount <= 0) {
     return { data: null, error: "Contribution amount must be greater than zero." };
@@ -241,6 +244,7 @@ export async function contributeToGoal(
   const newAmount = Number(current.current_amount) + amount;
   const isCompleted = newAmount >= Number(current.target_amount);
 
+  // Update goal progress
   const update: Record<string, any> = {
     current_amount: newAmount,
   };
@@ -250,15 +254,74 @@ export async function contributeToGoal(
     update.completed_date = new Date().toISOString().split("T")[0];
   }
 
-  const { data, error } = await supabase
+  // Create contribution record for audit trail
+  const contribution = {
+    goal_id: goalId,
+    user_id: userId || null,
+    amount: amount,
+    contribution_date: new Date().toISOString().split("T")[0],
+    contribution_type: "manual",
+  };
+
+  // Execute both operations in a transaction-like manner
+  const { data: updatedGoal, error: updateError } = await supabase
     .from("goals")
     .update(update)
     .eq("id", goalId)
     .select("*")
     .single();
 
-  if (error) return { data: null, error: error.message };
-  return { data: mapRow(data), error: null };
+  if (updateError) return { data: null, error: updateError.message };
+
+  // Create audit record
+  const { error: contributionError } = await supabase
+    .from("goal_contributions")
+    .insert(contribution);
+
+  if (contributionError) {
+    // Log error but don't fail the contribution
+    console.error("Failed to create contribution record:", contributionError);
+  }
+
+  return { data: mapRow(updatedGoal), error: null };
+}
+
+// ---------------------------------------------------------------------------
+// FETCH GOAL CONTRIBUTIONS
+// ---------------------------------------------------------------------------
+
+export async function fetchGoalContributions(
+  goalId: string
+): Promise<{ data: GoalContribution[]; error: string | null }> {
+  const { data, error } = await supabase
+    .from("goal_contributions")
+    .select(`
+      *,
+      profiles!goal_contributions_user_id_fkey (
+        full_name,
+        avatar_url
+      )
+    `)
+    .eq("goal_id", goalId)
+    .order("contribution_date", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (error) return { data: [], error: error.message };
+  
+  const contributions = (data || []).map(row => ({
+    id: row.id,
+    goal_id: row.goal_id,
+    user_id: row.user_id,
+    amount: Number(row.amount),
+    contribution_date: row.contribution_date,
+    contribution_type: row.contribution_type,
+    notes: row.notes,
+    created_at: row.created_at,
+    user_name: row.profiles?.full_name || "Unknown",
+    user_avatar: row.profiles?.avatar_url || null,
+  }));
+
+  return { data: contributions, error: null };
 }
 
 // ---------------------------------------------------------------------------

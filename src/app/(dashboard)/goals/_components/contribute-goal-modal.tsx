@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useAuth } from "@/components/auth/auth-context";
 import { contributeToGoal } from "../_lib/goal-service";
 import { cn } from "@/lib/utils";
 import {
@@ -39,6 +40,7 @@ interface ContributeGoalModalProps {
 }
 
 export function ContributeGoalModal({ open, onClose, goal, onSuccess }: ContributeGoalModalProps) {
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [amount, setAmount] = useState("");
   const [saving, setSaving] = useState(false);
@@ -65,7 +67,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess }: Contribu
     if (isNaN(parsed) || parsed <= 0) return;
     setSaving(true);
     setSaveError(null);
-    const { error } = await contributeToGoal(goal.id, parsed);
+    const { error } = await contributeToGoal(goal.id, parsed, user?.id);
     setSaving(false);
     if (error) {
       setSaveError(error);
@@ -73,7 +75,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess }: Contribu
     }
     handleClose();
     onSuccess?.();
-  }, [goal, amount, handleClose, onSuccess]);
+  }, [goal, amount, user?.id, handleClose, onSuccess]);
 
   const handleNext = useCallback(() => {
     if (step >= 2) {

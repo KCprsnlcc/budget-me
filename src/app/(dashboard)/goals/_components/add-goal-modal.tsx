@@ -100,7 +100,14 @@ export function AddGoalModal({ open, onClose, onSuccess }: AddGoalModalProps) {
     if (!user) return;
     setSaving(true);
     setSaveError(null);
-    const { error } = await createGoal(user.id, form);
+    
+    // Pass family_id for family goals
+    const goalForm = {
+      ...form,
+      family_id: form.isFamily && familyData?.id ? familyData.id : undefined
+    };
+    
+    const { error } = await createGoal(user.id, goalForm);
     setSaving(false);
     if (error) {
       setSaveError(error);
@@ -108,7 +115,7 @@ export function AddGoalModal({ open, onClose, onSuccess }: AddGoalModalProps) {
     }
     handleClose();
     onSuccess?.();
-  }, [user, form, handleClose, onSuccess]);
+  }, [user, form, familyData, handleClose, onSuccess]);
 
   const handleNext = useCallback(() => {
     if (step >= 3) {

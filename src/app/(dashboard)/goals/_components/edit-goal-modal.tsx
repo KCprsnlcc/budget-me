@@ -126,7 +126,14 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
 
     setSaving(true);
     setSaveError(null);
-    const { error } = await updateGoal(goal.id, form);
+    
+    // Pass family_id for family goals
+    const goalForm = {
+      ...form,
+      family_id: form.isFamily && familyData?.id ? familyData.id : undefined
+    };
+    
+    const { error } = await updateGoal(goal.id, goalForm);
     setSaving(false);
     if (error) {
       setSaveError(error);
@@ -134,7 +141,7 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
     }
     handleClose();
     onSuccess?.();
-  }, [goal, form, canEditThisGoal, handleClose, onSuccess]);
+  }, [goal, form, familyData, canEditThisGoal, handleClose, onSuccess]);
 
   const handleNext = useCallback(() => {
     if (step >= 3) {

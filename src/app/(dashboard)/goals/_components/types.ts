@@ -32,6 +32,20 @@ export interface GoalFormState {
   monthlyContribution: string;
   isFamily: boolean;
   isPublic: boolean;
+  family_id?: string | null;
+}
+
+export interface GoalContribution {
+  id: string;
+  goal_id: string;
+  user_id: string | null;
+  amount: number;
+  contribution_date: string;
+  contribution_type: string;
+  notes: string | null;
+  created_at: string;
+  user_name: string;
+  user_avatar: string | null;
 }
 
 export interface GoalModalProps {
