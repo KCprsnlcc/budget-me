@@ -22,6 +22,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TypingEffect } from "@/components/ui/typing-effect";
+import { TypingMarkdown } from "@/components/ui/typing-markdown";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
@@ -441,10 +442,11 @@ export default function ChatbotPage() {
     return (
       <div className={`text-sm leading-relaxed ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
         {isTyping ? (
-          <TypingEffect 
-            text={safeContent} 
+          <TypingMarkdown 
+            content={safeContent} 
             speed={7} 
             delay={200}
+            components={components}
             onComplete={() => setTypingMessageId(null)}
           />
         ) : (
