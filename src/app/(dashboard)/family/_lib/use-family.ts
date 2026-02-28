@@ -426,6 +426,24 @@ export function useFamily() {
     [userId, familyId, fetchData]
   );
 
+  // ----- Refresh discover families data only -----
+  const refreshDiscoverFamilies = useCallback(async () => {
+    if (!userId) return;
+
+    try {
+      // Fetch only discover families data (public families and join requests)
+      const [pubResult, joinReqResult] = await Promise.all([
+        fetchPublicFamilies(userId),
+        fetchUserJoinRequests(userId),
+      ]);
+
+      setPublicFamilies(pubResult.data);
+      setJoinRequests(joinReqResult.data);
+    } catch (err) {
+      console.error('Failed to refresh discover families:', err);
+    }
+  }, [userId]);
+
   return {
     // State
     familyState,
@@ -458,6 +476,7 @@ export function useFamily() {
 
     // Actions
     refetch,
+    refreshDiscoverFamilies,
     loadMoreActivities,
     handleCreateFamily,
     handleUpdateFamily,

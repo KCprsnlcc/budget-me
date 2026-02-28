@@ -99,6 +99,7 @@ export default function FamilyPage() {
     hasMoreActivities,
     mutating,
     refetch,
+    refreshDiscoverFamilies,
     loadMoreActivities,
     handleCreateFamily,
     handleUpdateFamily,
@@ -141,6 +142,7 @@ export default function FamilyPage() {
   const [joinFamilyModalOpen, setJoinFamilyModalOpen] = useState(false);
   const [selectedFamilyForJoin, setSelectedFamilyForJoin] = useState<PublicFamily | null>(null);
   const [tabSwitching, setTabSwitching] = useState(false);
+  const [discoverLoading, setDiscoverLoading] = useState(false);
 
   // Handle tab navigation with URL-based routing
   const handleTabChange = useCallback((tab: ActiveTab) => {
@@ -162,6 +164,13 @@ export default function FamilyPage() {
       setTabSwitching(false);
     }, 600);
   }, [router, searchParams, activeTab]);
+
+  // Handle refresh discover families with loading state
+  const handleRefreshDiscover = useCallback(async () => {
+    setDiscoverLoading(true);
+    await refreshDiscoverFamilies();
+    setDiscoverLoading(false);
+  }, [refreshDiscoverFamilies]);
 
   // Handlers that open modals
   const handleOpenCreateFamily = useCallback(() => {
@@ -724,11 +733,11 @@ export default function FamilyPage() {
                 variant="ghost"
                 size="xs"
                 className="text-slate-400 hover:text-slate-600"
-                onClick={refetch}
-                disabled={false}
+                onClick={handleRefreshDiscover}
+                disabled={discoverLoading}
               >
-                <RefreshCw size={12} />
-                Refresh
+                <RefreshCw size={12} className={discoverLoading ? 'animate-spin' : ''} />
+                {discoverLoading ? 'Refreshing...' : 'Refresh'}
               </Button>
             </div>
           </div>
@@ -745,7 +754,72 @@ export default function FamilyPage() {
             />
           </div>
 
-          {/* Your Join Requests Section */}
+          {discoverLoading ? (
+            // Skeleton loader for Discover Families
+            <div className="space-y-8">
+              {/* Join Requests Skeleton */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <Skeleton width={180} height={16} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="bg-white rounded-lg border border-slate-200 p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <Skeleton circle width={40} height={40} />
+                          <div>
+                            <Skeleton width={120} height={14} className="mb-1" />
+                            <Skeleton width={80} height={10} />
+                          </div>
+                        </div>
+                        <Skeleton width={60} height={24} borderRadius={4} />
+                      </div>
+                      <Skeleton width="100%" height={12} className="mb-3" />
+                      <div className="flex items-center justify-between">
+                        <Skeleton width={80} height={10} />
+                        <Skeleton width={60} height={10} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Available Groups Skeleton */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1 mb-4">
+                  <Skeleton width={100} height={10} />
+                  <Skeleton width={40} height={10} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="bg-white rounded-lg border border-slate-200 p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <Skeleton width={16} height={16} />
+                          <div>
+                            <Skeleton width={120} height={14} className="mb-1" />
+                            <Skeleton width={80} height={10} />
+                          </div>
+                        </div>
+                        <Skeleton width={50} height={28} borderRadius={4} />
+                      </div>
+                      <Skeleton width="100%" height={12} className="mb-3" />
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Skeleton circle width={20} height={20} />
+                          <Skeleton width={80} height={10} />
+                        </div>
+                        <Skeleton width={60} height={16} borderRadius={10} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Your Join Requests Section */}
           {joinRequests.length > 0 && (
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
@@ -892,6 +966,8 @@ export default function FamilyPage() {
               Can't find your group? Check the ID or ask your admin.
             </p>
           </div>
+        </>
+      )}
         </div>
       </Card>
 
