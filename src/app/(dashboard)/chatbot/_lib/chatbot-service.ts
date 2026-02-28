@@ -294,13 +294,11 @@ async function persistMessage(userId: string, message: MessageType): Promise<voi
 }
 
 // Save welcome message to database
-export async function saveWelcomeMessage(userId: string, userName?: string): Promise<{ success: boolean; error?: string }> {
+export async function saveWelcomeMessage(userId: string, userProfile?: { fullName?: string | null; email?: string; avatarUrl?: string | null; role?: string; currencyPreference?: string }): Promise<{ success: boolean; error?: string }> {
   try {
-    const firstName = userName?.split(' ')[0] || 'there';
-    
     // Import the welcome message generator
     const { generateWelcomeMessage } = await import('./welcome-messages');
-    const { question, suggestions } = generateWelcomeMessage(firstName);
+    const { question, suggestions } = generateWelcomeMessage(userProfile as any);
     
     const welcomeMessage = {
       id: `welcome-${Date.now()}`,

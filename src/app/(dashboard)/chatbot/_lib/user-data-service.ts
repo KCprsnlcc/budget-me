@@ -56,6 +56,63 @@ export interface UserFinancialContext {
 }
 
 // ---------------------------------------------------------------------------
+// User Profile Data Types
+// ---------------------------------------------------------------------------
+
+export interface UserProfile {
+  id: string;
+  fullName: string | null;
+  email: string;
+  avatarUrl: string | null;
+  role: string;
+  currencyPreference: string;
+  timezone: string;
+  language: string;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Fetch User Profile for Chatbot
+// ---------------------------------------------------------------------------
+
+export async function fetchUserProfile(
+  userId: string
+): Promise<{ data: UserProfile | null; error: string | null }> {
+  try {
+    const { data: profileData, error } = await supabase
+      .from("profiles")
+      .select("id, full_name, email, avatar_url, role, currency_preference, timezone, language, created_at")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    if (!profileData) {
+      return { data: null, error: "Profile not found" };
+    }
+
+    const profile: UserProfile = {
+      id: profileData.id,
+      fullName: profileData.full_name,
+      email: profileData.email,
+      avatarUrl: profileData.avatar_url,
+      role: profileData.role ?? "user",
+      currencyPreference: profileData.currency_preference ?? "PHP",
+      timezone: profileData.timezone ?? "UTC",
+      language: profileData.language ?? "en",
+      createdAt: profileData.created_at,
+    };
+
+    return { data: profile, error: null };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to fetch user profile";
+    return { data: null, error: errorMessage };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Fetch User's Financial Context for Chatbot
 // ---------------------------------------------------------------------------
 

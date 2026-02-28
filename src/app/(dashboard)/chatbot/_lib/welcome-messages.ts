@@ -1,3 +1,16 @@
+// User Profile Interface for Welcome Messages
+export interface UserProfile {
+  id: string;
+  fullName: string | null;
+  email: string;
+  avatarUrl: string | null;
+  role: string;
+  currencyPreference: string;
+  timezone: string;
+  language: string;
+  createdAt: string;
+}
+
 // Define 20 welcome questions covering all modules with 3 suggestions each
 export const WELCOME_QUESTIONS = [
   // Budgets Module (4 questions)
@@ -27,15 +40,53 @@ export const WELCOME_QUESTIONS = [
   { id: 20, category: "family", question: "I'm your personal financial assistant. I've reviewed your family's budget performance and shared spending habits.\n\nCurious about your family budget performance?", suggestions: ["Review family budgets", "Show shared budget usage", "Suggest family optimizations"] }
 ];
 
-// Generate random welcome message with suggestions
-export const generateWelcomeMessage = (userName?: string): { category: string; question: string; suggestions: string[] } => {
-  const firstName = userName?.split(' ')[0] || 'there';
+// Generate random welcome message with suggestions using full user profile
+export const generateWelcomeMessage = (userProfile?: UserProfile): { category: string; question: string; suggestions: string[]; userProfile?: UserProfile } => {
+  const firstName = userProfile?.fullName?.split(' ')[0] || 'there';
   const randomIndex = Math.floor(Math.random() * WELCOME_QUESTIONS.length);
   const selected = WELCOME_QUESTIONS[randomIndex];
   
   return {
     category: selected.category,
     question: `Hello ${firstName}! 👋\n\n${selected.question}`,
-    suggestions: selected.suggestions
+    suggestions: selected.suggestions,
+    userProfile
   };
+};
+
+// Get user display name from profile
+export const getUserDisplayName = (userProfile?: UserProfile): string => {
+  return userProfile?.fullName?.split(' ')[0] || 'there';
+};
+
+// Get user avatar URL from profile
+export const getUserAvatarUrl = (userProfile?: UserProfile): string | null => {
+  return userProfile?.avatarUrl || null;
+};
+
+// Format welcome message with user context
+export const formatWelcomeWithContext = (
+  userProfile?: UserProfile,
+  financialContext?: { summary?: { totalBalance?: number; monthlyIncome?: number; monthlyExpenses?: number } }
+): string => {
+  const firstName = getUserDisplayName(userProfile);
+  const currency = userProfile?.currencyPreference || 'PHP';
+  
+  let greeting = `Hello ${firstName}! 👋\n\n`;
+  greeting += `I'm your personal financial assistant.`;
+  
+  if (financialContext?.summary) {
+    const { totalBalance, monthlyIncome, monthlyExpenses } = financialContext.summary;
+    if (totalBalance !== undefined) {
+      greeting += ` I can see you have a total balance of ${currency === 'PHP' ? '₱' : '$'}${totalBalance.toLocaleString()}.`;
+    }
+    if (monthlyExpenses !== undefined && monthlyIncome !== undefined) {
+      const savingsRate = monthlyIncome > 0 ? ((monthlyIncome - monthlyExpenses) / monthlyIncome * 100).toFixed(1) : '0';
+      greeting += ` Your current savings rate is ${savingsRate}%.`;
+    }
+  }
+  
+  greeting += `\n\nHow can I help you manage your finances today?`;
+  
+  return greeting;
 };

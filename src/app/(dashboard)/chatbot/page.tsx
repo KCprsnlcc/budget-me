@@ -34,6 +34,7 @@ import type { MessageType, ExportFormat, MessageRole } from "./_components/types
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { useAuth } from "@/components/auth/auth-context";
+import { createClient } from "@/lib/supabase/client";
 import {
   sendMessageToAI,
   fetchChatHistory,
@@ -45,11 +46,13 @@ import {
   saveWelcomeMessage,
   type SendMessageResult,
 } from "./_lib/chatbot-service";
-import { generateWelcomeMessage } from "./_lib/welcome-messages";
+import { generateWelcomeMessage, type UserProfile } from "./_lib/welcome-messages";
+import { fetchUserProfile } from "./_lib/user-data-service";
 
 
 export default function ChatbotPage() {
   const { user, isLoading: authLoading } = useAuth();
+  const supabase = createClient();
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState(getDefaultModel().id);
@@ -68,6 +71,7 @@ export default function ChatbotPage() {
 
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile | undefined>(undefined);
 
   // Fetch available models and chat history on mount
   useEffect(() => {
@@ -75,6 +79,23 @@ export default function ChatbotPage() {
       if (!user?.id) return;
 
       try {
+        // Fetch user profile data
+        const { data: profileData } = await fetchUserProfile(user.id);
+        if (profileData) {
+          const profile: UserProfile = {
+            id: profileData.id,
+            fullName: profileData.fullName,
+            email: profileData.email,
+            avatarUrl: profileData.avatarUrl,
+            role: profileData.role,
+            currencyPreference: profileData.currencyPreference,
+            timezone: profileData.timezone,
+            language: profileData.language,
+            createdAt: profileData.createdAt,
+          };
+          setUserProfile(profile);
+        }
+
         // Fetch available models
         const { data: availableModels, error: modelsError } = await fetchAvailableModels();
         if (!modelsError && availableModels.length > 0) {
@@ -100,8 +121,7 @@ export default function ChatbotPage() {
           }
         } else {
           // No chat history, show and save personalized welcome message with dynamic suggestions
-          const userName = user.user_metadata?.full_name || user.email?.split('@')[0];
-          const { question, suggestions } = generateWelcomeMessage(userName);
+          const { question, suggestions, userProfile: profile } = generateWelcomeMessage(userProfile);
           
           const welcomeMessage: MessageType = {
             id: `welcome-${Date.now()}`,
@@ -119,12 +139,11 @@ export default function ChatbotPage() {
           setDynamicSuggestions(suggestions);
           
           // Save welcome message to database
-          await saveWelcomeMessage(user.id, userName);
+          await saveWelcomeMessage(user.id, userProfile);
         }
       } catch (err) {
         // On error, show welcome message
-        const userName = user.user_metadata?.full_name || user.email?.split('@')[0];
-        const { question, suggestions } = generateWelcomeMessage(userName);
+        const { question, suggestions } = generateWelcomeMessage(userProfile);
         
         const welcomeMessage: MessageType = {
           id: `welcome-${Date.now()}`,
@@ -189,6 +208,20 @@ export default function ChatbotPage() {
     setIsSending(true);
     setError(null);
 
+    // Persist user message to database
+    try {
+      await supabase.from("chatbot_messages").insert({
+        user_id: user.id,
+        role: userMessage.role,
+        content: userMessage.content,
+        model: null, // User messages don't have a model
+        suggestions: [],
+        created_at: new Date().toISOString(),
+      });
+    } catch {
+      // Silent fail - don't break the chat flow if persistence fails
+    }
+
     try {
       // Prepare messages for API (including current context)
       const contextMessages = [...messages, userMessage].slice(-10); // Keep last 10 messages for context
@@ -237,8 +270,7 @@ export default function ChatbotPage() {
         }
         
         // Reset with new randomized welcome message and suggestions
-        const userName = user.user_metadata?.full_name || user.email?.split('@')[0];
-        const { question, suggestions } = generateWelcomeMessage(userName);
+        const { question, suggestions } = generateWelcomeMessage(userProfile);
         
         const welcomeMessage: MessageType = {
           id: `welcome-${Date.now()}`,
@@ -256,7 +288,7 @@ export default function ChatbotPage() {
         setDynamicSuggestions(suggestions);
         
         // Save welcome message to database
-        await saveWelcomeMessage(user.id, userName);
+        await saveWelcomeMessage(user.id, userProfile);
         setTypingMessageId(null);
         setError(null);
       } catch (err) {
