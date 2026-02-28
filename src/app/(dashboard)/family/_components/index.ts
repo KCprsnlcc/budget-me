@@ -8,6 +8,7 @@ export { TransferOwnershipModal } from "./transfer-ownership-modal";
 export { RemoveMemberModal } from "./remove-member-modal";
 export { Stepper } from "./stepper";
 export { NoFamilyState } from "./no-family-state/no-family-state";
+export { OwnershipNotice } from "./ownership-notice";
 export { MembersTab } from "./tabs/members-tab";
 export { ActivityTab } from "./tabs/activity-tab";
 export { GoalsTab } from "./tabs/goals-tab";

@@ -53,7 +53,7 @@ export function RoleDropdown({
       <Button
         type="button"
         variant="outline"
-        className="w-full justify-between text-left font-normal h-8 px-3 py-1 text-xs border border-slate-200 rounded-lg bg-white text-slate-900 transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+        className="w-full justify-between text-left font-normal h-8 px-3 py-1 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 transition-all hover:border-slate-300 focus:outline-none focus:border-slate-500 focus:ring-[3px] focus:ring-slate-500/[0.06]"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
       >
@@ -78,7 +78,7 @@ export function RoleDropdown({
                   type="button"
                   className={cn(
                     "w-full px-3 py-2 text-left text-xs hover:bg-slate-50 transition-colors flex items-center gap-2",
-                    value === option.value && "bg-emerald-50 text-emerald-700"
+                    value === option.value && "bg-slate-100 text-slate-700"
                   )}
                   onClick={() => handleSelect(option.value)}
                 >

@@ -520,12 +520,12 @@ export function MembersTab({
             {/* Transfer Ownership Button (Owner only) */}
             {currentUserRole === "Owner" && onTransferOwnership && members.filter(m => m.id !== currentUserMember?.id && m.status === "active").length > 0 && (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="text-xs border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                className="text-xs text-slate-400 hover:text-emerald-600 hover:bg-transparent transition-colors flex items-center gap-1 h-8 px-2"
                 onClick={handleOpenTransferOwnership}
               >
-                <Crown size={12} className="mr-2" />
+                <Crown size={12} />
                 Transfer Ownership
               </Button>
             )}

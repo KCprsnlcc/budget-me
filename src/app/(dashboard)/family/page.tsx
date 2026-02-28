@@ -45,6 +45,8 @@ import {
   MembersTab,
   ActivityTab,
   GoalsTab,
+  OwnershipNotice,
+  TransferOwnershipModal,
 } from "./_components";
 import { FAMILY_TABS, ACTIVITY_FILTERS, GOAL_FILTERS } from "./_components/constants";
 import { useAuth } from "@/components/auth/auth-context";
@@ -140,6 +142,7 @@ export default function FamilyPage() {
   const [deleteFamilyModalOpen, setDeleteFamilyModalOpen] = useState(false);
   const [leaveFamilyModalOpen, setLeaveFamilyModalOpen] = useState(false);
   const [joinFamilyModalOpen, setJoinFamilyModalOpen] = useState(false);
+  const [transferOwnershipModalOpen, setTransferOwnershipModalOpen] = useState(false);
   const [selectedFamilyForJoin, setSelectedFamilyForJoin] = useState<PublicFamily | null>(null);
   const [tabSwitching, setTabSwitching] = useState(false);
   const [discoverLoading, setDiscoverLoading] = useState(false);
@@ -191,6 +194,10 @@ export default function FamilyPage() {
 
   const handleOpenLeaveFamily = useCallback(() => {
     setLeaveFamilyModalOpen(true);
+  }, []);
+
+  const handleOpenTransferOwnership = useCallback(() => {
+    setTransferOwnershipModalOpen(true);
   }, []);
 
   // Join family via request
@@ -721,7 +728,7 @@ export default function FamilyPage() {
       </Card>
 
       {/* Discover Families Section - Hidden for Family Owners */}
-      {!isOwner && (
+      {!isOwner ? (
         <Card className="p-6 mb-8">
           <div className="mb-8">
           <div className="flex items-center justify-between mb-8">
@@ -971,6 +978,12 @@ export default function FamilyPage() {
       )}
         </div>
       </Card>
+      ) : (
+        <OwnershipNotice
+          familyData={familyData}
+          onTransferOwnership={handleOpenTransferOwnership}
+          onLeaveFamily={handleOpenLeaveFamily}
+        />
       )}
 
       {/* Modals */}
@@ -1003,6 +1016,13 @@ export default function FamilyPage() {
         familyMembers={members}
         currentUserId={user?.id || ""}
         currentUserRole={currentUserMember?.role || ""}
+      />
+      <TransferOwnershipModal
+        open={transferOwnershipModalOpen}
+        onClose={() => setTransferOwnershipModalOpen(false)}
+        onConfirm={handleTransferOwnership}
+        familyMembers={members}
+        currentOwnerId={user?.id || ""}
       />
       <JoinFamilyModal
         open={joinFamilyModalOpen}
