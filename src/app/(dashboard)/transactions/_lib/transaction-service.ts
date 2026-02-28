@@ -350,19 +350,22 @@ export async function updateTransaction(
     }
   }
 
-  // Handle goal progress updates
+  // Handle goal progress updates - follow same pattern as createTransaction
   if (oldGoalId !== newGoalId) {
-    // Recalculate old goal if it existed
+    // Delete old contribution record if old goal existed
     if (oldGoalId) {
-      await recalculateGoalProgress(oldGoalId);
+      await deleteContributionRecord(oldGoalId, txId);
     }
-    // Update new goal if it exists and is different
+    // Create new contribution record if new goal exists
     if (newGoalId && newGoalId !== oldGoalId && userId) {
       await updateGoalProgressFromTransaction(newGoalId, amount, userId, txId);
     }
   } else if (newGoalId && (originalTx?.amount !== amount)) {
-    // Same goal but amount changed - recalculate
-    await recalculateGoalProgress(newGoalId);
+    // Same goal but amount changed - delete old and create new contribution
+    await deleteContributionRecord(newGoalId, txId);
+    if (userId) {
+      await updateGoalProgressFromTransaction(newGoalId, amount, userId, txId);
+    }
   }
 
   return { data: mapRow(data), error: null };
@@ -377,6 +380,13 @@ export async function deleteTransaction(
   budgetId?: string,
   goalId?: string
 ): Promise<{ error: string | null }> {
+  // Delete contribution record first if this transaction had a goal
+  // The trigger will automatically update the goal progress when the contribution is deleted
+  if (goalId) {
+    await deleteContributionRecord(goalId, txId);
+  }
+
+  // Then delete the transaction
   const { error } = await supabase
     .from("transactions")
     .delete()
@@ -386,11 +396,6 @@ export async function deleteTransaction(
   // Recalculate budget spent if this transaction had a budget
   if (budgetId) {
     await recalculateBudgetSpent(budgetId);
-  }
-  
-  // Recalculate goal progress if this transaction had a goal
-  if (goalId) {
-    await recalculateGoalProgress(goalId);
   }
   
   return { error: null };
@@ -750,6 +755,20 @@ async function updateGoalProgressFromTransaction(
   
   if (contributionError) {
     console.error("Failed to create contribution record:", contributionError);
+  }
+}
+
+async function deleteContributionRecord(goalId: string, transactionId: string): Promise<void> {
+  if (!goalId || !transactionId) return;
+  
+  const { error } = await supabase
+    .from("goal_contributions")
+    .delete()
+    .eq("goal_id", goalId)
+    .eq("transaction_id", transactionId);
+  
+  if (error) {
+    console.error("Failed to delete contribution record:", error);
   }
 }
 
