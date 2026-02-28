@@ -546,19 +546,38 @@ export async function fetchUserInvitations(
 ): Promise<{ data: Invitation[]; error: string | null }> {
   const { data, error } = await supabase
     .from("family_invitations")
-    .select(
-      `
+    .select(`
       *,
-      families!family_invitations_family_id_fkey ( family_name ),
-      profiles!family_invitations_invited_by_fkey ( full_name, email )
-    `
-    )
+      families!family_invitations_family_id_fkey ( family_name )
+    `)
     .eq("email", userEmail)
     .eq("status", "pending")
     .order("created_at", { ascending: false });
 
   if (error) return { data: [], error: error.message };
-  return { data: (data ?? []).map(mapInvitationRow), error: null };
+
+  // Fetch inviter profiles separately since invited_by points to auth.users, not profiles
+  const invitations = data ?? [];
+  const inviterIds = [...new Set(invitations.map((inv: any) => inv.invited_by).filter(Boolean))];
+  
+  let profileMap: Record<string, any> = {};
+  if (inviterIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", inviterIds);
+    for (const p of profiles ?? []) {
+      profileMap[p.id] = p;
+    }
+  }
+
+  // Map invitations with profile data
+  const mappedInvitations = invitations.map((inv: any) => {
+    inv.profiles = profileMap[inv.invited_by] ?? {};
+    return mapInvitationRow(inv);
+  });
+
+  return { data: mappedInvitations, error: null };
 }
 
 /* ------------------------------------------------------------------ */
