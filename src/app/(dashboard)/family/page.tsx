@@ -117,6 +117,10 @@ export default function FamilyPage() {
     handleContributeToGoal,
     handleRemoveMember,
     handleTransferOwnership,
+    // Goal CRUD with activity logging
+    handleCreateFamilyGoal,
+    handleUpdateFamilyGoal,
+    handleDeleteFamilyGoal,
   } = useFamily();
 
   // Get current user info
@@ -721,9 +725,10 @@ export default function FamilyPage() {
               onFilter={(filter) => setActiveGoalFilter(filter)}
               activeFilter={activeGoalFilter}
               onContributeGoal={(goalId, amount) => handleContributeToGoal(goalId, amount)}
+              onDeleteGoal={(goalId) => handleDeleteFamilyGoal(goalId)}
               onViewGoal={(goalId) => { }}
               isLoading={tabSwitching}
-              onRefreshGoals={refreshGoals}
+              onRefreshGoals={refetch}
             />
           )}
         </div>

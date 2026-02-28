@@ -1620,3 +1620,411 @@ export async function fetchSentInvitations(
 
   return { data: invitations, error: null };
 }
+
+/* ------------------------------------------------------------------ */
+/*  ACTIVITY LOGGING — Audit trail for family operations               */
+/* ------------------------------------------------------------------ */
+
+export interface ActivityLogEntry {
+  id: string;
+  familyId: string;
+  userId: string;
+  activityType: string;
+  description: string;
+  targetType?: string;
+  targetId?: string;
+  targetName?: string;
+  amount?: number;
+  metadata?: Record<string, any>;
+  createdAt: string;
+}
+
+async function logActivity(
+  familyId: string,
+  userId: string,
+  activityType: string,
+  description: string,
+  options?: {
+    targetType?: string;
+    targetId?: string;
+    targetName?: string;
+    amount?: number;
+    metadata?: Record<string, any>;
+  }
+): Promise<{ error: string | null }> {
+  const { error } = await supabase.from("family_activity_log").insert({
+    family_id: familyId,
+    user_id: userId,
+    activity_type: activityType,
+    description,
+    target_type: options?.targetType,
+    target_id: options?.targetId,
+    target_name: options?.targetName,
+    amount: options?.amount,
+    metadata: options?.metadata ?? {},
+  });
+
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
+// Family activity logging
+export async function logFamilyCreated(
+  familyId: string,
+  userId: string,
+  familyName: string
+): Promise<{ error: string | null }> {
+  return logActivity(familyId, userId, "family_created", `Created family "${familyName}"`, {
+    targetType: "family",
+    targetId: familyId,
+    targetName: familyName,
+  });
+}
+
+export async function logFamilyUpdated(
+  familyId: string,
+  userId: string,
+  familyName: string,
+  changes: Record<string, any>
+): Promise<{ error: string | null }> {
+  return logActivity(familyId, userId, "family_updated", `Updated family "${familyName}"`, {
+    targetType: "family",
+    targetId: familyId,
+    targetName: familyName,
+    metadata: { changes },
+  });
+}
+
+export async function logFamilyDeleted(
+  familyId: string,
+  userId: string,
+  familyName: string
+): Promise<{ error: string | null }> {
+  return logActivity(familyId, userId, "family_deleted", `Deleted family "${familyName}"`, {
+    targetType: "family",
+    targetId: familyId,
+    targetName: familyName,
+  });
+}
+
+// Member activity logging
+export async function logMemberJoined(
+  familyId: string,
+  userId: string,
+  memberName: string,
+  memberUserId: string
+): Promise<{ error: string | null }> {
+  return logActivity(familyId, userId, "member_joined", `${memberName} joined the family`, {
+    targetType: "member",
+    targetId: memberUserId,
+    targetName: memberName,
+  });
+}
+
+export async function logMemberLeft(
+  familyId: string,
+  userId: string,
+  memberName: string,
+  memberUserId: string
+): Promise<{ error: string | null }> {
+  return logActivity(familyId, userId, "member_left", `${memberName} left the family`, {
+    targetType: "member",
+    targetId: memberUserId,
+    targetName: memberName,
+  });
+}
+
+export async function logMemberInvited(
+  familyId: string,
+  userId: string,
+  invitedEmail: string,
+  role: string
+): Promise<{ error: string | null }> {
+  return logActivity(familyId, userId, "member_invited", `Invited ${invitedEmail} to join as ${role}`, {
+    targetType: "member",
+    targetName: invitedEmail,
+    metadata: { invitedEmail, role },
+  });
+}
+
+export async function logMemberRemoved(
+  familyId: string,
+  userId: string,
+  memberName: string,
+  memberUserId: string
+): Promise<{ error: string | null }> {
+  return logActivity(familyId, userId, "member_removed", `Removed ${memberName} from the family`, {
+    targetType: "member",
+    targetId: memberUserId,
+    targetName: memberName,
+  });
+}
+
+export async function logRoleChanged(
+  familyId: string,
+  userId: string,
+  memberName: string,
+  memberUserId: string,
+  oldRole: string,
+  newRole: string
+): Promise<{ error: string | null }> {
+  return logActivity(
+    familyId,
+    userId,
+    "role_changed",
+    `Changed ${memberName}'s role from ${oldRole} to ${newRole}`,
+    {
+      targetType: "member",
+      targetId: memberUserId,
+      targetName: memberName,
+      metadata: { oldRole, newRole },
+    }
+  );
+}
+
+export async function logOwnershipTransferred(
+  familyId: string,
+  userId: string,
+  oldOwnerName: string,
+  newOwnerName: string,
+  newOwnerId: string
+): Promise<{ error: string | null }> {
+  return logActivity(
+    familyId,
+    userId,
+    "ownership_transferred",
+    `Transferred ownership from ${oldOwnerName} to ${newOwnerName}`,
+    {
+      targetType: "member",
+      targetId: newOwnerId,
+      targetName: newOwnerName,
+      metadata: { oldOwnerName, newOwnerName },
+    }
+  );
+}
+
+// Goal activity logging
+export async function logGoalCreated(
+  familyId: string,
+  userId: string,
+  goalName: string,
+  goalId: string,
+  targetAmount?: number
+): Promise<{ error: string | null }> {
+  return logActivity(
+    familyId,
+    userId,
+    "goal_created",
+    `Created goal "${goalName}"${targetAmount ? ` targeting ₱${targetAmount.toLocaleString()}` : ""}`,
+    {
+      targetType: "goal",
+      targetId: goalId,
+      targetName: goalName,
+      amount: targetAmount,
+    }
+  );
+}
+
+export async function logGoalUpdated(
+  familyId: string,
+  userId: string,
+  goalName: string,
+  goalId: string,
+  changes: Record<string, any>
+): Promise<{ error: string | null }> {
+  return logActivity(familyId, userId, "goal_updated", `Updated goal "${goalName}"`, {
+    targetType: "goal",
+    targetId: goalId,
+    targetName: goalName,
+    metadata: { changes },
+  });
+}
+
+export async function logGoalDeleted(
+  familyId: string,
+  userId: string,
+  goalName: string,
+  goalId: string
+): Promise<{ error: string | null }> {
+  return logActivity(familyId, userId, "goal_deleted", `Deleted goal "${goalName}"`, {
+    targetType: "goal",
+    targetId: goalId,
+    targetName: goalName,
+  });
+}
+
+export async function logGoalContributed(
+  familyId: string,
+  userId: string,
+  goalName: string,
+  goalId: string,
+  amount: number,
+  contributorName?: string
+): Promise<{ error: string | null }> {
+  const description = contributorName
+    ? `${contributorName} contributed ₱${amount.toLocaleString()} to "${goalName}"`
+    : `Contributed ₱${amount.toLocaleString()} to "${goalName}"`;
+
+  return logActivity(familyId, userId, "goal_contributed", description, {
+    targetType: "goal",
+    targetId: goalId,
+    targetName: goalName,
+    amount,
+    metadata: { contributorName },
+  });
+}
+
+// Transaction activity logging (only for family-related transactions)
+export async function logTransactionAdded(
+  familyId: string,
+  userId: string,
+  description: string,
+  amount: number,
+  transactionId: string
+): Promise<{ error: string | null }> {
+  return logActivity(
+    familyId,
+    userId,
+    "transaction_added",
+    `Added transaction: ${description} (₱${amount.toLocaleString()})`,
+    {
+      targetType: "transaction",
+      targetId: transactionId,
+      targetName: description,
+      amount,
+    }
+  );
+}
+
+export async function logTransactionUpdated(
+  familyId: string,
+  userId: string,
+  description: string,
+  amount: number,
+  transactionId: string,
+  changes: Record<string, any>
+): Promise<{ error: string | null }> {
+  return logActivity(
+    familyId,
+    userId,
+    "transaction_updated",
+    `Updated transaction: ${description} (₱${amount.toLocaleString()})`,
+    {
+      targetType: "transaction",
+      targetId: transactionId,
+      targetName: description,
+      amount,
+      metadata: { changes },
+    }
+  );
+}
+
+export async function logTransactionDeleted(
+  familyId: string,
+  userId: string,
+  description: string,
+  amount: number,
+  transactionId: string
+): Promise<{ error: string | null }> {
+  return logActivity(
+    familyId,
+    userId,
+    "transaction_deleted",
+    `Deleted transaction: ${description} (₱${amount.toLocaleString()})`,
+    {
+      targetType: "transaction",
+      targetId: transactionId,
+      targetName: description,
+      amount,
+    }
+  );
+}
+
+// Fetch activity log for a family
+export async function fetchFamilyActivityLog(
+  familyId: string,
+  limit: number = 50,
+  offset: number = 0
+): Promise<{ data: ActivityItem[]; error: string | null; hasMore: boolean }> {
+  // Use a raw query to properly join with profiles
+  const { data: rawData, error } = await supabase
+    .from("family_activity_log")
+    .select(`
+      id,
+      family_id,
+      user_id,
+      activity_type,
+      description,
+      target_type,
+      target_id,
+      target_name,
+      amount,
+      metadata,
+      created_at
+    `)
+    .eq("family_id", familyId)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    console.log("fetchFamilyActivityLog error:", error);
+    return { data: [], error: error.message, hasMore: false };
+  }
+
+  // Fetch profiles separately for all user_ids in the results
+  const userIds = [...new Set((rawData || []).map((row: any) => row.user_id).filter(Boolean))];
+  
+  let profilesMap: Record<string, any> = {};
+  if (userIds.length > 0) {
+    const { data: profilesData } = await supabase
+      .from("profiles")
+      .select("id, full_name, email, avatar_url")
+      .in("id", userIds);
+    
+    profilesMap = (profilesData || []).reduce((acc: Record<string, any>, profile: any) => {
+      acc[profile.id] = profile;
+      return acc;
+    }, {});
+  }
+
+  const activities: ActivityItem[] = (rawData || []).map((row: any) => {
+    const profile = profilesMap[row.user_id] || {};
+    const fullName = profile.full_name || profile.email || "Unknown User";
+    
+    // Map activity_type to ActivityItem type
+    let activityType: "transaction" | "goal" | "member" | "budget";
+    if (row.activity_type.includes("transaction")) {
+      activityType = "transaction";
+    } else if (row.activity_type.includes("goal")) {
+      activityType = "goal";
+    } else if (row.activity_type.includes("member") || row.activity_type.includes("family")) {
+      activityType = "member";
+    } else {
+      activityType = "budget"; // fallback
+    }
+
+    return {
+      id: row.id,
+      type: activityType,
+      action: row.description,
+      memberName: fullName,
+      memberEmail: profile.email || "",
+      memberAvatar: profile.avatar_url || undefined,
+      details: row.activity_type.replace(/_/g, " "),
+      amount: row.amount ? Number(row.amount) : undefined,
+      target: row.target_name || undefined,
+      timestamp: row.created_at,
+      metadata: row.metadata || {},
+    };
+  });
+
+  // Check if there are more records
+  const { count } = await supabase
+    .from("family_activity_log")
+    .select("id", { count: "exact", head: true })
+    .eq("family_id", familyId);
+
+  const hasMore = (count ?? 0) > offset + limit;
+
+  return { data: activities, error: null, hasMore };
+}

@@ -18,9 +18,10 @@ interface DeleteGoalModalProps {
   onClose: () => void;
   goal: GoalType | null;
   onSuccess?: () => void;
+  onDelete?: (goalId: string) => Promise<{ error: string | null }>;
 }
 
-export function DeleteGoalModal({ open, onClose, goal, onSuccess }: DeleteGoalModalProps) {
+export function DeleteGoalModal({ open, onClose, goal, onSuccess, onDelete }: DeleteGoalModalProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -34,7 +35,13 @@ export function DeleteGoalModal({ open, onClose, goal, onSuccess }: DeleteGoalMo
     if (!goal) return;
     setIsDeleting(true);
     setDeleteError(null);
-    const { error } = await deleteGoal(goal.id);
+    
+    // Use onDelete if provided (for family goals with activity logging)
+    // Otherwise use the default service function
+    const { error } = onDelete 
+      ? await onDelete(goal.id)
+      : await deleteGoal(goal.id);
+    
     setIsDeleting(false);
     if (error) {
       setDeleteError(error);
@@ -42,7 +49,7 @@ export function DeleteGoalModal({ open, onClose, goal, onSuccess }: DeleteGoalMo
     }
     handleClose();
     onSuccess?.();
-  }, [goal, handleClose, onSuccess]);
+  }, [goal, handleClose, onSuccess, onDelete]);
 
   if (!goal) return null;
 

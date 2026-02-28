@@ -68,7 +68,7 @@ interface AddGoalModalProps {
 
 export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = false }: AddGoalModalProps) {
   const { user } = useAuth();
-  const { familyData, familyState, currentUserRole, isOwner } = useFamily();
+  const { familyData, familyState, currentUserRole, isOwner, handleCreateFamilyGoal } = useFamily();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<GoalFormState>({ ...INITIAL_GOAL_FORM_STATE, isFamily: defaultFamilyGoal });
   const [saving, setSaving] = useState(false);
@@ -102,13 +102,22 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
     setSaving(true);
     setSaveError(null);
     
-    // Pass family_id for family goals
-    const goalForm = {
-      ...form,
-      family_id: form.isFamily && familyData?.id ? familyData.id : undefined
-    };
+    let error: string | null = null;
     
-    const { error } = await createGoal(user.id, goalForm);
+    if (form.isFamily && familyData?.id) {
+      // Use family goal handler with activity logging
+      const result = await handleCreateFamilyGoal(form);
+      error = result.error;
+    } else {
+      // Use regular goal handler for individual goals
+      const goalForm = {
+        ...form,
+        family_id: undefined
+      };
+      const result = await createGoal(user.id, goalForm);
+      error = result.error;
+    }
+    
     setSaving(false);
     if (error) {
       setSaveError(error);
@@ -116,7 +125,7 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
     }
     handleClose();
     onSuccess?.();
-  }, [user, form, familyData, handleClose, onSuccess]);
+  }, [user, form, familyData, handleCreateFamilyGoal, handleClose, onSuccess]);
 
   const handleNext = useCallback(() => {
     if (step >= 3) {

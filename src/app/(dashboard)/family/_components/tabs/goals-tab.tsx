@@ -27,9 +27,9 @@ interface GoalsTabProps {
   onFilter: (filter: string) => void;
   activeFilter: string;
   onEditGoal?: (goalId: string) => void;
-  onDeleteGoal?: (goalId: string) => void;
+  onDeleteGoal?: (goalId: string) => Promise<{ error: string | null }>;
   onAddGoal?: () => void;
-  onContributeGoal?: (goalId: string, amount: number) => void;
+  onContributeGoal?: (goalId: string, amount: number) => Promise<{ error: string | null }>;
   onViewGoal?: (goalId: string) => void;
   isLoading?: boolean;
   onRefreshGoals?: () => Promise<void>;
@@ -628,7 +628,7 @@ export function GoalsTab({
         onClose={() => setAddModalOpen(false)}
         onSuccess={async () => {
           setAddModalOpen(false);
-          await handleRefreshGoals();
+          await onRefreshGoals?.();
         }}
         defaultFamilyGoal={true}
       />
@@ -639,8 +639,9 @@ export function GoalsTab({
         goal={selectedGoal as GoalType}
         onSuccess={async () => {
           setContributeModalOpen(false);
-          await handleRefreshGoals();
+          await onRefreshGoals?.();
         }}
+        onContribute={onContributeGoal}
       />
 
       <ViewGoalModal
@@ -673,7 +674,7 @@ export function GoalsTab({
         goal={selectedGoal as GoalType}
         onSuccess={async () => {
           setEditModalOpen(false);
-          await handleRefreshGoals();
+          await onRefreshGoals?.();
         }}
       />
 
@@ -683,8 +684,9 @@ export function GoalsTab({
         goal={selectedGoal as GoalType}
         onSuccess={async () => {
           setDeleteModalOpen(false);
-          await handleRefreshGoals();
+          await onRefreshGoals?.();
         }}
+        onDelete={onDeleteGoal}
       />
     </>
   );

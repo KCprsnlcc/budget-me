@@ -37,9 +37,10 @@ interface ContributeGoalModalProps {
   onClose: () => void;
   goal: GoalType | null;
   onSuccess?: () => void;
+  onContribute?: (goalId: string, amount: number) => Promise<{ error: string | null }>;
 }
 
-export function ContributeGoalModal({ open, onClose, goal, onSuccess }: ContributeGoalModalProps) {
+export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribute }: ContributeGoalModalProps) {
   const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [amount, setAmount] = useState("");
@@ -67,7 +68,13 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess }: Contribu
     if (isNaN(parsed) || parsed <= 0) return;
     setSaving(true);
     setSaveError(null);
-    const { error } = await contributeToGoal(goal.id, parsed, user?.id);
+    
+    // Use onContribute if provided (for family goals with activity logging)
+    // Otherwise use the default service function
+    const { error } = onContribute 
+      ? await onContribute(goal.id, parsed)
+      : await contributeToGoal(goal.id, parsed, user?.id);
+    
     setSaving(false);
     if (error) {
       setSaveError(error);
@@ -75,7 +82,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess }: Contribu
     }
     handleClose();
     onSuccess?.();
-  }, [goal, amount, user?.id, handleClose, onSuccess]);
+  }, [goal, amount, user?.id, handleClose, onSuccess, onContribute]);
 
   const handleNext = useCallback(() => {
     if (step >= 2) {

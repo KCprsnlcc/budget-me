@@ -3,10 +3,16 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import {
+  createGoal,
+  updateGoal,
+  deleteGoal,
+} from "@/app/(dashboard)/goals/_lib/goal-service";
+import type { GoalFormState } from "@/app/(dashboard)/goals/_components/types";
+import {
   fetchUserFamily,
   fetchFamilyMembers,
   fetchFamilyGoals,
-  fetchFamilyActivity,
+  fetchFamilyActivityLog,
   fetchJoinRequests,
   fetchPublicFamilies,
   fetchUserInvitations,
@@ -30,6 +36,20 @@ import {
   removeMember,
   transferOwnership,
   deleteAllUserJoinRequests,
+  // Activity logging functions
+  logFamilyCreated,
+  logFamilyUpdated,
+  logFamilyDeleted,
+  logMemberJoined,
+  logMemberLeft,
+  logMemberInvited,
+  logMemberRemoved,
+  logRoleChanged,
+  logOwnershipTransferred,
+  logGoalCreated,
+  logGoalUpdated,
+  logGoalDeleted,
+  logGoalContributed,
   type FamilyOverviewStats,
   type SentInvitation,
   type FamilyCategoryBreakdown,
@@ -163,7 +183,7 @@ export function useFamily() {
         await Promise.all([
           fetchFamilyMembers(family.id, family.createdBy),
           fetchFamilyGoals(family.id),
-          fetchFamilyActivity(family.id, 20, 0),
+          fetchFamilyActivityLog(family.id, 20, 0),
           fetchJoinRequests(family.id),
           fetchFamilyOverview(family.id),
           fetchSentInvitations(family.id),
@@ -255,7 +275,7 @@ export function useFamily() {
   const loadMoreActivities = useCallback(async () => {
     if (!familyId || activitiesLoading) return;
     setActivitiesLoading(true);
-    const result = await fetchFamilyActivity(familyId, 20, activityOffset);
+    const result = await fetchFamilyActivityLog(familyId, 20, activityOffset);
     if (!result.error) {
       setActivities((prev) => [...prev, ...result.data]);
       setHasMoreActivities(result.hasMore);
@@ -272,7 +292,9 @@ export function useFamily() {
       setMutating(true);
       const result = await createFamily(userId, form);
       setMutating(false);
-      if (!result.error) {
+      if (!result.error && result.data?.id) {
+        // Log family creation activity
+        await logFamilyCreated(result.data.id, userId, form.name);
         await fetchData();
       }
       return { error: result.error };
@@ -284,14 +306,17 @@ export function useFamily() {
     async (form: EditFamilyData): Promise<{ error: string | null }> => {
       if (!familyId) return { error: "No family to update." };
       setMutating(true);
+      const oldName = familyData?.name;
       const result = await updateFamily(familyId, form);
       setMutating(false);
       if (!result.error) {
+        // Log family update activity
+        await logFamilyUpdated(familyId, userId || "", form.name || oldName || "Family", form);
         await fetchData();
       }
       return { error: result.error };
     },
-    [familyId, fetchData]
+    [familyId, userId, familyData?.name, fetchData]
   );
 
   const handleDeleteFamily = useCallback(async (): Promise<{
@@ -299,26 +324,32 @@ export function useFamily() {
   }> => {
     if (!familyId) return { error: "No family to delete." };
     setMutating(true);
+    const familyName = familyData?.name || "Family";
     const result = await deleteFamily(familyId);
     setMutating(false);
     if (!result.error) {
+      // Log family deletion activity
+      await logFamilyDeleted(familyId, userId || "", familyName);
       await fetchData();
     }
     return { error: result.error };
-  }, [familyId, fetchData]);
+  }, [familyId, userId, familyData?.name, fetchData]);
 
   const handleLeaveFamily = useCallback(async (): Promise<{
     error: string | null;
   }> => {
     if (!familyId || !userId) return { error: "Missing data." };
     setMutating(true);
+    const userName = user?.user_metadata?.full_name || user?.email || "A member";
     const result = await leaveFamily(familyId, userId);
     setMutating(false);
     if (!result.error) {
+      // Log member left activity
+      await logMemberLeft(familyId, userId, userName, userId);
       await fetchData();
     }
     return { error: result.error };
-  }, [familyId, userId, fetchData]);
+  }, [familyId, userId, user, fetchData]);
 
   const handleSendInvitation = useCallback(
     async (form: InviteMemberData): Promise<{ error: string | null }> => {
@@ -327,6 +358,8 @@ export function useFamily() {
       const result = await sendInvitation(familyId, userId, form);
       setMutating(false);
       if (!result.error) {
+        // Log member invitation activity
+        await logMemberInvited(familyId, userId, form.email, form.role);
         await fetchData();
       }
       return { error: result.error };
@@ -344,11 +377,16 @@ export function useFamily() {
       const result = await respondToInvitation(invitationId, userId, accept);
       setMutating(false);
       if (!result.error) {
+        // Log member joined activity if accepted
+        if (accept && familyId) {
+          const userName = user?.user_metadata?.full_name || user?.email || "A member";
+          await logMemberJoined(familyId, userId, userName, userId);
+        }
         await fetchData();
       }
       return { error: result.error };
     },
-    [userId, fetchData]
+    [userId, user, familyId, fetchData]
   );
 
   const handleSendJoinRequest = useCallback(
@@ -378,12 +416,17 @@ export function useFamily() {
       setMutating(true);
       const result = await respondToJoinRequest(requestId, userId, true);
       setMutating(false);
-      if (!result.error) {
+      if (!result.error && familyId) {
+        // Get the requester's info to log the activity
+        const request = pendingRequests.find(r => r.id === requestId);
+        if (request) {
+          await logMemberJoined(familyId, userId, request.name, request.id);
+        }
         await fetchData();
       }
       return { error: result.error };
     },
-    [userId, fetchData]
+    [userId, familyId, pendingRequests, fetchData]
   );
 
   const handleDeclineRequest = useCallback(
@@ -406,14 +449,18 @@ export function useFamily() {
       newRole: string
     ): Promise<{ error: string | null }> => {
       setMutating(true);
+      const member = members.find(m => m.id === memberId);
+      const oldRole = member?.role;
       const result = await updateMemberRole(memberId, newRole, userId || undefined);
       setMutating(false);
-      if (!result.error) {
+      if (!result.error && member && oldRole && familyId) {
+        // Log role change activity
+        await logRoleChanged(familyId, userId || "", member.name, memberId, oldRole, newRole);
         await fetchData();
       }
       return { error: result.error };
     },
-    [userId, fetchData]
+    [userId, familyId, members, fetchData]
   );
 
   const handleContributeToGoal = useCallback(
@@ -423,42 +470,106 @@ export function useFamily() {
     ): Promise<{ error: string | null }> => {
       if (!userId) return { error: "Not authenticated." };
       setMutating(true);
+      const goal = goals.find(g => g.id === goalId);
       const result = await contributeToGoal(goalId, userId, amount);
       setMutating(false);
-      if (!result.error) {
+      if (!result.error && goal && familyId) {
+        // Log goal contribution activity
+        const userName = user?.user_metadata?.full_name || "A member";
+        await logGoalContributed(familyId, userId, goal.name, goalId, amount, userName);
         await fetchData();
       }
       return { error: result.error };
     },
-    [userId, fetchData]
+    [userId, familyId, goals, user, fetchData]
   );
 
   const handleRemoveMember = useCallback(
     async (memberId: string): Promise<{ error: string | null }> => {
       if (!userId) return { error: "Not authenticated." };
       setMutating(true);
+      const member = members.find(m => m.id === memberId);
       const result = await removeMember(memberId, userId);
       setMutating(false);
-      if (!result.error) {
+      if (!result.error && member && familyId) {
+        // Log member removal activity
+        await logMemberRemoved(familyId, userId, member.name, memberId);
         await fetchData();
       }
       return { error: result.error };
     },
-    [userId, fetchData]
+    [userId, familyId, members, fetchData]
   );
 
   const handleTransferOwnership = useCallback(
     async (newOwnerUserId: string): Promise<{ error: string | null }> => {
       if (!userId || !familyId) return { error: "Missing data." };
       setMutating(true);
+      const newOwner = members.find(m => m.id === newOwnerUserId);
+      const currentOwner = members.find(m => m.id === userId) || { name: "Current Owner" };
       const result = await transferOwnership(familyId, newOwnerUserId, userId);
       setMutating(false);
-      if (!result.error) {
+      if (!result.error && newOwner && familyId) {
+        // Log ownership transfer activity
+        await logOwnershipTransferred(familyId, userId, currentOwner.name, newOwner.name, newOwnerUserId);
         await fetchData();
       }
       return { error: result.error };
     },
+    [userId, familyId, members, fetchData]
+  );
+
+  // ----- Goal CRUD handlers with activity logging -----
+
+  const handleCreateFamilyGoal = useCallback(
+    async (form: GoalFormState): Promise<{ error: string | null; data?: { id: string; name: string; target: number } }> => {
+      if (!userId || !familyId) return { error: "Not authenticated or no family." };
+      setMutating(true);
+      const result = await createGoal(userId, { ...form, family_id: familyId, isFamily: true });
+      setMutating(false);
+      if (!result.error && result.data) {
+        // Log goal creation activity
+        await logGoalCreated(familyId, userId, result.data.name, result.data.id, result.data.target);
+        await fetchData();
+        return { error: null, data: { id: result.data.id, name: result.data.name, target: result.data.target } };
+      }
+      return { error: result.error };
+    },
     [userId, familyId, fetchData]
+  );
+
+  const handleUpdateFamilyGoal = useCallback(
+    async (goalId: string, form: GoalFormState): Promise<{ error: string | null }> => {
+      if (!userId || !familyId) return { error: "Not authenticated or no family." };
+      setMutating(true);
+      const goal = goals.find(g => g.id === goalId);
+      const result = await updateGoal(goalId, form);
+      setMutating(false);
+      if (!result.error && goal) {
+        // Log goal update activity
+        await logGoalUpdated(familyId, userId, result.data?.name || goal.name, goalId, form);
+        await fetchData();
+      }
+      return { error: result.error };
+    },
+    [userId, familyId, goals, fetchData]
+  );
+
+  const handleDeleteFamilyGoal = useCallback(
+    async (goalId: string): Promise<{ error: string | null }> => {
+      if (!userId || !familyId) return { error: "Not authenticated or no family." };
+      setMutating(true);
+      const goal = goals.find(g => g.id === goalId);
+      const result = await deleteGoal(goalId);
+      setMutating(false);
+      if (!result.error && goal) {
+        // Log goal deletion activity
+        await logGoalDeleted(familyId, userId, goal.name, goalId);
+        await fetchData();
+      }
+      return { error: result.error };
+    },
+    [userId, familyId, goals, fetchData]
   );
 
   // ----- Refresh discover families data only -----
@@ -527,5 +638,9 @@ export function useFamily() {
     handleContributeToGoal,
     handleRemoveMember,
     handleTransferOwnership,
+    // Goal CRUD with activity logging
+    handleCreateFamilyGoal,
+    handleUpdateFamilyGoal,
+    handleDeleteFamilyGoal,
   };
 }

@@ -83,7 +83,7 @@ interface EditGoalModalProps {
 
 export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalProps) {
   const { user } = useAuth();
-  const { familyData, familyState, currentUserRole, isOwner } = useFamily();
+  const { familyData, familyState, currentUserRole, isOwner, handleUpdateFamilyGoal } = useFamily();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<GoalFormState>(() => goalToFormState(goal));
   const [saving, setSaving] = useState(false);
@@ -127,13 +127,22 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
     setSaving(true);
     setSaveError(null);
     
-    // Pass family_id for family goals
-    const goalForm = {
-      ...form,
-      family_id: form.isFamily && familyData?.id ? familyData.id : undefined
-    };
+    let error: string | null = null;
     
-    const { error } = await updateGoal(goal.id, goalForm);
+    if (form.isFamily && familyData?.id) {
+      // Use family goal handler with activity logging
+      const result = await handleUpdateFamilyGoal(goal.id, form);
+      error = result.error;
+    } else {
+      // Use regular goal handler for individual goals
+      const goalForm = {
+        ...form,
+        family_id: undefined
+      };
+      const result = await updateGoal(goal.id, goalForm);
+      error = result.error;
+    }
+    
     setSaving(false);
     if (error) {
       setSaveError(error);
@@ -141,7 +150,7 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
     }
     handleClose();
     onSuccess?.();
-  }, [goal, form, familyData, canEditThisGoal, handleClose, onSuccess]);
+  }, [goal, form, familyData, canEditThisGoal, handleUpdateFamilyGoal, handleClose, onSuccess]);
 
   const handleNext = useCallback(() => {
     if (step >= 3) {
