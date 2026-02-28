@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Users, MessageSquare, Info, ArrowRight, ArrowLeft, Check, Loader2 } from "lucide-react";
+import { Users, MessageSquare, Info, ArrowRight, ArrowLeft, Check, Loader2, AlertTriangle } from "lucide-react";
 import { Stepper } from "./stepper";
 import type { PublicFamily } from "./types";
 
@@ -166,8 +166,12 @@ export function JoinFamilyModal({ open, onClose, family, onSendRequest }: JoinFa
                             </div>
 
                             {submitError && (
-                                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600">
-                                    {submitError}
+                                <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
+                                    <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+                                    <div>
+                                        <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
+                                        <p className="text-[11px] leading-relaxed opacity-85">{submitError}</p>
+                                    </div>
                                 </div>
                             )}
                         </div>

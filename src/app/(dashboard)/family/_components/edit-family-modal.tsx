@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Home, FileText, PhilippinePeso, Info, ArrowRight, ArrowLeft, Check, Trash2 } from "lucide-react";
+import { Home, FileText, PhilippinePeso, Info, ArrowRight, ArrowLeft, Check, Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import { Stepper } from "./stepper";
 import { FAMILY_TYPES, DEFAULT_CURRENCY, MODAL_STEPS } from "./constants";
 import type { EditFamilyData, ModalStep, Family } from "./types";
@@ -45,6 +45,7 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
 
   const reset = useCallback(() => {
     setCurrentStep(1);
+    setSubmitError(null);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -262,6 +263,16 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
               </div>
             </div>
 
+            {submitError && (
+              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
+                <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+                <div>
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
+                  <p className="text-[11px] leading-relaxed opacity-85">{submitError}</p>
+                </div>
+              </div>
+            )}
+
             {onDeleteFamily && (
               <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
                 <Trash2 className="text-red-600 mt-0.5" size={16} />
@@ -302,14 +313,11 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
             )}
             <Button
               onClick={handleNext}
-              disabled={!canContinue}
+              disabled={!canContinue || submitting}
               className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
             >
               {currentStep === 2 ? (
-                <>
-                  <Check size={16} />
-                  Update Family
-                </>
+                submitting ? (<><Loader2 size={14} className="animate-spin mr-1" /> Saving...</>) : (<> <Check size={16} /> Update Family</>)
               ) : (
                 <>
                   Next

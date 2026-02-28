@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { X, AlertTriangle, LogOut } from "lucide-react";
+import React, { useState } from "react";
+import { X, AlertTriangle, LogOut, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Modal,
@@ -17,14 +17,25 @@ interface LeaveFamilyModalProps {
 }
 
 export function LeaveFamilyModal({ open, onClose, onConfirm }: LeaveFamilyModalProps) {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const handleClose = () => {
+    setSubmitting(false);
+    setSubmitError(null);
     onClose();
   };
 
   const handleConfirm = async () => {
     if (onConfirm) {
+      setSubmitting(true);
+      setSubmitError(null);
       const result = await onConfirm();
-      if (result?.error) return;
+      setSubmitting(false);
+      if (result?.error) {
+        setSubmitError(result.error);
+        return;
+      }
     }
     handleClose();
   };
@@ -76,16 +87,26 @@ export function LeaveFamilyModal({ open, onClose, onConfirm }: LeaveFamilyModalP
               </p>
             </div>
           </div>
+
+          {submitError && (
+            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start mx-auto max-w-sm mt-4">
+              <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+              <div>
+                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
+                <p className="text-[11px] leading-relaxed opacity-85">{submitError}</p>
+              </div>
+            </div>
+          )}
         </div>
       </ModalBody>
 
       {/* Footer */}
       <ModalFooter className="px-6 py-4">
-        <Button variant="outline" size="sm" className="flex-1" onClick={handleClose}>
+        <Button variant="outline" size="sm" className="flex-1" onClick={handleClose} disabled={submitting}>
           Cancel
         </Button>
-        <Button variant="destructive" size="sm" className="flex-1" onClick={handleConfirm}>
-          Leave Family
+        <Button variant="destructive" size="sm" className="flex-1" onClick={handleConfirm} disabled={submitting}>
+          {submitting ? (<><Loader2 size={14} className="animate-spin mr-1" /> Leaving...</>) : (<>Leave Family</>)}
         </Button>
       </ModalFooter>
     </Modal>
