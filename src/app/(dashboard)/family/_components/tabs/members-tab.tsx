@@ -13,6 +13,8 @@ import { ROLE_ICONS } from "../constants";
 import type { FamilyMember, JoinRequest, PublicFamily, Family, EditFamilyData, InviteMemberData, Invitation } from "../types";
 import { useAuth } from "@/components/auth/auth-context";
 import { formatRelativeTime } from "../../_lib/family-service";
+import { TransferOwnershipModal } from "../transfer-ownership-modal";
+import { RemoveMemberModal } from "../remove-member-modal";
 
 interface MembersTabProps {
   familyData: Family | null;
@@ -32,6 +34,8 @@ interface MembersTabProps {
   onDeleteFamilyConfirm?: () => Promise<{ error: string | null }>;
   onLeaveFamilyConfirm?: () => Promise<{ error: string | null }>;
   onRespondToInvitation?: (invitationId: string, accept: boolean) => Promise<{ error: string | null }>;
+  onRemoveMember?: (memberId: string) => Promise<{ error: string | null }>;
+  onTransferOwnership?: (newOwnerId: string) => Promise<{ error: string | null }>;
   invitations?: Invitation[];
   isLoading?: boolean;
 }
@@ -54,6 +58,8 @@ export function MembersTab({
   onDeleteFamilyConfirm,
   onLeaveFamilyConfirm,
   onRespondToInvitation,
+  onRemoveMember,
+  onTransferOwnership,
   invitations = [],
   isLoading = false,
 }: MembersTabProps) {
@@ -63,6 +69,31 @@ export function MembersTab({
   const [roleChanges, setRoleChanges] = useState<Record<string, string>>({});
   const [savingRoles, setSavingRoles] = useState(false);
   const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
+
+  // Modal states
+  const [transferOwnershipModalOpen, setTransferOwnershipModalOpen] = useState(false);
+  const [removeMemberModalOpen, setRemoveMemberModalOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<FamilyMember | null>(null);
+
+  // Get current user's role and permissions
+  const currentUserMember = members.find(m => m.email === currentUserEmail);
+  const currentUserRole = currentUserMember?.role;
+  const canManageRoles = currentUserRole === "Owner" || currentUserRole === "Admin";
+
+  // Permission logic for removing members
+  const canRemoveMember = (memberRole: string, memberEmail: string) => {
+    const isTargetCurrentUser = memberEmail === currentUserEmail;
+    
+    if (currentUserRole === "Owner") {
+      // Owner can remove anyone except themselves
+      return memberRole !== "Owner" || !isTargetCurrentUser;
+    }
+    if (currentUserRole === "Admin") {
+      // Admin can remove Members and Viewers, but not Owners or other Admins
+      return (memberRole === "Member" || memberRole === "Viewer") && !isTargetCurrentUser;
+    }
+    return false; // Members and Viewers cannot remove anyone
+  };
 
   // Create icon mapping from string constants
   const getRoleIcon = (role: string) => {
@@ -107,6 +138,39 @@ export function MembersTab({
     setProcessingRequestId(requestId);
     await onDeclineRequest(requestId);
     setProcessingRequestId(null);
+  };
+
+  // Modal handlers
+  const handleOpenTransferOwnership = () => {
+    setTransferOwnershipModalOpen(true);
+  };
+
+  const handleCloseTransferOwnership = () => {
+    setTransferOwnershipModalOpen(false);
+  };
+
+  const handleTransferOwnership = async (newOwnerId: string) => {
+    if (onTransferOwnership) {
+      return await onTransferOwnership(newOwnerId);
+    }
+    return { error: "Transfer ownership function not available" };
+  };
+
+  const handleOpenRemoveMember = (member: FamilyMember) => {
+    setSelectedMember(member);
+    setRemoveMemberModalOpen(true);
+  };
+
+  const handleCloseRemoveMember = () => {
+    setRemoveMemberModalOpen(false);
+    setSelectedMember(null);
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (onRemoveMember) {
+      return await onRemoveMember(memberId);
+    }
+    return { error: "Remove member function not available" };
   };
 
 
@@ -490,113 +554,208 @@ export function MembersTab({
         </div>
 
         {/* Role Management and Info */}
-        <div className="space-y-6">
-          {/* Role Management interface */}
-          <Card className="p-6 overflow-hidden">
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold text-slate-900">
-                Role Management
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5 font-light">Assign and manage member permissions</p>
-            </div>
-            {members.filter(m => m.role !== "Owner").length > 0 ? (
-              <>
-                <div className="space-y-4">
-                  {members
-                    .filter(m => m.role !== "Owner")
-                    .map((member) => (
-                      <div key={member.id} className="flex items-center justify-between gap-3 p-3 border border-slate-100 rounded-lg hover:shadow-md transition-all cursor-pointer">
-                        <div className="flex items-center gap-3 min-w-0">
-                          {member.avatar ? (
-                            <img
-                              src={member.avatar}
-                              alt={member.name}
-                              className="w-8 h-8 rounded-full object-cover border border-slate-100 flex-shrink-0"
-                            />
-                          ) : (
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-[10px] flex-shrink-0 border ${member.role === "Admin"
-                                ? "border-blue-100 text-blue-700"
-                                : member.role === "Member"
-                                  ? "border-purple-100 text-purple-700"
-                                  : "border-slate-100 text-slate-700"
-                                }`}
-                            >
-                              {member.initials}
-                            </div>
-                          )}
-                          <span className="text-xs font-medium text-slate-900 truncate">{member.name}</span>
-                        </div>
-                        <select
-                          value={roleChanges[member.id] || member.role}
-                          onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                          className="text-[10px] border border-slate-200 rounded-lg px-2 py-1 bg-white focus:ring-1 focus:ring-emerald-500 outline-none"
-                        >
-                          <option value="Admin">Admin</option>
-                          <option value="Member">Member</option>
-                          <option value="Viewer">Viewer</option>
-                        </select>
-                      </div>
-                    ))}
-                </div>
-                {Object.keys(roleChanges).length > 0 && (
-                  <Button className="w-full text-xs justify-center py-2.5" onClick={handleSaveRoles} disabled={savingRoles}>
-                    {savingRoles ? (
-                      <span className="flex items-center gap-2">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
-                        Saving changes...
-                      </span>
-                    ) : (
-                      <span className="flex items-center">
-                        <Save className="mr-2 h-3.5 w-3.5 text-white" />
-                        Save Role Changes
-                      </span>
-                    )}
-                  </Button>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                  <Settings className="text-slate-400" size={32} />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">No Members to Manage</h3>
-                <p className="text-sm text-slate-500 mb-6">
-                  There are no family members whose roles can be changed.
-                </p>
-                <div className="text-xs text-slate-400">
-                  Only non-owner members can have their roles modified.
-                </div>
+        {canManageRoles && (
+          <div className="space-y-6">
+            {/* Role Management interface */}
+            <Card className="p-6 overflow-hidden">
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-slate-900">
+                  Role Management
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5 font-light">Assign and manage member permissions</p>
               </div>
-            )}
-          </Card>
+              {members.filter(m => {
+  // Owners can manage all non-owners
+  if (currentUserRole === "Owner") return m.role !== "Owner";
+  // Admins can manage Members and Viewers only
+  if (currentUserRole === "Admin") return m.role === "Member" || m.role === "Viewer";
+  return false;
+}).length > 0 ? (
+                <>
+                  <div className="space-y-4">
+                    {members
+                      .filter(m => {
+                        // Owners can manage all non-owners
+                        if (currentUserRole === "Owner") return m.role !== "Owner";
+                        // Admins can manage Members and Viewers only
+                        if (currentUserRole === "Admin") return m.role === "Member" || m.role === "Viewer";
+                        return false;
+                      })
+                      .map((member) => (
+                        <div key={member.id} className="flex items-center justify-between gap-3 p-3 border border-slate-100 rounded-lg hover:shadow-md transition-all cursor-pointer">
+                          <div className="flex items-center gap-3 min-w-0">
+                            {member.avatar ? (
+                              <img
+                                src={member.avatar}
+                                alt={member.name}
+                                className="w-8 h-8 rounded-full object-cover border border-slate-100 flex-shrink-0"
+                              />
+                            ) : (
+                              <div
+                                className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-[10px] flex-shrink-0 border ${member.role === "Admin"
+                                  ? "border-blue-100 text-blue-700"
+                                  : member.role === "Member"
+                                    ? "border-purple-100 text-purple-700"
+                                    : "border-slate-100 text-slate-700"
+                                  }`}
+                              >
+                                {member.initials}
+                              </div>
+                            )}
+                            <span className="text-xs font-medium text-slate-900 truncate">{member.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {/* Role dropdown with permissions */}
+                            <select
+                              value={roleChanges[member.id] || member.role}
+                              onChange={(e) => handleRoleChange(member.id, e.target.value)}
+                              disabled={!canManageRoles || (currentUserRole === "Admin" && member.role === "Owner")}
+                              className="text-[10px] border border-slate-200 rounded-lg px-2 py-1 bg-white focus:ring-1 focus:ring-emerald-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <option value="Owner" disabled={currentUserRole !== "Owner"}>Owner</option>
+                              <option value="Admin" disabled={currentUserRole === "Admin" && member.role === "Owner"}>Admin</option>
+                              <option value="Member">Member</option>
+                              <option value="Viewer">Viewer</option>
+                            </select>
+                            
+                            {/* Remove member button */}
+                            {canRemoveMember(member.role, member.email) && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-[10px] text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors p-1"
+                                onClick={() => handleOpenRemoveMember(member)}
+                                title="Remove member"
+                              >
+                                <Trash2 size={12} />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                  {Object.keys(roleChanges).length > 0 && (
+                    <Button className="w-full text-xs justify-center py-2.5" onClick={handleSaveRoles} disabled={savingRoles}>
+                      {savingRoles ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+                          Saving changes...
+                        </span>
+                      ) : (
+                        <span className="flex items-center">
+                          <Save className="mr-2 h-3.5 w-3.5 text-white" />
+                          Save Role Changes
+                        </span>
+                      )}
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                    <Settings className="text-slate-400" size={32} />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">No Members to Manage</h3>
+                  <p className="text-sm text-slate-500 mb-6">
+                    There are no family members whose roles can be changed.
+                  </p>
+                  <div className="text-xs text-slate-400">
+                    Only non-owner members can have their roles modified.
+                  </div>
+                </div>
+              )}
+            </Card>
 
-          {/* Info Card */}
-          <Card className="p-6 border-emerald-100 hover:shadow-md transition-all group cursor-pointer">
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold text-slate-900">
-                About Roles
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5 font-light">Understanding family member permissions</p>
+            {/* Info Card */}
+            <Card className="p-6 border-emerald-100 hover:shadow-md transition-all group cursor-pointer">
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-slate-900">
+                  About Roles & Permissions
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5 font-light">Understanding family member permissions</p>
+              </div>
+              <ul className="space-y-3">
+                <li className="text-[10px] text-emerald-800 leading-relaxed">
+                  <span className="font-bold">Owner:</span> Complete control, can manage all roles and remove any member.
+                </li>
+                <li className="text-[10px] text-emerald-800 leading-relaxed">
+                  <span className="font-bold">Admin:</span> Can manage Members/Viewers, invite members, and create shared goals.
+                </li>
+                <li className="text-[10px] text-emerald-800 leading-relaxed">
+                  <span className="font-bold">Member:</span> Full access to shared features and family goals.
+                </li>
+                <li className="text-[10px] text-emerald-800 leading-relaxed">
+                  <span className="font-bold">Viewer:</span> View-only access to family information.
+                </li>
+              </ul>
+              {currentUserRole === "Admin" && (
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <p className="text-[10px] text-blue-700 font-medium">
+                    <Shield size={12} className="inline mr-1" />
+                    As an Admin, you can manage Members and Viewers, but not Owners or other Admins.
+                  </p>
+                </div>
+              )}
+              {currentUserRole === "Owner" && (
+                <div className="mt-4 space-y-3">
+                  <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                    <p className="text-[10px] text-emerald-700 font-medium">
+                      <Crown size={12} className="inline mr-1" />
+                      As the Owner, you have complete control over all family members and settings.
+                    </p>
+                  </div>
+                  {onTransferOwnership && members.filter(m => m.id !== currentUserMember?.id && m.status === "active").length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-xs border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                      onClick={handleOpenTransferOwnership}
+                    >
+                      <Crown size={12} className="mr-2" />
+                      Transfer Ownership
+                    </Button>
+                  )}
+                </div>
+              )}
+            </Card>
+          </div>
+        )}
+
+        {/* Show restricted access message for non-admins */}
+        {!canManageRoles && (
+          <Card className="p-6 border-slate-200">
+            <div className="text-center py-4">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                <Shield className="text-slate-400" size={24} />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900 mb-2">Role Management Restricted</h3>
+              <p className="text-xs text-slate-500 mb-4">
+                Only family owners and admins can manage member roles and permissions.
+              </p>
+              <div className="text-xs text-slate-400">
+                Your current role: <span className="font-medium">{currentUserRole || "Unknown"}</span>
+              </div>
             </div>
-            <ul className="space-y-3">
-              <li className="text-[10px] text-emerald-800 leading-relaxed">
-                <span className="font-bold">Owner:</span> Complete control, can delete the family group.
-              </li>
-              <li className="text-[10px] text-emerald-800 leading-relaxed">
-                <span className="font-bold">Admin:</span> Can invite members, manage roles, and create shared family goals.
-              </li>
-              <li className="text-[10px] text-emerald-800 leading-relaxed">
-                <span className="font-bold">Member:</span> Full access to shared features, and family goals.
-              </li>
-              <li className="text-[10px] text-emerald-800 leading-relaxed">
-                <span className="font-bold">Viewer:</span> Read-only access to all family information.
-              </li>
-            </ul>
           </Card>
-        </div>
+        )}
       </div>
 
+      {/* Transfer Ownership Modal */}
+      <TransferOwnershipModal
+        open={transferOwnershipModalOpen}
+        onClose={handleCloseTransferOwnership}
+        onConfirm={handleTransferOwnership}
+        familyMembers={members}
+        currentOwnerId={currentUserMember?.id || ""}
+      />
+
+      {/* Remove Member Modal */}
+      <RemoveMemberModal
+        open={removeMemberModalOpen}
+        onClose={handleCloseRemoveMember}
+        onConfirm={handleRemoveMember}
+        member={selectedMember}
+      />
 
     </div>
   );

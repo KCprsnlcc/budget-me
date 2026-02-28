@@ -45,6 +45,7 @@ import {
   GoalsTab,
 } from "./_components";
 import { FAMILY_TABS, ACTIVITY_FILTERS, GOAL_FILTERS } from "./_components/constants";
+import { useAuth } from "@/components/auth/auth-context";
 import type {
   FamilyMember,
   Family,
@@ -107,7 +108,13 @@ export default function FamilyPage() {
     handleDeclineRequest,
     handleUpdateRole,
     handleContributeToGoal,
+    handleRemoveMember,
+    handleTransferOwnership,
   } = useFamily();
+
+  // Get current user info
+  const { user } = useAuth();
+  const currentUserMember = members.find(m => m.email === user?.email);
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -672,6 +679,8 @@ export default function FamilyPage() {
               onDeleteFamilyConfirm={handleDeleteFamily}
               onLeaveFamilyConfirm={handleLeaveFamily}
               onRespondToInvitation={handleRespondToInvitation}
+              onRemoveMember={handleRemoveMember}
+              onTransferOwnership={handleTransferOwnership}
               invitations={invitations}
               isLoading={tabSwitching}
             />
@@ -788,6 +797,9 @@ export default function FamilyPage() {
         open={leaveFamilyModalOpen}
         onClose={() => setLeaveFamilyModalOpen(false)}
         onConfirm={handleLeaveFamily}
+        familyMembers={members}
+        currentUserId={user?.id || ""}
+        currentUserRole={currentUserMember?.role || ""}
       />
       <JoinFamilyModal
         open={joinFamilyModalOpen}

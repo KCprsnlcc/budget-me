@@ -4,6 +4,8 @@ export { JoinFamilyModal } from "./join-family-modal";
 export { EditFamilyModal } from "./edit-family-modal";
 export { DeleteFamilyModal } from "./delete-family-modal";
 export { LeaveFamilyModal } from "./leave-family-modal";
+export { TransferOwnershipModal } from "./transfer-ownership-modal";
+export { RemoveMemberModal } from "./remove-member-modal";
 export { Stepper } from "./stepper";
 export { NoFamilyState } from "./no-family-state/no-family-state";
 export { MembersTab } from "./tabs/members-tab";
