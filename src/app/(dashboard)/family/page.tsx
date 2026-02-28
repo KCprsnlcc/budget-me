@@ -711,9 +711,28 @@ export default function FamilyPage() {
         </div>
       </Card>
 
-      {/* Join Section - Complete structure from no-family-state */}
-      <div className="space-y-6">
-        <div className="max-w-6xl mx-auto">
+      {/* Discover Families Section */}
+      <Card className="p-6 mb-8">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">Discover Families</h3>
+              <p className="text-xs text-slate-500 mt-1 font-light">Find and join other public family groups in your network</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="xs"
+                className="text-slate-400 hover:text-slate-600"
+                onClick={refetch}
+                disabled={false}
+              >
+                <RefreshCw size={12} />
+                Refresh
+              </Button>
+            </div>
+          </div>
+          
           <div className="relative mb-8">
             <Search
               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -874,7 +893,7 @@ export default function FamilyPage() {
             </p>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Modals */}
       <InviteMemberModal
