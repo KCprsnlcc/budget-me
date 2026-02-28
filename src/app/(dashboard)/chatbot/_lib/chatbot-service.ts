@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import type { MessageType, AIModel, ExportFormat } from "../_components/types";
+import { fetchUserFinancialContext, formatUserContextForAI } from "./user-data-service";
 
 const supabase = createClient();
 
@@ -124,9 +125,23 @@ export async function sendMessageToAI(
       };
     }
 
+    // Fetch user's financial context from Supabase
+    let userContext = "";
+    try {
+      const { data: userData, error: userDataError } = await fetchUserFinancialContext(userId);
+      if (!userDataError && userData) {
+        userContext = "\n\n" + formatUserContextForAI(userData);
+      }
+    } catch {
+      // Silent fail - continue without user context
+    }
+
+    // Build system prompt with user context
+    const enhancedSystemPrompt = SYSTEM_PROMPT + userContext;
+
     // Build messages array for API
     const apiMessages = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: enhancedSystemPrompt },
       ...messages.map((msg) => ({
         role: msg.role,
         content: msg.content,

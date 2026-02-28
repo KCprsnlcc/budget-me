@@ -326,98 +326,120 @@ export default function ChatbotPage() {
     };
     
     // Enhanced markdown rendering for headers, lists, and tables
-    if (safeContent.includes("|") || safeContent.includes("###") || safeContent.includes("- ")) {
+    if (safeContent.includes("|")) {
       const lines = safeContent.split("\n");
       
-      // Check for tables first
-      const tableLines = lines.filter(line => line.trim().startsWith("|"));
+      // Find table boundaries
+      const tableStartIndex = lines.findIndex(line => line.trim().includes("|"));
+      const tableEndIndex = lines.findIndex((line, index) => 
+        index > tableStartIndex && !line.trim().includes("|")
+      );
       
-      if (tableLines.length >= 2) {
-        // Parse table data
-        const headers = tableLines[0].split("|").filter(cell => cell.trim()).map(cell => cell.trim());
-        const rows = tableLines.slice(1).map(line => 
-          line.split("|").filter(cell => cell.trim()).map(cell => cell.trim())
-        ).filter(row => row.length === headers.length);
+      if (tableStartIndex !== -1) {
+        // Extract table lines
+        const tableLines = lines
+          .slice(tableStartIndex, tableEndIndex === -1 ? undefined : tableEndIndex)
+          .filter(line => line.trim().includes("|"));
+        
+        // Skip separator lines (containing only dashes and pipes)
+        const dataLines = tableLines.filter(line => 
+          !line.trim().match(/^\s*\|?[\s\-\|]+\|?\s*$/)
+        );
+        
+        if (dataLines.length >= 1) {
+          // Parse headers from first data line
+          const headers = dataLines[0]
+            .split("|")
+            .filter(cell => cell.trim())
+            .map(cell => cell.trim());
+          
+          // Parse data rows from remaining lines
+          const rows = dataLines.slice(1).map(line => 
+            line.split("|")
+              .filter(cell => cell.trim())
+              .map(cell => cell.trim())
+          ).filter(row => row.length === headers.length);
 
-        return (
-          <div className="space-y-4">
-            {/* Text before table */}
-            {lines.slice(0, lines.findIndex(line => line.trim().startsWith("|"))).join("\n").trim() && (
-              <div className={`text-sm leading-relaxed ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
-                {isTyping ? (
-                  <TypingEffect 
-                    text={lines.slice(0, lines.findIndex(line => line.trim().startsWith("|"))).join("\n").trim()} 
-                    speed={5} 
-                    delay={200}
-                    onComplete={() => setTypingMessageId(null)}
-                  />
-                ) : (
-                  renderMarkdownText(lines.slice(0, lines.findIndex(line => line.trim().startsWith("|"))).join("\n").trim(), role)
-                )}
-              </div>
-            )}
-            
-            {/* Dynamic Table */}
-            <div className="overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead className="bg-slate-50/50 border-b border-slate-100">
-                    <tr>
-                      {headers.map((header, index) => (
-                        <th 
-                          key={index} 
-                          className={`px-5 py-3 font-semibold text-slate-500 uppercase tracking-wider ${
-                            index === headers.length - 1 ? "text-right" : "text-left"
-                          }`}
-                        >
-                          {header}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {rows.map((row, rowIndex) => (
-                      <tr key={rowIndex} className="hover:bg-slate-50 transition-colors">
-                        {row.map((cell, cellIndex) => (
-                          <td 
-                            key={cellIndex} 
-                            className={`px-5 py-3 ${
-                              cellIndex === 0 ? "text-slate-700 font-medium" : "text-slate-500"
-                            } ${
-                              cellIndex === headers.length - 1 ? "text-right text-slate-900 font-semibold" : ""
+          return (
+            <div className="space-y-4">
+              {/* Text before table */}
+              {tableStartIndex > 0 && (
+                <div className={`text-sm leading-relaxed ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
+                  {isTyping ? (
+                    <TypingEffect 
+                      text={lines.slice(0, tableStartIndex).join("\n").trim()} 
+                      speed={5} 
+                      delay={200}
+                      onComplete={() => setTypingMessageId(null)}
+                    />
+                  ) : (
+                    renderMarkdownText(lines.slice(0, tableStartIndex).join("\n").trim(), role)
+                  )}
+                </div>
+              )}
+              
+              {/* Dynamic Table */}
+              <div className="overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-slate-50/50 border-b border-slate-100">
+                      <tr>
+                        {headers.map((header, index) => (
+                          <th 
+                            key={index} 
+                            className={`px-5 py-3 font-semibold text-slate-500 uppercase tracking-wider ${
+                              index === headers.length - 1 ? "text-right" : "text-left"
                             }`}
                           >
-                            {cell}
-                          </td>
+                            {header.replace(/\*\*/g, "")} {/* Remove bold markdown from headers */}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {rows.map((row, rowIndex) => (
+                        <tr key={rowIndex} className="hover:bg-slate-50 transition-colors">
+                          {row.map((cell, cellIndex) => (
+                            <td 
+                              key={cellIndex} 
+                              className={`px-5 py-3 ${
+                                cellIndex === 0 ? "text-slate-700 font-medium" : "text-slate-500"
+                              } ${
+                                cellIndex === headers.length - 1 ? "text-right text-slate-900 font-semibold" : ""
+                              }`}
+                            >
+                              {renderInlineMarkdown(cell, role)}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {rows.length > 0 && (
+                  <div className="p-2.5 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                    <span className="text-[10px] text-slate-400 font-medium px-2">
+                      {rows.length} {rows.length === 1 ? "item" : "items"}
+                    </span>
+                    <button 
+                      onClick={() => navigator.clipboard.writeText(tableLines.join("\n"))}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-slate-500 hover:text-emerald-500 hover:bg-white border border-transparent hover:border-slate-200 rounded transition-all"
+                    >
+                      Copy Table
+                    </button>
+                  </div>
+                )}
               </div>
-              {rows.length > 0 && (
-                <div className="p-2.5 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
-                  <span className="text-[10px] text-slate-400 font-medium px-2">
-                    {rows.length} {rows.length === 1 ? "item" : "items"}
-                  </span>
-                  <button 
-                    onClick={() => navigator.clipboard.writeText(tableLines.join("\n"))}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-slate-500 hover:text-emerald-500 hover:bg-white border border-transparent hover:border-slate-200 rounded transition-all"
-                  >
-                    Copy Table
-                  </button>
+              
+              {/* Text after table */}
+              {tableEndIndex !== -1 && tableEndIndex < lines.length && (
+                <div className={`text-sm leading-relaxed font-medium ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
+                  {renderMarkdownText(lines.slice(tableEndIndex).join("\n").trim(), role)}
                 </div>
               )}
             </div>
-            
-            {/* Text after table */}
-            {lines.slice(lines.findIndex(line => line.trim().startsWith("|")) + tableLines.length).join("\n").trim() && (
-              <div className={`text-sm leading-relaxed font-medium ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
-                {renderMarkdownText(lines.slice(lines.findIndex(line => line.trim().startsWith("|")) + tableLines.length).join("\n").trim(), role)}
-              </div>
-            )}
-          </div>
-        );
+          );
+        }
       }
       
       // Handle headers, lists, and other markdown without tables
