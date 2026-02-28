@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Crown, Shield, Eye, Edit, MoreHorizontal, UserCheck, Clock, Settings, LogOut, Trash2, Users, RefreshCw, Search, Filter, Info, Home, Mail } from "lucide-react";
+import { Crown, Shield, Eye, Edit, MoreHorizontal, UserCheck, Clock, Settings, LogOut, Trash2, Users, RefreshCw, Search, Filter, Info, Home, Mail, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -542,14 +542,16 @@ export function MembersTab({
                 {Object.keys(roleChanges).length > 0 && (
                   <Button className="w-full text-xs justify-center py-2.5" onClick={handleSaveRoles} disabled={savingRoles}>
                     {savingRoles ? (
-                      <span className="flex items-center">
-                        <Skeleton width={14} height={14} borderRadius="50%" className="mr-2" />
-                        Saving...
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+                        Saving changes...
                       </span>
                     ) : (
-                      <Crown className="text-amber-500 mr-2" size={14} />
+                      <span className="flex items-center">
+                        <Save className="mr-2 h-3.5 w-3.5 text-white" />
+                        Save Role Changes
+                      </span>
                     )}
-                    {savingRoles ? "Saving..." : "Save Role Changes"}
                   </Button>
                 )}
               </>
