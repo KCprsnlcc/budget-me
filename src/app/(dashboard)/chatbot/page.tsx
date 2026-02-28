@@ -24,6 +24,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TypingEffect } from "@/components/ui/typing-effect";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   ModelSelectorDropdown,
   ClearChatModal,
@@ -265,203 +267,122 @@ export default function ChatbotPage() {
     // Handle undefined content
     const safeContent = content || "";
     
-    // Helper function to render markdown text
-    const renderMarkdownText = (text: string, role: MessageRole) => {
-      const lines = text.split("\n");
-      return lines.map((line, index) => {
-        // Headers (###)
-        if (line.startsWith("### ")) {
-          return (
-            <h3 key={index} className={`font-bold text-base mt-4 mb-2 ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
-              {line.replace("### ", "")}
-            </h3>
-          );
-        }
-        
-        // Bullet points (-)
-        if (line.trim().startsWith("- ")) {
-          return (
-            <div key={index} className="flex items-start gap-2 mb-1">
-              <span className={`mt-1 ${role === "assistant" ? "text-emerald-500" : "text-emerald-300"}`}>•</span>
-              <span className="flex-1">{renderInlineMarkdown(line.replace(/^\s*-\s/, ""), role)}</span>
-            </div>
-          );
-        }
-        
-        // Numbered lists (1.)
-        if (/^\d+\.\s/.test(line.trim())) {
-          return (
-            <div key={index} className="flex items-start gap-2 mb-1">
-              <span className={`mt-1 font-semibold ${role === "assistant" ? "text-slate-600" : "text-slate-300"}`}>
-                {line.match(/^\d+/)?.[0]}.
-              </span>
-              <span className="flex-1">{renderInlineMarkdown(line.replace(/^\d+\.\s/, ""), role)}</span>
-            </div>
-          );
-        }
-        
-        // Regular text with inline markdown
-        return (
-          <div key={index} className="mb-2">
-            {renderInlineMarkdown(line, role)}
+    // Custom components for markdown rendering
+    const components = {
+      // Style tables
+      table: ({ children }: any) => (
+        <div className="overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm my-4">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              {children}
+            </table>
           </div>
-        );
-      });
-    };
-
-    // Helper function for inline markdown (bold, italic)
-    const renderInlineMarkdown = (text: string, role: MessageRole) => {
-      // Bold text (**text**)
-      let processed = text.split("**").map((part, index) =>
-        index % 2 === 1 ? (
-          <strong key={index} className={`font-semibold ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
-            {part}
-          </strong>
-        ) : (
-          <span key={index}>{part}</span>
-        )
-      );
-      
-      return <>{processed}</>;
-    };
-    
-    // Enhanced markdown rendering for headers, lists, and tables
-    if (safeContent.includes("|")) {
-      const lines = safeContent.split("\n");
-      
-      // Find table boundaries
-      const tableStartIndex = lines.findIndex(line => line.trim().includes("|"));
-      const tableEndIndex = lines.findIndex((line, index) => 
-        index > tableStartIndex && !line.trim().includes("|")
-      );
-      
-      if (tableStartIndex !== -1) {
-        // Extract table lines
-        const tableLines = lines
-          .slice(tableStartIndex, tableEndIndex === -1 ? undefined : tableEndIndex)
-          .filter(line => line.trim().includes("|"));
-        
-        // Skip separator lines (containing only dashes and pipes)
-        const dataLines = tableLines.filter(line => 
-          !line.trim().match(/^\s*\|?[\s\-\|]+\|?\s*$/)
-        );
-        
-        if (dataLines.length >= 1) {
-          // Parse headers from first data line
-          const headers = dataLines[0]
-            .split("|")
-            .filter(cell => cell.trim())
-            .map(cell => cell.trim());
-          
-          // Parse data rows from remaining lines
-          const rows = dataLines.slice(1).map(line => 
-            line.split("|")
-              .filter(cell => cell.trim())
-              .map(cell => cell.trim())
-          ).filter(row => row.length === headers.length);
-
-          return (
-            <div className="space-y-4">
-              {/* Text before table */}
-              {tableStartIndex > 0 && (
-                <div className={`text-sm leading-relaxed ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
-                  {isTyping ? (
-                    <TypingEffect 
-                      text={lines.slice(0, tableStartIndex).join("\n").trim()} 
-                      speed={5} 
-                      delay={200}
-                      onComplete={() => setTypingMessageId(null)}
-                    />
-                  ) : (
-                    renderMarkdownText(lines.slice(0, tableStartIndex).join("\n").trim(), role)
-                  )}
-                </div>
-              )}
-              
-              {/* Dynamic Table */}
-              <div className="overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead className="bg-slate-50/50 border-b border-slate-100">
-                      <tr>
-                        {headers.map((header, index) => (
-                          <th 
-                            key={index} 
-                            className={`px-5 py-3 font-semibold text-slate-500 uppercase tracking-wider ${
-                              index === headers.length - 1 ? "text-right" : "text-left"
-                            }`}
-                          >
-                            {header.replace(/\*\*/g, "")} {/* Remove bold markdown from headers */}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {rows.map((row, rowIndex) => (
-                        <tr key={rowIndex} className="hover:bg-slate-50 transition-colors">
-                          {row.map((cell, cellIndex) => (
-                            <td 
-                              key={cellIndex} 
-                              className={`px-5 py-3 ${
-                                cellIndex === 0 ? "text-slate-700 font-medium" : "text-slate-500"
-                              } ${
-                                cellIndex === headers.length - 1 ? "text-right text-slate-900 font-semibold" : ""
-                              }`}
-                            >
-                              {renderInlineMarkdown(cell, role)}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                {rows.length > 0 && (
-                  <div className="p-2.5 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
-                    <span className="text-[10px] text-slate-400 font-medium px-2">
-                      {rows.length} {rows.length === 1 ? "item" : "items"}
-                    </span>
-                    <button 
-                      onClick={() => navigator.clipboard.writeText(tableLines.join("\n"))}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-slate-500 hover:text-emerald-500 hover:bg-white border border-transparent hover:border-slate-200 rounded transition-all"
-                    >
-                      Copy Table
-                    </button>
-                  </div>
-                )}
-              </div>
-              
-              {/* Text after table */}
-              {tableEndIndex !== -1 && tableEndIndex < lines.length && (
-                <div className={`text-sm leading-relaxed font-medium ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
-                  {renderMarkdownText(lines.slice(tableEndIndex).join("\n").trim(), role)}
-                </div>
-              )}
-            </div>
-          );
-        }
-      }
-      
-      // Handle headers, lists, and other markdown without tables
-      return (
-        <div className={`text-sm leading-relaxed whitespace-pre-wrap ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
-          {isTyping ? (
-            <TypingEffect 
-              text={safeContent} 
-              speed={5} 
-              delay={200}
-              onComplete={() => setTypingMessageId(null)}
-            />
-          ) : (
-            renderMarkdownText(safeContent, role)
-          )}
         </div>
-      );
-    }
+      ),
+      thead: ({ children }: any) => (
+        <thead className="bg-slate-50/50 border-b border-slate-100">
+          {children}
+        </thead>
+      ),
+      th: ({ children, align }: any) => (
+        <th 
+          className={`px-5 py-3 font-semibold text-slate-500 uppercase tracking-wider ${
+            align === "right" ? "text-right" : "text-left"
+          }`}
+        >
+          {children}
+        </th>
+      ),
+      tbody: ({ children }: any) => (
+        <tbody className="divide-y divide-slate-50">
+          {children}
+        </tbody>
+      ),
+      tr: ({ children }: any) => (
+        <tr className="hover:bg-slate-50 transition-colors">
+          {children}
+        </tr>
+      ),
+      td: ({ children, align }: any) => (
+        <td 
+          className={`px-5 py-3 ${
+            align === "right" ? "text-right text-slate-900 font-semibold" : "text-slate-500"
+          }`}
+        >
+          {children}
+        </td>
+      ),
+      // Style headers
+      h1: ({ children }: any) => (
+        <h1 className={`text-xl font-bold mt-6 mb-4 ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
+          {children}
+        </h1>
+      ),
+      h2: ({ children }: any) => (
+        <h2 className={`text-lg font-bold mt-5 mb-3 ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
+          {children}
+        </h2>
+      ),
+      h3: ({ children }: any) => (
+        <h3 className={`text-base font-bold mt-4 mb-2 ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
+          {children}
+        </h3>
+      ),
+      h4: ({ children }: any) => (
+        <h4 className={`text-sm font-semibold mt-3 mb-2 ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
+          {children}
+        </h4>
+      ),
+      // Style lists
+      ul: ({ children }: any) => (
+        <ul className="space-y-1 mb-4">
+          {children}
+        </ul>
+      ),
+      ol: ({ children }: any) => (
+        <ol className="space-y-1 mb-4 list-decimal list-inside">
+          {children}
+        </ol>
+      ),
+      li: ({ children }: any) => (
+        <li className={`flex items-start gap-2 ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
+          {children}
+        </li>
+      ),
+      // Style paragraphs
+      p: ({ children }: any) => (
+        <p className={`mb-2 ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
+          {children}
+        </p>
+      ),
+      // Style blockquotes
+      blockquote: ({ children }: any) => (
+        <blockquote className={`border-l-4 border-slate-300 pl-4 py-2 my-4 ${role === "assistant" ? "text-slate-600" : "text-slate-300"}`}>
+          {children}
+        </blockquote>
+      ),
+      // Style code
+      code: ({ inline, children }: any) => (
+        <code className={`${inline ? 'bg-slate-100 px-1 py-0.5 rounded text-slate-800 text-xs' : 'block bg-slate-900 text-slate-100 p-4 rounded-lg text-sm my-4'}`}>
+          {children}
+        </code>
+      ),
+      // Style bold text
+      strong: ({ children }: any) => (
+        <strong className={`font-semibold ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
+          {children}
+        </strong>
+      ),
+      // Style links
+      a: ({ href, children }: any) => (
+        <a href={href} className="text-emerald-500 hover:text-emerald-600 underline">
+          {children}
+        </a>
+      ),
+    };
 
-    // Regular content with bold text support
     return (
-      <div className={`text-sm leading-relaxed whitespace-pre-wrap ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
+      <div className={`text-sm leading-relaxed ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
         {isTyping ? (
           <TypingEffect 
             text={safeContent} 
@@ -470,15 +391,12 @@ export default function ChatbotPage() {
             onComplete={() => setTypingMessageId(null)}
           />
         ) : (
-          safeContent.split("**").map((part, index) =>
-            index % 2 === 1 ? (
-              <strong key={index} className={`font-semibold ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
-                {part}
-              </strong>
-            ) : (
-              <span key={index}>{part}</span>
-            )
-          )
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={components}
+          >
+            {safeContent}
+          </ReactMarkdown>
         )}
       </div>
     );
@@ -797,7 +715,12 @@ export default function ChatbotPage() {
                 </span>
                 <div>|</div>
                 <span>Powered by</span>
-                <span className="opacity-70">OpenRouter</span>
+                <img 
+                  src="/logos/OpenAI-black-monoblossom.svg" 
+                  alt="OpenAI" 
+                  className="h-3 w-auto opacity-70"
+                />
+                <span>OpenAI</span>
               </div>
             </div>
           </div>
