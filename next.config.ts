@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
   env: {
     TZ: 'Asia/Manila',
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'noagsxfixjrgatexuwxm.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

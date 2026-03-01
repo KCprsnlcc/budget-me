@@ -1,102 +1,12 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Quote } from "lucide-react";
 import { Logo } from "@/components/shared/logo";
-
-const testimonialsData = {
-  login: [
-    {
-      name: "Marcus Alexander Roldan",
-      username: "@marcus.alexander",
-      image: "/profiles/marcus.alexander.webp",
-      content:
-        "BudgetMe helped me save enough for a down payment on my house in just 18 months. The goal tracking feature is fantastic!",
-    },
-    {
-      name: "Edward Baulita",
-      username: "@edward.bau",
-      image: "/profiles/edward.bau.webp",
-      content:
-        "As a freelancer with irregular income, BudgetMe has been a game-changer. The visualization tools help me see months ahead.",
-    },
-    {
-      name: "Kenneth Buela",
-      username: "@kenneth.b",
-      image: "/profiles/kenneth.b.webp",
-      content:
-        "The AI-powered insights have completely changed how I think about my spending habits. It predicted patterns I hadn't noticed.",
-    },
-  ],
-  register: [
-    {
-      name: "Adonis Vincent Villanueva",
-      username: "@adonis.vincent",
-      image: "/profiles/adonis.vincent.webp",
-      content:
-        "The interface is so clean and premium. It doesn't feel like a chore to manage my finances anymore. Truly a modern web experience.",
-    },
-    {
-      name: "Jamil Amilhamja",
-      username: "@jamil.amil",
-      image: "/profiles/jamil.amil.webp",
-      content:
-        "I love the joint account feature. Managing household expenses with my partner has never been this transparent and stress-free.",
-    },
-    {
-      name: "Sire Enopia",
-      username: "@sire.enopia",
-      image: "/profiles/sire.enopia.webp",
-      content:
-        "The AI reminders for upcoming bills have saved me from late fees multiple times. It's like having a personal assistant in my pocket.",
-    },
-  ],
-  forgot: [
-    {
-      name: "Abduradzmi Amdal",
-      username: "@abdu.amdal",
-      image: "/profiles/abdu.amdal.webp",
-      content:
-        "The expense categorization is spot on. I finally know where my money goes every month. It's so much easier than my old spreadsheet!",
-    },
-    {
-      name: "Saeed Nasre Shaidali",
-      username: "@saeed.nasre",
-      image: "/profiles/saeed.nasre.webp",
-      content:
-        "BudgetMe's debt payoff tracker is incredible. Seeing the progress bars move actually keeps me motivated to stay out of debt.",
-    },
-    {
-      name: "Khadz Akil",
-      username: "@khadz.akil",
-      image: "/profiles/khadz.akil.webp",
-      content:
-        "Highly recommended for students! The templates helped me manage my allowance and even save for a new laptop effortlessly.",
-    },
-  ],
-  "reset-password": [
-    {
-      name: "Marcus Alexander Roldan",
-      username: "@marcus.alexander",
-      image: "/profiles/marcus.alexander.webp",
-      content:
-        "BudgetMe helped me save enough for a down payment on my house in just 18 months. The goal tracking feature is fantastic!",
-    },
-    {
-      name: "Edward Baulita",
-      username: "@edward.bau",
-      image: "/profiles/edward.bau.webp",
-      content:
-        "As a freelancer with irregular income, BudgetMe has been a game-changer. The visualization tools help me see months ahead.",
-    },
-    {
-      name: "Kenneth Buela",
-      username: "@kenneth.b",
-      image: "/profiles/kenneth.b.webp",
-      content:
-        "The AI-powered insights have completely changed how I think about my spending habits. It predicted patterns I hadn't noticed.",
-    },
-  ],
-} as const;
+import { fetchTestimonials } from "@/components/landing/_lib/testimonial-service";
+import type { Testimonial } from "@/types";
 
 type PageType = "login" | "register" | "forgot" | "reset-password";
 
@@ -125,9 +35,27 @@ export function AuthPanel({
   page = "login",
   header,
 }: AuthPanelProps) {
-  const testimonials = testimonialsData[page];
-  const testimonial =
-    testimonials[Math.floor(Math.random() * testimonials.length)];
+  const [testimonial, setTestimonial] = useState<Testimonial | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadTestimonial() {
+      try {
+        const testimonials = await fetchTestimonials();
+        if (testimonials.length > 0) {
+          // Randomly select a testimonial
+          const randomIndex = Math.floor(Math.random() * testimonials.length);
+          setTestimonial(testimonials[randomIndex]);
+        }
+      } catch (error) {
+        console.error("Failed to load testimonial:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadTestimonial();
+  }, []);
 
   return (
     <>
@@ -251,6 +179,29 @@ export function AuthPanel({
               strokeWidth={0.5}
             />
           </g>
+          {/* Static paths - uncomment below and comment out above for animated version */}
+          <path
+            d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875"
+            stroke="url(#beam-gradient-0)"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            opacity={0.3}
+          />
+          <path
+            d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827"
+            stroke="url(#beam-gradient-1)"
+            strokeWidth={1}
+            strokeLinecap="round"
+            opacity={0.2}
+          />
+          <path
+            d="M-204 -381C-204 -381 -136 24 328 151C792 278 860 683 860 683"
+            stroke="url(#beam-gradient-0)"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            opacity={0.25}
+          />
+          {/* Animated paths - uncomment to restore animations
           <path
             d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875"
             stroke="url(#beam-gradient-0)"
@@ -272,6 +223,7 @@ export function AuthPanel({
             strokeLinecap="round"
             className="animate-beam-fast delay-200"
           />
+          */}
         </svg>
 
         {/* Top Right Action */}
@@ -287,33 +239,57 @@ export function AuthPanel({
 
         {/* Quote Content */}
         <div className="w-full max-w-[580px] relative z-10">
-          <div className="mb-8 p-3 bg-white w-fit rounded-xl border border-slate-100 shadow-sm">
-            <Quote className="h-6 w-6 rotate-180 fill-emerald-50 text-emerald-500" />
-          </div>
-
-          <blockquote className="mb-10 text-2xl font-normal leading-snug tracking-tight text-slate-900 [text-wrap:balance]">
-            {testimonial.content}
-          </blockquote>
-
-          <div className="flex items-center gap-4">
-            <div className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-white shadow-sm">
-              <Image
-                src={testimonial.image}
-                alt={testimonial.name}
-                width={40}
-                height={40}
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div>
-              <div className="text-sm font-medium text-slate-900">
-                {testimonial.name}
+          {isLoading ? (
+            <div className="animate-pulse">
+              <div className="mb-8 p-3 bg-slate-100 w-fit rounded-xl h-12 w-12" />
+              <div className="mb-10 space-y-3">
+                <div className="h-6 bg-slate-100 rounded w-full" />
+                <div className="h-6 bg-slate-100 rounded w-5/6" />
+                <div className="h-6 bg-slate-100 rounded w-4/6" />
               </div>
-              <div className="text-xs text-slate-500 font-medium">
-                {testimonial.username}
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-slate-100" />
+                <div className="space-y-2">
+                  <div className="h-4 bg-slate-100 rounded w-32" />
+                  <div className="h-3 bg-slate-100 rounded w-24" />
+                </div>
               </div>
             </div>
-          </div>
+          ) : testimonial ? (
+            <>
+              <div className="mb-8 p-3 bg-white w-fit rounded-xl border border-slate-100 shadow-sm">
+                <Quote className="h-6 w-6 rotate-180 fill-emerald-50 text-emerald-500" />
+              </div>
+
+              <blockquote className="mb-10 text-2xl font-normal leading-snug tracking-tight text-slate-900 [text-wrap:balance]">
+                {testimonial.text}
+              </blockquote>
+
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-white shadow-sm">
+                  <Image
+                    src={testimonial.avatar}
+                    alt={testimonial.name}
+                    width={40}
+                    height={40}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-slate-900">
+                    {testimonial.name}
+                  </div>
+                  <div className="text-xs text-slate-500 font-medium">
+                    {testimonial.handle}
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center text-slate-400">
+              <p className="text-sm">No testimonials available</p>
+            </div>
+          )}
         </div>
       </div>
     </>
