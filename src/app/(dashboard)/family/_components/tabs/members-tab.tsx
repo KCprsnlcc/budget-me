@@ -25,8 +25,8 @@ interface MembersTabProps {
   onUpdateRole: (memberId: string, role: string) => Promise<{ error: string | null }> | void;
   onApproveRequest: (requestId: string) => Promise<{ error: string | null }> | void;
   onDeclineRequest: (requestId: string) => Promise<{ error: string | null }> | void;
-  onEditFamily: () => void;
-  onDeleteFamily: () => void;
+  onEditFamily?: () => void;
+  onDeleteFamily?: () => void;
   onLeaveFamily: () => void;
   onJoinFamily: (familyId: string) => void;
   onRefreshFamilies: () => void;

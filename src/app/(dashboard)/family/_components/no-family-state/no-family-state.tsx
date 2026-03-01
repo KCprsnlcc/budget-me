@@ -535,7 +535,11 @@ export function NoFamilyState({
                                 <Button
                                   size="sm"
                                   className="text-xs bg-emerald-500 hover:bg-emerald-600 text-white border-0 hover:shadow-md transition-shadow"
-                                  onClick={() => onRespondToInvitation ? onRespondToInvitation(invitation.id, true) : onCheckInvitations()}
+                                  onClick={async () => {
+                                    if (onRespondToInvitation) {
+                                      await onRespondToInvitation(invitation.id, true);
+                                    }
+                                  }}
                                 >
                                   Accept
                                 </Button>
@@ -543,7 +547,11 @@ export function NoFamilyState({
                                   variant="outline"
                                   size="sm"
                                   className="text-xs border-slate-300 hover:bg-slate-50 hover:shadow-md transition-all"
-                                  onClick={() => onRespondToInvitation ? onRespondToInvitation(invitation.id, false) : onCheckInvitations()}
+                                  onClick={async () => {
+                                    if (onRespondToInvitation) {
+                                      await onRespondToInvitation(invitation.id, false);
+                                    }
+                                  }}
                                 >
                                   Decline
                                 </Button>

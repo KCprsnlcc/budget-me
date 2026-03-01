@@ -324,17 +324,32 @@ export default function FamilyPage() {
   // No family state - ALWAYS redirect/show no-family state component
   if (familyState === "no-family") {
     return (
-      <NoFamilyState
-        onCreateFamily={handleOpenCreateFamily}
-        onJoinFamily={handleJoinFamily}
-        onCheckInvitations={refetch}
-        publicFamilies={publicFamilies}
-        invitations={invitations}
-        joinRequests={joinRequests}
-        isLoading={mutating}
-        onRespondToInvitation={handleRespondToInvitation}
-        onSendJoinRequest={handleSendJoinRequest}
-      />
+      <>
+        <NoFamilyState
+          onCreateFamily={handleOpenCreateFamily}
+          onJoinFamily={handleJoinFamily}
+          onCheckInvitations={refetch}
+          publicFamilies={publicFamilies}
+          invitations={invitations}
+          joinRequests={joinRequests}
+          isLoading={mutating}
+          onRespondToInvitation={handleRespondToInvitation}
+          onSendJoinRequest={handleSendJoinRequest}
+        />
+        
+        {/* Modals for no-family state */}
+        <CreateFamilyModal
+          open={createFamilyModalOpen}
+          onClose={() => setCreateFamilyModalOpen(false)}
+          onCreateFamily={handleCreateFamily}
+        />
+        <JoinFamilyModal
+          open={joinFamilyModalOpen}
+          onClose={() => setJoinFamilyModalOpen(false)}
+          family={selectedFamilyForJoin}
+          onSendRequest={handleSendJoinRequest}
+        />
+      </>
     );
   }
 
