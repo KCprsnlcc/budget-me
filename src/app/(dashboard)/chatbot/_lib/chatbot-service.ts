@@ -29,16 +29,18 @@ export const AVAILABLE_MODELS: AIModel[] = [
   {
     id: "openai/gpt-4o-mini",
     name: "GPT-4o Mini",
-    description: "Fast & efficient",
+    description: "Fast & efficient with vision support",
     isDefault: false,
     isFree: false,
+    hasVision: true,
   },
   {
     id: "openai/gpt-4o",
     name: "GPT-4o",
-    description: "Latest GPT-4 model",
+    description: "Latest GPT-4 model with vision support",
     isDefault: false,
     isFree: false,
+    hasVision: true,
   },
   {
     id: "openai/o3-mini",
@@ -103,6 +105,9 @@ Guidelines:
 - Maintain a friendly, professional tone
 - Use "₱" (PHP) as the default currency symbol unless specified otherwise
 - Format tables using markdown table syntax when presenting data
+- You can analyze images uploaded by users, including receipts, bills, screenshots, and financial documents
+- When analyzing images, extract relevant financial information like amounts, dates, vendors, and suggest budget categories
+- Treat all uploaded files as private and confidential
 
 Current context: You are chatting with a BudgetSense user who wants help with their personal finances.`;
 
@@ -153,6 +158,18 @@ export async function sendMessageToAI(
       };
     }
 
+    // Check if any message has image attachments
+    const hasImageAttachment = messages.some(msg => msg.attachment && msg.attachment.type.startsWith('image/'));
+    
+    // Check if the selected model supports vision
+    const selectedModel = AVAILABLE_MODELS.find(model => model.id === modelId);
+    if (hasImageAttachment && selectedModel && !selectedModel.hasVision) {
+      return {
+        success: false,
+        error: `The selected model (${selectedModel.name}) doesn't support image analysis. Please switch to a model with vision support like GPT-4o or GPT-4o Mini, or remove the image and send a text message instead.`,
+      };
+    }
+
     // Fetch user's financial context from Supabase
     let userContext = "";
     try {
@@ -170,13 +187,41 @@ export async function sendMessageToAI(
     // Build messages array for API
     const apiMessages = [
       { role: "system", content: enhancedSystemPrompt },
-      ...messages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
+      ...messages.map((msg) => {
+        // If message has image attachment, use content array format
+        if (msg.attachment && msg.attachment.type.startsWith('image/') && msg.attachment.url) {
+          return {
+            role: msg.role,
+            content: [
+              {
+                type: "text",
+                text: msg.content,
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${msg.attachment.type};base64,${msg.attachment.url}`,
+                },
+              },
+            ],
+          };
+        }
+        
+        // Regular text message
+        return {
+          role: msg.role,
+          content: msg.content,
+        };
+      }),
     ];
 
     // Make API request to OpenRouter
+    console.log('Sending to AI:', {
+      model: modelId,
+      messageCount: apiMessages.length,
+      hasImages: apiMessages.some(msg => Array.isArray(msg.content))
+    });
+
     const response = await fetch(OPENROUTER_API_URL, {
       method: "POST",
       headers: {
@@ -196,13 +241,30 @@ export async function sendMessageToAI(
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.error?.message || `API error: ${response.status}`;
+      console.error('OpenRouter API Error:', errorData);
+      
+      // Check for image analysis errors
+      const hasImageAttachment = apiMessages.some(msg => Array.isArray(msg.content));
+      const errorMessage = errorData.error?.message || errorData.message || `API error: ${response.status}`;
       
       // Handle specific error cases
       if (response.status === 401) {
         return {
           success: false,
           error: "Invalid API key. Please check your OpenRouter API key configuration.",
+        };
+      }
+      if (response.status === 400) {
+        // Check if this is an image analysis error
+        if (hasImageAttachment && (errorMessage.includes('image') || errorMessage.includes('vision') || errorMessage.includes('multimodal'))) {
+          return {
+            success: false,
+            error: "The selected model doesn't support image analysis. Please delete this message with the image and try again with a model that supports images, or remove the image and send a text message instead.",
+          };
+        }
+        return {
+          success: false,
+          error: `Invalid request format: ${errorMessage}`,
         };
       }
       if (response.status === 429) {
@@ -408,49 +470,45 @@ export async function exportChat(
     const filename = `budgetsense-chat-${timestamp}`;
 
     switch (format) {
-      case "json": {
-        const data = JSON.stringify(
-          {
-            exported_at: new Date().toISOString(),
-            model: modelName,
-            message_count: messages.length,
-            messages: messages.map((msg) => ({
-              role: msg.role,
-              content: msg.content,
-              timestamp: msg.timestamp,
-              model: msg.model,
-            })),
-          },
-          null,
-          2
-        );
-        downloadFile(`${filename}.json`, data, "application/json");
-        return { success: true, filename: `${filename}.json`, data };
+      case "pdf": {
+        // Generate HTML for PDF-like formatting
+        const html = generatePDFHtml(messages, modelName);
+        downloadFile(`${filename}.pdf`, html, "text/html");
+        return { success: true, filename: `${filename}.pdf` };
       }
 
       case "markdown": {
-        let md = `# BudgetSense Chat Export\n\n`;
-        md += `**Exported:** ${new Date().toLocaleString()}\n\n`;
-        md += `**Model:** ${modelName}\n\n`;
-        md += `**Messages:** ${messages.length}\n\n`;
-        md += `---\n\n`;
+        // Generate Word-compatible document
+        let doc = `BudgetSense Chat Export\n\n`;
+        doc += `Exported: ${new Date().toLocaleString()}\n`;
+        doc += `Model: ${modelName}\n`;
+        doc += `Messages: ${messages.length}\n`;
+        doc += `${'='.repeat(50)}\n\n`;
 
         messages.forEach((msg) => {
-          const role = msg.role === "assistant" ? "🤖 BudgetSense AI" : "👤 You";
-          md += `### ${role} - ${msg.timestamp || "Unknown time"}\n\n`;
-          md += `${msg.content}\n\n`;
-          md += `---\n\n`;
+          const role = msg.role === "assistant" ? "BudgetSense AI" : "You";
+          doc += `${role} - ${msg.timestamp || "Unknown time"}\n`;
+          doc += `${'-'.repeat(30)}\n`;
+          doc += `${msg.content}\n\n`;
         });
 
-        downloadFile(`${filename}.md`, md, "text/markdown");
-        return { success: true, filename: `${filename}.md`, data: md };
+        downloadFile(`${filename}.doc`, doc, "application/msword");
+        return { success: true, filename: `${filename}.doc`, data: doc };
       }
 
-      case "pdf": {
-        // For PDF, generate HTML and download directly
-        const html = generatePDFHtml(messages, modelName);
-        downloadFile(`${filename}.html`, html, "text/html");
-        return { success: true, filename: `${filename}.html` };
+      case "json": {
+        // Generate CSV format
+        let csv = "Role,Timestamp,Content,Model\n";
+        messages.forEach((msg) => {
+          const role = msg.role === "assistant" ? "BudgetSense AI" : "You";
+          const content = `"${msg.content.replace(/"/g, '""')}"`; // Escape quotes
+          const timestamp = msg.timestamp || "";
+          const model = msg.model || "";
+          csv += `${role},"${timestamp}",${content},"${model}"\n`;
+        });
+
+        downloadFile(`${filename}.csv`, csv, "text/csv");
+        return { success: true, filename: `${filename}.csv`, data: csv };
       }
 
       default:

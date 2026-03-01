@@ -19,9 +19,9 @@ interface ExportChatModalProps {
 }
 
 const EXPORT_OPTIONS: { format: ExportFormat; label: string; desc: string; icon: React.ElementType }[] = [
-  { format: "pdf", label: "HTML Document", desc: "Download as HTML file for easy viewing", icon: FileText },
-  { format: "markdown", label: "Markdown", desc: "Plain text with formatting preserved", icon: FileCode },
-  { format: "json", label: "JSON", desc: "Raw data format for developers", icon: FileJson },
+  { format: "pdf", label: "PDF Document", desc: "Formatted for easy reading and sharing", icon: FileText },
+  { format: "markdown", label: "Word Document", desc: "Formatted for Microsoft Word", icon: FileCode },
+  { format: "json", label: "CSV File", desc: "Data format for spreadsheets", icon: FileJson },
 ];
 
 export function ExportChatModal({ open, onClose, onExport, isLoading = false }: ExportChatModalProps) {
@@ -48,7 +48,7 @@ export function ExportChatModal({ open, onClose, onExport, isLoading = false }: 
 
       {/* Body */}
       <ModalBody className="px-5 py-8">
-        <div className="text-center">
+        <div className="text-center animate-txn-in">
           {/* Export Icon */}
           <div className="w-16 h-16 rounded-full text-emerald-500 flex items-center justify-center mx-auto mb-6 border border-emerald-200">
             <Download size={28} />

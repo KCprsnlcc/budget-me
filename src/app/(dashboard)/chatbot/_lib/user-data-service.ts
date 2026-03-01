@@ -235,19 +235,32 @@ export async function fetchUserFinancialContext(
     });
 
     // Fetch family members
-    const { data: familyData } = await supabase
-      .from("family_members")
-      .select(
+    let familyData: any[] = [];
+    try {
+      const { data: data, error: familyError } = await supabase
+        .from("family_members")
+        .select(
+          `
+          id, role,
+          families!inner ( id, family_name ),
+          profiles!inner ( id, full_name, email )
         `
-        id, role,
-        families!inner ( id, family_name ),
-        profiles!inner ( id, full_name, email )
-      `
-      )
-      .eq("user_id", userId)
-      .eq("status", "active");
+        )
+        .eq("user_id", userId)
+        .eq("status", "active");
 
-    const familyMembers = (familyData ?? []).map((row: any) => ({
+      if (familyError) {
+        console.error('Family members query error:', familyError);
+        // Continue without family data if query fails
+      } else {
+        familyData = data || [];
+      }
+    } catch (error) {
+      console.error('Family members fetch error:', error);
+      // Continue without family data if fetch fails
+    }
+
+    const familyMembers = familyData.map((row: any) => ({
       id: row.id,
       name: row.profiles?.full_name ?? null,
       email: row.profiles?.email ?? "",

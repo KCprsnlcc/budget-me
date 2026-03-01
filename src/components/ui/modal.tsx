@@ -34,7 +34,7 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity"
       onClick={onClose}
       role="dialog"
       aria-modal="true"

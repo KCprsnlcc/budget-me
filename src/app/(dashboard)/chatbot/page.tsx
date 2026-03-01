@@ -225,6 +225,28 @@ export default function ChatbotPage() {
 
     const trimmedInput = input.trim();
     
+    // Convert file to base64 if it's an image
+    let base64Data: string | undefined;
+    if (attachedFile && attachedFile.type.startsWith('image/')) {
+      try {
+        base64Data = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = reader.result as string;
+            // Remove data URL prefix to get just the base64
+            const base64 = result.split(',')[1];
+            resolve(base64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(attachedFile);
+        });
+      } catch (error) {
+        console.error('Error converting image to base64:', error);
+        setError('Failed to process image');
+        return;
+      }
+    }
+    
     // Create user message with unique ID
     const userMessageId = `user-${Date.now()}-${Math.random()}`;
     const userMessage: MessageType = {
@@ -239,6 +261,7 @@ export default function ChatbotPage() {
         name: attachedFile.name,
         type: attachedFile.type,
         size: attachedFile.size,
+        url: base64Data,
       } : undefined,
     };
 

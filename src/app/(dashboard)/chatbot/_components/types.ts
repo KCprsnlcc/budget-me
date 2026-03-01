@@ -21,6 +21,7 @@ export type AIModel = {
   description: string;
   isDefault?: boolean;
   isFree?: boolean;
+  hasVision?: boolean;
 };
 
 export type ChatSuggestion = {
