@@ -1172,7 +1172,7 @@ export default function PredictionsPage() {
             {aiInsights?.growthPotential ? (
               <>
                 <p className="text-[13px] text-slate-700 leading-relaxed font-medium mb-3">
-                  Potential savings of {aiInsights.growthPotential} identified through spending optimization and category analysis.
+                  {aiInsights.growthAnalysis || `Potential savings of ${aiInsights.growthPotential} identified through spending optimization and category analysis.`}
                 </p>
                 <div className="mt-4 flex items-center gap-2 text-[10px] text-slate-600 font-semibold">
                   <TrendingUp size={12} />
@@ -1217,7 +1217,7 @@ export default function PredictionsPage() {
                           <div className="flex items-center gap-2 mt-2">
                             <Badge 
                               variant={rec.priority === "high" ? "danger" : rec.priority === "medium" ? "warning" : "neutral"}
-                              className="text-[9px] px-2 py-0.5"
+                              className="text-[9px] px-2 py-0.5 bg-transparent"
                             >
                               {rec.priority} priority
                             </Badge>
@@ -1244,7 +1244,7 @@ export default function PredictionsPage() {
                               aiInsights.riskLevel === "low" ? "success" : 
                               aiInsights.riskLevel === "medium" ? "warning" : "danger"
                             } 
-                            className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest"
+                            className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-transparent"
                           >
                             {aiInsights.riskLevel} Risk Environment
                           </Badge>
@@ -1289,7 +1289,41 @@ export default function PredictionsPage() {
             )}
 
             {/* Long-term Opportunity Map */}
-            {forecastData && forecastData.predicted.length > 0 && (
+            {aiInsights?.longTermOpportunities && aiInsights.longTermOpportunities.length > 0 ? (
+              <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="text-slate-500 p-2 rounded-lg">
+                      <File size={22} strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <h4 className="text-[13px] font-bold text-slate-900">Long-term Opportunity Map</h4>
+                      <p className="text-[10px] text-slate-500">AI-identified wealth building opportunities</p>
+                    </div>
+                  </div>
+                  <Badge variant="neutral" className="px-3 py-1 bg-transparent border border-slate-200 text-[10px] font-medium text-slate-600">
+                    {aiInsights.longTermOpportunities.length} {aiInsights.longTermOpportunities.length === 1 ? 'Opportunity' : 'Opportunities'}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {aiInsights.longTermOpportunities.map((opp, idx) => (
+                    <div key={idx} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <h5 className="text-sm font-semibold text-slate-800 leading-tight">{opp.opportunity}</h5>
+                        <Badge variant="success" className="text-[9px] px-2 py-0.5 whitespace-nowrap flex-shrink-0 bg-transparent">
+                          {opp.potentialReturn}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed mb-3">{opp.description}</p>
+                      <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                        <span className="text-[9px] text-slate-400 uppercase">Timeframe:</span>
+                        <span className="text-[10px] text-slate-600 font-medium">{opp.timeframe}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            ) : forecastData && forecastData.predicted.length > 0 ? (
               <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                   <div className="flex items-center gap-3">
@@ -1337,7 +1371,7 @@ export default function PredictionsPage() {
                   </div>
                 </div>
               </Card>
-            )}
+            ) : null}
           </div>
         )}
       </Card>
