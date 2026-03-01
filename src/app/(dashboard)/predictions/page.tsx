@@ -493,12 +493,12 @@ export default function PredictionsPage() {
       </div>
 
       {/* Prediction Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {/* Monthly Income Card */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        {/* Projected Income Growth Card */}
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
             <div className="text-slate-500 p-2 rounded-lg">
-              <Wallet size={22} strokeWidth={1.5} />
+              <TrendingUp size={22} strokeWidth={1.5} />
             </div>
             <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
               (summary?.incomeChange || 0) >= 0 
@@ -510,13 +510,16 @@ export default function PredictionsPage() {
               {summary?.incomeChange?.toFixed(1) || "0.0"}%
             </div>
           </div>
-          <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Monthly Income</div>
+          <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Projected Income Growth</div>
           <div className="text-xl font-semibold text-slate-900 tracking-tight">
             {formatCurrency(summary?.monthlyIncome || 0)}
           </div>
+          <div className="text-xs text-slate-500 mt-1">
+            Current month income
+          </div>
         </Card>
 
-        {/* Monthly Expenses Card */}
+        {/* Projected Expense Growth Card */}
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
             <div className="text-slate-500 p-2 rounded-lg">
@@ -532,35 +535,38 @@ export default function PredictionsPage() {
               {summary?.expenseChange?.toFixed(1) || "0.0"}%
             </div>
           </div>
-          <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Monthly Expenses</div>
+          <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Projected Expense Growth</div>
           <div className="text-xl font-semibold text-slate-900 tracking-tight">
             {formatCurrency(summary?.monthlyExpenses || 0)}
           </div>
+          <div className="text-xs text-slate-500 mt-1">
+            Current month expenses
+          </div>
         </Card>
 
-        {/* Net Balance Card */}
+        {/* Projected Savings Growth Card */}
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
             <div className="text-slate-500 p-2 rounded-lg">
               <PiggyBank size={22} strokeWidth={1.5} />
             </div>
+            <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
+              (summary?.savingsRate || 0) >= 10 
+                ? "text-emerald-700 border-emerald-100" 
+                : (summary?.savingsRate || 0) >= 5
+                ? "text-amber-700 border-amber-100"
+                : "text-red-700 border-red-100"
+            }`}>
+              <ChartBar size={12} />
+              {(summary?.savingsRate || 0).toFixed(1)}%
+            </div>
           </div>
-          <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Net Balance</div>
+          <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Projected Savings Growth</div>
           <div className="text-xl font-semibold text-slate-900 tracking-tight">
             {formatCurrency(summary?.netBalance || 0)}
           </div>
-        </Card>
-
-        {/* Savings Rate Card */}
-        <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
-          <div className="flex justify-between items-start mb-4">
-            <div className="text-slate-500 p-2 rounded-lg">
-              <ChartBar size={22} strokeWidth={1.5} />
-            </div>
-          </div>
-          <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Savings Rate</div>
-          <div className="text-xl font-semibold text-slate-900 tracking-tight">
-            {(summary?.savingsRate || 0).toFixed(1)}%
+          <div className="text-xs text-slate-500 mt-1">
+            Current month net balance
           </div>
         </Card>
       </div>

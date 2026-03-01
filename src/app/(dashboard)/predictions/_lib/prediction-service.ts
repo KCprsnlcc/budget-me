@@ -449,11 +449,13 @@ export async function analyzeTransactionBehavior(userId: string): Promise<Transa
  * Generate comprehensive prediction summary
  */
 export async function generatePredictionSummary(userId: string): Promise<PredictionSummary> {
+  // Get both historical data and forecast for accurate projections
+  const forecast = await generateIncomeExpenseForecast(userId);
   const transactions = await fetchHistoricalTransactions(userId, 3);
   const monthlyData = aggregateByMonth(transactions);
   const sortedMonths = Object.keys(monthlyData).sort();
 
-  if (sortedMonths.length === 0) {
+  if (sortedMonths.length === 0 && forecast.historical.length === 0) {
     return {
       monthlyIncome: 0,
       monthlyExpenses: 0,
@@ -464,16 +466,30 @@ export async function generatePredictionSummary(userId: string): Promise<Predict
     };
   }
 
-  const currentMonth = sortedMonths[sortedMonths.length - 1];
-  const income = monthlyData[currentMonth].income;
-  const expenses = monthlyData[currentMonth].expenses;
+  // Use forecast data for current month (last historical) and next month (first predicted)
+  const currentMonth = forecast.historical[forecast.historical.length - 1];
+  const nextMonth = forecast.predicted[0];
+
+  const income = currentMonth?.income || 0;
+  const expenses = currentMonth?.expense || 0;
   const net = income - expenses;
 
-  // Calculate changes
+  // Calculate projected changes based on forecast (predicted vs current)
   let incomeChange = null;
   let expenseChange = null;
 
-  if (sortedMonths.length >= 2) {
+  if (currentMonth && nextMonth) {
+    const predictedIncome = nextMonth.income;
+    const predictedExpenses = nextMonth.expense;
+
+    if (income > 0) {
+      incomeChange = ((predictedIncome - income) / income) * 100;
+    }
+    if (expenses > 0) {
+      expenseChange = ((predictedExpenses - expenses) / expenses) * 100;
+    }
+  } else if (sortedMonths.length >= 2) {
+    // Fallback to historical comparison if forecast not available
     const prevMonth = sortedMonths[sortedMonths.length - 2];
     const prevIncome = monthlyData[prevMonth].income;
     const prevExpenses = monthlyData[prevMonth].expenses;
