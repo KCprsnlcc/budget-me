@@ -38,26 +38,33 @@ export async function fetchTestimonials(): Promise<Testimonial[]> {
 }
 
 /**
- * Submit a new testimonial
+ * Submit a new testimonial via API route (allows unauthenticated users)
  */
 export async function submitTestimonial(
   input: TestimonialInput,
   userId?: string
 ): Promise<{ error: string | null }> {
   try {
-    const { error } = await supabase.from("testimonials").insert({
-      name: input.name,
-      handle: input.handle,
-      text: input.text,
-      avatar_url: input.avatar_url,
-      ring_color: input.ring_color || "ring-emerald-50",
-      status: "approved",
-      user_id: userId || null,
+    const response = await fetch("/api/testimonials", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: input.name,
+        handle: input.handle,
+        text: input.text,
+        avatar_url: input.avatar_url,
+        ring_color: input.ring_color || "ring-emerald-50",
+        user_id: userId || null,
+      }),
     });
 
-    if (error) {
-      console.error("Failed to submit testimonial:", error);
-      return { error: error.message };
+    const result = await response.json();
+
+    if (!response.ok || result.error) {
+      console.error("Failed to submit testimonial:", result.error);
+      return { error: result.error || "Failed to submit testimonial" };
     }
 
     return { error: null };
