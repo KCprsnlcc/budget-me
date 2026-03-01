@@ -523,13 +523,13 @@ export default function PredictionsPage() {
               </>
             ) : (
               <>
-                <Wand2 size={16} className="mr-2" />
+                <Wand2 size={16}  />
                 Generate Predictions
               </>
             )}
           </Button>
           <Button variant="outline" size="sm" onClick={handleHistory}>
-            <History size={16} className="mr-2" />
+            <History size={16} />
             View History
           </Button>
         </div>
@@ -952,7 +952,7 @@ export default function PredictionsPage() {
               {detailedInsights ? "View Less" : "View More"}
             </Button>
             <Button size="sm" onClick={handleGeneratePredictions} className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600">
-              <Wand2 size={14} className="mr-1" />
+              <Wand2 size={14} />
               Regenerate
             </Button>
           </div>
@@ -1032,7 +1032,7 @@ export default function PredictionsPage() {
                 </>
               ) : (
                 <>
-                  <Wand2 size={14} className="mr-1" />
+                  <Wand2 size={14} />
                   Regenerate
                 </>
               )}
