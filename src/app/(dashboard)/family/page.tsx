@@ -131,6 +131,11 @@ export default function FamilyPage() {
   // Get current user info
   const { user } = useAuth();
   const currentUserMember = members.find(m => m.email === user?.email);
+  
+  // Permission checks
+  const canInviteMembers = currentUserRole === "Owner" || currentUserRole === "Admin";
+  const canEditFamily = currentUserRole === "Owner" || currentUserRole === "Admin";
+  const canDeleteFamily = currentUserRole === "Owner";
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -348,12 +353,16 @@ export default function FamilyPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={handleOpenEditFamily}>
-              <Settings size={16} className="mr-1" /> Settings
-            </Button>
-            <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={handleOpenInviteMember}>
-              <Mail size={16} className="mr-1" /> Invite Member
-            </Button>
+            {canEditFamily && (
+              <Button variant="outline" size="sm" onClick={handleOpenEditFamily}>
+                <Settings size={16} className="mr-1" /> Settings
+              </Button>
+            )}
+            {canInviteMembers && (
+              <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={handleOpenInviteMember}>
+                <Mail size={16} className="mr-1" /> Invite Member
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -698,8 +707,8 @@ export default function FamilyPage() {
               onUpdateRole={(memberId, role) => handleUpdateRole(memberId, role)}
               onApproveRequest={(requestId) => handleApproveRequest(requestId)}
               onDeclineRequest={(requestId) => handleDeclineRequest(requestId)}
-              onEditFamily={handleOpenEditFamily}
-              onDeleteFamily={handleOpenDeleteFamily}
+              onEditFamily={canEditFamily ? handleOpenEditFamily : undefined}
+              onDeleteFamily={canDeleteFamily ? handleOpenDeleteFamily : undefined}
               onLeaveFamily={handleOpenLeaveFamily}
               onJoinFamily={(targetFamilyId) => handleJoinFamily(targetFamilyId)}
               onRefreshFamilies={refetch}
@@ -1019,9 +1028,10 @@ export default function FamilyPage() {
       <EditFamilyModal
         open={editFamilyModalOpen}
         onClose={() => setEditFamilyModalOpen(false)}
-        onDeleteFamily={handleOpenDeleteFamily}
+        onDeleteFamily={canDeleteFamily ? handleOpenDeleteFamily : undefined}
         onUpdateFamily={handleUpdateFamily}
         familyData={familyData}
+        canDeleteFamily={canDeleteFamily}
       />
       <DeleteFamilyModal
         open={deleteFamilyModalOpen}

@@ -80,6 +80,9 @@ export function MembersTab({
   const currentUserMember = members.find(m => m.email === currentUserEmail);
   const currentUserRole = currentUserMember?.role;
   const canManageRoles = currentUserRole === "Owner" || currentUserRole === "Admin";
+  const canInviteMembers = currentUserRole === "Owner" || currentUserRole === "Admin";
+  const canEditFamily = currentUserRole === "Owner" || currentUserRole === "Admin";
+  const canDeleteFamily = currentUserRole === "Owner";
 
   // Permission logic for removing members
   const canRemoveMember = (memberRole: string, memberEmail: string) => {

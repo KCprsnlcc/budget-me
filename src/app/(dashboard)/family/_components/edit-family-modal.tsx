@@ -22,9 +22,10 @@ interface EditFamilyModalProps {
   onDeleteFamily?: () => void;
   onUpdateFamily?: (form: EditFamilyData) => Promise<{ error: string | null }>;
   familyData?: Family | null;
+  canDeleteFamily?: boolean;
 }
 
-export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily, familyData }: EditFamilyModalProps) {
+export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily, familyData, canDeleteFamily = true }: EditFamilyModalProps) {
   const [currentStep, setCurrentStep] = useState<ModalStep>(1);
   const [formData, setFormData] = useState<EditFamilyData>({
     name: familyData?.name ?? "",
@@ -205,14 +206,16 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
               </Card>
 
               <div className="pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  className="flex items-center gap-2 text-[10px] font-bold text-red-500 hover:text-red-700 transition-colors"
-                  onClick={handleDeleteFamily}
-                >
-                  <Trash2 size={14} />
-                  DELETE FAMILY GROUP
-                </button>
+                {canDeleteFamily && onDeleteFamily && (
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 text-[10px] font-bold text-red-500 hover:text-red-700 transition-colors"
+                    onClick={handleDeleteFamily}
+                  >
+                    <Trash2 size={14} />
+                    DELETE FAMILY GROUP
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -273,7 +276,7 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
               </div>
             )}
 
-            {onDeleteFamily && (
+            {canDeleteFamily && onDeleteFamily && (
               <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
                 <Trash2 className="text-red-600 mt-0.5" size={16} />
                 <div className="text-xs text-red-800">
@@ -301,7 +304,7 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
             Back
           </Button>
           <div className="flex items-center gap-2">
-            {onDeleteFamily && currentStep === 2 && (
+            {canDeleteFamily && onDeleteFamily && currentStep === 2 && (
               <Button
                 variant="outline"
                 onClick={handleDeleteFamily}
