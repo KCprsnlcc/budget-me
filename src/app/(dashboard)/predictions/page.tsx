@@ -38,6 +38,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { 
   HistoryModal,
   DetailedBreakdownModal,
@@ -208,6 +209,12 @@ export default function PredictionsPage() {
     if (!user?.id) return;
 
     setIsGenerating(true);
+    
+    // Show loading toast
+    const loadingToast = toast.loading("Generating predictions...", {
+      description: "Analyzing your financial data with AI",
+    });
+
     try {
       // Save current prediction to history
       await savePrediction(user.id, {
@@ -245,11 +252,20 @@ export default function PredictionsPage() {
       setBehaviorInsights(newBehavior);
       setSummary(newSummaryData);
       
-      // Keep existing anomalies, savings opportunities, AI insights, and history
-      // These don't need to be regenerated every time
+      // Dismiss loading toast and show success
+      toast.success("Predictions generated successfully", {
+        id: loadingToast,
+        description: "Your financial forecast has been updated",
+      });
       
     } catch (error) {
       console.error("Error generating predictions:", error);
+      
+      // Show error toast
+      toast.error("Failed to generate predictions", {
+        id: loadingToast,
+        description: "Please try again later",
+      });
     } finally {
       setIsGenerating(false);
     }
