@@ -138,8 +138,26 @@ export default function PredictionsPage() {
     summary: string;
     riskLevel: "low" | "medium" | "high";
     riskScore: number;
+    riskAnalysis: string;
     growthPotential: string;
-    recommendations: string[];
+    growthAnalysis: string;
+    recommendations: Array<{
+      title: string;
+      description: string;
+      priority: "high" | "medium" | "low";
+      category: string;
+    }>;
+    riskMitigationStrategies: Array<{
+      strategy: string;
+      description: string;
+      impact: "high" | "medium" | "low";
+    }>;
+    longTermOpportunities: Array<{
+      opportunity: string;
+      description: string;
+      timeframe: string;
+      potentialReturn: string;
+    }>;
   } | null>(null);
   const [predictionHistory, setPredictionHistory] = useState<PredictionHistory[]>([]);
 
@@ -157,7 +175,6 @@ export default function PredictionsPage() {
         summaryData,
         anomaliesData,
         savings,
-        insights,
         history,
       ] = await Promise.all([
         generateIncomeExpenseForecast(user.id),
@@ -167,7 +184,6 @@ export default function PredictionsPage() {
         generatePredictionSummary(user.id),
         detectAnomalies(user.id),
         generateSavingsOpportunities(user.id),
-        generateAIInsights(user.id),
         fetchPredictionHistory(user.id),
       ]);
 
@@ -178,8 +194,29 @@ export default function PredictionsPage() {
       setSummary(summaryData);
       setAnomalies(anomaliesData);
       setSavingsOpportunities(savings);
-      setAiInsights(insights);
       setPredictionHistory(history);
+      
+      // Try to fetch latest AI insights from database
+      try {
+        const { fetchLatestAIInsights } = await import("./_lib/ai-insights-service");
+        const latestInsights = await fetchLatestAIInsights(user.id);
+        if (latestInsights) {
+          setAiInsights({
+            summary: latestInsights.financialSummary,
+            riskLevel: latestInsights.riskLevel,
+            riskScore: latestInsights.riskScore,
+            riskAnalysis: latestInsights.riskAnalysis,
+            growthPotential: latestInsights.growthPotential,
+            growthAnalysis: latestInsights.growthAnalysis,
+            recommendations: latestInsights.recommendations,
+            riskMitigationStrategies: latestInsights.riskMitigationStrategies,
+            longTermOpportunities: latestInsights.longTermOpportunities,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching AI insights:", error);
+        // Silent fail - AI insights are optional
+      }
     } catch (error) {
       console.error("Error fetching predictions:", error);
     } finally {
@@ -274,39 +311,55 @@ export default function PredictionsPage() {
 
   // Handler for AI Insights generation (separate from predictions)
   const handleGenerateAIInsights = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id || !forecastData || !summary || !expenseTypes) return;
 
     setIsGeneratingInsights(true);
     
     // Show loading toast
     const loadingToast = toast.loading("Generating AI insights...", {
-      description: "Analyzing your spending patterns and trends",
+      description: "Analyzing your spending patterns with OpenRouter AI",
     });
 
     try {
-      // Simulate processing delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Import AI insights service
+      const { generateAIFinancialInsights } = await import("./_lib/ai-insights-service");
 
-      // Fetch AI-specific insights
-      const [
-        newAnomalies,
-        newSavings,
-        newInsights,
-      ] = await Promise.all([
+      // Generate comprehensive AI insights using OpenRouter API
+      const aiResponse = await generateAIFinancialInsights({
+        userId: user.id,
+        forecastData,
+        categoryPredictions,
+        expenseTypes,
+        behaviorInsights,
+        summary,
+      });
+
+      // Update AI insights state with full structure
+      setAiInsights({
+        summary: aiResponse.financialSummary,
+        riskLevel: aiResponse.riskLevel,
+        riskScore: aiResponse.riskScore,
+        riskAnalysis: aiResponse.riskAnalysis,
+        growthPotential: aiResponse.growthPotential,
+        growthAnalysis: aiResponse.growthAnalysis,
+        recommendations: aiResponse.recommendations,
+        riskMitigationStrategies: aiResponse.riskMitigationStrategies,
+        longTermOpportunities: aiResponse.longTermOpportunities,
+      });
+
+      // Also update anomalies and savings opportunities
+      const [newAnomalies, newSavings] = await Promise.all([
         detectAnomalies(user.id),
         generateSavingsOpportunities(user.id),
-        generateAIInsights(user.id),
       ]);
 
-      // Update AI insights states
       setAnomalies(newAnomalies);
       setSavingsOpportunities(newSavings);
-      setAiInsights(newInsights);
       
       // Dismiss loading toast and show success
       toast.success("AI insights generated successfully", {
         id: loadingToast,
-        description: "Your financial intelligence has been updated",
+        description: "Your financial intelligence has been updated with real AI analysis",
       });
       
     } catch (error) {
@@ -320,7 +373,7 @@ export default function PredictionsPage() {
     } finally {
       setIsGeneratingInsights(false);
     }
-  }, [user?.id]);
+  }, [user?.id, forecastData, categoryPredictions, expenseTypes, behaviorInsights, summary]);
 
   // Combine historical and predicted for chart display
   const chartData = [
@@ -1049,16 +1102,26 @@ export default function PredictionsPage() {
               </div>
               <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Financial Summary</span>
             </div>
-            <p className="text-[13px] text-slate-700 leading-relaxed font-medium">
-              {aiInsights?.summary || "Your income stability is being analyzed. Add more transactions to see detailed insights."}
-            </p>
-            <div className="mt-4 flex items-center gap-2 text-[10px] text-slate-600 font-semibold">
-              <Star size={12} />
-              {savingsOpportunities.length > 0 
-                ? `${savingsOpportunities.length} savings opportunities detected`
-                : "Strong growth profile detected"
-              }
-            </div>
+            {aiInsights?.summary ? (
+              <>
+                <p className="text-[13px] text-slate-700 leading-relaxed font-medium">
+                  {aiInsights.summary}
+                </p>
+                <div className="mt-4 flex items-center gap-2 text-[10px] text-slate-600 font-semibold">
+                  <Star size={12} />
+                  {savingsOpportunities.length > 0 
+                    ? `${savingsOpportunities.length} savings opportunities detected`
+                    : "Financial patterns analyzed"
+                  }
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <Brain size={32} className="text-slate-300 mb-3" />
+                <p className="text-xs text-slate-500 mb-2">No AI insights available</p>
+                <p className="text-[10px] text-slate-400">Click "Regenerate" to generate insights</p>
+              </div>
+            )}
           </Card>
 
           {/* Risk Management Card */}
@@ -1068,24 +1131,34 @@ export default function PredictionsPage() {
                 <Shield size={20} strokeWidth={1.5} />
               </div>
               <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-              Risk Level: {aiInsights?.riskLevel ? aiInsights.riskLevel.charAt(0).toUpperCase() + aiInsights.riskLevel.slice(1) : "Low"}
-            </span>
-          </div>
-          <p className="text-[13px] text-slate-700 leading-relaxed">
-            {anomalies.length > 0 
-              ? `Detected ${anomalies.length} anomaly${anomalies.length > 1 ? "ies" : "y"} in your transactions. Review the flagged items for potential savings.`
-              : "No significant anomalies detected. Your spending patterns are consistent with historical trends."
-            }
-          </p>
-          <div className="w-full bg-slate-100 rounded-full h-1 mt-4">
-            <div 
-              className={`h-full rounded-full ${
-                (aiInsights?.riskScore || 0) < 30 ? "bg-emerald-500" : 
-                (aiInsights?.riskScore || 0) < 60 ? "bg-amber-500" : "bg-red-500"
-              }`} 
-              style={{ width: `${Math.min(100, aiInsights?.riskScore || 15)}%` }} 
-            />
-          </div>
+                Risk Level: {aiInsights?.riskLevel ? aiInsights.riskLevel.charAt(0).toUpperCase() + aiInsights.riskLevel.slice(1) : "Unknown"}
+              </span>
+            </div>
+            {aiInsights?.riskLevel ? (
+              <>
+                <p className="text-[13px] text-slate-700 leading-relaxed">
+                  {aiInsights.riskAnalysis || (anomalies.length > 0 
+                    ? `Detected ${anomalies.length} anomaly${anomalies.length > 1 ? "ies" : "y"} in your transactions. Review the flagged items for potential savings.`
+                    : "No significant anomalies detected. Your spending patterns are consistent with historical trends."
+                  )}
+                </p>
+                <div className="w-full bg-slate-100 rounded-full h-1 mt-4">
+                  <div 
+                    className={`h-full rounded-full ${
+                      aiInsights.riskScore < 30 ? "bg-emerald-500" : 
+                      aiInsights.riskScore < 60 ? "bg-amber-500" : "bg-red-500"
+                    }`} 
+                    style={{ width: `${Math.min(100, aiInsights.riskScore)}%` }} 
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <Shield size={32} className="text-slate-300 mb-3" />
+                <p className="text-xs text-slate-500 mb-2">No risk assessment available</p>
+                <p className="text-[10px] text-slate-400">Generate AI insights to see risk analysis</p>
+              </div>
+            )}
           </Card>
 
           {/* Smart Opportunities Card */}
@@ -1096,113 +1169,175 @@ export default function PredictionsPage() {
               </div>
               <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Growth Potential</span>
             </div>
-            <p className="text-[13px] text-slate-700 leading-relaxed">
-              Potential to save ₱3,500/mo by optimizing recurring transportation and dining subscriptions.
-            </p>
+            {aiInsights?.growthPotential ? (
+              <>
+                <p className="text-[13px] text-slate-700 leading-relaxed font-medium mb-3">
+                  Potential savings of {aiInsights.growthPotential} identified through spending optimization and category analysis.
+                </p>
+                <div className="mt-4 flex items-center gap-2 text-[10px] text-slate-600 font-semibold">
+                  <TrendingUp size={12} />
+                  {savingsOpportunities.length > 0 
+                    ? `${savingsOpportunities.length} optimization ${savingsOpportunities.length === 1 ? 'opportunity' : 'opportunities'} available`
+                    : forecastData?.summary.trendDirection === "up" 
+                    ? "Positive growth trajectory detected"
+                    : "Stable financial outlook"
+                  }
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <TrendingUp size={32} className="text-slate-300 mb-3" />
+                <p className="text-xs text-slate-500 mb-2">No growth analysis available</p>
+                <p className="text-[10px] text-slate-400">Generate AI insights to see opportunities</p>
+              </div>
+            )}
           </Card>
         </div>
 
         {/* Detailed Expansion (Hidden by default) */}
         {detailedInsights && (
           <div className="space-y-6 pt-6 border-t border-slate-100 animate-fade-in">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Actionable Recommendations */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <ListChecks size={16} className="text-emerald-500" />
-                  Smart Recommendations
-                </h4>
-                <div className="space-y-3">
-                  <div className="flex gap-4 p-4 rounded-xl border border-slate-100 hover:bg-slate-50 hover:shadow-sm transition-all group">
-                    <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-800 mb-1">Optimize Transportation Budget</p>
-                      <p className="text-xs text-slate-500 leading-relaxed font-light">Reduce variable commute costs by 15% through consolidated travel or alternative transport methods.</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4 p-4 rounded-xl border border-slate-100 hover:bg-slate-50 hover:shadow-sm transition-all group">
-                    <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-800 mb-1">Emergency Fund Allocation</p>
-                      <p className="text-xs text-slate-500 leading-relaxed font-light">Direct the projected ₱4,200 net savings into your liquid emergency fund to cover 6 months of expenses.</p>
-                    </div>
+            {aiInsights?.recommendations && aiInsights.recommendations.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Actionable Recommendations */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <ListChecks size={16} className="text-emerald-500" />
+                    Smart Recommendations
+                  </h4>
+                  <div className="space-y-3">
+                    {aiInsights.recommendations.slice(0, 3).map((rec, idx) => (
+                      <div key={idx} className="flex gap-4 p-4 rounded-xl border border-slate-100 hover:bg-slate-50 hover:shadow-sm transition-all group">
+                        <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                          {idx + 1}
+                        </span>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-800 mb-1">{rec.title}</p>
+                          <p className="text-xs text-slate-500 leading-relaxed font-light">{rec.description}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge 
+                              variant={rec.priority === "high" ? "danger" : rec.priority === "medium" ? "warning" : "neutral"}
+                              className="text-[9px] px-2 py-0.5"
+                            >
+                              {rec.priority} priority
+                            </Badge>
+                            <span className="text-[9px] text-slate-400">{rec.category}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
 
-              {/* Deep Risk Assessment */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <ShieldCheck size={16} className="text-amber-500" />
-                  Risk Mitigation Strategies
-                </h4>
-                <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="success" className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
-                        Low Risk Environment
-                      </Badge>
-                      <span className="text-[10px] text-slate-400 font-mono">CONFIDENCE: 94%</span>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex items-start gap-3 p-3 rounded-xl border border-slate-100">
-                        <div className="mt-1 w-2 h-2 rounded-full bg-slate-300"></div>
-                        <p className="text-[11px] text-slate-600 leading-relaxed">
-                          <span className="text-slate-900 font-bold">Data Anomaly:</span> Irregular utility spike detected in previous 30-day window (₱820). Recommend usage audit.
-                        </p>
+                {/* Deep Risk Assessment */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <ShieldCheck size={16} className="text-amber-500" />
+                    Risk Mitigation Strategies
+                  </h4>
+                  {aiInsights?.riskMitigationStrategies && aiInsights.riskMitigationStrategies.length > 0 ? (
+                    <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <Badge 
+                            variant={
+                              aiInsights.riskLevel === "low" ? "success" : 
+                              aiInsights.riskLevel === "medium" ? "warning" : "danger"
+                            } 
+                            className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest"
+                          >
+                            {aiInsights.riskLevel} Risk Environment
+                          </Badge>
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            SCORE: {aiInsights.riskScore}/100
+                          </span>
+                        </div>
+                        <div className="space-y-4">
+                          {aiInsights.riskMitigationStrategies.slice(0, 2).map((strategy, idx) => (
+                            <div key={idx} className="flex items-start gap-3 p-3 rounded-xl border border-slate-100">
+                              <div className={`mt-1 w-2 h-2 rounded-full ${
+                                strategy.impact === "high" ? "bg-red-500" : 
+                                strategy.impact === "medium" ? "bg-amber-500" : "bg-emerald-500"
+                              }`}></div>
+                              <p className="text-[11px] text-slate-600 leading-relaxed">
+                                <span className="text-slate-900 font-bold">{strategy.strategy}:</span> {strategy.description}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <div className="flex items-start gap-3 p-3 rounded-xl border border-slate-100">
-                        <div className="mt-1 w-2 h-2 rounded-full bg-slate-300"></div>
-                        <p className="text-[11px] text-slate-600 leading-relaxed">
-                          <span className="text-slate-900 font-bold">Mitigation:</span> No immediate action required for major assets. Financial buffer exceeds volatility margin by 18%.
-                        </p>
+                    </Card>
+                  ) : (
+                    <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
+                      <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <ShieldCheck size={32} className="text-slate-300 mb-3" />
+                        <p className="text-xs text-slate-500 mb-2">No risk strategies available</p>
+                        <p className="text-[10px] text-slate-400">Generate AI insights to see mitigation strategies</p>
                       </div>
-                    </div>
-                  </div>
-                </Card>
+                    </Card>
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Lightbulb size={48} className="text-slate-300 mb-4" />
+                <h4 className="text-sm font-semibold text-slate-700 mb-2">No Detailed Insights Available</h4>
+                <p className="text-xs text-slate-500 mb-4 max-w-md">
+                  Click the "Regenerate" button above to generate comprehensive AI insights including recommendations and risk strategies.
+                </p>
+              </div>
+            )}
 
             {/* Long-term Opportunity Map */}
-            <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="text-slate-500 p-2 rounded-lg">
-                    <File size={22} strokeWidth={1.5} />
+            {forecastData && forecastData.predicted.length > 0 && (
+              <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="text-slate-500 p-2 rounded-lg">
+                      <File size={22} strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <h4 className="text-[13px] font-bold text-slate-900">Long-term Opportunity Map</h4>
+                      <p className="text-[10px] text-slate-500">Predicted wealth accumulation markers</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-[13px] font-bold text-slate-900">Long-term Opportunity Map</h4>
-                    <p className="text-[10px] text-slate-500">Predicted wealth accumulation markers</p>
+                  <div className="flex gap-2">
+                    <Badge variant="neutral" className="px-3 py-1 bg-white border border-slate-200 text-[10px] font-medium text-slate-600">
+                      {forecastData.summary.trendDirection === "up" ? "Growth Trend" : "Stable Trend"}
+                    </Badge>
+                    <Badge variant="neutral" className="px-3 py-1 bg-white border border-slate-200 text-[10px] font-medium text-slate-600">
+                      {forecastData.summary.confidence}% Confidence
+                    </Badge>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Badge variant="neutral" className="px-3 py-1 bg-white border border-slate-200 text-[10px] font-medium text-slate-600">
-                    Investment Ready
-                  </Badge>
-                  <Badge variant="neutral" className="px-3 py-1 bg-white border border-slate-200 text-[10px] font-medium text-slate-600">
-                    Debt Free Trend
-                  </Badge>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                    <span className="text-[9px] text-slate-400 uppercase block mb-1">6-Month Goal</span>
+                    <span className="text-sm font-bold text-slate-800">
+                      {formatCurrency(forecastData.summary.maxSavings * 6)}
+                    </span>
+                  </div>
+                  <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                    <span className="text-[9px] text-slate-400 uppercase block mb-1">1-Year Projection</span>
+                    <span className="text-sm font-bold text-slate-800">
+                      {formatCurrency(forecastData.summary.maxSavings * 12)}
+                    </span>
+                  </div>
+                  <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                    <span className="text-[9px] text-slate-400 uppercase block mb-1">Avg Growth</span>
+                    <span className="text-sm font-bold text-slate-800">
+                      {forecastData.summary.avgGrowth > 0 ? "+" : ""}{forecastData.summary.avgGrowth.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                    <span className="text-[9px] text-slate-400 uppercase block mb-1">Trend Strength</span>
+                    <span className="text-sm font-bold text-slate-800">
+                      {((forecastData.summary.trendStrength || 0) * 100).toFixed(0)}%
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
-                  <span className="text-[9px] text-slate-400 uppercase block mb-1">6-Month Goal</span>
-                  <span className="text-sm font-bold text-slate-800">₱25,200</span>
-                </div>
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
-                  <span className="text-[9px] text-slate-400 uppercase block mb-1">1-Year Projection</span>
-                  <span className="text-sm font-bold text-slate-800">₱50,400</span>
-                </div>
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
-                  <span className="text-[9px] text-slate-400 uppercase block mb-1">Investment Ready</span>
-                  <span className="text-sm font-bold text-slate-800">Q3 2025</span>
-                </div>
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
-                  <span className="text-[9px] text-slate-400 uppercase block mb-1">Debt Free Target</span>
-                  <span className="text-sm font-bold text-slate-800">Q1 2026</span>
-                </div>
-              </div>
-            </Card>
+              </Card>
+            )}
           </div>
         )}
       </Card>
