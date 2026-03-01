@@ -7,6 +7,7 @@ import type { LucideIcon } from "lucide-react";
 
 /**
  * Monthly forecast data point for income vs expenses chart
+ * Enhanced with Prophet-style confidence intervals
  */
 export interface MonthlyForecast {
   month: string;
@@ -14,6 +15,15 @@ export interface MonthlyForecast {
   expense: number;
   type: "historical" | "current" | "predicted";
   confidence?: number;
+  // Prophet-style confidence intervals
+  incomeUpper?: number;
+  incomeLower?: number;
+  expenseUpper?: number;
+  expenseLower?: number;
+  // Prophet components
+  trend?: number;
+  seasonality?: number;
+  changepoint?: boolean;
 }
 
 /**
@@ -122,29 +132,41 @@ export interface AIInsights {
 }
 
 /**
- * Complete prediction result
+ * Prophet ML model details for a forecast
  */
-export interface PredictionResult {
-  forecast: {
-    historical: MonthlyForecast[];
-    predicted: MonthlyForecast[];
-    summary: {
-      avgGrowth: number;
-      maxSavings: number;
-      confidence: number;
-    };
-  };
-  categories: CategoryPrediction[];
-  expenseTypes: {
-    recurring: ExpenseTypeForecast;
-    variable: ExpenseTypeForecast;
-  };
-  behaviorInsights: TransactionBehaviorInsight[];
-  summary: PredictionSummary;
-  anomalies: AnomalyResult[];
-  savingsOpportunities: SavingsOpportunity[];
-  aiInsights: AIInsights;
-  history: PredictionHistory[];
+export interface ProphetModelDetails {
+  seasonalityMode: "additive" | "multiplicative";
+  yearlySeasonality: boolean;
+  weeklySeasonality: boolean;
+  changepointPriorScale: number;
+  seasonalityPriorScale: number;
+  uncertaintySamples: number;
+}
+
+/**
+ * Forecast accuracy metrics
+ */
+export interface ForecastAccuracy {
+  mape: number; // Mean Absolute Percentage Error
+  rmse: number; // Root Mean Square Error
+  mae: number;  // Mean Absolute Error
+  coverage: number; // Confidence interval coverage
+}
+
+/**
+ * Enhanced forecast summary with Prophet metrics
+ */
+export interface ForecastSummary {
+  avgGrowth: number;
+  maxSavings: number;
+  confidence: number;
+  // Prophet-specific metrics
+  modelDetails?: ProphetModelDetails;
+  accuracy?: ForecastAccuracy;
+  changepoints?: string[]; // Months with detected changepoints
+  seasonalityStrength?: number;
+  trendDirection?: "up" | "down" | "stable";
+  trendStrength?: number;
 }
 
 /**
@@ -179,6 +201,15 @@ export interface ForecastStep {
   expenses: number;
   savings: number;
   confidence: number;
+  // Prophet-style confidence intervals
+  incomeUpper: number;
+  incomeLower: number;
+  expenseUpper: number;
+  expenseLower: number;
+  // Trend indicators
+  incomeTrend: "up" | "down" | "stable";
+  expenseTrend: "up" | "down" | "stable";
+  changepoint?: boolean;
 }
 
 /**

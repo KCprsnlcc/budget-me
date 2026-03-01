@@ -1,6 +1,9 @@
-// Flexible transaction type for insights generation
-import { getPhilippinesNow, formatInPhilippines } from "@/lib/timezone";
+"use client";
 
+import { getPhilippinesNow, formatInPhilippines } from "@/lib/timezone";
+import type { DashboardSummary, RecentTransaction, BudgetProgress } from "./dashboard-service";
+
+// Flexible transaction type for insights generation
 export interface InsightsTransaction {
   id?: string;
   user_id?: string;
@@ -44,11 +47,6 @@ export interface InsightData {
  * Generate financial insights based on transactions, budgets, and financial data
  * Exact replication from useInsightsAndCharts.ts
  */
-"use client";
-
-import { getPhilippinesNow, formatInPhilippines } from "@/lib/timezone";
-import type { DashboardSummary, RecentTransaction, BudgetProgress } from "./dashboard-service";
-
 export function generateInsights(
   transactions: InsightsTransaction[],
   budgets: InsightsBudget[],

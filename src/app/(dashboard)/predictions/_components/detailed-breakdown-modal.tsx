@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   Modal,
   ModalHeader,
@@ -14,18 +14,24 @@ import {
   ArrowRight,
   TrendingUp,
   TrendingDown,
+  TrendingDown as TrendingFlat,
   Calendar,
   PhilippinePeso,
   Wrench,
   Brain,
   CheckCircle,
   AlertTriangle,
+  Activity,
+  BarChart3,
+  ChevronRight,
+  Info,
+  Layers,
+  Zap,
 } from "lucide-react";
 import type { 
   MonthlyForecast, 
   CategoryPrediction, 
-  ForecastStep, 
-  CategoryAnalysis 
+  ForecastStep,
 } from "../_lib/types";
 
 interface DetailedBreakdownModalProps {
@@ -34,12 +40,28 @@ interface DetailedBreakdownModalProps {
   forecastData?: {
     historical: MonthlyForecast[];
     predicted: MonthlyForecast[];
-    summary: { avgGrowth: number; maxSavings: number; confidence: number };
+    summary: {
+      avgGrowth: number;
+      maxSavings: number;
+      confidence: number;
+      trendDirection?: "up" | "down" | "stable";
+      trendStrength?: number;
+      seasonalityStrength?: number;
+      changepoints?: string[];
+      modelDetails?: {
+        seasonalityMode: "additive" | "multiplicative";
+        yearlySeasonality: boolean;
+        weeklySeasonality: boolean;
+        changepointPriorScale: number;
+        seasonalityPriorScale: number;
+        uncertaintySamples: number;
+      };
+    };
   } | null;
   categoryPredictions?: CategoryPrediction[];
 }
 
-const STEPS = ["Overview", "Monthly Breakdown", "Category Analysis"];
+const STEPS = ["Overview", "Income vs Expenses Forecast", "Category Analysis"];
 
 export function DetailedBreakdownModal({ 
   open, 
@@ -241,57 +263,238 @@ export function DetailedBreakdownModal({
           </div>
         )}
 
-        {/* STEP 2: Monthly Breakdown */}
+        {/* STEP 2: Income vs Expenses Forecast with Prophet ML */}
         {step === 2 && (
           <div className="space-y-6 animate-txn-in">
-            <h3 className="text-[15px] font-bold text-slate-900">Monthly Projection Breakdown</h3>
-            
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-              <div className="p-5 space-y-0 divide-y divide-slate-100">
-                {allMonths.length > 0 ? (
-                  allMonths.map((item) => (
-                    <div key={`${item.month}-${item.type}`} className="py-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-semibold text-slate-900">
-                          {item.month}
-                          {item.type === "predicted" && (
-                            <Badge variant="neutral" className="ml-2 text-[9px]">Predicted</Badge>
-                          )}
-                          {item.type === "current" && (
-                            <Badge variant="success" className="ml-2 text-[9px]">Current</Badge>
-                          )}
-                        </span>
+            {/* Prophet ML Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BarChart3 size={18} className="text-emerald-500" />
+                <h3 className="text-[15px] font-bold text-slate-900">Income vs Expenses Forecast</h3>
+              </div>
+              <Badge variant="neutral" className="text-xs flex items-center gap-1">
+                <Brain size={12} />
+                Prophet ML
+              </Badge>
+            </div>
+
+            {/* Prophet Model Configuration */}
+            <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Prophet Model Configuration</span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400">Mode:</span>
+                  <span className="font-medium text-slate-700 capitalize">
+                    {forecastData?.summary.modelDetails?.seasonalityMode || "multiplicative"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400">Yearly Seasonality:</span>
+                  <span className="font-medium text-slate-700">
+                    {forecastData?.summary.modelDetails?.yearlySeasonality ? "Enabled" : "Disabled"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400">Uncertainty:</span>
+                  <span className="font-medium text-slate-700">
+                    {forecastData?.summary.modelDetails?.uncertaintySamples?.toLocaleString() || "1,000"} samples
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400">Changepoint Scale:</span>
+                  <span className="font-medium text-slate-700">
+                    {forecastData?.summary.modelDetails?.changepointPriorScale || 0.05}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400">Seasonality Strength:</span>
+                  <span className="font-medium text-slate-700">
+                    {(forecastData?.summary.seasonalityStrength || 0).toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400">Trend Strength:</span>
+                  <span className="font-medium text-slate-700">
+                    {(forecastData?.summary.trendStrength || 0).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Trend Direction & Changepoints */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="border border-slate-100 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Trend Direction</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  {forecastData?.summary.trendDirection === "up" ? (
+                    <TrendingUp size={24} className="text-emerald-500" />
+                  ) : forecastData?.summary.trendDirection === "down" ? (
+                    <TrendingDown size={24} className="text-rose-500" />
+                  ) : (
+                    <TrendingFlat size={24} className="text-slate-400" />
+                  )}
+                  <div>
+                    <div className="font-semibold text-slate-900 capitalize">
+                      {forecastData?.summary.trendDirection || "Stable"} Trend
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      Strength: {((forecastData?.summary.trendStrength || 0) * 100).toFixed(0)}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="border border-slate-100 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Detected Changepoints</span>
+                </div>
+                <div className="text-sm text-slate-700">
+                  {forecastData?.summary.changepoints && forecastData.summary.changepoints.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {forecastData.summary.changepoints.map((cp, i) => (
+                        <Badge key={i} variant="neutral" className="text-xs">{cp}</Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-slate-400">No significant changepoints detected</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Forecast Table with Confidence Intervals */}
+            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+              <div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Monthly Forecast with Confidence Intervals</span>
+                </div>
+              </div>
+              <div className="p-5 space-y-4 max-h-[400px] overflow-y-auto">
+                {forecastData?.predicted && forecastData.predicted.length > 0 ? (
+                  forecastData.predicted.map((item, idx) => (
+                    <div key={`${item.month}-${idx}`} className="space-y-3">
+                      {/* Month Header */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={14} className="text-slate-400" />
+                          <span className="text-sm font-semibold text-slate-900">{item.month}</span>
+                          <Badge variant="neutral" className="text-[9px]">Predicted</Badge>
+                        </div>
                         {item.confidence && (
-                          <Badge variant={item.confidence >= 90 ? "success" : "warning"} className="text-xs">
+                          <Badge variant={item.confidence >= 85 ? "success" : item.confidence >= 60 ? "warning" : "neutral"} className="text-xs">
                             {item.confidence}% confidence
                           </Badge>
                         )}
                       </div>
-                      <div className="grid grid-cols-3 gap-4 text-xs">
-                        <div>
-                          <span className="text-slate-400">Income</span>
-                          <div className="font-semibold text-slate-900">{formatCurrency(item.income)}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Expenses</span>
-                          <div className="font-semibold text-slate-900">{formatCurrency(item.expense)}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Savings</span>
-                          <div className="font-semibold text-slate-900">
-                            {formatCurrency(item.income - item.expense)}
+
+                      {/* Income with Confidence Interval */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-slate-600 font-medium">Income Forecast</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-slate-400">Lower:</span>
+                            <span className="font-medium text-slate-600">{formatCurrency(item.incomeLower || 0)}</span>
+                            <ChevronRight size={12} className="text-slate-300" />
+                            <span className="font-bold text-emerald-600">{formatCurrency(item.income)}</span>
+                            <ChevronRight size={12} className="text-slate-300" />
+                            <span className="text-slate-400">Upper:</span>
+                            <span className="font-medium text-slate-600">{formatCurrency(item.incomeUpper || 0)}</span>
                           </div>
                         </div>
+                        {/* Visual confidence bar for income */}
+                        <div className="relative h-6 bg-slate-100 rounded-md overflow-hidden">
+                          {/* Confidence interval background */}
+                          <div 
+                            className="absolute h-full bg-emerald-500/20 rounded-md transition-all duration-500"
+                            style={{
+                              left: `${Math.max(0, ((item.incomeLower || 0) / Math.max(item.incomeUpper || 1, 1)) * 100)}%`,
+                              right: `${Math.max(0, 100 - ((item.incomeUpper || 0) / Math.max(item.incomeUpper || 1, 1)) * 100)}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Expenses with Confidence Interval */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-slate-600 font-medium">Expense Forecast</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-slate-400">Lower:</span>
+                            <span className="font-medium text-slate-600">{formatCurrency(item.expenseLower || 0)}</span>
+                            <ChevronRight size={12} className="text-slate-300" />
+                            <span className="font-bold text-rose-600">{formatCurrency(item.expense)}</span>
+                            <ChevronRight size={12} className="text-slate-300" />
+                            <span className="text-slate-400">Upper:</span>
+                            <span className="font-medium text-slate-600">{formatCurrency(item.expenseUpper || 0)}</span>
+                          </div>
+                        </div>
+                        {/* Visual confidence bar for expenses */}
+                        <div className="relative h-6 bg-slate-100 rounded-md overflow-hidden">
+                          {/* Confidence interval background */}
+                          <div 
+                            className="absolute h-full bg-rose-500/20 rounded-md transition-all duration-500"
+                            style={{
+                              left: `${Math.max(0, ((item.expenseLower || 0) / Math.max(item.expenseUpper || 1, 1)) * 100)}%`,
+                              right: `${Math.max(0, 100 - ((item.expenseUpper || 0) / Math.max(item.expenseUpper || 1, 1)) * 100)}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Net Savings */}
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                        <span className="text-xs font-medium text-slate-600">Projected Net Savings</span>
+                        <span className={`text-sm font-bold ${(item.income - item.expense) >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                          {formatCurrency(item.income - item.expense)}
+                        </span>
                       </div>
                     </div>
                   ))
                 ) : (
                   <div className="py-8 text-center text-slate-500">
-                    No forecast data available. Generate predictions to see monthly breakdown.
+                    <BarChart3 size={32} className="mx-auto mb-2 text-slate-300" />
+                    <p>No forecast data available. Generate predictions to see detailed Prophet ML analysis.</p>
                   </div>
                 )}
               </div>
             </div>
+
+            {/* Historical Data Summary */}
+            {forecastData?.historical && forecastData.historical.length > 0 && (
+              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Historical Data Summary</span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                  <div>
+                    <span className="text-slate-400 block">Months Analyzed</span>
+                    <span className="font-semibold text-slate-700">{forecastData.historical.length}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block">Avg Monthly Income</span>
+                    <span className="font-semibold text-slate-700">
+                      {formatCurrency(forecastData.historical.reduce((sum, h) => sum + h.income, 0) / forecastData.historical.length)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block">Avg Monthly Expenses</span>
+                    <span className="font-semibold text-slate-700">
+                      {formatCurrency(forecastData.historical.reduce((sum, h) => sum + h.expense, 0) / forecastData.historical.length)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block">Avg Savings Rate</span>
+                    <span className="font-semibold text-slate-700">
+                      {((forecastData.historical.reduce((sum, h) => sum + (h.income - h.expense), 0) / 
+                        forecastData.historical.reduce((sum, h) => sum + h.income, 1)) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -104,7 +104,23 @@ export default function PredictionsPage() {
   const [forecastData, setForecastData] = useState<{
     historical: MonthlyForecast[];
     predicted: MonthlyForecast[];
-    summary: { avgGrowth: number; maxSavings: number; confidence: number };
+    summary: { 
+      avgGrowth: number; 
+      maxSavings: number; 
+      confidence: number;
+      trendDirection?: "up" | "down" | "stable";
+      trendStrength?: number;
+      seasonalityStrength?: number;
+      changepoints?: string[];
+      modelDetails?: {
+        seasonalityMode: "additive" | "multiplicative";
+        yearlySeasonality: boolean;
+        weeklySeasonality: boolean;
+        changepointPriorScale: number;
+        seasonalityPriorScale: number;
+        uncertaintySamples: number;
+      };
+    };
   } | null>(null);
   
   const [categoryPredictions, setCategoryPredictions] = useState<CategoryPrediction[]>([]);

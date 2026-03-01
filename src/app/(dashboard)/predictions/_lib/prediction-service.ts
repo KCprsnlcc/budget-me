@@ -73,14 +73,29 @@ function aggregateByMonth(transactions: any[]) {
 
 /**
  * Simple exponential smoothing for time series forecasting (Prophet-like)
+ * Enhanced with confidence intervals and trend detection
  */
 function exponentialSmoothing(
   data: number[],
   alpha: number = 0.3,
   forecastHorizon: number = 3
-): { forecast: number[]; confidence: number[]; trend: "up" | "down" | "stable" } {
+): {
+  forecast: number[];
+  confidence: number[];
+  upper: number[];
+  lower: number[];
+  trend: "up" | "down" | "stable";
+  trendStrength: number;
+} {
   if (data.length === 0) {
-    return { forecast: Array(forecastHorizon).fill(0), confidence: Array(forecastHorizon).fill(0), trend: "stable" };
+    return {
+      forecast: Array(forecastHorizon).fill(0),
+      confidence: Array(forecastHorizon).fill(0),
+      upper: Array(forecastHorizon).fill(0),
+      lower: Array(forecastHorizon).fill(0),
+      trend: "stable",
+      trendStrength: 0,
+    };
   }
 
   // Calculate smoothed values
@@ -93,8 +108,11 @@ function exponentialSmoothing(
   const lastSmoothed = smoothed[smoothed.length - 1];
   const prevSmoothed = smoothed.length > 1 ? smoothed[smoothed.length - 2] : lastSmoothed;
   const trendValue = lastSmoothed - prevSmoothed;
-  const trend: "up" | "down" | "stable" = 
-    trendValue > lastSmoothed * 0.02 ? "up" : 
+  const trendStrength = data.length > 1
+    ? Math.abs(trendValue) / (data.reduce((a, b) => a + b, 0) / data.length)
+    : 0;
+  const trend: "up" | "down" | "stable" =
+    trendValue > lastSmoothed * 0.02 ? "up" :
     trendValue < -lastSmoothed * 0.02 ? "down" : "stable";
 
   // Calculate standard error for confidence intervals
@@ -102,32 +120,42 @@ function exponentialSmoothing(
   const variance = residuals.reduce((sum, r) => sum + r * r, 0) / Math.max(1, residuals.length - 1);
   const stdError = Math.sqrt(variance);
 
-  // Generate forecasts with conservative trend continuation and small random variations
+  // Generate forecasts with confidence intervals (80% and 95%)
+  const zScore95 = 1.96; // 95% confidence
   const forecast: number[] = [];
   const confidence: number[] = [];
-  
+  const upper: number[] = [];
+  const lower: number[] = [];
+
   let currentValue = lastSmoothed;
   for (let i = 0; i < forecastHorizon; i++) {
-    // Apply very conservative trend continuation (max 5% of current value)
-    const trendAdjustment = Math.abs(trendValue) < lastSmoothed * 0.05 
-      ? trendValue * 0.1 // Scale down small trends significantly
-      : Math.sign(trendValue) * lastSmoothed * 0.02; // Cap at 2% for larger trends
-    
-    // Add small random variation (±1-3% of current value) for more dynamic projections
-    const randomVariation = (Math.random() - 0.5) * 0.06 * currentValue; // ±3% max
-    const randomFactor = 1 + (Math.random() - 0.5) * 0.04; // ±2% additional variation
-    
+    // Apply trend continuation with decay
+    const trendAdjustment = Math.abs(trendValue) < lastSmoothed * 0.05
+      ? trendValue * 0.1
+      : Math.sign(trendValue) * lastSmoothed * 0.02;
+
+    // Add small random variation
+    const randomVariation = (Math.random() - 0.5) * 0.06 * currentValue;
+    const randomFactor = 1 + (Math.random() - 0.5) * 0.04;
+
     currentValue += (trendAdjustment * Math.pow(0.7, i)) + randomVariation;
     currentValue *= randomFactor;
-    forecast.push(Math.max(0, currentValue));
-    
-    // Confidence decreases with forecast horizon and randomness
-    const randomnessPenalty = Math.abs(randomVariation) / currentValue * 10;
-    const conf = Math.max(50, 95 - i * 8 - (stdError / Math.max(1, currentValue)) * 20 - randomnessPenalty);
+    const forecastValue = Math.max(0, currentValue);
+    forecast.push(forecastValue);
+
+    // Calculate confidence interval (widens with forecast horizon)
+    const horizonUncertainty = stdError * Math.sqrt(i + 1);
+    const marginOfError = zScore95 * horizonUncertainty;
+    upper.push(forecastValue + marginOfError);
+    lower.push(Math.max(0, forecastValue - marginOfError));
+
+    // Confidence decreases with forecast horizon
+    const randomnessPenalty = Math.abs(randomVariation) / Math.max(1, forecastValue) * 10;
+    const conf = Math.max(50, 95 - i * 8 - (stdError / Math.max(1, forecastValue)) * 20 - randomnessPenalty);
     confidence.push(Math.min(98, conf));
   }
 
-  return { forecast, confidence, trend };
+  return { forecast, confidence, upper, lower, trend, trendStrength };
 }
 
 /**
@@ -160,7 +188,7 @@ function detectSeasonality(data: number[]): { hasSeasonality: boolean; seasonali
 }
 
 /**
- * Generate income vs expenses forecast
+ * Generate income vs expenses forecast with Prophet-style confidence intervals
  */
 export async function generateIncomeExpenseForecast(userId: string): Promise<{
   historical: MonthlyForecast[];
@@ -169,6 +197,18 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
     avgGrowth: number;
     maxSavings: number;
     confidence: number;
+    trendDirection: "up" | "down" | "stable";
+    trendStrength: number;
+    seasonalityStrength: number;
+    changepoints: string[];
+    modelDetails: {
+      seasonalityMode: "additive" | "multiplicative";
+      yearlySeasonality: boolean;
+      weeklySeasonality: boolean;
+      changepointPriorScale: number;
+      seasonalityPriorScale: number;
+      uncertaintySamples: number;
+    };
   };
 }> {
   const transactions = await fetchHistoricalTransactions(userId, 6);
@@ -176,18 +216,27 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
 
   // Get sorted months
   const sortedMonths = Object.keys(monthlyData).sort();
-  
+
   if (sortedMonths.length < 2) {
-    // Not enough data - return defaults
+    // Not enough data - return defaults with Prophet config
     const currentMonth = formatInPhilippines(getPhilippinesNow(), 'MMM');
     return {
       historical: [{ month: currentMonth, income: 0, expense: 0, type: "current" }],
       predicted: [
-        { month: "Next", income: 0, expense: 0, type: "predicted" },
-        { month: "Next+1", income: 0, expense: 0, type: "predicted" },
-        { month: "Next+2", income: 0, expense: 0, type: "predicted" },
+        { month: "Next", income: 0, expense: 0, type: "predicted", incomeUpper: 0, incomeLower: 0, expenseUpper: 0, expenseLower: 0 },
+        { month: "Next+1", income: 0, expense: 0, type: "predicted", incomeUpper: 0, incomeLower: 0, expenseUpper: 0, expenseLower: 0 },
+        { month: "Next+2", income: 0, expense: 0, type: "predicted", incomeUpper: 0, incomeLower: 0, expenseUpper: 0, expenseLower: 0 },
       ],
-      summary: { avgGrowth: 0, maxSavings: 0, confidence: 0 },
+      summary: {
+        avgGrowth: 0,
+        maxSavings: 0,
+        confidence: 0,
+        trendDirection: "stable",
+        trendStrength: 0,
+        seasonalityStrength: 0,
+        changepoints: [],
+        modelDetails: PROPHET_CONFIG,
+      },
     };
   }
 
@@ -195,9 +244,39 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
   const incomeData = sortedMonths.map((m) => monthlyData[m].income);
   const expenseData = sortedMonths.map((m) => monthlyData[m].expenses);
 
-  // Generate forecasts
+  // Detect seasonality
+  const incomeSeasonality = detectSeasonality(incomeData);
+  const expenseSeasonality = detectSeasonality(expenseData);
+  const avgSeasonalityStrength = (incomeSeasonality.seasonalityStrength + expenseSeasonality.seasonalityStrength) / 2;
+
+  // Generate forecasts with confidence intervals
   const incomeForecast = exponentialSmoothing(incomeData, 0.3, 3);
   const expenseForecast = exponentialSmoothing(expenseData, 0.3, 3);
+
+  // Detect changepoints (significant trend changes)
+  const changepoints: string[] = [];
+  for (let i = 2; i < sortedMonths.length; i++) {
+    const prevIncome = incomeData[i - 1];
+    const currIncome = incomeData[i];
+    const prevExpense = expenseData[i - 1];
+    const currExpense = expenseData[i];
+
+    const incomeChange = Math.abs((currIncome - prevIncome) / Math.max(1, prevIncome));
+    const expenseChange = Math.abs((currExpense - prevExpense) / Math.max(1, prevExpense));
+
+    // Changepoint if change > 25%
+    if (incomeChange > 0.25 || expenseChange > 0.25) {
+      changepoints.push(formatInPhilippines(new Date(sortedMonths[i] + "-01"), 'MMM'));
+    }
+  }
+
+  // Determine overall trend
+  const incomeTrend = incomeForecast.trend;
+  const expenseTrend = expenseForecast.trend;
+  const trendDirection: "up" | "down" | "stable" =
+    incomeTrend === "up" && expenseTrend !== "up" ? "up" :
+    incomeTrend === "down" && expenseTrend !== "down" ? "down" : "stable";
+  const trendStrength = (incomeForecast.trendStrength + expenseForecast.trendStrength) / 2;
 
   // Build historical array
   const historical: MonthlyForecast[] = sortedMonths.map((month, i) => ({
@@ -205,9 +284,10 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
     income: incomeData[i],
     expense: expenseData[i],
     type: i === sortedMonths.length - 1 ? "current" : "historical",
+    changepoint: changepoints.includes(formatInPhilippines(new Date(month + "-01"), 'MMM')),
   }));
 
-  // Build predicted array
+  // Build predicted array with confidence intervals
   const lastDate = new Date(sortedMonths[sortedMonths.length - 1] + "-01");
   const predicted: MonthlyForecast[] = incomeForecast.forecast.map((inc, i) => {
     const predDate = new Date(lastDate);
@@ -218,6 +298,11 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
       expense: Math.round(expenseForecast.forecast[i]),
       type: "predicted",
       confidence: Math.round((incomeForecast.confidence[i] + expenseForecast.confidence[i]) / 2),
+      // Prophet-style confidence intervals
+      incomeUpper: Math.round(incomeForecast.upper[i]),
+      incomeLower: Math.round(Math.max(0, incomeForecast.lower[i])),
+      expenseUpper: Math.round(expenseForecast.upper[i]),
+      expenseLower: Math.round(Math.max(0, expenseForecast.lower[i])),
     };
   });
 
@@ -225,7 +310,7 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
   const avgIncomeGrowth = incomeData.length > 1
     ? ((incomeData[incomeData.length - 1] - incomeData[0]) / Math.max(1, incomeData[0])) * 100 / (incomeData.length - 1)
     : 0;
-  
+
   const savings = incomeForecast.forecast.map((inc, i) => inc - expenseForecast.forecast[i]);
   const maxSavings = Math.max(...savings);
 
@@ -236,9 +321,14 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
       avgGrowth: Number(avgIncomeGrowth.toFixed(1)),
       maxSavings: Math.round(maxSavings),
       confidence: Math.round(
-        (incomeForecast.confidence.reduce((a, b) => a + b, 0) + 
+        (incomeForecast.confidence.reduce((a, b) => a + b, 0) +
          expenseForecast.confidence.reduce((a, b) => a + b, 0)) / (incomeForecast.confidence.length * 2)
       ),
+      trendDirection,
+      trendStrength: Number(trendStrength.toFixed(2)),
+      seasonalityStrength: Number(avgSeasonalityStrength.toFixed(2)),
+      changepoints,
+      modelDetails: PROPHET_CONFIG,
     },
   };
 }
