@@ -844,33 +844,94 @@ export async function respondToInvitation(
     return { error: "This invitation has expired." };
   }
 
-  const { error: updateErr } = await supabase
+  if (accept) {
+    // Get the inviter's role and family info to determine the new member's role
+    const { data: family, error: familyErr } = await supabase
+      .from("families")
+      .select("created_by")
+      .eq("id", invitation.family_id)
+      .single();
+
+    if (familyErr) return { error: "Family not found." };
+
+    // Get inviter's membership to check their role
+    const { data: inviterMembership, error: inviterErr } = await supabase
+      .from("family_members")
+      .select("role")
+      .eq("family_id", invitation.family_id)
+      .eq("user_id", invitation.invited_by)
+      .eq("status", "active")
+      .maybeSingle();
+
+    // Determine the role based on inviter's role
+    // If invited by owner (created_by), assign the role from invitation or default to member
+    // If invited by admin, assign member role
+    let assignedRole = "member";
+    const isInvitedByOwner = invitation.invited_by === family.created_by;
+    
+    if (isInvitedByOwner) {
+      // Owner can assign any role specified in the invitation
+      assignedRole = invitation.role ?? "member";
+    } else if (inviterMembership?.role === "admin") {
+      // Admin can only invite as member
+      assignedRole = "member";
+    } else {
+      // Default to member for any other case
+      assignedRole = "member";
+    }
+
+    // Check if user already has a membership record (could be removed/inactive)
+    const { data: existingMembership, error: checkErr } = await supabase
+      .from("family_members")
+      .select("id, status")
+      .eq("family_id", invitation.family_id)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (existingMembership) {
+      // User was previously a member - reactivate their membership
+      const { error: updateErr } = await supabase
+        .from("family_members")
+        .update({
+          role: assignedRole,
+          status: "active",
+          can_create_goals: assignedRole === "admin",
+          can_view_budgets: true,
+          can_contribute_goals: true,
+          invited_by: invitation.invited_by,
+          invited_at: invitation.created_at,
+          joined_at: formatDateForInput(getPhilippinesNow()),
+          updated_at: formatDateForInput(getPhilippinesNow()),
+        })
+        .eq("id", existingMembership.id);
+
+      if (updateErr) return { error: updateErr.message };
+    } else {
+      // New member - create membership record
+      const { error: memberErr } = await supabase.from("family_members").insert({
+        family_id: invitation.family_id,
+        user_id: userId,
+        role: assignedRole,
+        status: "active",
+        can_create_goals: assignedRole === "admin",
+        can_view_budgets: true,
+        can_contribute_goals: true,
+        invited_by: invitation.invited_by,
+        invited_at: invitation.created_at,
+        joined_at: formatDateForInput(getPhilippinesNow()),
+      });
+
+      if (memberErr) return { error: memberErr.message };
+    }
+  }
+
+  // Delete invitation record AFTER successfully processing (accept or decline)
+  const { error: deleteErr } = await supabase
     .from("family_invitations")
-    .update({
-      status: accept ? "accepted" : "declined",
-      responded_at: formatDateForInput(getPhilippinesNow()),
-    })
+    .delete()
     .eq("id", invitationId);
 
-  if (updateErr) return { error: updateErr.message };
-
-  if (accept) {
-    // Add user as member
-    const { error: memberErr } = await supabase.from("family_members").insert({
-      family_id: invitation.family_id,
-      user_id: userId,
-      role: invitation.role ?? "member",
-      status: "active",
-      can_create_goals: invitation.role === "admin",
-      can_view_budgets: true,
-      can_contribute_goals: true,
-      invited_by: invitation.invited_by,
-      invited_at: invitation.created_at,
-      joined_at: formatDateForInput(getPhilippinesNow()),
-    });
-
-    if (memberErr) return { error: memberErr.message };
-  }
+  if (deleteErr) return { error: deleteErr.message };
 
   return { error: null };
 }
@@ -925,31 +986,55 @@ export async function respondToJoinRequest(
 
   if (fetchErr) return { error: fetchErr.message };
 
-  const { error: updateErr } = await supabase
+  if (approve) {
+    // Check if user already has a membership record (could be removed/inactive)
+    const { data: existingMembership, error: checkErr } = await supabase
+      .from("family_members")
+      .select("id, status")
+      .eq("family_id", request.family_id)
+      .eq("user_id", request.user_id)
+      .maybeSingle();
+
+    if (existingMembership) {
+      // User was previously a member - reactivate their membership
+      const { error: updateErr } = await supabase
+        .from("family_members")
+        .update({
+          role: "member",
+          status: "active",
+          can_create_goals: false,
+          can_view_budgets: true,
+          can_contribute_goals: true,
+          joined_at: formatDateForInput(getPhilippinesNow()),
+          updated_at: formatDateForInput(getPhilippinesNow()),
+        })
+        .eq("id", existingMembership.id);
+
+      if (updateErr) return { error: updateErr.message };
+    } else {
+      // New member - create membership record
+      const { error: memberErr } = await supabase.from("family_members").insert({
+        family_id: request.family_id,
+        user_id: request.user_id,
+        role: "member",
+        status: "active",
+        can_create_goals: false,
+        can_view_budgets: true,
+        can_contribute_goals: true,
+        joined_at: formatDateForInput(getPhilippinesNow()),
+      });
+
+      if (memberErr) return { error: memberErr.message };
+    }
+  }
+
+  // Delete join request record AFTER successfully processing (approve or decline)
+  const { error: deleteErr } = await supabase
     .from("family_join_requests")
-    .update({
-      status: approve ? "approved" : "declined",
-      reviewed_by: reviewerId,
-      reviewed_at: formatDateForInput(getPhilippinesNow()),
-    })
+    .delete()
     .eq("id", requestId);
 
-  if (updateErr) return { error: updateErr.message };
-
-  if (approve) {
-    const { error: memberErr } = await supabase.from("family_members").insert({
-      family_id: request.family_id,
-      user_id: request.user_id,
-      role: "member",
-      status: "active",
-      can_create_goals: false,
-      can_view_budgets: true,
-      can_contribute_goals: true,
-      joined_at: formatDateForInput(getPhilippinesNow()),
-    });
-
-    if (memberErr) return { error: memberErr.message };
-  }
+  if (deleteErr) return { error: deleteErr.message };
 
   return { error: null };
 }
