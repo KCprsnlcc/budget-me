@@ -477,26 +477,7 @@ export async function exportChat(
         return { success: true, filename: `${filename}.pdf` };
       }
 
-      case "markdown": {
-        // Generate Word-compatible document
-        let doc = `BudgetSense Chat Export\n\n`;
-        doc += `Exported: ${new Date().toLocaleString()}\n`;
-        doc += `Model: ${modelName}\n`;
-        doc += `Messages: ${messages.length}\n`;
-        doc += `${'='.repeat(50)}\n\n`;
-
-        messages.forEach((msg) => {
-          const role = msg.role === "assistant" ? "BudgetSense AI" : "You";
-          doc += `${role} - ${msg.timestamp || "Unknown time"}\n`;
-          doc += `${'-'.repeat(30)}\n`;
-          doc += `${msg.content}\n\n`;
-        });
-
-        downloadFile(`${filename}.doc`, doc, "application/msword");
-        return { success: true, filename: `${filename}.doc`, data: doc };
-      }
-
-      case "json": {
+      case "csv": {
         // Generate CSV format
         let csv = "Role,Timestamp,Content,Model\n";
         messages.forEach((msg) => {
