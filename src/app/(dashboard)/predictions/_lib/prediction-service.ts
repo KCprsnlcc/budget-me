@@ -467,27 +467,29 @@ export async function generatePredictionSummary(userId: string): Promise<Predict
     };
   }
 
-  // Use forecast data for current month (last historical) and next month (first predicted)
-  const currentMonth = forecast.historical[forecast.historical.length - 1];
+  // Use projected next month data for the cards (what's coming next month)
   const nextMonth = forecast.predicted[0];
+  const currentMonth = forecast.historical[forecast.historical.length - 1];
 
-  const income = currentMonth?.income || 0;
-  const expenses = currentMonth?.expense || 0;
-  const net = income - expenses;
+  const projectedIncome = nextMonth?.income || 0;
+  const projectedExpenses = nextMonth?.expense || 0;
+  const projectedNet = projectedIncome - projectedExpenses;
+
+  // Use current month data for comparison and change calculation
+  const currentIncome = currentMonth?.income || 0;
+  const currentExpenses = currentMonth?.expense || 0;
+  const currentNet = currentIncome - currentExpenses;
 
   // Calculate projected changes based on forecast (predicted vs current)
   let incomeChange = null;
   let expenseChange = null;
 
   if (currentMonth && nextMonth) {
-    const predictedIncome = nextMonth.income;
-    const predictedExpenses = nextMonth.expense;
-
-    if (income > 0) {
-      incomeChange = ((predictedIncome - income) / income) * 100;
+    if (currentIncome > 0) {
+      incomeChange = ((projectedIncome - currentIncome) / currentIncome) * 100;
     }
-    if (expenses > 0) {
-      expenseChange = ((predictedExpenses - expenses) / expenses) * 100;
+    if (currentExpenses > 0) {
+      expenseChange = ((projectedExpenses - currentExpenses) / currentExpenses) * 100;
     }
   } else if (sortedMonths.length >= 2) {
     // Fallback to historical comparison if forecast not available
@@ -496,18 +498,18 @@ export async function generatePredictionSummary(userId: string): Promise<Predict
     const prevExpenses = monthlyData[prevMonth].expenses;
 
     if (prevIncome > 0) {
-      incomeChange = ((income - prevIncome) / prevIncome) * 100;
+      incomeChange = ((currentIncome - prevIncome) / prevIncome) * 100;
     }
     if (prevExpenses > 0) {
-      expenseChange = ((expenses - prevExpenses) / prevExpenses) * 100;
+      expenseChange = ((currentExpenses - prevExpenses) / prevExpenses) * 100;
     }
   }
 
   return {
-    monthlyIncome: income,
-    monthlyExpenses: expenses,
-    netBalance: net,
-    savingsRate: income > 0 ? (net / income) * 100 : 0,
+    monthlyIncome: projectedIncome,      // Show projected income for next month
+    monthlyExpenses: projectedExpenses, // Show projected expenses for next month
+    netBalance: projectedNet,            // Show projected net balance for next month
+    savingsRate: projectedIncome > 0 ? (projectedNet / projectedIncome) * 100 : 0,
     incomeChange,
     expenseChange,
   };

@@ -515,7 +515,7 @@ export default function PredictionsPage() {
             {formatCurrency(summary?.monthlyIncome || 0)}
           </div>
           <div className="text-xs text-slate-500 mt-1">
-            Current month income
+            Next month projection
           </div>
         </Card>
 
@@ -540,7 +540,7 @@ export default function PredictionsPage() {
             {formatCurrency(summary?.monthlyExpenses || 0)}
           </div>
           <div className="text-xs text-slate-500 mt-1">
-            Current month expenses
+            Next month projection
           </div>
         </Card>
 
@@ -566,7 +566,7 @@ export default function PredictionsPage() {
             {formatCurrency(summary?.netBalance || 0)}
           </div>
           <div className="text-xs text-slate-500 mt-1">
-            Current month net balance
+            Next month projection
           </div>
         </Card>
       </div>
