@@ -97,7 +97,10 @@ export default function PredictionsPage() {
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [detailedBreakdownModalOpen, setDetailedBreakdownModalOpen] = useState(false);
   const [detailedInsights, setDetailedInsights] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isCheckingExistingData, setIsCheckingExistingData] = useState(true);
+  const [hasGeneratedPredictions, setHasGeneratedPredictions] = useState(false);
+  const [hasGeneratedInsights, setHasGeneratedInsights] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const [hoveredBar, setHoveredBar] = useState<{month: string, type: 'income' | 'expense', value: number, dataType: 'historical' | 'predicted'} | null>(null);
@@ -161,9 +164,14 @@ export default function PredictionsPage() {
   } | null>(null);
   const [predictionHistory, setPredictionHistory] = useState<PredictionHistory[]>([]);
 
-  // Fetch all prediction data
-  const fetchPredictions = useCallback(async () => {
+  // Fetch all prediction data - only called explicitly after user action
+  const fetchPredictions = useCallback(async (isInitialLoad = false) => {
     if (!user?.id) return;
+
+    // Skip automatic fetch on initial load - require explicit user action
+    if (isInitialLoad) {
+      return;
+    }
 
     setLoading(true);
     try {
@@ -196,6 +204,8 @@ export default function PredictionsPage() {
       setSavingsOpportunities(savings);
       setPredictionHistory(history);
       
+      setHasGeneratedPredictions(true);
+      
       // Try to fetch latest AI insights from database
       try {
         const { fetchLatestAIInsights } = await import("./_lib/ai-insights-service");
@@ -212,6 +222,7 @@ export default function PredictionsPage() {
             riskMitigationStrategies: latestInsights.riskMitigationStrategies,
             longTermOpportunities: latestInsights.longTermOpportunities,
           });
+          setHasGeneratedInsights(true);
         }
       } catch (error) {
         console.error("Error fetching AI insights:", error);
@@ -224,12 +235,90 @@ export default function PredictionsPage() {
     }
   }, [user?.id]);
 
-  // Initial load
+  // Removed automatic initial load - predictions only fetched on explicit user action
+  // useEffect(() => {
+  //   if (user?.id) {
+  //     fetchPredictions();
+  //   }
+  // }, [user?.id, fetchPredictions]);
+
+  // Check for existing saved data on initial load
   useEffect(() => {
-    if (user?.id) {
-      fetchPredictions();
-    }
-  }, [user?.id, fetchPredictions]);
+    const loadExistingData = async () => {
+      if (!user?.id) {
+        setIsCheckingExistingData(false);
+        return;
+      }
+      
+      try {
+        // Fetch prediction history to check for existing data
+        const history = await fetchPredictionHistory(user.id);
+        
+        if (history && history.length > 0) {
+          // User has existing predictions - load the latest data
+          setPredictionHistory(history);
+          setHasGeneratedPredictions(true);
+          
+          // Also fetch the latest prediction data
+          const [
+            forecast,
+            categories,
+            expenseTypeData,
+            behavior,
+            summaryData,
+            anomaliesData,
+            savings,
+          ] = await Promise.all([
+            generateIncomeExpenseForecast(user.id),
+            generateCategoryForecast(user.id),
+            analyzeExpenseTypes(user.id),
+            analyzeTransactionBehavior(user.id),
+            generatePredictionSummary(user.id),
+            detectAnomalies(user.id),
+            generateSavingsOpportunities(user.id),
+          ]);
+
+          setForecastData(forecast);
+          setCategoryPredictions(categories);
+          setExpenseTypes(expenseTypeData);
+          setBehaviorInsights(behavior);
+          setSummary(summaryData);
+          setAnomalies(anomaliesData);
+          setSavingsOpportunities(savings);
+          
+          // Try to fetch latest AI insights from database
+          try {
+            const { fetchLatestAIInsights } = await import("./_lib/ai-insights-service");
+            const latestInsights = await fetchLatestAIInsights(user.id);
+            if (latestInsights) {
+              setAiInsights({
+                summary: latestInsights.financialSummary,
+                riskLevel: latestInsights.riskLevel,
+                riskScore: latestInsights.riskScore,
+                riskAnalysis: latestInsights.riskAnalysis,
+                growthPotential: latestInsights.growthPotential,
+                growthAnalysis: latestInsights.growthAnalysis,
+                recommendations: latestInsights.recommendations,
+                riskMitigationStrategies: latestInsights.riskMitigationStrategies,
+                longTermOpportunities: latestInsights.longTermOpportunities,
+              });
+              setHasGeneratedInsights(true);
+            }
+          } catch (error) {
+            console.error("Error fetching AI insights:", error);
+            // Silent fail - AI insights are optional
+          }
+        }
+      } catch (error) {
+        console.error("Error checking for existing predictions:", error);
+        // Silent fail - no existing data is not an error
+      } finally {
+        setIsCheckingExistingData(false);
+      }
+    };
+
+    loadExistingData();
+  }, [user?.id]);
 
   const handleHistory = useCallback(() => {
     setHistoryModalOpen(true);
@@ -289,6 +378,7 @@ export default function PredictionsPage() {
       setExpenseTypes(newExpenseTypeData);
       setBehaviorInsights(newBehavior);
       setSummary(newSummaryData);
+      setHasGeneratedPredictions(true);
       
       // Dismiss loading toast and show success
       toast.success("Predictions generated successfully", {
@@ -355,6 +445,7 @@ export default function PredictionsPage() {
 
       setAnomalies(newAnomalies);
       setSavingsOpportunities(newSavings);
+      setHasGeneratedInsights(true);
       
       // Dismiss loading toast and show success
       toast.success("AI insights generated successfully", {
@@ -387,8 +478,8 @@ export default function PredictionsPage() {
     1
   );
 
-  // Loading state
-  if (loading) {
+  // Loading state for explicit generation or initial data check
+  if (loading || isCheckingExistingData) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
@@ -655,8 +746,56 @@ export default function PredictionsPage() {
         </div>
       </div>
 
-      {/* Prediction Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      {/* Prediction Summary Cards - No Data State */}
+      {!hasGeneratedPredictions ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {/* Projected Income Growth Card - No Data */}
+          <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
+            <div className="flex justify-between items-start mb-4">
+              <div className="text-slate-300 p-2 rounded-lg bg-slate-50">
+                <TrendingUp size={22} strokeWidth={1.5} />
+              </div>
+            </div>
+            <div className="text-slate-400 text-xs font-medium mb-1 uppercase tracking-wide">Projected Income Growth</div>
+            <div className="flex flex-col items-center justify-center py-4 text-center">
+              <Brain size={24} className="text-slate-300 mb-2" />
+              <p className="text-xs text-slate-500 mb-1">No predictions yet</p>
+              <p className="text-[10px] text-slate-400">Generate to see forecast</p>
+            </div>
+          </Card>
+
+          {/* Projected Expense Growth Card - No Data */}
+          <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
+            <div className="flex justify-between items-start mb-4">
+              <div className="text-slate-300 p-2 rounded-lg bg-slate-50">
+                <ShoppingBag size={22} strokeWidth={1.5} />
+              </div>
+            </div>
+            <div className="text-slate-400 text-xs font-medium mb-1 uppercase tracking-wide">Projected Expense Growth</div>
+            <div className="flex flex-col items-center justify-center py-4 text-center">
+              <Brain size={24} className="text-slate-300 mb-2" />
+              <p className="text-xs text-slate-500 mb-1">No predictions yet</p>
+              <p className="text-[10px] text-slate-400">Generate to see forecast</p>
+            </div>
+          </Card>
+
+          {/* Projected Savings Growth Card - No Data */}
+          <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
+            <div className="flex justify-between items-start mb-4">
+              <div className="text-slate-300 p-2 rounded-lg bg-slate-50">
+                <PiggyBank size={22} strokeWidth={1.5} />
+              </div>
+            </div>
+            <div className="text-slate-400 text-xs font-medium mb-1 uppercase tracking-wide">Projected Savings Growth</div>
+            <div className="flex flex-col items-center justify-center py-4 text-center">
+              <Brain size={24} className="text-slate-300 mb-2" />
+              <p className="text-xs text-slate-500 mb-1">No predictions yet</p>
+              <p className="text-[10px] text-slate-400">Generate to see forecast</p>
+            </div>
+          </Card>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {/* Projected Income Growth Card */}
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
@@ -739,9 +878,29 @@ export default function PredictionsPage() {
           </div>
         </Card>
       </div>
+      )}
 
-      {/* Interactive Prediction Chart */}
-      <Card className="p-6 mb-8 hover:shadow-md transition-all group cursor-pointer">
+      {/* Interactive Prediction Chart - No Data State */}
+      {!hasGeneratedPredictions ? (
+        <Card className="p-6 mb-8 hover:shadow-md transition-all group cursor-pointer">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">Income vs Expenses Forecast</h3>
+              <p className="text-xs text-slate-500 mt-1 font-light">Prophet ML predictions with confidence intervals</p>
+            </div>
+          </div>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+              <TrendingUp size={32} className="text-slate-300" />
+            </div>
+            <h4 className="text-sm font-semibold text-slate-700 mb-2">No Forecast Data Available</h4>
+            <p className="text-xs text-slate-500 mb-4 max-w-md">
+              Generate predictions to see your income and expense forecasts powered by Prophet machine learning.
+            </p>
+          </div>
+        </Card>
+      ) : (
+        <Card className="p-6 mb-8 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h3 className="text-sm font-semibold text-slate-900">Income vs Expenses Forecast</h3>
@@ -868,102 +1027,159 @@ export default function PredictionsPage() {
           </Button>
         </div>
       </Card>
-              {/* Category Predictions Table */}
-      <Card className="overflow-hidden mb-8 hover:shadow-md transition-all group cursor-pointer">
-        <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h3 className="text-sm font-semibold text-slate-900">Category Spending Forecast</h3>
-            <p className="text-xs text-slate-500 mt-1 font-light">Detailed predictions for each spending category</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input 
-                type="text" 
-                placeholder="Filter categories..."
-                className="pl-9 pr-4 py-1.5 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full lg:w-48"
-              />
+      )}
+              
+      {/* Category Predictions Table - No Data State */}
+      {!hasGeneratedPredictions ? (
+        <Card className="overflow-hidden mb-8 hover:shadow-md transition-all group cursor-pointer">
+          <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">Category Spending Forecast</h3>
+              <p className="text-xs text-slate-500 mt-1 font-light">Detailed predictions for each spending category</p>
             </div>
           </div>
-        </div>
-        <div className="overflow-x-auto">
-          <div className="max-h-64 overflow-y-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold sticky top-0 bg-white">
-                  <th className="px-6 py-4">Category</th>
-                  <th className="px-6 py-4 text-right">Historical Avg.</th>
-                  <th className="px-6 py-4 text-right">Predicted</th>
-                  <th className="px-6 py-4 text-right">Change</th>
-                  <th className="px-6 py-4 text-center">Trend</th>
-                  <th className="px-6 py-4 text-center">Confidence</th>
-                </tr>
-              </thead>
-              <tbody className="text-xs divide-y divide-slate-50">
-              {categoryPredictions.length > 0 ? (
-                categoryPredictions.map((pred) => {
-                  const Icon = getCategoryIcon(pred.category);
-                  return (
-                    <tr key={pred.category} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg text-emerald-600 flex items-center justify-center">
-                            <Icon size={18} />
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+              <ChartBar size={32} className="text-slate-300" />
+            </div>
+            <h4 className="text-sm font-semibold text-slate-700 mb-2">No Category Predictions</h4>
+            <p className="text-xs text-slate-500 mb-4 max-w-md">
+              Generate predictions to see category-specific spending forecasts.
+            </p>
+          </div>
+        </Card>
+      ) : (
+        <Card className="overflow-hidden mb-8 hover:shadow-md transition-all group cursor-pointer">
+          <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">Category Spending Forecast</h3>
+              <p className="text-xs text-slate-500 mt-1 font-light">Detailed predictions for each spending category</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="Filter categories..."
+                  className="pl-9 pr-4 py-1.5 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full lg:w-48"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <div className="max-h-64 overflow-y-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold sticky top-0 bg-white">
+                    <th className="px-6 py-4">Category</th>
+                    <th className="px-6 py-4 text-right">Historical Avg.</th>
+                    <th className="px-6 py-4 text-right">Predicted</th>
+                    <th className="px-6 py-4 text-right">Change</th>
+                    <th className="px-6 py-4 text-center">Trend</th>
+                    <th className="px-6 py-4 text-center">Confidence</th>
+                  </tr>
+                </thead>
+                <tbody className="text-xs divide-y divide-slate-50">
+                {categoryPredictions.length > 0 ? (
+                  categoryPredictions.map((pred) => {
+                    const Icon = getCategoryIcon(pred.category);
+                    return (
+                      <tr key={pred.category} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg text-emerald-600 flex items-center justify-center">
+                              <Icon size={18} />
+                            </div>
+                            <span className="font-medium text-slate-900">{pred.category}</span>
                           </div>
-                          <span className="font-medium text-slate-900">{pred.category}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right text-slate-500">
-                        {formatCurrency(pred.actual)}
-                      </td>
-                      <td className="px-6 py-4 text-right font-bold text-slate-900">
-                        {formatCurrency(pred.predicted)}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <span className={`font-medium ${pred.change > 0 ? "text-amber-600" : "text-emerald-600"}`}>
-                          {pred.change > 0 ? "+" : ""}
-                          {formatCurrency(Math.abs(pred.change))} ({pred.change > 0 ? "+" : ""}{pred.changePercent}%)
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center">
-                          <Badge 
-                            variant={pred.trend === "up" ? "warning" : pred.trend === "down" ? "success" : "neutral"} 
-                            className="px-2 py-0.5 rounded-full text-[9px]"
-                          >
-                            {pred.trend === "up" ? "Increasing" : pred.trend === "down" ? "Decreasing" : "Stable"}
-                          </Badge>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="text-[10px] font-bold text-slate-900">{pred.confidence}%</span>
-                          <div className="w-12 bg-slate-100 h-1 rounded-full overflow-hidden">
-                            <div className={`h-full rounded-full ${
-                              pred.confidence >= 90 ? "bg-emerald-500" : 
-                              pred.confidence >= 80 ? "bg-amber-500" : "bg-red-500"
-                            }`} style={{ width: `${pred.confidence}%` }} />
+                        </td>
+                        <td className="px-6 py-4 text-right text-slate-500">
+                          {formatCurrency(pred.actual)}
+                        </td>
+                        <td className="px-6 py-4 text-right font-bold text-slate-900">
+                          {formatCurrency(pred.predicted)}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <span className={`font-medium ${pred.change > 0 ? "text-amber-600" : "text-emerald-600"}`}>
+                            {pred.change > 0 ? "+" : ""}
+                            {formatCurrency(Math.abs(pred.change))} ({pred.change > 0 ? "+" : ""}{pred.changePercent}%)
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center">
+                            <Badge 
+                              variant={pred.trend === "up" ? "warning" : pred.trend === "down" ? "success" : "neutral"} 
+                              className="px-2 py-0.5 rounded-full text-[9px]"
+                            >
+                              {pred.trend === "up" ? "Increasing" : pred.trend === "down" ? "Decreasing" : "Stable"}
+                            </Badge>
                           </div>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
-                    No category data available. Add more transactions to see predictions.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        </div>
-      </Card>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="text-[10px] font-bold text-slate-900">{pred.confidence}%</span>
+                            <div className="w-12 bg-slate-100 h-1 rounded-full overflow-hidden">
+                              <div className={`h-full rounded-full ${
+                                pred.confidence >= 90 ? "bg-emerald-500" : 
+                                pred.confidence >= 80 ? "bg-amber-500" : "bg-red-500"
+                              }`} style={{ width: `${pred.confidence}%` }} />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
+                      No category data available. Add more transactions to see predictions.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          </div>
+        </Card>
+      )}
 
-      {/* Expense Type Forecast and Transaction Behavior Insight */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      {/* Expense Type Forecast and Transaction Behavior Insight - No Data State */}
+      {!hasGeneratedPredictions ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Expense Type Forecast - No Data */}
+          <Card className="lg:col-span-1 p-6 hover:shadow-md transition-all group cursor-pointer">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-slate-900">Expense Type Forecast</h3>
+              <p className="text-xs text-slate-500 mt-0.5 font-light">Analysis of recurring vs variable expenses</p>
+            </div>
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                <Wallet size={24} className="text-slate-300" />
+              </div>
+              <p className="text-xs text-slate-500 mb-1">No expense analysis</p>
+              <p className="text-[10px] text-slate-400">Generate to see breakdown</p>
+            </div>
+          </Card>
+
+          {/* Transaction Behavior Insight - No Data */}
+          <Card className="lg:col-span-2 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+            <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+              <div className="mb-2">
+                <h3 className="text-sm font-semibold text-slate-900">Transaction Behavior Insight</h3>
+                <p className="text-xs text-slate-500 mt-0.5 font-light">Detailed transaction type analysis and predictions</p>
+              </div>
+            </div>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                <FileText size={24} className="text-slate-300" />
+              </div>
+              <p className="text-xs text-slate-500 mb-1">No behavior insights yet</p>
+              <p className="text-[10px] text-slate-400">Generate predictions to see analysis</p>
+            </div>
+          </Card>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Expense Type Forecast */}
         <Card className="lg:col-span-1 p-6 hover:shadow-md transition-all group cursor-pointer">
           <div className="mb-4">
@@ -1058,24 +1274,21 @@ export default function PredictionsPage() {
           </div>
         </Card>
       </div>
-      <Card className="p-6 mb-8 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h3 className="text-sm font-semibold text-slate-900">
-              AI Financial Intelligence
-            </h3>
-            <p className="text-xs text-slate-500 mt-1 font-light">Deep analysis of your spending habits and financial future</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={toggleDetailedInsights} className="text-xs h-9 px-4">
-              <ArrowRight size={14} className={`transition-transform ${detailedInsights ? "rotate-180" : ""}`} />
-              {detailedInsights ? "View Less" : "View More"}
-            </Button>
+      )}
+      {!hasGeneratedInsights ? (
+        <Card className="p-6 mb-8 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">
+                AI Financial Intelligence
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 font-light">Deep analysis of your spending habits and financial future</p>
+            </div>
             <Button 
               size="sm" 
               onClick={handleGenerateAIInsights} 
               className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600"
-              disabled={isGeneratingInsights}
+              disabled={isGeneratingInsights || !hasGeneratedPredictions}
             >
               {isGeneratingInsights ? (
                 <>
@@ -1085,12 +1298,94 @@ export default function PredictionsPage() {
               ) : (
                 <>
                   <Wand2 size={14} />
-                  Regenerate
+                  Generate AI Insights
                 </>
               )}
             </Button>
           </div>
-        </div>
+
+          {/* No Data Grid: Key Highlights */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            {/* Financial Summary Card - No Data */}
+            <Card className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="text-slate-300 p-2 rounded-lg bg-slate-50">
+                  <Clapperboard size={20} strokeWidth={1.5} />
+                </div>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Financial Summary</span>
+              </div>
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <Brain size={32} className="text-slate-300 mb-3" />
+                <p className="text-xs text-slate-500 mb-1">No AI insights available</p>
+                <p className="text-[10px] text-slate-400">Generate to see analysis</p>
+              </div>
+            </Card>
+
+            {/* Risk Management Card - No Data */}
+            <Card className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="text-slate-300 p-2 rounded-lg bg-slate-50">
+                  <Shield size={20} strokeWidth={1.5} />
+                </div>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Risk Level: Unknown</span>
+              </div>
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <Shield size={32} className="text-slate-300 mb-3" />
+                <p className="text-xs text-slate-500 mb-1">No risk assessment available</p>
+                <p className="text-[10px] text-slate-400">Generate AI insights to see analysis</p>
+              </div>
+            </Card>
+
+            {/* Growth Potential Card - No Data */}
+            <Card className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="text-slate-300 p-2 rounded-lg bg-slate-50">
+                  <Star size={20} strokeWidth={1.5} />
+                </div>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Growth Potential</span>
+              </div>
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <TrendingUp size={32} className="text-slate-300 mb-3" />
+                <p className="text-xs text-slate-500 mb-1">No growth analysis available</p>
+                <p className="text-[10px] text-slate-400">Generate AI insights to see opportunities</p>
+              </div>
+            </Card>
+          </div>
+        </Card>
+      ) : (
+        <Card className="p-6 mb-8 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">
+                AI Financial Intelligence
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 font-light">Deep analysis of your spending habits and financial future</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={toggleDetailedInsights} className="text-xs h-9 px-4">
+                <ArrowRight size={14} className={`transition-transform ${detailedInsights ? "rotate-180" : ""}`} />
+                {detailedInsights ? "View Less" : "View More"}
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={handleGenerateAIInsights} 
+                className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600"
+                disabled={isGeneratingInsights}
+              >
+                {isGeneratingInsights ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 size={14} />
+                    Regenerate
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
 
         {/* Initial Grid: Key Highlights */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -1375,6 +1670,7 @@ export default function PredictionsPage() {
           </div>
         )}
       </Card>
+      )}
 
       {/* Modals */}
       <HistoryModal
