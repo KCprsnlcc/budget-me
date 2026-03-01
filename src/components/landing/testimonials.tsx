@@ -112,8 +112,8 @@ export function Testimonials() {
           {/* Write Review Button */}
           <Button
             onClick={handleOpenModal}
-            variant="outline"
-            className="bg-white hover:bg-slate-50 border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-700 transition-colors"
+            variant="secondary"
+            size="lg"
           >
             <PenLine className="w-4 h-4 mr-2" />
             Write a Review
