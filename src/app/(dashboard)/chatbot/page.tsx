@@ -108,9 +108,11 @@ export default function ChatbotPage() {
         const { data: availableModels, error: modelsError } = await fetchAvailableModels();
         if (!modelsError && availableModels.length > 0) {
           setModels(availableModels);
-          // Set default model
-          const defaultModel = availableModels.find((m) => m.isDefault) || availableModels[0];
-          setSelectedModel(defaultModel.id);
+          // Only set default model if no model is currently selected
+          if (!selectedModel || !availableModels.find(m => m.id === selectedModel)) {
+            const defaultModel = availableModels.find((m) => m.isDefault) || availableModels[0];
+            setSelectedModel(defaultModel.id);
+          }
         }
 
         // Fetch chat history from Supabase
@@ -139,7 +141,7 @@ export default function ChatbotPage() {
               hour: "numeric",
               minute: "2-digit",
             }),
-            model: getDefaultModel().id,
+            model: selectedModel,
             suggestions: suggestions,
           };
           
@@ -161,7 +163,7 @@ export default function ChatbotPage() {
             hour: "numeric",
             minute: "2-digit",
           }),
-          model: getDefaultModel().id,
+          model: selectedModel,
           suggestions: suggestions,
         };
         
@@ -348,7 +350,7 @@ export default function ChatbotPage() {
             hour: "numeric",
             minute: "2-digit",
           }),
-          model: getDefaultModel().id,
+          model: selectedModel,
           suggestions: suggestions,
         };
         
