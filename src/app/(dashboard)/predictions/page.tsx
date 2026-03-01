@@ -99,6 +99,7 @@ export default function PredictionsPage() {
   const [detailedInsights, setDetailedInsights] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const [hoveredBar, setHoveredBar] = useState<{month: string, type: 'income' | 'expense', value: number, dataType: 'historical' | 'predicted'} | null>(null);
 
   // Real data states
@@ -270,6 +271,56 @@ export default function PredictionsPage() {
       setIsGenerating(false);
     }
   }, [user?.id, forecastData, anomalies, savingsOpportunities]);
+
+  // Handler for AI Insights generation (separate from predictions)
+  const handleGenerateAIInsights = useCallback(async () => {
+    if (!user?.id) return;
+
+    setIsGeneratingInsights(true);
+    
+    // Show loading toast
+    const loadingToast = toast.loading("Generating AI insights...", {
+      description: "Analyzing your spending patterns and trends",
+    });
+
+    try {
+      // Simulate processing delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Fetch AI-specific insights
+      const [
+        newAnomalies,
+        newSavings,
+        newInsights,
+      ] = await Promise.all([
+        detectAnomalies(user.id),
+        generateSavingsOpportunities(user.id),
+        generateAIInsights(user.id),
+      ]);
+
+      // Update AI insights states
+      setAnomalies(newAnomalies);
+      setSavingsOpportunities(newSavings);
+      setAiInsights(newInsights);
+      
+      // Dismiss loading toast and show success
+      toast.success("AI insights generated successfully", {
+        id: loadingToast,
+        description: "Your financial intelligence has been updated",
+      });
+      
+    } catch (error) {
+      console.error("Error generating AI insights:", error);
+      
+      // Show error toast
+      toast.error("Failed to generate AI insights", {
+        id: loadingToast,
+        description: "Please try again later",
+      });
+    } finally {
+      setIsGeneratingInsights(false);
+    }
+  }, [user?.id]);
 
   // Combine historical and predicted for chart display
   const chartData = [
@@ -534,7 +585,7 @@ export default function PredictionsPage() {
           >
             {isGenerating ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 Generating...
               </>
             ) : (
@@ -967,9 +1018,23 @@ export default function PredictionsPage() {
               <ArrowRight size={14} className={`transition-transform ${detailedInsights ? "rotate-180" : ""}`} />
               {detailedInsights ? "View Less" : "View More"}
             </Button>
-            <Button size="sm" onClick={handleGeneratePredictions} className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600">
-              <Wand2 size={14} />
-              Regenerate
+            <Button 
+              size="sm" 
+              onClick={handleGenerateAIInsights} 
+              className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600"
+              disabled={isGeneratingInsights}
+            >
+              {isGeneratingInsights ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 size={14} />
+                  Regenerate
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -1034,26 +1099,6 @@ export default function PredictionsPage() {
             <p className="text-[13px] text-slate-700 leading-relaxed">
               Potential to save ₱3,500/mo by optimizing recurring transportation and dining subscriptions.
             </p>
-            <div className="mt-4">
-            <Button 
-              size="sm" 
-              onClick={handleGeneratePredictions} 
-              className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600"
-              disabled={isGenerating}
-            >
-              {isGenerating ? (
-                <>
-                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Wand2 size={14} />
-                  Regenerate
-                </>
-              )}
-            </Button>
-          </div>
           </Card>
         </div>
 
