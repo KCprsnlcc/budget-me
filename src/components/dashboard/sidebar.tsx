@@ -31,13 +31,13 @@ export function Sidebar() {
             {DASHBOARD_NAV.map((group, index) => (
               <div key={group.label}>
                 <div className="px-2 text-[10px] font-medium text-slate-500 uppercase tracking-widest mb-2 mt-5 first:mt-0">
-                  <Skeleton width={80} height={12} />
+                  <Skeleton width={70} height={10} />
                 </div>
                 {group.items.map((item) => (
-                  <div key={item.module} className="mb-2">
+                  <div key={item.module}>
                     <div className="flex items-center gap-3 px-3 py-1.5">
                       <Skeleton width={18} height={18} borderRadius={4} />
-                      <Skeleton width={100} height={14} />
+                      <Skeleton width={90} height={13} />
                     </div>
                   </div>
                 ))}
@@ -52,62 +52,50 @@ export function Sidebar() {
               </div>
             ))}
 
-            {/* AI Usage */}
+            {/* AI Usage Skeleton */}
             <div className="mt-auto px-2 mb-4">
-              {loading ? (
-                <div className="bg-slate-50 rounded-xl border border-slate-200/60 p-3">
-                  <div className="flex items-center justify-between mb-2.5">
-                    <div className="flex items-center gap-2">
-                      <div className="text-emerald-600">
-                        <Skeleton width={14} height={14} borderRadius={4} />
-                      </div>
-                      <div>
-                        <div className="text-[9px] font-bold text-slate-900 uppercase tracking-wider">
-                          <Skeleton width={60} height={12} />
-                        </div>
-                        <div className="text-[9px] text-slate-500">
-                          <Skeleton width={80} height={10} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <Skeleton height={8} borderRadius={4} className="mb-2" />
-                  <div className="flex justify-between items-center text-[9px]">
-                    <Skeleton width={100} height={10} />
-                    <Skeleton width={60} height={10} />
+              <div className="bg-slate-50 rounded-lg border border-slate-200/60 p-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Skeleton width={14} height={14} borderRadius={4} />
+                  <div className="flex-1">
+                    <Skeleton width={60} height={9} className="mb-0.5" />
+                    <Skeleton width={80} height={9} />
                   </div>
                 </div>
-              ) : (
-                <AIUsageCard />
-              )}
+                <Skeleton height={6} borderRadius={4} className="mb-1.5" />
+                <div className="flex justify-between mb-1.5">
+                  <Skeleton width={60} height={9} />
+                  <Skeleton width={50} height={9} />
+                </div>
+                <div className="pt-1.5 border-t border-slate-200/50 grid grid-cols-3 gap-1">
+                  <div className="text-center">
+                    <Skeleton width={15} height={8} className="mx-auto mb-0.5" />
+                    <Skeleton width={45} height={8} className="mx-auto" />
+                  </div>
+                  <div className="text-center border-l border-slate-200/50">
+                    <Skeleton width={15} height={8} className="mx-auto mb-0.5" />
+                    <Skeleton width={35} height={8} className="mx-auto" />
+                  </div>
+                  <div className="text-center border-l border-slate-200/50">
+                    <Skeleton width={15} height={8} className="mx-auto mb-0.5" />
+                    <Skeleton width={40} height={8} className="mx-auto" />
+                  </div>
+                </div>
+              </div>
             </div>
           </nav>
 
-          {/* User Profile */}
-          {loading ? (
-            <div className="p-4 border-t border-slate-200/50">
-              <div className="flex items-center gap-3">
-                <Skeleton width={32} height={32} borderRadius={50} />
-                <div className="flex-1 overflow-hidden">
-                  <div className="text-sm font-medium text-slate-700 truncate mb-1">
-                    <Skeleton width={120} height={16} />
-                  </div>
-                  <div className="text-[11px] text-slate-500 truncate">
-                    <Skeleton width={150} height={12} />
-                  </div>
-                </div>
-                <button
-                  disabled={true}
-                  className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Sign out"
-                >
-                  <Skeleton width={18} height={18} borderRadius={4} />
-                </button>
+          {/* User Profile Skeleton */}
+          <div className="p-4 border-t border-slate-200/50">
+            <div className="flex items-center gap-3">
+              <Skeleton width={32} height={32} circle />
+              <div className="flex-1 overflow-hidden">
+                <Skeleton width={110} height={13} className="mb-1" />
+                <Skeleton width={140} height={11} />
               </div>
+              <Skeleton width={18} height={18} borderRadius={4} />
             </div>
-          ) : (
-            <UserProfileCard />
-          )}
+          </div>
         </aside>
       </SkeletonTheme>
     );

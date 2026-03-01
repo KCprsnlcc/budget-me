@@ -38,6 +38,8 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { useAuth } from "@/components/auth/auth-context";
 import { createClient } from "@/lib/supabase/client";
+import { checkAIUsage, incrementAIUsage, AIUsageStatus } from "../_lib/ai-rate-limit-service";
+import { toast } from "sonner";
 import {
   sendMessageToAI,
   fetchChatHistory,
@@ -80,6 +82,9 @@ export default function ChatbotPage() {
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // AI Rate Limit State
+  const [rateLimitStatus, setRateLimitStatus] = useState<AIUsageStatus | null>(null);
 
   // Fetch available models and chat history on mount
   useEffect(() => {
@@ -179,6 +184,26 @@ export default function ChatbotPage() {
     }
   }, [authLoading, user]);
 
+  // Fetch AI rate limit status
+  useEffect(() => {
+    const fetchRateLimitStatus = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { status } = await checkAIUsage(user.id, "chatbot");
+        setRateLimitStatus(status);
+      } catch (error) {
+        console.error("Error fetching rate limit status:", error);
+      }
+    };
+
+    fetchRateLimitStatus();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchRateLimitStatus, 30000);
+    return () => clearInterval(interval);
+  }, [user?.id]);
+
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
@@ -224,6 +249,15 @@ export default function ChatbotPage() {
 
   const handleSend = useCallback(async () => {
     if ((!input.trim() && !attachedFile) || isSending || !user?.id) return;
+
+    // Check rate limit before sending
+    const { allowed, error: limitError } = await checkAIUsage(user.id, "chatbot");
+    if (!allowed) {
+      toast.error("Daily limit reached", {
+        description: limitError || "You've reached your daily limit for AI Chatbot. Try again tomorrow.",
+      });
+      return;
+    }
 
     const trimmedInput = input.trim();
     
@@ -276,6 +310,16 @@ export default function ChatbotPage() {
     }
     setIsSending(true);
     setError(null);
+
+    // Increment usage
+    try {
+      const { success: incrementSuccess, status: newStatus } = await incrementAIUsage(user.id, "chatbot");
+      if (incrementSuccess && newStatus) {
+        setRateLimitStatus(newStatus);
+      }
+    } catch (error) {
+      console.error("Error incrementing usage:", error);
+    }
 
     // Persist user message to database
     try {
@@ -697,6 +741,8 @@ export default function ChatbotPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              <div className="h-8 w-px bg-slate-200 mx-1" />
+
               {/* Model Selector Dropdown */}
               <ModelSelectorDropdown
                 selectedModel={selectedModel}
@@ -903,16 +949,23 @@ export default function ChatbotPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={isSending ? "AI is thinking..." : attachedFile ? "Add a message about this file..." : "Message BudgetSense..."}
+                  placeholder={!rateLimitStatus?.canUseAI 
+                    ? "Daily AI limit reached (25/day). Resets at midnight." 
+                    : isSending 
+                      ? "AI is thinking..." 
+                      : attachedFile 
+                        ? "Add a message about this file..." 
+                        : "Message BudgetSense..."}
                   rows={1}
-                  disabled={isSending}
+                  disabled={isSending || !rateLimitStatus?.canUseAI}
                   className="w-full bg-transparent border-none text-sm text-slate-600 placeholder-slate-400 focus:outline-none resize-none py-1.5 max-h-32 leading-relaxed disabled:opacity-50"
                 />
 
                 {/* Send Button */}
                 <button
                   onClick={handleSend}
-                  disabled={(!input.trim() && !attachedFile) || isSending}
+                  disabled={(!input.trim() && !attachedFile) || isSending || !rateLimitStatus?.canUseAI}
+                  title={!rateLimitStatus?.canUseAI ? "Daily AI limit reached (25/day)" : ""}
                   className="p-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-full transition-all shadow-sm hover:shadow-md flex-shrink-0"
                 >
                   {isSending ? (

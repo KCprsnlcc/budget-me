@@ -64,6 +64,7 @@ import { useAuth } from "@/components/auth/auth-context";
 import { useState, useCallback, useEffect } from "react";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
+import { checkAIUsage, incrementAIUsage, AIUsageStatus } from "../_lib/ai-rate-limit-service";
 
 // Icon mapping for category predictions
 const CATEGORY_ICONS: Record<string, React.ComponentType<any>> = {
@@ -163,6 +164,9 @@ export default function PredictionsPage() {
     }>;
   } | null>(null);
   const [predictionHistory, setPredictionHistory] = useState<PredictionHistory[]>([]);
+  
+  // AI Rate Limit State
+  const [rateLimitStatus, setRateLimitStatus] = useState<AIUsageStatus | null>(null);
 
   // Fetch all prediction data - only called explicitly after user action
   const fetchPredictions = useCallback(async (isInitialLoad = false) => {
@@ -320,6 +324,26 @@ export default function PredictionsPage() {
     loadExistingData();
   }, [user?.id]);
 
+  // Fetch AI rate limit status
+  useEffect(() => {
+    const fetchRateLimitStatus = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { status } = await checkAIUsage(user.id, "predictions");
+        setRateLimitStatus(status);
+      } catch (error) {
+        console.error("Error fetching rate limit status:", error);
+      }
+    };
+
+    fetchRateLimitStatus();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchRateLimitStatus, 30000);
+    return () => clearInterval(interval);
+  }, [user?.id]);
+
   const handleHistory = useCallback(() => {
     setHistoryModalOpen(true);
   }, []);
@@ -335,6 +359,15 @@ export default function PredictionsPage() {
   const handleGeneratePredictions = useCallback(async () => {
     if (!user?.id) return;
 
+    // Check rate limit before generating
+    const { allowed, error: limitError } = await checkAIUsage(user.id, "predictions");
+    if (!allowed) {
+      toast.error("Daily limit reached", {
+        description: limitError || "You've reached your daily limit for AI Predictions. Try again tomorrow.",
+      });
+      return;
+    }
+
     setIsGenerating(true);
     
     // Show loading toast
@@ -343,6 +376,20 @@ export default function PredictionsPage() {
     });
 
     try {
+      // Increment usage
+      const { success: incrementSuccess } = await incrementAIUsage(user.id, "predictions");
+      if (!incrementSuccess) {
+        toast.error("Failed to track usage", {
+          description: "Please try again",
+        });
+        setIsGenerating(false);
+        return;
+      }
+
+      // Refresh rate limit status
+      const { status } = await checkAIUsage(user.id, "predictions");
+      setRateLimitStatus(status);
+
       // Save current prediction to history
       await savePrediction(user.id, {
         type: "full",
@@ -403,6 +450,15 @@ export default function PredictionsPage() {
   const handleGenerateAIInsights = useCallback(async () => {
     if (!user?.id || !forecastData || !summary || !expenseTypes) return;
 
+    // Check rate limit before generating
+    const { allowed, error: limitError } = await checkAIUsage(user.id, "insights");
+    if (!allowed) {
+      toast.error("Daily limit reached", {
+        description: limitError || "You've reached your daily limit for AI Insights. Try again tomorrow.",
+      });
+      return;
+    }
+
     setIsGeneratingInsights(true);
     
     // Show loading toast
@@ -411,6 +467,20 @@ export default function PredictionsPage() {
     });
 
     try {
+      // Increment usage
+      const { success: incrementSuccess } = await incrementAIUsage(user.id, "insights");
+      if (!incrementSuccess) {
+        toast.error("Failed to track usage", {
+          description: "Please try again",
+        });
+        setIsGeneratingInsights(false);
+        return;
+      }
+
+      // Refresh rate limit status
+      const { status } = await checkAIUsage(user.id, "insights");
+      setRateLimitStatus(status);
+
       // Import AI insights service
       const { generateAIFinancialInsights } = await import("./_lib/ai-insights-service");
 
@@ -723,9 +793,10 @@ export default function PredictionsPage() {
         <div className="flex flex-wrap items-center gap-2">
           <Button 
             size="sm" 
-            className="bg-emerald-500 hover:bg-emerald-600" 
+            className="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed" 
             onClick={handleGeneratePredictions}
-            disabled={isGenerating}
+            disabled={isGenerating || !rateLimitStatus?.canUseAI}
+            title={!rateLimitStatus?.canUseAI ? "Daily AI limit reached (25/day)" : ""}
           >
             {isGenerating ? (
               <>
@@ -1287,8 +1358,9 @@ export default function PredictionsPage() {
             <Button 
               size="sm" 
               onClick={handleGenerateAIInsights} 
-              className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600"
-              disabled={isGeneratingInsights || !hasGeneratedPredictions}
+              className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isGeneratingInsights || !hasGeneratedPredictions || !rateLimitStatus?.canUseAI}
+              title={!rateLimitStatus?.canUseAI ? "Daily limit reached" : !hasGeneratedPredictions ? "Generate predictions first" : ""}
             >
               {isGeneratingInsights ? (
                 <>
@@ -1354,14 +1426,14 @@ export default function PredictionsPage() {
         </Card>
       ) : (
         <Card className="p-6 mb-8 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
             <div>
               <h3 className="text-sm font-semibold text-slate-900">
                 AI Financial Intelligence
               </h3>
               <p className="text-xs text-slate-500 mt-1 font-light">Deep analysis of your spending habits and financial future</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button variant="outline" size="sm" onClick={toggleDetailedInsights} className="text-xs h-9 px-4">
                 <ArrowRight size={14} className={`transition-transform ${detailedInsights ? "rotate-180" : ""}`} />
                 {detailedInsights ? "View Less" : "View More"}
@@ -1369,8 +1441,9 @@ export default function PredictionsPage() {
               <Button 
                 size="sm" 
                 onClick={handleGenerateAIInsights} 
-                className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600"
-                disabled={isGeneratingInsights}
+                className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isGeneratingInsights || !rateLimitStatus?.canUseAI}
+                title={!rateLimitStatus?.canUseAI ? "Daily limit reached" : ""}
               >
                 {isGeneratingInsights ? (
                   <>
