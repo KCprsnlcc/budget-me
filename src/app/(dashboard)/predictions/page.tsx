@@ -98,6 +98,7 @@ export default function PredictionsPage() {
   const [detailedInsights, setDetailedInsights] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [hoveredBar, setHoveredBar] = useState<{month: string, type: 'income' | 'expense', value: number, dataType: 'historical' | 'predicted'} | null>(null);
 
   // Real data states
   const [forecastData, setForecastData] = useState<{
@@ -203,14 +204,40 @@ export default function PredictionsPage() {
         accuracy: forecastData?.summary.confidence,
       });
 
-      // Refresh all data
-      await fetchPredictions();
+      // Simulate processing delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Only fetch and update prediction-related data (not everything)
+      const [
+        newForecast,
+        newCategories,
+        newExpenseTypeData,
+        newBehavior,
+        newSummaryData,
+      ] = await Promise.all([
+        generateIncomeExpenseForecast(user.id),
+        generateCategoryForecast(user.id),
+        analyzeExpenseTypes(user.id),
+        analyzeTransactionBehavior(user.id),
+        generatePredictionSummary(user.id),
+      ]);
+
+      // Update only the prediction-related states
+      setForecastData(newForecast);
+      setCategoryPredictions(newCategories);
+      setExpenseTypes(newExpenseTypeData);
+      setBehaviorInsights(newBehavior);
+      setSummary(newSummaryData);
+      
+      // Keep existing anomalies, savings opportunities, AI insights, and history
+      // These don't need to be regenerated every time
+      
     } catch (error) {
       console.error("Error generating predictions:", error);
     } finally {
       setIsGenerating(false);
     }
-  }, [user?.id, fetchPredictions, forecastData, anomalies, savingsOpportunities]);
+  }, [user?.id, forecastData, anomalies, savingsOpportunities]);
 
   // Combine historical and predicted for chart display
   const chartData = [
@@ -501,18 +528,20 @@ export default function PredictionsPage() {
               <TrendingUp size={22} strokeWidth={1.5} />
             </div>
             <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
-              (summary?.incomeChange || 0) >= 0 
+              ((forecastData?.predicted?.[0]?.income || 0) - (forecastData?.historical?.[forecastData?.historical.length - 1]?.income || 0)) >= 0 
                 ? "text-emerald-700 border-emerald-100" 
                 : "text-red-700 border-red-100"
             }`}>
-              {(summary?.incomeChange || 0) >= 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-              {(summary?.incomeChange || 0) >= 0 ? "+" : ""}
-              {summary?.incomeChange?.toFixed(1) || "0.0"}%
+              {((forecastData?.predicted?.[0]?.income || 0) - (forecastData?.historical?.[forecastData?.historical.length - 1]?.income || 0)) >= 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+              {((forecastData?.predicted?.[0]?.income || 0) - (forecastData?.historical?.[forecastData?.historical.length - 1]?.income || 0)) >= 0 ? "+" : ""}
+              {forecastData?.historical && forecastData.historical[forecastData.historical.length - 1]?.income > 0 
+                ? (((forecastData?.predicted?.[0]?.income || 0) - (forecastData.historical[forecastData.historical.length - 1]?.income || 0)) / (forecastData.historical[forecastData.historical.length - 1]?.income || 1) * 100).toFixed(1)
+                : "0.0"}%
             </div>
           </div>
           <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Projected Income Growth</div>
           <div className="text-xl font-semibold text-slate-900 tracking-tight">
-            {formatCurrency(summary?.monthlyIncome || 0)}
+            {formatCurrency(forecastData?.predicted?.[0]?.income || 0)}
           </div>
           <div className="text-xs text-slate-500 mt-1">
             Next month projection
@@ -526,18 +555,20 @@ export default function PredictionsPage() {
               <ShoppingBag size={22} strokeWidth={1.5} />
             </div>
             <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
-              (summary?.expenseChange || 0) <= 0 
+              ((forecastData?.predicted?.[0]?.expense || 0) - (forecastData?.historical?.[forecastData?.historical.length - 1]?.expense || 0)) <= 0 
                 ? "text-emerald-700 border-emerald-100" 
                 : "text-amber-700 border-amber-100"
             }`}>
-              {(summary?.expenseChange || 0) >= 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-              {(summary?.expenseChange || 0) >= 0 ? "+" : ""}
-              {summary?.expenseChange?.toFixed(1) || "0.0"}%
+              {((forecastData?.predicted?.[0]?.expense || 0) - (forecastData?.historical?.[forecastData?.historical.length - 1]?.expense || 0)) <= 0 ? <ArrowDown size={12} /> : <ArrowUp size={12} />}
+              {((forecastData?.predicted?.[0]?.expense || 0) - (forecastData?.historical?.[forecastData?.historical.length - 1]?.expense || 0)) <= 0 ? "" : "+"}
+              {forecastData?.historical && forecastData.historical[forecastData.historical.length - 1]?.expense > 0 
+                ? (((forecastData?.predicted?.[0]?.expense || 0) - (forecastData.historical[forecastData.historical.length - 1]?.expense || 0)) / (forecastData.historical[forecastData.historical.length - 1]?.expense || 1) * 100).toFixed(1)
+                : "0.0"}%
             </div>
           </div>
           <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Projected Expense Growth</div>
           <div className="text-xl font-semibold text-slate-900 tracking-tight">
-            {formatCurrency(summary?.monthlyExpenses || 0)}
+            {formatCurrency(forecastData?.predicted?.[0]?.expense || 0)}
           </div>
           <div className="text-xs text-slate-500 mt-1">
             Next month projection
@@ -551,19 +582,21 @@ export default function PredictionsPage() {
               <PiggyBank size={22} strokeWidth={1.5} />
             </div>
             <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
-              (summary?.savingsRate || 0) >= 10 
+              ((forecastData?.predicted?.[0]?.income || 0) - (forecastData?.predicted?.[0]?.expense || 0)) >= (forecastData?.predicted?.[0]?.income || 0) * 0.10 
                 ? "text-emerald-700 border-emerald-100" 
-                : (summary?.savingsRate || 0) >= 5
+                : ((forecastData?.predicted?.[0]?.income || 0) - (forecastData?.predicted?.[0]?.expense || 0)) >= (forecastData?.predicted?.[0]?.income || 0) * 0.05
                 ? "text-amber-700 border-amber-100"
                 : "text-red-700 border-red-100"
             }`}>
               <ChartBar size={12} />
-              {(summary?.savingsRate || 0).toFixed(1)}%
+              {forecastData?.predicted?.[0]?.income && forecastData.predicted[0].income > 0 
+                ? (((forecastData.predicted[0].income || 0) - (forecastData.predicted[0]?.expense || 0)) / (forecastData.predicted[0].income || 1) * 100).toFixed(1)
+                : "0.0"}%
             </div>
           </div>
           <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Projected Savings Growth</div>
           <div className="text-xl font-semibold text-slate-900 tracking-tight">
-            {formatCurrency(summary?.netBalance || 0)}
+            {formatCurrency((forecastData?.predicted?.[0]?.income || 0) - (forecastData?.predicted?.[0]?.expense || 0))}
           </div>
           <div className="text-xs text-slate-500 mt-1">
             Next month projection
@@ -603,38 +636,62 @@ export default function PredictionsPage() {
             <div className="w-full h-px bg-slate-100/50" />
             <div className="w-full h-px bg-slate-100/50" />
           </div>
+          
           {chartData.map((d) => {
             const incomeHeight = maxChartValue > 0 ? (d.income / maxChartValue) * 100 : 0;
             const expenseHeight = maxChartValue > 0 ? (d.expense / maxChartValue) * 100 : 0;
             
             return (
-              <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
+              <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
                 {d.type === "predicted" ? (
                   <>
                     <div
-                      className="w-3 sm:w-5 bg-slate-200 border-2 border-emerald-500 border-dashed rounded-t-[2px] transition-all hover:bg-slate-300"
-                      style={{ height: `${Math.max(5, incomeHeight)}%` }}
-                      title={`${d.month} Income: ${formatCurrency(d.income)}`}
+                      className="w-3 sm:w-5 bg-slate-200 border-2 border-emerald-500 border-dashed rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
+                      style={{ height: `${incomeHeight}%` }}
+                      onMouseEnter={() => setHoveredBar({ month: d.month, type: 'income', value: d.income, dataType: 'predicted' })}
+                      onMouseLeave={() => setHoveredBar(null)}
                     />
                     <div
-                      className="w-3 sm:w-5 bg-emerald-500/90 border-2 border-emerald-500/30 border-dashed rounded-t-[2px] transition-all hover:bg-emerald-500"
-                      style={{ height: `${Math.max(5, expenseHeight)}%` }}
-                      title={`${d.month} Expense: ${formatCurrency(d.expense)}`}
+                      className="w-3 sm:w-5 bg-emerald-500/90 border-2 border-emerald-500/30 border-dashed rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
+                      style={{ height: `${expenseHeight}%` }}
+                      onMouseEnter={() => setHoveredBar({ month: d.month, type: 'expense', value: d.expense, dataType: 'predicted' })}
+                      onMouseLeave={() => setHoveredBar(null)}
                     />
                   </>
                 ) : (
                   <>
                     <div
-                      className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:bg-slate-400"
-                      style={{ height: `${Math.max(5, incomeHeight)}%` }}
-                      title={`${d.month} Income: ${formatCurrency(d.income)}`}
+                      className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
+                      style={{ height: `${incomeHeight}%` }}
+                      onMouseEnter={() => setHoveredBar({ month: d.month, type: 'income', value: d.income, dataType: 'historical' })}
+                      onMouseLeave={() => setHoveredBar(null)}
                     />
                     <div
-                      className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:bg-emerald-600"
-                      style={{ height: `${Math.max(5, expenseHeight)}%` }}
-                      title={`${d.month} Expense: ${formatCurrency(d.expense)}`}
+                      className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
+                      style={{ height: `${expenseHeight}%` }}
+                      onMouseEnter={() => setHoveredBar({ month: d.month, type: 'expense', value: d.expense, dataType: 'historical' })}
+                      onMouseLeave={() => setHoveredBar(null)}
                     />
                   </>
+                )}
+                
+                {/* Tooltip */}
+                {hoveredBar && hoveredBar.month === d.month && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
+                    <div className="font-medium text-slate-700">{hoveredBar.month}</div>
+                    <div className="flex items-center gap-1">
+                      <div className={`w-2 h-2 rounded-full ${
+                        hoveredBar.type === 'income' 
+                          ? hoveredBar.dataType === 'predicted' ? 'bg-slate-200 border border-emerald-500' : 'bg-slate-300'
+                          : hoveredBar.dataType === 'predicted' ? 'bg-emerald-500/90' : 'bg-emerald-500'
+                      }`} />
+                      <span className="capitalize">{hoveredBar.type}: {formatCurrency(hoveredBar.value)}</span>
+                      {hoveredBar.dataType === 'predicted' && (
+                        <span className="text-emerald-600 text-[10px] ml-1">(Predicted)</span>
+                      )}
+                    </div>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                  </div>
                 )}
               </div>
             );

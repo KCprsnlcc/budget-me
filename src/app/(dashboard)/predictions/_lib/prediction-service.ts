@@ -102,18 +102,28 @@ function exponentialSmoothing(
   const variance = residuals.reduce((sum, r) => sum + r * r, 0) / Math.max(1, residuals.length - 1);
   const stdError = Math.sqrt(variance);
 
-  // Generate forecasts with increasing uncertainty
+  // Generate forecasts with conservative trend continuation and small random variations
   const forecast: number[] = [];
   const confidence: number[] = [];
   
   let currentValue = lastSmoothed;
   for (let i = 0; i < forecastHorizon; i++) {
-    // Add slight trend continuation
-    currentValue += trendValue * Math.pow(0.9, i); // Decaying trend influence
+    // Apply very conservative trend continuation (max 5% of current value)
+    const trendAdjustment = Math.abs(trendValue) < lastSmoothed * 0.05 
+      ? trendValue * 0.1 // Scale down small trends significantly
+      : Math.sign(trendValue) * lastSmoothed * 0.02; // Cap at 2% for larger trends
+    
+    // Add small random variation (±1-3% of current value) for more dynamic projections
+    const randomVariation = (Math.random() - 0.5) * 0.06 * currentValue; // ±3% max
+    const randomFactor = 1 + (Math.random() - 0.5) * 0.04; // ±2% additional variation
+    
+    currentValue += (trendAdjustment * Math.pow(0.7, i)) + randomVariation;
+    currentValue *= randomFactor;
     forecast.push(Math.max(0, currentValue));
     
-    // Confidence decreases with forecast horizon
-    const conf = Math.max(50, 95 - i * 8 - (stdError / Math.max(1, currentValue)) * 20);
+    // Confidence decreases with forecast horizon and randomness
+    const randomnessPenalty = Math.abs(randomVariation) / currentValue * 10;
+    const conf = Math.max(50, 95 - i * 8 - (stdError / Math.max(1, currentValue)) * 20 - randomnessPenalty);
     confidence.push(Math.min(98, conf));
   }
 
@@ -284,7 +294,13 @@ export async function generateCategoryForecast(userId: string): Promise<Category
 
     const forecast = exponentialSmoothing(data.amounts, 0.25, 1);
     const historicalAvg = data.amounts.reduce((a, b) => a + b, 0) / data.amounts.length;
-    const predicted = forecast.forecast[0];
+    
+    // Add small random variation to category predictions (±2-5%)
+    let predicted = forecast.forecast[0];
+    const categoryRandomFactor = 1 + (Math.random() - 0.5) * 0.1; // ±5% max variation
+    const categoryRandomVariation = (Math.random() - 0.5) * 0.04 * historicalAvg; // ±2% additional
+    predicted = (predicted * categoryRandomFactor) + categoryRandomVariation;
+    
     const change = predicted - historicalAvg;
     const changePercent = historicalAvg > 0 ? (change / historicalAvg) * 100 : 0;
 
@@ -393,51 +409,66 @@ export async function analyzeExpenseTypes(userId: string): Promise<{
 }
 
 /**
- * Analyze transaction behavior patterns
+ * Analyze transaction behavior patterns by transaction type
  */
 export async function analyzeTransactionBehavior(userId: string): Promise<TransactionBehaviorInsight[]> {
   const transactions = await fetchHistoricalTransactions(userId, 6);
 
-  // Group by transaction description patterns
-  const patterns: Record<string, {
+  // Group by transaction type (income, expense, cash_in)
+  const typeGroups: Record<string, {
     amounts: number[];
     dates: Date[];
-    category?: string;
+    count: number;
   }> = {};
 
   for (const tx of transactions) {
-    const desc = tx.description?.toLowerCase().trim() || "unknown";
-    if (!patterns[desc]) {
-      const cat = tx.expense_categories?.category_name || tx.income_categories?.category_name;
-      patterns[desc] = { amounts: [], dates: [], category: cat };
+    const type = tx.type || 'unknown';
+    if (!typeGroups[type]) {
+      typeGroups[type] = { amounts: [], dates: [], count: 0 };
     }
-    patterns[desc].amounts.push(Number(tx.amount));
-    patterns[desc].dates.push(new Date(tx.date));
+    typeGroups[type].amounts.push(Number(tx.amount));
+    typeGroups[type].dates.push(new Date(tx.date));
+    typeGroups[type].count++;
   }
 
   const insights: TransactionBehaviorInsight[] = [];
 
-  // Identify subscription-like patterns
-  for (const [desc, data] of Object.entries(patterns)) {
-    if (data.amounts.length >= 2) {
-      const avg = data.amounts.reduce((a, b) => a + b, 0) / data.amounts.length;
-      const variance = data.amounts.reduce((sum, a) => sum + Math.pow(a - avg, 2), 0) / data.amounts.length;
-      const cv = Math.sqrt(variance) / avg;
+  // Analyze each transaction type
+  for (const [type, data] of Object.entries(typeGroups)) {
+    if (data.amounts.length < 2) continue;
 
-      if (cv < 0.1 && data.amounts.length >= 2) {
-        // Likely subscription/recurring
-        const isIncreasing = data.amounts[data.amounts.length - 1] > data.amounts[0];
-        
-        insights.push({
-          type: "Subscription",
-          name: desc,
-          currentAvg: Math.round(avg),
-          nextMonth: Math.round(avg * (isIncreasing ? 1.02 : 1)),
-          trend: isIncreasing ? "up" : "stable",
-          confidence: Math.round(Math.max(70, 95 - cv * 100)),
-        });
-      }
-    }
+    const avg = data.amounts.reduce((a, b) => a + b, 0) / data.amounts.length;
+    const variance = data.amounts.reduce((sum, a) => sum + Math.pow(a - avg, 2), 0) / data.amounts.length;
+    const cv = Math.sqrt(variance) / avg;
+
+    // Determine trend based on recent vs older amounts
+    const recentAvg = data.amounts.slice(-3).reduce((a, b) => a + b, 0) / Math.min(3, data.amounts.slice(-3).length);
+    const olderAvg = data.amounts.slice(0, 3).reduce((a, b) => a + b, 0) / Math.min(3, data.amounts.slice(0, 3).length);
+    const isIncreasing = recentAvg > olderAvg * 1.05; // 5% threshold
+    
+    // Add small random variation to next month prediction (±1-3%)
+    let nextMonthValue = avg * (isIncreasing ? 1.02 : 1);
+    const behaviorRandomFactor = 1 + (Math.random() - 0.5) * 0.06; // ±3% max variation
+    const behaviorRandomVariation = (Math.random() - 0.5) * 0.02 * avg; // ±2% additional
+    nextMonthValue = (nextMonthValue * behaviorRandomFactor) + behaviorRandomVariation;
+
+    // Map transaction types to user-friendly names
+    const typeNames: Record<string, string> = {
+      'income': 'Income',
+      'expense': 'Expenses', 
+      'cash_in': 'Cash In',
+      'transfer': 'Transfers',
+      'unknown': 'Other'
+    };
+
+    insights.push({
+      type: typeNames[type] || 'Other',
+      name: `${typeNames[type] || 'Other'} Transactions`,
+      currentAvg: Math.round(avg),
+      nextMonth: Math.round(nextMonthValue),
+      trend: isIncreasing ? "up" : cv < 0.1 ? "stable" : "down",
+      confidence: Math.round(Math.max(70, 95 - cv * 100)),
+    });
   }
 
   // Sort by confidence and take top results
