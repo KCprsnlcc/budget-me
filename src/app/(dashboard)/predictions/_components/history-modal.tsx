@@ -22,66 +22,15 @@ import {
   FileText,
   AlertTriangle,
 } from "lucide-react";
+import type { PredictionHistory } from "../_lib/types";
 
 interface HistoryModalProps {
   open: boolean;
   onClose: () => void;
+  history?: PredictionHistory[];
 }
 
-interface PredictionHistory {
-  id: string;
-  date: string;
-  type: "monthly" | "weekly" | "category";
-  status: "completed" | "failed" | "processing";
-  accuracy?: number;
-  insights: number;
-  dataPoints: number;
-  model: string;
-}
-
-const mockHistory: PredictionHistory[] = [
-  {
-    id: "1",
-    date: "2024-02-10",
-    type: "monthly",
-    status: "completed",
-    accuracy: 94.2,
-    insights: 8,
-    dataPoints: 186,
-    model: "Prophet v1.1"
-  },
-  {
-    id: "2",
-    date: "2024-02-03",
-    type: "weekly",
-    status: "completed",
-    accuracy: 91.8,
-    insights: 5,
-    dataPoints: 42,
-    model: "Prophet v1.1"
-  },
-  {
-    id: "3",
-    date: "2024-01-27",
-    type: "category",
-    status: "failed",
-    insights: 0,
-    dataPoints: 0,
-    model: "Prophet v1.0"
-  },
-  {
-    id: "4",
-    date: "2024-01-20",
-    type: "monthly",
-    status: "completed",
-    accuracy: 89.5,
-    insights: 12,
-    dataPoints: 186,
-    model: "Prophet v1.0"
-  },
-];
-
-export function HistoryModal({ open, onClose }: HistoryModalProps) {
+export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps) {
   const [selectedItem, setSelectedItem] = useState<PredictionHistory | null>(null);
   const [view, setView] = useState<"list" | "details">("list");
 
@@ -136,7 +85,7 @@ export function HistoryModal({ open, onClose }: HistoryModalProps) {
             Prediction History
           </span>
           <span className="text-[10px] text-slate-400 font-medium tracking-wide">
-            {mockHistory.length} total predictions
+            {history.length} total predictions
           </span>
         </div>
       </ModalHeader>
@@ -153,46 +102,52 @@ export function HistoryModal({ open, onClose }: HistoryModalProps) {
             {/* Prediction List */}
             <div className="max-h-96 overflow-y-auto">
               <div className="divide-y divide-slate-100">
-                {mockHistory.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => handleItemClick(item)}
-                    className="px-5 py-4 hover:shadow-md transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {getStatusIcon(item.status)}
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-slate-900">
-                              {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Prediction
-                            </span>
-                            {getStatusBadge(item.status)}
-                          </div>
-                          <div className="text-xs text-slate-500 mt-1">
-                            {new Date(item.date).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit"
-                            })}
+                {history.length > 0 ? (
+                  history.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => handleItemClick(item)}
+                      className="px-5 py-4 hover:shadow-md transition-all cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {getStatusIcon(item.status)}
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-slate-900">
+                                {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Prediction
+                              </span>
+                              {getStatusBadge(item.status)}
+                            </div>
+                            <div className="text-xs text-slate-500 mt-1">
+                              {new Date(item.date).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit"
+                              })}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        {item.accuracy && (
-                          <div className="text-sm font-medium text-slate-900">
-                            {item.accuracy}% accuracy
+                        <div className="text-right">
+                          {item.accuracy && (
+                            <div className="text-sm font-medium text-slate-900">
+                              {item.accuracy.toFixed(1)}% accuracy
+                            </div>
+                          )}
+                          <div className="text-xs text-slate-500">
+                            {item.insights} insights
                           </div>
-                        )}
-                        <div className="text-xs text-slate-500">
-                          {item.insights} insights
                         </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="px-5 py-8 text-center text-slate-500">
+                    No prediction history yet. Generate your first prediction to see it here.
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>

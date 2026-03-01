@@ -40,79 +40,140 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { Button } from "@/components/ui/button";
 import { 
   HistoryModal,
-  DetailedBreakdownModal 
+  DetailedBreakdownModal,
+  generateIncomeExpenseForecast,
+  generateCategoryForecast,
+  analyzeExpenseTypes,
+  analyzeTransactionBehavior,
+  generatePredictionSummary,
+  detectAnomalies,
+  generateSavingsOpportunities,
+  generateAIInsights,
+  fetchPredictionHistory,
+  savePrediction,
+  type MonthlyForecast,
+  type CategoryPrediction,
+  type TransactionBehaviorInsight,
+  type PredictionSummary,
+  type AnomalyResult,
+  type SavingsOpportunity,
+  type PredictionHistory,
 } from "./_components";
+import { useAuth } from "@/components/auth/auth-context";
 import { useState, useCallback, useEffect } from "react";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 
-const PREDICTIONS = [
-  {
-    category: "Food & Dining",
-    icon: Utensils,
-    predicted: 580,
-    actual: 420,
-    confidence: 87,
-    trend: "down",
-    insight: "Spending likely to increase by 15% due to upcoming holidays",
-  },
-  {
-    category: "Shopping",
-    icon: ShoppingBag,
-    predicted: 450,
-    actual: 230,
-    confidence: 72,
-    trend: "up",
-    insight: "Pattern suggests large purchase expected mid-month",
-  },
-  {
-    category: "Transportation",
-    icon: Car,
-    predicted: 210,
-    actual: 185,
-    confidence: 91,
-    trend: "stable",
-    insight: "Consistent spending pattern detected",
-  },
-];
+// Icon mapping for category predictions
+const CATEGORY_ICONS: Record<string, React.ComponentType<any>> = {
+  "Food & Dining": Utensils,
+  "Shopping": ShoppingBag,
+  "Transportation": Car,
+  "Utilities": ChartBar,
+  "Entertainment": Clapperboard,
+  "Health": Shield,
+  "Education": FileText,
+  "Housing": PiggyBank,
+};
 
-const ANOMALIES = [
-  {
-    type: "warning",
-    title: "Duplicate Netflix Charge",
-    description: "Two charges of ₱15.99 detected from Netflix on Feb 7",
-    amount: "₱15.99",
-    action: "Review",
-  },
-  {
-    type: "info",
-    title: "New Recurring Payment",
-    description: "Monthly charge from Adobe Creative Cloud detected",
-    amount: "₱54.99",
-    action: "Categorize",
-  },
-];
+// Helper to get icon for category
+function getCategoryIcon(categoryName: string): React.ComponentType<any> {
+  for (const [key, icon] of Object.entries(CATEGORY_ICONS)) {
+    if (categoryName.toLowerCase().includes(key.toLowerCase())) {
+      return icon;
+    }
+  }
+  return ShoppingBag;
+}
 
-const SAVINGS_OPPORTUNITIES = [
-  { title: "Switch to annual Spotify plan", potential: "₱24/year", confidence: 95 },
-  { title: "Reduce dining out frequency by 20%", potential: "₱120/month", confidence: 78 },
-  { title: "Bundle insurance policies", potential: "₱45/month", confidence: 65 },
-];
+// Helper to format currency
+function formatCurrency(amount: number): string {
+  return `₱${amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 export default function PredictionsPage() {
+  const { user } = useAuth();
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [detailedBreakdownModalOpen, setDetailedBreakdownModalOpen] = useState(false);
   const [detailedInsights, setDetailedInsights] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  // Simulate loading state
-  useEffect(() => {
-    const timer = setTimeout(() => {
+  // Real data states
+  const [forecastData, setForecastData] = useState<{
+    historical: MonthlyForecast[];
+    predicted: MonthlyForecast[];
+    summary: { avgGrowth: number; maxSavings: number; confidence: number };
+  } | null>(null);
+  
+  const [categoryPredictions, setCategoryPredictions] = useState<CategoryPrediction[]>([]);
+  const [expenseTypes, setExpenseTypes] = useState<{
+    recurring: { amount: number; percentage: number; trend: string; trendValue: number };
+    variable: { amount: number; percentage: number; trend: string; trendValue: number };
+  } | null>(null);
+  const [behaviorInsights, setBehaviorInsights] = useState<TransactionBehaviorInsight[]>([]);
+  const [summary, setSummary] = useState<PredictionSummary | null>(null);
+  const [anomalies, setAnomalies] = useState<AnomalyResult[]>([]);
+  const [savingsOpportunities, setSavingsOpportunities] = useState<SavingsOpportunity[]>([]);
+  const [aiInsights, setAiInsights] = useState<{
+    summary: string;
+    riskLevel: "low" | "medium" | "high";
+    riskScore: number;
+    growthPotential: string;
+    recommendations: string[];
+  } | null>(null);
+  const [predictionHistory, setPredictionHistory] = useState<PredictionHistory[]>([]);
+
+  // Fetch all prediction data
+  const fetchPredictions = useCallback(async () => {
+    if (!user?.id) return;
+
+    setLoading(true);
+    try {
+      const [
+        forecast,
+        categories,
+        expenseTypeData,
+        behavior,
+        summaryData,
+        anomaliesData,
+        savings,
+        insights,
+        history,
+      ] = await Promise.all([
+        generateIncomeExpenseForecast(user.id),
+        generateCategoryForecast(user.id),
+        analyzeExpenseTypes(user.id),
+        analyzeTransactionBehavior(user.id),
+        generatePredictionSummary(user.id),
+        detectAnomalies(user.id),
+        generateSavingsOpportunities(user.id),
+        generateAIInsights(user.id),
+        fetchPredictionHistory(user.id),
+      ]);
+
+      setForecastData(forecast);
+      setCategoryPredictions(categories);
+      setExpenseTypes(expenseTypeData);
+      setBehaviorInsights(behavior);
+      setSummary(summaryData);
+      setAnomalies(anomaliesData);
+      setSavingsOpportunities(savings);
+      setAiInsights(insights);
+      setPredictionHistory(history);
+    } catch (error) {
+      console.error("Error fetching predictions:", error);
+    } finally {
       setLoading(false);
-    }, 1200); // 1.2 seconds loading time
+    }
+  }, [user?.id]);
 
-    return () => clearTimeout(timer);
-  }, []);
+  // Initial load
+  useEffect(() => {
+    if (user?.id) {
+      fetchPredictions();
+    }
+  }, [user?.id, fetchPredictions]);
 
   const handleHistory = useCallback(() => {
     setHistoryModalOpen(true);
@@ -126,12 +187,42 @@ export default function PredictionsPage() {
     setDetailedInsights(prev => !prev);
   }, []);
 
-  const handleGeneratePredictions = useCallback(() => {
-    // TODO: Implement actual predictions generation logic
-    console.log("Generating predictions...");
-    // This would typically call an API to generate new predictions
-    // and update the state with the new data
-  }, []);
+  const handleGeneratePredictions = useCallback(async () => {
+    if (!user?.id) return;
+
+    setIsGenerating(true);
+    try {
+      // Save current prediction to history
+      await savePrediction(user.id, {
+        type: "full",
+        insights: [
+          ...(anomalies || []),
+          ...(savingsOpportunities || []),
+        ],
+        dataPoints: forecastData?.historical.length || 0,
+        accuracy: forecastData?.summary.confidence,
+      });
+
+      // Refresh all data
+      await fetchPredictions();
+    } catch (error) {
+      console.error("Error generating predictions:", error);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [user?.id, fetchPredictions, forecastData, anomalies, savingsOpportunities]);
+
+  // Combine historical and predicted for chart display
+  const chartData = [
+    ...(forecastData?.historical || []),
+    ...(forecastData?.predicted || []),
+  ];
+
+  // Calculate percentages for visualization
+  const maxChartValue = Math.max(
+    ...chartData.map((d) => Math.max(d.income, d.expense)),
+    1
+  );
 
   // Loading state
   if (loading) {
@@ -376,9 +467,23 @@ export default function PredictionsPage() {
           <p className="text-sm text-slate-500 mt-1 font-light">Smart forecasts and insights powered by Prophet machine learning.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={handleGeneratePredictions}>
-            <Wand2 size={16} className="mr-2" />
-            Generate Predictions
+          <Button 
+            size="sm" 
+            className="bg-emerald-500 hover:bg-emerald-600" 
+            onClick={handleGeneratePredictions}
+            disabled={isGenerating}
+          >
+            {isGenerating ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Wand2 size={16} className="mr-2" />
+                Generate Predictions
+              </>
+            )}
           </Button>
           <Button variant="outline" size="sm" onClick={handleHistory}>
             <History size={16} className="mr-2" />
@@ -395,13 +500,20 @@ export default function PredictionsPage() {
             <div className="text-slate-500 p-2 rounded-lg">
               <Wallet size={22} strokeWidth={1.5} />
             </div>
-            <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-700 border-emerald-100 px-2 py-1 rounded-full border">
-              <ArrowUp size={12} />
-              +12.4%
+            <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
+              (summary?.incomeChange || 0) >= 0 
+                ? "text-emerald-700 border-emerald-100" 
+                : "text-red-700 border-red-100"
+            }`}>
+              {(summary?.incomeChange || 0) >= 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+              {(summary?.incomeChange || 0) >= 0 ? "+" : ""}
+              {summary?.incomeChange?.toFixed(1) || "0.0"}%
             </div>
           </div>
           <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Monthly Income</div>
-          <div className="text-xl font-semibold text-slate-900 tracking-tight">₱8,240.00</div>
+          <div className="text-xl font-semibold text-slate-900 tracking-tight">
+            {formatCurrency(summary?.monthlyIncome || 0)}
+          </div>
         </Card>
 
         {/* Monthly Expenses Card */}
@@ -410,13 +522,20 @@ export default function PredictionsPage() {
             <div className="text-slate-500 p-2 rounded-lg">
               <ShoppingBag size={22} strokeWidth={1.5} />
             </div>
-            <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-700 border-emerald-100 px-2 py-1 rounded-full border">
-              <ArrowUp size={12} />
-              +5.4%
+            <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
+              (summary?.expenseChange || 0) <= 0 
+                ? "text-emerald-700 border-emerald-100" 
+                : "text-amber-700 border-amber-100"
+            }`}>
+              {(summary?.expenseChange || 0) >= 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+              {(summary?.expenseChange || 0) >= 0 ? "+" : ""}
+              {summary?.expenseChange?.toFixed(1) || "0.0"}%
             </div>
           </div>
           <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Monthly Expenses</div>
-          <div className="text-xl font-semibold text-slate-900 tracking-tight">₱3,405.50</div>
+          <div className="text-xl font-semibold text-slate-900 tracking-tight">
+            {formatCurrency(summary?.monthlyExpenses || 0)}
+          </div>
         </Card>
 
         {/* Net Balance Card */}
@@ -427,7 +546,9 @@ export default function PredictionsPage() {
             </div>
           </div>
           <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Net Balance</div>
-          <div className="text-xl font-semibold text-slate-900 tracking-tight">₱4,834.50</div>
+          <div className="text-xl font-semibold text-slate-900 tracking-tight">
+            {formatCurrency(summary?.netBalance || 0)}
+          </div>
         </Card>
 
         {/* Savings Rate Card */}
@@ -438,7 +559,9 @@ export default function PredictionsPage() {
             </div>
           </div>
           <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Savings Rate</div>
-          <div className="text-xl font-semibold text-slate-900 tracking-tight">58.6%</div>
+          <div className="text-xl font-semibold text-slate-900 tracking-tight">
+            {(summary?.savingsRate || 0).toFixed(1)}%
+          </div>
         </Card>
       </div>
 
@@ -474,54 +597,52 @@ export default function PredictionsPage() {
             <div className="w-full h-px bg-slate-100/50" />
             <div className="w-full h-px bg-slate-100/50" />
           </div>
-          {[
-            { month: "Oct", income: 75, expense: 55, type: "historical" as const },
-            { month: "Nov", income: 80, expense: 60, type: "historical" as const },
-            { month: "Dec", income: 78, expense: 58, type: "current" as const },
-            { month: "Jan", income: 85, expense: 62, type: "predicted" as const },
-            { month: "Feb", income: 88, expense: 65, type: "predicted" as const },
-            { month: "Mar", income: 92, expense: 60, type: "predicted" as const },
-          ].map((d) => (
-            <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
-              {d.type === "predicted" ? (
-                <>
-                  <div
-                    className="w-3 sm:w-5 bg-slate-200 border-2 border-emerald-500 border-dashed rounded-t-[2px]"
-                    style={{ height: `${d.income}%` }}
-                  />
-                  <div
-                    className="w-3 sm:w-5 bg-emerald-500/90 border-2 border-emerald-500/30 border-dashed rounded-t-[2px]"
-                    style={{ height: `${d.expense}%` }}
-                  />
-                </>
-              ) : (
-                <>
-                  <div
-                    className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px]"
-                    style={{ height: `${d.income}%` }}
-                  />
-                  <div
-                    className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px]"
-                    style={{ height: `${d.expense}%` }}
-                  />
-                </>
-              )}
-            </div>
-          ))}
+          {chartData.map((d) => {
+            const incomeHeight = maxChartValue > 0 ? (d.income / maxChartValue) * 100 : 0;
+            const expenseHeight = maxChartValue > 0 ? (d.expense / maxChartValue) * 100 : 0;
+            
+            return (
+              <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer">
+                {d.type === "predicted" ? (
+                  <>
+                    <div
+                      className="w-3 sm:w-5 bg-slate-200 border-2 border-emerald-500 border-dashed rounded-t-[2px] transition-all hover:bg-slate-300"
+                      style={{ height: `${Math.max(5, incomeHeight)}%` }}
+                      title={`${d.month} Income: ${formatCurrency(d.income)}`}
+                    />
+                    <div
+                      className="w-3 sm:w-5 bg-emerald-500/90 border-2 border-emerald-500/30 border-dashed rounded-t-[2px] transition-all hover:bg-emerald-500"
+                      style={{ height: `${Math.max(5, expenseHeight)}%` }}
+                      title={`${d.month} Expense: ${formatCurrency(d.expense)}`}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <div
+                      className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:bg-slate-400"
+                      style={{ height: `${Math.max(5, incomeHeight)}%` }}
+                      title={`${d.month} Income: ${formatCurrency(d.income)}`}
+                    />
+                    <div
+                      className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:bg-emerald-600"
+                      style={{ height: `${Math.max(5, expenseHeight)}%` }}
+                      title={`${d.month} Expense: ${formatCurrency(d.expense)}`}
+                    />
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
         <div className="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
-          {[
-            { month: "Oct", type: "historical" },
-            { month: "Nov", type: "historical" },
-            { month: "Dec", type: "current" },
-            { month: "Jan", type: "predicted" },
-            { month: "Feb", type: "predicted" },
-            { month: "Mar", type: "predicted" },
-          ].map((d) => (
-            <span key={d.month} className={
-              d.type === "current" ? "text-slate-600" : 
-              d.type === "predicted" ? "text-emerald-600" : "text-slate-400"
-            }>
+          {chartData.map((d) => (
+            <span 
+              key={d.month} 
+              className={
+                d.type === "current" ? "text-slate-600" : 
+                d.type === "predicted" ? "text-emerald-600" : "text-slate-400"
+              }
+            >
               {d.month}
             </span>
           ))}
@@ -531,11 +652,15 @@ export default function PredictionsPage() {
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-slate-400">Avg. Growth</span>
-              <span className="text-xs font-bold text-emerald-600">+8.5%</span>
+              <span className="text-xs font-bold text-emerald-600">
+                {forecastData?.summary.avgGrowth ? `+${forecastData.summary.avgGrowth}%` : "N/A"}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-slate-400">Max Savings</span>
-              <span className="text-xs font-bold text-slate-900">₱6,800</span>
+              <span className="text-xs font-bold text-slate-900">
+                {formatCurrency(forecastData?.summary.maxSavings || 0)}
+              </span>
             </div>
           </div>
           <Button variant="ghost" size="sm" className="text-xs font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1" onClick={handleDetailedBreakdown}>
@@ -563,62 +688,78 @@ export default function PredictionsPage() {
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
-                <th className="px-6 py-4">Category</th>
-                <th className="px-6 py-4 text-right">Historical Avg.</th>
-                <th className="px-6 py-4 text-right">Predicted</th>
-                <th className="px-6 py-4 text-right">Change</th>
-                <th className="px-6 py-4 text-center">Trend</th>
-                <th className="px-6 py-4 text-center">Confidence</th>
-              </tr>
-            </thead>
-            <tbody className="text-xs divide-y divide-slate-50">
-              {PREDICTIONS.map((pred) => {
-                const Icon = pred.icon;
-                const change = pred.predicted - pred.actual;
-                const changePercent = ((change / pred.actual) * 100).toFixed(1);
-                return (
-                  <tr key={pred.category} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg text-emerald-600 flex items-center justify-center">
-                          <Icon size={18} />
+          <div className="max-h-64 overflow-y-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold sticky top-0 bg-white">
+                  <th className="px-6 py-4">Category</th>
+                  <th className="px-6 py-4 text-right">Historical Avg.</th>
+                  <th className="px-6 py-4 text-right">Predicted</th>
+                  <th className="px-6 py-4 text-right">Change</th>
+                  <th className="px-6 py-4 text-center">Trend</th>
+                  <th className="px-6 py-4 text-center">Confidence</th>
+                </tr>
+              </thead>
+              <tbody className="text-xs divide-y divide-slate-50">
+              {categoryPredictions.length > 0 ? (
+                categoryPredictions.map((pred) => {
+                  const Icon = getCategoryIcon(pred.category);
+                  return (
+                    <tr key={pred.category} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg text-emerald-600 flex items-center justify-center">
+                            <Icon size={18} />
+                          </div>
+                          <span className="font-medium text-slate-900">{pred.category}</span>
                         </div>
-                        <span className="font-medium text-slate-900">{pred.category}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right text-slate-500">₱{pred.actual.toLocaleString()}.00</td>
-                    <td className="px-6 py-4 text-right font-bold text-slate-900">₱{pred.predicted.toLocaleString()}.00</td>
-                    <td className="px-6 py-4 text-right">
-                      <span className={`font-medium ${change > 0 ? "text-amber-600" : "text-emerald-600"}`}>
-                        {change > 0 ? "+" : ""}₱{Math.abs(change).toLocaleString()}.00 ({change > 0 ? "+" : ""}{changePercent}%)
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-center">
-                        <Badge variant={pred.trend === "up" ? "warning" : pred.trend === "down" ? "success" : "neutral"} className="px-2 py-0.5 rounded-full text-[9px]">
-                          {pred.trend === "up" ? "Increasing" : pred.trend === "down" ? "Decreasing" : "Stable"}
-                        </Badge>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="text-[10px] font-bold text-slate-900">{pred.confidence}%</span>
-                        <div className="w-12 bg-slate-100 h-1 rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full ${
-                            pred.confidence >= 90 ? "bg-emerald-500" : 
-                            pred.confidence >= 80 ? "bg-amber-500" : "bg-red-500"
-                          }`} style={{ width: `${pred.confidence}%` }} />
+                      </td>
+                      <td className="px-6 py-4 text-right text-slate-500">
+                        {formatCurrency(pred.actual)}
+                      </td>
+                      <td className="px-6 py-4 text-right font-bold text-slate-900">
+                        {formatCurrency(pred.predicted)}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className={`font-medium ${pred.change > 0 ? "text-amber-600" : "text-emerald-600"}`}>
+                          {pred.change > 0 ? "+" : ""}
+                          {formatCurrency(Math.abs(pred.change))} ({pred.change > 0 ? "+" : ""}{pred.changePercent}%)
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center">
+                          <Badge 
+                            variant={pred.trend === "up" ? "warning" : pred.trend === "down" ? "success" : "neutral"} 
+                            className="px-2 py-0.5 rounded-full text-[9px]"
+                          >
+                            {pred.trend === "up" ? "Increasing" : pred.trend === "down" ? "Decreasing" : "Stable"}
+                          </Badge>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-[10px] font-bold text-slate-900">{pred.confidence}%</span>
+                          <div className="w-12 bg-slate-100 h-1 rounded-full overflow-hidden">
+                            <div className={`h-full rounded-full ${
+                              pred.confidence >= 90 ? "bg-emerald-500" : 
+                              pred.confidence >= 80 ? "bg-amber-500" : "bg-red-500"
+                            }`} style={{ width: `${pred.confidence}%` }} />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
+                    No category data available. Add more transactions to see predictions.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
+        </div>
         </div>
       </Card>
 
@@ -634,27 +775,41 @@ export default function PredictionsPage() {
             <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs font-medium text-slate-700">Recurring Expenses</span>
-                <span className="text-xs font-bold text-slate-900">₱2,840</span>
+                <span className="text-xs font-bold text-slate-900">
+                  {formatCurrency(expenseTypes?.recurring.amount || 0)}
+                </span>
               </div>
               <div className="w-full bg-white rounded-full h-1.5 overflow-hidden">
-                <div className="bg-blue-500 h-full rounded-full" style={{ width: "67%" }} />
+                <div 
+                  className="bg-blue-500 h-full rounded-full" 
+                  style={{ width: `${expenseTypes?.recurring.percentage || 0}%` }} 
+                />
               </div>
               <div className="flex justify-between items-center mt-2 text-[10px]">
-                <span className="text-slate-400">67% of total</span>
-                <span className="text-emerald-600 font-medium">-2.1% trend</span>
+                <span className="text-slate-400">{expenseTypes?.recurring.percentage || 0}% of total</span>
+                <span className="text-emerald-600 font-medium">
+                  {expenseTypes?.recurring.trendValue || 0}% trend
+                </span>
               </div>
             </div>
             <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs font-medium text-slate-700">Variable Expenses</span>
-                <span className="text-xs font-bold text-slate-900">₱1,410</span>
+                <span className="text-xs font-bold text-slate-900">
+                  {formatCurrency(expenseTypes?.variable.amount || 0)}
+                </span>
               </div>
               <div className="w-full bg-white rounded-full h-1.5 overflow-hidden">
-                <div className="bg-amber-500 h-full rounded-full" style={{ width: "33%" }} />
+                <div 
+                  className="bg-amber-500 h-full rounded-full" 
+                  style={{ width: `${expenseTypes?.variable.percentage || 0}%` }} 
+                />
               </div>
               <div className="flex justify-between items-center mt-2 text-[10px]">
-                <span className="text-slate-400">33% of total</span>
-                <span className="text-amber-600 font-medium">+5.4% trend</span>
+                <span className="text-slate-400">{expenseTypes?.variable.percentage || 0}% of total</span>
+                <span className="text-amber-600 font-medium">
+                  {expenseTypes?.variable.trendValue || 0}% trend
+                </span>
               </div>
             </div>
           </div>
@@ -669,27 +824,38 @@ export default function PredictionsPage() {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
-                  <th className="px-4 py-3">Transaction Type</th>
-                  <th className="px-4 py-3 text-right">Current Avg.</th>
-                  <th className="px-4 py-3 text-right">Next Month</th>
-                </tr>
-              </thead>
+            <div className="max-h-48 overflow-y-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[10px] text-slate-500 uppercase tracking-widest font-semibold sticky top-0 bg-white">
+                    <th className="px-4 py-3">Transaction Type</th>
+                    <th className="px-4 py-3 text-right">Current Avg.</th>
+                    <th className="px-4 py-3 text-right">Next Month</th>
+                  </tr>
+                </thead>
               <tbody className="divide-y divide-slate-50">
-                <tr>
-                  <td className="px-4 py-3 font-medium text-slate-700">Subscription</td>
-                  <td className="px-4 py-3 text-right text-slate-500">₱850.00</td>
-                  <td className="px-4 py-3 text-right font-bold text-slate-900">₱850.00</td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 font-medium text-slate-700">Utility Bill</td>
-                  <td className="px-4 py-3 text-right text-slate-500">₱1,200.00</td>
-                  <td className="px-4 py-3 text-right font-bold text-slate-900">₱1,320.00</td>
-                </tr>
+                {behaviorInsights.length > 0 ? (
+                  behaviorInsights.map((insight, i) => (
+                    <tr key={i}>
+                      <td className="px-4 py-3 font-medium text-slate-700">{insight.name}</td>
+                      <td className="px-4 py-3 text-right text-slate-500">
+                        {formatCurrency(insight.currentAvg)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold text-slate-900">
+                        {formatCurrency(insight.nextMonth)}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} className="px-4 py-8 text-center text-slate-500">
+                      No recurring patterns detected. Add more transactions to see insights.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
+          </div>
           </div>
         </Card>
       </div>
@@ -724,11 +890,14 @@ export default function PredictionsPage() {
               <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Financial Summary</span>
             </div>
             <p className="text-[13px] text-slate-700 leading-relaxed font-medium">
-              Your income stability is high, with a projected 12.4% increase, while expenses show a manageable 4.2% rise.
+              {aiInsights?.summary || "Your income stability is being analyzed. Add more transactions to see detailed insights."}
             </p>
             <div className="mt-4 flex items-center gap-2 text-[10px] text-slate-600 font-semibold">
               <Star size={12} />
-              Strong growth profile detected
+              {savingsOpportunities.length > 0 
+                ? `${savingsOpportunities.length} savings opportunities detected`
+                : "Strong growth profile detected"
+              }
             </div>
           </Card>
 
@@ -738,14 +907,25 @@ export default function PredictionsPage() {
               <div className="text-slate-500 p-2 rounded-lg">
                 <Shield size={20} strokeWidth={1.5} />
               </div>
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Risk Level: Low</span>
-            </div>
-            <p className="text-[13px] text-slate-700 leading-relaxed">
-              Detected 3 subscription spikes totaling ₱1,240. Risk factors remain low due to high savings rate buffer.
-            </p>
-            <div className="w-full bg-slate-100 rounded-full h-1 mt-4">
-              <div className="bg-amber-500 h-full rounded-full" style={{ width: "25%" }} />
-            </div>
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              Risk Level: {aiInsights?.riskLevel ? aiInsights.riskLevel.charAt(0).toUpperCase() + aiInsights.riskLevel.slice(1) : "Low"}
+            </span>
+          </div>
+          <p className="text-[13px] text-slate-700 leading-relaxed">
+            {anomalies.length > 0 
+              ? `Detected ${anomalies.length} anomaly${anomalies.length > 1 ? "ies" : "y"} in your transactions. Review the flagged items for potential savings.`
+              : "No significant anomalies detected. Your spending patterns are consistent with historical trends."
+            }
+          </p>
+          <div className="w-full bg-slate-100 rounded-full h-1 mt-4">
+            <div 
+              className={`h-full rounded-full ${
+                (aiInsights?.riskScore || 0) < 30 ? "bg-emerald-500" : 
+                (aiInsights?.riskScore || 0) < 60 ? "bg-amber-500" : "bg-red-500"
+              }`} 
+              style={{ width: `${Math.min(100, aiInsights?.riskScore || 15)}%` }} 
+            />
+          </div>
           </Card>
 
           {/* Smart Opportunities Card */}
@@ -760,11 +940,25 @@ export default function PredictionsPage() {
               Potential to save ₱3,500/mo by optimizing recurring transportation and dining subscriptions.
             </p>
             <div className="mt-4">
-              <Button variant="ghost" size="sm" className="text-[10px] font-bold text-slate-600 hover:text-slate-700 underline flex items-center gap-1 p-0 h-auto">
-                View optimization plan
-                <ArrowRight size={10} />
-              </Button>
-            </div>
+            <Button 
+              size="sm" 
+              onClick={handleGeneratePredictions} 
+              className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600"
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 size={14} className="mr-1" />
+                  Regenerate
+                </>
+              )}
+            </Button>
+          </div>
           </Card>
         </div>
 
@@ -877,10 +1071,13 @@ export default function PredictionsPage() {
       <HistoryModal
         open={historyModalOpen}
         onClose={() => setHistoryModalOpen(false)}
+        history={predictionHistory}
       />
       <DetailedBreakdownModal
         open={detailedBreakdownModalOpen}
         onClose={() => setDetailedBreakdownModalOpen(false)}
+        forecastData={forecastData}
+        categoryPredictions={categoryPredictions}
       />
     </div>
   );

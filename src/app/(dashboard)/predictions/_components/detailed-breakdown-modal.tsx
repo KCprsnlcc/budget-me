@@ -21,15 +21,32 @@ import {
   CheckCircle,
   AlertTriangle,
 } from "lucide-react";
+import type { 
+  MonthlyForecast, 
+  CategoryPrediction, 
+  ForecastStep, 
+  CategoryAnalysis 
+} from "../_lib/types";
 
 interface DetailedBreakdownModalProps {
   open: boolean;
   onClose: () => void;
+  forecastData?: {
+    historical: MonthlyForecast[];
+    predicted: MonthlyForecast[];
+    summary: { avgGrowth: number; maxSavings: number; confidence: number };
+  } | null;
+  categoryPredictions?: CategoryPrediction[];
 }
 
 const STEPS = ["Overview", "Monthly Breakdown", "Category Analysis"];
 
-export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModalProps) {
+export function DetailedBreakdownModal({ 
+  open, 
+  onClose, 
+  forecastData,
+  categoryPredictions = []
+}: DetailedBreakdownModalProps) {
   const [step, setStep] = useState(1);
 
   const reset = useCallback(() => {
@@ -55,7 +72,23 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
     }
   }, [step]);
 
-  const canContinue = true; // Always allow continue (final step closes modal)
+  const canContinue = true;
+
+  // Format currency helper
+  const formatCurrency = (amount: number): string => {
+    return `₱${amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  // Combine forecast data
+  const allMonths = [
+    ...(forecastData?.historical || []),
+    ...(forecastData?.predicted || [])
+  ];
+
+  // Calculate totals
+  const totalPredictedIncome = forecastData?.predicted.reduce((sum, p) => sum + p.income, 0) || 0;
+  const totalPredictedExpenses = forecastData?.predicted.reduce((sum, p) => sum + p.expense, 0) || 0;
+  const netSavings = totalPredictedIncome - totalPredictedExpenses; // Always allow continue (final step closes modal)
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-3xl">
@@ -128,30 +161,40 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
                 <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                   Total Predicted Income
                 </div>
-                <div className="text-2xl font-semibold text-slate-900 mb-2">₱25,350</div>
+                <div className="text-2xl font-semibold text-slate-900 mb-2">
+                  {formatCurrency(totalPredictedIncome)}
+                </div>
                 <div className="flex items-center gap-2">
                   <TrendingUp size={16} className="text-slate-500" />
-                  <span className="text-sm text-slate-600 font-medium">+12.4% vs last month</span>
+                  <span className="text-sm text-slate-600 font-medium">
+                    {forecastData?.summary.avgGrowth ? `+${forecastData.summary.avgGrowth}%` : "N/A"} vs last month
+                  </span>
                 </div>
               </div>
               <div className="border border-slate-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer">
                 <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                   Total Predicted Expenses
                 </div>
-                <div className="text-2xl font-semibold text-slate-900 mb-2">₱16,950</div>
+                <div className="text-2xl font-semibold text-slate-900 mb-2">
+                  {formatCurrency(totalPredictedExpenses)}
+                </div>
                 <div className="flex items-center gap-2">
                   <TrendingUp size={16} className="text-slate-500" />
-                  <span className="text-sm text-slate-600 font-medium">+4.2% vs last month</span>
+                  <span className="text-sm text-slate-600 font-medium">Based on historical trends</span>
                 </div>
               </div>
               <div className="border border-slate-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer">
                 <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                   Net Savings Projection
                 </div>
-                <div className="text-2xl font-semibold text-slate-900 mb-2">₱8,400</div>
+                <div className="text-2xl font-semibold text-slate-900 mb-2">
+                  {formatCurrency(netSavings)}
+                </div>
                 <div className="flex items-center gap-2">
                   <Wrench size={16} className="text-slate-500" />
-                  <span className="text-sm text-slate-600 font-medium">95% of goal</span>
+                  <span className="text-sm text-slate-600 font-medium">
+                    {forecastData?.summary.confidence || 0}% confidence
+                  </span>
                 </div>
               </div>
             </div>
@@ -160,20 +203,39 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
             <div>
               <h3 className="text-[15px] font-bold text-slate-900 mb-3">Key Insights</h3>
               <div className="space-y-3">
-                <div className="flex gap-3 p-3 rounded-lg border border-slate-100 hover:shadow-md transition-all group cursor-pointer">
-                  <CheckCircle size={16} className="text-slate-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900">Strong Income Growth</h4>
-                    <p className="text-xs text-slate-600 mt-1">Projected 12.4% increase in monthly income based on historical patterns and market trends.</p>
+                {forecastData && forecastData.summary.avgGrowth > 0 ? (
+                  <div className="flex gap-3 p-3 rounded-lg border border-slate-100 hover:shadow-md transition-all group cursor-pointer">
+                    <CheckCircle size={16} className="text-slate-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-900">Strong Income Growth</h4>
+                      <p className="text-xs text-slate-600 mt-1">
+                        Projected {forecastData.summary.avgGrowth.toFixed(1)}% increase in monthly income based on historical patterns.
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-3 p-3 rounded-lg border border-slate-100 hover:shadow-md transition-all group cursor-pointer">
-                  <AlertTriangle size={16} className="text-slate-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900">Expense Monitoring Needed</h4>
-                    <p className="text-xs text-slate-600 mt-1">Utility bills showing 4.2% increase, consider energy-saving measures.</p>
+                ) : (
+                  <div className="flex gap-3 p-3 rounded-lg border border-slate-100 hover:shadow-md transition-all group cursor-pointer">
+                    <AlertTriangle size={16} className="text-slate-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-900">Limited Data</h4>
+                      <p className="text-xs text-slate-600 mt-1">
+                        Add more transactions to see detailed insights and accurate predictions.
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
+                
+                {forecastData?.summary.maxSavings && forecastData.summary.maxSavings > 0 && (
+                  <div className="flex gap-3 p-3 rounded-lg border border-slate-100 hover:shadow-md transition-all group cursor-pointer">
+                    <CheckCircle size={16} className="text-emerald-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-900">Savings Opportunity</h4>
+                      <p className="text-xs text-slate-600 mt-1">
+                        Maximum projected savings of {formatCurrency(forecastData.summary.maxSavings)} in upcoming months.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -186,34 +248,48 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
             
             <div className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-all group cursor-pointer">
               <div className="p-5 space-y-0 divide-y divide-slate-100">
-                {[
-                  { month: "January", income: 8500, expenses: 5200, savings: 3300, confidence: 92 },
-                  { month: "February", income: 8800, expenses: 5500, savings: 3300, confidence: 89 },
-                  { month: "March", income: 9200, expenses: 6000, savings: 3200, confidence: 94 },
-                ].map((item) => (
-                  <div key={item.month} className="py-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold text-slate-900">{item.month}</span>
-                      <Badge variant={item.confidence >= 90 ? "success" : "warning"} className="text-xs">
-                        {item.confidence}% confidence
-                      </Badge>
+                {allMonths.length > 0 ? (
+                  allMonths.map((item) => (
+                    <div key={`${item.month}-${item.type}`} className="py-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-slate-900">
+                          {item.month}
+                          {item.type === "predicted" && (
+                            <Badge variant="neutral" className="ml-2 text-[9px]">Predicted</Badge>
+                          )}
+                          {item.type === "current" && (
+                            <Badge variant="success" className="ml-2 text-[9px]">Current</Badge>
+                          )}
+                        </span>
+                        {item.confidence && (
+                          <Badge variant={item.confidence >= 90 ? "success" : "warning"} className="text-xs">
+                            {item.confidence}% confidence
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 text-xs">
+                        <div>
+                          <span className="text-slate-400">Income</span>
+                          <div className="font-semibold text-slate-900">{formatCurrency(item.income)}</div>
+                        </div>
+                        <div>
+                          <span className="text-slate-400">Expenses</span>
+                          <div className="font-semibold text-slate-900">{formatCurrency(item.expense)}</div>
+                        </div>
+                        <div>
+                          <span className="text-slate-400">Savings</span>
+                          <div className="font-semibold text-slate-900">
+                            {formatCurrency(item.income - item.expense)}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4 text-xs">
-                      <div>
-                        <span className="text-slate-400">Income</span>
-                        <div className="font-semibold text-slate-900">₱{item.income.toLocaleString()}</div>
-                      </div>
-                      <div>
-                        <span className="text-slate-400">Expenses</span>
-                        <div className="font-semibold text-slate-900">₱{item.expenses.toLocaleString()}</div>
-                      </div>
-                      <div>
-                        <span className="text-slate-400">Savings</span>
-                        <div className="font-semibold text-slate-900">₱{item.savings.toLocaleString()}</div>
-                      </div>
-                    </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center text-slate-500">
+                    No forecast data available. Generate predictions to see monthly breakdown.
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -225,59 +301,70 @@ export function DetailedBreakdownModal({ open, onClose }: DetailedBreakdownModal
             <h3 className="text-[15px] font-bold text-slate-900">Category-wise Analysis</h3>
             
             <div className="space-y-4">
-              {[
-                { category: "Food & Dining", current: 420, predicted: 580, change: 38, trend: "up" },
-                { category: "Shopping", current: 230, predicted: 450, change: 96, trend: "up" },
-                { category: "Transportation", current: 180, predicted: 220, change: 22, trend: "up" },
-                { category: "Utilities", current: 1200, predicted: 1320, change: 10, trend: "up" },
-              ].map((item) => (
-                <div key={item.category} className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-slate-900">{item.category}</span>
-                    <div className="flex items-center gap-2">
-                      {item.trend === "up" ? (
-                        <TrendingUp size={16} className="text-amber-500" />
-                      ) : (
-                        <TrendingDown size={16} className="text-emerald-500" />
-                      )}
-                      <span className={`text-sm font-medium ${
-                        item.trend === "up" ? "text-amber-600" : "text-emerald-600"
-                      }`}>
-                        +{item.change}%
-                      </span>
+              {categoryPredictions.length > 0 ? (
+                categoryPredictions.map((item) => (
+                  <div 
+                    key={item.category} 
+                    className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-semibold text-slate-900">{item.category}</span>
+                      <div className="flex items-center gap-2">
+                        {item.trend === "up" ? (
+                          <TrendingUp size={16} className="text-amber-500" />
+                        ) : item.trend === "down" ? (
+                          <TrendingDown size={16} className="text-emerald-500" />
+                        ) : (
+                          <span className="text-xs text-slate-400">→</span>
+                        )}
+                        <span className={`text-sm font-medium ${
+                          item.trend === "up" ? "text-amber-600" : "text-emerald-600"
+                        }`}>
+                          {item.change > 0 ? "+" : ""}{item.changePercent}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <div>
+                        <span className="text-slate-400">Current: </span>
+                        <span className="font-medium">{formatCurrency(item.actual)}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400">Predicted: </span>
+                        <span className="font-medium">{formatCurrency(item.predicted)}</span>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-slate-500">
+                      Confidence: {item.confidence}%
                     </div>
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <div>
-                      <span className="text-slate-400">Current: </span>
-                      <span className="font-medium">₱{item.current}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400">Predicted: </span>
-                      <span className="font-medium">₱{item.predicted}</span>
-                    </div>
-                  </div>
+                ))
+              ) : (
+                <div className="bg-white border border-slate-200 rounded-lg p-8 text-center text-slate-500">
+                  No category data available. Add categorized transactions to see analysis.
                 </div>
-              ))}
+              )}
             </div>
 
             {/* AI Recommendations */}
-            <div className="border border-slate-100 rounded-lg p-4">
-              <h4 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                <Brain size={16} className="text-emerald-500" />
-                AI Recommendations
-              </h4>
-              <div className="space-y-2 text-xs">
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5"></div>
-                  <p className="text-slate-600">Focus on controlling shopping expenses - highest growth potential detected</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5"></div>
-                  <p className="text-slate-600">Utility optimization could save ₱200/month based on consumption patterns</p>
+            {categoryPredictions.length > 0 && (
+              <div className="border border-slate-100 rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                  <Brain size={16} className="text-emerald-500" />
+                  AI Recommendations
+                </h4>
+                <div className="space-y-2 text-xs">
+                  {categoryPredictions.slice(0, 3).map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-2">
+                      <div className={`w-1.5 h-1.5 rounded-full mt-1.5 ${
+                        idx === 0 ? "bg-emerald-500" : idx === 1 ? "bg-blue-500" : "bg-amber-500"
+                      }`} />
+                      <p className="text-slate-600">{item.insight}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </ModalBody>
