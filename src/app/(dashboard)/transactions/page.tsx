@@ -68,6 +68,14 @@ import { DeleteTransactionModal } from "./_components/delete-transaction-modal";
 import { useTransactions } from "./_lib/use-transactions";
 import type { TransactionType } from "./_components/types";
 import { FilterTableSkeleton, TransactionCardSkeleton } from "@/components/ui/skeleton-filter-loaders";
+import {
+  exportToCSV,
+  exportTransactionsToPDF,
+  formatExportDate,
+  formatCurrencyPHP,
+  getTimestampString,
+  type TransactionExportData,
+} from "@/lib/export-utils";
 
 type SummaryType = {
   label: string;
@@ -364,6 +372,54 @@ export default function TransactionsPage() {
     ];
   }, [summary]);
 
+  // Export handlers
+  const handleExportCSV = useCallback(() => {
+    if (transactions.length === 0) {
+      alert("No transactions to export");
+      return;
+    }
+
+    const exportData: TransactionExportData[] = transactions.map((tx) => ({
+      id: tx.id,
+      date: formatExportDate(tx.date),
+      description: tx.description || "Untitled",
+      type: tx.type,
+      category: tx.category_name || tx.type,
+      account: tx.account_name || "—",
+      amount: isIncomeType(tx) ? tx.amount : -tx.amount,
+      notes: tx.notes,
+    }));
+
+    const filename = `transactions_${getTimestampString()}.csv`;
+    exportToCSV(exportData, filename);
+  }, [transactions]);
+
+  const handleExportPDF = useCallback(() => {
+    if (transactions.length === 0) {
+      alert("No transactions to export");
+      return;
+    }
+
+    const exportData: TransactionExportData[] = transactions.map((tx) => ({
+      id: tx.id,
+      date: formatExportDate(tx.date),
+      description: tx.description || "Untitled",
+      type: tx.type,
+      category: tx.category_name || tx.type,
+      account: tx.account_name || "—",
+      amount: isIncomeType(tx) ? tx.amount : -tx.amount,
+      notes: tx.notes,
+    }));
+
+    const summary = {
+      totalIncome: summaryItems[0]?.value ? parseFloat(summaryItems[0].value.replace(/[₱,]/g, "")) : 0,
+      totalExpenses: summaryItems[1]?.value ? parseFloat(summaryItems[1].value.replace(/[₱,]/g, "")) : 0,
+      netBalance: summaryItems[2]?.value ? parseFloat(summaryItems[2].value.replace(/[₱,]/g, "")) : 0,
+    };
+
+    exportTransactionsToPDF(exportData, summary);
+  }, [transactions, summaryItems]);
+
   // Normalize chart data to percentages for bar heights
   const chartData = useMemo(() => {
     if (!monthlyTrend.length) return [];
@@ -556,10 +612,10 @@ export default function TransactionsPage() {
             </Button>
             {/* Dropdown */}
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 hidden group-hover:block z-50">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50" onClick={handleExportPDF}>
                 <span className="text-rose-500">PDF</span> Export as PDF
               </Button>
-              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50" onClick={handleExportCSV}>
                 <span className="text-emerald-500">CSV</span> Export as CSV
               </Button>
             </div>

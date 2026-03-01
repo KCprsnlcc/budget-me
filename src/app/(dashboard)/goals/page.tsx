@@ -43,6 +43,14 @@ import {
   ContributeGoalModal,
 } from "./_components";
 import { FilterTableSkeleton, GoalCardSkeleton } from "@/components/ui/skeleton-filter-loaders";
+import {
+  exportToCSV,
+  exportGoalsToPDF,
+  formatExportDate,
+  formatCurrencyPHP,
+  getTimestampString,
+  type GoalExportData,
+} from "@/lib/export-utils";
 import type { GoalType } from "./_components/types";
 import { getGoalProgress, formatCurrency, formatDate } from "./_components/constants";
 import { useGoals } from "./_lib/use-goals";
@@ -300,7 +308,47 @@ export default function GoalsPage() {
     }, 150);
   }, []);
 
-  // Fetch contributors for each goal when goals change
+  const summaryData = useMemo(() => [
+    { label: "Active Goals", value: (summary?.activeGoals ?? 0).toString() },
+    { label: "Total Saved", value: formatCurrency(summary?.totalSaved ?? 0) },
+    { label: "Monthly Contributions", value: formatCurrency(summary?.monthlyContributions ?? 0) },
+    { label: "Completed", value: (summary?.completedGoals ?? 0).toString() },
+  ], [summary]);
+
+  // Export handlers
+  const handleExportCSV = useCallback(() => {
+    if (goals.length === 0) { alert("No goals to export"); return; }
+    const exportData = goals.map((goal) => ({
+      id: goal.id, name: goal.name, target: goal.target, current: goal.current,
+      remaining: goal.target - goal.current,
+      progress: `${Math.round((goal.current / goal.target) * 100)}%`,
+      priority: goal.priority, status: goal.status, category: goal.category,
+      deadline: formatExportDate(goal.deadline),
+      monthlyContribution: goal.monthlyContribution ?? 0,
+      isFamily: goal.isFamily,
+    }));
+    exportToCSV(exportData, `goals_${getTimestampString()}.csv`);
+  }, [goals]);
+
+  const handleExportPDF = useCallback(() => {
+    if (goals.length === 0) { alert("No goals to export"); return; }
+    const exportData = goals.map((goal) => ({
+      id: goal.id, name: goal.name, target: goal.target, current: goal.current,
+      remaining: goal.target - goal.current,
+      progress: `${Math.round((goal.current / goal.target) * 100)}%`,
+      priority: goal.priority, status: goal.status, category: goal.category,
+      deadline: formatExportDate(goal.deadline),
+      monthlyContribution: goal.monthlyContribution ?? 0,
+      isFamily: goal.isFamily,
+    }));
+    const summaryForExport = {
+      totalGoals: summaryData[0]?.value ? parseInt(summaryData[0].value) : goals.length,
+      totalSaved: summary?.totalSaved ?? 0,
+      totalTarget: allGoals.reduce((s, g) => s + g.target, 0),
+      completedGoals: summary?.completedGoals ?? 0,
+    };
+    exportGoalsToPDF(exportData, summaryForExport);
+  }, [goals, summary, summaryData, allGoals]);
   useEffect(() => {
     const fetchContributors = async () => {
       setContributorsLoading(true);
@@ -325,13 +373,6 @@ export default function GoalsPage() {
       fetchContributors();
     }
   }, [goals]);
-
-  const summaryData = useMemo(() => [
-    { label: "Active Goals", value: (summary?.activeGoals ?? 0).toString() },
-    { label: "Total Saved", value: formatCurrency(summary?.totalSaved ?? 0) },
-    { label: "Monthly Contributions", value: formatCurrency(summary?.monthlyContributions ?? 0) },
-    { label: "Completed", value: (summary?.completedGoals ?? 0).toString() },
-  ], [summary]);
 
   const chartData = useMemo(() => {
     const totalTarget = allGoals.reduce((s, g) => s + g.target, 0);
@@ -548,10 +589,10 @@ export default function GoalsPage() {
             </Button>
             {/* Dropdown */}
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 hidden group-hover:block z-50">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50" onClick={handleExportPDF}>
                 <span className="text-rose-500">PDF</span> Export as PDF
               </Button>
-              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50" onClick={handleExportCSV}>
                 <span className="text-emerald-500">CSV</span> Export as CSV
               </Button>
             </div>

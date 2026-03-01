@@ -54,6 +54,14 @@ import {
 } from "./_components";
 import type { BudgetType } from "./_components/types";
 import { FilterTableSkeleton, BudgetFilterGridSkeleton } from "@/components/ui/skeleton-filter-loaders";
+import {
+  exportToCSV,
+  exportBudgetsToPDF,
+  formatExportDate,
+  formatCurrencyPHP,
+  getTimestampString,
+  type BudgetExportData,
+} from "@/lib/export-utils";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { deriveBudgetHealth } from "./_components/types";
@@ -226,6 +234,61 @@ export default function BudgetsPage() {
       setEditModalOpen(true);
     }, 150);
   }, []);
+
+  // Export handlers
+  const handleExportCSV = useCallback(() => {
+    if (budgets.length === 0) { alert("No budgets to export"); return; }
+    const exportData = budgets.map((budget) => {
+      const remaining = budget.amount - budget.spent;
+      const percentage = budget.amount > 0 ? Math.round((budget.spent / budget.amount) * 100) : 0;
+      const health = deriveBudgetHealth(budget.spent, budget.amount);
+      return {
+        id: budget.id,
+        budget_name: budget.budget_name,
+        category: budget.expense_category_name ?? budget.category_name ?? "Uncategorized",
+        period: BUDGET_PERIODS.find((p) => p.key === budget.period)?.label ?? budget.period,
+        amount: budget.amount,
+        spent: budget.spent,
+        remaining,
+        percentage: `${percentage}%`,
+        status: budget.status,
+        health: health === "on-track" ? "On Track" : health === "caution" ? "Caution" : "At Risk",
+        start_date: formatExportDate(budget.start_date),
+        end_date: formatExportDate(budget.end_date),
+      };
+    });
+    exportToCSV(exportData, `budgets_${getTimestampString()}.csv`);
+  }, [budgets]);
+
+  const handleExportPDF = useCallback(() => {
+    if (budgets.length === 0) { alert("No budgets to export"); return; }
+    const exportData = budgets.map((budget) => {
+      const remaining = budget.amount - budget.spent;
+      const percentage = budget.amount > 0 ? Math.round((budget.spent / budget.amount) * 100) : 0;
+      const health = deriveBudgetHealth(budget.spent, budget.amount);
+      return {
+        id: budget.id,
+        budget_name: budget.budget_name,
+        category: budget.expense_category_name ?? budget.category_name ?? "Uncategorized",
+        period: BUDGET_PERIODS.find((p) => p.key === budget.period)?.label ?? budget.period,
+        amount: budget.amount,
+        spent: budget.spent,
+        remaining,
+        percentage: `${percentage}%`,
+        status: budget.status,
+        health: health === "on-track" ? "On Track" : health === "caution" ? "Caution" : "At Risk",
+        start_date: formatExportDate(budget.start_date),
+        end_date: formatExportDate(budget.end_date),
+      };
+    });
+    const exportSummary = {
+      totalBudgets: summary.budgetCount,
+      totalBudget: summary.totalBudget,
+      totalSpent: summary.totalSpent,
+      remaining: summary.remaining,
+    };
+    exportBudgetsToPDF(exportData, exportSummary);
+  }, [budgets, summary]);
 
   const overallPercentage = summary.totalBudget > 0
     ? Math.round((summary.totalSpent / summary.totalBudget) * 100)
@@ -463,10 +526,10 @@ export default function BudgetsPage() {
             </Button>
             {/* Dropdown */}
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 hidden group-hover:block z-50">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50" onClick={handleExportPDF}>
                 <span className="text-rose-500">PDF</span> Export as PDF
               </Button>
-              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50" onClick={handleExportCSV}>
                 <span className="text-emerald-500">CSV</span> Export as CSV
               </Button>
             </div>
