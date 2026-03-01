@@ -3,13 +3,17 @@ import { BarChart3, Clock } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { getAIUsageStatus, formatTimeRemaining, AIUsageStatus } from "@/app/(dashboard)/_lib/ai-rate-limit-service";
 import { useAuth } from "@/components/auth/auth-context";
+import { createClient } from "@/lib/supabase/client";
 
 export function AIUsageCard() {
   const { user } = useAuth();
   const [status, setStatus] = useState<AIUsageStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState("00:00:00");
+  
   useEffect(() => {
+    const supabase = createClient();
+    
     const fetchStatus = async () => {
       if (!user?.id) {
         setLoading(false);
@@ -26,11 +30,31 @@ export function AIUsageCard() {
       }
     };
 
+    // Initial fetch
     fetchStatus();
 
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchStatus, 30000);
-    return () => clearInterval(interval);
+    // Subscribe to realtime changes for this user's usage
+    const channel = supabase
+      .channel('ai-usage-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'ai_usage_rate_limits',
+          filter: `user_id=eq.${user?.id}`,
+        },
+        () => {
+          // Refetch when data changes
+          fetchStatus();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
 
   // Update countdown timer
