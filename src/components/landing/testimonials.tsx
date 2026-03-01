@@ -1,5 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
-import { TESTIMONIALS_ROW1, TESTIMONIALS_ROW2 } from "@/lib/constants";
+import { Button } from "@/components/ui/button";
+import { PenLine, Loader2 } from "lucide-react";
+import { useTestimonials } from "./_lib/use-testimonials";
+import { WriteReviewModal } from "./_components/write-review-modal";
 import type { Testimonial } from "@/types";
 
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
@@ -25,6 +31,25 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
       <p className="text-slate-600 text-[13px] leading-relaxed">
         &ldquo;{testimonial.text}&rdquo;
       </p>
+    </div>
+  );
+}
+
+function TestimonialSkeleton() {
+  return (
+    <div className="w-[350px] shrink-0 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-full bg-slate-200 animate-pulse" />
+        <div className="space-y-2">
+          <div className="w-32 h-4 bg-slate-200 rounded animate-pulse" />
+          <div className="w-20 h-3 bg-slate-200 rounded animate-pulse" />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <div className="w-full h-3 bg-slate-200 rounded animate-pulse" />
+        <div className="w-full h-3 bg-slate-200 rounded animate-pulse" />
+        <div className="w-3/4 h-3 bg-slate-200 rounded animate-pulse" />
+      </div>
     </div>
   );
 }
@@ -55,6 +80,12 @@ function MarqueeRow({
 }
 
 export function Testimonials() {
+  const { testimonialsRow1, testimonialsRow2, isLoading, submitReview } = useTestimonials();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+
   return (
     <section
       id="testimonials"
@@ -74,17 +105,53 @@ export function Testimonials() {
           <h3 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight mb-3">
             Loved by the community
           </h3>
-          <p className="text-sm text-slate-500 max-w-lg mx-auto leading-relaxed">
+          <p className="text-sm text-slate-500 max-w-lg mx-auto leading-relaxed mb-6">
             See why thousands of users are switching to BudgetMe for their daily financial planning.
           </p>
+          
+          {/* Write Review Button */}
+          <Button
+            onClick={handleOpenModal}
+            variant="outline"
+            className="bg-white hover:bg-slate-50 border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-700 transition-colors"
+          >
+            <PenLine className="w-4 h-4 mr-2" />
+            Write a Review
+          </Button>
         </div>
 
         {/* Marquee Rows */}
-        <div className="relative overflow-hidden py-4 space-y-6">
-          <MarqueeRow testimonials={TESTIMONIALS_ROW1} duration="120s" />
-          <MarqueeRow testimonials={TESTIMONIALS_ROW2} reverse duration="100s" />
-        </div>
+        {isLoading ? (
+          <div className="relative overflow-hidden py-4 space-y-6">
+            <div className="flex gap-6">
+              <TestimonialSkeleton />
+              <TestimonialSkeleton />
+              <TestimonialSkeleton />
+            </div>
+            <div className="flex gap-6">
+              <TestimonialSkeleton />
+              <TestimonialSkeleton />
+              <TestimonialSkeleton />
+            </div>
+          </div>
+        ) : (
+          <div className="relative overflow-hidden py-4 space-y-6">
+            {testimonialsRow1.length > 0 && (
+              <MarqueeRow testimonials={testimonialsRow1} duration="120s" />
+            )}
+            {testimonialsRow2.length > 0 && (
+              <MarqueeRow testimonials={testimonialsRow2} reverse duration="100s" />
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Write Review Modal */}
+      <WriteReviewModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={submitReview}
+      />
     </section>
   );
 }

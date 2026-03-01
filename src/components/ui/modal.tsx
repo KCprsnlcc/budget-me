@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +33,7 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
 
   if (!open) return null;
 
-  return (
+  const modalContent = (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity"
       onClick={onClose}
@@ -51,6 +52,9 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
       </div>
     </div>
   );
+
+  // Render modal in a portal at document.body level to ensure it's above all other content
+  return typeof document !== "undefined" ? createPortal(modalContent, document.body) : null;
 }
 
 export function ModalHeader({
