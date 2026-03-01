@@ -31,13 +31,13 @@ export function Sidebar() {
             {DASHBOARD_NAV.map((group, index) => (
               <div key={group.label}>
                 <div className="px-2 text-[10px] font-medium text-slate-500 uppercase tracking-widest mb-2 mt-5 first:mt-0">
-                  <Skeleton width={70} height={10} />
+                  <Skeleton width={60} height={8} />
                 </div>
                 {group.items.map((item) => (
                   <div key={item.module}>
                     <div className="flex items-center gap-3 px-3 py-1.5">
-                      <Skeleton width={18} height={18} borderRadius={4} />
-                      <Skeleton width={90} height={13} />
+                      <Skeleton width={16} height={16} borderRadius={4} />
+                      <Skeleton width={80} height={12} />
                     </div>
                   </div>
                 ))}
@@ -54,31 +54,31 @@ export function Sidebar() {
 
             {/* AI Usage Skeleton */}
             <div className="mt-auto px-2 mb-4">
-              <div className="bg-slate-50 rounded-lg border border-slate-200/60 p-3">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Skeleton width={14} height={14} borderRadius={4} />
+              <div className="bg-slate-50 rounded-lg border border-slate-200/60 p-2.5">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Skeleton width={12} height={12} borderRadius={4} />
                   <div className="flex-1">
-                    <Skeleton width={60} height={9} className="mb-0.5" />
-                    <Skeleton width={80} height={9} />
+                    <Skeleton width={50} height={8} className="mb-0.5" />
+                    <Skeleton width={70} height={8} />
                   </div>
                 </div>
-                <Skeleton height={6} borderRadius={4} className="mb-1.5" />
-                <div className="flex justify-between mb-1.5">
-                  <Skeleton width={60} height={9} />
-                  <Skeleton width={50} height={9} />
+                <Skeleton height={5} borderRadius={3} className="mb-1" />
+                <div className="flex justify-between mb-1">
+                  <Skeleton width={50} height={8} />
+                  <Skeleton width={40} height={8} />
                 </div>
-                <div className="pt-1.5 border-t border-slate-200/50 grid grid-cols-3 gap-1">
+                <div className="pt-1 border-t border-slate-200/50 grid grid-cols-3 gap-1">
                   <div className="text-center">
-                    <Skeleton width={15} height={8} className="mx-auto mb-0.5" />
-                    <Skeleton width={45} height={8} className="mx-auto" />
+                    <Skeleton width={12} height={7} className="mx-auto mb-0.5" />
+                    <Skeleton width={35} height={7} className="mx-auto" />
                   </div>
                   <div className="text-center border-l border-slate-200/50">
-                    <Skeleton width={15} height={8} className="mx-auto mb-0.5" />
-                    <Skeleton width={35} height={8} className="mx-auto" />
+                    <Skeleton width={12} height={7} className="mx-auto mb-0.5" />
+                    <Skeleton width={30} height={7} className="mx-auto" />
                   </div>
                   <div className="text-center border-l border-slate-200/50">
-                    <Skeleton width={15} height={8} className="mx-auto mb-0.5" />
-                    <Skeleton width={40} height={8} className="mx-auto" />
+                    <Skeleton width={12} height={7} className="mx-auto mb-0.5" />
+                    <Skeleton width={32} height={7} className="mx-auto" />
                   </div>
                 </div>
               </div>
@@ -86,14 +86,14 @@ export function Sidebar() {
           </nav>
 
           {/* User Profile Skeleton */}
-          <div className="p-4 border-t border-slate-200/50">
-            <div className="flex items-center gap-3">
-              <Skeleton width={32} height={32} circle />
+          <div className="p-3 border-t border-slate-200/50">
+            <div className="flex items-center gap-2.5">
+              <Skeleton width={28} height={28} circle />
               <div className="flex-1 overflow-hidden">
-                <Skeleton width={110} height={13} className="mb-1" />
-                <Skeleton width={140} height={11} />
+                <Skeleton width={100} height={12} className="mb-0.5" />
+                <Skeleton width={120} height={10} />
               </div>
-              <Skeleton width={18} height={18} borderRadius={4} />
+              <Skeleton width={16} height={16} borderRadius={4} />
             </div>
           </div>
         </aside>

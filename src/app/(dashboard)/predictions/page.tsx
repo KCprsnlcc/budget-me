@@ -569,8 +569,8 @@ export default function PredictionsPage() {
           </div>
 
           {/* Prediction Summary Cards Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {Array.from({ length: 4 }).map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {Array.from({ length: 3 }).map((_, i) => (
               <Card key={i} className="p-5">
                 <div className="flex justify-between items-start mb-4">
                   <Skeleton width={40} height={40} borderRadius={8} />
