@@ -1,4 +1,6 @@
 // Flexible transaction type for insights generation
+import { getPhilippinesNow, formatInPhilippines } from "@/lib/timezone";
+
 export interface InsightsTransaction {
   id?: string;
   user_id?: string;
@@ -42,6 +44,11 @@ export interface InsightData {
  * Generate financial insights based on transactions, budgets, and financial data
  * Exact replication from useInsightsAndCharts.ts
  */
+"use client";
+
+import { getPhilippinesNow, formatInPhilippines } from "@/lib/timezone";
+import type { DashboardSummary, RecentTransaction, BudgetProgress } from "./dashboard-service";
+
 export function generateInsights(
   transactions: InsightsTransaction[],
   budgets: InsightsBudget[],
@@ -110,7 +117,7 @@ export function generateInsights(
       const amount = typeof largeSubscription.amount === 'string' ? parseFloat(largeSubscription.amount) : largeSubscription.amount;
       newInsights.push({
         title: "Critical: Unusual subscription charge",
-        description: `There's an unusually large subscription charge of ${formatCurrency(amount)} on ${new Date(largeSubscription.date).toLocaleDateString()}. Please verify this transaction.`,
+        description: `There's an unusually large subscription charge of ${formatCurrency(amount)} on ${formatInPhilippines(largeSubscription.date)}. Please verify this transaction.`,
         type: "danger",
         icon: "lucide:alert-circle",
       });
@@ -202,7 +209,7 @@ export function generateInsights(
   const dailyAverage = safeExpenses / 30;
   const last7DaysTx = expenseTransactions.filter(tx => {
     const txDate = new Date(tx.date);
-    const sevenDaysAgo = new Date();
+    const sevenDaysAgo = new Date(getPhilippinesNow());
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     return txDate >= sevenDaysAgo;
   });
@@ -308,8 +315,8 @@ export function generateInsights(
   }
   
   // 5. Monthly spending trend analysis
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
+  const currentMonth = getPhilippinesNow().getMonth();
+  const currentYear = getPhilippinesNow().getFullYear();
   const currentMonthTx = expenseTransactions.filter(tx => {
     const txDate = new Date(tx.date);
     return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
@@ -724,8 +731,8 @@ export function generateInsights(
   }
   
   // 20. Dynamic time-based insights (change on refresh)
-  const currentHour = new Date().getHours();
-  const dayOfWeek = new Date().getDay();
+  const currentHour = getPhilippinesNow().getHours();
+  const dayOfWeek = getPhilippinesNow().getDay();
   
   // Time-based motivational insights
   if (currentHour >= 9 && currentHour <= 11) {

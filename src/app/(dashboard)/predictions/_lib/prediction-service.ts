@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { getPhilippinesNow, formatInPhilippines, formatDateForInput } from "@/lib/timezone";
 import type { CategoryPrediction, MonthlyForecast, ExpenseTypeForecast, TransactionBehaviorInsight, PredictionHistory, PredictionSummary, CategorySpendingData } from "./types";
 
 const supabase = createClient();
@@ -20,7 +21,7 @@ const PROPHET_CONFIG = {
  * Fetch historical transaction data for forecasting
  */
 async function fetchHistoricalTransactions(userId: string, months: number = 6) {
-  const startDate = new Date();
+  const startDate = new Date(getPhilippinesNow());
   startDate.setMonth(startDate.getMonth() - months);
   
   const { data, error } = await supabase
@@ -32,7 +33,7 @@ async function fetchHistoricalTransactions(userId: string, months: number = 6) {
     `)
     .eq("user_id", userId)
     .eq("status", "completed")
-    .gte("date", startDate.toISOString().split("T")[0])
+    .gte("date", formatDateForInput(startDate))
     .order("date", { ascending: true });
 
   if (error) {
@@ -168,7 +169,7 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
   
   if (sortedMonths.length < 2) {
     // Not enough data - return defaults
-    const currentMonth = new Date().toLocaleDateString("en-US", { month: "short" });
+    const currentMonth = formatInPhilippines(getPhilippinesNow(), 'MMM');
     return {
       historical: [{ month: currentMonth, income: 0, expense: 0, type: "current" }],
       predicted: [
@@ -190,7 +191,7 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
 
   // Build historical array
   const historical: MonthlyForecast[] = sortedMonths.map((month, i) => ({
-    month: new Date(month + "-01").toLocaleDateString("en-US", { month: "short" }),
+    month: formatInPhilippines(new Date(month + "-01"), 'MMM'),
     income: incomeData[i],
     expense: expenseData[i],
     type: i === sortedMonths.length - 1 ? "current" : "historical",
@@ -202,7 +203,7 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
     const predDate = new Date(lastDate);
     predDate.setMonth(predDate.getMonth() + i + 1);
     return {
-      month: predDate.toLocaleDateString("en-US", { month: "short" }),
+      month: formatInPhilippines(predDate, 'MMM'),
       income: Math.round(inc),
       expense: Math.round(expenseForecast.forecast[i]),
       type: "predicted",

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { formatDateForInput, getPhilippinesNow, formatInPhilippines } from "@/lib/timezone";
 import {
   Home,
   Car,
@@ -222,7 +223,7 @@ export async function createTransaction(
   const insert: Record<string, any> = {
     user_id: userId,
     amount,
-    date: form.date || new Date().toISOString().split("T")[0],
+    date: form.date || formatDateForInput(getPhilippinesNow()),
     type: form.type,
     description: form.description || null,
     account_id: form.account || null,
@@ -609,7 +610,7 @@ export async function fetchMonthlyTrend(
   userId: string,
   months: number = 6
 ): Promise<MonthlyTrendPoint[]> {
-  const now = new Date();
+  const now = getPhilippinesNow();
   const points: MonthlyTrendPoint[] = [];
 
   for (let i = months - 1; i >= 0; i--) {
@@ -636,7 +637,7 @@ export async function fetchMonthlyTrend(
       else if (row.type === "expense") exp += amt;
     }
 
-    const label = d.toLocaleDateString("en-US", { month: "short" });
+    const label = formatInPhilippines(d, 'MMM');
     points.push({ month: label, income: inc, expense: exp });
   }
 
@@ -744,7 +745,7 @@ async function updateGoalProgressFromTransaction(
     goal_id: goalId,
     user_id: userId,
     amount: amount,
-    contribution_date: new Date().toISOString().split("T")[0],
+    contribution_date: formatDateForInput(getPhilippinesNow()),
     contribution_type: "manual", // Changed from "transaction" to "manual" to match constraint
     transaction_id: transactionId,
   };
@@ -801,7 +802,7 @@ export async function recalculateGoalProgress(goalId: string): Promise<void> {
   
   if (isCompleted && goal.status !== "completed") {
     update.status = "completed";
-    update.completed_date = new Date().toISOString().split("T")[0];
+    update.completed_date = formatDateForInput(getPhilippinesNow());
   } else if (!isCompleted && goal.status === "completed") {
     update.status = "in_progress";
     update.completed_date = null;

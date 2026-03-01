@@ -1,4 +1,10 @@
 import { createClient } from "@/lib/supabase/client";
+import { 
+  getPhilippinesNow, 
+  formatInPhilippines, 
+  formatDateForInput,
+  formatRelativeTimeInPhilippines 
+} from "@/lib/timezone";
 import type {
   Family,
   FamilyMember,
@@ -76,10 +82,7 @@ function mapMemberRow(row: any): FamilyMember {
     spending: 0,
     budget: 0,
     joinedAt: row.joined_at
-      ? new Date(row.joined_at).toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      })
+      ? formatInPhilippines(row.joined_at, 'MMM yyyy')
       : undefined,
     avatar: profile.avatar_url || undefined,
   };
@@ -110,7 +113,7 @@ function mapGoalRow(row: any): SharedGoal {
       ? Number(row.current_amount) / Number(row.target_amount)
       : 0;
     if (row.target_date) {
-      const now = new Date();
+      const now = getPhilippinesNow();
       const target = new Date(row.target_date);
       const created = new Date(row.created_at);
       const totalDays = (target.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
@@ -202,16 +205,7 @@ function mapInvitationRow(row: any): Invitation {
 /* ------------------------------------------------------------------ */
 
 export function formatRelativeTime(dateStr: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffDays > 30) return `${Math.floor(diffDays / 30)}mo ago`;
-  if (diffDays > 0) return `${diffDays}d ago`;
-  if (diffHours > 0) return `${diffHours}h ago`;
-  return "Now";
+  return formatRelativeTimeInPhilippines(dateStr);
 }
 
 function getRolePermissions(role: string): string[] {
@@ -616,7 +610,7 @@ export async function createFamily(
     can_create_goals: true,
     can_view_budgets: true,
     can_contribute_goals: true,
-    joined_at: new Date().toISOString(),
+    joined_at: formatDateForInput(getPhilippinesNow()),
   });
 
   if (memberErr) return { data: null, error: memberErr.message };
@@ -642,7 +636,7 @@ export async function updateFamily(
       family_name: form.name.trim(),
       description: form.description?.trim() || null,
       is_public: form.visibility === "public",
-      updated_at: new Date().toISOString(),
+      updated_at: formatDateForInput(getPhilippinesNow()),
     })
     .eq("id", familyId)
     .select("*")
@@ -854,7 +848,7 @@ export async function respondToInvitation(
     .from("family_invitations")
     .update({
       status: accept ? "accepted" : "declined",
-      responded_at: new Date().toISOString(),
+      responded_at: formatDateForInput(getPhilippinesNow()),
     })
     .eq("id", invitationId);
 
@@ -872,7 +866,7 @@ export async function respondToInvitation(
       can_contribute_goals: true,
       invited_by: invitation.invited_by,
       invited_at: invitation.created_at,
-      joined_at: new Date().toISOString(),
+      joined_at: formatDateForInput(getPhilippinesNow()),
     });
 
     if (memberErr) return { error: memberErr.message };
@@ -936,7 +930,7 @@ export async function respondToJoinRequest(
     .update({
       status: approve ? "approved" : "declined",
       reviewed_by: reviewerId,
-      reviewed_at: new Date().toISOString(),
+      reviewed_at: formatDateForInput(getPhilippinesNow()),
     })
     .eq("id", requestId);
 
@@ -951,7 +945,7 @@ export async function respondToJoinRequest(
       can_create_goals: false,
       can_view_budgets: true,
       can_contribute_goals: true,
-      joined_at: new Date().toISOString(),
+      joined_at: formatDateForInput(getPhilippinesNow()),
     });
 
     if (memberErr) return { error: memberErr.message };
@@ -1085,7 +1079,7 @@ export async function updateMemberRole(
         can_create_goals: dbRole === "admin",
         can_view_budgets: true,
         can_contribute_goals: dbRole !== "viewer",
-        updated_at: new Date().toISOString(),
+        updated_at: formatDateForInput(getPhilippinesNow()),
       })
       .eq("id", memberId);
 
@@ -1129,11 +1123,11 @@ export async function contributeToGoal(
     const newAmount = Number(goal.current_amount) + amount;
     const updates: Record<string, any> = {
       current_amount: newAmount,
-      updated_at: new Date().toISOString(),
+      updated_at: formatDateForInput(getPhilippinesNow()),
     };
     if (newAmount >= Number(goal.target_amount)) {
       updates.status = "completed";
-      updates.completed_date = new Date().toISOString().split("T")[0];
+      updates.completed_date = formatDateForInput(getPhilippinesNow());
     }
 
     await supabase.from("goals").update(updates).eq("id", goalId);
@@ -1312,12 +1306,12 @@ export async function fetchFamilyBudgetVsActual(
   const userIds = (members ?? []).map((m: any) => m.user_id);
   if (userIds.length === 0) {
     // Return empty data for each month
-    const now = new Date();
+    const now = getPhilippinesNow();
     const emptyData: FamilyMonthlyChartPoint[] = [];
     for (let i = months - 1; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       emptyData.push({
-        month: d.toLocaleDateString("en-US", { month: "short" }),
+        month: formatInPhilippines(d, 'MMM'),
         budget: 0,
         actual: 0,
       });
@@ -1325,7 +1319,7 @@ export async function fetchFamilyBudgetVsActual(
     return { data: emptyData, error: null };
   }
 
-  const now = new Date();
+  const now = getPhilippinesNow();
   const points: FamilyMonthlyChartPoint[] = [];
 
   for (let i = months - 1; i >= 0; i--) {
@@ -1357,7 +1351,7 @@ export async function fetchFamilyBudgetVsActual(
       }
     }
 
-    const label = d.toLocaleDateString("en-US", { month: "short" });
+    const label = formatInPhilippines(d, 'MMM');
     points.push({ month: label, budget, actual });
   }
 
@@ -1397,12 +1391,12 @@ export async function fetchFamilyGoalsSavingsProgress(
   const totalSaved = (goals ?? []).reduce((s, g) => s + Number(g.current_amount), 0);
   const savedPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
 
-  const now = new Date();
+  const now = getPhilippinesNow();
   const points: FamilyGoalsSavingsPoint[] = [];
 
   for (let i = months - 1; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const label = d.toLocaleDateString("en-US", { month: "short" });
+    const label = formatInPhilippines(d, 'MMM');
 
     // Use the same progressive calculation as goals page
     const factor = (months - i) / months;

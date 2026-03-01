@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { getPhilippinesNow, formatInPhilippines, formatDateForInput } from "@/lib/timezone";
 import { generateInsights, InsightData, InsightsTransaction, InsightsBudget } from "./insights-service";
 import { generateSpendingTrends, SpendingTrend as TrendServiceSpendingTrend } from "./trends-service";
 
@@ -258,7 +259,7 @@ export async function fetchMonthlyChart(
   userId: string,
   months: number = 6
 ): Promise<MonthlyChartPoint[]> {
-  const now = new Date();
+  const now = getPhilippinesNow();
   const points: MonthlyChartPoint[] = [];
 
   for (let i = months - 1; i >= 0; i--) {
@@ -285,7 +286,7 @@ export async function fetchMonthlyChart(
       else if (row.type === "expense") exp += amt;
     }
 
-    const label = d.toLocaleDateString("en-US", { month: "short" });
+    const label = formatInPhilippines(d, 'MMM');
     points.push({ month: label, income: inc, expense: exp });
   }
 
@@ -362,7 +363,7 @@ export async function acceptInvitation(
   // Update invitation status
   const { error: updateError } = await supabase
     .from("family_invitations")
-    .update({ status: "accepted", responded_at: new Date().toISOString() })
+    .update({ status: "accepted", responded_at: formatDateForInput(getPhilippinesNow()) })
     .eq("id", invitationId);
 
   if (updateError) return { error: updateError.message };
@@ -384,7 +385,7 @@ export async function acceptInvitation(
       user_id: userId,
       role: inv.role || "member",
       status: "active",
-      joined_at: new Date().toISOString(),
+      joined_at: formatDateForInput(getPhilippinesNow()),
     });
 
   if (memberError) return { error: memberError.message };
@@ -396,7 +397,7 @@ export async function declineInvitation(
 ): Promise<{ error: string | null }> {
   const { error } = await supabase
     .from("family_invitations")
-    .update({ status: "declined", responded_at: new Date().toISOString() })
+    .update({ status: "declined", responded_at: formatDateForInput(getPhilippinesNow()) })
     .eq("id", invitationId);
 
   if (error) return { error: error.message };
@@ -468,7 +469,7 @@ export async function fetchInsights(
   const topInsights = shuffledInsights.slice(0, 4);
   
   // Add timestamp to ensure refresh detection
-  const timestamp = new Date().toISOString();
+  const timestamp = formatDateForInput(getPhilippinesNow());
 
   // Map to InsightItem format with proper types and icons
   const mappedInsights = topInsights.map((insight, index) => ({

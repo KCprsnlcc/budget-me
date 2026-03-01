@@ -11,6 +11,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import type { ActivityItem } from "../types";
 import { createClient } from "@/lib/supabase/client";
+import { formatRelativeTimeInPhilippines, getPhilippinesNow, formatDateForInput } from "@/lib/timezone";
 import type { User } from "@supabase/supabase-js";
 
 const MONTH_NAMES = [
@@ -149,23 +150,7 @@ export function ActivityTab({
   }, []);
   
   const formatTime = useCallback((timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffDays > 0) {
-      return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-    } else if (diffHours > 0) {
-      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-    } else {
-      const diffMinutes = Math.floor(diffMs / (1000 * 60));
-      if (diffMinutes > 0) {
-        return `${diffMinutes} minute${diffMinutes > 1 ? "s" : ""} ago`;
-      }
-      return "Just now";
-    }
+    return formatRelativeTimeInPhilippines(timestamp);
   }, []);
   
   const getIcon = useCallback((type: string) => {
@@ -262,7 +247,7 @@ export function ActivityTab({
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `family-activity-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `family-activity-${formatDateForInput(getPhilippinesNow())}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -273,7 +258,7 @@ export function ActivityTab({
   const resetFilters = useCallback(() => {
     setSearchQuery("");
     setActiveFilter("");
-    const now = new Date();
+    const now = getPhilippinesNow();
     setMonthFilter((now.getMonth() + 1).toString()); // Current month
     setYearFilter(now.getFullYear().toString()); // Current year
   }, []);
@@ -457,7 +442,7 @@ export function ActivityTab({
             <FilterDropdown
               value={yearFilter === "all" ? "" : yearFilter.toString()}
               onChange={(value) => setYearFilter(value === "" ? "all" : value)}
-              options={Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
+              options={Array.from({ length: 5 }, (_, i) => getPhilippinesNow().getFullYear() - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
               placeholder="All Years"
               className="w-full text-slate-900"
               allowEmpty={true}

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { getPhilippinesNow, formatInPhilippines } from "@/lib/timezone";
 import type {
   BudgetType,
   BudgetFormState,
@@ -292,7 +293,7 @@ export async function fetchBudgetMonthlyTrend(
   userId: string,
   months: number = 6
 ): Promise<BudgetMonthlyTrendPoint[]> {
-  const now = new Date();
+  const now = getPhilippinesNow();
   const points: BudgetMonthlyTrendPoint[] = [];
 
   for (let i = months - 1; i >= 0; i--) {
@@ -318,7 +319,7 @@ export async function fetchBudgetMonthlyTrend(
       spentTotal += Number(row.spent);
     }
 
-    const label = d.toLocaleDateString("en-US", { month: "short" });
+    const label = formatInPhilippines(d, 'MMM');
     points.push({ month: label, budget: budgetTotal, spent: spentTotal });
   }
 

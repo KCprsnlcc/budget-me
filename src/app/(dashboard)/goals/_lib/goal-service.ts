@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { formatDateForInput, getPhilippinesNow, formatInPhilippines } from "@/lib/timezone";
 import type { GoalType, GoalFormState, GoalCategory, GoalContribution } from "../_components/types";
 
 const supabase = createClient();
@@ -233,9 +234,7 @@ export async function contributeToGoal(
   }
 
   // Create contribution record - the trigger will automatically update the goal progress
-  const now = new Date();
-  // Use the current UTC date for consistent storage
-  const localDate = now.toISOString().split("T")[0];
+  const localDate = formatDateForInput(getPhilippinesNow());
   
   const contribution = {
     goal_id: goalId,

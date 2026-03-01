@@ -1,4 +1,6 @@
 // Flexible transaction type for trends analysis
+import { getPhilippinesNow } from "@/lib/timezone";
+
 export interface TrendsTransaction {
   id?: string;
   user_id?: string;
@@ -92,7 +94,7 @@ export function generateSpendingTrends(
   if (sortedMonths.length < 2) {
     // If less than 2 months, return top categories by total spending
     const trends: SpendingTrend[] = [];
-    const currentTime = new Date().getTime();
+    const currentTime = getPhilippinesNow().getTime();
     
     // Prioritize actual database categories, but include user categories too
     const allCategories = new Set([
@@ -177,7 +179,7 @@ export function generateSpendingTrends(
   
   // Calculate trends with insights for all-time analysis
   const trends: SpendingTrend[] = [];
-  const currentTime = new Date().getTime();
+  const currentTime = getPhilippinesNow().getTime();
   
   allCategories.forEach((category) => {
     const currentAmount = recentSpending.get(category) ?? 0;

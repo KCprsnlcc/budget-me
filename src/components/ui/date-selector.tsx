@@ -4,6 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import { Calendar, ChevronDown } from "lucide-react";
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
+import { 
+  PHILIPPINES_TIMEZONE, 
+  getPhilippinesToday, 
+  getPhilippinesNow,
+  formatInPhilippines,
+  formatDateForInput,
+  parseDateFromInput,
+  isTodayInPhilippines
+} from "@/lib/timezone";
 
 interface DateSelectorProps {
   value: string;
@@ -21,7 +30,7 @@ export function DateSelector({
   className 
 }: DateSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(getPhilippinesNow());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showMonthSelector, setShowMonthSelector] = useState(false);
   const [showYearSelector, setShowYearSelector] = useState(false);
@@ -40,7 +49,7 @@ export function DateSelector({
 
   useEffect(() => {
     if (value) {
-      setSelectedDate(new Date(value + "T00:00:00"));
+      setSelectedDate(parseDateFromInput(value));
     } else {
       setSelectedDate(null);
     }
@@ -55,7 +64,7 @@ export function DateSelector({
   };
 
   const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0];
+    return formatDateForInput(date);
   };
 
   const handleDateSelect = (day: number) => {
@@ -91,9 +100,9 @@ export function DateSelector({
         selectedDate.getMonth() === currentMonth.getMonth() &&
         selectedDate.getFullYear() === currentMonth.getFullYear();
       
-      const isToday = new Date().getDate() === day &&
-        new Date().getMonth() === currentMonth.getMonth() &&
-        new Date().getFullYear() === currentMonth.getFullYear();
+      const isToday = isTodayInPhilippines(
+        new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
+      );
 
       days.push(
         <button
@@ -131,7 +140,7 @@ export function DateSelector({
   ];
 
   const getYears = () => {
-    const currentYear = new Date().getFullYear();
+    const currentYear = getPhilippinesNow().getFullYear();
     const years = [];
     for (let i = currentYear - 50; i <= currentYear + 10; i++) {
       years.push(i);
@@ -152,11 +161,7 @@ export function DateSelector({
         disabled={disabled}
       >
         <span className={cn(!value && "text-slate-500")}>
-          {selectedDate ? selectedDate.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric' 
-          }) : placeholder}
+          {selectedDate ? formatInPhilippines(selectedDate, 'MMM dd, yyyy') : placeholder}
         </span>
         <Calendar className="ml-2 h-4 w-4 opacity-50" />
       </Button>
@@ -254,7 +259,7 @@ export function DateSelector({
                 <button
                   type="button"
                   onClick={() => {
-                    const today = new Date();
+                    const today = getPhilippinesToday();
                     setCurrentMonth(today);
                     handleDateSelect(today.getDate());
                   }}
