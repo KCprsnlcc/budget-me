@@ -60,7 +60,7 @@ export const DEFAULT_SUGGESTIONS: ChatSuggestion[] = [
   { id: "3", label: "Create a budget plan", icon: "check-square" },
 ];
 
-export type ExportFormat = "pdf" | "markdown" | "json";
+export type ExportFormat = "pdf" | "csv";
 
 // Extended types for backend integration
 export interface ChatSession {

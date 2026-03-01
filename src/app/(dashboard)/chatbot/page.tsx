@@ -20,6 +20,7 @@ import {
   X,
   FileText,
   FileCode,
+  MoreHorizontal,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,9 +32,8 @@ import remarkGfm from 'remark-gfm';
 import {
   ModelSelectorDropdown,
   ClearChatModal,
-  ExportChatModal,
 } from "./_components";
-import type { MessageType, ExportFormat, MessageRole } from "./_components/types";
+import type { MessageType, MessageRole } from "./_components/types";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { useAuth } from "@/components/auth/auth-context";
@@ -44,13 +44,17 @@ import {
   sendMessageToAI,
   fetchChatHistory,
   clearChatHistory,
-  exportChat,
   fetchAvailableModels,
   AVAILABLE_MODELS,
   getDefaultModel,
   saveWelcomeMessage,
   type SendMessageResult,
 } from "./_lib/chatbot-service";
+import {
+  exportChatToPDF,
+  exportChatToCSV,
+  type ChatMessageExportData,
+} from "@/lib/export-utils";
 import { generateWelcomeMessage, type UserProfile } from "./_lib/welcome-messages";
 import { fetchUserProfile } from "./_lib/user-data-service";
 
@@ -63,7 +67,6 @@ export default function ChatbotPage() {
   const [selectedModel, setSelectedModel] = useState(getDefaultModel().id);
   const [models, setModels] = useState(AVAILABLE_MODELS);
   const [clearChatModalOpen, setClearChatModalOpen] = useState(false);
-  const [exportModalOpen, setExportModalOpen] = useState(false);
   const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
@@ -411,22 +414,39 @@ export default function ChatbotPage() {
     });
   }, [user]);
 
-  const handleExport = useCallback(async (format: ExportFormat) => {
-    if (messages.length === 0) return;
+  const handleExportPDF = useCallback(() => {
+    if (messages.length === 0) {
+      alert("No messages to export");
+      return;
+    }
 
-    startTransition(async () => {
-      try {
-        const result = await exportChat(messages, format, currentModel.name);
-        if (!result.success && result.error) {
-          setError(result.error);
-        } else {
-          setError(null);
-        }
-      } catch (err) {
-        setError("Failed to export chat");
-      }
-    });
-  }, [messages, currentModel.name]);
+    const exportData: ChatMessageExportData[] = messages.map((msg) => ({
+      timestamp: msg.timestamp || new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+      role: msg.role === "user" ? "You" : "BudgetSense AI",
+      content: msg.content || "",
+      model: msg.model || null,
+      userName: userProfile?.fullName || undefined,
+    }));
+
+    exportChatToPDF(exportData, userProfile?.fullName || undefined);
+  }, [messages, userProfile]);
+
+  const handleExportCSV = useCallback(() => {
+    if (messages.length === 0) {
+      alert("No messages to export");
+      return;
+    }
+
+    const exportData: ChatMessageExportData[] = messages.map((msg) => ({
+      timestamp: msg.timestamp || new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+      role: msg.role === "user" ? "You" : "BudgetSense AI",
+      content: msg.content || "",
+      model: msg.model || null,
+      userName: userProfile?.fullName || undefined,
+    }));
+
+    exportChatToCSV(exportData, userProfile?.fullName || undefined);
+  }, [messages, userProfile]);
 
   const handleCopyMessage = useCallback((content: string, messageId: string) => {
     navigator.clipboard.writeText(content);
@@ -762,15 +782,39 @@ export default function ChatbotPage() {
                 <Trash2 size={20} />
               </button>
 
-              {/* Export Chat Button */}
-              <button
-                onClick={() => setExportModalOpen(true)}
-                disabled={isPending || messages.length === 0}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg transition-colors disabled:opacity-50"
-                title="Export Chat"
-              >
-                <Download size={20} />
-              </button>
+              {/* Export Chat Dropdown */}
+              <div className="relative group">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  disabled={isPending || messages.length === 0}
+                  className="p-2 text-slate-400 hover:text-slate-600 disabled:opacity-50"
+                >
+                  <Download size={20} />
+                  <MoreHorizontal size={12} />
+                </Button>
+                {/* Dropdown */}
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 hidden group-hover:block z-50">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50" 
+                    onClick={handleExportPDF}
+                    disabled={messages.length === 0}
+                  >
+                    <span className="text-rose-500">PDF</span> Export as PDF
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50" 
+                    onClick={handleExportCSV}
+                    disabled={messages.length === 0}
+                  >
+                    <span className="text-emerald-500">CSV</span> Export as CSV
+                  </Button>
+                </div>
+              </div>
             </div>
           </header>
 
@@ -1000,13 +1044,6 @@ export default function ChatbotPage() {
         open={clearChatModalOpen}
         onClose={() => setClearChatModalOpen(false)}
         onConfirm={handleClearChat}
-        isLoading={isPending}
-      />
-
-      <ExportChatModal
-        open={exportModalOpen}
-        onClose={() => setExportModalOpen(false)}
-        onExport={handleExport}
         isLoading={isPending}
       />
     </div>
