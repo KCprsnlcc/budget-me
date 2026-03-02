@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import type { AccountType, AccountColor } from "@/app/(dashboard)/settings/_components/types";
 import { ACCOUNT_COLORS, CASH_IN_SOURCES } from "@/app/(dashboard)/settings/_components/constants";
@@ -450,15 +451,12 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
                     />
                   </div>
 
-                  <label className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={formData.isDefault}
-                      onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                      className="h-5 w-5 accent-emerald-500 border-gray-300 rounded flex-shrink-0"
-                    />
-                    <span className="text-sm font-medium text-gray-700">Set as default account</span>
-                  </label>
+                  <Checkbox
+                    id="default-account"
+                    checked={formData.isDefault}
+                    onChange={(checked) => setFormData({ ...formData, isDefault: checked })}
+                    label="Set as default account"
+                  />
                 </div>
               </div>
             )}
@@ -471,33 +469,33 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
                   <p className="text-gray-500 text-[15px]">Double-check your account details before creating</p>
                 </div>
 
-                <div className="border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm">
-                  <div className="flex items-center gap-4 p-6 border-b border-gray-100">
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
-                      style={{ backgroundColor: formData.color }}
-                    >
-                      {selectedType && <selectedType.icon className="w-6 h-6" />}
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-lg">{formData.name || "New Account"}</h3>
-                      <span className="text-sm font-medium px-3 py-1 rounded-lg bg-gray-100 text-gray-600 uppercase tracking-wider border border-gray-200">
-                        {accountType}
-                      </span>
+                <div className="border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm divide-y divide-gray-100">
+                  <div className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white border border-gray-100 shadow-sm">
+                        {selectedType && <selectedType.icon className="w-6 h-6" style={{ color: formData.color }} />}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-lg">{formData.name || "New Account"}</h3>
+                        <span className="text-sm font-medium text-gray-600 uppercase tracking-wider">
+                          {accountType}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="p-6 space-y-4">
-                    <div className="flex justify-between items-center py-3 border-b border-gray-50">
+                  
+                  <div className="px-6 pb-6 space-y-4">
+                    <div className="flex justify-between items-center py-3">
                       <span className="text-sm text-gray-500">Initial Balance</span>
                       <span className="font-semibold text-gray-900">
                         ₱{parseFloat(formData.balance || "0").toLocaleString("en-PH", { minimumFractionDigits: 2 })}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b border-gray-50">
+                    <div className="flex justify-between items-center py-3">
                       <span className="text-sm text-gray-500">Institution</span>
                       <span className="font-medium text-gray-700">{formData.institution || "—"}</span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b border-gray-50">
+                    <div className="flex justify-between items-center py-3">
                       <span className="text-sm text-gray-500">Color Theme</span>
                       <div className="flex items-center gap-2">
                         <span className="w-4 h-4 rounded-full" style={{ backgroundColor: formData.color }} />
@@ -511,14 +509,14 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
                   </div>
                 </div>
 
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                <div className="border border-gray-200 rounded-xl p-4 bg-white">
                   <div className="flex items-start gap-3">
                     <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check className="w-3 h-3 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-emerald-900 mb-1">Ready to create</h4>
-                      <p className="text-sm text-emerald-700">
+                      <h4 className="font-semibold text-gray-900 mb-1">Ready to create</h4>
+                      <p className="text-sm text-gray-700">
                         Your account will be created and you&apos;ll be taken to your dashboard.
                       </p>
                     </div>

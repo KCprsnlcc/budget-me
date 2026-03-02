@@ -331,7 +331,6 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
                 onChange={(checked) => updateField("isFamily", checked)}
                 disabled={!hasFamily || !canCreateFamilyGoalsBool}
                 label="This is a family goal"
-                icon={<Users size={16} />}
               />
 
               {form.isFamily && hasFamily && canCreateFamilyGoalsBool && (
