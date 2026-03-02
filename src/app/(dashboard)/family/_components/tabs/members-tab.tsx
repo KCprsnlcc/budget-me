@@ -83,6 +83,7 @@ export function MembersTab({
   const canInviteMembers = currentUserRole === "Owner" || currentUserRole === "Admin";
   const canEditFamily = currentUserRole === "Owner" || currentUserRole === "Admin";
   const canDeleteFamily = currentUserRole === "Owner";
+  const canApproveRequests = currentUserRole === "Owner" || currentUserRole === "Admin";
 
   // Permission logic for removing members
   const canRemoveMember = (memberRole: string, memberEmail: string) => {
@@ -349,7 +350,11 @@ export function MembersTab({
                 Pending Join Requests
                 ({pendingRequests.length})
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5 font-light">Review and approve family member requests</p>
+              <p className="text-xs text-slate-500 mt-0.5 font-light">
+                {canApproveRequests 
+                  ? "Review and approve family member requests" 
+                  : "Only admins and owners can approve join requests"}
+              </p>
             </div>
             <div className="space-y-3">
               {pendingRequests.map((request) => (
@@ -381,9 +386,10 @@ export function MembersTab({
                   <div className="flex items-center gap-2">
                     <Button
                       size="sm"
-                      className="flex-1 bg-emerald-500 hover:bg-emerald-600"
+                      className="flex-1 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => handleApprove(request.id)}
-                      disabled={processingRequestId === request.id}
+                      disabled={!canApproveRequests || processingRequestId === request.id}
+                      title={!canApproveRequests ? "Only admins and owners can approve requests" : ""}
                     >
                       {processingRequestId === request.id ? (
                         <span className="flex items-center">
@@ -400,9 +406,10 @@ export function MembersTab({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                      className="flex-1 text-rose-600 hover:text-rose-700 hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => handleDecline(request.id)}
-                      disabled={processingRequestId === request.id}
+                      disabled={!canApproveRequests || processingRequestId === request.id}
+                      title={!canApproveRequests ? "Only admins and owners can decline requests" : ""}
                     >
                       {processingRequestId === request.id ? (
                         <span className="flex items-center">
@@ -428,7 +435,11 @@ export function MembersTab({
                 Pending Join Requests
                 (0)
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5 font-light">Review and approve family member requests</p>
+              <p className="text-xs text-slate-500 mt-0.5 font-light">
+                {canApproveRequests 
+                  ? "Review and approve family member requests" 
+                  : "Only admins and owners can approve join requests"}
+              </p>
             </div>
             <div className="text-center py-8">
               <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3">

@@ -986,6 +986,32 @@ export async function respondToJoinRequest(
 
   if (fetchErr) return { error: fetchErr.message };
 
+  // Verify reviewer has permission (must be owner or admin)
+  const { data: family, error: familyErr } = await supabase
+    .from("families")
+    .select("created_by")
+    .eq("id", request.family_id)
+    .single();
+
+  if (familyErr) return { error: "Family not found." };
+
+  const isOwner = reviewerId === family.created_by;
+
+  if (!isOwner) {
+    // Check if reviewer is an admin
+    const { data: reviewerMembership, error: reviewerErr } = await supabase
+      .from("family_members")
+      .select("role")
+      .eq("family_id", request.family_id)
+      .eq("user_id", reviewerId)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (reviewerErr || !reviewerMembership || reviewerMembership.role !== "admin") {
+      return { error: "Only family owners and admins can approve or decline join requests." };
+    }
+  }
+
   if (approve) {
     // Check if user already has a membership record (could be removed/inactive)
     const { data: existingMembership, error: checkErr } = await supabase
