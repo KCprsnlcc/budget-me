@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { checkUserDataStatus, type UserDataStatus } from "../_lib/account-service";
 import { OnboardingModal } from "./onboarding-modal";
-import { Loader2 } from "lucide-react";
 
 interface OnboardingCheckProps {
   children: React.ReactNode;
@@ -57,18 +56,6 @@ export function OnboardingCheck({ children }: OnboardingCheckProps) {
   const handleCloseOnboarding = () => {
     setShowOnboarding(false);
   };
-
-  // Show loading while checking auth and data status
-  if (authLoading || checking) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
-          <span className="text-sm text-slate-500">Loading...</span>
-        </div>
-      </div>
-    );
-  }
 
   // Don't render anything until we have user data
   if (!user) {

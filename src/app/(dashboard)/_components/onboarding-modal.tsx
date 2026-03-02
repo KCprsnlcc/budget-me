@@ -529,31 +529,33 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
           </div>
           </div>
 
-          {/* Footer - Bottom Right */}
-          <div className="px-8 lg:px-12 py-6 border-t border-gray-100 flex justify-end bg-white">
-            <div className="flex items-center gap-3">
-              {step > 1 && (
-                <button
-                  onClick={handleBack}
-                  className="px-5 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm"
-                >
-                  Back
-                </button>
-              )}
+          {/* Footer - Using ModalFooter Component */}
+          <ModalFooter className="flex justify-between">
+            {step > 1 ? (
               <button
-                onClick={handleNext}
-                disabled={!canProceed()}
-                className={cn(
-                  "px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm",
-                  step === 4 
-                    ? "bg-emerald-500 hover:bg-emerald-600 text-white" 
-                    : "bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                )}
+                onClick={handleBack}
+                className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 flex items-center"
               >
-                {step === 4 ? "Create Account" : "Continue"}
+                <ArrowLeft size={14} className="mr-2" />
+                Back
               </button>
-            </div>
-          </div>
+            ) : (
+              <div />
+            )}
+            <button
+              onClick={handleNext}
+              disabled={!canProceed()}
+              className={cn(
+                "px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center",
+                step === 4 
+                  ? "bg-emerald-500 hover:bg-emerald-600 text-white" 
+                  : "bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              )}
+            >
+              {step === 4 ? "Create Account" : "Continue"}
+              {step < 4 && <ArrowRight size={14} className="ml-2" />}
+            </button>
+          </ModalFooter>
         </div>
 
         {/* Right Sidebar - Stealth Style Stepper */}
