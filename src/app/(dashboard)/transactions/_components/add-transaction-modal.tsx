@@ -123,6 +123,12 @@ function getAccountIcon(accountName: string): React.ComponentType<any> {
   return FileText;
 }
 
+// Helper function to get budget icon from category
+function getBudgetIcon(categoryIcon: string | null | undefined): React.ComponentType<any> {
+  if (!categoryIcon) return FileText;
+  return getLucideIcon(categoryIcon);
+}
+
 export function AddTransactionModal({ open, onClose, onSuccess }: AddTransactionModalProps) {
   const { user } = useAuth();
   const [step, setStep] = useState(1);
@@ -254,6 +260,7 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
 
   // Helper: look up display names for review step
   const accountName = accounts.find((a) => a.id === form.account)?.account_name ?? "—";
+  const accountBalance = accounts.find((a) => a.id === form.account)?.balance;
   const catName = categories.find((c) => c.id === categoryValue)?.category_name ?? "—";
   const goalName = goals.find((g) => g.id === form.goal)?.goal_name ?? "—";
 
@@ -407,6 +414,7 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
                       options={budgets.map((b) => ({
                         value: b.id,
                         label: b.budget_name,
+                        icon: getBudgetIcon(b.category_icon),
                       }))}
                       placeholder="No budget"
                       className="w-full"
@@ -447,6 +455,7 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
                     value: a.id,
                     label: a.account_name,
                     icon: getAccountIcon(a.account_name),
+                    subtitle: `Balance: ₱${a.balance.toFixed(2)}`,
                   }))}
                   placeholder="Select account..."
                   className="w-full"
@@ -504,6 +513,18 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
                   <ReviewRow label="Date" value={form.date ? new Date(form.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"} />
                   <ReviewRow label="Category" value={catName} />
                   <ReviewRow label="Account" value={accountName} />
+                  {accountBalance !== undefined && (
+                    <ReviewRow 
+                      label="Current Balance" 
+                      value={`₱${accountBalance.toFixed(2)}`} 
+                    />
+                  )}
+                  {accountBalance !== undefined && (
+                    <ReviewRow 
+                      label="New Balance" 
+                      value={`₱${(accountBalance + (form.type === "income" ? parseFloat(form.amount || "0") : -parseFloat(form.amount || "0"))).toFixed(2)}`} 
+                    />
+                  )}
                   <ReviewRow label="Goal" value={goalName} />
                   {form.type === "expense" && form.budget && (
                     <ReviewRow label="Budget" value={budgets.find(b => b.id === form.budget)?.budget_name || "—"} />

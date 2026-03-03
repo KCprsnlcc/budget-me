@@ -408,49 +408,45 @@ export function EditGoalModal({ open, onClose, goal, onSuccess }: EditGoalModalP
               <p className="text-xs text-slate-500">Confirm your goal updates before saving</p>
             </div>
 
-            <div className="space-y-3">
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Goal Name</div>
-                <div className="text-sm font-semibold text-slate-900">{form.name || "Untitled Goal"}</div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Target Amount</div>
-                <div className="text-sm font-semibold text-slate-900">{formatCurrency(form.target || "0")}</div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Monthly Contribution</div>
-                <div className="text-sm font-semibold text-slate-900">{formatCurrency(form.monthlyContribution || "0")}</div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Category</div>
-                <div className="text-sm font-semibold text-slate-900">
-                  {GOAL_CATEGORIES.find((cat) => cat.key === form.category)?.label || "Other"}
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+              <div className="p-5 space-y-0 divide-y divide-gray-100">
+                <div className="flex justify-between items-center py-2.5">
+                  <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Goal Name</span>
+                  <span className="text-[13px] font-semibold text-gray-700">{form.name || "Untitled Goal"}</span>
                 </div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Priority</div>
-                <div className="text-sm font-semibold text-slate-900">
-                  {GOAL_PRIORITIES.find((p) => p.key === form.priority)?.label || "Medium"}
+                <div className="flex justify-between items-center py-2.5">
+                  <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Target Amount</span>
+                  <span className="text-[13px] font-semibold text-gray-700">{formatCurrency(form.target || "0")}</span>
                 </div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Deadline</div>
-                <div className="text-sm font-semibold text-slate-900">{formatDate(form.deadline)}</div>
-              </div>
-
-              {form.isFamily && (
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Goal Type</div>
-                  <div className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                    <Users size={14} /> Family Goal
+                <div className="flex justify-between items-center py-2.5">
+                  <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Monthly Contribution</span>
+                  <span className="text-[13px] font-semibold text-gray-700">{formatCurrency(form.monthlyContribution || "0")}</span>
+                </div>
+                <div className="flex justify-between items-center py-2.5">
+                  <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Category</span>
+                  <span className="text-[13px] font-semibold text-gray-700">
+                    {GOAL_CATEGORIES.find((cat) => cat.key === form.category)?.label || "Other"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2.5">
+                  <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Priority</span>
+                  <span className="text-[13px] font-semibold text-gray-700">
+                    {GOAL_PRIORITIES.find((p) => p.key === form.priority)?.label || "Medium"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2.5">
+                  <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Deadline</span>
+                  <span className="text-[13px] font-semibold text-gray-700">{formatDate(form.deadline)}</span>
+                </div>
+                {form.isFamily && (
+                  <div className="flex justify-between items-center py-2.5">
+                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Goal Type</span>
+                    <span className="text-[13px] font-semibold text-gray-700 flex items-center gap-2">
+                      <Users size={14} /> Family Goal
+                    </span>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {saveError && (

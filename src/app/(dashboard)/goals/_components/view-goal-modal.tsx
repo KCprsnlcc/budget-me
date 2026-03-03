@@ -169,10 +169,10 @@ export function ViewGoalModal({
         {/* STEP 1: Overview */}
         {step === 1 && (
           <div className="space-y-4 animate-txn-in">
-            <div className="text-center py-6 bg-emerald-50/50 rounded-xl border border-emerald-100">
-              <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Progress</div>
-              <div className="text-3xl font-bold text-emerald-600">{progress}%</div>
-              <div className="text-xs text-emerald-600/80 mt-1 font-medium">
+            <div className="text-center py-6 bg-[#F9FAFB]/50 rounded-xl border border-gray-200">
+              <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Progress</div>
+              <div className="text-3xl font-bold text-gray-900">{progress}%</div>
+              <div className="text-xs text-gray-600 mt-1 font-medium">
                 {formatCurrency(goal.current)} of {formatCurrency(goal.target)}
               </div>
             </div>
@@ -187,28 +187,28 @@ export function ViewGoalModal({
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Status</div>
-                  <div className="text-sm font-semibold text-slate-900">
+                <div className="p-4 rounded-lg bg-white border border-gray-200">
+                  <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">Status</div>
+                  <div className="text-sm font-semibold text-gray-900">
                     <Badge variant={goal.status === "completed" ? "success" : goal.status === "in_progress" ? "info" : "warning"} className="!bg-transparent">
                       {goal.status === "completed" ? "Completed" : goal.status === "in_progress" ? "In Progress" : "Overdue"}
                     </Badge>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Priority</div>
-                  <div className="text-sm font-semibold text-slate-900 capitalize">{goal.priority}</div>
+                <div className="p-4 rounded-lg bg-white border border-gray-200">
+                  <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">Priority</div>
+                  <div className="text-sm font-semibold text-gray-900 capitalize">{goal.priority}</div>
                 </div>
 
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Remaining</div>
-                  <div className="text-sm font-semibold text-slate-900">{formatCurrency(remaining)}</div>
+                <div className="p-4 rounded-lg bg-white border border-gray-200">
+                  <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">Remaining</div>
+                  <div className="text-sm font-semibold text-gray-900">{formatCurrency(remaining)}</div>
                 </div>
 
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Days Left</div>
-                  <div className="text-sm font-semibold text-slate-900">{daysRemaining} days</div>
+                <div className="p-4 rounded-lg bg-white border border-gray-200">
+                  <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">Days Left</div>
+                  <div className="text-sm font-semibold text-gray-900">{daysRemaining} days</div>
                 </div>
               </div>
             </div>
@@ -269,40 +269,40 @@ export function ViewGoalModal({
 
             {/* Goal Performance Overview */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
-                <div className="text-[10px] text-slate-500 mb-2">Goal Utilization</div>
+              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                <div className="text-[10px] text-gray-500 mb-2">Goal Utilization</div>
                 <div className="flex items-center justify-center h-16">
                   <div className="relative">
-                    <div className="w-14 h-14 rounded-full border-3 border-slate-200"></div>
+                    <div className="w-14 h-14 rounded-full border-3 border-gray-200"></div>
                     <div
                       className="absolute inset-0 w-14 h-14 rounded-full border-3 border-emerald-500 border-t-transparent rotate-45"
                     ></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xs font-bold text-slate-700">{progress}%</span>
+                      <span className="text-xs font-bold text-gray-700">{progress}%</span>
                     </div>
                   </div>
                 </div>
                 <div className="text-center mt-2">
-                  <div className="text-xs font-semibold text-slate-700">{formatCurrency(remaining)}</div>
-                  <div className="text-[9px] text-slate-500">remaining</div>
+                  <div className="text-xs font-semibold text-gray-700">{formatCurrency(remaining)}</div>
+                  <div className="text-[9px] text-gray-500">remaining</div>
                 </div>
               </div>
 
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
-                <div className="text-[10px] text-slate-500 mb-2">Contribution Trend</div>
+              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                <div className="text-[10px] text-gray-500 mb-2">Contribution Trend</div>
                 <div className="h-16 flex items-end justify-center gap-1">
-                  <div className="w-2 bg-slate-300 h-1/2 rounded-t-sm"></div>
-                  <div className="w-2 bg-slate-300 h-2/3 rounded-t-sm"></div>
+                  <div className="w-2 bg-gray-300 h-1/2 rounded-t-sm"></div>
+                  <div className="w-2 bg-gray-300 h-2/3 rounded-t-sm"></div>
                   <div className="w-2 bg-emerald-500 h-3/4 rounded-t-sm"></div>
                   <div className="w-2 bg-amber-500 h-full rounded-t-sm"></div>
-                  <div className="w-2 bg-slate-300 h-2/3 rounded-t-sm"></div>
+                  <div className="w-2 bg-gray-300 h-2/3 rounded-t-sm"></div>
                 </div>
                 <div className="text-center mt-2">
-                  <div className="text-xs font-semibold text-slate-700 flex items-center justify-center gap-1">
+                  <div className="text-xs font-semibold text-gray-700 flex items-center justify-center gap-1">
                     {progress > 80 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                     {Math.abs(progress - 100)}%
                   </div>
-                  <div className="text-[9px] text-slate-500">vs target</div>
+                  <div className="text-[9px] text-gray-500">vs target</div>
                 </div>
               </div>
             </div>
@@ -418,7 +418,7 @@ export function ViewGoalModal({
                 {contributors.length > 0 ? (
                   <div className="space-y-3">
                     {contributors.map((contributor) => (
-                      <div key={contributor.user_id} className="p-3 rounded-lg border border-slate-100 bg-slate-50/50">
+                      <div key={contributor.user_id} className="p-3 rounded-lg border border-gray-200 bg-white">
                         <div className="flex items-center gap-3">
                           {/* Avatar */}
                           <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xs font-semibold overflow-hidden">
@@ -429,8 +429,8 @@ export function ViewGoalModal({
                             )}
                           </div>
                           <div className="flex-1">
-                            <div className="text-sm font-medium text-slate-900">{contributor.full_name}</div>
-                            <div className="text-[10px] text-slate-500">
+                            <div className="text-sm font-medium text-gray-900">{contributor.full_name}</div>
+                            <div className="text-[10px] text-gray-500">
                               Contributed {formatCurrency(contributor.total_contributed)}
                             </div>
                           </div>
@@ -439,8 +439,8 @@ export function ViewGoalModal({
                     ))}
                   </div>
                 ) : (
-                  <div className="p-3 rounded-lg border border-slate-100 bg-slate-50/50 text-center">
-                    <div className="text-sm text-slate-500">No contributions yet</div>
+                  <div className="p-3 rounded-lg border border-gray-200 bg-white text-center">
+                    <div className="text-sm text-gray-500">No contributions yet</div>
                   </div>
                 )}
                 

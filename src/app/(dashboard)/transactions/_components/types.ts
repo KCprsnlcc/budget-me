@@ -58,6 +58,7 @@ export type AccountOption = {
   account_name: string;
   account_type: string;
   account_number_masked: string | null;
+  balance: number;
 };
 
 export type CategoryOption = {
@@ -70,6 +71,7 @@ export type CategoryOption = {
 export type BudgetOption = {
   id: string;
   budget_name: string;
+  category_icon?: string | null;
 };
 
 export type GoalOption = {

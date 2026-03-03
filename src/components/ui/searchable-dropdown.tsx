@@ -10,6 +10,7 @@ interface DropdownOption {
   label: string;
   icon?: React.ComponentType<any>;
   color?: string;
+  subtitle?: string;
 }
 
 interface SearchableDropdownProps {
@@ -124,7 +125,12 @@ export function SearchableDropdown({
                   onClick={() => handleSelect(option.value)}
                 >
                   {option.icon && <option.icon size={16} />}
-                  <span>{option.label}</span>
+                  <div className="flex-1 min-w-0">
+                    <div>{option.label}</div>
+                    {option.subtitle && (
+                      <div className="text-xs text-gray-500 mt-0.5">{option.subtitle}</div>
+                    )}
+                  </div>
                 </button>
               ))
             )}

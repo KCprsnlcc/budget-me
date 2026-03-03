@@ -10,7 +10,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Loader2, AlertTriangle, TrendingUp } from "lucide-react";
 import type { TransactionType } from "./types";
-import { deleteTransaction } from "../_lib/transaction-service";
+import { deleteTransaction, fetchAccounts } from "../_lib/transaction-service";
+import { useAuth } from "@/components/auth/auth-context";
+import { useEffect } from "react";
 
 interface DeleteTransactionModalProps {
   open: boolean;
@@ -27,9 +29,12 @@ export function DeleteTransactionModal({
 }: DeleteTransactionModalProps) {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [accountBalance, setAccountBalance] = useState<number | null>(null);
+  const { user } = useAuth();
 
   const handleClose = useCallback(() => {
     setDeleteError(null);
+    setAccountBalance(null);
     onClose();
   }, [onClose]);
 
@@ -50,6 +55,21 @@ export function DeleteTransactionModal({
     handleClose();
     onSuccess?.();
   }, [transaction, handleClose, onSuccess]);
+
+  // Fetch account balance when modal opens
+  useEffect(() => {
+    if (!open || !transaction || !user) return;
+    
+    const fetchAccountBalance = async () => {
+      const accounts = await fetchAccounts(user.id);
+      const account = accounts.find(a => a.id === transaction.account_id);
+      if (account) {
+        setAccountBalance(account.balance);
+      }
+    };
+    
+    fetchAccountBalance();
+  }, [open, transaction, user]);
 
   if (!transaction) return null;
 
@@ -93,6 +113,20 @@ export function DeleteTransactionModal({
                   {new Date(transaction.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </span>
               </div>
+              {accountBalance !== null && (
+                <>
+                  <div className="flex justify-between items-center py-2.5">
+                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Current Balance</span>
+                    <span className="text-sm font-semibold text-gray-700">₱{accountBalance.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2.5">
+                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Balance After Delete</span>
+                    <span className="text-sm font-bold text-gray-900">
+                      ₱{(accountBalance + (isIncome ? -transaction.amount : transaction.amount)).toFixed(2)}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

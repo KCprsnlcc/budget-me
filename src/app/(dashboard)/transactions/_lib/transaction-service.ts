@@ -411,7 +411,7 @@ export async function fetchAccounts(
 ): Promise<AccountOption[]> {
   const { data } = await supabase
     .from("accounts")
-    .select("id, account_name, account_type, account_number_masked")
+    .select("id, account_name, account_type, account_number_masked, balance")
     .eq("user_id", userId)
     .eq("status", "active")
     .order("account_name");
@@ -447,11 +447,22 @@ export async function fetchBudgets(
 ): Promise<BudgetOption[]> {
   const { data } = await supabase
     .from("budgets")
-    .select("id, budget_name")
+    .select(`
+      id, 
+      budget_name,
+      expense_categories!budgets_category_id_fkey (
+        icon
+      )
+    `)
     .eq("user_id", userId)
     .eq("status", "active")
     .order("budget_name");
-  return (data ?? []) as BudgetOption[];
+  
+  return (data ?? []).map((budget: any) => ({
+    id: budget.id,
+    budget_name: budget.budget_name,
+    category_icon: budget.expense_categories?.icon || null,
+  }));
 }
 
 export async function fetchGoals(

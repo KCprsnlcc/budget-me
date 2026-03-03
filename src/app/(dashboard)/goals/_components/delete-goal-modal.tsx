@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { deleteGoal } from "../_lib/goal-service";
+import { useState, useCallback, useEffect } from "react";
+import { deleteGoal, fetchGoalContributions } from "../_lib/goal-service";
+import { fetchAccounts } from "../../transactions/_lib/transaction-service";
+import type { AccountOption } from "../../transactions/_components/types";
 import {
   Modal,
   ModalHeader,
@@ -9,9 +11,10 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { Loader2, AlertTriangle, TrendingUp } from "lucide-react";
 import type { GoalType } from "./types";
 import { formatCurrency, formatDate, getGoalProgress } from "./constants";
+import { useAuth } from "@/components/auth/auth-context";
 
 interface DeleteGoalModalProps {
   open: boolean;
@@ -22,12 +25,35 @@ interface DeleteGoalModalProps {
 }
 
 export function DeleteGoalModal({ open, onClose, goal, onSuccess, onDelete }: DeleteGoalModalProps) {
+  const { user } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [accounts, setAccounts] = useState<AccountOption[]>([]);
+  const [contributionAmount, setContributionAmount] = useState<number>(0);
+
+  // Fetch accounts and contributions when modal opens
+  useEffect(() => {
+    if (!open || !goal || !user) return;
+    
+    const loadData = async () => {
+      // Fetch accounts
+      const accountsData = await fetchAccounts(user.id);
+      setAccounts(accountsData);
+      
+      // Fetch goal contributions to calculate total
+      const { data: contributions } = await fetchGoalContributions(goal.id);
+      const total = contributions.reduce((sum, c) => sum + c.amount, 0);
+      setContributionAmount(total);
+    };
+    
+    loadData();
+  }, [open, goal, user]);
 
   const handleClose = useCallback(() => {
     setIsDeleting(false);
     setDeleteError(null);
+    setAccounts([]);
+    setContributionAmount(0);
     onClose();
   }, [onClose]);
 
@@ -102,6 +128,22 @@ export function DeleteGoalModal({ open, onClose, goal, onSuccess, onDelete }: De
               </div>
             </div>
           </div>
+          {/* Balance Restoration Info */}
+          {contributionAmount > 0 && accounts.length > 0 && (
+            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 mx-auto max-w-sm mt-4 items-start">
+              <TrendingUp size={16} className="flex-shrink-0 mt-px text-emerald-500" />
+              <div>
+                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Balance Restoration</h4>
+                <p className="text-[11px] leading-relaxed">
+                  Deleting this goal will restore {formatCurrency(contributionAmount)} to your accounts.
+                </p>
+                <div className="text-[11px] text-gray-600 mt-1">
+                  <div className="font-semibold">Total to be restored: {formatCurrency(contributionAmount)}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Error Notice */}
           {deleteError && (
             <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 mx-auto max-w-sm mt-4 items-start">

@@ -19,7 +19,7 @@ import {
 import { Stepper } from "./stepper";
 import type { TransactionType } from "./types";
 import { useAuth } from "@/components/auth/auth-context";
-import { fetchSimilarTransactions, fetchCategoryStats } from "../_lib/transaction-service";
+import { fetchSimilarTransactions, fetchCategoryStats, fetchAccounts } from "../_lib/transaction-service";
 
 const STEPS = ["Overview", "Analysis"];
 
@@ -43,11 +43,13 @@ export function ViewTransactionModal({
   const [similar, setSimilar] = useState<{ description: string | null; date: string; amount: number; category_icon?: React.ComponentType<any> }[]>([]);
   const [stats, setStats] = useState<{ average: number; monthlyTotal: number; count: number } | null>(null);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
+  const [accountBalance, setAccountBalance] = useState<number | null>(null);
 
   const reset = useCallback(() => {
     setStep(1);
     setSimilar([]);
     setStats(null);
+    setAccountBalance(null);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -69,6 +71,21 @@ export function ViewTransactionModal({
       setStats(st);
     }).finally(() => setLoadingAnalysis(false));
   }, [step, transaction, user]);
+
+  // Fetch account balance when modal opens
+  useEffect(() => {
+    if (!open || !transaction || !user) return;
+    
+    const fetchAccountBalance = async () => {
+      const accounts = await fetchAccounts(user.id);
+      const account = accounts.find(a => a.id === transaction.account_id);
+      if (account) {
+        setAccountBalance(account.balance);
+      }
+    };
+    
+    fetchAccountBalance();
+  }, [open, transaction, user]);
 
   if (!transaction) return null;
 
@@ -120,6 +137,9 @@ export function ViewTransactionModal({
               <div className="p-5 space-y-0 divide-y divide-gray-100">
                 <DetailRow label="Date" value={new Date(transaction.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} />
                 <DetailRow label="Account" value={transaction.account_name ? `${transaction.account_name}${transaction.account_number_masked ? ` ${transaction.account_number_masked}` : ""}` : "\u2014"} />
+                {accountBalance !== null && (
+                  <DetailRow label="Account Balance" value={`₱${accountBalance.toFixed(2)}`} />
+                )}
                 <DetailRow label="Category">
                   <Badge variant={isIncome ? "info" : "success"}>{catName}</Badge>
                 </DetailRow>
