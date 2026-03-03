@@ -39,6 +39,7 @@ interface NoFamilyStateProps {
   isLoading?: boolean;
   onRespondToInvitation?: (invitationId: string, accept: boolean) => Promise<{ error: string | null }>;
   onSendJoinRequest?: (familyId: string, message: string) => Promise<{ error: string | null }>;
+  handleCreateFamily?: (form: any) => Promise<{ error: string | null }>;
 }
 
 export function NoFamilyState({
@@ -51,6 +52,7 @@ export function NoFamilyState({
   isLoading = false,
   onRespondToInvitation,
   onSendJoinRequest,
+  handleCreateFamily,
 }: NoFamilyStateProps) {
   const [activeTab, setActiveTab] = useState<NoFamilyTab>("create");
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -69,7 +71,7 @@ export function NoFamilyState({
     }, 600);
   };
 
-  const handleCreateFamily = () => {
+  const handleOpenCreateModal = () => {
     setCreateModalOpen(true);
   };
 
@@ -331,7 +333,7 @@ export function NoFamilyState({
 
                   <div className="pt-6 flex flex-col items-center border-t border-slate-50">
                     <Button
-                      onClick={handleCreateFamily}
+                      onClick={handleOpenCreateModal}
                       className="px-10 py-3.5 rounded-lg text-sm font-medium flex items-center gap-2 hover:translate-y-[-1px] transition-all bg-emerald-500 hover:bg-emerald-600"
                     >
                       <Home size={20} />
@@ -602,6 +604,7 @@ export function NoFamilyState({
       <CreateFamilyModal
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
+        onCreateFamily={handleCreateFamily}
       />
       <InviteMemberModal
         open={inviteModalOpen}

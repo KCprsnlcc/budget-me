@@ -642,6 +642,40 @@ export async function createFamily(
     return { data: null, error: "Family name is required." };
   }
 
+  // Ensure user has a profile before creating family
+  const { data: existingProfile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (!existingProfile) {
+    // Try to create profile from auth user metadata
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { error: profileErr } = await supabase
+          .from("profiles")
+          .insert({
+            id: userId,
+            full_name: user.user_metadata?.full_name || null,
+            email: user.email || null,
+            avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+            updated_at: new Date().toISOString()
+          });
+        
+        if (profileErr) {
+          console.error("Failed to create profile:", profileErr);
+          return { data: null, error: "Failed to create user profile. Please try again." };
+        }
+      }
+    } catch (err) {
+      console.error("Error creating profile:", err);
+      return { data: null, error: "Failed to create user profile. Please try again." };
+    }
+  }
+
   const { data: familyRow, error: createErr } = await supabase
     .from("families")
     .insert({

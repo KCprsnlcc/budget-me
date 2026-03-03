@@ -13,6 +13,7 @@ import { Home, FileText, Info, ArrowRight, ArrowLeft, Check, AlertTriangle, Load
 import { Stepper } from "./stepper";
 import { FAMILY_TYPES, MODAL_STEPS } from "./constants";
 import type { CreateFamilyData, ModalStep } from "./types";
+import { toast } from "sonner";
 
 const STEPS = ["Details", "Review"];
 
@@ -50,17 +51,34 @@ export function CreateFamilyModal({ open, onClose, onCreateFamily }: CreateFamil
 
   const handleNext = useCallback(async () => {
     if (currentStep >= 2) {
-      if (onCreateFamily) {
-        setSubmitting(true);
-        setSubmitError(null);
+      if (!onCreateFamily) {
+        toast.error("Create family function not available");
+        return;
+      }
+      
+      setSubmitting(true);
+      setSubmitError(null);
+      
+      try {
         const result = await onCreateFamily(formData);
-        setSubmitting(false);
+        
         if (result.error) {
           setSubmitError(result.error);
+          toast.error(result.error);
+          setSubmitting(false);
           return;
         }
+        
+        // Success
+        toast.success("Family created successfully!");
+        setSubmitting(false);
+        handleClose();
+      } catch (err: any) {
+        const errorMsg = err?.message || "Failed to create family";
+        setSubmitError(errorMsg);
+        toast.error(errorMsg);
+        setSubmitting(false);
       }
-      handleClose();
       return;
     }
     setCurrentStep((s) => (s + 1) as ModalStep);

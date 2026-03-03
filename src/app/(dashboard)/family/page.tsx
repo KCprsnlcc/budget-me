@@ -335,6 +335,7 @@ export default function FamilyPage() {
           isLoading={mutating}
           onRespondToInvitation={handleRespondToInvitation}
           onSendJoinRequest={handleSendJoinRequest}
+          handleCreateFamily={handleCreateFamily}
         />
         
         {/* Modals for no-family state */}
