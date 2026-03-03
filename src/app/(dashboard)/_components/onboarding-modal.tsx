@@ -192,14 +192,14 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
           });
         }
 
-        // Mark account setup as completed (replicated from old system)
-        try {
-          await supabase.rpc("mark_account_setup_completed", {
-            user_uuid: userId,
-          });
-        } catch (error) {
-          // Silently fail - not critical
-        }
+        // Mark account setup as completed in localStorage
+        localStorage.setItem('accountSetupCompleted', 'true');
+        localStorage.setItem('accountSetupCompletedBy', userId);
+        localStorage.setItem('accountSetupCompletedAt', new Date().toISOString());
+        
+        // Clear any skip data
+        localStorage.removeItem('accountSetupSkipUntil');
+        localStorage.removeItem('accountSetupSkippedBy');
 
         // Success - close modal and refresh
         onClose();
@@ -218,10 +218,12 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
 
   const handleSkipForLater = useCallback(async () => {
     try {
-      await supabase.rpc("skip_account_setup_for_later", {
-        user_uuid: userId,
-        skip_minutes: 25,
-      });
+      // Calculate skip until time (25 minutes from now)
+      const skipUntil = new Date(Date.now() + 25 * 60 * 1000).toISOString();
+      
+      // Save to localStorage
+      localStorage.setItem('accountSetupSkipUntil', skipUntil);
+      localStorage.setItem('accountSetupSkippedBy', userId);
 
       setShowSkipConfirmation(false);
       onClose();

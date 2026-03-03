@@ -17,9 +17,9 @@ export interface UserDataStatus {
  * Check if a user has any data (accounts, transactions, budgets, goals)
  * Used to determine if onboarding modal should be shown
  * 
- * Logic replicated from old system:
+ * Logic:
  * - Show modal if user has no accounts OR all accounts have zero balance
- * - BUT NOT if they have already completed the account setup process OR skipped for later
+ * - BUT NOT if they have already completed the account setup OR skipped for later (within 25 minutes)
  */
 export async function checkUserDataStatus(userId: string): Promise<UserDataStatus> {
   const [
@@ -27,8 +27,6 @@ export async function checkUserDataStatus(userId: string): Promise<UserDataStatu
     transactionsResult,
     budgetsResult,
     goalsResult,
-    setupStatusResult,
-    skipStatusResult,
   ] = await Promise.all([
     supabase
       .from("accounts")
@@ -50,10 +48,6 @@ export async function checkUserDataStatus(userId: string): Promise<UserDataStatu
       .select("id", { count: "exact", head: true })
       .eq("user_id", userId)
       .eq("status", "active"),
-    // Check if user has completed account setup
-    supabase.rpc("check_account_setup_completed", { user_uuid: userId }),
-    // Check if user has skipped setup for later
-    supabase.rpc("check_account_setup_skip_active", { user_uuid: userId }),
   ]);
 
   const hasAccounts = (accountsResult.count ?? 0) > 0;
@@ -71,14 +65,31 @@ export async function checkUserDataStatus(userId: string): Promise<UserDataStatu
         !account.balance
     );
 
-  // Check setup completion status
-  const hasCompletedSetup = setupStatusResult.data === true;
-  const hasSkippedSetup = skipStatusResult.data === true;
+  // Check setup completion status from localStorage
+  const completedBy = localStorage.getItem('accountSetupCompletedBy');
+  const hasCompletedSetup = completedBy === userId && localStorage.getItem('accountSetupCompleted') === 'true';
+
+  // Check skip status from localStorage
+  const skipUntilStr = localStorage.getItem('accountSetupSkipUntil');
+  const skippedBy = localStorage.getItem('accountSetupSkippedBy');
+  let hasSkippedSetup = false;
+  
+  if (skipUntilStr && skippedBy === userId) {
+    const skipUntil = new Date(skipUntilStr);
+    const now = new Date();
+    hasSkippedSetup = now < skipUntil; // Skip is active if current time is before skip until time
+    
+    // Clean up expired skip
+    if (!hasSkippedSetup) {
+      localStorage.removeItem('accountSetupSkipUntil');
+      localStorage.removeItem('accountSetupSkippedBy');
+    }
+  }
 
   // A first-time user should see onboarding if:
   // 1. They have no accounts OR all accounts have zero balance
   // 2. AND they haven't completed setup
-  // 3. AND they haven't skipped setup
+  // 3. AND they haven't skipped setup (or skip time has expired)
   const isFirstTimeUser =
     (!hasAccounts || allAccountsHaveZeroBalance) &&
     !hasCompletedSetup &&
