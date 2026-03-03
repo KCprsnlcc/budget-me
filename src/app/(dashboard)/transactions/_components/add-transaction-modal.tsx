@@ -173,7 +173,12 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
 
   const canContinue =
     (step === 1 && form.type !== "") ||
-    (step === 2 && form.amount !== "" && form.date !== "" && form.account !== "") ||
+    (step === 2 && 
+      form.amount !== "" && 
+      form.date !== "" && 
+      form.account !== "" &&
+      (form.type === "income" ? form.income_category_id !== "" : form.expense_category_id !== "")
+    ) ||
     step === 3;
 
   const handleSubmit = useCallback(async () => {
