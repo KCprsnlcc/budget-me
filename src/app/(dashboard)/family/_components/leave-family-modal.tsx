@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { LogOut, AlertTriangle, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Modal,
@@ -118,38 +118,57 @@ export function LeaveFamilyModal({
 
           {isOwner && !showTransferStep && (
             <div className="mt-6 max-w-sm mx-auto">
-              <label className="block text-xs font-medium text-slate-700 mb-3 text-left">
-                Select New Owner *
+              <label className="block text-[11px] font-semibold text-gray-700 mb-3 uppercase tracking-[0.04em] text-left">
+                Select New Owner <span className="text-gray-400">*</span>
               </label>
-              <div className="space-y-2 max-h-32 overflow-y-auto mb-4">
+              <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto mb-4">
                 {eligibleSuccessors.length > 0 ? (
-                  eligibleSuccessors.map((member) => (
-                    <div
-                      key={member.id}
-                      onClick={() => setSelectedSuccessorId(member.id)}
-                      className={`p-3 border rounded-lg cursor-pointer transition-all text-left ${
-                        selectedSuccessorId === member.id
-                          ? "border-emerald-500 bg-emerald-50"
-                          : "border-slate-200 hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        {member.avatar ? (
-                          <img src={member.avatar} alt={member.name} className="w-8 h-8 rounded-full object-cover" />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-sm font-medium text-slate-600">
-                            {member.initials}
+                  eligibleSuccessors.map((member, idx) => {
+                    const selected = selectedSuccessorId === member.id;
+                    return (
+                      <button
+                        key={member.id}
+                        type="button"
+                        onClick={() => setSelectedSuccessorId(member.id)}
+                        className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${
+                          selected
+                            ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
+                            : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                        }`}
+                        style={{ animationDelay: `${idx * 60}ms` }}
+                      >
+                        <div className="flex items-start gap-4">
+                          <div
+                            className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white ${
+                              selected
+                                ? "text-gray-700 border-gray-200"
+                                : "text-gray-400 border-gray-100"
+                            }`}
+                          >
+                            {member.avatar ? (
+                              <img src={member.avatar} alt={member.name} className="w-10 h-10 rounded-[10px] object-cover" />
+                            ) : (
+                              <span className="text-sm font-medium">{member.initials}</span>
+                            )}
                           </div>
-                        )}
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">{member.name}</p>
-                          <p className="text-xs text-slate-500">{member.role}</p>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{member.name}</h3>
+                            <p className="text-[11px] text-gray-500 leading-relaxed">{member.role}</p>
+                          </div>
+                          {/* Check indicator */}
+                          <div
+                            className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
+                              selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                            }`}
+                          >
+                            <Check size={10} />
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))
+                      </button>
+                    );
+                  })
                 ) : (
-                  <p className="text-sm text-slate-500 py-4">No eligible members found</p>
+                  <p className="text-sm text-gray-500 py-4 text-center">No eligible members found</p>
                 )}
               </div>
               {selectedSuccessorId && (

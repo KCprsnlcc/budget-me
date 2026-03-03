@@ -172,50 +172,55 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
         {/* STEP 1: Category Selection */}
         {step === 1 && (
-          <div className="space-y-4 animate-txn-in">
-            <div>
-              <h4 className="text-sm font-semibold text-slate-900 mb-2">Choose Goal Category</h4>
-              <p className="text-xs text-slate-500">Select what type of goal you want to create</p>
+          <div className="animate-txn-in">
+            <div className="mb-5">
+              <h2 className="text-[17px] font-bold text-gray-900 mb-1">Choose Goal Category</h2>
+              <p className="text-[11px] text-gray-500">Select what type of goal you want to create</p>
             </div>
 
             <div className="grid grid-cols-1 gap-3">
-              {GOAL_CATEGORIES.map((category) => {
+              {GOAL_CATEGORIES.map((category, idx) => {
                 const IconComponent = CATEGORY_ICONS[category.key];
+                const selected = form.category === category.key;
                 return (
-                  <div
+                  <button
                     key={category.key}
-                    className={cn(
-                      "relative p-4 rounded-xl border cursor-pointer transition-all duration-200 bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]",
-                      form.category === category.key
-                        ? "border-emerald-500 shadow-[0_0_0_1px_rgba(16,185,129,0.1)]"
-                        : "border-slate-200"
-                    )}
+                    type="button"
                     onClick={() => selectCategory(category.key)}
+                    className={cn(
+                      "relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white",
+                      selected
+                        ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
+                        : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                    )}
+                    style={{ animationDelay: `${idx * 60}ms` }}
                   >
-                    <div
-                      className={cn(
-                        "absolute top-3 right-3 w-4.5 h-4.5 rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200",
-                        form.category === category.key ? "opacity-100 scale-100" : "opacity-0 scale-50"
-                      )}
-                    >
-                      <Check size={12} />
-                    </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start gap-4">
                       <div
                         className={cn(
-                          "w-10 h-10 rounded-lg flex items-center justify-center border transition-all duration-200 flex-shrink-0",
-                          form.category === category.key
-                            ? "text-emerald-500 border-slate-100"
-                            : "text-slate-500 border-slate-100"
+                          "w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white",
+                          selected
+                            ? "text-gray-700 border-gray-200"
+                            : "text-gray-400 border-gray-100"
                         )}
                       >
-                        <IconComponent size={20} />
+                        <IconComponent size={18} />
                       </div>
-                      <div className="flex-1">
-                        <div className="font-medium text-slate-900">{category.label}</div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{category.label}</h3>
+                        <p className="text-[11px] text-gray-500 leading-relaxed">{category.description}</p>
+                      </div>
+                      {/* Check indicator */}
+                      <div
+                        className={cn(
+                          "w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200",
+                          selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                        )}
+                      >
+                        <Check size={10} />
                       </div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>

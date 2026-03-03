@@ -18,14 +18,14 @@ export const GOAL_PRIORITIES = [
 ];
 
 export const GOAL_CATEGORIES = [
-  { key: "emergency" as GoalCategory, label: "Emergency Fund", icon: "shield-check" },
-  { key: "vacation" as GoalCategory, label: "Vacation", icon: "airplane" },
-  { key: "house" as GoalCategory, label: "Housing", icon: "home-2" },
-  { key: "car" as GoalCategory, label: "Transportation", icon: "car" },
-  { key: "education" as GoalCategory, label: "Education", icon: "graduation-cap" },
-  { key: "retirement" as GoalCategory, label: "Retirement", icon: "target" },
-  { key: "debt" as GoalCategory, label: "Debt Payoff", icon: "trending-up" },
-  { key: "general" as GoalCategory, label: "General", icon: "flag" },
+  { key: "emergency" as GoalCategory, label: "Emergency Fund", icon: "shield-check", description: "Build a safety net for unexpected expenses" },
+  { key: "vacation" as GoalCategory, label: "Vacation", icon: "airplane", description: "Save for travel and leisure activities" },
+  { key: "house" as GoalCategory, label: "Housing", icon: "home-2", description: "Save for home purchase or renovation" },
+  { key: "car" as GoalCategory, label: "Transportation", icon: "car", description: "Save for vehicle purchase or maintenance" },
+  { key: "education" as GoalCategory, label: "Education", icon: "graduation-cap", description: "Fund education and learning expenses" },
+  { key: "retirement" as GoalCategory, label: "Retirement", icon: "target", description: "Build long-term retirement savings" },
+  { key: "debt" as GoalCategory, label: "Debt Payoff", icon: "trending-up", description: "Pay off loans and credit obligations" },
+  { key: "general" as GoalCategory, label: "General", icon: "flag", description: "Other savings goals and objectives" },
 ];
 
 export const GOAL_STATUSES = [

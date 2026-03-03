@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   Modal,
   ModalHeader,
@@ -8,10 +8,9 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Mail, User, Shield, Eye, Info, ArrowRight, ArrowLeft, Check, AlertTriangle, Loader2 } from "lucide-react";
+import { User, Shield, Eye, Info, ArrowRight, ArrowLeft, Check, AlertTriangle, Loader2 } from "lucide-react";
 import { Stepper } from "./stepper";
-import { FAMILY_ROLES, MODAL_STEPS } from "./constants";
+import { FAMILY_ROLES } from "./constants";
 import type { InviteMemberData, ModalStep } from "./types";
 
 const STEPS = ["Details", "Review"];
@@ -99,24 +98,24 @@ export function InviteMemberModal({ open, onClose, onSendInvitation }: InviteMem
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
         {/* STEP 1: Member Details */}
         {currentStep === 1 && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-txn-in">
             <div>
-              <h4 className="text-sm font-semibold text-slate-900 mb-2">
+              <h4 className="text-[17px] font-bold text-gray-900 mb-1">
                 Member Details
               </h4>
-              <p className="text-xs text-slate-500">
+              <p className="text-[11px] text-gray-500">
                 Send an invitation to join your family budget group.
               </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-2">
-                  Email Address *
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Email Address <span className="text-gray-400">*</span>
                 </label>
                 <input
                   type="email"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                  className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-[13px] text-gray-900 bg-white transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
                   placeholder="Enter email address"
                   value={formData.email}
                   onChange={(e) => updateFormData("email", e.target.value)}
@@ -124,44 +123,61 @@ export function InviteMemberModal({ open, onClose, onSendInvitation }: InviteMem
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-2">
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Role
                 </label>
                 <div className="grid grid-cols-1 gap-3">
-                  {Object.entries(FAMILY_ROLES).map(([key, role]) => (
-                    <button
-                      key={key}
-                      onClick={() => updateFormData("role", key as "member" | "admin" | "viewer")}
-                      className={`p-3 rounded-lg border transition-all ${formData.role === key
-                          ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                          : "border-slate-200 hover:border-slate-300"
+                  {Object.entries(FAMILY_ROLES).map(([key, role], idx) => {
+                    const selected = formData.role === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => updateFormData("role", key as "member" | "admin" | "viewer")}
+                        className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${
+                          selected
+                            ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
+                            : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
                         }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${formData.role === key
-                            ? "bg-emerald-100 text-emerald-600"
-                            : "bg-slate-100 text-slate-600"
-                          }`}>
-                          {key === "member" && <User size={16} />}
-                          {key === "admin" && <Shield size={16} />}
-                          {key === "viewer" && <Eye size={16} />}
+                        style={{ animationDelay: `${idx * 60}ms` }}
+                      >
+                        <div className="flex items-start gap-4">
+                          <div
+                            className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white ${
+                              selected
+                                ? "text-gray-700 border-gray-200"
+                                : "text-gray-400 border-gray-100"
+                            }`}
+                          >
+                            {key === "member" && <User size={18} />}
+                            {key === "admin" && <Shield size={18} />}
+                            {key === "viewer" && <Eye size={18} />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{role.title}</h3>
+                            <p className="text-[11px] text-gray-500 leading-relaxed">{role.description}</p>
+                          </div>
+                          {/* Check indicator */}
+                          <div
+                            className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
+                              selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                            }`}
+                          >
+                            <Check size={10} />
+                          </div>
                         </div>
-                        <div className="text-left">
-                          <div className="font-medium text-sm">{role.title}</div>
-                          <div className="text-xs text-slate-500">{role.description}</div>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-2">
-                  Message (Optional)
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Message <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
                 </label>
                 <textarea
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none"
+                  className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-[13px] text-gray-900 bg-white resize-none transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
                   rows={3}
                   placeholder="Personal message for the invitation"
                   value={formData.message}
@@ -174,38 +190,38 @@ export function InviteMemberModal({ open, onClose, onSendInvitation }: InviteMem
 
         {/* STEP 2: Review */}
         {currentStep === 2 && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-txn-in">
             <div>
-              <h4 className="text-sm font-semibold text-slate-900 mb-2">
+              <h4 className="text-[17px] font-bold text-gray-900 mb-1">
                 Review Invitation
               </h4>
-              <p className="text-xs text-slate-500">
+              <p className="text-[11px] text-gray-500">
                 Please review the invitation details before sending.
               </p>
             </div>
 
-            <Card className="p-4 bg-slate-50 border-slate-200">
-              <div className="space-y-3">
-                <div className="flex justify-between items-start">
-                  <span className="text-xs font-medium text-slate-600">Email Address</span>
-                  <span className="text-sm font-medium text-slate-900">{formData.email}</span>
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+              <div className="p-5 space-y-0 divide-y divide-gray-100">
+                <div className="flex justify-between items-center py-2.5">
+                  <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Email Address</span>
+                  <span className="text-[13px] font-semibold text-gray-700">{formData.email}</span>
                 </div>
-                <div className="flex justify-between items-start">
-                  <span className="text-xs font-medium text-slate-600">Role</span>
-                  <span className="text-sm font-medium text-slate-900">
+                <div className="flex justify-between items-center py-2.5">
+                  <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Role</span>
+                  <span className="text-[13px] font-semibold text-gray-700">
                     {FAMILY_ROLES[formData.role as keyof typeof FAMILY_ROLES].title}
                   </span>
                 </div>
                 {formData.message && (
-                  <div className="flex justify-between items-start">
-                    <span className="text-xs font-medium text-slate-600">Message</span>
-                    <span className="text-sm text-slate-900 max-w-xs text-right">
+                  <div className="flex justify-between items-start py-2.5">
+                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Message</span>
+                    <span className="text-[11px] text-gray-500 italic max-w-[180px] text-right">
                       {formData.message}
                     </span>
                   </div>
                 )}
               </div>
-            </Card>
+            </div>
 
             <div className="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-lg">
               <Info className="text-gray-600 mt-0.5" size={16} />
@@ -231,33 +247,35 @@ export function InviteMemberModal({ open, onClose, onSendInvitation }: InviteMem
       </ModalBody>
 
       {/* Footer */}
-      <ModalFooter className="px-5 py-3.5">
-        <div className="flex items-center justify-between">
+      <ModalFooter className="flex justify-between">
+        {currentStep > 1 ? (
           <Button
-            variant="outline"
+            variant="secondary"
+            size="sm"
             onClick={handleBack}
-            disabled={currentStep === 1}
             className="flex items-center gap-2"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={14} />
             Back
           </Button>
-          <Button
-            onClick={handleNext}
-            disabled={!canContinue || submitting}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
-          >
-            {currentStep === 2 ? (
-              submitting ? (<><Loader2 size={14} className="animate-spin
-                " /> Sending...</>) : (<> <Check size={16} /> Send Invitation</>)
-            ) : (
-              <>
-                Next
-                <ArrowRight size={16} />
-              </>
-            )}
-          </Button>
-        </div>
+        ) : (
+          <div />
+        )}
+        <Button
+          size="sm"
+          onClick={handleNext}
+          disabled={!canContinue || submitting}
+          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50"
+        >
+          {currentStep === 2 ? (
+            submitting ? (<><Loader2 size={14} className="animate-spin" /> Sending...</>) : (<>Send Invitation <Check size={14} /></>)
+          ) : (
+            <>
+              Continue
+              <ArrowRight size={14} />
+            </>
+          )}
+        </Button>
       </ModalFooter>
     </Modal>
   );

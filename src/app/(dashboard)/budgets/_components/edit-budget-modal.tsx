@@ -209,45 +209,49 @@ export function EditBudgetModal({ open, onClose, budget, onSuccess }: EditBudget
             </div>
 
             <div className="grid grid-cols-1 gap-3">
-              {BUDGET_PERIODS.map((period, idx) => (
-                <button
-                  key={period.key}
-                  type="button"
-                  onClick={() => selectPeriod(period.key)}
-                  className={cn(
-                    "relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white",
-                    form.period === period.key
-                      ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
-                      : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
-                  )}
-                  style={{ animationDelay: `${idx * 60}ms` }}
-                >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={cn(
-                        "w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white",
-                        form.period === period.key
-                          ? "text-gray-700 border-gray-200"
-                          : "text-gray-400 border-gray-100"
-                      )}
-                    >
-                      <Calendar size={18} />
+              {BUDGET_PERIODS.map((period, idx) => {
+                const selected = form.period === period.key;
+                return (
+                  <button
+                    key={period.key}
+                    type="button"
+                    onClick={() => selectPeriod(period.key)}
+                    className={cn(
+                      "relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white",
+                      selected
+                        ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
+                        : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                    )}
+                    style={{ animationDelay: `${idx * 60}ms` }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div
+                        className={cn(
+                          "w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white",
+                          selected
+                            ? "text-gray-700 border-gray-200"
+                            : "text-gray-400 border-gray-100"
+                        )}
+                      >
+                        <Calendar size={18} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{period.label}</h3>
+                        <p className="text-[11px] text-gray-500 leading-relaxed">{period.description}</p>
+                      </div>
+                      {/* Check indicator */}
+                      <div
+                        className={cn(
+                          "w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200",
+                          selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                        )}
+                      >
+                        <Check size={10} />
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{period.label}</h3>
-                      <p className="text-[11px] text-gray-500 leading-relaxed">{period.description}</p>
-                    </div>
-                    <div
-                      className={cn(
-                        "w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200",
-                        form.period === period.key ? "opacity-100 scale-100" : "opacity-0 scale-50"
-                      )}
-                    >
-                      <Check size={10} />
-                    </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
