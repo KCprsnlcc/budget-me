@@ -37,6 +37,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { useDashboard } from "./_lib/use-dashboard";
 import type { InsightItem } from "./_lib/dashboard-service";
+import { OnboardingCheck } from "../_components/onboarding-check";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -427,6 +428,7 @@ export default function DashboardPage() {
   // Loading state
   if (loading) {
     return (
+      <OnboardingCheck>
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
           {/* Welcome Header Skeleton */}
@@ -622,21 +624,25 @@ export default function DashboardPage() {
           <div className="h-8" />
         </div>
       </SkeletonTheme>
+      </OnboardingCheck>
     );
   }
 
   // Error state
   if (error) {
     return (
+      <OnboardingCheck>
       <div className="max-w-6xl mx-auto flex flex-col items-center justify-center py-24 gap-4">
         <AlertTriangle size={40} className="text-red-400" />
         <p className="text-sm text-slate-600">{error}</p>
         <Button size="sm" onClick={refetch}>Try Again</Button>
       </div>
+      </OnboardingCheck>
     );
   }
 
   return (
+    <OnboardingCheck>
     <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
       {/* Welcome Header */}
       <div className="flex flex-col gap-6">
@@ -1118,5 +1124,6 @@ export default function DashboardPage() {
 
       <div className="h-8" />
     </div>
+    </OnboardingCheck>
   );
 }

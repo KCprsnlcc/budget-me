@@ -823,7 +823,7 @@ export default function PredictionsPage() {
           {/* Projected Income Growth Card - No Data */}
           <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-4">
-              <div className="text-slate-300 p-2 rounded-lg bg-slate-50">
+              <div className="text-slate-300">
                 <TrendingUp size={22} strokeWidth={1.5} />
               </div>
             </div>
@@ -838,7 +838,7 @@ export default function PredictionsPage() {
           {/* Projected Expense Growth Card - No Data */}
           <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-4">
-              <div className="text-slate-300 p-2 rounded-lg bg-slate-50">
+              <div className="text-slate-300">
                 <ShoppingBag size={22} strokeWidth={1.5} />
               </div>
             </div>
@@ -853,7 +853,7 @@ export default function PredictionsPage() {
           {/* Projected Savings Growth Card - No Data */}
           <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-4">
-              <div className="text-slate-300 p-2 rounded-lg bg-slate-50">
+              <div className="text-slate-300">
                 <PiggyBank size={22} strokeWidth={1.5} />
               </div>
             </div>
@@ -870,7 +870,7 @@ export default function PredictionsPage() {
         {/* Projected Income Growth Card */}
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
-            <div className="text-slate-500 p-2 rounded-lg">
+            <div className="text-slate-500">
               <TrendingUp size={22} strokeWidth={1.5} />
             </div>
             <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
@@ -897,7 +897,7 @@ export default function PredictionsPage() {
         {/* Projected Expense Growth Card */}
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
-            <div className="text-slate-500 p-2 rounded-lg">
+            <div className="text-slate-500">
               <ShoppingBag size={22} strokeWidth={1.5} />
             </div>
             <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
@@ -924,7 +924,7 @@ export default function PredictionsPage() {
         {/* Projected Savings Growth Card */}
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-4">
-            <div className="text-slate-500 p-2 rounded-lg">
+            <div className="text-slate-500">
               <PiggyBank size={22} strokeWidth={1.5} />
             </div>
             <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
@@ -961,7 +961,7 @@ export default function PredictionsPage() {
             </div>
           </div>
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 flex items-center justify-center mb-4">
               <TrendingUp size={32} className="text-slate-300" />
             </div>
             <h4 className="text-sm font-semibold text-slate-700 mb-2">No Forecast Data Available</h4>
@@ -1110,7 +1110,7 @@ export default function PredictionsPage() {
             </div>
           </div>
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 flex items-center justify-center mb-4">
               <ChartBar size={32} className="text-slate-300" />
             </div>
             <h4 className="text-sm font-semibold text-slate-700 mb-2">No Category Predictions</h4>
@@ -1158,7 +1158,7 @@ export default function PredictionsPage() {
                       <tr key={pred.category} className="hover:bg-slate-50/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg text-emerald-600 flex items-center justify-center">
+                            <div className="w-8 h-8 text-emerald-600 flex items-center justify-center">
                               <Icon size={18} />
                             </div>
                             <span className="font-medium text-slate-900">{pred.category}</span>
@@ -1224,7 +1224,7 @@ export default function PredictionsPage() {
               <p className="text-xs text-slate-500 mt-0.5 font-light">Analysis of recurring vs variable expenses</p>
             </div>
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+              <div className="w-12 h-12 flex items-center justify-center mb-3">
                 <Wallet size={24} className="text-slate-300" />
               </div>
               <p className="text-xs text-slate-500 mb-1">No expense analysis</p>
@@ -1241,7 +1241,7 @@ export default function PredictionsPage() {
               </div>
             </div>
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+              <div className="w-12 h-12 flex items-center justify-center mb-3">
                 <FileText size={24} className="text-slate-300" />
               </div>
               <p className="text-xs text-slate-500 mb-1">No behavior insights yet</p>
@@ -1381,7 +1381,7 @@ export default function PredictionsPage() {
             {/* Financial Summary Card - No Data */}
             <Card className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
               <div className="flex items-center gap-3 mb-4">
-                <div className="text-slate-300 p-2 rounded-lg bg-slate-50">
+                <div className="text-slate-300">
                   <Clapperboard size={20} strokeWidth={1.5} />
                 </div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Financial Summary</span>
@@ -1396,7 +1396,7 @@ export default function PredictionsPage() {
             {/* Risk Management Card - No Data */}
             <Card className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
               <div className="flex items-center gap-3 mb-4">
-                <div className="text-slate-300 p-2 rounded-lg bg-slate-50">
+                <div className="text-slate-300">
                   <Shield size={20} strokeWidth={1.5} />
                 </div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Risk Level: Unknown</span>
@@ -1411,7 +1411,7 @@ export default function PredictionsPage() {
             {/* Growth Potential Card - No Data */}
             <Card className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
               <div className="flex items-center gap-3 mb-4">
-                <div className="text-slate-300 p-2 rounded-lg bg-slate-50">
+                <div className="text-slate-300">
                   <Star size={20} strokeWidth={1.5} />
                 </div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Growth Potential</span>
@@ -1465,7 +1465,7 @@ export default function PredictionsPage() {
           {/* High-Level Financial Analysis Card */}
           <Card className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
             <div className="flex items-center gap-3 mb-4">
-              <div className="text-slate-500 p-2 rounded-lg">
+              <div className="text-slate-500">
                 <Clapperboard size={20} strokeWidth={1.5} />
               </div>
               <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Financial Summary</span>
@@ -1495,7 +1495,7 @@ export default function PredictionsPage() {
           {/* Risk Management Card */}
           <Card className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
             <div className="flex items-center gap-3 mb-4">
-              <div className="text-slate-500 p-2 rounded-lg">
+              <div className="text-slate-500">
                 <Shield size={20} strokeWidth={1.5} />
               </div>
               <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
@@ -1532,7 +1532,7 @@ export default function PredictionsPage() {
           {/* Smart Opportunities Card */}
           <Card className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
             <div className="flex items-center gap-3 mb-4">
-              <div className="text-slate-500 p-2 rounded-lg">
+              <div className="text-slate-500">
                 <Star size={20} strokeWidth={1.5} />
               </div>
               <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Growth Potential</span>
@@ -1661,7 +1661,7 @@ export default function PredictionsPage() {
               <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="text-slate-500 p-2 rounded-lg">
+                    <div className="text-slate-500">
                       <File size={22} strokeWidth={1.5} />
                     </div>
                     <div>
@@ -1695,7 +1695,7 @@ export default function PredictionsPage() {
               <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="text-slate-500 p-2 rounded-lg">
+                    <div className="text-slate-500">
                       <File size={22} strokeWidth={1.5} />
                     </div>
                     <div>
