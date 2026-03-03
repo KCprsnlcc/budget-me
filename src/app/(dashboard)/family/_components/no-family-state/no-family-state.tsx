@@ -492,11 +492,11 @@ export function NoFamilyState({
                           </p>
                           <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             <Button onClick={() => handleTabChange("create")} className="bg-emerald-500 hover:bg-emerald-600">
-                              <Plus size={16} className="mr-2" />
+                              <Plus size={16}/>
                               Create Family
                             </Button>
                             <Button variant="outline" onClick={() => onCheckInvitations()}>
-                              <Mail size={16} className="mr-2" />
+                              <Mail size={16}/>
                               Refresh Invitations
                             </Button>
                           </div>
@@ -582,11 +582,11 @@ export function NoFamilyState({
                         </p>
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                           <Button onClick={() => handleTabChange("create")} className="bg-emerald-500 hover:bg-emerald-600">
-                            <Plus size={16} className="mr-2" />
+                            <Plus size={16} />
                             Create Family
                           </Button>
                           <Button variant="outline" onClick={() => onCheckInvitations()}>
-                            <Mail size={16} className="mr-2" />
+                            <Mail size={16} />
                             Refresh Invitations
                           </Button>
                         </div>

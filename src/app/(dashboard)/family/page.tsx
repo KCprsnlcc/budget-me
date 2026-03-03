@@ -371,12 +371,12 @@ export default function FamilyPage() {
           <div className="flex items-center gap-3">
             {canEditFamily && (
               <Button variant="outline" size="sm" onClick={handleOpenEditFamily}>
-                <Settings size={16} className="mr-1" /> Settings
+                <Settings size={16}/> Settings
               </Button>
             )}
             {canInviteMembers && (
               <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={handleOpenInviteMember}>
-                <Mail size={16} className="mr-1" /> Invite Member
+                <Mail size={16}/> Invite Member
               </Button>
             )}
           </div>
@@ -1001,11 +1001,11 @@ export default function FamilyPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button onClick={handleOpenCreateFamily} className="bg-emerald-500 hover:bg-emerald-600">
-                    <Plus size={16} className="mr-2" />
+                    <Plus size={16}/>
                     Create Family
                   </Button>
                   <Button variant="outline" onClick={refetch}>
-                    <RefreshCw size={16} className="mr-2" />
+                    <RefreshCw size={16}/>
                     Refresh
                   </Button>
                 </div>

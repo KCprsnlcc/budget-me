@@ -277,7 +277,7 @@ export function TransferOwnershipModal({
             className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
           >
             {currentStep === 2 ? (
-              submitting ? (<><Loader2 size={14} className="animate-spin mr-1" /> Transferring...</>) : (<> <Check size={16} /> Transfer Ownership</>)
+              submitting ? (<><Loader2 size={14} className="animate-spin" /> Transferring...</>) : (<> <Check size={16} /> Transfer Ownership</>)
             ) : (
               <>
                 Next

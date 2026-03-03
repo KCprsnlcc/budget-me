@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Modal,
@@ -103,7 +103,13 @@ export function DeleteFamilyModal({ open, onClose, onConfirm }: DeleteFamilyModa
 
       {/* Footer */}
       <ModalFooter className="px-6 py-4">
-        <Button variant="outline" size="sm" className="flex-1" onClick={handleClose}>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex-1" 
+          onClick={handleClose}
+          disabled={submitting}
+        >
           Cancel
         </Button>
         <Button 
@@ -111,9 +117,16 @@ export function DeleteFamilyModal({ open, onClose, onConfirm }: DeleteFamilyModa
           size="sm" 
           className="flex-1" 
           onClick={handleConfirm}
-          disabled={confirmationText !== "DELETE"}
+          disabled={confirmationText !== "DELETE" || submitting}
         >
-          Delete Family
+          {submitting ? (
+            <>
+              <Loader2 size={14} className="animate-spin" />
+              Deleting...
+            </>
+          ) : (
+            "Delete Family"
+          )}
         </Button>
       </ModalFooter>
     </Modal>

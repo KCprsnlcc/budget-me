@@ -221,7 +221,7 @@ export function LeaveFamilyModal({
             onClick={handleConfirm}
             disabled={confirmationText !== "LEAVE" || submitting || (isOwner && !selectedSuccessorId)}
           >
-            {submitting ? (<><Loader2 size={14} className="animate-spin mr-1" /> Leaving...</>) : ("Leave Family")}
+            {submitting ? (<><Loader2 size={14} className="animate-spin" /> Leaving...</>) : ("Leave Family")}
           </Button>
         )}
       </ModalFooter>

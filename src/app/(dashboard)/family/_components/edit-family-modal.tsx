@@ -320,7 +320,7 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
               className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
             >
               {currentStep === 2 ? (
-                submitting ? (<><Loader2 size={14} className="animate-spin mr-1" /> Saving...</>) : (<> <Check size={16} /> Update Family</>)
+                submitting ? (<><Loader2 size={14} className="animate-spin" /> Saving...</>) : (<> <Check size={16} /> Update Family</>)
               ) : (
                 <>
                   Next

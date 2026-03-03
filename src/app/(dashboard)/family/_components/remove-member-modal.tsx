@@ -152,7 +152,7 @@ export function RemoveMemberModal({
           onClick={handleConfirm}
           disabled={confirmationText !== "REMOVE" || submitting}
         >
-          {submitting ? (<><Loader2 size={14} className="animate-spin mr-1" /> Removing...</>) : ("Remove Member")}
+          {submitting ? (<><Loader2 size={14} className="animate-spin" /> Removing...</>) : ("Remove Member")}
         </Button>
       </ModalFooter>
     </Modal>
