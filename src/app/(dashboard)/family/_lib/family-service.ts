@@ -40,7 +40,11 @@ function mapFamilyRow(row: any): Family {
 
 function mapMemberRow(row: any): FamilyMember {
   const profile = row.profiles ?? {};
-  const fullName = profile.full_name || row.email || profile.email || "Unknown Member";
+  
+  // Use profile data if available, otherwise provide sensible defaults
+  const fullName = profile.full_name || "Unknown Member";
+  const email = profile.email || "";
+  
   const initials = fullName
     .split(" ")
     .map((n: string) => n ? n[0] : "")
@@ -71,7 +75,7 @@ function mapMemberRow(row: any): FamilyMember {
   return {
     id: row.id,
     name: fullName,
-    email: profile.email ?? "",
+    email: email,
     initials,
     role: displayRole,
     status: statusMap[row.status] ?? "active",
@@ -300,13 +304,65 @@ export async function fetchFamilyMembers(
     ...new Set((data ?? []).map((r: any) => r.user_id).filter(Boolean)),
   ];
   let profileMap: Record<string, any> = {};
+  
   if (userIds.length > 0) {
     const { data: profiles } = await supabase
       .from("profiles")
       .select("id, full_name, email, avatar_url, last_login")
       .in("id", userIds);
+    
     for (const p of profiles ?? []) {
       profileMap[p.id] = p;
+    }
+    
+    // Find users without profiles and try to sync them
+    const usersWithoutProfiles = userIds.filter(id => !profileMap[id]);
+    
+    if (usersWithoutProfiles.length > 0) {
+      // Try to get user metadata and create missing profiles
+      for (const userId of usersWithoutProfiles) {
+        try {
+          const { data: userData } = await supabase.rpc('get_user_metadata', { 
+            user_id: userId 
+          });
+          
+          if (userData && userData.length > 0) {
+            const user = userData[0];
+            
+            // Create the missing profile
+            const { error: insertError } = await supabase
+              .from("profiles")
+              .insert({
+                id: userId,
+                full_name: user.full_name,
+                email: user.email,
+                avatar_url: user.avatar_url || user.picture,
+                updated_at: new Date().toISOString()
+              });
+            
+            if (!insertError) {
+              // Add to profile map
+              profileMap[userId] = {
+                id: userId,
+                full_name: user.full_name,
+                email: user.email,
+                avatar_url: user.avatar_url || user.picture,
+                last_login: null
+              };
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to sync profile for user ${userId}:`, error);
+          // Create a basic profile entry
+          profileMap[userId] = {
+            id: userId,
+            full_name: null,
+            email: null,
+            avatar_url: null,
+            last_login: null
+          };
+        }
+      }
     }
   }
 

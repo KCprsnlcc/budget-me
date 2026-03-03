@@ -70,6 +70,7 @@ export function MembersTab({
   const [roleChanges, setRoleChanges] = useState<Record<string, string>>({});
   const [savingRoles, setSavingRoles] = useState(false);
   const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
+  const [processingInvitationId, setProcessingInvitationId] = useState<string | null>(null);
 
   // Modal states
   const [transferOwnershipModalOpen, setTransferOwnershipModalOpen] = useState(false);
@@ -158,6 +159,18 @@ export function MembersTab({
     setProcessingRequestId(requestId);
     await onDeclineRequest(requestId);
     setProcessingRequestId(null);
+  };
+
+  const handleAcceptInvitation = async (invitationId: string) => {
+    setProcessingInvitationId(invitationId);
+    await onRespondToInvitation?.(invitationId, true);
+    setProcessingInvitationId(null);
+  };
+
+  const handleDeclineInvitation = async (invitationId: string) => {
+    setProcessingInvitationId(invitationId);
+    await onRespondToInvitation?.(invitationId, false);
+    setProcessingInvitationId(null);
   };
 
   // Modal handlers
@@ -392,15 +405,15 @@ export function MembersTab({
                       title={!canApproveRequests ? "Only admins and owners can approve requests" : ""}
                     >
                       {processingRequestId === request.id ? (
-                        <span className="flex items-center">
-                          <Skeleton width={14} height={14} borderRadius="50%" className="mr-1" />
-                          Processing...
-                        </span>
+                        <>
+                          <Loader2 size={14} className="animate-spin mr-1" />
+                          Approving...
+                        </>
                       ) : (
-                        <span className="flex items-center">
+                        <>
                           <UserCheck size={14} className="mr-1" />
                           Approve
-                        </span>
+                        </>
                       )}
                     </Button>
                     <Button
@@ -412,15 +425,15 @@ export function MembersTab({
                       title={!canApproveRequests ? "Only admins and owners can decline requests" : ""}
                     >
                       {processingRequestId === request.id ? (
-                        <span className="flex items-center">
-                          <Skeleton width={14} height={14} borderRadius="50%" className="mr-1" />
-                          Processing...
-                        </span>
+                        <>
+                          <Loader2 size={14} className="animate-spin mr-1" />
+                          Declining...
+                        </>
                       ) : (
-                        <span className="flex items-center">
+                        <>
                           <Trash2 size={14} className="mr-1" />
                           Decline
-                        </span>
+                        </>
                       )}
                     </Button>
                   </div>
@@ -482,18 +495,34 @@ export function MembersTab({
                     <div className="flex items-center gap-2">
                       <Button
                         size="sm"
-                        className="bg-emerald-500 hover:bg-emerald-600 text-xs px-3 h-8"
-                        onClick={() => onRespondToInvitation?.(invitation.id, true)}
+                        className="bg-emerald-500 hover:bg-emerald-600 text-xs px-3 h-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => handleAcceptInvitation(invitation.id)}
+                        disabled={processingInvitationId === invitation.id}
                       >
-                        Accept
+                        {processingInvitationId === invitation.id ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin mr-1" />
+                            Accepting...
+                          </>
+                        ) : (
+                          "Accept"
+                        )}
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-xs px-3 h-8"
-                        onClick={() => onRespondToInvitation?.(invitation.id, false)}
+                        className="text-xs px-3 h-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => handleDeclineInvitation(invitation.id)}
+                        disabled={processingInvitationId === invitation.id}
                       >
-                        Decline
+                        {processingInvitationId === invitation.id ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin mr-1" />
+                            Declining...
+                          </>
+                        ) : (
+                          "Decline"
+                        )}
                       </Button>
                     </div>
                   </div>
