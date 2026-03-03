@@ -37,12 +37,20 @@ export function OnboardingCheck({ children }: OnboardingCheckProps) {
         const status = await checkUserDataStatus(user.id);
         setDataStatus(status);
         
-        // Show onboarding if user has no accounts and no transactions
+        // Show onboarding if user is a first-time user
+        // This now includes the logic from the old system:
+        // - Show if no accounts OR all accounts have zero balance
+        // - BUT NOT if they've completed setup OR skipped for later
         if (status.isFirstTimeUser) {
-          setShowOnboarding(true);
+          // Add a 1 second delay like the old system
+          const timer = setTimeout(() => {
+            setShowOnboarding(true);
+          }, 1000);
+          
+          return () => clearTimeout(timer);
         }
       } catch (error) {
-        console.error("Failed to check user data status:", error);
+        // Silently fail - not critical
       } finally {
         setChecking(false);
       }

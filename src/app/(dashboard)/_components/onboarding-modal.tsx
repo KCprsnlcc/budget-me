@@ -7,11 +7,9 @@ import {
   ArrowRight,
   ArrowLeft,
   Wallet,
-  Building2,
   CreditCard,
   TrendingUp,
   Wallet2,
-  User,
   PiggyBank,
   X,
   Landmark,
@@ -93,6 +91,7 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [accountType, setAccountType] = useState<AccountType | null>(null);
+  const [showSkipConfirmation, setShowSkipConfirmation] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     balance: "",
@@ -193,11 +192,20 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
           });
         }
 
+        // Mark account setup as completed (replicated from old system)
+        try {
+          await supabase.rpc("mark_account_setup_completed", {
+            user_uuid: userId,
+          });
+        } catch (error) {
+          // Silently fail - not critical
+        }
+
         // Success - close modal and refresh
         onClose();
         router.refresh();
       } catch (error) {
-        console.error("Failed to create account:", error);
+        // Handle error silently or show user-friendly message
       }
     } else {
       setStep((s) => Math.min(s + 1, 4));
@@ -208,10 +216,25 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
     setStep((s) => Math.max(s - 1, 1));
   }, []);
 
+  const handleSkipForLater = useCallback(async () => {
+    try {
+      await supabase.rpc("skip_account_setup_for_later", {
+        user_uuid: userId,
+        skip_minutes: 25,
+      });
+
+      setShowSkipConfirmation(false);
+      onClose();
+    } catch (error) {
+      // Silently fail - not critical
+    }
+  }, [userId, onClose]);
+
   const selectedType = ACCOUNT_TYPE_OPTIONS.find((t) => t.type === accountType);
   const colorName = ACCOUNT_COLORS.find((c) => c.color === formData.color)?.name || "Green";
 
   return (
+    <>
     <Modal open={open} onClose={onClose} className="w-[90vw] max-w-[1280px] h-[85vh]">
       <div className="flex h-full bg-white rounded-2xl overflow-hidden">
         {/* Main Content Area */}
@@ -219,13 +242,21 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
           {/* Header - Stealth Style */}
           <div className="h-[88px] border-b border-gray-100 px-8 lg:px-12 flex items-center justify-between shrink-0 bg-white">
             <Logo variant="landing" size="md" className="h-10 w-auto" />
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-50"
-              aria-label="Close modal"
-            >
-              <X size={20} />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowSkipConfirmation(true)}
+                className="text-gray-500 hover:text-gray-700 transition-colors px-3 py-1.5 text-sm font-medium rounded-lg hover:bg-gray-50"
+              >
+                Skip for Later
+              </button>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-50"
+                aria-label="Close modal"
+              >
+                <X size={20} />
+              </button>
+            </div>
           </div>
 
           {/* Modal Body */}
@@ -583,5 +614,48 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
         </div>
       </div>
     </Modal>
+
+    {/* Skip Confirmation Dialog */}
+    {showSkipConfirmation && (
+      <Modal open={showSkipConfirmation} onClose={() => setShowSkipConfirmation(false)} className="max-w-md">
+        <ModalHeader>
+          <h3 className="text-lg font-semibold text-gray-900">Skip Account Setup?</h3>
+        </ModalHeader>
+        <ModalBody>
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              Account setup will be postponed for 25 minutes. You can always set up your account later from the settings page.
+            </p>
+            <div className="p-4 border border-gray-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-gray-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="text-sm text-gray-700">
+                  <p className="font-medium mb-1">Important:</p>
+                  <p>This setup modal will reappear in about 25 minutes if your account remains empty or not fully set up.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ModalBody>
+        <ModalFooter className="flex justify-between">
+          <button
+            onClick={() => setShowSkipConfirmation(false)}
+            className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 flex items-center"
+          >
+            <ArrowLeft size={14} className="mr-2" />
+            Continue Setup
+          </button>
+          <button
+            onClick={handleSkipForLater}
+            className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm bg-emerald-500 hover:bg-emerald-600 text-white"
+          >
+            Skip for 25 Minutes
+          </button>
+        </ModalFooter>
+      </Modal>
+    )}
+    </>
   );
 }
