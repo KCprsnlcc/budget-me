@@ -162,12 +162,12 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
             Create Budget
           </span>
-          <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide">
             Step {step} of 3
           </span>
         </div>
@@ -177,52 +177,54 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
       <Stepper steps={STEPS} currentStep={step} />
 
       {/* Body */}
-      <ModalBody className="px-5 py-5">
+      <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
         {/* STEP 1: Period Selection */}
         {step === 1 && (
-          <div className="space-y-4 animate-txn-in">
-            <div>
-              <h4 className="text-sm font-semibold text-slate-900 mb-2">Choose Budget Period</h4>
-              <p className="text-xs text-slate-500">Select how often your budget resets</p>
+          <div className="animate-txn-in">
+            <div className="mb-5">
+              <h2 className="text-[17px] font-bold text-gray-900 mb-1">Choose Budget Period</h2>
+              <p className="text-[11px] text-gray-500">Select how often your budget resets</p>
             </div>
 
             <div className="grid grid-cols-1 gap-3">
-              {BUDGET_PERIODS.map((period) => (
-                <div
+              {BUDGET_PERIODS.map((period, idx) => (
+                <button
                   key={period.key}
-                  className={cn(
-                    "relative p-4 rounded-xl border cursor-pointer transition-all duration-200 bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]",
-                    form.period === period.key
-                      ? "border-emerald-500 shadow-[0_0_0_1px_rgba(16,185,129,0.1)]"
-                      : "border-slate-200"
-                  )}
+                  type="button"
                   onClick={() => selectPeriod(period.key)}
+                  className={cn(
+                    "relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white",
+                    form.period === period.key
+                      ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
+                      : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                  )}
+                  style={{ animationDelay: `${idx * 60}ms` }}
                 >
-                  <div
-                    className={cn(
-                      "absolute top-3 right-3 w-4.5 h-4.5 rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200",
-                      form.period === period.key ? "opacity-100 scale-100" : "opacity-0 scale-50"
-                    )}
-                  >
-                    <Check size={12} />
-                  </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start gap-4">
                     <div
                       className={cn(
-                        "w-10 h-10 rounded-lg flex items-center justify-center border transition-all duration-200 flex-shrink-0",
+                        "w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white",
                         form.period === period.key
-                          ? "text-emerald-500 border-slate-100"
-                          : "text-slate-500 border-slate-100"
+                          ? "text-gray-700 border-gray-200"
+                          : "text-gray-400 border-gray-100"
                       )}
                     >
-                      <Calendar size={20} />
+                      <Calendar size={18} />
                     </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-slate-900">{period.label}</div>
-                      <div className="text-xs text-slate-500">{period.description}</div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{period.label}</h3>
+                      <p className="text-[11px] text-gray-500 leading-relaxed">{period.description}</p>
+                    </div>
+                    <div
+                      className={cn(
+                        "w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200",
+                        form.period === period.key ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                      )}
+                    >
+                      <Check size={10} />
                     </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -230,41 +232,47 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
 
         {/* STEP 2: Budget Details */}
         {step === 2 && (
-          <div className="space-y-4 animate-txn-in">
-            <div>
-              <h4 className="text-sm font-semibold text-slate-900 mb-2">Budget Details</h4>
-              <p className="text-xs text-slate-500">Configure your budget parameters</p>
+          <div className="animate-txn-in">
+            <div className="mb-5">
+              <h2 className="text-[17px] font-bold text-gray-900 mb-1">Budget Details</h2>
+              <p className="text-[11px] text-gray-500">Configure your budget parameters</p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">Budget Name</label>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Budget Name <span className="text-gray-400">*</span>
+                </label>
                 <input
                   type="text"
                   value={form.budget_name}
                   onChange={(e) => updateField("budget_name", e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                  className="w-full px-3.5 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
                   placeholder="e.g., Monthly Groceries"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Budget Amount</label>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                    Budget Amount <span className="text-gray-400">*</span>
+                  </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₱</span>
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">₱</span>
                     <input
                       type="number"
                       value={form.amount}
                       onChange={(e) => updateField("amount", e.target.value)}
-                      className="w-full pl-6 pr-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                      className="w-full pl-7 pr-4 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
                       placeholder="0.00"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Category</label>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                    Category
+                  </label>
                   <SearchableDropdown
                     value={form.category_id}
                     onChange={(value) => updateField("category_id", value)}
@@ -282,7 +290,9 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Start Date</label>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                    Start Date <span className="text-gray-400">*</span>
+                  </label>
                   <DateSelector
                     value={form.start_date}
                     onChange={(value) => updateField("start_date", value)}
@@ -291,22 +301,14 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">End Date</label>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                    End Date <span className="text-gray-400">*</span>
+                  </label>
                   <DateSelector
                     value={form.end_date}
                     onChange={(value) => updateField("end_date", value)}
                     placeholder="Select end date"
                   />
-                </div>
-              </div>
-
-              <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-blue-700 flex items-start gap-3">
-                <Info size={16} className="flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="font-medium text-sm">Budget Period</div>
-                  <div className="text-xs opacity-90">
-                    Your budget will reset automatically based on the selected period
-                  </div>
                 </div>
               </div>
             </div>
@@ -315,62 +317,44 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
 
         {/* STEP 3: Review */}
         {step === 3 && (
-          <div className="space-y-4 animate-txn-in">
-            <div>
-              <h4 className="text-sm font-semibold text-slate-900 mb-2">Review Budget</h4>
-              <p className="text-xs text-slate-500">Confirm your budget details before creating</p>
+          <div className="animate-txn-in">
+            <div className="mb-5">
+              <h2 className="text-[17px] font-bold text-gray-900 mb-1">Review Budget</h2>
+              <p className="text-[11px] text-gray-500">Confirm your budget details before creating</p>
             </div>
 
-            <div className="space-y-3">
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Budget Name</div>
-                <div className="text-sm font-semibold text-slate-900">{form.budget_name || "Untitled Budget"}</div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Amount</div>
-                <div className="text-sm font-semibold text-slate-900">{formatCurrency(form.amount || "0")}</div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Category</div>
-                <div className="text-sm font-semibold text-slate-900">{catName}</div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Period</div>
-                <div className="text-sm font-semibold text-slate-900">
-                  {BUDGET_PERIODS.find((p) => p.key === form.period)?.label || "Monthly"}
+            <div className="space-y-4">
+              {/* Budget Details */}
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-5 space-y-0 divide-y divide-gray-100">
+                  <ReviewRow label="Budget Name" value={form.budget_name || "Untitled Budget"} />
+                  <ReviewRow label="Amount" value={formatCurrency(form.amount || "0")} />
+                  <ReviewRow label="Category" value={catName} />
+                  <ReviewRow label="Period" value={BUDGET_PERIODS.find((p) => p.key === form.period)?.label || "Monthly"} />
+                  <ReviewRow label="Start Date" value={form.start_date ? formatDate(form.start_date) : "—"} />
+                  <ReviewRow label="End Date" value={form.end_date ? formatDate(form.end_date) : "—"} />
                 </div>
               </div>
 
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Start Date</div>
-                <div className="text-sm font-semibold text-slate-900">{form.start_date ? formatDate(form.start_date) : "—"}</div>
-              </div>
+              {/* Error Notice */}
+              {saveError && (
+                <div className="flex gap-2.5 p-3 rounded-lg text-xs border border-gray-200 text-gray-700 items-start">
+                  <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
+                  <div>
+                    <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Error</h4>
+                    <p className="text-[11px] leading-relaxed">{saveError}</p>
+                  </div>
+                </div>
+              )}
 
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">End Date</div>
-                <div className="text-sm font-semibold text-slate-900">{form.end_date ? formatDate(form.end_date) : "—"}</div>
-              </div>
-            </div>
-
-            {saveError && (
-              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
-                <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+              {/* Success Notice */}
+              <div className="flex gap-2.5 p-3 rounded-lg text-xs border border-gray-200 text-gray-700 items-start">
+                <CheckCircle size={16} className="flex-shrink-0 mt-px text-emerald-500" />
                 <div>
-                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
-                  <p className="text-[11px] leading-relaxed opacity-85">{saveError}</p>
-                </div>
-              </div>
-            )}
-
-            <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-start gap-3">
-              <CheckCircle size={16} className="flex-shrink-0 mt-0.5" />
-              <div>
-                <div className="font-medium text-sm">Ready to Create</div>
-                <div className="text-xs opacity-90">
-                  Your budget is ready to be created and will start tracking immediately
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Ready to Create</h4>
+                  <p className="text-[11px] leading-relaxed">
+                    Your budget is ready to be created and will start tracking immediately
+                  </p>
                 </div>
               </div>
             </div>
@@ -403,5 +387,14 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
         </Button>
       </ModalFooter>
     </Modal>
+  );
+}
+
+function ReviewRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between items-center py-2.5">
+      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">{label}</span>
+      <span className="text-[13px] font-semibold text-gray-700">{value}</span>
+    </div>
   );
 }

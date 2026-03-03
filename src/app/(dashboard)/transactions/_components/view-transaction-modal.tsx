@@ -79,12 +79,12 @@ export function ViewTransactionModal({
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
             Transaction Details
           </span>
-          <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide">
             Step {step} of 2
           </span>
         </div>
@@ -94,13 +94,13 @@ export function ViewTransactionModal({
       <Stepper steps={STEPS} currentStep={step} />
 
       {/* Body */}
-      <ModalBody className="px-5 py-5">
+      <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
         {/* STEP 1: Overview */}
         {step === 1 && (
           <div className="space-y-6 animate-txn-in">
             {/* Amount Display */}
-            <div className="text-center p-6 bg-slate-50 rounded-xl border border-slate-200">
-              <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">
+            <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-gray-200">
+              <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
                 Transaction Amount
               </div>
               <div
@@ -110,14 +110,14 @@ export function ViewTransactionModal({
               >
                 {isIncome ? "+" : "-"}₱{absAmount}
               </div>
-              <span className="text-xs font-semibold px-2 py-1 rounded bg-slate-100 text-slate-500 uppercase tracking-wider inline-block mt-2">
+              <span className="text-xs font-semibold px-2 py-1 rounded bg-white text-gray-500 uppercase tracking-wider inline-block mt-2 border border-gray-100">
                 {isIncome ? "Income" : "Expense"}
               </span>
             </div>
 
             {/* Transaction Details */}
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-              <div className="p-5 space-y-0 divide-y divide-slate-100">
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+              <div className="p-5 space-y-0 divide-y divide-gray-100">
                 <DetailRow label="Date" value={new Date(transaction.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} />
                 <DetailRow label="Account" value={transaction.account_name ? `${transaction.account_name}${transaction.account_number_masked ? ` ${transaction.account_number_masked}` : ""}` : "\u2014"} />
                 <DetailRow label="Category">
@@ -157,25 +157,25 @@ export function ViewTransactionModal({
             {loadingAnalysis ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 size={20} className="animate-spin text-emerald-500" />
-                <span className="ml-2 text-sm text-slate-500">Loading insights...</span>
+                <span className="ml-2 text-sm text-gray-500">Loading insights...</span>
               </div>
             ) : (
               <>
                 {/* Spending Insights */}
                 <div>
-                  <h3 className="text-[15px] font-bold text-slate-900 mb-3">
+                  <h3 className="text-[15px] font-bold text-gray-900 mb-3">
                     Spending Insights
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                      <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+                    <div className="bg-[#F9FAFB]/50 rounded-lg p-4 border border-gray-100">
+                      <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
                         Category Avg
                       </div>
-                      <div className="text-lg font-bold text-slate-900">
+                      <div className="text-lg font-bold text-gray-900">
                         ₱{stats?.average.toFixed(2) ?? "0.00"}
                       </div>
                       {stats && stats.average > 0 && (
-                        <div className="text-[10px] text-slate-500 mt-1">
+                        <div className="text-[10px] text-gray-500 mt-1">
                           This transaction is{" "}
                           <span className={transaction.amount > stats.average ? "text-amber-600 font-semibold" : "text-emerald-600 font-semibold"}>
                             {transaction.amount > stats.average
@@ -185,14 +185,14 @@ export function ViewTransactionModal({
                         </div>
                       )}
                     </div>
-                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                      <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+                    <div className="bg-[#F9FAFB]/50 rounded-lg p-4 border border-gray-100">
+                      <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
                         Monthly Total
                       </div>
-                      <div className="text-lg font-bold text-slate-900">
+                      <div className="text-lg font-bold text-gray-900">
                         ₱{stats?.monthlyTotal.toFixed(2) ?? "0.00"}
                       </div>
-                      <div className="text-[10px] text-slate-500 mt-1">
+                      <div className="text-[10px] text-gray-500 mt-1">
                         <span className="text-emerald-600 font-semibold">{stats?.count ?? 0} transactions</span> this month
                       </div>
                     </div>
@@ -201,30 +201,30 @@ export function ViewTransactionModal({
 
                 {/* Similar Transactions */}
                 <div>
-                  <h3 className="text-[15px] font-bold text-slate-900 mb-3">
+                  <h3 className="text-[15px] font-bold text-gray-900 mb-3">
                     Similar Transactions
                   </h3>
                   {similar.length === 0 ? (
-                    <p className="text-xs text-slate-400 text-center py-4">No similar transactions found.</p>
+                    <p className="text-xs text-gray-400 text-center py-4">No similar transactions found.</p>
                   ) : (
                     <div className="space-y-2">
                       {similar.map((item, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100"
+                          className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-gray-100"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-lg border border-slate-100">
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-lg border border-gray-100 bg-white">
                               {item.category_icon ? <item.category_icon size={16} /> : <FileText size={16} />}
                             </div>
                             <div>
-                              <div className="text-sm font-semibold text-slate-900">{item.description ?? "\u2014"}</div>
-                              <div className="text-[10px] text-slate-400">
+                              <div className="text-sm font-semibold text-gray-900">{item.description ?? "\u2014"}</div>
+                              <div className="text-[10px] text-gray-400">
                                 {new Date(item.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                               </div>
                             </div>
                           </div>
-                          <div className="text-sm font-bold text-slate-900">₱{item.amount.toFixed(2)}</div>
+                          <div className="text-sm font-bold text-gray-900">₱{item.amount.toFixed(2)}</div>
                         </div>
                       ))}
                     </div>
@@ -278,11 +278,11 @@ function DetailRow({
 }) {
   return (
     <div className="flex justify-between items-center py-2.5">
-      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">
+      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">
         {label}
       </span>
       {children ?? (
-        <span className="text-[13px] font-semibold text-slate-700">{value}</span>
+        <span className="text-[13px] font-semibold text-gray-700">{value}</span>
       )}
     </div>
   );

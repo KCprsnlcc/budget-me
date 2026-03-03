@@ -130,16 +130,16 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-lg">
-      <ModalHeader onClose={handleClose}>
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center justify-between w-full">
-          <span className="text-xs font-bold uppercase tracking-wider">
+          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
             {step === 1 && "Workflow"}
             {step === 2 && "Select Type"}
             {step === 3 && "Account Details"}
             {step === 4 && "Initial Funds"}
             {step === 5 && "Review"}
           </span>
-          <span className="text-[10px] text-slate-400 font-medium tracking-wide ml-4">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide ml-4">
             Step {step} of 5
           </span>
         </div>
@@ -149,22 +149,22 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
         <Stepper steps={STEPS} currentStep={step} variant="compact" />
 
         {/* Content */}
-      <ModalBody className="max-h-[60vh]">
+      <ModalBody className="max-h-[60vh] bg-[#F9FAFB]/30">
           {/* Step 1: Workflow Choice */}
           {step === 1 && (
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="mb-5">
-                <h2 className="text-[17px] font-bold text-slate-900 mb-1">Add Account</h2>
-                <p className="text-[11px] text-slate-500">Choose how you want to add this account.</p>
+                <h2 className="text-[17px] font-bold text-gray-900 mb-1">Add Account</h2>
+                <p className="text-[11px] text-gray-500">Choose how you want to add this account.</p>
               </div>
               <div className="grid grid-cols-1 gap-3">
                 <button
                   onClick={() => setWorkflow("new")}
                   className={cn(
-                    "relative p-4 rounded-xl border text-left transition-all cursor-pointer",
+                    "relative p-4 rounded-xl border text-left transition-all cursor-pointer bg-white",
                     workflow === "new"
                       ? "border-emerald-500 ring-1 ring-emerald-500"
-                      : "border-slate-200 hover:border-slate-300"
+                      : "border-gray-200 hover:border-gray-300"
                   )}
                 >
                   <div className="flex items-start gap-4">
@@ -172,8 +172,8 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                       <ArrowUp size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-[13px] font-bold text-slate-900 mb-0.5">Create New Account</h3>
-                      <p className="text-[11px] text-slate-500 leading-relaxed">
+                      <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">Create New Account</h3>
+                      <p className="text-[11px] text-gray-500 leading-relaxed">
                         Set up a checking, savings, or credit card account from scratch.
                       </p>
                     </div>
@@ -188,10 +188,10 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                 <button
                   onClick={() => setWorkflow("existing")}
                   className={cn(
-                    "relative p-4 rounded-xl border text-left transition-all cursor-pointer",
+                    "relative p-4 rounded-xl border text-left transition-all cursor-pointer bg-white",
                     workflow === "existing"
                       ? "border-emerald-500 ring-1 ring-emerald-500"
-                      : "border-slate-200 hover:border-slate-300"
+                      : "border-gray-200 hover:border-gray-300"
                   )}
                 >
                   <div className="flex items-start gap-4">
@@ -199,8 +199,8 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                       <ArrowRightLeft size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-[13px] font-bold text-slate-900 mb-0.5">Top-up / Cash In</h3>
-                      <p className="text-[11px] text-slate-500 leading-relaxed">
+                      <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">Top-up / Cash In</h3>
+                      <p className="text-[11px] text-gray-500 leading-relaxed">
                         Add funds to an existing account manually.
                       </p>
                     </div>
@@ -219,8 +219,8 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
           {step === 2 && (
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="mb-5">
-                <h2 className="text-[17px] font-bold text-slate-900 mb-1">Select Account Type</h2>
-                <p className="text-[11px] text-slate-500">Choose the category that best fits your needs.</p>
+                <h2 className="text-[17px] font-bold text-gray-900 mb-1">Select Account Type</h2>
+                <p className="text-[11px] text-gray-500">Choose the category that best fits your needs.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {ACCOUNT_TYPE_OPTIONS.map((option) => {
@@ -231,19 +231,19 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                       key={option.type}
                       onClick={() => setAccountType(option.type)}
                       className={cn(
-                        "relative p-4 rounded-xl border text-left transition-all cursor-pointer",
+                        "relative p-4 rounded-xl border text-left transition-all cursor-pointer bg-white",
                         isSelected
                           ? "border-emerald-500 ring-1 ring-emerald-500"
-                          : "border-slate-200 hover:border-slate-300"
+                          : "border-gray-200 hover:border-gray-300"
                       )}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="text-slate-500 flex items-center justify-center">
+                        <div className="text-gray-500 flex items-center justify-center">
                           <Icon size={16} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-[13px] font-bold text-slate-900 mb-0.5">{option.label}</h3>
-                          <p className="text-[10px] text-slate-500 leading-relaxed">{option.description}</p>
+                          <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{option.label}</h3>
+                          <p className="text-[10px] text-gray-500 leading-relaxed">{option.description}</p>
                         </div>
                         {isSelected && (
                           <div className="absolute top-3 right-3 w-[18px] h-[18px] rounded-full bg-emerald-500 flex items-center justify-center text-white">
@@ -262,8 +262,8 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
           {step === 3 && (
             <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="mb-5">
-                <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                  <div className="text-slate-500 flex items-center justify-center">
+                <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
+                  <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
                     <UserPlus size={14} />
                   </div>
                   Add Account
@@ -272,8 +272,8 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
 
               <div className="space-y-4">
                 <div>
-                  <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">
-                    Account Name <span className="text-slate-400">*</span>
+                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">
+                    Account Name <span className="text-gray-400">*</span>
                   </Label>
                   <Input
                     value={formData.name}
@@ -284,11 +284,11 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                 </div>
 
                 <div>
-                  <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">
-                    Initial Balance <span className="text-slate-400">*</span>
+                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">
+                    Initial Balance <span className="text-gray-400">*</span>
                   </Label>
                   <div className="relative mt-1.5">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">₱</span>
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">₱</span>
                     <Input
                       type="number"
                       step="0.01"
@@ -298,14 +298,14 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                       className="pl-7 h-10 text-[13px]"
                     />
                   </div>
-                  <div className="flex items-start gap-2 mt-2 p-3 rounded-lg bg-slate-50 border border-slate-100">
-                    <Info size={14} className="text-slate-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-[11px] text-slate-500">Current funds available in this account.</span>
+                  <div className="flex items-start gap-2 mt-2 p-3 rounded-lg bg-white border border-gray-200">
+                    <Info size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-[11px] text-gray-500">Current funds available in this account.</span>
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Institution</Label>
+                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Institution</Label>
                   <Input
                     value={formData.institution}
                     onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
@@ -315,20 +315,20 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                 </div>
 
                 <div>
-                  <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">
-                    Description <span className="text-slate-400 font-normal lowercase">(optional)</span>
+                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">
+                    Description <span className="text-gray-400 font-normal lowercase">(optional)</span>
                   </Label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={2}
                     placeholder="Notes about this account..."
-                    className="w-full mt-1.5 px-3 py-2 text-[13px] border border-slate-200 rounded-lg resize-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                    className="w-full mt-1.5 px-3 py-2 text-[13px] border border-gray-200 rounded-lg resize-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Color Theme</Label>
+                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Color Theme</Label>
                   <div className="flex gap-2.5 flex-wrap mt-2">
                     {ACCOUNT_COLORS.map((c) => (
                       <button
@@ -338,7 +338,7 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                         className={cn(
                           "w-7 h-7 rounded-full border-2 transition-all",
                           formData.color === c.color
-                            ? "border-slate-900 scale-110"
+                            ? "border-gray-900 scale-110"
                             : "border-transparent hover:scale-105"
                         )}
                         style={{ backgroundColor: c.color }}
@@ -348,14 +348,14 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                   </div>
                 </div>
 
-                <label className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
+                <label className="flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
                   <input
                     type="checkbox"
                     checked={formData.isDefault}
                     onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                    className="h-4 w-4 accent-emerald-500 border-slate-300 rounded flex-shrink-0"
+                    className="h-4 w-4 accent-emerald-500 border-gray-300 rounded flex-shrink-0"
                   />
-                  <span className="text-[12px] text-slate-600 font-medium">Set as default account</span>
+                  <span className="text-[12px] text-gray-600 font-medium">Set as default account</span>
                 </label>
               </div>
             </div>
@@ -365,24 +365,24 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
           {step === 4 && (
             <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="mb-5">
-                <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                  <div className="text-slate-500 flex items-center justify-center">
+                <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
+                  <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
                     <Wallet size={14} />
                   </div>
                   Initial Funds
                 </h2>
               </div>
 
-              <label className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
+              <label className="flex items-start gap-3 p-3 rounded-lg bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
                 <input
                   type="checkbox"
                   checked={formData.skipCashIn}
                   onChange={(e) => setFormData({ ...formData, skipCashIn: e.target.checked })}
-                  className="h-4 w-4 mt-0.5 accent-emerald-500 border-slate-300 rounded flex-shrink-0"
+                  className="h-4 w-4 mt-0.5 accent-emerald-500 border-gray-300 rounded flex-shrink-0"
                 />
                 <div>
-                  <div className="text-[12px] font-semibold text-slate-900">Skip transaction record</div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">
+                  <div className="text-[12px] font-semibold text-gray-900">Skip transaction record</div>
+                  <div className="text-[10px] text-gray-500 mt-0.5">
                     Don&apos;t create a transaction record for the initial balance.
                   </div>
                 </div>
@@ -390,7 +390,7 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
 
               <div className={cn("space-y-4 transition-opacity duration-300", formData.skipCashIn && "opacity-35 pointer-events-none")}>
                 <div>
-                  <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Transaction Date</Label>
+                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Transaction Date</Label>
                   <Input
                     type="date"
                     value={formData.cashInDate}
@@ -400,11 +400,11 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                 </div>
 
                 <div>
-                  <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Source</Label>
+                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Source</Label>
                   <select
                     value={formData.cashInSource}
                     onChange={(e) => setFormData({ ...formData, cashInSource: e.target.value })}
-                    className="w-full mt-1.5 h-10 px-3 text-[13px] border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                    className="w-full mt-1.5 h-10 px-3 text-[13px] border border-gray-200 rounded-lg bg-white text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                   >
                     {CASH_IN_SOURCES.map((s) => (
                       <option key={s.value} value={s.value}>{s.label}</option>
@@ -413,9 +413,9 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                 </div>
               </div>
 
-              <div className="flex items-start gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100">
-                <Info size={14} className="text-slate-400 flex-shrink-0 mt-0.5" />
-                <span className="text-[11px] text-slate-500">
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-white border border-gray-200">
+                <Info size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                <span className="text-[11px] text-gray-500">
                   The initial balance (₱<strong>{parseFloat(formData.balance || "0").toFixed(2)}</strong>) will be recorded as your first income transaction.
                 </span>
               </div>
@@ -426,16 +426,16 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
           {step === 5 && (
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="mb-5">
-                <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                  <div className="text-slate-500 flex items-center justify-center">
+                <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
+                  <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
                     <ClipboardCheck size={14} />
                   </div>
                   Review & Confirm
                 </h2>
               </div>
 
-              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-                <div className="flex items-center gap-4 p-5 border-b border-slate-100">
+              <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                <div className="flex items-center gap-4 p-5 border-b border-gray-100">
                   <div
                     className="w-11 h-11 rounded-xl flex items-center justify-center text-white"
                     style={{ backgroundColor: formData.color }}
@@ -443,48 +443,48 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                     <Wallet size={20} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-[15px]">{formData.name || "New Account"}</h3>
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-widest border border-slate-200 inline-block mt-1">
+                    <h3 className="font-bold text-gray-900 text-[15px]">{formData.name || "New Account"}</h3>
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-white text-gray-500 uppercase tracking-widest border border-gray-200 inline-block mt-1">
                       {accountType}
                     </span>
                   </div>
                 </div>
                 <div className="p-5 space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Initial Balance</span>
-                    <span className="font-bold text-slate-900 text-sm">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Initial Balance</span>
+                    <span className="font-bold text-gray-900 text-sm">
                       ₱{parseFloat(formData.balance || "0").toLocaleString("en-PH", { minimumFractionDigits: 2 })}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Institution</span>
-                    <span className="text-[13px] font-semibold text-slate-700">{formData.institution || "-"}</span>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Institution</span>
+                    <span className="text-[13px] font-semibold text-gray-700">{formData.institution || "-"}</span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Color</span>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Color</span>
                     <div className="flex items-center gap-2">
                       <span className="w-4 h-4 rounded-full" style={{ backgroundColor: formData.color }} />
-                      <span className="text-[13px] font-semibold text-slate-700">{colorName}</span>
+                      <span className="text-[13px] font-semibold text-gray-700">{colorName}</span>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Default</span>
-                    <span className="text-[13px] font-semibold text-slate-700">{formData.isDefault ? "Yes" : "No"}</span>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Default</span>
+                    <span className="text-[13px] font-semibold text-gray-700">{formData.isDefault ? "Yes" : "No"}</span>
                   </div>
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Notes</span>
-                    <span className="text-[11px] text-slate-500 italic max-w-[180px] text-right">
+                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Notes</span>
+                    <span className="text-[11px] text-gray-500 italic max-w-[180px] text-right">
                       {formData.description || "No notes provided."}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 border border-amber-100">
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-white border border-gray-200">
                 <AlertTriangle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-amber-900">Action is final</h4>
-                  <p className="text-[11px] text-amber-700 leading-relaxed">
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Action is final</h4>
+                  <p className="text-[11px] text-gray-700 leading-relaxed">
                     Your account will be created immediately. Please ensure all details are correct.
                   </p>
                 </div>

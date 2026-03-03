@@ -45,25 +45,25 @@ export function ModelSelectorDropdown({
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg transition-colors text-xs font-medium text-slate-600 group"
+        className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-xs font-medium text-gray-600 group"
       >
         <Monitor
           size={14}
-          className="text-slate-400 group-hover:text-emerald-500 transition-colors"
+          className="text-gray-400 group-hover:text-emerald-500 transition-colors"
         />
         <span>{currentModel.name}</span>
         <ChevronDown
           size={14}
-          className={`text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-56 bg-white border border-slate-200 rounded-lg shadow-lg z-50 overflow-hidden">
+        <div className="absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
           {/* Header */}
-          <div className="px-3 py-2 bg-slate-50 border-b border-slate-100">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+          <div className="px-3 py-2 bg-[#F9FAFB]/50 border-b border-gray-100">
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
               Select Model
             </span>
           </div>
@@ -78,8 +78,8 @@ export function ModelSelectorDropdown({
                   onClick={() => handleSelect(model.id)}
                   className={`w-full p-3 text-left transition-colors border-l-2 ${
                     isSelected
-                      ? "border-emerald-500 bg-emerald-50/50"
-                      : "border-transparent group"
+                      ? "border-emerald-500 bg-[#F9FAFB]/50"
+                      : "border-transparent hover:bg-gray-50 group"
                   }`}
                 >
                   <div className="flex justify-between items-center">
@@ -89,20 +89,20 @@ export function ModelSelectorDropdown({
                         className={`transition-colors ${
                           isSelected
                             ? "text-emerald-500"
-                            : "text-slate-400 group-hover:text-emerald-500"
+                            : "text-gray-400 group-hover:text-emerald-500"
                         }`}
                       />
                       <div>
                         <div
                           className={`text-xs font-semibold transition-colors ${
                             isSelected
-                              ? "text-slate-900"
-                              : "text-slate-900 group-hover:text-emerald-500"
+                              ? "text-gray-900"
+                              : "text-gray-900 group-hover:text-emerald-500"
                           }`}
                         >
                           {model.name}
                         </div>
-                        <div className="text-[10px] text-slate-500">
+                        <div className="text-[10px] text-gray-500">
                           {model.description}
                         </div>
                       </div>

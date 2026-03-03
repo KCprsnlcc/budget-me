@@ -153,17 +153,17 @@ export function ViewGoalModal({
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
-        <h3 className="text-sm font-semibold text-slate-900">{goal.name}</h3>
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
+        <h3 className="text-sm font-semibold text-gray-900">{goal.name}</h3>
         <div className="flex items-center gap-3">
-          <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide">
             Step {step} of 2
           </span>
         </div>
       </ModalHeader>
 
       {/* Body */}
-      <ModalBody className="px-5 py-5">
+      <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
         {/* Stepper */}
         <Stepper steps={STEPS} currentStep={step} />
         {/* STEP 1: Overview */}
@@ -213,11 +213,11 @@ export function ViewGoalModal({
               </div>
             </div>
 
-            <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-blue-700 flex items-start gap-3">
-              <Info size={16} className="flex-shrink-0 mt-0.5" />
+            <div className="p-3 rounded-lg bg-white border border-gray-200 flex items-start gap-3">
+              <Info size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
               <div>
-                <div className="font-medium text-sm">Goal Performance</div>
-                <div className="text-xs opacity-90">
+                <div className="font-medium text-sm text-gray-900">Goal Performance</div>
+                <div className="text-xs text-gray-600">
                   You're {progress}% toward your goal with {daysRemaining} days remaining.
                 </div>
               </div>
@@ -225,19 +225,19 @@ export function ViewGoalModal({
 
             {/* Family Context Section */}
             {goal.isFamily && (
-              <div className="p-3 rounded-lg border border-emerald-100 bg-emerald-50/50 flex items-start gap-3">
-                <Users size={16} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+              <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
+                <Users size={16} className="text-gray-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <div className="font-medium text-sm text-emerald-800 mb-1.5">Family Goal</div>
+                  <div className="font-medium text-sm text-gray-900 mb-1.5">Family Goal</div>
                   <div className="space-y-1">
-                    <div className="text-xs text-emerald-700">
+                    <div className="text-xs text-gray-600">
                       Family: <span className="font-semibold">{familyData?.name || "Unknown"}</span>
                     </div>
-                    <div className="text-xs text-emerald-700">
+                    <div className="text-xs text-gray-600">
                       Your Role: <span className="font-semibold capitalize">{isOwner ? "Owner" : (currentUserRole || "N/A")}</span>
                     </div>
                   </div>
-                  <div className="text-xs text-emerald-600/80 mt-2">
+                  <div className="text-xs text-gray-500 mt-2">
                     Shared with family members for collaborative tracking and contributions
                   </div>
                 </div>
@@ -246,11 +246,11 @@ export function ViewGoalModal({
 
             {/* Public Goal Context */}
             {goal.is_public && !goal.isFamily && (
-              <div className="p-3 rounded-lg border border-blue-100 bg-blue-50/50 flex items-start gap-3">
-                <Globe size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
+                <Globe size={16} className="text-gray-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <div className="font-medium text-sm text-blue-800 mb-1">Public Goal</div>
-                  <div className="text-xs text-blue-600/80">
+                  <div className="font-medium text-sm text-gray-900 mb-1">Public Goal</div>
+                  <div className="text-xs text-gray-500">
                     Visible to the public community for inspiration
                   </div>
                 </div>
@@ -347,23 +347,23 @@ export function ViewGoalModal({
               </div>
 
               {(goal.isFamily || goal.is_public) && (
-                <div className={`p-4 rounded-lg border ${goal.isFamily ? 'border-emerald-100 text-emerald-700' : 'border-blue-100 text-blue-700'}`}>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.05em] mb-2 text-slate-600">Goal Type</div>
+                <div className={`p-4 rounded-lg border border-gray-200 bg-white`}>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.05em] mb-2 text-gray-600">Goal Type</div>
                   <div className="text-sm font-semibold flex items-center gap-2 mb-3">
                     {goal.isFamily ? (
                       <>
-                        <Users size={14} className="text-emerald-600" />
-                        <span className="text-emerald-700">Family Goal</span>
+                        <Users size={14} className="text-gray-600" />
+                        <span className="text-gray-900">Family Goal</span>
                       </>
                     ) : (
                       <>
-                        <Globe size={14} className="text-blue-600" />
-                        <span className="text-blue-700">Public Goal</span>
+                        <Globe size={14} className="text-gray-600" />
+                        <span className="text-gray-900">Public Goal</span>
                       </>
                     )}
                   </div>
 
-                  <div className="text-xs mt-3 pt-2 border-t border-emerald-200/50 opacity-90">
+                  <div className="text-xs mt-3 pt-2 border-t border-gray-100 text-gray-600">
                     {goal.isFamily ? (
                       <>Shared with family members for collaborative tracking and contributions</>
                     ) : (

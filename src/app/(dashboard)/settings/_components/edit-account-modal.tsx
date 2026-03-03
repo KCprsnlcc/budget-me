@@ -110,14 +110,14 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-lg">
-      <ModalHeader onClose={handleClose}>
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center justify-between w-full">
-          <span className="text-xs font-bold uppercase tracking-wider">
+          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
             {step === 1 && "Edit Details"}
             {step === 2 && "Balance Adjustment"}
             {step === 3 && "Review Changes"}
           </span>
-          <span className="text-[10px] text-slate-400 font-medium tracking-wide ml-4">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide ml-4">
             Step {step} of 3
           </span>
         </div>
@@ -126,13 +126,13 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
         {/* Stepper */}
         <Stepper steps={STEPS} currentStep={step} />
 
-      <ModalBody className="max-h-[60vh]">
+      <ModalBody className="max-h-[60vh] bg-[#F9FAFB]/30">
           {/* Step 1: Account Details */}
           {step === 1 && (
             <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="mb-5">
-                <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                  <div className="text-slate-500 flex items-center justify-center">
+                <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
+                  <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
                     <PenSquare size={14} />
                   </div>
                   Edit Account Details
@@ -141,8 +141,8 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
 
               <div className="space-y-4">
                 <div>
-                  <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">
-                    Account Name <span className="text-slate-400">*</span>
+                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">
+                    Account Name <span className="text-gray-400">*</span>
                   </Label>
                   <Input
                     value={name}
@@ -153,21 +153,21 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
                 </div>
 
                 <div>
-                  <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Account Type</Label>
-                  <div className="mt-1.5 p-3 rounded-lg bg-slate-50 border border-slate-100 text-sm text-slate-700">
+                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Account Type</Label>
+                  <div className="mt-1.5 p-3 rounded-lg bg-white border border-gray-200 text-sm text-gray-700">
                     {account?.type ? account.type.charAt(0).toUpperCase() + account.type.slice(1) : "-"}
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Current Balance</Label>
-                  <div className="mt-1.5 p-3 rounded-lg bg-slate-50 border border-slate-100 text-sm font-semibold text-slate-900">
+                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Current Balance</Label>
+                  <div className="mt-1.5 p-3 rounded-lg bg-white border border-gray-200 text-sm font-semibold text-gray-900">
                     ₱{currentBalance.toFixed(2)}
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Color Theme</Label>
+                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Color Theme</Label>
                   <div className="flex gap-2.5 flex-wrap mt-2">
                     {ACCOUNT_COLORS.map((c) => (
                       <button
@@ -177,7 +177,7 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
                         className={cn(
                           "w-7 h-7 rounded-full border-2 transition-all",
                           color === c.color
-                            ? "border-slate-900 scale-110"
+                            ? "border-gray-900 scale-110"
                             : "border-transparent hover:scale-105"
                         )}
                         style={{ backgroundColor: c.color }}
@@ -194,8 +194,8 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
           {step === 2 && (
             <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="mb-5">
-                <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                  <div className="text-slate-500 flex items-center justify-center">
+                <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
+                  <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
                     <Wallet size={14} />
                   </div>
                   Balance Adjustment
@@ -208,8 +208,8 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
                   className={cn(
                     "relative p-4 rounded-xl border text-left transition-all cursor-pointer",
                     adjustmentType === "deposit"
-                      ? "border-emerald-500 ring-1 ring-emerald-500 bg-emerald-50/50"
-                      : "border-slate-200 hover:border-slate-300 bg-white"
+                      ? "border-emerald-500 ring-1 ring-emerald-500 bg-white"
+                      : "border-gray-200 hover:border-gray-300 bg-white"
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -217,8 +217,8 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
                       <ArrowUp size={16} />
                     </div>
                     <div>
-                      <div className="text-[12px] font-semibold text-slate-900">Deposit</div>
-                      <div className="text-[9px] text-slate-500">Add funds</div>
+                      <div className="text-[12px] font-semibold text-gray-900">Deposit</div>
+                      <div className="text-[9px] text-gray-500">Add funds</div>
                     </div>
                   </div>
                   {adjustmentType === "deposit" && (
@@ -233,8 +233,8 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
                   className={cn(
                     "relative p-4 rounded-xl border text-left transition-all cursor-pointer",
                     adjustmentType === "withdrawal"
-                      ? "border-red-500 ring-1 ring-red-500 bg-red-50/50"
-                      : "border-slate-200 hover:border-slate-300 bg-white"
+                      ? "border-red-500 ring-1 ring-red-500 bg-white"
+                      : "border-gray-200 hover:border-gray-300 bg-white"
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -242,8 +242,8 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
                       <ArrowDown size={16} />
                     </div>
                     <div>
-                      <div className="text-[12px] font-semibold text-slate-900">Withdrawal</div>
-                      <div className="text-[9px] text-slate-500">Remove funds</div>
+                      <div className="text-[12px] font-semibold text-gray-900">Withdrawal</div>
+                      <div className="text-[9px] text-gray-500">Remove funds</div>
                     </div>
                   </div>
                   {adjustmentType === "withdrawal" && (
@@ -257,11 +257,11 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
               {adjustmentType && (
                 <div className="space-y-4 animate-in fade-in duration-300">
                   <div>
-                    <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">
-                      Amount <span className="text-slate-400">*</span>
+                    <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">
+                      Amount <span className="text-gray-400">*</span>
                     </Label>
                     <div className="relative mt-1.5">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">₱</span>
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">₱</span>
                       <Input
                         type="number"
                         step="0.01"
@@ -274,8 +274,8 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
                   </div>
 
                   <div>
-                    <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">
-                      Reason <span className="text-slate-400">*</span>
+                    <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">
+                      Reason <span className="text-gray-400">*</span>
                     </Label>
                     <Input
                       value={adjustmentReason}
@@ -285,9 +285,9 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
                     />
                   </div>
 
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100">
-                    <Info size={14} className="text-slate-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-[11px] text-slate-500">
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-white border border-gray-200">
+                    <Info size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-[11px] text-gray-500">
                       This adjustment will be recorded as a transaction for tracking purposes.
                     </span>
                   </div>
@@ -295,9 +295,9 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
               )}
 
               {!adjustmentType && (
-                <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 border border-blue-100">
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-white border border-gray-200">
                   <Info size={14} className="text-blue-400 flex-shrink-0 mt-0.5" />
-                  <span className="text-[11px] text-blue-600">
+                  <span className="text-[11px] text-gray-600">
                     Select an adjustment type above if you want to modify the account balance. Otherwise, click Continue to proceed.
                   </span>
                 </div>
@@ -309,16 +309,16 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
           {step === 3 && (
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="mb-5">
-                <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                  <div className="text-slate-500 flex items-center justify-center">
+                <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
+                  <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
                     <ClipboardCheck size={14} />
                   </div>
                   Review Changes
                 </h2>
               </div>
 
-              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-                <div className="flex items-center gap-4 p-5 border-b border-slate-100">
+              <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                <div className="flex items-center gap-4 p-5 border-b border-gray-100">
                   <div
                     className="w-11 h-11 rounded-xl flex items-center justify-center text-white"
                     style={{ backgroundColor: color }}
@@ -326,20 +326,20 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
                     <Wallet size={20} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-[15px]">{name}</h3>
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-widest border border-slate-200 inline-block mt-1">
+                    <h3 className="font-bold text-gray-900 text-[15px]">{name}</h3>
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-white text-gray-500 uppercase tracking-widest border border-gray-200 inline-block mt-1">
                       {account?.type}
                     </span>
                   </div>
                 </div>
                 <div className="p-5 space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Current Balance</span>
-                    <span className="font-bold text-slate-900 text-sm">₱{currentBalance.toFixed(2)}</span>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Current Balance</span>
+                    <span className="font-bold text-gray-900 text-sm">₱{currentBalance.toFixed(2)}</span>
                   </div>
                   {adjustmentType && (
-                    <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">
+                    <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">
                         {adjustmentType === "deposit" ? "Deposit" : "Withdrawal"}
                       </span>
                       <span className={cn(
@@ -351,13 +351,13 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
                     </div>
                   )}
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">New Balance</span>
-                    <span className="font-bold text-slate-900 text-sm">₱{newBalance.toFixed(2)}</span>
+                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">New Balance</span>
+                    <span className="font-bold text-gray-900 text-sm">₱{newBalance.toFixed(2)}</span>
                   </div>
                   {adjustmentType && (
-                    <div className="flex justify-between items-center py-2 border-t border-slate-100">
-                      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Reason</span>
-                      <span className="text-[11px] text-slate-500 text-right">{adjustmentReason}</span>
+                    <div className="flex justify-between items-center py-2 border-t border-gray-100">
+                      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Reason</span>
+                      <span className="text-[11px] text-gray-500 text-right">{adjustmentReason}</span>
                     </div>
                   )}
                 </div>

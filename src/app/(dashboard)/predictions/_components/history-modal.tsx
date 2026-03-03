@@ -79,47 +79,47 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
   return (
     <Modal open={open} onClose={handleClose} className="max-w-2xl">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
             Prediction History
           </span>
-          <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide">
             {history.length} total predictions
           </span>
         </div>
       </ModalHeader>
 
       {/* Body */}
-      <ModalBody className="p-0">
+      <ModalBody className="p-0 bg-[#F9FAFB]/30">
         {view === "list" ? (
           <div className="animate-txn-in">
             {/* List Header */}
-            <div className="px-5 py-4 border-b border-slate-100">
-              <h3 className="text-sm font-semibold text-slate-900">Recent Predictions</h3>
+            <div className="px-5 py-4 border-b border-gray-100 bg-white">
+              <h3 className="text-sm font-semibold text-gray-900">Recent Predictions</h3>
             </div>
             
             {/* Prediction List */}
             <div className="max-h-96 overflow-y-auto">
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-gray-100">
                 {history.length > 0 ? (
                   history.map((item) => (
                     <div
                       key={item.id}
                       onClick={() => handleItemClick(item)}
-                      className="px-5 py-4 hover:shadow-md transition-all cursor-pointer"
+                      className="px-5 py-4 hover:shadow-md transition-all cursor-pointer bg-white"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           {getStatusIcon(item.status)}
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-slate-900">
+                              <span className="text-sm font-medium text-gray-900">
                                 {item.type.charAt(0).toUpperCase() + item.type.slice(1)} Prediction
                               </span>
                               {getStatusBadge(item.status)}
                             </div>
-                            <div className="text-xs text-slate-500 mt-1">
+                            <div className="text-xs text-gray-500 mt-1">
                               {new Date(item.date).toLocaleDateString("en-US", {
                                 month: "short",
                                 day: "numeric",
@@ -132,11 +132,11 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
                         </div>
                         <div className="text-right">
                           {item.accuracy && (
-                            <div className="text-sm font-medium text-slate-900">
+                            <div className="text-sm font-medium text-gray-900">
                               {item.accuracy.toFixed(1)}% accuracy
                             </div>
                           )}
-                          <div className="text-xs text-slate-500">
+                          <div className="text-xs text-gray-500">
                             {item.insights} insights
                           </div>
                         </div>
@@ -144,7 +144,7 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
                     </div>
                   ))
                 ) : (
-                  <div className="px-5 py-8 text-center text-slate-500">
+                  <div className="px-5 py-8 text-center text-gray-500 bg-white">
                     No prediction history yet. Generate your first prediction to see it here.
                   </div>
                 )}
@@ -154,16 +154,16 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
         ) : (
           <div className="animate-txn-in">
             {selectedItem && (
-              <div className="px-5 py-6">
+              <div className="px-5 py-6 bg-white">
                 {/* Detail Header */}
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-4">
                     {getStatusIcon(selectedItem.status)}
                     <div>
-                      <h3 className="text-lg font-bold text-slate-900">
+                      <h3 className="text-lg font-bold text-gray-900">
                         {selectedItem.type.charAt(0).toUpperCase() + selectedItem.type.slice(1)} Prediction
                       </h3>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-sm text-gray-500">
                         {new Date(selectedItem.date).toLocaleDateString("en-US", {
                           weekday: "long",
                           month: "long",
@@ -178,15 +178,15 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
 
                 {/* Performance Metrics */}
                 <div className="mb-6">
-                  <h4 className="text-[15px] font-bold text-slate-900 mb-3">Performance Metrics</h4>
+                  <h4 className="text-[15px] font-bold text-gray-900 mb-3">Performance Metrics</h4>
                   <div className="grid grid-cols-2 gap-3">
                     {selectedItem.accuracy && (
-                      <div className="border border-slate-100 rounded-lg p-4">
-                        <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+                      <div className="border border-gray-100 rounded-lg p-4 bg-white">
+                        <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
                           Accuracy
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-lg font-bold text-slate-900">{selectedItem.accuracy}%</span>
+                          <span className="text-lg font-bold text-gray-900">{selectedItem.accuracy}%</span>
                           {selectedItem.accuracy >= 90 ? (
                             <TrendingUp size={16} className="text-emerald-500" />
                           ) : (
@@ -195,35 +195,35 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
                         </div>
                       </div>
                     )}
-                    <div className="border border-slate-100 rounded-lg p-4">
-                      <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+                    <div className="border border-gray-100 rounded-lg p-4 bg-white">
+                      <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
                         Data Points
                       </div>
-                      <div className="text-lg font-bold text-slate-900">{selectedItem.dataPoints}</div>
+                      <div className="text-lg font-bold text-gray-900">{selectedItem.dataPoints}</div>
                     </div>
-                    <div className="border border-slate-100 rounded-lg p-4">
-                      <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+                    <div className="border border-gray-100 rounded-lg p-4 bg-white">
+                      <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
                         Insights Generated
                       </div>
-                      <div className="text-lg font-bold text-slate-900">{selectedItem.insights}</div>
+                      <div className="text-lg font-bold text-gray-900">{selectedItem.insights}</div>
                     </div>
-                    <div className="border border-slate-100 rounded-lg p-4">
-                      <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+                    <div className="border border-gray-100 rounded-lg p-4 bg-white">
+                      <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
                         Model Version
                       </div>
-                      <div className="text-sm font-medium text-slate-900">{selectedItem.model}</div>
+                      <div className="text-sm font-medium text-gray-900">{selectedItem.model}</div>
                     </div>
                   </div>
                 </div>
 
                 {/* Analysis Details */}
                 <div className="mb-6">
-                  <h4 className="text-[15px] font-bold text-slate-900 mb-3 flex items-center gap-2">
+                  <h4 className="text-[15px] font-bold text-gray-900 mb-3 flex items-center gap-2">
                     <Brain size={16} className="text-emerald-500" />
                     Analysis Details
                   </h4>
-                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-                    <div className="p-5 space-y-0 divide-y divide-slate-100">
+                  <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                    <div className="p-5 space-y-0 divide-y divide-gray-100">
                       <DetailRow label="Processing Time" value="2.4 seconds" />
                       <DetailRow label="Confidence Level" value="High" />
                       <DetailRow label="Categories Analyzed" value="8" />
@@ -234,11 +234,11 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
 
                 {/* Status Message */}
                 {selectedItem.status === "failed" && (
-                  <div className="flex gap-2.5 p-3 rounded-lg text-xs border border-amber-100 text-amber-900 items-start">
-                    <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+                  <div className="flex gap-2.5 p-3 rounded-lg text-xs border border-gray-200 text-gray-700 items-start bg-white">
+                    <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
                     <div>
-                      <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error Details</h4>
-                      <p className="text-[11px] leading-relaxed opacity-85">
+                      <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Error Details</h4>
+                      <p className="text-[11px] leading-relaxed">
                         Prediction failed due to insufficient data. Please ensure you have at least 30 days of transaction history.
                       </p>
                     </div>
@@ -271,8 +271,8 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between items-center py-2.5">
-      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">{label}</span>
-      <span className="text-sm font-semibold text-slate-700">{value}</span>
+      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">{label}</span>
+      <span className="text-sm font-semibold text-gray-700">{value}</span>
     </div>
   );
 }

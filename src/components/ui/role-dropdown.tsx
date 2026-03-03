@@ -53,7 +53,7 @@ export function RoleDropdown({
       <Button
         type="button"
         variant="outline"
-        className="w-full justify-between text-left font-normal h-8 px-3 py-1 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 transition-all hover:border-slate-300 focus:outline-none focus:border-slate-500 focus:ring-[3px] focus:ring-slate-500/[0.06]"
+        className="w-full justify-between text-left font-normal h-8 px-3 py-1 text-xs border border-gray-200 rounded-lg bg-white text-gray-600 transition-all hover:border-gray-300 focus:outline-none focus:border-gray-500 focus:ring-[3px] focus:ring-gray-500/[0.06]"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
       >
@@ -65,10 +65,10 @@ export function RoleDropdown({
       </Button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg">
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
           <div className="max-h-60 overflow-y-auto">
             {options.length === 0 ? (
-              <div className="px-3 py-2 text-xs text-slate-500 text-center">
+              <div className="px-3 py-2 text-xs text-gray-500 text-center">
                 No options found
               </div>
             ) : (
@@ -77,8 +77,8 @@ export function RoleDropdown({
                   key={option.value}
                   type="button"
                   className={cn(
-                    "w-full px-3 py-2 text-left text-xs hover:bg-slate-50 transition-colors flex items-center gap-2",
-                    value === option.value && "bg-slate-100 text-slate-700"
+                    "w-full px-3 py-2 text-left text-xs hover:bg-gray-50 transition-colors flex items-center gap-2",
+                    value === option.value && "bg-white text-gray-700 border-l-2 border-gray-400"
                   )}
                   onClick={() => handleSelect(option.value)}
                 >

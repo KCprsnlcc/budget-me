@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Modal,
@@ -43,14 +43,14 @@ export function DeleteFamilyModal({ open, onClose, onConfirm }: DeleteFamilyModa
   return (
     <Modal open={open} onClose={handleClose} className="max-w-md">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
-        <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
+        <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
           Delete Family Group
         </span>
       </ModalHeader>
 
       {/* Body */}
-      <ModalBody className="px-5 py-8">
+      <ModalBody className="px-5 py-8 bg-[#F9FAFB]/30">
         <div className="text-center animate-txn-in">
           {/* Warning Message */}
           <h2 className="text-lg font-bold text-slate-900 mb-3">Delete Family Group?</h2>
@@ -90,12 +90,15 @@ export function DeleteFamilyModal({ open, onClose, onConfirm }: DeleteFamilyModa
             />
           </div>
           {/* Final Warning */}
-          <div className="p-3 rounded-lg text-xs bg-amber-50 border border-amber-100 text-amber-900 mx-auto max-w-sm mt-6">
-            <div>
-              <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Irreversible Action</h4>
-              <p className="text-[11px] leading-relaxed opacity-85">
-                This family group and all associated data will be permanently deleted and cannot be recovered.
-              </p>
+          <div className="p-3 rounded-lg text-xs bg-white border border-gray-200 mx-auto max-w-sm mt-6">
+            <div className="flex gap-2.5 items-start">
+              <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
+              <div>
+                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Irreversible Action</h4>
+                <p className="text-[11px] leading-relaxed text-gray-700">
+                  This family group and all associated data will be permanently deleted and cannot be recovered.
+                </p>
+              </div>
             </div>
           </div>
         </div>

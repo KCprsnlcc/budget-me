@@ -154,12 +154,12 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
             Create Goal
           </span>
-          <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide">
             Step {step} of 3
           </span>
         </div>
@@ -169,7 +169,7 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
       <Stepper steps={STEPS} currentStep={step} />
 
       {/* Body */}
-      <ModalBody className="px-5 py-5">
+      <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
         {/* STEP 1: Category Selection */}
         {step === 1 && (
           <div className="space-y-4 animate-txn-in">
@@ -307,22 +307,22 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
               />
 
               {form.isFamily && hasFamily && canCreateFamilyGoalsBool && (
-                <div className="p-3 rounded-lg border border-emerald-100 text-emerald-700 flex items-start gap-3">
-                  <Users size={16} className="flex-shrink-0 mt-0.5" />
+                <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
+                  <Users size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
                   <div className="flex-1">
-                    <div className="font-medium text-sm mb-2">Family Goal Permissions</div>
-                    <div className="text-xs opacity-90 mb-2">
+                    <div className="font-medium text-sm mb-2 text-gray-900">Family Goal Permissions</div>
+                    <div className="text-xs text-gray-600 mb-2">
                       This goal will be shared with your family: <span className="font-semibold">{familyName}</span>
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {permissions.canEdit && (
-                        <span className="px-2 py-1 border border-emerald-200 text-emerald-700 rounded-full text-xs">Can Edit</span>
+                        <span className="px-2 py-1 border border-gray-200 text-gray-700 rounded-full text-xs bg-white">Can Edit</span>
                       )}
                       {permissions.canDelete && (
-                        <span className="px-2 py-1 border border-red-200 text-red-700 rounded-full text-xs">Can Delete</span>
+                        <span className="px-2 py-1 border border-gray-200 text-gray-700 rounded-full text-xs bg-white">Can Delete</span>
                       )}
                       {permissions.canContribute && (
-                        <span className="px-2 py-1 border border-blue-200 text-blue-700 rounded-full text-xs">Can Contribute</span>
+                        <span className="px-2 py-1 border border-gray-200 text-gray-700 rounded-full text-xs bg-white">Can Contribute</span>
                       )}
                     </div>
                   </div>
@@ -330,11 +330,11 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
               )}
 
               {!hasFamily && (
-                <div className="p-3 rounded-lg border border-amber-100 text-amber-700 flex items-start gap-3">
-                  <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
+                <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
+                  <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
                   <div>
-                    <div className="font-medium text-sm">No Family Available</div>
-                    <div className="text-xs opacity-90">
+                    <div className="font-medium text-sm text-gray-900">No Family Available</div>
+                    <div className="text-xs text-gray-600">
                       You need to join or create a family to create family goals
                     </div>
                   </div>
@@ -342,22 +342,22 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
               )}
 
               {hasFamily && !canCreateFamilyGoalsBool && (
-                <div className="p-3 rounded-lg border border-red-100 text-red-700 flex items-start gap-3">
-                  <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
+                <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
+                  <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
                   <div>
-                    <div className="font-medium text-sm">Insufficient Permissions</div>
-                    <div className="text-xs opacity-90">
+                    <div className="font-medium text-sm text-gray-900">Insufficient Permissions</div>
+                    <div className="text-xs text-gray-600">
                       Your role as <span className="font-semibold capitalize">{currentUserRole}</span> does not allow creating family goals. Only Owners and Admins can create family goals.
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="p-3 rounded-lg border border-blue-100 text-blue-700 flex items-start gap-3">
-                <Info size={16} className="flex-shrink-0 mt-0.5" />
+              <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
+                <Info size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
                 <div>
-                  <div className="font-medium text-sm">Goal Planning</div>
-                  <div className="text-xs opacity-90">
+                  <div className="font-medium text-sm text-gray-900">Goal Planning</div>
+                  <div className="text-xs text-gray-600">
                     Set realistic targets and monthly contributions to stay on track
                   </div>
                 </div>
@@ -420,20 +420,20 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
             </div>
 
             {saveError && (
-              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
-                <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
+                <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
                 <div>
-                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
-                  <p className="text-[11px] leading-relaxed opacity-85">{saveError}</p>
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Error</h4>
+                  <p className="text-[11px] leading-relaxed">{saveError}</p>
                 </div>
               </div>
             )}
 
-            <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-start gap-3">
-              <CheckCircle size={16} className="flex-shrink-0 mt-0.5" />
+            <div className="p-3 rounded-lg bg-white border border-gray-200 flex items-start gap-3">
+              <CheckCircle size={16} className="flex-shrink-0 mt-0.5 text-emerald-500" />
               <div>
-                <div className="font-medium text-sm">Ready to Create</div>
-                <div className="text-xs opacity-90">
+                <div className="font-medium text-sm text-gray-900">Ready to Create</div>
+                <div className="text-xs text-gray-600">
                   Your goal is ready to be created and will start tracking immediately
                 </div>
               </div>

@@ -99,12 +99,12 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
             Edit Family
           </span>
-          <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide">
             Step {currentStep} of 2
           </span>
         </div>
@@ -114,7 +114,7 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
       <Stepper currentStep={currentStep} totalSteps={2} labels={STEPS} />
 
       {/* Body */}
-      <ModalBody className="px-5 py-5">
+      <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
         {/* STEP 1: Family Details */}
         {currentStep === 1 && (
           <div className="space-y-6">
@@ -191,14 +191,14 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
                 </div>
               </div>
 
-              <Card className="p-4 bg-blue-50 border-blue-100">
+              <Card className="p-4 bg-white border-gray-200">
                 <div className="flex gap-3">
-                  <Info className="text-blue-500 shrink-0" size={16} />
+                  <Info className="text-gray-600 shrink-0" size={16} />
                   <div>
-                    <p className="font-medium text-blue-900 text-xs">
+                    <p className="font-medium text-gray-900 text-xs">
                       Family Settings
                     </p>
-                    <p className="text-blue-700 text-[10px] mt-0.5">
+                    <p className="text-gray-600 text-[10px] mt-0.5">
                       Private families require invitations. Public families can be discovered by others.
                     </p>
                   </div>
@@ -256,10 +256,10 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
               </div>
             </Card>
 
-            <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <Info className="text-blue-600 mt-0.5" size={16} />
-              <div className="text-xs text-blue-800">
-                <p className="font-medium">Update Confirmation</p>
+            <div className="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-lg">
+              <Info className="text-gray-600 mt-0.5" size={16} />
+              <div className="text-xs text-gray-700">
+                <p className="font-medium text-gray-900">Update Confirmation</p>
                 <p className="mt-1">
                   These changes will be applied to your family group immediately.
                 </p>
@@ -267,20 +267,20 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
             </div>
 
             {submitError && (
-              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
-                <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
+                <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
                 <div>
-                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
-                  <p className="text-[11px] leading-relaxed opacity-85">{submitError}</p>
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Error</h4>
+                  <p className="text-[11px] leading-relaxed">{submitError}</p>
                 </div>
               </div>
             )}
 
             {canDeleteFamily && onDeleteFamily && (
-              <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <Trash2 className="text-red-600 mt-0.5" size={16} />
-                <div className="text-xs text-red-800">
-                  <p className="font-medium">Delete Family</p>
+              <div className="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-lg">
+                <Trash2 className="text-gray-600 mt-0.5" size={16} />
+                <div className="text-xs text-gray-700">
+                  <p className="font-medium text-gray-900">Delete Family</p>
                   <p className="mt-1">
                     If you want to delete this family group, click the delete button below.
                   </p>

@@ -99,12 +99,12 @@ export function CreateFamilyModal({ open, onClose, onCreateFamily }: CreateFamil
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
             Create Family
           </span>
-          <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide">
             Step {currentStep} of 2
           </span>
         </div>
@@ -114,7 +114,7 @@ export function CreateFamilyModal({ open, onClose, onCreateFamily }: CreateFamil
       <Stepper currentStep={currentStep} totalSteps={2} labels={STEPS} />
 
       {/* Body */}
-      <ModalBody className="px-5 py-5">
+      <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
         {/* STEP 1: Family Details */}
         {currentStep === 1 && (
           <div className="space-y-6">
@@ -216,10 +216,10 @@ export function CreateFamilyModal({ open, onClose, onCreateFamily }: CreateFamil
               </div>
             </Card>
 
-            <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <Info className="text-blue-600 mt-0.5" size={16} />
-              <div className="text-xs text-blue-800">
-                <p className="font-medium">Important Note</p>
+            <div className="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-lg">
+              <Info className="text-gray-600 mt-0.5" size={16} />
+              <div className="text-xs text-gray-700">
+                <p className="font-medium text-gray-900">Important Note</p>
                 <p className="mt-1">
                   Once created, you can invite family members and start managing shared budgets and goals.
                 </p>
@@ -227,11 +227,11 @@ export function CreateFamilyModal({ open, onClose, onCreateFamily }: CreateFamil
             </div>
 
             {submitError && (
-              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
-                <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
+                <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
                 <div>
-                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
-                  <p className="text-[11px] leading-relaxed opacity-85">{submitError}</p>
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Error</h4>
+                  <p className="text-[11px] leading-relaxed">{submitError}</p>
                 </div>
               </div>
             )}

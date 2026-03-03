@@ -108,10 +108,10 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
-        <h3 className="text-sm font-semibold text-slate-900">Contribute to Goal</h3>
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
+        <h3 className="text-sm font-semibold text-gray-900">Contribute to Goal</h3>
         <div className="flex items-center gap-3">
-          <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide">
             Step {step} of 2
           </span>
         </div>
@@ -121,7 +121,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
       <Stepper steps={STEPS} currentStep={step} />
 
       {/* Body */}
-      <ModalBody className="px-5 py-5">
+      <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
         {/* STEP 1: Amount Selection */}
         {step === 1 && (
           <div className="space-y-4 animate-txn-in">
@@ -198,11 +198,11 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
               </div>
             </div>
 
-            <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-blue-700 flex items-start gap-3">
-              <Info size={16} className="flex-shrink-0 mt-0.5" />
+            <div className="p-3 rounded-lg bg-white border border-gray-200 flex items-start gap-3">
+              <Info size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
               <div>
-                <div className="font-medium text-sm">Contribution Impact</div>
-                <div className="text-xs opacity-90">
+                <div className="font-medium text-sm text-gray-900">Contribution Impact</div>
+                <div className="text-xs text-gray-600">
                   Your contribution will be immediately reflected in your goal progress
                 </div>
               </div>
@@ -267,20 +267,20 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
             </div>
 
             {saveError && (
-              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
-                <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
+                <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
                 <div>
-                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
-                  <p className="text-[11px] leading-relaxed opacity-85">{saveError}</p>
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Error</h4>
+                  <p className="text-[11px] leading-relaxed">{saveError}</p>
                 </div>
               </div>
             )}
 
-            <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-start gap-3">
-              <CheckCircle size={16} className="flex-shrink-0 mt-0.5" />
+            <div className="p-3 rounded-lg bg-white border border-gray-200 flex items-start gap-3">
+              <CheckCircle size={16} className="flex-shrink-0 mt-0.5 text-emerald-500" />
               <div>
-                <div className="font-medium text-sm">Ready to Contribute</div>
-                <div className="text-xs opacity-90">
+                <div className="font-medium text-sm text-gray-900">Ready to Contribute</div>
+                <div className="text-xs text-gray-600">
                   Your contribution will be processed immediately
                 </div>
               </div>

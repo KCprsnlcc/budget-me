@@ -255,12 +255,12 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
             Add Transaction
           </span>
-          <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide">
             Step {step} of 3
           </span>
         </div>
@@ -270,13 +270,13 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
       <Stepper steps={STEPS} currentStep={step} />
 
       {/* Body */}
-      <ModalBody className="px-5 py-5">
+      <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
         {/* STEP 1: Transaction Type */}
         {step === 1 && (
           <div className="animate-txn-in">
             <div className="mb-5">
-              <h2 className="text-[17px] font-bold text-slate-900 mb-1">Transaction Type</h2>
-              <p className="text-[11px] text-slate-500">Select the type of transaction you want to record.</p>
+              <h2 className="text-[17px] font-bold text-gray-900 mb-1">Transaction Type</h2>
+              <p className="text-[11px] text-gray-500">Select the type of transaction you want to record.</p>
             </div>
             <div className="grid grid-cols-1 gap-3">
               {TYPE_OPTIONS.map(({ key, label, desc, icon: Icon }, idx) => {
@@ -286,26 +286,26 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
                     key={key}
                     type="button"
                     onClick={() => updateField("type", key)}
-                    className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 ${
+                    className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${
                       selected
                         ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
-                        : "border-slate-200 hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                        : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
                     }`}
                     style={{ animationDelay: `${idx * 60}ms` }}
                   >
                     <div className="flex items-start gap-4">
                       <div
-                        className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 ${
+                        className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white ${
                           selected
-                            ? "text-slate-700 border-slate-200"
-                            : "text-slate-400 border-slate-100"
+                            ? "text-gray-700 border-gray-200"
+                            : "text-gray-400 border-gray-100"
                         }`}
                       >
                         <Icon size={18} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-[13px] font-bold text-slate-900 mb-0.5">{label}</h3>
-                        <p className="text-[11px] text-slate-500 leading-relaxed">{desc}</p>
+                        <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{label}</h3>
+                        <p className="text-[11px] text-gray-500 leading-relaxed">{desc}</p>
                       </div>
                       {/* Check indicator */}
                       <div
@@ -327,8 +327,8 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
         {step === 2 && (
           <div className="animate-txn-in">
             <div className="mb-5">
-              <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                <div className="w-[30px] h-[30px] rounded-lg border border-slate-100 flex items-center justify-center text-slate-400">
+              <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
+                <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
                   <PenSquare size={14} />
                 </div>
                 Transaction Details
@@ -337,17 +337,17 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
             <div className="space-y-5">
               {/* Amount */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                  Amount <span className="text-slate-400">*</span>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Amount <span className="text-gray-400">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">₱</span>
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">₱</span>
                   <input
                     type="number"
                     step="0.01"
                     value={form.amount}
                     onChange={(e) => updateField("amount", e.target.value)}
-                    className="w-full pl-7 pr-4 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+                    className="w-full pl-7 pr-4 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
                     placeholder="0.00"
                   />
                 </div>
@@ -355,8 +355,8 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
 
               {/* Date */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                  Date <span className="text-slate-400">*</span>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Date <span className="text-gray-400">*</span>
                 </label>
                 <DateSelector
                   value={form.date}
@@ -369,8 +369,8 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
               {/* Category + Budget */}
               <div className={`grid gap-4 ${form.type === "expense" ? "grid-cols-2" : "grid-cols-1"}`}>
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                    Category {form.type === "income" || form.type === "expense" ? <span className="text-slate-400">*</span> : null}
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                    Category {form.type === "income" || form.type === "expense" ? <span className="text-gray-400">*</span> : null}
                   </label>
                   <SearchableDropdown
                     value={categoryValue}
@@ -386,14 +386,14 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
                     disabled={form.type === "contribution"}
                   />
                   {form.type === "contribution" && (
-                    <p className="text-[10px] text-slate-400 mt-1">
+                    <p className="text-[10px] text-gray-400 mt-1">
                       Category is automatically selected based on the goal chosen
                     </p>
                   )}
                 </div>
                 {form.type === "expense" && (
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
+                    <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                       Budget
                     </label>
                     <SearchableDropdown
@@ -413,7 +413,7 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
 
               {/* Goal */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Goal Contribution
                 </label>
                 <SearchableDropdown
@@ -432,8 +432,8 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
 
               {/* Account */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                  Account <span className="text-slate-400">*</span>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Account <span className="text-gray-400">*</span>
                 </label>
                 <SearchableDropdown
                   value={form.account}
@@ -451,14 +451,14 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
 
               {/* Description */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                  Description <span className="text-slate-400 font-normal lowercase tracking-normal">(optional)</span>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Description <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
                 </label>
                 <textarea
                   rows={2}
                   value={form.description}
                   onChange={(e) => updateField("description", e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg resize-none transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+                  className="w-full px-3.5 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg resize-none transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
                   placeholder="What was this transaction for?"
                 />
               </div>
@@ -470,8 +470,8 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
         {step === 3 && (
           <div className="animate-txn-in">
             <div className="mb-5">
-              <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                <div className="w-[30px] h-[30px] rounded-lg border border-slate-100 flex items-center justify-center text-slate-400">
+              <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
+                <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
                   <ClipboardCheck size={14} />
                 </div>
                 Review &amp; Confirm
@@ -479,8 +479,8 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
             </div>
             <div className="space-y-4">
               {/* Amount Display */}
-              <div className="text-center p-6 bg-slate-50 rounded-xl border border-slate-200">
-                <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Transaction Amount</div>
+              <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-gray-200">
+                <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Transaction Amount</div>
                 <div
                   className={`text-[32px] font-bold my-2 ${
                     form.type === "income" ? "text-emerald-500" : "text-red-500"
@@ -488,14 +488,14 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
                 >
                   {form.type === "income" ? "+" : "-"}₱{parseFloat(form.amount || "0").toFixed(2)}
                 </div>
-                <span className="text-xs font-semibold px-2 py-1 rounded bg-slate-100 text-slate-500 uppercase tracking-wider inline-block mt-2">
+                <span className="text-xs font-semibold px-2 py-1 rounded bg-white text-gray-500 uppercase tracking-wider inline-block mt-2 border border-gray-100">
                   {form.type ? form.type.charAt(0).toUpperCase() + form.type.slice(1) : "—"}
                 </span>
               </div>
 
               {/* Review Details */}
-              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-                <div className="p-5 space-y-0 divide-y divide-slate-100">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-5 space-y-0 divide-y divide-gray-100">
                   <ReviewRow label="Date" value={form.date ? new Date(form.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"} />
                   <ReviewRow label="Category" value={catName} />
                   <ReviewRow label="Account" value={accountName} />
@@ -509,11 +509,11 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
 
               {/* Budget Impact Notice */}
               {form.type === "expense" && form.budget && (
-                <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-blue-50 border border-blue-100 text-blue-900 items-start">
-                  <TrendingUp size={16} className="flex-shrink-0 mt-px" />
+                <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
+                  <TrendingUp size={16} className="flex-shrink-0 mt-px text-blue-500" />
                   <div>
-                    <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Budget Impact</h4>
-                    <p className="text-[11px] leading-relaxed opacity-85">
+                    <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Budget Impact</h4>
+                    <p className="text-[11px] leading-relaxed">
                       This expense will add ₱{parseFloat(form.amount || "0").toFixed(2)} to your <strong>{budgets.find(b => b.id === form.budget)?.budget_name}</strong> budget progress.
                     </p>
                   </div>
@@ -522,19 +522,19 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
 
               {/* Warning Notice */}
               {saveError && (
-                <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
-                  <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+                <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
+                  <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
                   <div>
-                    <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
-                    <p className="text-[11px] leading-relaxed opacity-85">{saveError}</p>
+                    <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Error</h4>
+                    <p className="text-[11px] leading-relaxed">{saveError}</p>
                   </div>
                 </div>
               )}
-              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-amber-50 border border-amber-100 text-amber-900 items-start">
-                <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+              <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
+                <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
                 <div>
-                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Action is final</h4>
-                  <p className="text-[11px] leading-relaxed opacity-85">
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Action is final</h4>
+                  <p className="text-[11px] leading-relaxed">
                     Your transaction will be created immediately. Please ensure all details are correct.
                   </p>
                 </div>
@@ -573,8 +573,8 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
 function ReviewRow({ label, value, italic }: { label: string; value: string; italic?: boolean }) {
   return (
     <div className="flex justify-between items-center py-2.5">
-      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">{label}</span>
-      <span className={`text-[13px] font-semibold text-slate-700 ${italic ? "italic text-[11px] text-slate-500 max-w-[180px] text-right" : ""}`}>
+      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">{label}</span>
+      <span className={`text-[13px] font-semibold text-gray-700 ${italic ? "italic text-[11px] text-gray-500 max-w-[180px] text-right" : ""}`}>
         {value}
       </span>
     </div>

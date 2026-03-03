@@ -105,19 +105,19 @@ export function DetailedBreakdownModal({
   return (
     <Modal open={open} onClose={handleClose} className="max-w-3xl">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
             Detailed Breakdown
           </span>
-          <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide">
             Step {step} of {STEPS.length}
           </span>
         </div>
       </ModalHeader>
 
       {/* Stepper */}
-      <div className="flex items-center justify-center px-5 py-3.5 bg-white border-b border-slate-100" aria-label="Progress">
+      <div className="flex items-center justify-center px-5 py-3.5 bg-white border-b border-gray-100" aria-label="Progress">
         {STEPS.map((label, idx) => {
           const stepNum = idx + 1;
           const isActive = stepNum === step;
@@ -128,7 +128,7 @@ export function DetailedBreakdownModal({
               {idx > 0 && (
                 <div
                   className={`w-9 h-[1.5px] mx-1.5 mb-[18px] flex-shrink-0 transition-colors duration-300 ${
-                    isCompleted ? "bg-emerald-500" : "bg-slate-200"
+                    isCompleted ? "bg-emerald-500" : "bg-gray-200"
                   }`}
                 />
               )}
@@ -139,7 +139,7 @@ export function DetailedBreakdownModal({
                       ? "border-emerald-500 bg-emerald-500 text-white shadow-[0_0_0_3px_rgba(16,185,129,0.1)]"
                       : isCompleted
                       ? "border-emerald-500 bg-emerald-500 text-white"
-                      : "border-slate-300 bg-white text-slate-400"
+                      : "border-gray-300 bg-white text-gray-400"
                   }`}
                   aria-current={isActive ? "step" : undefined}
                 >
@@ -150,8 +150,8 @@ export function DetailedBreakdownModal({
                     isActive
                       ? "text-emerald-500"
                       : isCompleted
-                      ? "text-slate-600"
-                      : "text-slate-400"
+                      ? "text-gray-600"
+                      : "text-gray-400"
                   }`}
                 >
                   {label}
@@ -163,48 +163,48 @@ export function DetailedBreakdownModal({
       </div>
 
       {/* Body */}
-      <ModalBody className="px-5 py-5">
+      <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
         {/* STEP 1: Overview */}
         {step === 1 && (
           <div className="space-y-6 animate-txn-in">
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="border border-slate-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer">
-                <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+              <div className="border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer bg-white">
+                <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
                   Total Predicted Income
                 </div>
-                <div className="text-2xl font-semibold text-slate-900 mb-2">
+                <div className="text-2xl font-semibold text-gray-900 mb-2">
                   {formatCurrency(totalPredictedIncome)}
                 </div>
                 <div className="flex items-center gap-2">
-                  <TrendingUp size={16} className="text-slate-500" />
-                  <span className="text-sm text-slate-600 font-medium">
+                  <TrendingUp size={16} className="text-gray-500" />
+                  <span className="text-sm text-gray-600 font-medium">
                     {forecastData?.summary.avgGrowth ? `+${forecastData.summary.avgGrowth}%` : "N/A"} vs last month
                   </span>
                 </div>
               </div>
-              <div className="border border-slate-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer">
-                <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+              <div className="border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer bg-white">
+                <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
                   Total Predicted Expenses
                 </div>
-                <div className="text-2xl font-semibold text-slate-900 mb-2">
+                <div className="text-2xl font-semibold text-gray-900 mb-2">
                   {formatCurrency(totalPredictedExpenses)}
                 </div>
                 <div className="flex items-center gap-2">
-                  <TrendingUp size={16} className="text-slate-500" />
-                  <span className="text-sm text-slate-600 font-medium">Based on historical trends</span>
+                  <TrendingUp size={16} className="text-gray-500" />
+                  <span className="text-sm text-gray-600 font-medium">Based on historical trends</span>
                 </div>
               </div>
-              <div className="border border-slate-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer">
-                <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+              <div className="border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer bg-white">
+                <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
                   Net Savings Projection
                 </div>
-                <div className="text-2xl font-semibold text-slate-900 mb-2">
+                <div className="text-2xl font-semibold text-gray-900 mb-2">
                   {formatCurrency(netSavings)}
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle size={16} className="text-slate-500" />
-                  <span className="text-sm text-slate-600 font-medium">
+                  <CheckCircle size={16} className="text-gray-500" />
+                  <span className="text-sm text-gray-600 font-medium">
                     {forecastData?.summary.confidence || 0}% confidence
                   </span>
                 </div>
@@ -213,24 +213,24 @@ export function DetailedBreakdownModal({
 
             {/* Key Insights */}
             <div>
-              <h3 className="text-[15px] font-bold text-slate-900 mb-3">Key Insights</h3>
+              <h3 className="text-[15px] font-bold text-gray-900 mb-3">Key Insights</h3>
               <div className="space-y-3">
                 {forecastData && forecastData.summary.avgGrowth > 0 ? (
-                  <div className="flex gap-3 p-3 rounded-lg border border-slate-100 hover:shadow-md transition-all group cursor-pointer">
-                    <CheckCircle size={16} className="text-slate-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex gap-3 p-3 rounded-lg border border-gray-100 hover:shadow-md transition-all group cursor-pointer bg-white">
+                    <CheckCircle size={16} className="text-gray-500 flex-shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-900">Strong Income Growth</h4>
-                      <p className="text-xs text-slate-600 mt-1">
+                      <h4 className="text-sm font-semibold text-gray-900">Strong Income Growth</h4>
+                      <p className="text-xs text-gray-600 mt-1">
                         Projected {forecastData.summary.avgGrowth.toFixed(1)}% increase in monthly income based on historical patterns.
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex gap-3 p-3 rounded-lg border border-slate-100 hover:shadow-md transition-all group cursor-pointer">
-                    <AlertTriangle size={16} className="text-slate-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex gap-3 p-3 rounded-lg border border-gray-100 hover:shadow-md transition-all group cursor-pointer bg-white">
+                    <AlertTriangle size={16} className="text-gray-500 flex-shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-900">Limited Data</h4>
-                      <p className="text-xs text-slate-600 mt-1">
+                      <h4 className="text-sm font-semibold text-gray-900">Limited Data</h4>
+                      <p className="text-xs text-gray-600 mt-1">
                         Add more transactions to see detailed insights and accurate predictions.
                       </p>
                     </div>
@@ -238,11 +238,11 @@ export function DetailedBreakdownModal({
                 )}
                 
                 {forecastData?.summary.maxSavings && forecastData.summary.maxSavings > 0 && (
-                  <div className="flex gap-3 p-3 rounded-lg border border-slate-100 hover:shadow-md transition-all group cursor-pointer">
+                  <div className="flex gap-3 p-3 rounded-lg border border-gray-100 hover:shadow-md transition-all group cursor-pointer bg-white">
                     <CheckCircle size={16} className="text-emerald-500 flex-shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-900">Savings Opportunity</h4>
-                      <p className="text-xs text-slate-600 mt-1">
+                      <h4 className="text-sm font-semibold text-gray-900">Savings Opportunity</h4>
+                      <p className="text-xs text-gray-600 mt-1">
                         Maximum projected savings of {formatCurrency(forecastData.summary.maxSavings)} in upcoming months.
                       </p>
                     </div>
@@ -258,19 +258,19 @@ export function DetailedBreakdownModal({
           <div className="space-y-4 animate-txn-in">
             <div className="flex items-center gap-2">
               <BarChart3 size={16} className="text-emerald-500" />
-              <h3 className="text-sm font-bold text-slate-900">Monthly Financial Forecast</h3>
+              <h3 className="text-sm font-bold text-gray-900">Monthly Financial Forecast</h3>
             </div>
 
             {/* Compact Monthly Cards */}
             <div className="space-y-3">
               {forecastData?.predicted && forecastData.predicted.length > 0 ? (
                 forecastData.predicted.map((item, idx) => (
-                  <div key={`${item.month}-${idx}`} className="bg-white border border-slate-200 rounded-lg p-3 hover:shadow-md transition-all">
+                  <div key={`${item.month}-${idx}`} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all">
                     {/* Month Header */}
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1.5">
-                        <Calendar size={12} className="text-slate-400" />
-                        <span className="text-xs font-bold text-slate-900">{item.month}</span>
+                        <Calendar size={12} className="text-gray-400" />
+                        <span className="text-xs font-bold text-gray-900">{item.month}</span>
                       </div>
                       {item.confidence && (
                         <Badge 
@@ -287,7 +287,7 @@ export function DetailedBreakdownModal({
                       {/* Income */}
                       <div>
                         <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-[10px] text-slate-500">Income</span>
+                          <span className="text-[10px] text-gray-500">Income</span>
                         </div>
                         <div className="text-sm font-bold text-emerald-600">{formatCurrency(item.income)}</div>
                       </div>
@@ -295,14 +295,14 @@ export function DetailedBreakdownModal({
                       {/* Expenses */}
                       <div>
                         <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-[10px] text-slate-500">Expenses</span>
+                          <span className="text-[10px] text-gray-500">Expenses</span>
                         </div>
                         <div className="text-sm font-bold text-rose-600">{formatCurrency(item.expense)}</div>
                       </div>
                     </div>
 
                     {/* Single Progress Bar */}
-                    <div className="w-full bg-slate-100 rounded-full h-1.5 mb-2">
+                    <div className="w-full bg-gray-100 rounded-full h-1.5 mb-2">
                       <div 
                         className="bg-rose-500 h-1.5 rounded-full transition-all" 
                         style={{ width: `${Math.min(100, (item.expense / item.income) * 100)}%` }} 
@@ -310,8 +310,8 @@ export function DetailedBreakdownModal({
                     </div>
 
                     {/* Net Savings */}
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                      <span className="text-[10px] font-medium text-slate-500">Net Savings</span>
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                      <span className="text-[10px] font-medium text-gray-500">Net Savings</span>
                       <span className={`text-sm font-bold ${(item.income - item.expense) >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
                         {formatCurrency(item.income - item.expense)}
                       </span>
@@ -319,8 +319,8 @@ export function DetailedBreakdownModal({
                   </div>
                 ))
               ) : (
-                <div className="py-8 text-center text-slate-500">
-                  <BarChart3 size={32} className="mx-auto mb-2 text-slate-300" />
+                <div className="py-8 text-center text-gray-500">
+                  <BarChart3 size={32} className="mx-auto mb-2 text-gray-300" />
                   <p className="text-xs">No forecast data available. Generate predictions to view analysis.</p>
                 </div>
               )}
@@ -328,18 +328,18 @@ export function DetailedBreakdownModal({
 
             {/* Quick Stats */}
             {forecastData?.historical && forecastData.historical.length > 0 && (
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                <div className="text-[10px] font-semibold text-slate-600 mb-2">Historical Analysis ({forecastData.historical.length} months)</div>
+              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                <div className="text-[10px] font-semibold text-gray-600 mb-2">Historical Analysis ({forecastData.historical.length} months)</div>
                 <div className="grid grid-cols-2 gap-3 text-[10px]">
                   <div>
-                    <span className="text-slate-400 block mb-0.5">Average Income</span>
-                    <span className="font-bold text-slate-900 text-xs">
+                    <span className="text-gray-400 block mb-0.5">Average Income</span>
+                    <span className="font-bold text-gray-900 text-xs">
                       {formatCurrency(forecastData.historical.reduce((sum, h) => sum + h.income, 0) / forecastData.historical.length)}
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block mb-0.5">Average Expenses</span>
-                    <span className="font-bold text-slate-900 text-xs">
+                    <span className="text-gray-400 block mb-0.5">Average Expenses</span>
+                    <span className="font-bold text-gray-900 text-xs">
                       {formatCurrency(forecastData.historical.reduce((sum, h) => sum + h.expense, 0) / forecastData.historical.length)}
                     </span>
                   </div>
@@ -352,17 +352,17 @@ export function DetailedBreakdownModal({
         {/* STEP 3: Categories - Simplified */}
         {step === 3 && (
           <div className="space-y-5 animate-txn-in">
-            <h3 className="text-base font-bold text-slate-900">Category Spending Analysis</h3>
+            <h3 className="text-base font-bold text-gray-900">Category Spending Analysis</h3>
             
             <div className="space-y-3">
               {categoryPredictions.length > 0 ? (
                 categoryPredictions.map((item) => (
                   <div 
                     key={item.category} 
-                    className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-all"
+                    className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-bold text-slate-900">{item.category}</span>
+                      <span className="text-sm font-bold text-gray-900">{item.category}</span>
                       <div className="flex items-center gap-1">
                         {item.trend === "up" ? (
                           <TrendingUp size={14} className="text-amber-500" />
@@ -378,18 +378,18 @@ export function DetailedBreakdownModal({
                     </div>
                     
                     <div className="flex justify-between items-center text-xs mb-2">
-                      <span className="text-slate-500">Current Average</span>
-                      <span className="font-bold text-slate-900">{formatCurrency(item.actual)}</span>
+                      <span className="text-gray-500">Current Average</span>
+                      <span className="font-bold text-gray-900">{formatCurrency(item.actual)}</span>
                     </div>
                     
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500">Predicted</span>
-                      <span className="font-bold text-slate-900">{formatCurrency(item.predicted)}</span>
+                      <span className="text-gray-500">Predicted</span>
+                      <span className="font-bold text-gray-900">{formatCurrency(item.predicted)}</span>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="bg-white border border-slate-200 rounded-lg p-12 text-center text-slate-500">
+                <div className="bg-white border border-gray-200 rounded-lg p-12 text-center text-gray-500">
                   <p className="text-sm">Insufficient data for category predictions. Add more categorized transactions.</p>
                 </div>
               )}

@@ -68,11 +68,11 @@ export function FilterDropdown({
       <Button
         type="button"
         variant="outline"
-        className="w-full justify-between text-left font-normal h-9 px-3.5 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+        className="w-full justify-between text-left font-normal h-9 px-3.5 py-2 text-sm border border-gray-200 rounded-lg bg-white text-gray-900 transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
       >
-        <span className={cn(!value && "text-slate-500", "flex items-center gap-2")}>
+        <span className={cn(!value && "text-gray-500", "flex items-center gap-2")}>
           {selectedOption?.icon && <selectedOption.icon size={16} />}
           {selectedOption?.label || (allowEmpty && !value ? emptyLabel : placeholder)}
         </span>
@@ -80,17 +80,17 @@ export function FilterDropdown({
       </Button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg">
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
           {!hideSearch && (
-            <div className="p-3 border-b border-slate-100">
+            <div className="p-3 border-b border-gray-100">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
                 <input
                   type="text"
                   placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:border-emerald-500"
+                  className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-emerald-500"
                   autoFocus
                 />
               </div>
@@ -101,7 +101,7 @@ export function FilterDropdown({
             {allowEmpty && (
               <button
                 type="button"
-                className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 transition-colors flex items-center gap-2"
+                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 transition-colors flex items-center gap-2"
                 onClick={() => handleSelect("")}
               >
                 {emptyLabel}
@@ -109,7 +109,7 @@ export function FilterDropdown({
             )}
             
             {filteredOptions.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-slate-500 text-center">
+              <div className="px-3 py-2 text-sm text-gray-500 text-center">
                 No options found
               </div>
             ) : (
@@ -118,8 +118,8 @@ export function FilterDropdown({
                   key={option.value}
                   type="button"
                   className={cn(
-                    "w-full px-3 py-2 text-left text-sm hover:bg-slate-50 transition-colors flex items-center gap-2",
-                    value === option.value && "bg-emerald-50 text-emerald-700"
+                    "w-full px-3 py-2 text-left text-sm hover:bg-gray-50 transition-colors flex items-center gap-2",
+                    value === option.value && "bg-white text-emerald-700 border-l-2 border-emerald-500"
                   )}
                   onClick={() => handleSelect(option.value)}
                 >

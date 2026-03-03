@@ -110,10 +110,10 @@ export function DateSelector({
           type="button"
           onClick={() => handleDateSelect(day)}
           className={cn(
-            "h-6 w-6 rounded text-xs font-medium transition-colors hover:bg-slate-100",
+            className="h-6 w-6 rounded text-xs font-medium transition-colors hover:bg-gray-100",
             isSelected && "bg-emerald-500 text-white hover:bg-emerald-600",
-            isToday && !isSelected && "bg-slate-100 text-slate-900",
-            !isSelected && !isToday && "text-slate-700"
+            isToday && !isSelected && "bg-gray-100 text-gray-900",
+            !isSelected && !isToday && "text-gray-700"
           )}
         >
           {day}
@@ -167,7 +167,7 @@ export function DateSelector({
       </Button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-slate-200 rounded-lg shadow-sm p-3">
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-sm p-3">
           {showMonthSelector ? (
             // Month Selector
             <div className="grid grid-cols-3 gap-1">
@@ -177,7 +177,7 @@ export function DateSelector({
                   type="button"
                   onClick={() => handleMonthSelect(index)}
                   className={cn(
-                    "px-2 py-1 text-xs rounded hover:bg-slate-100 transition-colors",
+                    "px-2 py-1 text-xs rounded hover:bg-gray-100 transition-colors",
                     currentMonth.getMonth() === index && "bg-emerald-500 text-white hover:bg-emerald-600"
                   )}
                 >
@@ -194,7 +194,7 @@ export function DateSelector({
                   type="button"
                   onClick={() => handleYearSelect(year)}
                   className={cn(
-                    "px-2 py-1 text-xs rounded hover:bg-slate-100 transition-colors",
+                    "px-2 py-1 text-xs rounded hover:bg-gray-100 transition-colors",
                     currentMonth.getFullYear() === year && "bg-emerald-500 text-white hover:bg-emerald-600"
                   )}
                 >
@@ -210,7 +210,7 @@ export function DateSelector({
                 <button
                   type="button"
                   onClick={handlePreviousMonth}
-                  className="p-1 hover:bg-slate-100 rounded text-slate-600"
+                  className="p-1 hover:bg-gray-100 rounded text-gray-600"
                 >
                   ◀
                 </button>
@@ -218,15 +218,15 @@ export function DateSelector({
                   <button
                     type="button"
                     onClick={() => setShowMonthSelector(true)}
-                    className="text-sm font-medium text-slate-900 hover:text-emerald-600 transition-colors"
+                    className="text-sm font-medium text-gray-900 hover:text-emerald-600 transition-colors"
                   >
                     {currentMonth.toLocaleDateString('en-US', { month: 'short' })}
                   </button>
-                  <span className="text-slate-400 text-sm">,</span>
+                  <span className="text-gray-400 text-sm">,</span>
                   <button
                     type="button"
                     onClick={() => setShowYearSelector(true)}
-                    className="text-sm font-medium text-slate-900 hover:text-emerald-600 transition-colors"
+                    className="text-sm font-medium text-gray-900 hover:text-emerald-600 transition-colors"
                   >
                     {currentMonth.getFullYear()}
                   </button>
@@ -234,7 +234,7 @@ export function DateSelector({
                 <button
                   type="button"
                   onClick={handleNextMonth}
-                  className="p-1 hover:bg-slate-100 rounded text-slate-600"
+                  className="p-1 hover:bg-gray-100 rounded text-gray-600"
                 >
                   ▶
                 </button>
@@ -243,7 +243,7 @@ export function DateSelector({
               {/* Week Days */}
               <div className="grid grid-cols-7 gap-1">
                 {weekDays.map((day, index) => (
-                  <div key={`weekday-${index}`} className="h-6 flex items-center justify-center text-[10px] font-medium text-slate-400">
+                  <div key={`weekday-${index}`} className="h-6 flex items-center justify-center text-[10px] font-medium text-gray-400">
                     {day}
                   </div>
                 ))}
@@ -255,7 +255,7 @@ export function DateSelector({
               </div>
 
               {/* Today Button */}
-              <div className="pt-2 border-t border-slate-100">
+              <div className="pt-2 border-t border-gray-100">
                 <button
                   type="button"
                   onClick={() => {

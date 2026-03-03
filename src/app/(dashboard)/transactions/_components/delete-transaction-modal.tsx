@@ -59,37 +59,37 @@ export function DeleteTransactionModal({
   return (
     <Modal open={open} onClose={handleClose} className="max-w-md">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5">
-        <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
+        <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
           Delete Transaction
         </span>
       </ModalHeader>
 
       {/* Body */}
-      <ModalBody className="px-5 py-8">
+      <ModalBody className="px-5 py-8 bg-[#F9FAFB]/30">
         <div className="text-center animate-txn-in">
           {/* Warning Message */}
-          <h2 className="text-lg font-bold text-slate-900 mb-3">Delete Transaction?</h2>
-          <p className="text-sm text-slate-500 mb-6 max-w-xs mx-auto leading-relaxed">
+          <h2 className="text-lg font-bold text-gray-900 mb-3">Delete Transaction?</h2>
+          <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto leading-relaxed">
             Are you sure you want to delete this transaction? This action cannot be undone and will permanently remove the transaction from your records.
           </p>
 
           {/* Transaction Details */}
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mx-auto max-w-sm">
-            <div className="p-5 space-y-0 divide-y divide-slate-100">
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mx-auto max-w-sm">
+            <div className="p-5 space-y-0 divide-y divide-gray-100">
               <div className="flex justify-between items-center py-2.5">
-                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Amount</span>
-                <span className="text-sm font-bold text-slate-900">
+                <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Amount</span>
+                <span className="text-sm font-bold text-gray-900">
                   {isIncome ? "+" : "-"}₱{absAmount}
                 </span>
               </div>
               <div className="flex justify-between items-center py-2.5">
-                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Description</span>
-                <span className="text-sm font-semibold text-slate-700">{transaction.description ?? "—"}</span>
+                <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Description</span>
+                <span className="text-sm font-semibold text-gray-700">{transaction.description ?? "—"}</span>
               </div>
               <div className="flex justify-between items-center py-2.5">
-                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Date</span>
-                <span className="text-sm font-semibold text-slate-700">
+                <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Date</span>
+                <span className="text-sm font-semibold text-gray-700">
                   {new Date(transaction.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </span>
               </div>
@@ -98,11 +98,11 @@ export function DeleteTransactionModal({
 
           {/* Budget Restoration Notice */}
           {transaction.type === "expense" && transaction.budget_id && (
-            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-green-50 border border-green-100 text-green-900 mx-auto max-w-sm mt-4 items-start">
-              <TrendingUp size={16} className="flex-shrink-0 mt-px" />
+            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 mx-auto max-w-sm mt-4 items-start">
+              <TrendingUp size={16} className="flex-shrink-0 mt-px text-emerald-500" />
               <div>
-                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Budget Will Be Restored</h4>
-                <p className="text-[11px] leading-relaxed opacity-85">
+                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Budget Will Be Restored</h4>
+                <p className="text-[11px] leading-relaxed">
                   ₱{absAmount} will be restored from your budget progress when this expense is deleted.
                 </p>
               </div>
@@ -111,11 +111,11 @@ export function DeleteTransactionModal({
 
           {/* Goal Progress Restoration Notice */}
           {transaction.goal_id && (
-            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-blue-50 border border-blue-100 text-blue-900 mx-auto max-w-sm mt-4 items-start">
-              <TrendingUp size={16} className="flex-shrink-0 mt-px" />
+            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 mx-auto max-w-sm mt-4 items-start">
+              <TrendingUp size={16} className="flex-shrink-0 mt-px text-blue-500" />
               <div>
-                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Goal Progress Will Be Updated</h4>
-                <p className="text-[11px] leading-relaxed opacity-85">
+                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Goal Progress Will Be Updated</h4>
+                <p className="text-[11px] leading-relaxed">
                   ₱{absAmount} will be removed from your goal progress and contribution history when this transaction is deleted.
                 </p>
               </div>
@@ -124,22 +124,25 @@ export function DeleteTransactionModal({
 
           {/* Error Notice */}
           {deleteError && (
-            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 mx-auto max-w-sm mt-4 items-start">
-              <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
+            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 mx-auto max-w-sm mt-4 items-start">
+              <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
               <div>
-                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Error</h4>
-                <p className="text-[11px] leading-relaxed opacity-85">{deleteError}</p>
+                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Error</h4>
+                <p className="text-[11px] leading-relaxed">{deleteError}</p>
               </div>
             </div>
           )}
 
           {/* Final Warning */}
-          <div className="p-3 rounded-lg text-xs bg-amber-50 border border-amber-100 text-amber-900 mx-auto max-w-sm mt-6">
-            <div>
-              <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5">Irreversible Action</h4>
-              <p className="text-[11px] leading-relaxed opacity-85">
-                This transaction will be permanently deleted and cannot be recovered.
-              </p>
+          <div className="p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 mx-auto max-w-sm mt-6">
+            <div className="flex gap-2.5 items-start">
+              <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
+              <div>
+                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Irreversible Action</h4>
+                <p className="text-[11px] leading-relaxed">
+                  This transaction will be permanently deleted and cannot be recovered.
+                </p>
+              </div>
             </div>
           </div>
         </div>
