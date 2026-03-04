@@ -92,6 +92,18 @@ export interface PredictionHistory {
   savingsOpportunities?: number;
   confidenceLevel?: "low" | "medium" | "high" | "very high";
   errorMessage?: string;
+  // Full data for reconstruction on page refresh
+  fullForecastData?: {
+    historical: MonthlyForecast[];
+    predicted: MonthlyForecast[];
+    summary: any;
+  };
+  fullCategoryPredictions?: CategoryPrediction[];
+  fullExpenseTypes?: {
+    recurring: ExpenseTypeForecast;
+    variable: ExpenseTypeForecast;
+  };
+  fullBehaviorInsights?: TransactionBehaviorInsight[];
 }
 
 /**

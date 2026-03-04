@@ -690,6 +690,11 @@ export async function fetchPredictionHistory(userId: string): Promise<Prediction
       transactionPatterns: predictionData.transactionPatterns,
       anomaliesDetected: predictionData.anomaliesDetected,
       savingsOpportunities: predictionData.savingsOpportunities,
+      // Full data for reconstruction
+      fullForecastData: predictionData.fullForecastData,
+      fullCategoryPredictions: predictionData.fullCategoryPredictions,
+      fullExpenseTypes: predictionData.fullExpenseTypes,
+      fullBehaviorInsights: predictionData.fullBehaviorInsights,
     };
   });
 }
@@ -717,6 +722,11 @@ export async function savePrediction(
     transactionPatterns?: Array<{ type: string; avgAmount: number; trend: string }>;
     anomaliesDetected?: number;
     savingsOpportunities?: number;
+    // Full data for reconstruction
+    fullForecastData?: any;
+    fullCategoryPredictions?: any[];
+    fullExpenseTypes?: any;
+    fullBehaviorInsights?: any[];
   }
 ): Promise<{ success: boolean; error?: string }> {
   const { error } = await supabase
@@ -729,7 +739,7 @@ export async function savePrediction(
       data_points: prediction.dataPoints,
       accuracy_score: prediction.accuracy,
       model_version: "Prophet v1.1",
-      // Store prediction data as JSON
+      // Store prediction data as JSON with full data for reconstruction
       prediction_data: {
         projectedIncome: prediction.projectedIncome,
         projectedExpenses: prediction.projectedExpenses,
@@ -744,6 +754,11 @@ export async function savePrediction(
         transactionPatterns: prediction.transactionPatterns,
         anomaliesDetected: prediction.anomaliesDetected,
         savingsOpportunities: prediction.savingsOpportunities,
+        // Store complete data for page refresh reconstruction
+        fullForecastData: prediction.fullForecastData,
+        fullCategoryPredictions: prediction.fullCategoryPredictions,
+        fullExpenseTypes: prediction.fullExpenseTypes,
+        fullBehaviorInsights: prediction.fullBehaviorInsights,
       },
     });
 
