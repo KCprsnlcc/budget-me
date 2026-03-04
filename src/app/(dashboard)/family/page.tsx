@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useTransition } from "react";
+import React, { useState, useCallback, useEffect, useTransition, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Users,
@@ -161,6 +161,7 @@ export default function FamilyPage() {
   const [selectedFamilyForJoin, setSelectedFamilyForJoin] = useState<PublicFamily | null>(null);
   const [tabSwitching, setTabSwitching] = useState(false);
   const [discoverLoading, setDiscoverLoading] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Handle tab navigation with URL-based routing
   const handleTabChange = useCallback((tab: ActiveTab) => {
@@ -356,27 +357,31 @@ export default function FamilyPage() {
 
   // User has a family - render family dashboard
   return (
-    <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
-      {/* Header with Family Greeting */}
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
+      {/* Header with Family Greeting - Responsive */}
+      <div className="flex flex-col gap-2 px-4 sm:px-0 pt-4 sm:pt-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
               {familyName} Dashboard
             </h2>
-            <p className="text-sm text-slate-500 mt-1 font-light">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 font-light">
               Manage family members and shared finances
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
             {canEditFamily && (
-              <Button variant="outline" size="sm" onClick={handleOpenEditFamily}>
-                <Settings size={16}/> Settings
+              <Button variant="outline" size="sm" onClick={handleOpenEditFamily} className="w-full sm:w-auto">
+                <Settings size={14} className="sm:mr-1" />
+                <span className="hidden sm:inline">Settings</span>
+                <span className="sm:hidden">Settings</span>
               </Button>
             )}
             {canInviteMembers && (
-              <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={handleOpenInviteMember}>
-                <Mail size={16}/> Invite Member
+              <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 w-full sm:w-auto" onClick={handleOpenInviteMember}>
+                <Mail size={14} className="sm:mr-1" />
+                <span className="hidden sm:inline">Invite Member</span>
+                <span className="sm:hidden">Invite</span>
               </Button>
             )}
           </div>
@@ -385,37 +390,37 @@ export default function FamilyPage() {
 
       {/* Pending Invitation Alert */}
       {invitations.length > 0 && (
-        <Card className="p-0.5 relative overflow-hidden group">
+        <Card className="p-0.5 relative overflow-hidden group mb-4 sm:mb-6">
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/30 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="bg-white rounded-[10px] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-emerald-500 shrink-0">
-                <Users size={20} />
+          <div className="bg-white rounded-[10px] p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 relative z-10">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-slate-200 flex items-center justify-center text-emerald-500 shrink-0">
+                <Users size={18} className="sm:w-5 sm:h-5" />
               </div>
               <div>
-                <h3 className="text-sm font-medium text-slate-800 flex items-center gap-2">
+                <h3 className="text-xs sm:text-sm font-medium text-slate-800 flex items-center gap-2">
                   Pending Invitation
-                  <Badge variant="success">New</Badge>
+                  <Badge variant="success" className="text-[10px]">New</Badge>
                 </h3>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                <p className="text-[10px] sm:text-xs text-slate-400 mt-1 leading-relaxed">
                   You have been invited by <span className="text-slate-600 font-medium">{invitations[0].inviterEmail}</span> to join the <span className="text-slate-600 font-medium">{invitations[0].familyName}</span> dashboard.
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3 w-full sm:w-auto pl-14 sm:pl-0">
-              <Button variant="ghost" size="sm" onClick={() => handleRespondToInvitation(invitations[0].id, false)}>Decline</Button>
-              <Button size="sm" onClick={() => handleRespondToInvitation(invitations[0].id, true)}>Accept Invitation</Button>
+            <div className="flex items-center gap-2 w-full sm:w-auto pl-11 sm:pl-0">
+              <Button variant="ghost" size="sm" className="text-xs flex-1 sm:flex-none" onClick={() => handleRespondToInvitation(invitations[0].id, false)}>Decline</Button>
+              <Button size="sm" className="text-xs flex-1 sm:flex-none" onClick={() => handleRespondToInvitation(invitations[0].id, true)}>Accept Invitation</Button>
             </div>
           </div>
         </Card>
       )}
 
       {/* Tab Navigation */}
-      <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-        <div className="flex border-b border-slate-200/60 overflow-x-auto">
+      <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer mb-4 sm:mb-6">
+        <div className="flex border-b border-slate-200/60 overflow-x-auto scrollbar-hide">
           <button
             onClick={() => handleTabChange("overview")}
-            className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "overview"
+            className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === "overview"
               ? "text-emerald-600 border-emerald-500"
               : "text-slate-500 hover:text-slate-700 border-transparent"
               }`}
@@ -424,7 +429,7 @@ export default function FamilyPage() {
           </button>
           <button
             onClick={() => handleTabChange("members")}
-            className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "members"
+            className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === "members"
               ? "text-emerald-600 border-emerald-500"
               : "text-slate-500 hover:text-slate-700 border-transparent"
               }`}
@@ -433,7 +438,7 @@ export default function FamilyPage() {
           </button>
           <button
             onClick={() => handleTabChange("activity")}
-            className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "activity"
+            className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === "activity"
               ? "text-emerald-600 border-emerald-500"
               : "text-slate-500 hover:text-slate-700 border-transparent"
               }`}
@@ -442,7 +447,7 @@ export default function FamilyPage() {
           </button>
           <button
             onClick={() => handleTabChange("goals")}
-            className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === "goals"
+            className={`px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === "goals"
               ? "text-emerald-600 border-emerald-500"
               : "text-slate-500 hover:text-slate-700 border-transparent"
               }`}
@@ -451,18 +456,18 @@ export default function FamilyPage() {
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Tab Content */}
           {activeTab === "overview" && (
             tabSwitching ? (
               <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
                 <div className="space-y-6">
                   {/* Summary Cards Skeleton */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {Array.from({ length: 4 }).map((_, i) => (
-                      <Card key={i} className="p-5">
-                        <div className="flex justify-between items-start mb-4">
-                          <Skeleton width={40} height={40} borderRadius={8} />
+                      <Card key={i} className="p-4 sm:p-5">
+                        <div className="flex justify-between items-start mb-3 sm:mb-4">
+                          <Skeleton width={36} height={36} borderRadius={8} className="sm:w-10 sm:h-10" />
                         </div>
                         <Skeleton width={100} height={12} className="mb-2" />
                         <Skeleton width={80} height={24} />
@@ -472,37 +477,37 @@ export default function FamilyPage() {
                   </div>
 
                   {/* Charts Section Skeleton */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <Card className="p-6">
-                      <Skeleton width={180} height={16} className="mb-6" />
-                      <div className="flex items-center justify-center h-64">
-                        <Skeleton width={192} height={192} borderRadius="50%" />
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <Card className="p-4 sm:p-6">
+                      <Skeleton width={160} height={16} className="mb-4 sm:mb-6" />
+                      <div className="flex items-center justify-center h-48 sm:h-64">
+                        <Skeleton width={160} height={160} borderRadius="50%" className="sm:w-48 sm:h-48" />
                       </div>
-                      <div className="grid grid-cols-2 gap-4 mt-6">
+                      <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-4 sm:mt-6">
                         {Array.from({ length: 4 }).map((_, i) => (
                           <div key={i} className="flex items-center justify-between">
-                            <Skeleton width={60} height={10} />
-                            <Skeleton width={30} height={10} />
+                            <Skeleton width={50} height={10} className="sm:w-16" />
+                            <Skeleton width={24} height={10} />
                           </div>
                         ))}
                       </div>
                     </Card>
 
-                    <Card className="p-6 lg:col-span-2">
-                      <div className="flex items-center justify-between mb-8">
+                    <Card className="p-4 sm:p-6 lg:col-span-2">
+                      <div className="flex items-center justify-between mb-4 sm:mb-8">
                         <div>
-                          <Skeleton width={200} height={16} className="mb-2" />
-                          <Skeleton width={150} height={12} />
+                          <Skeleton width={160} height={16} className="mb-2" />
+                          <Skeleton width={120} height={12} />
                         </div>
                         <div className="flex gap-4">
-                          <Skeleton width={60} height={12} />
-                          <Skeleton width={60} height={12} />
+                          <Skeleton width={50} height={12} className="hidden sm:block" />
+                          <Skeleton width={50} height={12} className="hidden sm:block" />
                         </div>
                       </div>
-                      <Skeleton height={240} borderRadius={8} />
+                      <Skeleton height={180} borderRadius={8} className="sm:h-60" />
                       <div className="flex justify-between mt-4">
                         {Array.from({ length: 6 }).map((_, i) => (
-                          <Skeleton key={i} width={30} height={12} />
+                          <Skeleton key={i} width={24} height={12} className="sm:w-8" />
                         ))}
                       </div>
                     </Card>
@@ -510,44 +515,44 @@ export default function FamilyPage() {
                 </div>
               </SkeletonTheme>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Financial Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
-                    <div className="flex justify-between items-start mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
+                    <div className="flex justify-between items-start mb-3 sm:mb-4">
                       <div className="text-slate-500 p-2 rounded-lg">
-                        <Users size={22} strokeWidth={1.5} />
+                        <Users size={20} strokeWidth={1.5} className="sm:w-[22px] sm:h-[22px]" />
                       </div>
                     </div>
-                    <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Family Members</div>
-                    <div className="text-xl font-semibold text-slate-900 tracking-tight">{overviewStats?.totalMembers ?? 0}</div>
+                    <div className="text-slate-500 text-[10px] sm:text-xs font-medium mb-1 uppercase tracking-wide">Family Members</div>
+                    <div className="text-lg sm:text-xl font-semibold text-slate-900 tracking-tight">{overviewStats?.totalMembers ?? 0}</div>
                     <div className="text-[10px] text-emerald-600 mt-1">{overviewStats?.activeMembers ?? 0} active, {overviewStats?.pendingMembers ?? 0} pending</div>
                   </Card>
 
-                  <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
-                    <div className="flex justify-between items-start mb-4">
+                  <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
+                    <div className="flex justify-between items-start mb-3 sm:mb-4">
                       <div className="text-slate-500 p-2 rounded-lg">
-                        <Wallet size={22} strokeWidth={1.5} />
+                        <Wallet size={20} strokeWidth={1.5} className="sm:w-[22px] sm:h-[22px]" />
                       </div>
                     </div>
-                    <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Goals Saved</div>
-                    <div className="text-xl font-semibold text-slate-900 tracking-tight">₱{(overviewStats?.totalGoalsSaved ?? 0).toLocaleString()}</div>
+                    <div className="text-slate-500 text-[10px] sm:text-xs font-medium mb-1 uppercase tracking-wide">Goals Saved</div>
+                    <div className="text-lg sm:text-xl font-semibold text-slate-900 tracking-tight">₱{(overviewStats?.totalGoalsSaved ?? 0).toLocaleString()}</div>
                   </Card>
 
-                  <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
-                    <div className="flex justify-between items-start mb-4">
+                  <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
+                    <div className="flex justify-between items-start mb-3 sm:mb-4">
                       <div className="text-slate-500 p-2 rounded-lg">
-                        <ShoppingBag size={22} strokeWidth={1.5} />
+                        <ShoppingBag size={20} strokeWidth={1.5} className="sm:w-[22px] sm:h-[22px]" />
                       </div>
                     </div>
-                    <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Goals Target</div>
-                    <div className="text-xl font-semibold text-slate-900 tracking-tight">₱{(overviewStats?.totalGoalsTarget ?? 0).toLocaleString()}</div>
+                    <div className="text-slate-500 text-[10px] sm:text-xs font-medium mb-1 uppercase tracking-wide">Goals Target</div>
+                    <div className="text-lg sm:text-xl font-semibold text-slate-900 tracking-tight">₱{(overviewStats?.totalGoalsTarget ?? 0).toLocaleString()}</div>
                   </Card>
 
-                  <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
-                    <div className="flex justify-between items-start mb-4">
+                  <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
+                    <div className="flex justify-between items-start mb-3 sm:mb-4">
                       <div className="text-slate-500 p-2 rounded-lg">
-                        <Flag size={22} strokeWidth={1.5} />
+                        <Flag size={20} strokeWidth={1.5} className="sm:w-[22px] sm:h-[22px]" />
                       </div>
                       {(overviewStats?.goalsProgress ?? 0) > 0 && (
                         <div className="text-[10px] font-medium text-purple-700 border-purple-100 px-2 py-1 rounded-full border">
@@ -555,8 +560,8 @@ export default function FamilyPage() {
                         </div>
                       )}
                     </div>
-                    <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Shared Goals</div>
-                    <div className="text-xl font-semibold text-slate-900 tracking-tight">{overviewStats?.totalGoals ?? 0}</div>
+                    <div className="text-slate-500 text-[10px] sm:text-xs font-medium mb-1 uppercase tracking-wide">Shared Goals</div>
+                    <div className="text-lg sm:text-xl font-semibold text-slate-900 tracking-tight">{overviewStats?.totalGoals ?? 0}</div>
                     <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
                       <div className="bg-purple-500 h-full rounded-full" style={{ width: `${overviewStats?.goalsProgress ?? 0}%` }} />
                     </div>
@@ -564,17 +569,17 @@ export default function FamilyPage() {
                 </div>
 
                 {/* Charts and Analytics Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                   {/* Family Goals Health */}
                   {goalsHealth.length > 0 ? (
-                    <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
+                    <Card className="p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
                       <div className="mb-4">
-                        <h3 className="text-sm font-semibold text-slate-900">Family Goals Health</h3>
-                        <p className="text-xs text-slate-500 mt-0.5 font-light">Track your family goal completion status</p>
+                        <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Family Goals Health</h3>
+                        <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 font-light">Track your family goal completion status</p>
                       </div>
-                      <div className="flex items-center justify-center h-64">
+                      <div className="flex items-center justify-center h-48 sm:h-64">
                         <div
-                          className="relative w-48 h-48 rounded-full shadow-inner"
+                          className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full shadow-inner"
                           style={{
                             background: (() => {
                               if (goalsHealth.length === 0) return "conic-gradient(#e2e8f0 0% 100%)";
@@ -596,12 +601,12 @@ export default function FamilyPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-6">
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-2 sm:gap-x-4 sm:gap-y-2 mt-4 sm:mt-6">
                         {goalsHealth.map((item) => (
                           <div key={item.name} className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-                              <span className="text-[10px] text-slate-600 truncate max-w-[80px]">{item.name}</span>
+                              <span className="text-[10px] text-slate-600 truncate max-w-[60px] sm:max-w-[80px]">{item.name}</span>
                             </div>
                             <span className="text-[10px] font-bold text-slate-900">{Math.round((item.value / (totalGoals || 1)) * 100)}%</span>
                           </div>
@@ -609,20 +614,20 @@ export default function FamilyPage() {
                       </div>
                     </Card>
                   ) : (
-                    <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
+                    <Card className="p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
                       <div className="mb-4">
-                        <h3 className="text-sm font-semibold text-slate-900">Family Goals Health</h3>
-                        <p className="text-xs text-slate-500 mt-0.5 font-light">Track your family goal completion status</p>
+                        <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Family Goals Health</h3>
+                        <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 font-light">Track your family goal completion status</p>
                       </div>
-                      <div className="flex flex-col items-center justify-center h-64 text-center">
-                        <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
-                          <Flag size={24} />
+                      <div className="flex flex-col items-center justify-center h-48 sm:h-64 text-center">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
+                          <Flag size={20} className="sm:w-6 sm:h-6" />
                         </div>
-                        <h4 className="text-sm font-medium text-slate-800 mb-1">No Family Goals Yet</h4>
-                        <p className="text-xs text-slate-400 max-w-sm mb-4">
+                        <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Family Goals Yet</h4>
+                        <p className="text-[10px] sm:text-xs text-slate-400 max-w-sm mb-4">
                           Create family goals to track your progress and see your goal completion status.
                         </p>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" className="text-xs">
                           Create Family Goal
                         </Button>
                       </div>
@@ -630,13 +635,13 @@ export default function FamilyPage() {
                   )}
 
                   {/* Family Goals Savings Progress Chart */}
-                  <Card className="p-6 lg:col-span-2 hover:shadow-md transition-all group cursor-pointer">
-                    <div className="flex items-center justify-between mb-8">
+                  <Card className="p-4 sm:p-6 lg:col-span-2 hover:shadow-md transition-all group cursor-pointer">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-8">
                       <div>
-                        <h3 className="text-sm font-semibold text-slate-900">Family Goals Savings Progress</h3>
-                        <p className="text-xs text-slate-500 mt-1 font-light">Target vs Saved over last 6 months</p>
+                        <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Family Goals Savings Progress</h3>
+                        <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Target vs Saved over last 6 months</p>
                       </div>
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 mt-2 sm:mt-0">
                         <div className="flex items-center gap-1.5">
                           <div className="w-2 h-2 rounded-full bg-slate-300" />
                           <span className="text-[10px] font-medium text-slate-400">Target</span>
@@ -772,19 +777,20 @@ export default function FamilyPage() {
       </Card>
 
       {/* Discover Families Section - Hidden for Family Owners */}
-      {!isOwner ? (
-        <Card className="p-6 mb-8">
-          <div className="mb-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900">Discover Families</h3>
-              <p className="text-xs text-slate-500 mt-1 font-light">Find and join other public family groups in your network</p>
-            </div>
+      {!isOwner && (
+        <div className="px-4 sm:px-0">
+          <Card className="p-4 sm:p-6 mb-6 sm:mb-8">
+            <div className="mb-6 sm:mb-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-8 gap-2">
+                <div>
+                  <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Discover Families</h3>
+                  <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Find and join other public family groups in your network</p>
+                </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="xs"
-                className="text-slate-400 hover:text-slate-600"
+                className="text-slate-400 hover:text-slate-600 text-xs"
                 onClick={handleRefreshDiscover}
                 disabled={discoverLoading}
               >
@@ -794,43 +800,43 @@ export default function FamilyPage() {
             </div>
           </div>
           
-          <div className="relative mb-8">
+          <div className="relative mb-6 sm:mb-8">
             <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-              size={18}
+              className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              size={16}
             />
             <input
               type="text"
-              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none"
+              className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none"
               placeholder="Find by name or group ID..."
             />
           </div>
 
           {discoverLoading ? (
             // Skeleton loader for Discover Families
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               {/* Join Requests Skeleton */}
-              <div className="mb-8">
+              <div className="mb-6 sm:mb-8">
                 <div className="flex items-center justify-between mb-4">
-                  <Skeleton width={180} height={16} />
+                  <Skeleton width={140} height={14} className="sm:w-[180px] sm:h-4" />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {[1, 2].map((i) => (
-                    <div key={i} className="bg-white rounded-lg border border-slate-200 p-4">
+                    <div key={i} className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4">
                       <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <Skeleton circle width={40} height={40} />
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <Skeleton circle width={32} height={32} className="sm:w-10 sm:h-10" />
                           <div>
-                            <Skeleton width={120} height={14} className="mb-1" />
-                            <Skeleton width={80} height={10} />
+                            <Skeleton width={100} height={12} className="mb-1 sm:w-[120px]" />
+                            <Skeleton width={60} height={10} className="sm:w-20" />
                           </div>
                         </div>
-                        <Skeleton width={60} height={24} borderRadius={4} />
+                        <Skeleton width={50} height={20} borderRadius={4} />
                       </div>
-                      <Skeleton width="100%" height={12} className="mb-3" />
+                      <Skeleton width="100%" height={10} className="mb-3 sm:h-3" />
                       <div className="flex items-center justify-between">
-                        <Skeleton width={80} height={10} />
                         <Skeleton width={60} height={10} />
+                        <Skeleton width={50} height={10} />
                       </div>
                     </div>
                   ))}
@@ -840,29 +846,29 @@ export default function FamilyPage() {
               {/* Available Groups Skeleton */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between px-1 mb-4">
-                  <Skeleton width={100} height={10} />
-                  <Skeleton width={40} height={10} />
+                  <Skeleton width={80} height={10} className="sm:w-[100px]" />
+                  <Skeleton width={30} height={10} />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="bg-white rounded-lg border border-slate-200 p-4">
+                    <div key={i} className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4">
                       <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <Skeleton width={16} height={16} />
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <Skeleton width={14} height={14} className="sm:w-4 sm:h-4" />
                           <div>
-                            <Skeleton width={120} height={14} className="mb-1" />
-                            <Skeleton width={80} height={10} />
+                            <Skeleton width={100} height={12} className="mb-1 sm:w-[120px]" />
+                            <Skeleton width={60} height={10} className="sm:w-20" />
                           </div>
                         </div>
-                        <Skeleton width={50} height={28} borderRadius={4} />
+                        <Skeleton width={45} height={24} borderRadius={4} />
                       </div>
-                      <Skeleton width="100%" height={12} className="mb-3" />
+                      <Skeleton width="100%" height={10} className="mb-3 sm:h-3" />
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Skeleton circle width={20} height={20} />
-                          <Skeleton width={80} height={10} />
+                          <Skeleton circle width={16} height={16} className="sm:w-5 sm:h-5" />
+                          <Skeleton width={60} height={10} className="sm:w-20" />
                         </div>
-                        <Skeleton width={60} height={16} borderRadius={10} />
+                        <Skeleton width={50} height={14} borderRadius={10} />
                       </div>
                     </div>
                   ))}
@@ -873,28 +879,28 @@ export default function FamilyPage() {
             <>
               {/* Your Join Requests Section */}
           {joinRequests.length > 0 && (
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-slate-900">Your Join Requests ({joinRequests.length})</h3>
+                <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Your Join Requests ({joinRequests.length})</h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {joinRequests.map((request) => (
-                  <Card key={request.family_id} className="p-4 border border-slate-200 bg-white">
+                  <Card key={request.family_id} className="p-3 sm:p-4 border border-slate-200 bg-white">
                     <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         {request.createdByAvatar ? (
                           <img
                             src={request.createdByAvatar}
                             alt={request.createdBy}
-                            className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-slate-200"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200">
-                            <Users size={20} />
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200">
+                            <Users size={16} className="sm:w-5 sm:h-5" />
                           </div>
                         )}
                         <div>
-                          <h4 className="text-sm font-medium text-slate-900">{request.families?.family_name}</h4>
+                          <h4 className="text-xs sm:text-sm font-medium text-slate-900">{request.families?.family_name}</h4>
                           <p className="text-[10px] text-slate-500">
                             Requested {formatRelativeTime(request.requestedAt)}
                           </p>
@@ -902,22 +908,22 @@ export default function FamilyPage() {
                       </div>
                       <Button
                         size="sm"
-                        className="text-xs bg-white text-slate-600 border border-slate-300 hover:bg-slate-50 cursor-default"
+                        className="text-[10px] sm:text-xs bg-white text-slate-600 border border-slate-300 hover:bg-slate-50 cursor-default h-7 sm:h-8"
                         disabled
                       >
                         Pending
                       </Button>
                     </div>
-                    <p className="text-xs text-slate-600 mb-3 line-clamp-2">
+                    <p className="text-[10px] sm:text-xs text-slate-600 mb-3 line-clamp-2">
                       {request.families?.description || "No description available"}
                     </p>
                     <div className="flex items-center justify-between text-[10px] text-slate-500">
                       <div className="flex items-center gap-1">
-                        <User size={12} />
+                        <User size={10} className="sm:w-3 sm:h-3" />
                         <span>{request.createdBy}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Users size={12} />
+                        <Users size={10} className="sm:w-3 sm:h-3" />
                         <span>{request.memberCount} members</span>
                       </div>
                     </div>
@@ -938,16 +944,16 @@ export default function FamilyPage() {
               </span>
             </div>
             {publicFamilies.filter(f => !joinRequests.some(req => req.family_id === f.id)).length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {publicFamilies.filter(f => !joinRequests.some(req => req.family_id === f.id)).map((family) => (
-                  <Card key={family.id} className="p-4 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group">
+                  <Card key={family.id} className="p-3 sm:p-4 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group">
                     <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <div className="flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition-colors">
-                          <Home size={16} />
+                          <Home size={14} className="sm:w-4 sm:h-4" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-medium text-slate-900">{family.name}</h4>
+                          <h4 className="text-xs sm:text-sm font-medium text-slate-900">{family.name}</h4>
                           <p className="text-[10px] text-slate-500">
                             {family.memberCount} active members
                           </p>
@@ -955,7 +961,7 @@ export default function FamilyPage() {
                       </div>
                       <Button
                         size="sm"
-                        className="text-xs bg-emerald-500 hover:bg-emerald-600 text-white border-0 hover:shadow-md transition-shadow"
+                        className="text-[10px] sm:text-xs bg-emerald-500 hover:bg-emerald-600 text-white border-0 hover:shadow-md transition-shadow h-7 sm:h-8"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleJoinFamily(family.id);
@@ -964,7 +970,7 @@ export default function FamilyPage() {
                         Join
                       </Button>
                     </div>
-                    <p className="text-xs text-slate-600 mb-3 line-clamp-2">
+                    <p className="text-[10px] sm:text-xs text-slate-600 mb-3 line-clamp-2">
                       {family.description || "Join this family group to collaborate on finances"}
                     </p>
                     <div className="flex items-center justify-between text-[10px] text-slate-500">
@@ -973,39 +979,39 @@ export default function FamilyPage() {
                           <img
                             src={family.creatorAvatar}
                             alt={family.createdBy}
-                            className="w-5 h-5 rounded-full object-cover border border-slate-100"
+                            className="w-4 h-4 sm:w-5 sm:h-5 rounded-full object-cover border border-slate-100"
                           />
                         ) : (
-                          <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[8px] font-medium text-slate-400 border border-slate-100">
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-100 flex items-center justify-center text-[6px] sm:text-[8px] font-medium text-slate-400 border border-slate-100">
                             {family.createdBy.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
                         )}
                         <span>Created by {family.createdBy}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 rounded-full border border-slate-100 text-slate-400">
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-50 rounded-full border border-slate-100 text-slate-400">
                         <div className="w-1 h-1 rounded-full bg-slate-300" />
-                        <span>Public group</span>
+                        <span>Public</span>
                       </div>
                     </div>
                   </Card>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
+              <div className="text-center py-8 sm:py-12">
                 <div className="flex items-center justify-center text-slate-400 mx-auto mb-4">
-                  <Search className="text-slate-400" size={32} />
+                  <Search className="text-slate-400 w-6 h-6 sm:w-8 sm:h-8" size={24} />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">No More Groups Available</h3>
-                <p className="text-sm text-slate-500 mb-6">
+                <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">No More Groups Available</h3>
+                <p className="text-xs sm:text-sm text-slate-500 mb-4 sm:mb-6">
                   You've requested to join all available public groups. Wait for approval or create your own family.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button onClick={handleOpenCreateFamily} className="bg-emerald-500 hover:bg-emerald-600">
-                    <Plus size={16}/>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
+                  <Button onClick={handleOpenCreateFamily} className="bg-emerald-500 hover:bg-emerald-600 text-xs sm:text-sm h-8 sm:h-9">
+                    <Plus size={14} className="sm:w-4 sm:h-4"/>
                     Create Family
                   </Button>
-                  <Button variant="outline" onClick={refetch}>
-                    <RefreshCw size={16}/>
+                  <Button variant="outline" onClick={refetch} className="text-xs sm:text-sm h-8 sm:h-9">
+                    <RefreshCw size={14} className="sm:w-4 sm:h-4"/>
                     Refresh
                   </Button>
                 </div>
@@ -1013,16 +1019,18 @@ export default function FamilyPage() {
             )}
           </div>
 
-          <div className="pt-8 mt-8 border-t border-slate-50 text-center">
-            <p className="text-[10px] text-slate-400 uppercase tracking-widest">
-              Can't find your group? Check the ID or ask your admin.
-            </p>
-          </div>
-        </>
-      )}
+              <div className="pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-slate-50 text-center">
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest">
+                  Can't find your group? Check the ID or ask your admin.
+                </p>
+              </div>
+            </>
+          )}
+            </div>
+          </Card>
         </div>
-      </Card>
-      ) : (
+      )}
+      {isOwner && (
         <OwnershipNotice
           familyData={familyData}
           onTransferOwnership={handleOpenTransferOwnership}

@@ -329,29 +329,29 @@ export function ActivityTab({
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="space-y-4">
           {/* Header Skeleton */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
             <div>
-              <Skeleton width={150} height={16} className="mb-2" />
-              <Skeleton width={200} height={12} />
+              <Skeleton width={120} height={14} className="mb-2 sm:w-[150px] sm:h-4" />
+              <Skeleton width={160} height={10} className="sm:w-[200px] sm:h-3" />
             </div>
-            <Skeleton width={100} height={32} borderRadius={6} />
+            <Skeleton width={80} height={28} borderRadius={6} className="sm:w-[100px] sm:h-8" />
           </div>
 
           {/* Activity List Skeleton */}
-          <Card className="p-6">
-            <div className="space-y-4">
+          <Card className="p-4 sm:p-6">
+            <div className="space-y-3 sm:space-y-4">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex items-start gap-4 p-3 rounded-lg border border-slate-100">
-                  <Skeleton width={40} height={40} borderRadius="50%" />
+                <div key={i} className="flex items-start gap-3 sm:gap-4 p-2.5 sm:p-3 rounded-lg border border-slate-100">
+                  <Skeleton width={32} height={32} borderRadius="50%" className="sm:w-10 sm:h-10" />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <Skeleton width={120} height={14} />
-                      <Skeleton width={60} height={10} />
+                    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                      <Skeleton width={100} height={12} className="sm:w-[120px] sm:h-4" />
+                      <Skeleton width={50} height={8} className="sm:w-[60px] sm:h-3" />
                     </div>
-                    <Skeleton width="80%" height={12} className="mb-2" />
+                    <Skeleton width="80%" height={10} className="mb-1.5 sm:mb-2 sm:h-3" />
                     <div className="flex items-center gap-2">
-                      <Skeleton width={70} height={18} borderRadius={10} />
-                      <Skeleton width={50} height={10} />
+                      <Skeleton width={50} height={14} borderRadius={10} className="sm:w-[70px] sm:h-5" />
+                      <Skeleton width={40} height={8} className="sm:w-12 sm:h-3" />
                     </div>
                   </div>
                 </div>
@@ -365,15 +365,15 @@ export function ActivityTab({
 
   if (!loading && activities.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-          <Clock className="text-slate-400" size={32} />
+      <div className="text-center py-8 sm:py-12">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+          <Clock className="text-slate-400 w-6 h-6 sm:w-8 sm:h-8" size={32} />
         </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">No Activity Yet</h3>
-        <p className="text-sm text-slate-500 mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">No Activity Yet</h3>
+        <p className="text-xs sm:text-sm text-slate-500 mb-4 sm:mb-6">
           There hasn't been any activity in your family yet.
         </p>
-        <div className="text-xs text-slate-400">
+        <div className="text-[10px] sm:text-xs text-slate-400">
           Start by adding transactions, creating goals, or inviting family members to see activity here.
         </div>
       </div>
@@ -382,16 +382,16 @@ export function ActivityTab({
 
   if (!loading && filteredActivities.length === 0 && activities.length > 0) {
     return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-          <Filter className="text-slate-400" size={32} />
+      <div className="text-center py-8 sm:py-12">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+          <Filter className="text-slate-400 w-6 h-6 sm:w-8 sm:h-8" size={32} />
         </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">No {activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Activity</h3>
-        <p className="text-sm text-slate-500 mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">No {activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Activity</h3>
+        <p className="text-xs sm:text-sm text-slate-500 mb-4 sm:mb-6">
           There are no {activeFilter} activities matching your filter.
         </p>
-        <Button variant="outline" onClick={() => setActiveFilter("all")}>
-          <Filter size={14} className="mr-2" />
+        <Button variant="outline" onClick={() => setActiveFilter("all")} size="sm" className="h-8 sm:h-9">
+          <Filter size={14} className="mr-1 sm:w-4 sm:h-4" />
           Show All Activity
         </Button>
       </div>
@@ -399,15 +399,15 @@ export function ActivityTab({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Filter Controls */}
-      <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
-        <div className="flex flex-col xl:flex-row items-center gap-3">
-          <div className="flex items-center gap-2 text-xs text-slate-500 w-full xl:w-auto">
-            <Filter size={16} />
-            <span className="font-medium">Filters</span>
+      <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
+        <div className="flex flex-col xl:flex-row items-start xl:items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-slate-500 w-full xl:w-auto">
+            <Filter size={14} className="sm:w-4 sm:h-4" />
+            <span className="font-medium text-[10px] sm:text-xs">Filters</span>
             {(searchQuery || activeFilter !== "" || monthFilter !== "all" || yearFilter !== "all") && (
-              <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full">
+              <span className="bg-emerald-100 text-emerald-800 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
                 {filteredActivities.length} results
               </span>
             )}
@@ -415,13 +415,13 @@ export function ActivityTab({
           <div className="hidden xl:block h-4 w-px bg-slate-200"></div>
 
           <div className="relative w-full xl:w-64">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 sm:w-3.5 sm:h-3.5" />
             <input
               type="text"
               placeholder="Search activities..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
+              className="w-full pl-8 pr-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
               aria-label="Search activities"
               role="searchbox"
             />
@@ -433,7 +433,7 @@ export function ActivityTab({
               onChange={(value) => setMonthFilter(value === "" ? "all" : value)}
               options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
               placeholder="All Months"
-              className="w-full text-slate-900"
+              className="w-full text-slate-900 text-xs sm:text-sm"
               allowEmpty={true}
               emptyLabel="All Months"
               hideSearch={true}
@@ -444,7 +444,7 @@ export function ActivityTab({
               onChange={(value) => setYearFilter(value === "" ? "all" : value)}
               options={Array.from({ length: 5 }, (_, i) => getPhilippinesNow().getFullYear() - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
               placeholder="All Years"
-              className="w-full text-slate-900"
+              className="w-full text-slate-900 text-xs sm:text-sm"
               allowEmpty={true}
               emptyLabel="All Years"
               hideSearch={true}
@@ -461,53 +461,53 @@ export function ActivityTab({
                 { value: "budget", label: "Budgets" }
               ]}
               placeholder="All Types"
-              className="w-full text-slate-900"
+              className="w-full text-slate-900 text-xs sm:text-sm"
               allowEmpty={true}
               emptyLabel="All Types"
               hideSearch={true}
             />
           </div>
 
-          <div className="flex-1"></div>
+          <div className="flex-1 hidden xl:block"></div>
           <div className="flex items-center gap-2 w-full xl:w-auto">
-            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset to Current Period" onClick={resetFilters}>
-              <RotateCcw size={14} /> Current
+            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center h-7 sm:h-8" title="Reset to Current Period" onClick={resetFilters}>
+              <RotateCcw size={12} className="sm:w-3.5 sm:h-3.5" /> <span className="hidden sm:inline">Current</span>
             </Button>
-            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={resetFiltersToAll}>
-              <RotateCcw size={14} /> All Time
+            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center h-7 sm:h-8" title="Reset to All Time" onClick={resetFiltersToAll}>
+              <RotateCcw size={12} className="sm:w-3.5 sm:h-3.5" /> <span className="hidden sm:inline">All Time</span>
             </Button>
           </div>
         </div>
       </Card>
 
       {/* Activity Feed */}
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {filteredActivities.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-              <Filter className="text-slate-400" size={32} />
+          <div className="text-center py-8 sm:py-12">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+              <Filter className="text-slate-400 w-6 h-6 sm:w-8 sm:h-8" size={32} />
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+            <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">
               {searchQuery ? "No Matching Activities" : "No Activity Yet"}
             </h3>
-            <p className="text-sm text-slate-500 mb-6">
+            <p className="text-xs sm:text-sm text-slate-500 mb-4 sm:mb-6">
               {searchQuery 
                 ? "No activities match your search criteria."
                 : "There hasn't been any activity in your family yet."
               }
             </p>
             {searchQuery || activeFilter !== "all" || monthFilter !== "all" || yearFilter !== "all" ? (
-              <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
+              <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2 h-8 sm:h-9">
                 Clear Filters
               </Button>
             ) : searchQuery && (
-              <Button variant="outline" onClick={() => setSearchQuery("")}>
-                <X size={14} className="mr-2" />
+              <Button variant="outline" onClick={() => setSearchQuery("")} size="sm" className="h-8 sm:h-9">
+                <X size={12} className="mr-1 sm:w-3.5 sm:h-3.5" />
                 Clear Search
               </Button>
             )}
             {!searchQuery && (
-              <div className="text-xs text-slate-400">
+              <div className="text-[10px] sm:text-xs text-slate-400">
                 Start by adding transactions, creating goals, or inviting family members to see activity here.
               </div>
             )}
@@ -521,7 +521,7 @@ export function ActivityTab({
               return (
                 <Card
                   key={activity.id}
-                  className={`flex items-start gap-3 p-4 bg-white hover:bg-slate-50 rounded-xl transition-all duration-200 border border-slate-200 hover:border-slate-300 hover:shadow-sm cursor-pointer ${
+                  className={`flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-white hover:bg-slate-50 rounded-xl transition-all duration-200 border border-slate-200 hover:border-slate-300 hover:shadow-sm cursor-pointer ${
                     isRealtime ? "ring-2 ring-emerald-500 ring-opacity-50 bg-emerald-50/30" : ""
                   }`}
                   role="article"
@@ -534,43 +534,43 @@ export function ActivityTab({
                   <div className="flex-shrink-0">
                     <UserAvatar 
                       user={createMockUser(activity)} 
-                      size="lg"
-                      className="ring-2 ring-white shadow-sm"
+                      size="md"
+                      className="ring-2 ring-white shadow-sm w-8 h-8 sm:w-10 sm:h-10"
                     />
                   </div>
                   
-                  <div className="flex items-center justify-center text-slate-400 flex-shrink-0 -ml-6 mt-5 bg-white rounded-full p-1 shadow-sm border border-slate-100">
-                    <Icon size={12} />
+                  <div className="flex items-center justify-center text-slate-400 flex-shrink-0 -ml-5 sm:-ml-6 mt-4 sm:mt-5 bg-white rounded-full p-0.5 sm:p-1 shadow-sm border border-slate-100">
+                    <Icon size={10} className="sm:w-3 sm:h-3" />
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-700 leading-relaxed">
+                    <div className="flex items-start justify-between mb-1 sm:mb-2">
+                      <div className="flex-1 min-w-0 pr-2">
+                        <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
                           <span className="text-slate-600">{getActivityDescription(activity)}</span>
                           {activity.type === "goal" && !activity.action.includes("goal") && (
                             <span className="text-slate-500 ml-1">goal</span>
                           )}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                      <div className="flex items-center gap-1.5 sm:gap-2 ml-1 flex-shrink-0">
                         {isRealtime && (
-                          <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full font-medium">
+                          <span className="bg-emerald-100 text-emerald-800 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium">
                             New
                           </span>
                         )}
-                        <span className="text-xs text-slate-400 whitespace-nowrap">
+                        <span className="text-[10px] sm:text-xs text-slate-400 whitespace-nowrap">
                           {formatTime(activity.timestamp)}
                         </span>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                      <Badge className={`${getBadgeColor(activity.type)} text-xs px-2 py-1 border font-medium`}>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <Badge className={`${getBadgeColor(activity.type)} text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 border font-medium`}>
                         {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
                       </Badge>
-                      <span className="text-xs text-slate-300">•</span>
-                      <span className="text-xs text-slate-500 capitalize">
+                      <span className="text-[10px] sm:text-xs text-slate-300">•</span>
+                      <span className="text-[10px] sm:text-xs text-slate-500 capitalize">
                         {activity.details}
                       </span>
                     </div>
@@ -590,12 +590,13 @@ export function ActivityTab({
                   size="sm"
                   onClick={onLoadMore}
                   disabled={isLoading}
-                  className="text-sm px-6 py-2"
+                  className="text-xs sm:text-sm px-4 sm:px-6 py-1.5 sm:py-2 h-8 sm:h-9"
                 >
                   {isLoading ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600 mr-2"></div>
-                      Loading...
+                      <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-emerald-600 mr-2"></div>
+                      <span className="hidden sm:inline">Loading...</span>
+                      <span className="sm:hidden">...</span>
                     </>
                   ) : (
                     "Load More Activity"
@@ -608,21 +609,21 @@ export function ActivityTab({
 
         {/* Pagination */}
         {!loading && !isLoading && filteredActivities.length > 0 && onPageChange && (
-          <div className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-lg mt-6">
-            <div className="text-sm text-slate-600">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 px-3 sm:px-4 py-3 bg-white border border-slate-200 rounded-lg mt-4 sm:mt-6">
+            <div className="text-xs sm:text-sm text-slate-600">
               Showing {((internalCurrentPage - 1) * internalPageSize) + 1} to {Math.min(internalCurrentPage * internalPageSize, totalCount)} of {totalCount} activities
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               {totalPages > 1 && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={previousPage}
                     disabled={!hasPreviousPage}
-                    className="h-8 w-8 p-0"
+                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                   >
-                    <ChevronLeft size={16} />
+                    <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
                   </Button>
                   <div className="flex items-center gap-1">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -643,7 +644,7 @@ export function ActivityTab({
                           variant={internalCurrentPage === pageNum ? "default" : "outline"}
                           size="sm"
                           onClick={() => goToPage(pageNum)}
-                          className="h-8 w-8 p-0 text-xs"
+                          className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs"
                         >
                           {pageNum}
                         </Button>
@@ -655,18 +656,18 @@ export function ActivityTab({
                     size="sm"
                     onClick={nextPage}
                     disabled={!hasNextPage}
-                    className="h-8 w-8 p-0"
+                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                   >
-                    <ChevronRight size={16} />
+                    <ChevronRight size={14} className="sm:w-4 sm:h-4" />
                   </Button>
                 </div>
               )}
-              <div className="text-sm text-slate-600 flex items-center gap-2">
-                <span>Show</span>
+              <div className="text-xs sm:text-sm text-slate-600 flex items-center gap-1.5 sm:gap-2">
+                <span className="hidden sm:inline">Show</span>
                 <select
                   value={internalPageSize === Number.MAX_SAFE_INTEGER ? "all" : internalPageSize}
                   onChange={(e) => handlePageSizeChange(e.target.value === "all" ? "all" : parseInt(e.target.value))}
-                  className="text-sm border border-slate-200 rounded px-2 py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
+                  className="text-xs sm:text-sm border border-slate-200 rounded px-2 py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
                 >
                   <option value={10}>10</option>
                   <option value={25}>25</option>
@@ -674,7 +675,7 @@ export function ActivityTab({
                   <option value={100}>100</option>
                   <option value="all">All</option>
                 </select>
-                <span>per page</span>
+                <span className="hidden sm:inline">per page</span>
               </div>
             </div>
           </div>

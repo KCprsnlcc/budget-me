@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { ShieldCheck, Filter, MoreHorizontal, Calendar, TrendingUp, TrendingDown, Flag, Plus, Edit, Trash2 } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { ShieldCheck, Filter, MoreHorizontal, Calendar, TrendingUp, TrendingDown, Flag, Plus, Edit, Trash2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +49,8 @@ export function GoalsTab({
 }: GoalsTabProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [isGoalOperationLoading, setIsGoalOperationLoading] = useState(false);
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const exportDropdownRef = useRef<HTMLDivElement>(null);
   
   // Modal states
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -58,6 +60,20 @@ export function GoalsTab({
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   
   const [selectedGoal, setSelectedGoal] = useState<GoalType | SharedGoal | null>(null);
+
+  // Close export dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+        setExportDropdownOpen(false);
+      }
+    };
+
+    if (exportDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [exportDropdownOpen]);
 
   const getGoalIcon = (status: string) => {
     switch (status) {
@@ -222,85 +238,85 @@ export function GoalsTab({
   if (isLoading || isGoalOperationLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Header Skeleton */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
             <div>
-              <Skeleton width={150} height={16} className="mb-2" />
-              <Skeleton width={250} height={12} />
+              <Skeleton width={120} height={14} className="mb-2 sm:w-[150px] sm:h-4" />
+              <Skeleton width={180} height={10} className="sm:w-[250px] sm:h-3" />
             </div>
-            <div className="flex items-center gap-2">
-              <Skeleton width={80} height={32} borderRadius={6} />
-              <Skeleton width={90} height={32} borderRadius={6} />
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Skeleton width={70} height={28} borderRadius={6} className="flex-1 sm:flex-none sm:w-20 sm:h-8" />
+              <Skeleton width={80} height={28} borderRadius={6} className="flex-1 sm:flex-none sm:w-24 sm:h-8" />
             </div>
           </div>
 
           {/* Overall Family Goal Progress Skeleton */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-2">
+          <Card className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
               <div>
-                <Skeleton width={200} height={16} className="mb-2" />
-                <Skeleton width={300} height={12} />
+                <Skeleton width={140} height={14} className="mb-2 sm:w-[200px] sm:h-4" />
+                <Skeleton width={200} height={10} className="sm:w-[300px] sm:h-3" />
               </div>
-              <Skeleton width={80} height={20} borderRadius={10} />
+              <Skeleton width={60} height={18} borderRadius={10} className="sm:w-20 sm:h-5" />
             </div>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <Skeleton width={80} height={12} />
-                <Skeleton width={150} height={12} />
+                <Skeleton width={60} height={10} className="sm:w-20 sm:h-3" />
+                <Skeleton width={120} height={10} className="sm:w-[150px] sm:h-3" />
               </div>
-              <Skeleton height={8} borderRadius={4} />
+              <Skeleton height={6} borderRadius={4} className="sm:h-2" />
             </div>
           </Card>
 
           {/* Goals Grid Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i} className="p-6">
+              <Card key={i} className="p-4 sm:p-6">
                 {/* Goal Header Skeleton */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <Skeleton width={40} height={40} borderRadius="50%" />
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <Skeleton width={32} height={32} borderRadius="50%" className="sm:w-10 sm:h-10" />
                     <div>
-                      <Skeleton width={120} height={16} className="mb-1" />
-                      <Skeleton width={150} height={10} />
+                      <Skeleton width={100} height={14} className="mb-1 sm:w-[120px] sm:h-4" />
+                      <Skeleton width={120} height={10} className="sm:w-[150px] sm:h-3" />
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Skeleton width={70} height={20} borderRadius={10} />
-                    <Skeleton width={24} height={24} borderRadius={6} />
+                    <Skeleton width={50} height={16} borderRadius={10} className="sm:w-[70px] sm:h-5" />
+                    <Skeleton width={20} height={20} borderRadius={6} className="sm:w-6 sm:h-6" />
                   </div>
                 </div>
 
                 {/* Progress Section Skeleton */}
-                <div className="space-y-3 mb-6">
+                <div className="space-y-3 mb-4 sm:mb-6">
                   <div className="flex justify-between">
-                    <Skeleton width={80} height={12} />
-                    <Skeleton width={150} height={12} />
+                    <Skeleton width={60} height={10} className="sm:w-20 sm:h-3" />
+                    <Skeleton width={120} height={10} className="sm:w-[150px] sm:h-3" />
                   </div>
-                  <Skeleton height={8} borderRadius={4} />
+                  <Skeleton height={6} borderRadius={4} className="sm:h-2" />
                   <div className="border border-slate-100 p-2 rounded-lg flex justify-between">
-                    <Skeleton width={120} height={10} />
-                    <Skeleton width={80} height={10} />
+                    <Skeleton width={100} height={8} className="sm:w-[120px] sm:h-3" />
+                    <Skeleton width={60} height={8} className="sm:w-20 sm:h-3" />
                   </div>
                 </div>
 
                 {/* Member Contributions Skeleton */}
-                <div className="border-t border-slate-100 pt-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <Skeleton width={100} height={12} />
-                    <Skeleton width={50} height={10} />
+                <div className="border-t border-slate-100 pt-4">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <Skeleton width={80} height={10} className="sm:w-[100px] sm:h-3" />
+                    <Skeleton width={40} height={8} className="sm:w-12 sm:h-3" />
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {Array.from({ length: 3 }).map((_, j) => (
                       <div key={j} className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2">
-                          <Skeleton width={24} height={24} borderRadius="50%" />
-                          <Skeleton width={80} height={10} />
+                          <Skeleton width={20} height={20} borderRadius="50%" className="sm:w-6 sm:h-6" />
+                          <Skeleton width={60} height={8} className="sm:w-20 sm:h-3" />
                         </div>
                         <div className="flex items-center gap-2">
-                          <Skeleton width={60} height={10} />
-                          <Skeleton width={50} height={10} />
+                          <Skeleton width={40} height={8} className="sm:w-16 sm:h-3" />
+                          <Skeleton width={40} height={8} className="sm:w-12 sm:h-3" />
                         </div>
                       </div>
                     ))}
@@ -308,9 +324,9 @@ export function GoalsTab({
                 </div>
 
                 {/* Quick Actions Skeleton */}
-                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
-                  <Skeleton width="50%" height={28} borderRadius={6} />
-                  <Skeleton width="50%" height={28} borderRadius={6} />
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+                  <Skeleton width="50%" height={24} borderRadius={6} className="sm:h-7" />
+                  <Skeleton width="50%" height={24} borderRadius={6} className="sm:h-7" />
                 </div>
               </Card>
             ))}
@@ -323,19 +339,19 @@ export function GoalsTab({
   if (!isLoading && goals.length === 0) {
     return (
       <>
-        <div className="text-center py-12">
-          <div className="w-16 h-16 rounded-full border border-slate-200 flex items-center justify-center mx-auto mb-4">
-            <Flag className="text-slate-400" size={32} />
+        <div className="text-center py-8 sm:py-12">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border border-slate-200 flex items-center justify-center mx-auto mb-4">
+            <Flag className="text-slate-400 w-6 h-6 sm:w-8 sm:h-8" size={32} />
           </div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">No Goals Yet</h3>
-          <p className="text-sm text-slate-500 mb-6">
+          <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">No Goals Yet</h3>
+          <p className="text-xs sm:text-sm text-slate-500 mb-4 sm:mb-6">
             Start by creating your first family savings goal.
           </p>
-          <Button onClick={handleAddGoal}>
-            <Flag size={16} className="mr-2" />
+          <Button onClick={handleAddGoal} size="sm" className="h-8 sm:h-9">
+            <Flag size={14} className="mr-1 sm:w-4 sm:h-4" />
             Create Goal
           </Button>
-          <div className="text-xs text-slate-400 mt-4">
+          <div className="text-[10px] sm:text-xs text-slate-400 mt-4">
             Set shared financial objectives that your family can work towards together.
           </div>
         </div>
@@ -355,16 +371,16 @@ export function GoalsTab({
 
   if (!isLoading && filteredGoals.length === 0 && goals.length > 0) {
     return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-          <Filter className="text-slate-400" size={32} />
+      <div className="text-center py-8 sm:py-12">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+          <Filter className="text-slate-400 w-6 h-6 sm:w-8 sm:h-8" size={32} />
         </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">No {activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Goals</h3>
-        <p className="text-sm text-slate-500 mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">No {activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Goals</h3>
+        <p className="text-xs sm:text-sm text-slate-500 mb-4 sm:mb-6">
           There are no goals with status "{activeFilter}".
         </p>
-        <Button variant="outline" onClick={() => onFilter("all")}>
-          <Filter size={14} className="mr-2" />
+        <Button variant="outline" onClick={() => onFilter("all")} size="sm" className="h-8 sm:h-9">
+          <Filter size={14} className="mr-1 sm:w-4 sm:h-4" />
           Show All Goals
         </Button>
       </div>
@@ -373,22 +389,61 @@ export function GoalsTab({
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">
+            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">
               Family Goals ({filteredGoals.length})
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5 font-light">Track and manage shared family savings objectives</p>
+            <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 font-light">Track and manage shared family savings objectives</p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="relative">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:flex-none" ref={exportDropdownRef}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto flex items-center gap-1.5 text-xs h-8"
+                onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+              >
+                <Download size={14} className="sm:mr-0.5" />
+                <span className="hidden sm:inline">Export</span>
+                <MoreHorizontal size={12} className="ml-0.5" />
+              </Button>
+              {/* Dropdown */}
+              {exportDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-44 sm:w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                    onClick={() => {
+                      // Export PDF logic here
+                      setExportDropdownOpen(false);
+                    }}
+                  >
+                    <span className="text-rose-500 mr-2">PDF</span> Export as PDF
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                    onClick={() => {
+                      // Export CSV logic here
+                      setExportDropdownOpen(false);
+                    }}
+                  >
+                    <span className="text-emerald-500 mr-2">CSV</span> Export as CSV
+                  </Button>
+                </div>
+              )}
+            </div>
+            <div className="relative flex-1 sm:flex-none">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 text-xs"
+                className="w-full sm:w-auto flex items-center gap-1.5 text-xs h-8"
               >
                 <Filter size={14} />
                 <span>
@@ -413,26 +468,27 @@ export function GoalsTab({
                 </div>
               )}
             </div>
-            <Button size="sm" onClick={handleAddGoal}>
+            <Button size="sm" onClick={handleAddGoal} className="h-8 text-xs flex-shrink-0">
               <Flag size={14} className="mr-1" />
-              Add Goal
+              <span className="hidden sm:inline">Add</span>
+              <span className="sm:hidden">Add</span>
             </Button>
           </div>
         </div>
 
         {/* Overall Goal Progress */}
-        <Card className="p-6 hover:shadow-md transition-all group">
-          <div className="flex items-center justify-between mb-2">
+        <Card className="p-4 sm:p-6 hover:shadow-md transition-all group">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">Overall Family Goal Progress</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Your family has saved {overallProgressPercentage}% of your total goal targets.</p>
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Overall Family Goal Progress</h3>
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">Your family has saved {overallProgressPercentage}% of your total goal targets.</p>
             </div>
-            <Badge variant={overallStatus.variant}>
+            <Badge variant={overallStatus.variant} className="text-[10px] sm:text-xs">
               {overallStatus.text}
             </Badge>
           </div>
           <div className="space-y-3">
-            <div className="flex justify-between text-xs">
+            <div className="flex justify-between text-[10px] sm:text-xs">
               <span className="text-slate-500 font-medium">Total Progress</span>
               <span className="font-bold text-slate-900">
                 {formatCurrency(totalSaved)} / {formatCurrency(totalTarget)} ({overallProgressPercentage}%)
@@ -442,13 +498,13 @@ export function GoalsTab({
               value={totalSaved}
               max={totalTarget}
               color={overallStatus.variant === "success" ? "success" : overallStatus.variant === "warning" ? "warning" : "danger"}
-              className="h-2"
+              className="h-1.5 sm:h-2"
             />
           </div>
         </Card>
 
         {/* Goals Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {filteredGoals.map((goal) => {
             const progress = calculateProgress(goal.saved, goal.target);
             const daysRemaining = getDaysRemaining(goal.targetDate);
@@ -457,32 +513,32 @@ export function GoalsTab({
             return (
               <Card
                 key={goal.id}
-                className="p-6 hover:shadow-md transition-all group"
+                className="p-4 sm:p-6 hover:shadow-md transition-all group"
               >
                 {/* Goal Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     {/* Creator avatar - use existing creatorAvatar if available, otherwise show goal icon */}
                     {goal.creatorAvatar ? (
                       <img
                         src={goal.creatorAvatar}
                         alt={goal.createdBy}
-                        className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-slate-200"
                       />
                     ) : (
                       <div className="flex items-center justify-center text-slate-600 transition-colors group-hover:scale-110">
                         {getGoalIcon(goal.status)}
                       </div>
                     )}
-                    <div>
-                      <h4 className="text-base font-semibold text-slate-900">{goal.name}</h4>
-                      <p className="text-[10px] text-slate-500">
+                    <div className="min-w-0">
+                      <h4 className="text-sm sm:text-base font-semibold text-slate-900 truncate">{goal.name}</h4>
+                      <p className="text-[10px] sm:text-xs text-slate-500 truncate">
                         Created by {goal.createdBy} • Target: {goal.targetDate ? new Date(goal.targetDate).toLocaleDateString() : "No date"}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(goal.status) + " px-2.5 py-1"}>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge className={getStatusColor(goal.status) + " px-1.5 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs"}>
                       {goal.status === "on-track" && "On Track"}
                       {goal.status === "at-risk" && "At Risk"}
                       {goal.status === "completed" && "Completed"}
@@ -492,26 +548,26 @@ export function GoalsTab({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="p-2 text-slate-400 hover:text-slate-600 rounded-lg"
+                        className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 rounded-lg h-7 w-7 sm:h-8 sm:w-8"
                         onClick={() => handleEditGoal(goal)}
                       >
-                        <Edit size={16} />
+                        <Edit size={14} className="sm:w-4 sm:h-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="p-2 text-slate-400 hover:text-red-600 rounded-lg"
+                        className="p-1.5 sm:p-2 text-slate-400 hover:text-red-600 rounded-lg h-7 w-7 sm:h-8 sm:w-8"
                         onClick={() => handleDeleteGoal(goal)}
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} className="sm:w-4 sm:h-4" />
                       </Button>
                     </div>
                   </div>
                 </div>
 
                 {/* Progress Section */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-xs">
+                <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+                  <div className="flex justify-between text-[10px] sm:text-xs">
                     <span className="text-slate-500 font-medium">Overall Progress</span>
                     <span className="font-bold text-slate-900">
                       {formatCurrency(goal.saved)} / {formatCurrency(goal.target)} ({Math.round(progress)}%)
@@ -521,38 +577,38 @@ export function GoalsTab({
                     value={goal.saved}
                     max={goal.target}
                     color={getProgressColor(goal.status)}
-                    className="h-2"
+                    className="h-1.5 sm:h-2"
                   />
-                  <div className="flex justify-between items-center border border-slate-100 p-2 rounded-lg">
-                    <span className="text-[10px] text-slate-500">
+                  <div className="flex justify-between items-center border border-slate-100 p-1.5 sm:p-2 rounded-lg">
+                    <span className="text-[10px] sm:text-xs text-slate-500 truncate mr-2">
                       {daysRemaining !== null
                         ? `${daysRemaining} days remaining until target date`
                         : "No deadline set"
                       }
                     </span>
-                    <span className="text-[10px] font-medium text-slate-700">
+                    <span className="text-[10px] sm:text-xs font-medium text-slate-700 shrink-0">
                       {goal.targetDate ? new Date(goal.targetDate).toLocaleDateString() : "No date"}
                     </span>
                   </div>
                 </div>
 
                 {/* Member Contributions with Avatar Fetching */}
-                <div className="border-t border-slate-100 pt-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <h5 className="text-xs font-semibold text-slate-700">Member Contributions</h5>
+                <div className="border-t border-slate-100 pt-4">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <h5 className="text-[10px] sm:text-xs font-semibold text-slate-700">Member Contributions</h5>
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="text-[10px] font-medium text-emerald-600"
+                      className="text-[10px] sm:text-xs font-medium text-emerald-600 h-6 sm:h-7 px-1.5 sm:px-2"
                       onClick={() => handleViewGoal(goal)}
                     >
                       View All
                     </Button>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {goal.contributions.slice(0, 3).map((contribution) => (
-                      <div key={contribution.id} className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2">
+                      <div key={contribution.id} className="flex items-center justify-between text-[10px] sm:text-xs">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
                           {/* Avatar fetching for contributors */}
                           {contribution.memberId ? (
                             <UserAvatar 
@@ -563,20 +619,20 @@ export function GoalsTab({
                             <img
                               src={contribution.memberAvatar}
                               alt={contribution.memberName}
-                              className="w-6 h-6 rounded-full object-cover border border-slate-100"
+                              className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-slate-100"
                             />
                           ) : (
-                            <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[8px] font-medium text-slate-600">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-200 flex items-center justify-center text-[6px] sm:text-[8px] font-medium text-slate-600">
                               {contribution.memberName.split(' ').map(n => n[0]).join('')}
                             </div>
                           )}
-                          <span className="text-slate-700">{contribution.memberName}</span>
+                          <span className="text-slate-700 truncate max-w-[80px] sm:max-w-[120px]">{contribution.memberName}</span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
                           <span className="font-medium text-slate-900">
                             {formatCurrency(contribution.amount)}
                           </span>
-                          <span className="text-slate-400">
+                          <span className="text-slate-400 text-[10px] sm:text-xs shrink-0">
                             {new Date(contribution.date).toLocaleDateString()}
                           </span>
                         </div>
@@ -587,7 +643,7 @@ export function GoalsTab({
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="text-[10px] text-emerald-600"
+                          className="text-[10px] sm:text-xs text-emerald-600 h-6 sm:h-7"
                           onClick={() => handleViewGoal(goal)}
                         >
                           +{goal.contributions.length - 3} more contributions
@@ -598,10 +654,10 @@ export function GoalsTab({
                 </div>
 
                 {/* Quick Actions */}
-                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
+                <div className="flex items-center gap-2 mt-3 sm:mt-4 pt-3 border-t border-slate-100">
                   <Button
                     size="sm"
-                    className="text-xs py-1 px-2 flex-1"
+                    className="text-xs py-1 px-2 sm:px-3 flex-1 h-7 sm:h-8"
                     onClick={() => handleContributeGoal(goal)}
                     disabled={goal.status === "completed"}
                   >
@@ -610,7 +666,7 @@ export function GoalsTab({
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-xs" 
+                    className="text-xs h-7 sm:h-8 px-2" 
                     onClick={() => handleViewGoal(goal)}
                   >
                     View Details
