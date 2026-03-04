@@ -18,7 +18,9 @@ function formatCurrency(amount: number): string {
 // Helper to calculate date ranges
 function getDateRange(timeframe: 'month' | 'quarter' | 'year') {
   const now = new Date();
-  const endDate = now.toISOString().split('T')[0];
+  const endDateFull = now.toISOString(); // Full ISO for timestamp fields
+  const endDate = now.toISOString().split('T')[0]; // Date only for date fields
+  let startDateFull: string;
   let startDate: string;
 
   switch (timeframe) {
@@ -26,27 +28,31 @@ function getDateRange(timeframe: 'month' | 'quarter' | 'year') {
       // Last 30 days
       const monthAgo = new Date(now);
       monthAgo.setDate(monthAgo.getDate() - 30);
+      startDateFull = monthAgo.toISOString();
       startDate = monthAgo.toISOString().split('T')[0];
       break;
     case 'quarter':
       // Last 3 months (90 days)
       const quarterAgo = new Date(now);
       quarterAgo.setDate(quarterAgo.getDate() - 90);
+      startDateFull = quarterAgo.toISOString();
       startDate = quarterAgo.toISOString().split('T')[0];
       break;
     case 'year':
       // Last 12 months (365 days)
       const yearAgo = new Date(now);
       yearAgo.setDate(yearAgo.getDate() - 365);
+      startDateFull = yearAgo.toISOString();
       startDate = yearAgo.toISOString().split('T')[0];
       break;
     default:
       const defaultAgo = new Date(now);
       defaultAgo.setDate(defaultAgo.getDate() - 30);
+      startDateFull = defaultAgo.toISOString();
       startDate = defaultAgo.toISOString().split('T')[0];
   }
 
-  return { startDate, endDate };
+  return { startDate, endDate, startDateFull, endDateFull };
 }
 
 /**
@@ -132,120 +138,58 @@ export async function fetchReportSummary(userId: string, timeframe: 'month' | 'q
  */
 export async function fetchAnomalyAlerts(userId: string, timeframe: 'month' | 'quarter' | 'year' = 'month'): Promise<AnomalyAlert[]> {
   try {
-    const { startDate, endDate } = getDateRange(timeframe);
-    const anomalies: AnomalyAlert[] = [];
+    const { startDateFull, endDateFull } = getDateRange(timeframe);
 
-    // Fetch transactions for the period
-    const { data: transactions, error: transError } = await supabase
-      .from('transactions')
-      .select('*, expense_category_id, expense_categories(category_name)')
-      .eq('user_id', userId)
-      .eq('type', 'expense')
-      .gte('date', startDate)
-      .lte('date', endDate);
-
-    if (transError) throw transError;
-
-    if (!transactions || transactions.length === 0) {
-      return anomalies;
-    }
-
-    // Group by category
-    const categorySpending: Record<string, { total: number; count: number; transactions: any[] }> = {};
-    
-    transactions.forEach(t => {
-      const categoryName = (t.expense_categories as any)?.category_name || 'Uncategorized';
-      if (!categorySpending[categoryName]) {
-        categorySpending[categoryName] = { total: 0, count: 0, transactions: [] };
-      }
-      categorySpending[categoryName].total += parseFloat(t.amount);
-      categorySpending[categoryName].count += 1;
-      categorySpending[categoryName].transactions.push(t);
-    });
-
-    // Detect unusual spending patterns (spending > 40% above average)
-    for (const [category, data] of Object.entries(categorySpending)) {
-      const avgSpending = data.total / data.count;
-      const recentSpending = data.transactions
-        .slice(-Math.ceil(data.count / 3)) // Last third of transactions
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
-      
-      const recentAvg = recentSpending / Math.ceil(data.count / 3);
-      const percentageIncrease = ((recentAvg - avgSpending) / avgSpending) * 100;
-
-      if (percentageIncrease > 40) {
-        anomalies.push({
-          id: `unusual-${category}`,
-          type: 'unusual-spending',
-          title: 'Unusual Spending Pattern',
-          description: `Your "${category}" spending is ${percentageIncrease.toFixed(0)}% higher than usual for this time period.`,
-          severity: percentageIncrease > 60 ? 'high' : 'medium',
-          timestamp: new Date().toISOString(),
-          amount: recentAvg,
-          category,
-          trend: percentageIncrease,
-          status: 'active',
-        });
-      }
-    }
-
-    // Detect duplicate transactions (same amount, same day, same category)
-    const duplicates = new Map<string, any[]>();
-    transactions.forEach(t => {
-      const key = `${t.date}-${t.amount}-${t.expense_category_id}`;
-      if (!duplicates.has(key)) {
-        duplicates.set(key, []);
-      }
-      duplicates.get(key)!.push(t);
-    });
-
-    duplicates.forEach((group, key) => {
-      if (group.length > 1) {
-        const categoryName = (group[0].expense_categories as any)?.category_name || 'Uncategorized';
-        anomalies.push({
-          id: `duplicate-${key}`,
-          type: 'duplicate-transaction',
-          title: 'Duplicate Transaction',
-          description: `Possible duplicate charge detected: ${group[0].description || categoryName} (${formatCurrency(parseFloat(group[0].amount))}) charged ${group.length} times.`,
-          severity: 'low',
-          timestamp: new Date().toISOString(),
-          amount: parseFloat(group[0].amount),
-          category: categoryName,
-          status: 'active',
-        });
-      }
-    });
-
-    // Detect budget overspend
-    const { data: budgets, error: budgetError } = await supabase
-      .from('budgets')
+    // Fetch anomalies from database
+    const { data: dbAnomalies, error: anomalyError } = await supabase
+      .from('admin_anomalies')
       .select('*')
       .eq('user_id', userId)
-      .eq('status', 'active');
+      .eq('resolution_status', 'open')
+      .gte('detected_at', startDateFull)
+      .lte('detected_at', endDateFull)
+      .order('detected_at', { ascending: false });
 
-    if (!budgetError && budgets) {
-      budgets.forEach(budget => {
-        if (budget.spent > budget.amount) {
-          anomalies.push({
-            id: `overspend-${budget.id}`,
-            type: 'budget-overspend',
-            title: 'Budget Overspend',
-            description: `Your "${budget.budget_name}" budget has been exceeded by ${formatCurrency(budget.spent - budget.amount)}.`,
-            severity: 'high',
-            timestamp: new Date().toISOString(),
-            amount: budget.spent - budget.amount,
-            category: budget.budget_name,
-            status: 'active',
-          });
-        }
-      });
+    if (anomalyError) {
+      console.error('Error fetching anomalies from database:', anomalyError);
     }
 
-    return anomalies.slice(0, 10); // Return top 10 anomalies
+    // Transform database anomalies to AnomalyAlert format
+    const transformedAnomalies: AnomalyAlert[] = (dbAnomalies || []).map(anomaly => ({
+      id: anomaly.id,
+      type: mapAnomalyType(anomaly.anomaly_type),
+      title: anomaly.anomaly_type.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+      description: anomaly.anomaly_data?.description || 'No description available',
+      severity: anomaly.severity as 'low' | 'medium' | 'high',
+      timestamp: new Date(anomaly.detected_at).toLocaleDateString(),
+      amount: anomaly.anomaly_data?.amount,
+      category: anomaly.anomaly_data?.category,
+      trend: anomaly.anomaly_data?.trend,
+      status: 'active',
+    }));
+
+    // Return database anomalies (they are already saved)
+    return transformedAnomalies.slice(0, 10);
   } catch (error) {
     console.error('Error fetching anomaly alerts:', error);
     return [];
   }
+}
+
+// Helper function to map database anomaly types to UI types
+function mapAnomalyType(dbType: string): 'unusual-spending' | 'duplicate-transaction' | 'budget-overspend' | 'income-anomaly' {
+  const typeMap: Record<string, 'unusual-spending' | 'duplicate-transaction' | 'budget-overspend' | 'income-anomaly'> = {
+    'spending_spike': 'unusual-spending',
+    'unusual_pattern': 'unusual-spending',
+    'income_drop': 'income-anomaly',
+    'prediction_variance': 'unusual-spending',
+    'data_inconsistency': 'duplicate-transaction',
+    'service_failure': 'unusual-spending',
+    'accuracy_drop': 'unusual-spending',
+    'user_behavior': 'unusual-spending',
+  };
+  
+  return typeMap[dbType] || 'unusual-spending';
 }
 
 /**

@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   Calendar,
   Activity,
+  CheckCircle,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,8 @@ import {
   fetchReportChartData,
   computeAnomalyDetails,
 } from "./_lib/reports-service";
+import { fetchResolvedAnomalies, dismissAnomaly, resolveAnomaly } from "./_actions/anomaly-actions";
+import { detectAndSaveAnomalies } from "./_actions/detect-anomalies";
 import {
   generateReportAIInsights,
   fetchCachedReportInsights,
@@ -53,6 +56,7 @@ export default function ReportsPage() {
   const [showAnomalyModal, setShowAnomalyModal] = useState(false);
   const [selectedAnomaly, setSelectedAnomaly] = useState<AnomalyDetails | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "grid">("grid");
+  const [anomalyTab, setAnomalyTab] = useState<"active" | "resolved">("active");
   const [reportSettings, setReportSettings] = useState<ReportSettings>({
     reportType: "spending",
     timeframe: "month",
@@ -68,6 +72,7 @@ export default function ReportsPage() {
   // Real data states
   const [summaryData, setSummaryData] = useState<any>(null);
   const [anomalies, setAnomalies] = useState<AnomalyAlert[]>([]);
+  const [resolvedAnomalies, setResolvedAnomalies] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any>(null);
   const [aiInsights, setAiInsights] = useState<ReportAIInsightResponse | null>(null);
   const [hasGeneratedInsights, setHasGeneratedInsights] = useState(false);
@@ -108,16 +113,21 @@ export default function ReportsPage() {
 
     setLoading(true);
     try {
-      // Fetch summary, anomalies, chart data, and cached insights in parallel
-      const [summary, anomalyData, chart, cachedInsights] = await Promise.all([
+      // First, detect and save any new anomalies
+      await detectAndSaveAnomalies(user.id, reportSettings.timeframe);
+
+      // Then fetch summary, anomalies, chart data, cached insights, and resolved anomalies in parallel
+      const [summary, anomalyData, chart, cachedInsights, resolvedData] = await Promise.all([
         fetchReportSummary(user.id, reportSettings.timeframe),
         fetchAnomalyAlerts(user.id, reportSettings.timeframe),
         fetchReportChartData(user.id, reportSettings.reportType, reportSettings.timeframe),
         fetchCachedReportInsights(user.id, reportSettings.reportType, reportSettings.timeframe),
+        fetchResolvedAnomalies(user.id, reportSettings.timeframe),
       ]);
 
       setSummaryData(summary);
       setAnomalies(anomalyData);
+      setResolvedAnomalies(resolvedData.data || []);
       setChartData(chart);
 
       // Auto-load cached insights if available
@@ -256,15 +266,70 @@ export default function ReportsPage() {
     }
   }, [user?.id, anomalies]);
 
-  const handleDismissAnomaly = useCallback((anomalyId: string) => {
-    console.log("Dismissing anomaly:", anomalyId);
-    setShowAnomalyModal(false);
-  }, []);
+  const handleDismissAnomaly = useCallback(async (anomalyId: string) => {
+    if (!user?.id) return;
 
-  const handleResolveAnomaly = useCallback((anomalyId: string) => {
-    console.log("Resolving anomaly:", anomalyId);
+    // Remove from active anomalies list immediately for better UX
+    setAnomalies(prev => prev.filter(a => a.id !== anomalyId));
+    
+    try {
+      // Call server action to delete from database
+      const result = await dismissAnomaly(anomalyId, user.id);
+      
+      if (result.success) {
+        // Refresh active anomalies to ensure sync with database
+        const activeData = await fetchAnomalyAlerts(user.id, reportSettings.timeframe);
+        setAnomalies(activeData);
+      } else {
+        // If failed, restore the anomaly in the list
+        const activeData = await fetchAnomalyAlerts(user.id, reportSettings.timeframe);
+        setAnomalies(activeData);
+      }
+    } catch (error) {
+      console.error("Error dismissing anomaly:", error);
+      // Restore on error
+      const activeData = await fetchAnomalyAlerts(user.id, reportSettings.timeframe);
+      setAnomalies(activeData);
+    }
+    
     setShowAnomalyModal(false);
-  }, []);
+  }, [user?.id, reportSettings.timeframe]);
+
+  const handleResolveAnomaly = useCallback(async (anomalyId: string) => {
+    if (!user?.id) return;
+
+    // Remove from active anomalies list immediately for better UX
+    setAnomalies(prev => prev.filter(a => a.id !== anomalyId));
+    
+    try {
+      // Call server action to update in database
+      const result = await resolveAnomaly(anomalyId, user.id);
+      
+      if (result.success) {
+        // Refresh both active and resolved anomalies
+        const [activeData, resolvedResult] = await Promise.all([
+          fetchAnomalyAlerts(user.id, reportSettings.timeframe),
+          fetchResolvedAnomalies(user.id, reportSettings.timeframe)
+        ]);
+        
+        setAnomalies(activeData);
+        if (resolvedResult.success) {
+          setResolvedAnomalies(resolvedResult.data || []);
+        }
+      } else {
+        // If failed, restore the anomaly in the list
+        const activeData = await fetchAnomalyAlerts(user.id, reportSettings.timeframe);
+        setAnomalies(activeData);
+      }
+    } catch (error) {
+      console.error("Error resolving anomaly:", error);
+      // Restore on error
+      const activeData = await fetchAnomalyAlerts(user.id, reportSettings.timeframe);
+      setAnomalies(activeData);
+    }
+    
+    setShowAnomalyModal(false);
+  }, [user?.id, reportSettings.timeframe]);
 
   // Loading state
   if (loading) {
@@ -495,90 +560,176 @@ export default function ReportsPage() {
             <h3 className="text-sm font-semibold text-slate-900">Anomaly Detection</h3>
             <p className="text-xs text-slate-500 mt-0.5 font-light">AI-powered transaction monitoring</p>
           </div>
-          {anomalies.length > 0 && (
-            <Badge variant="warning" className="text-[10px] px-2.5 py-1">
-              {anomalies.filter(a => a.status === 'active').length} Active Alerts
-            </Badge>
-          )}
         </div>
 
-        {anomalies.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
-              <AlertTriangle size={24} className="sm:w-8 sm:h-8 text-slate-300" />
-            </div>
-            <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Anomalies Detected</h4>
-            <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
-              Your spending patterns look normal. Anomalies will appear here when unusual activity is detected.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {anomalies.slice(0, 4).map((anomaly) => (
-              <div
-                key={anomaly.id} 
-                className={`bg-white rounded-xl border-l-4 ${
-                  anomaly.severity === 'high' ? 'border-l-red-500' :
-                  anomaly.severity === 'medium' ? 'border-l-amber-500' : 'border-l-blue-500'
-                } shadow-sm p-4 hover:shadow-md transition-all group cursor-pointer`}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div className={`text-[10px] font-bold ${
-                    anomaly.severity === 'high' ? 'text-red-600' :
-                    anomaly.severity === 'medium' ? 'text-amber-600' : 'text-blue-600'
-                  } uppercase tracking-wider`}>
-                    {anomaly.severity} Severity
-                  </div>
-                  <div className={`${
-                    anomaly.severity === 'high' ? 'text-red-600' :
-                    anomaly.severity === 'medium' ? 'text-amber-600' : 'text-blue-600'
-                  }`}>
-                    {anomaly.type === 'unusual-spending' ? <TrendingUp size={16} /> : <RefreshCw size={16} />}
-                  </div>
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6 border-b border-slate-200">
+          <button
+            onClick={() => setAnomalyTab("active")}
+            className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+              anomalyTab === "active"
+                ? "text-emerald-600 border-b-2 border-emerald-600"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            Active {anomalies.length > 0 && `(${anomalies.length})`}
+          </button>
+          <button
+            onClick={() => setAnomalyTab("resolved")}
+            className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+              anomalyTab === "resolved"
+                ? "text-emerald-600 border-b-2 border-emerald-600"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            Resolved {resolvedAnomalies.length > 0 && `(${resolvedAnomalies.length})`}
+          </button>
+        </div>
+
+        {/* Active Anomalies Tab */}
+        {anomalyTab === "active" && (
+          <>
+            {anomalies.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
+                  <AlertTriangle size={24} className="sm:w-8 sm:h-8 text-slate-300" />
                 </div>
-                
-                <h4 className="text-sm font-bold text-slate-800 mb-1">{anomaly.title}</h4>
-                <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
-                  {anomaly.description}
+                <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Anomalies Detected</h4>
+                <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
+                  Your spending patterns look normal. Anomalies will appear here when unusual activity is detected.
                 </p>
-                
-                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-slate-500">{anomaly.category}</span>
-                    {anomaly.amount && (
-                      <span className="text-[10px] font-medium text-slate-700">
-                        ₱{typeof anomaly.amount === 'number' ? anomaly.amount.toFixed(2) : anomaly.amount}
-                      </span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {anomalies.slice(0, 4).map((anomaly) => (
+                  <div
+                    key={anomaly.id} 
+                    className={`bg-white rounded-xl border-l-4 ${
+                      anomaly.severity === 'high' ? 'border-l-red-500' :
+                      anomaly.severity === 'medium' ? 'border-l-amber-500' : 'border-l-blue-500'
+                    } shadow-sm p-4 hover:shadow-md transition-all group cursor-pointer`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className={`text-[10px] font-bold ${
+                        anomaly.severity === 'high' ? 'text-red-600' :
+                        anomaly.severity === 'medium' ? 'text-amber-600' : 'text-blue-600'
+                      } uppercase tracking-wider`}>
+                        {anomaly.severity} Severity
+                      </div>
+                      <div className={`${
+                        anomaly.severity === 'high' ? 'text-red-600' :
+                        anomaly.severity === 'medium' ? 'text-amber-600' : 'text-blue-600'
+                      }`}>
+                        {anomaly.type === 'unusual-spending' ? <TrendingUp size={16} /> : <RefreshCw size={16} />}
+                      </div>
+                    </div>
+                    
+                    <h4 className="text-sm font-bold text-slate-800 mb-1">{anomaly.title}</h4>
+                    <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
+                      {anomaly.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-slate-500">{anomaly.category}</span>
+                        {anomaly.amount && (
+                          <span className="text-[10px] font-medium text-slate-700">
+                            ₱{typeof anomaly.amount === 'number' ? anomaly.amount.toFixed(2) : anomaly.amount}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="xs" 
+                          className={`${
+                            anomaly.severity === 'high' ? 'text-red-600 hover:text-red-700' :
+                            anomaly.severity === 'medium' ? 'text-amber-600 hover:text-amber-700' : 'text-blue-600 hover:text-blue-700'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDismissAnomaly(anomaly.id);
+                          }}
+                        >
+                          Dismiss
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="xs" 
+                          className={`${
+                            anomaly.severity === 'high' ? 'text-red-600 hover:text-red-700' :
+                            anomaly.severity === 'medium' ? 'text-amber-600 hover:text-amber-700' : 'text-blue-600 hover:text-blue-700'
+                          }`}
+                          onClick={() => handleAnomalyDetails(anomaly.id)}
+                        >
+                          Details <ArrowRight size={12} />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Resolved Anomalies Tab */}
+        {anomalyTab === "resolved" && (
+          <>
+            {resolvedAnomalies.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
+                  <CheckCircle size={24} className="sm:w-8 sm:h-8 text-slate-300" />
+                </div>
+                <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Resolved Anomalies</h4>
+                <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
+                  Resolved and dismissed anomalies will appear here.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {resolvedAnomalies.slice(0, 6).map((anomaly: any) => (
+                  <div
+                    key={anomaly.id} 
+                    className="bg-white rounded-xl border-l-4 border-l-emerald-500 shadow-sm p-4 hover:shadow-md transition-all"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
+                        {anomaly.status === "resolved" ? "Resolved" : "Dismissed"}
+                      </div>
+                      <div className="text-emerald-600">
+                        <CheckCircle size={16} />
+                      </div>
+                    </div>
+                    
+                    <h4 className="text-sm font-bold text-slate-800 mb-1">{anomaly.title}</h4>
+                    <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
+                      {anomaly.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-slate-500">{anomaly.category}</span>
+                        {anomaly.amount && (
+                          <span className="text-[10px] font-medium text-slate-700">
+                            ₱{typeof anomaly.amount === 'number' ? anomaly.amount.toFixed(2) : anomaly.amount}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-400">
+                        {anomaly.resolvedAt && new Date(anomaly.resolvedAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                    {anomaly.resolutionNotes && (
+                      <div className="mt-2 pt-2 border-t border-slate-100">
+                        <p className="text-[10px] text-slate-500 italic">{anomaly.resolutionNotes}</p>
+                      </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="xs" 
-                      className={`${
-                        anomaly.severity === 'high' ? 'text-red-600 hover:text-red-700' :
-                        anomaly.severity === 'medium' ? 'text-amber-600 hover:text-amber-700' : 'text-blue-600 hover:text-blue-700'
-                      }`}
-                      onClick={() => handleDismissAnomaly(anomaly.id)}
-                    >
-                      Dismiss
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="xs" 
-                      className={`${
-                        anomaly.severity === 'high' ? 'text-red-600 hover:text-red-700' :
-                        anomaly.severity === 'medium' ? 'text-amber-600 hover:text-amber-700' : 'text-blue-600 hover:text-blue-700'
-                      }`}
-                      onClick={() => handleAnomalyDetails(anomaly.id)}
-                    >
-                      Details <ArrowRight size={12} />
-                    </Button>
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </Card>
 
@@ -1006,6 +1157,7 @@ export default function ReportsPage() {
           anomalyDetails={selectedAnomaly}
           onDismiss={handleDismissAnomaly}
           onResolve={handleResolveAnomaly}
+          userId={user?.id}
         />
       )}
     </div>

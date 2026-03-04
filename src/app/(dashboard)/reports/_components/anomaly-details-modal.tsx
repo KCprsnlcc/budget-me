@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Stepper } from "./stepper";
 import type { AnomalyDetails } from "./types";
+import { dismissAnomaly, resolveAnomaly } from "../_actions/anomaly-actions";
 
 interface AnomalyDetailsModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ interface AnomalyDetailsModalProps {
   anomalyDetails: AnomalyDetails | null;
   onDismiss?: (anomalyId: string) => void;
   onResolve?: (anomalyId: string) => void;
+  userId?: string;
 }
 
 const STEPS = ["Overview", "Details", "Actions"];
@@ -54,8 +56,10 @@ export function AnomalyDetailsModal({
   anomalyDetails,
   onDismiss,
   onResolve,
+  userId,
 }: AnomalyDetailsModalProps) {
   const [step, setStep] = useState(1);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const reset = useCallback(() => {
     setStep(1);
@@ -79,19 +83,51 @@ export function AnomalyDetailsModal({
     setStep((s) => s - 1);
   }, []);
 
-  const handleDismiss = useCallback(() => {
-    if (anomalyDetails && onDismiss) {
-      onDismiss(anomalyDetails.anomaly.id);
-      handleClose();
+  const handleDismiss = useCallback(async () => {
+    if (!anomalyDetails || !userId) {
+      return;
     }
-  }, [anomalyDetails, onDismiss, handleClose]);
 
-  const handleResolve = useCallback(() => {
-    if (anomalyDetails && onResolve) {
-      onResolve(anomalyDetails.anomaly.id);
-      handleClose();
+    setIsProcessing(true);
+
+    try {
+      const result = await dismissAnomaly(anomalyDetails.anomaly.id, userId);
+
+      if (result.success) {
+        if (onDismiss) {
+          onDismiss(anomalyDetails.anomaly.id);
+        }
+        handleClose();
+      }
+    } catch (error) {
+      console.error("Error dismissing anomaly:", error);
+    } finally {
+      setIsProcessing(false);
     }
-  }, [anomalyDetails, onResolve, handleClose]);
+  }, [anomalyDetails, userId, onDismiss, handleClose]);
+
+  const handleResolve = useCallback(async () => {
+    if (!anomalyDetails || !userId) {
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const result = await resolveAnomaly(anomalyDetails.anomaly.id, userId);
+
+      if (result.success) {
+        if (onResolve) {
+          onResolve(anomalyDetails.anomaly.id);
+        }
+        handleClose();
+      }
+    } catch (error) {
+      console.error("Error resolving anomaly:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [anomalyDetails, userId, onResolve, handleClose]);
 
   if (!anomalyDetails) return null;
 
@@ -268,13 +304,24 @@ export function AnomalyDetailsModal({
             {/* Action Buttons */}
             {anomalyData.status === "active" && (
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
-                <Button variant="outline" size="sm" onClick={handleDismiss} className="w-full">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleDismiss} 
+                  className="w-full"
+                  disabled={isProcessing}
+                >
                   <XCircle size={14} className="mr-1.5" />
-                  Dismiss
+                  {isProcessing ? "Processing..." : "Dismiss"}
                 </Button>
-                <Button size="sm" onClick={handleResolve} className="w-full bg-emerald-500 hover:bg-emerald-600">
+                <Button 
+                  size="sm" 
+                  onClick={handleResolve} 
+                  className="w-full bg-emerald-500 hover:bg-emerald-600"
+                  disabled={isProcessing}
+                >
                   <CheckCircle size={14} className="mr-1.5" />
-                  Resolve
+                  {isProcessing ? "Processing..." : "Resolve"}
                 </Button>
               </div>
             )}
