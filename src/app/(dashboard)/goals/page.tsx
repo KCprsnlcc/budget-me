@@ -2,7 +2,7 @@
 
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
-import { memo, useState, useCallback, useMemo, useEffect } from "react";
+import { memo, useState, useCallback, useMemo, useEffect, useRef } from "react";
 import {
   Plus,
   Flag,
@@ -259,6 +259,10 @@ export default function GoalsPage() {
   const [selectedGoal, setSelectedGoal] = useState<GoalType | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('grid');
   const [hoveredBar, setHoveredBar] = useState<{ month: string, type: 'target' | 'saved', value: number } | null>(null);
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const [mobileChartTab, setMobileChartTab] = useState<'overview' | 'health'>('overview');
+  const exportDropdownRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   
   // State for goal contributors (avatars to display on goal cards)
   const [goalContributors, setGoalContributors] = useState<Record<string, { user_id: string; full_name: string; avatar_url: string | null; total_contributed: number }[]>>({});
@@ -374,6 +378,20 @@ export default function GoalsPage() {
     }
   }, [goals]);
 
+  // Close export dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+        setExportDropdownOpen(false);
+      }
+    };
+
+    if (exportDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [exportDropdownOpen]);
+
   const chartData = useMemo(() => {
     const totalTarget = allGoals.reduce((s, g) => s + g.target, 0);
     const totalSaved = allGoals.reduce((s, g) => s + g.current, 0);
@@ -421,129 +439,122 @@ export default function GoalsPage() {
   if (loading && !tableLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
-        <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+        <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
           {/* Header Skeleton */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
             <div>
-              <Skeleton width={200} height={32} className="mb-2" />
-              <Skeleton width={300} height={16} />
+              <Skeleton width={180} height={28} className="mb-2" />
+              <Skeleton width={250} height={14} />
             </div>
-            <div className="flex gap-3">
-              <Skeleton width={100} height={36} />
-              <Skeleton width={120} height={36} />
-              <Skeleton width={140} height={36} />
+            <div className="flex gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+              <Skeleton width={80} height={32} />
+              <Skeleton width={100} height={32} />
+              <Skeleton width={120} height={32} />
             </div>
           </div>
 
-          {/* Summary Stats Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="p-5">
-                <div className="flex justify-between items-start mb-4">
-                  <Skeleton width={40} height={40} borderRadius={8} />
-                  <Skeleton width={80} height={20} borderRadius={10} />
+          {/* Scrollable Content Area for Mobile/Tablet - Skeleton */}
+          <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0">
+            {/* Summary Stats Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="p-4 sm:p-5">
+                  <div className="flex justify-between items-start mb-3 sm:mb-4">
+                    <Skeleton width={36} height={36} borderRadius={8} />
+                    <Skeleton width={70} height={18} borderRadius={10} />
+                  </div>
+                  <Skeleton width={90} height={14} className="mb-2" />
+                  <Skeleton width={110} height={22} />
+                </Card>
+              ))}
+            </div>
+
+            {/* Charts Skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+              <Card className="lg:col-span-2 p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-6 sm:mb-8">
+                  <div>
+                    <Skeleton width={130} height={14} className="mb-2" />
+                    <Skeleton width={100} height={10} />
+                  </div>
+                  <div className="flex gap-2 sm:gap-3">
+                    <Skeleton width={50} height={10} />
+                    <Skeleton width={50} height={10} />
+                  </div>
                 </div>
-                <Skeleton width={100} height={16} className="mb-2" />
-                <Skeleton width={120} height={24} />
+                <Skeleton height={192} className="sm:h-60" />
               </Card>
-            ))}
-          </div>
+              <Card className="p-4 sm:p-6">
+                <Skeleton width={80} height={14} className="mb-2" />
+                <Skeleton width={120} height={10} className="mb-4 sm:mb-6" />
+                <Skeleton width={96} height={96} borderRadius="50%" className="mx-auto mb-4 sm:mb-6 sm:w-32 sm:h-32" />
+                <div className="space-y-2 sm:space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex justify-between">
+                      <Skeleton width={70} height={10} />
+                      <Skeleton width={35} height={10} />
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
 
-          {/* Charts Skeleton */}
-          <div className="hidden lg:grid grid-cols-3 gap-6">
-            <Card className="col-span-2 p-6">
-              <div className="flex items-center justify-between mb-8">
+            {/* Overall Progress Skeleton */}
+            <Card className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-2">
                 <div>
                   <Skeleton width={150} height={16} className="mb-2" />
-                  <Skeleton width={120} height={12} />
+                  <Skeleton width={250} height={12} />
                 </div>
-                <div className="flex gap-3">
-                  <Skeleton width={60} height={12} />
-                  <Skeleton width={60} height={12} />
-                </div>
+                <Skeleton width={60} height={20} borderRadius={10} />
               </div>
-              <Skeleton height={240} />
+              <Skeleton height={10} borderRadius={5} className="sm:h-3" />
             </Card>
-            <Card className="p-6">
-              <Skeleton width={100} height={16} className="mb-2" />
-              <Skeleton width={140} height={12} className="mb-6" />
-              <Skeleton width={128} height={128} borderRadius="50%" className="mx-auto mb-6" />
-              <div className="space-y-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="flex justify-between">
-                    <Skeleton width={80} height={12} />
-                    <Skeleton width={40} height={12} />
-                  </div>
-                ))}
+
+            {/* Filters Skeleton */}
+            <Card className="p-3 sm:p-4">
+              <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
+                <Skeleton width={50} height={14} />
+                <Skeleton width={180} height={32} />
+                <Skeleton width={500} height={32} className="flex-1" />
+                <Skeleton width={70} height={28} />
+                <Skeleton width={70} height={28} />
               </div>
             </Card>
-          </div>
 
-          {/* Overall Progress Skeleton */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <Skeleton width={180} height={16} className="mb-2" />
-                <Skeleton width={300} height={12} />
-              </div>
-              <Skeleton width={80} height={24} borderRadius={10} />
-            </div>
-            <Skeleton height={12} borderRadius={6} />
-          </Card>
-
-          {/* Filters Skeleton */}
-          <Card className="p-4">
-            <div className="flex flex-col xl:flex-row items-center gap-3">
-              <Skeleton width={60} height={16} />
-              <Skeleton width={200} height={36} />
-              <Skeleton width={500} height={36} className="flex-1" />
-              <Skeleton width={80} height={32} />
-              <Skeleton width={80} height={32} />
-            </div>
-          </Card>
-
-          {/* Goal Cards Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className="p-5">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <Skeleton width={40} height={40} borderRadius={8} />
-                    <div>
-                      <Skeleton width={120} height={16} className="mb-1" />
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <Skeleton width={60} height={16} borderRadius={8} />
-                        <Skeleton width={40} height={16} borderRadius={8} />
+            {/* Goal Cards Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="p-4 sm:p-5">
+                  <div className="flex items-start justify-between mb-3 sm:mb-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton width={36} height={36} borderRadius={8} />
+                      <div>
+                        <Skeleton width={110} height={14} className="mb-1" />
+                        <Skeleton width={70} height={10} />
                       </div>
                     </div>
+                    <Skeleton width={55} height={18} borderRadius={10} />
                   </div>
-                  <Skeleton width={80} height={20} borderRadius={10} />
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <Skeleton width={40} height={12} />
-                    <Skeleton width={100} height={12} />
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Skeleton width={35} height={10} />
+                      <Skeleton width={90} height={10} />
+                    </div>
+                    <Skeleton height={6} borderRadius={4} className="sm:h-2" />
+                    <div className="flex justify-between">
+                      <Skeleton width={70} height={10} />
+                      <Skeleton width={25} height={10} />
+                    </div>
                   </div>
-                  <Skeleton height={8} borderRadius={4} />
-                  <div className="flex justify-between">
-                    <Skeleton width={80} height={10} />
-                    <Skeleton width={30} height={10} />
+                  <div className="mt-3 sm:mt-4 pt-3 border-t border-slate-50 flex justify-center gap-3">
+                    <Skeleton width={28} height={28} borderRadius={4} className="sm:w-8 sm:h-8" />
+                    <Skeleton width={28} height={28} borderRadius={4} className="sm:w-8 sm:h-8" />
+                    <Skeleton width={28} height={28} borderRadius={4} className="sm:w-8 sm:h-8" />
                   </div>
-                </div>
-
-                <div className="mt-5 pt-4 border-t border-slate-50 flex items-center justify-between">
-                  <Skeleton width={80} height={12} />
-                  <Skeleton width={60} height={24} borderRadius={4} />
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-50 flex justify-center gap-3">
-                  <Skeleton width={32} height={32} borderRadius={4} />
-                  <Skeleton width={32} height={32} borderRadius={4} />
-                  <Skeleton width={32} height={32} borderRadius={4} />
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </SkeletonTheme>
@@ -551,57 +562,90 @@ export default function GoalsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+    <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
         <div>
-          <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">Financial Goals</h2>
-          <p className="text-sm text-slate-500 mt-1 font-light">Track your savings goals and milestones</p>
+          <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">Financial Goals</h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 font-light">Track your savings goals and milestones</p>
         </div>
-        <div className="flex gap-3">
-          <div className="flex bg-slate-100 p-1 rounded-lg">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+        <div className="flex gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+          <div className="flex gap-2 order-1 w-full sm:w-auto">
+            <div className="flex bg-slate-100 p-1 rounded-lg flex-1 sm:flex-none">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${
+                  viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                 }`}
-              onClick={() => setViewMode('table')}
-            >
-              <Table size={14} className="mr-1" />
-              Table
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                }`}
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid3X3 size={14} className="mr-1" />
-              Grid
-            </Button>
-          </div>
-          <div className="relative group">
-            <Button variant="outline" size="sm">
-              <Download size={16} />
-              <span className="hidden sm:inline">Export</span>
-              <MoreHorizontal size={12} />
-            </Button>
-            {/* Dropdown */}
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 hidden group-hover:block z-50">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50" onClick={handleExportPDF}>
-                <span className="text-rose-500">PDF</span> Export as PDF
+                onClick={() => setViewMode('table')}
+              >
+                <Table size={14} className="mr-1" />
+                Table
               </Button>
-              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50" onClick={handleExportCSV}>
-                <span className="text-emerald-500">CSV</span> Export as CSV
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${
+                  viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}
+                onClick={() => setViewMode('grid')}
+              >
+                <Grid3X3 size={14} className="mr-1" />
+                Grid
               </Button>
             </div>
+            <div className="relative flex-1 sm:flex-none" ref={exportDropdownRef}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+                onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+              >
+                <Download size={14} className="sm:mr-1" />
+                <span className="hidden sm:inline">Export</span>
+                <MoreHorizontal size={12} className="ml-1" />
+              </Button>
+              {/* Dropdown */}
+              {exportDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                    onClick={() => {
+                      handleExportPDF();
+                      setExportDropdownOpen(false);
+                    }}
+                  >
+                    <span className="text-rose-500 mr-2">PDF</span> Export as PDF
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                    onClick={() => {
+                      handleExportCSV();
+                      setExportDropdownOpen(false);
+                    }}
+                  >
+                    <span className="text-emerald-500 mr-2">CSV</span> Export as CSV
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
-          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => setAddModalOpen(true)}>
-            <Plus size={16} /> Create Goal
+          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 order-2 w-full sm:w-auto" onClick={() => setAddModalOpen(true)}>
+            <Plus size={14} className="sm:mr-1" /> <span className="hidden sm:inline">Create Goal</span><span className="sm:hidden">Create</span>
           </Button>
         </div>
       </div>
+
+      {/* Scrollable Content Area for Mobile/Tablet */}
+      <div
+        ref={contentRef}
+        className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth"
+      >
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -613,8 +657,8 @@ export default function GoalsPage() {
           const hasData = item.value !== "0" && item.value !== formatCurrency(0);
 
           return (
-            <Card key={item.label} className="p-5 hover:shadow-md transition-all group cursor-pointer">
-              <div className="flex justify-between items-start mb-4">
+            <Card key={item.label} className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
+              <div className="flex justify-between items-start mb-3 sm:mb-4">
                 <div className="text-slate-500 p-2 rounded-lg">
                   <Icon size={22} strokeWidth={1.5} />
                 </div>
@@ -649,29 +693,54 @@ export default function GoalsPage() {
       </div>
 
       {/* Charts Section */}
-      <div className="hidden lg:grid grid-cols-3 gap-6">
+      <div>
+        {/* Mobile Chart Tabs */}
+        <div className="flex p-1 bg-slate-100 rounded-lg lg:hidden mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`flex-1 text-xs transition-colors ${
+              mobileChartTab === 'overview' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+            }`}
+            onClick={() => setMobileChartTab('overview')}
+          >
+            Overview
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`flex-1 text-xs transition-colors ${
+              mobileChartTab === 'health' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+            }`}
+            onClick={() => setMobileChartTab('health')}
+          >
+            Health
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Progress Chart */}
-        <Card className="col-span-2 p-6 hover:shadow-md transition-all group cursor-pointer">
-          <div className="flex items-center justify-between mb-8">
+        <Card className={`lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer ${mobileChartTab === 'health' ? 'hidden lg:block' : ''}`}>
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">Savings Progress</h3>
-              <p className="text-xs text-slate-500 mt-1 font-light">Target vs Saved over last 6 months</p>
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Savings Progress</h3>
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Target vs Saved over last 6 months</p>
             </div>
-            <div className="flex gap-3">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-slate-300" />
-                <span className="text-[10px] font-medium text-slate-400">Target</span>
+            <div className="flex gap-2 sm:gap-3">
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-300" />
+                <span className="text-[9px] sm:text-[10px] font-medium text-slate-400">Target</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-[10px] font-medium text-slate-400">Saved</span>
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500" />
+                <span className="text-[9px] sm:text-[10px] font-medium text-slate-400">Saved</span>
               </div>
             </div>
           </div>
 
           {chartData.length > 0 ? (
             <>
-              <div className="relative h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50">
+              <div className="relative h-48 sm:h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50">
                 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                   <div className="w-full h-px bg-slate-100/50" />
                   <div className="w-full h-px bg-slate-100/50" />
@@ -682,13 +751,13 @@ export default function GoalsPage() {
                 {chartData.map((data) => (
                   <div key={data.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
                     <div
-                      className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
+                      className="w-2 sm:w-3 md:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
                       style={{ height: `${data.target}%` }}
                       onMouseEnter={() => setHoveredBar({ month: data.month, type: 'target', value: data.targetValue })}
                       onMouseLeave={() => setHoveredBar(null)}
                     />
                     <div
-                      className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
+                      className="w-2 sm:w-3 md:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
                       style={{ height: `${data.saved}%` }}
                       onMouseEnter={() => setHoveredBar({ month: data.month, type: 'saved', value: data.savedValue })}
                       onMouseLeave={() => setHoveredBar(null)}
@@ -696,10 +765,10 @@ export default function GoalsPage() {
 
                     {/* Tooltip */}
                     {hoveredBar && hoveredBar.month === data.month && (
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-[10px] sm:text-xs rounded shadow-sm whitespace-nowrap z-50">
                         <div className="font-medium text-slate-700">{hoveredBar.month}</div>
                         <div className="flex items-center gap-1">
-                          <div className={`w-2 h-2 rounded-full ${hoveredBar.type === 'target' ? 'bg-slate-300' : 'bg-emerald-500'}`} />
+                          <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${hoveredBar.type === 'target' ? 'bg-slate-300' : 'bg-emerald-500'}`} />
                           <span className="capitalize">{hoveredBar.type}: {formatCurrency(hoveredBar.value)}</span>
                         </div>
                         <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
@@ -708,24 +777,25 @@ export default function GoalsPage() {
                   </div>
                 ))}
               </div>
-              <div className="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
-                {chartData.map((data) => (
-                  <span key={data.month} className={data.month === 'Jan' ? 'text-slate-600' : ''}>
-                    {data.month}
+              <div className="flex justify-between mt-3 sm:mt-4 text-[9px] sm:text-[10px] font-medium text-slate-400 px-2 sm:px-4 uppercase tracking-wider">
+                {chartData.map((data, i) => (
+                  <span key={data.month} className={`${i === chartData.length - 1 ? 'text-slate-600' : ''} truncate`}>
+                    <span className="hidden sm:inline">{data.month}</span>
+                    <span className="sm:hidden">{data.month.slice(0, 3)}</span>
                   </span>
                 ))}
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center h-60 text-center">
-              <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
-                <TrendingUp size={24} />
+            <div className="flex flex-col items-center justify-center h-48 sm:h-60 text-center px-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
+                <TrendingUp size={20} className="sm:w-6 sm:h-6" />
               </div>
-              <h4 className="text-sm font-medium text-slate-800 mb-1">No Savings Data</h4>
-              <p className="text-xs text-slate-400 max-w-sm mb-4">
+              <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Savings Data</h4>
+              <p className="text-[10px] sm:text-xs text-slate-400 max-w-sm mb-3 sm:mb-4">
                 Create goals and track your savings over time to see your target vs saved progress.
               </p>
-              <Button size="sm" variant="outline" onClick={() => setAddModalOpen(true)}>
+              <Button size="sm" variant="outline" onClick={() => setAddModalOpen(true)} className="text-xs">
                 Create Goal
               </Button>
             </div>
@@ -733,27 +803,27 @@ export default function GoalsPage() {
         </Card>
 
         {/* Goal Health */}
-        <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
-          <h3 className="text-sm font-semibold text-slate-900 mb-2">Goal Health</h3>
-          <p className="text-xs text-slate-500 mb-6 font-light">Track your goal completion status</p>
+        <Card className={`p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer ${mobileChartTab === 'overview' ? 'hidden lg:flex' : ''}`}>
+          <h3 className="text-xs sm:text-sm font-semibold text-slate-900 mb-2">Goal Health</h3>
+          <p className="text-[10px] sm:text-xs text-slate-500 mb-4 sm:mb-6 font-light">Track your goal completion status</p>
 
           {allGoals.length > 0 ? (
             <>
-              <div className="flex items-center justify-center mb-6 relative">
-                <div className="w-32 h-32 rounded-full relative"
+              <div className="flex items-center justify-center mb-4 sm:mb-6 relative">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full relative"
                   style={{ background: goalHealthGradient }}>
-                  <div className="absolute inset-0 m-auto w-24 h-24 bg-white rounded-full flex flex-col items-center justify-center">
-                    <span className="text-xs text-slate-400">Total</span>
-                    <span className="text-xl font-bold text-slate-900">{allGoals.length}</span>
+                  <div className="absolute inset-0 m-auto w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex flex-col items-center justify-center">
+                    <span className="text-[10px] sm:text-xs text-slate-400">Total</span>
+                    <span className="text-lg sm:text-xl font-bold text-slate-900">{allGoals.length}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-3 flex-1 px-4">
+              <div className="space-y-2 sm:space-y-3 flex-1 px-2 sm:px-4">
                 {goalHealthData.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between text-xs">
+                  <div key={item.name} className="flex items-center justify-between text-[10px] sm:text-xs">
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${item.color}`} />
+                      <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${item.color}`} />
                       <span className="text-slate-600">{item.name}</span>
                     </div>
                     <span className="font-medium text-slate-900">{item.value} ({Math.round((item.value / (allGoals.length || 1)) * 100)}%)</span>
@@ -762,55 +832,56 @@ export default function GoalsPage() {
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
-                <Flag size={24} />
+            <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center px-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
+                <Flag size={20} className="sm:w-6 sm:h-6" />
               </div>
-              <h4 className="text-sm font-medium text-slate-800 mb-1">No Goals Yet</h4>
-              <p className="text-xs text-slate-400 max-w-sm mb-4">
+              <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Goals Yet</h4>
+              <p className="text-[10px] sm:text-xs text-slate-400 max-w-sm mb-3 sm:mb-4">
                 Create savings goals to track your progress and see your goal completion status.
               </p>
-              <Button size="sm" variant="outline" onClick={() => setAddModalOpen(true)}>
+              <Button size="sm" variant="outline" onClick={() => setAddModalOpen(true)} className="text-xs">
                 Create Goal
               </Button>
             </div>
           )}
         </Card>
+        </div>
       </div>
 
       {/* Overall Goal Progress */}
-      <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
+      <Card className="p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">Overall Goal Progress</h3>
-            <p className="text-xs text-slate-500 mt-0.5">You have saved {Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100)}% of your total goal targets.</p>
+            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Overall Goal Progress</h3>
+            <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">You have saved {Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100)}% of your total goal targets.</p>
           </div>
           <Badge variant={Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 75 ? "success" : Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 50 ? "warning" : "danger"}>
             {Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 75 ? "On Track" : Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 50 ? "Good Progress" : "Needs Attention"}
           </Badge>
         </div>
-        <div className="w-full bg-slate-100 rounded-full h-3 mt-2 overflow-hidden">
+        <div className="w-full bg-slate-100 rounded-full h-2.5 sm:h-3 mt-2 overflow-hidden">
           <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${Math.min(Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100), 100)}%` }} />
         </div>
       </Card>
 
       {/* Filters */}
-      <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
-        <div className="flex flex-col xl:flex-row items-center gap-3">
-          <div className="flex items-center gap-2 text-xs text-slate-500 w-full xl:w-auto">
-            <Filter size={16} />
+      <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
+        <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
+            <Filter size={14} className="sm:w-4 sm:h-4" />
             <span className="font-medium">Filters</span>
           </div>
           <div className="hidden xl:block h-4 w-px bg-slate-200"></div>
 
           <div className="relative w-full xl:w-64">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={12} className="sm:w-[14px] sm:h-[14px] absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search goals..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
+              className="w-full pl-7 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
             />
           </div>
 
@@ -820,7 +891,7 @@ export default function GoalsPage() {
               onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
               options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
               placeholder="All Months"
-              className="w-full text-slate-900"
+              className="w-full text-slate-900 text-xs sm:text-sm"
               allowEmpty={true}
               emptyLabel="All Months"
               hideSearch={true}
@@ -830,7 +901,7 @@ export default function GoalsPage() {
               onChange={(value) => setYear(value === "" ? "all" : Number(value))}
               options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
               placeholder="All Years"
-              className="w-full text-slate-900"
+              className="w-full text-slate-900 text-xs sm:text-sm"
               allowEmpty={true}
               emptyLabel="All Years"
               hideSearch={true}
@@ -844,7 +915,7 @@ export default function GoalsPage() {
                 { value: "low", label: "Low" },
               ]}
               placeholder="All Priorities"
-              className="w-full"
+              className="w-full text-xs sm:text-sm"
               allowEmpty={true}
               emptyLabel="All Priorities"
               hideSearch={true}
@@ -859,7 +930,7 @@ export default function GoalsPage() {
                 { value: "overdue", label: "Overdue" },
               ]}
               placeholder="All Statuses"
-              className="w-full"
+              className="w-full text-xs sm:text-sm"
               allowEmpty={true}
               emptyLabel="All Statuses"
               hideSearch={true}
@@ -868,11 +939,11 @@ export default function GoalsPage() {
 
           <div className="flex-1"></div>
           <div className="flex items-center gap-2 w-full xl:w-auto">
-            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset to Current Month" onClick={resetFilters}>
-              <RotateCcw size={14} /> Current
+            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to Current Month" onClick={resetFilters}>
+              <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> Current
             </Button>
-            <Button variant="outline" size="sm" className="text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={resetFiltersToAll}>
-              <RotateCcw size={14} /> All Time
+            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={resetFiltersToAll}>
+              <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> All Time
             </Button>
           </div>
         </div>
@@ -988,7 +1059,7 @@ export default function GoalsPage() {
           )}
         </Card>
       ) : tableLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: pageSize }).map((_, i) => (
             <GoalCardSkeleton key={i} />
           ))}
@@ -996,7 +1067,7 @@ export default function GoalsPage() {
       ) : (
         <>
           {/* Goal Cards Grid (Desktop) */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {goals.map((goal) => {
                 const _canEdit = canEditGoalFn(goal, currentUserRole, isOwner, user?.id);
                 const _canDelete = canDeleteGoalFn(goal, currentUserRole, isOwner, user?.id);
@@ -1047,23 +1118,23 @@ export default function GoalsPage() {
 
       {/* Pagination */}
       {!loading && !tableLoading && !error && goals.length > 0 && (
-        <div className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-lg">
-          <div className="text-sm text-slate-600">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0">
+          <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
             Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} goals
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
             {totalPages > 1 && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={previousPage}
                   disabled={!hasPreviousPage}
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
                 </Button>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     let pageNum;
                     if (totalPages <= 5) {
@@ -1075,14 +1146,14 @@ export default function GoalsPage() {
                     } else {
                       pageNum = currentPage - 2 + i;
                     }
-
+                    
                     return (
                       <Button
                         key={pageNum}
                         variant={currentPage === pageNum ? "default" : "outline"}
                         size="sm"
                         onClick={() => goToPage(pageNum)}
-                        className="h-8 w-8 p-0 text-xs"
+                        className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-[10px] sm:text-xs"
                       >
                         {pageNum}
                       </Button>
@@ -1094,18 +1165,18 @@ export default function GoalsPage() {
                   size="sm"
                   onClick={nextPage}
                   disabled={!hasNextPage}
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                 >
-                  <ChevronRight size={16} />
+                  <ChevronRight size={14} className="sm:w-4 sm:h-4" />
                 </Button>
               </div>
             )}
-            <div className="text-sm text-slate-600 flex items-center gap-2">
+            <div className="text-xs sm:text-sm text-slate-600 flex items-center gap-2">
               <span>Show</span>
               <select
                 value={pageSize === Number.MAX_SAFE_INTEGER ? "all" : pageSize}
                 onChange={(e) => handlePageSizeChange(e.target.value === "all" ? "all" : parseInt(e.target.value))}
-                className="text-sm border border-slate-200 rounded px-2 py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
+                className="text-xs sm:text-sm border border-slate-200 rounded px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -1113,11 +1184,12 @@ export default function GoalsPage() {
                 <option value={100}>100</option>
                 <option value="all">All</option>
               </select>
-              <span>per page</span>
+              <span className="hidden sm:inline">per page</span>
             </div>
           </div>
         </div>
       )}
+      </div>
 
       {/* Modals */}
       <AddGoalModal

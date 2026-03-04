@@ -153,22 +153,22 @@ type InsightType = {
 const StatCard = memo(({ stat }: { stat: StatType }) => {
   const IconCmp = stat.icon;
   return (
-    <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
-      <div className="flex justify-between items-start mb-4">
-        <div className="text-slate-500 p-2 rounded-lg">
-          <IconCmp size={22} strokeWidth={1.5} />
+    <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
+      <div className="flex justify-between items-start mb-3 sm:mb-4">
+        <div className="text-slate-500 p-1.5 sm:p-2 rounded-lg">
+          <IconCmp size={20} className="sm:w-[22px] sm:h-[22px]" strokeWidth={1.5} />
         </div>
         {stat.change && (
-          <div className={`flex items-center gap-1 text-[10px] font-medium ${stat.trend === "up" ? "text-emerald-700 border-emerald-100" :
+          <div className={`flex items-center gap-1 text-[10px] sm:text-[11px] font-medium ${stat.trend === "up" ? "text-emerald-700 border-emerald-100" :
               "text-red-700 border-red-100"
-            } px-2 py-1 rounded-full border`}>
-            {stat.trend === "up" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+            } px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full border`}>
+            {stat.trend === "up" ? <ArrowUp size={10} className="sm:w-3 sm:h-3" /> : <ArrowDown size={10} className="sm:w-3 sm:h-3" />}
             {stat.change}
           </div>
         )}
       </div>
-      <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">{stat.label}</div>
-      <div className="text-xl font-semibold text-slate-900 tracking-tight">{stat.value}</div>
+      <div className="text-slate-500 text-[10px] sm:text-xs font-medium mb-1 uppercase tracking-wide">{stat.label}</div>
+      <div className="text-lg sm:text-xl font-semibold text-slate-900 tracking-tight">{stat.value}</div>
     </Card>
   );
 });
@@ -341,33 +341,33 @@ export default function DashboardPage() {
     const renderIcon = () => {
       if (typeof insight.icon === 'string') {
         // Use Iconify for string icon names (e.g., "lucide:alert-triangle")
-        return <Icon icon={insight.icon} width={16} height={16} className={insight.iconColor} />;
+        return <Icon icon={insight.icon} width={14} height={14} className={`sm:w-4 sm:h-4 ${insight.iconColor}`} />;
       } else {
         // Use React component icon
         const IconCmp = insight.icon;
-        return <IconCmp size={16} className={insight.iconColor} />;
+        return <IconCmp size={14} className={`sm:w-4 sm:h-4 ${insight.iconColor}`} />;
       }
     };
 
     return (
       <div
-        className={`bg-white rounded-xl border-l-4 ${insight.borderColor} shadow-sm p-4 hover:shadow-md transition-all group cursor-pointer ${insightsLoading ? 'opacity-50' : ''}`}
+        className={`bg-white rounded-xl border-l-4 ${insight.borderColor} shadow-sm p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer ${insightsLoading ? 'opacity-50' : ''}`}
       >
-        <div className="flex justify-between items-start mb-2">
-          <div className={`text-[10px] font-bold ${insight.labelColor} uppercase tracking-wider`}>
+        <div className="flex justify-between items-start mb-1.5 sm:mb-2">
+          <div className={`text-[9px] sm:text-[10px] font-bold ${insight.labelColor} uppercase tracking-wider`}>
             {insight.label}
           </div>
           {renderIcon()}
         </div>
-        <h4 className="text-sm font-bold text-slate-800 mb-1">{insight.title}</h4>
-        <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
+        <h4 className="text-xs sm:text-sm font-bold text-slate-800 mb-0.5 sm:mb-1">{insight.title}</h4>
+        <p className="text-[10px] sm:text-[11px] text-slate-500 leading-relaxed mb-2 sm:mb-3">
           {insight.description}
         </p>
 
         {/* Expanded content - exact implementation from old FinancialInsights */}
         {isExpanded && (
-          <div className="mt-3 text-sm text-slate-600 animate__animated animate__fadeIn">
-            <p className="text-xs leading-relaxed">
+          <div className="mt-2 sm:mt-3 text-xs sm:text-sm text-slate-600 animate__animated animate__fadeIn">
+            <p className="text-[10px] sm:text-xs leading-relaxed">
               {getInsightContextMessage(insight.type)}
             </p>
           </div>
@@ -377,10 +377,10 @@ export default function DashboardPage() {
         <Button
           variant="ghost"
           size="xs"
-          className={insight.actionColor}
+          className={`${insight.actionColor} text-[10px] sm:text-xs`}
           onClick={() => handleToggleInsightExpand(insight.title)}
         >
-          {isExpanded ? 'Show less' : 'Learn more'} <ArrowRight size={12} />
+          {isExpanded ? 'Show less' : 'Learn more'} <ArrowRight size={10} className="sm:w-3 sm:h-3" />
         </Button>
       </div>
     );
@@ -422,6 +422,9 @@ export default function DashboardPage() {
     [categoryBreakdown]
   );
 
+  // Chart tab switch state
+  const [activeChartTab, setActiveChartTab] = useState<'overview' | 'categories'>('overview');
+
   // Current month label for chart highlighting
   const currentMonthLabel = new Date().toLocaleDateString("en-US", { month: "short" });
 
@@ -430,24 +433,24 @@ export default function DashboardPage() {
     return (
       <OnboardingCheck>
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
-        <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
           {/* Welcome Header Skeleton */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4 sm:gap-6">
             <div>
               <Skeleton width={120} height={12} className="mb-2" />
-              <Skeleton width={250} height={32} className="mb-2" />
-              <Skeleton width={300} height={16} />
+              <Skeleton width={250} height={28} className="sm:h-[32px] mb-2" />
+              <Skeleton width={300} height={14} className="sm:h-[16px]" />
             </div>
 
             {/* Pending Invitation Skeleton */}
-            <Card className="p-5">
-              <div className="flex items-center gap-4">
+            <Card className="p-4 sm:p-5">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <Skeleton width={40} height={40} borderRadius={50} />
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                   <Skeleton width={150} height={16} className="mb-2" />
-                  <Skeleton width={400} height={12} />
+                  <Skeleton width="100%" height={12} className="sm:w-[400px]" />
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-3 w-full sm:w-auto">
                   <Skeleton width={60} height={32} borderRadius={4} />
                   <Skeleton width={100} height={32} borderRadius={4} />
                 </div>
@@ -464,71 +467,71 @@ export default function DashboardPage() {
               </div>
               <Skeleton width={80} height={24} borderRadius={4} />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="p-4">
-                  <div className="flex justify-between items-start mb-4">
-                    <Skeleton width={40} height={40} borderRadius={8} />
-                    <Skeleton width={60} height={20} borderRadius={10} />
+                <Card key={i} className="p-3 sm:p-4">
+                  <div className="flex justify-between items-start mb-3 sm:mb-4">
+                    <Skeleton width={36} height={36} borderRadius={8} className="sm:w-[40px] sm:h-[40px]" />
+                    <Skeleton width={50} height={18} borderRadius={10} className="sm:w-[60px] sm:h-[20px]" />
                   </div>
-                  <Skeleton width={100} height={12} className="mb-2" />
-                  <Skeleton width={120} height={24} />
+                  <Skeleton width={90} height={10} className="sm:w-[100px] sm:h-[12px] mb-2" />
+                  <Skeleton width={110} height={20} className="sm:w-[120px] sm:h-[24px]" />
                 </Card>
               ))}
             </div>
           </div>
 
           {/* Stats Grid Skeleton */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i} className="p-5">
-                <div className="flex justify-between items-start mb-4">
-                  <Skeleton width={40} height={40} borderRadius={8} />
-                  <Skeleton width={80} height={20} borderRadius={10} />
+              <Card key={i} className="p-4 sm:p-5">
+                <div className="flex justify-between items-start mb-3 sm:mb-4">
+                  <Skeleton width={36} height={36} borderRadius={8} className="sm:w-[40px] sm:h-[40px]" />
+                  <Skeleton width={70} height={18} borderRadius={10} className="sm:w-[80px] sm:h-[20px]" />
                 </div>
-                <Skeleton width={100} height={16} className="mb-2" />
-                <Skeleton width={120} height={24} />
+                <Skeleton width={90} height={14} className="sm:w-[100px] sm:h-[16px] mb-2" />
+                <Skeleton width={110} height={20} className="sm:w-[120px] sm:h-[24px]" />
               </Card>
             ))}
           </div>
 
           {/* Charts + Categories Skeleton */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Income vs Expenses Chart Skeleton */}
-            <Card className="lg:col-span-2 p-6">
-              <div className="flex items-center justify-between mb-8">
+            <Card className="lg:col-span-2 p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-2 sm:gap-0">
                 <div>
-                  <Skeleton width={150} height={16} className="mb-2" />
-                  <Skeleton width={120} height={12} />
+                  <Skeleton width={140} height={14} className="sm:w-[150px] sm:h-[16px] mb-2" />
+                  <Skeleton width={110} height={12} className="sm:w-[120px]" />
                 </div>
                 <div className="flex gap-3">
                   <div className="flex items-center gap-1.5">
                     <Skeleton width={8} height={8} circle />
-                    <Skeleton width={50} height={12} />
+                    <Skeleton width={45} height={12} className="sm:w-[50px]" />
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Skeleton width={8} height={8} circle />
-                    <Skeleton width={60} height={12} />
+                    <Skeleton width={55} height={12} className="sm:w-[60px]" />
                   </div>
                 </div>
               </div>
-              <Skeleton height={240} />
+              <Skeleton height={180} className="sm:h-[200px] lg:h-[240px]" />
             </Card>
 
             {/* Expense Categories Skeleton */}
-            <Card className="p-6 flex flex-col">
-              <div className="mb-6">
-                <Skeleton width={100} height={16} />
-                <Skeleton width={140} height={12} className="mt-1" />
+            <Card className="p-4 sm:p-6 flex flex-col">
+              <div className="mb-4 sm:mb-6">
+                <Skeleton width={90} height={14} className="sm:w-[100px] sm:h-[16px]" />
+                <Skeleton width={120} height={12} className="sm:w-[140px] mt-1" />
               </div>
-              <div className="flex items-center gap-6 mb-6">
-                <Skeleton width={128} height={128} borderRadius="50%" className="mx-auto" />
+              <div className="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
+                <Skeleton width={100} height={100} borderRadius="50%" className="sm:w-[128px] sm:h-[128px] mx-auto" />
               </div>
-              <div className="space-y-3 max-h-28 overflow-y-auto">
+              <div className="space-y-2 sm:space-y-3 max-h-24 sm:max-h-28 overflow-y-auto">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="flex justify-between">
-                    <Skeleton width={80} height={12} />
-                    <Skeleton width={40} height={12} />
+                    <Skeleton width={70} height={12} className="sm:w-[80px]" />
+                    <Skeleton width={35} height={12} className="sm:w-[40px]" />
                   </div>
                 ))}
               </div>
@@ -541,16 +544,16 @@ export default function DashboardPage() {
               <Skeleton width={16} height={16} />
               <Skeleton width={150} height={16} />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="p-4">
+                <Card key={i} className="p-3 sm:p-4">
                   <div className="flex justify-between items-center">
                     <div>
-                      <Skeleton width={80} height={12} className="mb-1" />
-                      <Skeleton width={80} height={16} />
-                      <Skeleton width={60} height={12} className="mt-1" />
+                      <Skeleton width={70} height={10} className="sm:w-[80px] sm:h-[12px] mb-1" />
+                      <Skeleton width={70} height={14} className="sm:w-[80px] sm:h-[16px]" />
+                      <Skeleton width={50} height={10} className="sm:w-[60px] sm:h-[12px] mt-1" />
                     </div>
-                    <Skeleton width={40} height={40} borderRadius={50} />
+                    <Skeleton width={36} height={36} borderRadius={50} className="sm:w-[40px] sm:h-[40px]" />
                   </div>
                 </Card>
               ))}
@@ -558,62 +561,62 @@ export default function DashboardPage() {
           </div>
 
           {/* Budget Progress & Recent Transactions Skeleton */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Budget Progress Skeleton */}
-            <Card className="p-6 flex flex-col">
-              <div className="flex items-center justify-between mb-6">
+            <Card className="p-4 sm:p-6 flex flex-col">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div>
-                  <Skeleton width={150} height={16} className="mb-2" />
-                  <Skeleton width={200} height={12} />
+                  <Skeleton width={130} height={14} className="sm:w-[150px] sm:h-[16px] mb-2" />
+                  <Skeleton width={180} height={12} className="sm:w-[200px]" />
                 </div>
-                <Skeleton width={60} height={24} borderRadius={4} />
+                <Skeleton width={55} height={22} borderRadius={4} className="sm:w-[60px] sm:h-[24px]" />
               </div>
 
-              <div className="space-y-5">
+              <div className="space-y-4 sm:space-y-5">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i}>
                     <div className="flex justify-between items-center mb-2">
-                      <div className="flex items-center gap-3">
-                        <Skeleton width={32} height={32} borderRadius={8} />
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <Skeleton width={28} height={28} borderRadius={8} className="sm:w-[32px] sm:h-[32px]" />
                         <div>
-                          <Skeleton width={80} height={12} />
-                          <Skeleton width={60} height={10} />
+                          <Skeleton width={70} height={10} className="sm:w-[80px] sm:h-[12px]" />
+                          <Skeleton width={50} height={10} className="sm:w-[60px]" />
                         </div>
                       </div>
                       <div className="text-right">
-                        <Skeleton width={40} height={12} />
-                        <Skeleton width={60} height={16} borderRadius={10} />
+                        <Skeleton width={35} height={10} className="sm:w-[40px]" />
+                        <Skeleton width={50} height={14} borderRadius={10} className="sm:w-[60px] sm:h-[16px]" />
                       </div>
                     </div>
-                    <Skeleton height={6} borderRadius={3} />
+                    <Skeleton height={5} borderRadius={3} className="sm:h-[6px]" />
                   </div>
                 ))}
               </div>
             </Card>
 
             {/* Recent Transactions Skeleton */}
-            <Card className="p-6 flex flex-col">
-              <div className="flex items-center justify-between mb-6">
+            <Card className="p-4 sm:p-6 flex flex-col">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div>
-                  <Skeleton width={180} height={16} className="mb-2" />
-                  <Skeleton width={200} height={12} />
+                  <Skeleton width={160} height={14} className="sm:w-[180px] sm:h-[16px] mb-2" />
+                  <Skeleton width={180} height={12} className="sm:w-[200px]" />
                 </div>
-                <Skeleton width={60} height={24} borderRadius={4} />
+                <Skeleton width={55} height={22} borderRadius={4} className="sm:w-[60px] sm:h-[24px]" />
               </div>
 
-              <div className="space-y-4 flex-1">
+              <div className="space-y-3 sm:space-y-4 flex-1">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="flex items-center justify-between p-2">
-                    <div className="flex items-center gap-3">
-                      <Skeleton width={20} height={20} borderRadius={4} />
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <Skeleton width={18} height={18} borderRadius={4} className="sm:w-[20px] sm:h-[20px]" />
                       <div>
-                        <Skeleton width={100} height={12} />
-                        <Skeleton width={80} height={10} />
+                        <Skeleton width={90} height={10} className="sm:w-[100px] sm:h-[12px]" />
+                        <Skeleton width={70} height={10} />
                       </div>
                     </div>
                     <div className="text-right">
-                      <Skeleton width={60} height={12} />
-                      <Skeleton width={80} height={10} />
+                      <Skeleton width={50} height={10} className="sm:w-[60px]" />
+                      <Skeleton width={70} height={10} />
                     </div>
                   </div>
                 ))}
@@ -621,7 +624,7 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          <div className="h-8" />
+          <div className="h-6 sm:h-8" />
         </div>
       </SkeletonTheme>
       </OnboardingCheck>
@@ -643,17 +646,17 @@ export default function DashboardPage() {
 
   return (
     <OnboardingCheck>
-    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+    <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
       {/* Welcome Header */}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 sm:gap-6">
         <div>
           <div className="text-xs font-semibold text-emerald-600 mb-1 uppercase tracking-wide">
             {greeting}
           </div>
-          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-semibold text-slate-800 tracking-tight">
             Welcome back, {userName}!
           </h2>
-          <p className="text-sm text-slate-400 mt-1 font-light">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1 font-light">
             Here&apos;s a summary of your finances. You&apos;re doing great!
           </p>
         </div>
@@ -663,17 +666,17 @@ export default function DashboardPage() {
           pendingInvitations.map((inv) => (
             <Card key={inv.id} className="p-0.5 relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/30 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="bg-white rounded-[10px] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-emerald-500 shrink-0">
-                    <Users size={20} />
+              <div className="bg-white rounded-[10px] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 flex items-center justify-center text-emerald-500 shrink-0">
+                    <Users size={18} className="sm:w-5 sm:h-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-slate-800 flex items-center gap-2">
+                    <h3 className="text-xs sm:text-sm font-medium text-slate-800 flex items-center gap-2 flex-wrap">
                       Pending Invitation
-                      <Badge variant="success">New</Badge>
+                      <Badge variant="success" className="text-[10px]">New</Badge>
                     </h3>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                    <p className="text-[10px] sm:text-xs text-slate-400 mt-1 leading-relaxed">
                       You have been invited by{" "}
                       <span className="text-slate-600 font-medium">{inv.inviter_email}</span> to
                       join the{" "}
@@ -681,22 +684,22 @@ export default function DashboardPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 w-full sm:w-auto pl-14 sm:pl-0">
-                  <Button variant="ghost" size="sm" onClick={() => handleDeclineInvitation(inv.id)}>Decline</Button>
-                  <Button size="sm" onClick={() => handleAcceptInvitation(inv.id)}>Accept Invitation</Button>
+                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto pl-12 sm:pl-0">
+                  <Button variant="ghost" size="sm" className="text-xs" onClick={() => handleDeclineInvitation(inv.id)}>Decline</Button>
+                  <Button size="sm" className="text-xs" onClick={() => handleAcceptInvitation(inv.id)}>Accept Invitation</Button>
                 </div>
               </div>
             </Card>
           ))
         ) : (
-          <Card className="p-6 border border-slate-100">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                <Users size={20} />
+          <Card className="p-4 sm:p-6 border border-slate-100">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
+                <Users size={18} className="sm:w-5 sm:h-5" />
               </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-slate-800">No Pending Invitations</h3>
-                <p className="text-xs text-slate-400 mt-1">When someone invites you to join their family dashboard, it will appear here.</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-xs sm:text-sm font-medium text-slate-800">No Pending Invitations</h3>
+                <p className="text-[10px] sm:text-xs text-slate-400 mt-1">When someone invites you to join their family dashboard, it will appear here.</p>
               </div>
             </div>
           </Card>
@@ -723,9 +726,9 @@ export default function DashboardPage() {
         </div>
         {insightsLoading ? (
           // Skeleton loader for insights
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-xl border border-slate-200/60 p-4">
+              <div key={i} className="bg-white rounded-xl border border-slate-200/60 p-3 sm:p-4">
                 <div className="flex justify-between items-start mb-2">
                   <Skeleton width={60} height={12} />
                   <Skeleton circle width={16} height={16} />
@@ -737,13 +740,13 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : insightCards.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {insightCards.map((insight) => (
               <InsightCard key={insight.title} insight={insight} />
             ))}
           </div>
         ) : (
-          <Card className="p-8 border border-slate-100">
+          <Card className="p-6 sm:p-8 border border-slate-100">
             <div className="flex flex-col items-center gap-4 text-center">
               <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
                 <Icon icon="material-symbols:insights" width={24} height={24} />
@@ -764,13 +767,13 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       {stats.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {stats.map((stat) => (
             <StatCard key={stat.label} stat={stat} />
           ))}
         </div>
       ) : (
-        <Card className="p-8 border border-slate-100">
+        <Card className="p-6 sm:p-8 border border-slate-100">
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
               <BarChart3 size={24} />
@@ -789,121 +792,147 @@ export default function DashboardPage() {
       )}
 
       {/* Charts + Categories */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Income vs Expenses Chart */}
-        <Card className="lg:col-span-2 p-6 hover:shadow-md transition-all group cursor-pointer">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-800">Income vs Expenses</h3>
-              <p className="text-xs text-slate-400 mt-1 font-light">6-month comparison.</p>
-            </div>
-            <div className="flex gap-3">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-gray-300" />
-                <span className="text-[10px] font-medium text-slate-400">Income</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-[10px] font-medium text-slate-400">Expense</span>
-              </div>
-            </div>
-          </div>
+      <div>
+        {/* Mobile Chart Tabs */}
+        <div className="flex p-1 bg-slate-100 rounded-lg lg:hidden mb-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`flex-1 ${activeChartTab === 'overview' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            onClick={() => setActiveChartTab('overview')}
+          >
+            Overview
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`flex-1 ${activeChartTab === 'categories' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            onClick={() => setActiveChartTab('categories')}
+          >
+            Categories
+          </Button>
+        </div>
 
-          {chartData.length > 0 ? (
-            <>
-              <div className="relative h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50">
-                {/* Grid lines */}
-                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-                  <div className="w-full h-px bg-slate-100/50" />
-                  <div className="w-full h-px bg-slate-100/50" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Income vs Expenses Chart - Show on desktop or when overview tab is active */}
+          {(activeChartTab === 'overview' || !activeChartTab) && (
+            <Card className="lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-2 sm:gap-0">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-800">Income vs Expenses</h3>
+                  <p className="text-xs text-slate-400 mt-1 font-light">6-month comparison.</p>
                 </div>
-                {chartData.map((d) => (
-                  <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
-                    <div
-                      className="w-3 sm:w-5 bg-gray-300 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
-                      style={{ height: `${d.income}%` }}
-                      onMouseEnter={() => setHoveredBar({ month: d.month, type: 'income', value: d.incomeValue })}
-                      onMouseLeave={() => setHoveredBar(null)}
-                    />
-                    <div
-                      className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
-                      style={{ height: `${d.expense}%` }}
-                      onMouseEnter={() => setHoveredBar({ month: d.month, type: 'expense', value: d.expenseValue })}
-                      onMouseLeave={() => setHoveredBar(null)}
-                    />
+                <div className="flex gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-gray-300" />
+                    <span className="text-[10px] font-medium text-slate-400">Income</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="text-[10px] font-medium text-slate-400">Expense</span>
+                  </div>
+                </div>
+              </div>
 
-                    {/* Tooltip */}
-                    {hoveredBar && hoveredBar.month === d.month && (
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
-                        <div className="font-medium text-slate-700">{hoveredBar.month}</div>
-                        <div className="flex items-center gap-1">
-                          <div className={`w-2 h-2 rounded-full ${hoveredBar.type === 'income' ? 'bg-gray-300' : 'bg-emerald-500'}`} />
-                          <span className="capitalize">{hoveredBar.type}: {formatCurrency(hoveredBar.value)}</span>
-                        </div>
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+              {chartData.length > 0 ? (
+                <>
+                  <div className="relative h-48 sm:h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50">
+                    {/* Grid lines */}
+                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                      <div className="w-full h-px bg-slate-100/50" />
+                      <div className="w-full h-px bg-slate-100/50" />
+                    </div>
+                    {chartData.map((d) => (
+                      <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
+                        <div
+                          className="w-2 sm:w-5 bg-gray-300 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
+                          style={{ height: `${d.income}%` }}
+                          onMouseEnter={() => setHoveredBar({ month: d.month, type: 'income', value: d.incomeValue })}
+                          onMouseLeave={() => setHoveredBar(null)}
+                        />
+                        <div
+                          className="w-2 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
+                          style={{ height: `${d.expense}%` }}
+                          onMouseEnter={() => setHoveredBar({ month: d.month, type: 'expense', value: d.expenseValue })}
+                          onMouseLeave={() => setHoveredBar(null)}
+                        />
+
+                        {/* Tooltip */}
+                        {hoveredBar && hoveredBar.month === d.month && (
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
+                            <div className="font-medium text-slate-700">{hoveredBar.month}</div>
+                            <div className="flex items-center gap-1">
+                              <div className={`w-2 h-2 rounded-full ${hoveredBar.type === 'income' ? 'bg-gray-300' : 'bg-emerald-500'}`} />
+                              <span className="capitalize">{hoveredBar.type}: {formatCurrency(hoveredBar.value)}</span>
+                            </div>
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div className="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
-                {chartData.map((d, i) => (
-                  <span key={d.month} className={d.month === currentMonthLabel ? 'text-slate-600' : ''}>
-                    {d.month}
-                  </span>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-60 text-center">
-              <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
-                <BarChart3 size={24} />
-              </div>
-              <h4 className="text-sm font-medium text-slate-800 mb-1">No Chart Data</h4>
-              <p className="text-xs text-slate-400 max-w-sm mb-4">
-                Add transactions over multiple months to see your income vs expenses trend.
-              </p>
-              <Button size="sm" variant="outline" onClick={() => window.location.href = '/transactions'}>
-                Add Transactions
-              </Button>
-            </div>
-          )}
-        </Card>
-
-        {/* Expense Categories */}
-        <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-slate-900">Categories</h3>
-            <p className="text-xs text-slate-500 mt-0.5 font-light">All-time expense breakdown</p>
-          </div>
-          <div className="flex items-center gap-6 mb-6">
-            {/* Donut Chart */}
-            <div className="w-32 h-32 mx-auto rounded-full flex-shrink-0 relative"
-              style={donutStyle}>
-              <div className="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
-                <span className="text-xs text-slate-400 font-medium">Total</span>
-                <span className="text-sm font-bold text-slate-900">{formatCompact(categoryTotal)}</span>
-              </div>
-            </div>
-          </div>
-          <div className="space-y-3 flex-1 max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300 pr-1">
-            {categoryBreakdown.map((cat) => {
-              const pct = categoryTotal > 0 ? Math.round((cat.amount / categoryTotal) * 100) : 0;
-              return (
-                <div key={cat.name} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color || DONUT_COLORS[categoryBreakdown.indexOf(cat) % DONUT_COLORS.length] }} />
-                    <span className="text-slate-600">{cat.name}</span>
+                  <div className="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-4 uppercase tracking-wider">
+                    {chartData.map((d, i) => (
+                      <span key={d.month} className={d.month === currentMonthLabel ? 'text-slate-600' : ''}>
+                        {d.month}
+                      </span>
+                    ))}
                   </div>
-                  <span className="font-medium text-slate-900">{pct}%</span>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-48 sm:h-60 text-center">
+                  <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
+                    <BarChart3 size={24} />
+                  </div>
+                  <h4 className="text-sm font-medium text-slate-800 mb-1">No Chart Data</h4>
+                  <p className="text-xs text-slate-400 max-w-sm mb-4">
+                    Add transactions over multiple months to see your income vs expenses trend.
+                  </p>
+                  <Button size="sm" variant="outline" onClick={() => window.location.href = '/transactions'}>
+                    Add Transactions
+                  </Button>
                 </div>
-              );
-            })}
-            {categoryBreakdown.length === 0 && (
-              <p className="text-xs text-slate-400 text-center py-4">No expense data found.</p>
-            )}
-          </div>
-        </Card>
+              )}
+            </Card>
+          )}
+
+          {/* Expense Categories - Show on desktop or when categories tab is active */}
+          {(activeChartTab === 'categories' || !activeChartTab) && (
+            <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
+              <div className="mb-4 sm:mb-6">
+                <h3 className="text-sm font-semibold text-slate-900">Categories</h3>
+                <p className="text-xs text-slate-500 mt-0.5 font-light">All-time expense breakdown</p>
+              </div>
+              <div className="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
+                {/* Donut Chart */}
+                <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto rounded-full flex-shrink-0 relative"
+                  style={donutStyle}>
+                  <div className="absolute inset-0 m-auto w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                    <span className="text-[10px] sm:text-xs text-slate-400 font-medium">Total</span>
+                    <span className="text-xs sm:text-sm font-bold text-slate-900">{formatCompact(categoryTotal)}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2 sm:space-y-3 flex-1 max-h-24 sm:max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300 pr-1">
+                {categoryBreakdown.map((cat) => {
+                  const pct = categoryTotal > 0 ? Math.round((cat.amount / categoryTotal) * 100) : 0;
+                  return (
+                    <div key={cat.name} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color || DONUT_COLORS[categoryBreakdown.indexOf(cat) % DONUT_COLORS.length] }} />
+                        <span className="text-slate-600">{cat.name}</span>
+                      </div>
+                      <span className="font-medium text-slate-900">{pct}%</span>
+                    </div>
+                  );
+                })}
+                {categoryBreakdown.length === 0 && (
+                  <p className="text-xs text-slate-400 text-center py-4">No expense data found.</p>
+                )}
+              </div>
+            </Card>
+          )}
+        </div>
       </div>
 
       {/* Spending Trends */}
@@ -926,9 +955,9 @@ export default function DashboardPage() {
         </div>
         {trendsLoading ? (
           // Skeleton loader for spending trends
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-xl border border-slate-200/60 p-4">
+              <div key={i} className="bg-white rounded-xl border border-slate-200/60 p-3 sm:p-4">
                 <div className="flex justify-between items-start mb-2">
                   <Skeleton width={60} height={12} />
                   <Skeleton circle width={16} height={16} />
@@ -939,34 +968,34 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : spendingTrends.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {spendingTrends.map((trend) => {
               const vis = getTrendVisuals(trend.trend);
               const changeStr = Math.abs(trend.change) < 1 ? "No change" : `${trend.change >= 0 ? "+" : ""}${trend.change.toFixed(0)}%`;
               return (
-                <Card key={trend.category} className={`p-4 flex items-center justify-between transition-all cursor-pointer group hover:shadow-md ${vis.hoverBorder}`}>
+                <Card key={trend.category} className={`p-3 sm:p-4 flex items-center justify-between transition-all cursor-pointer group hover:shadow-md ${vis.hoverBorder}`}>
                   <div>
-                    <div className="text-[10px] text-slate-400 uppercase tracking-wide mb-0.5">{trend.category}</div>
+                    <div className="text-[10px] sm:text-[11px] text-slate-400 uppercase tracking-wide mb-0.5">{trend.category}</div>
                     <div className="text-sm font-bold text-slate-800">{formatCurrency(trend.currentAmount)}</div>
-                    <div className={`text-[10px] font-medium flex items-center gap-0.5 mt-1 ${trend.trend === 'down' ? 'text-emerald-600' :
+                    <div className={`text-[10px] sm:text-[11px] font-medium flex items-center gap-0.5 mt-1 ${trend.trend === 'down' ? 'text-emerald-600' :
                         trend.trend === 'up' ? 'text-red-500' :
                           'text-slate-400'
                       }`}>
-                      {trend.trend === 'down' && <ArrowDown size={12} />}
-                      {trend.trend === 'up' && <ArrowUp size={12} />}
-                      {trend.trend === 'neutral' && <MinusCircle size={12} />}
+                      {trend.trend === 'down' && <ArrowDown size={12} className="sm:w-3.5 sm:h-3.5" />}
+                      {trend.trend === 'up' && <ArrowUp size={12} className="sm:w-3.5 sm:h-3.5" />}
+                      {trend.trend === 'neutral' && <MinusCircle size={12} className="sm:w-3.5 sm:h-3.5" />}
                       {changeStr} {trend.trend === 'down' ? 'less' : trend.trend === 'up' ? 'more' : ''}
                     </div>
                   </div>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${vis.iconColor}`}>
-                    <PhilippinePeso size={20} />
+                  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${vis.iconColor}`}>
+                    <PhilippinePeso size={18} className="sm:w-5 sm:h-5" />
                   </div>
                 </Card>
               );
             })}
           </div>
         ) : (
-          <Card className="p-8 border border-slate-100">
+          <Card className="p-6 sm:p-8 border border-slate-100">
             <div className="flex flex-col items-center gap-4 text-center">
               <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
                 <BarChart3 size={24} />
@@ -986,10 +1015,10 @@ export default function DashboardPage() {
       </div>
 
       {/* Budget Progress & Recent Transactions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Budget Progress */}
-        <Card className="p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
-          <div className="flex items-center justify-between mb-6">
+        <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
               <h3 className="text-sm font-semibold text-slate-800">Budget Progress</h3>
               <p className="text-xs text-slate-500 mt-0.5 font-light">Track spending against budget limits</p>
@@ -1005,7 +1034,7 @@ export default function DashboardPage() {
             </Button>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
             {budgetProgress.length > 0 ? (
               budgetProgress.map((item) => {
                 const vis = getBudgetVisuals(item.status);
@@ -1013,18 +1042,18 @@ export default function DashboardPage() {
                 return (
                   <div key={item.id} className="group">
                     <div className="flex justify-between items-center mb-2">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-600">
-                          <BudgetIcon size={16} />
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-slate-600">
+                          <BudgetIcon size={14} className="sm:w-4 sm:h-4" />
                         </div>
                         <div>
                           <div className="text-xs font-medium text-slate-800">{item.name}</div>
-                          <div className="text-[10px] text-slate-400">{formatCurrency(item.spent)} / {formatCurrency(item.budget)}</div>
+                          <div className="text-[10px] sm:text-[11px] text-slate-400">{formatCurrency(item.spent)} / {formatCurrency(item.budget)}</div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-xs font-bold text-slate-800">{Math.round(item.percentage)}%</div>
-                        <div className={`text-[9px] font-medium ${vis.statusColor} ${vis.statusBg} px-1.5 py-0.5 rounded inline-block`}>
+                        <div className={`text-[9px] sm:text-[10px] font-medium ${vis.statusColor} ${vis.statusBg} px-1.5 py-0.5 rounded inline-block`}>
                           {item.status}
                         </div>
                       </div>
@@ -1039,7 +1068,7 @@ export default function DashboardPage() {
                 );
               })
             ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center">
                 <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
                   <PiggyBank size={24} />
                 </div>
@@ -1056,8 +1085,8 @@ export default function DashboardPage() {
         </Card>
 
         {/* Recent Transactions */}
-        <Card className="p-6 flex flex-col">
-          <div className="flex items-center justify-between mb-6">
+        <Card className="p-4 sm:p-6 flex flex-col">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
               <h3 className="text-sm font-semibold text-slate-800">Recent Transactions</h3>
               <p className="text-xs text-slate-500 mt-0.5 font-light">Monthly expense breakdown</p>
@@ -1073,7 +1102,7 @@ export default function DashboardPage() {
             </Button>
           </div>
 
-          <div className="space-y-4 flex-1 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+          <div className="space-y-3 sm:space-y-4 flex-1 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
             {recentTransactions.length > 0 ? (
               recentTransactions.map((tx) => {
                 const TxIcon = getCategoryIcon(tx.category_icon);
@@ -1088,11 +1117,11 @@ export default function DashboardPage() {
                     key={tx.id}
                     className="flex items-center justify-between group cursor-pointer p-2 -mx-2 hover:bg-gray-50 rounded-lg transition-colors"
                   >
-                    <div className="flex items-center gap-3">
-                      <TxIcon size={20} className="text-slate-600" />
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <TxIcon size={18} className="sm:w-5 sm:h-5 text-slate-600" />
                       <div>
                         <div className="text-xs font-semibold text-slate-800">{tx.description || tx.category_name || "Transaction"}</div>
-                        <div className="text-[10px] text-slate-400">{tx.category_name || tx.type} • {formatDate(tx.date)}</div>
+                        <div className="text-[10px] sm:text-[11px] text-slate-400">{tx.category_name || tx.type} • {formatDate(tx.date)}</div>
                       </div>
                     </div>
                     <div className="text-right">
@@ -1105,7 +1134,7 @@ export default function DashboardPage() {
                 );
               })
             ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center">
                 <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
                   <Receipt size={24} />
                 </div>
@@ -1122,7 +1151,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="h-8" />
+      <div className="h-6 sm:h-8" />
     </div>
     </OnboardingCheck>
   );
