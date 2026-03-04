@@ -903,33 +903,39 @@ export default function DashboardPage() {
                 <h3 className="text-sm font-semibold text-slate-900">Categories</h3>
                 <p className="text-xs text-slate-500 mt-0.5 font-light">All-time expense breakdown</p>
               </div>
-              <div className="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
-                {/* Donut Chart */}
-                <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto rounded-full flex-shrink-0 relative"
-                  style={donutStyle}>
-                  <div className="absolute inset-0 m-auto w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
-                    <span className="text-[10px] sm:text-xs text-slate-400 font-medium">Total</span>
-                    <span className="text-xs sm:text-sm font-bold text-slate-900">{formatCompact(categoryTotal)}</span>
-                  </div>
+              {categoryBreakdown.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <p className="text-xs text-slate-400 text-center">No expense data found.</p>
                 </div>
-              </div>
-              <div className="space-y-2 sm:space-y-3 flex-1 max-h-24 sm:max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300 pr-1">
-                {categoryBreakdown.map((cat) => {
-                  const pct = categoryTotal > 0 ? Math.round((cat.amount / categoryTotal) * 100) : 0;
-                  return (
-                    <div key={cat.name} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color || DONUT_COLORS[categoryBreakdown.indexOf(cat) % DONUT_COLORS.length] }} />
-                        <span className="text-slate-600">{cat.name}</span>
+              ) : (
+                <>
+                  {/* Donut Chart */}
+                  <div className="flex items-center justify-center mb-4 sm:mb-6">
+                    <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full flex-shrink-0 relative"
+                      style={donutStyle}>
+                      <div className="absolute inset-0 m-auto w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                        <span className="text-[10px] sm:text-xs text-slate-400 font-medium">Total</span>
+                        <span className="text-sm sm:text-base font-bold text-slate-900">{formatCompact(categoryTotal)}</span>
                       </div>
-                      <span className="font-medium text-slate-900">{pct}%</span>
                     </div>
-                  );
-                })}
-                {categoryBreakdown.length === 0 && (
-                  <p className="text-xs text-slate-400 text-center py-4">No expense data found.</p>
-                )}
-              </div>
+                  </div>
+                  {/* Legend */}
+                  <div className="space-y-2 sm:space-y-3 max-h-32 sm:max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300 pr-1">
+                    {categoryBreakdown.map((cat, idx) => {
+                      const pct = categoryTotal > 0 ? Math.round((cat.amount / categoryTotal) * 100) : 0;
+                      return (
+                        <div key={cat.name} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color || DONUT_COLORS[idx % DONUT_COLORS.length] }} />
+                            <span className="text-slate-600 truncate">{cat.name}</span>
+                          </div>
+                          <span className="font-medium text-slate-900 ml-2">{pct}%</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </Card>
           )}
         </div>
