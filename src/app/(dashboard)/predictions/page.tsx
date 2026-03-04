@@ -66,6 +66,13 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { checkAIUsage, incrementAIUsage, AIUsageStatus } from "../_lib/ai-rate-limit-service";
+import {
+  exportPredictionsToCSV,
+  exportPredictionsToPDF,
+  type PredictionExportData,
+  type CategoryPredictionExportData,
+  type AIInsightsExportData,
+} from "@/lib/export-utils";
 
 // Icon mapping for category predictions
 const CATEGORY_ICONS: Record<string, React.ComponentType<any>> = {
@@ -376,6 +383,159 @@ export default function PredictionsPage() {
     setDetailedInsights(prev => !prev);
   }, []);
 
+  // Export handlers
+  const handleExportCSV = useCallback(() => {
+    if (!forecastData && categoryPredictions.length === 0 && !aiInsights) {
+      toast.error("No prediction data to export", {
+        description: "Please generate predictions first.",
+      });
+      return;
+    }
+
+    // Prepare forecast data
+    const forecastExportData: PredictionExportData[] = [
+      ...(forecastData?.historical || []).map((d) => ({
+        month: d.month,
+        type: "Historical",
+        income: d.income,
+        expense: d.expense,
+        netSavings: d.income - d.expense,
+      })),
+      ...(forecastData?.predicted || []).map((d) => ({
+        month: d.month,
+        type: "Predicted",
+        income: d.income,
+        expense: d.expense,
+        netSavings: d.income - d.expense,
+      })),
+    ];
+
+    // Prepare category predictions data
+    const categoryExportData: CategoryPredictionExportData[] = categoryPredictions.map((pred) => ({
+      category: pred.category,
+      historicalAvg: pred.actual,
+      predicted: pred.predicted,
+      change: pred.change,
+      changePercent: `${pred.changePercent}%`,
+      trend: pred.trend === "up" ? "Increasing" : pred.trend === "down" ? "Decreasing" : "Stable",
+      confidence: `${pred.confidence}%`,
+    }));
+
+    // Prepare AI insights data
+    const aiInsightsExportData: AIInsightsExportData | null = aiInsights ? {
+      summary: aiInsights.summary,
+      riskLevel: aiInsights.riskLevel.toUpperCase(),
+      riskScore: aiInsights.riskScore,
+      riskAnalysis: aiInsights.riskAnalysis,
+      growthPotential: aiInsights.growthPotential,
+      growthAnalysis: aiInsights.growthAnalysis,
+      recommendations: aiInsights.recommendations.map(rec => ({
+        title: rec.title,
+        description: rec.description,
+        priority: rec.priority.toUpperCase(),
+        category: rec.category,
+      })),
+      riskMitigationStrategies: aiInsights.riskMitigationStrategies.map(strategy => ({
+        strategy: strategy.strategy,
+        description: strategy.description,
+        impact: strategy.impact.toUpperCase(),
+      })),
+      longTermOpportunities: aiInsights.longTermOpportunities.map(opp => ({
+        opportunity: opp.opportunity,
+        description: opp.description,
+        timeframe: opp.timeframe,
+        potentialReturn: opp.potentialReturn,
+      })),
+    } : null;
+
+    exportPredictionsToCSV(forecastExportData, categoryExportData, aiInsightsExportData);
+    
+    toast.success("Predictions exported successfully", {
+      description: "CSV files have been downloaded.",
+    });
+  }, [forecastData, categoryPredictions, aiInsights]);
+
+  const handleExportPDF = useCallback(() => {
+    if (!forecastData && categoryPredictions.length === 0 && !aiInsights) {
+      toast.error("No prediction data to export", {
+        description: "Please generate predictions first.",
+      });
+      return;
+    }
+
+    // Prepare forecast data
+    const forecastExportData: PredictionExportData[] = [
+      ...(forecastData?.historical || []).map((d) => ({
+        month: d.month,
+        type: "Historical",
+        income: d.income,
+        expense: d.expense,
+        netSavings: d.income - d.expense,
+      })),
+      ...(forecastData?.predicted || []).map((d) => ({
+        month: d.month,
+        type: "Predicted",
+        income: d.income,
+        expense: d.expense,
+        netSavings: d.income - d.expense,
+      })),
+    ];
+
+    // Prepare category predictions data
+    const categoryExportData: CategoryPredictionExportData[] = categoryPredictions.map((pred) => ({
+      category: pred.category,
+      historicalAvg: pred.actual,
+      predicted: pred.predicted,
+      change: pred.change,
+      changePercent: `${pred.changePercent}%`,
+      trend: pred.trend === "up" ? "Increasing" : pred.trend === "down" ? "Decreasing" : "Stable",
+      confidence: `${pred.confidence}%`,
+    }));
+
+    // Prepare summary
+    const exportSummary = {
+      avgGrowth: forecastData?.summary.avgGrowth || 0,
+      maxSavings: forecastData?.summary.maxSavings || 0,
+      confidence: forecastData?.summary.confidence || 0,
+      projectedIncome: forecastData?.predicted?.[0]?.income || 0,
+      projectedExpense: forecastData?.predicted?.[0]?.expense || 0,
+      projectedSavings: (forecastData?.predicted?.[0]?.income || 0) - (forecastData?.predicted?.[0]?.expense || 0),
+    };
+
+    // Prepare AI insights data
+    const aiInsightsExportData: AIInsightsExportData | null = aiInsights ? {
+      summary: aiInsights.summary,
+      riskLevel: aiInsights.riskLevel.toUpperCase(),
+      riskScore: aiInsights.riskScore,
+      riskAnalysis: aiInsights.riskAnalysis,
+      growthPotential: aiInsights.growthPotential,
+      growthAnalysis: aiInsights.growthAnalysis,
+      recommendations: aiInsights.recommendations.map(rec => ({
+        title: rec.title,
+        description: rec.description,
+        priority: rec.priority.toUpperCase(),
+        category: rec.category,
+      })),
+      riskMitigationStrategies: aiInsights.riskMitigationStrategies.map(strategy => ({
+        strategy: strategy.strategy,
+        description: strategy.description,
+        impact: strategy.impact.toUpperCase(),
+      })),
+      longTermOpportunities: aiInsights.longTermOpportunities.map(opp => ({
+        opportunity: opp.opportunity,
+        description: opp.description,
+        timeframe: opp.timeframe,
+        potentialReturn: opp.potentialReturn,
+      })),
+    } : null;
+
+    exportPredictionsToPDF(forecastExportData, categoryExportData, exportSummary, aiInsightsExportData);
+    
+    toast.success("Predictions exported successfully", {
+      description: "PDF file has been downloaded.",
+    });
+  }, [forecastData, categoryPredictions, aiInsights]);
+
   const handleGeneratePredictions = useCallback(async () => {
     if (!user?.id) return;
 
@@ -410,20 +570,6 @@ export default function PredictionsPage() {
       const { status } = await checkAIUsage(user.id, "predictions");
       setRateLimitStatus(status);
 
-      // Save current prediction to history
-      await savePrediction(user.id, {
-        type: "full",
-        insights: [
-          ...(anomalies || []),
-          ...(savingsOpportunities || []),
-        ],
-        dataPoints: forecastData?.historical.length || 0,
-        accuracy: forecastData?.summary.confidence,
-      });
-
-      // Simulate processing delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
       // Only fetch and update prediction-related data (not everything)
       const [
         newForecast,
@@ -438,6 +584,53 @@ export default function PredictionsPage() {
         analyzeTransactionBehavior(user.id),
         generatePredictionSummary(user.id),
       ]);
+
+      // Calculate growth percentages
+      const incomeGrowth = newSummaryData.incomeChange || 0;
+      const expenseGrowth = newSummaryData.expenseChange || 0;
+      const currentSavings = newSummaryData.monthlyIncome - newSummaryData.monthlyExpenses;
+      const prevIncome = newSummaryData.incomeChange 
+        ? newSummaryData.monthlyIncome / (1 + newSummaryData.incomeChange / 100)
+        : newSummaryData.monthlyIncome;
+      const prevExpenses = newSummaryData.expenseChange
+        ? newSummaryData.monthlyExpenses / (1 + newSummaryData.expenseChange / 100)
+        : newSummaryData.monthlyExpenses;
+      const prevSavings = prevIncome - prevExpenses;
+      const savingsGrowth = prevSavings !== 0 
+        ? ((currentSavings - prevSavings) / Math.abs(prevSavings)) * 100
+        : 0;
+
+      // Save prediction with comprehensive data
+      await savePrediction(user.id, {
+        type: "predictions", // Changed from "full" to match the constraint
+        insights: [
+          ...(anomalies || []),
+          ...(savingsOpportunities || []),
+        ],
+        dataPoints: newForecast?.historical.length || 0,
+        accuracy: newForecast?.summary.confidence,
+        projectedIncome: newSummaryData.monthlyIncome,
+        projectedExpenses: newSummaryData.monthlyExpenses,
+        projectedSavings: currentSavings,
+        incomeGrowth,
+        expenseGrowth,
+        savingsGrowth,
+        categoriesAnalyzed: newCategories?.length || 0,
+        topCategories: newCategories?.slice(0, 5).map(cat => ({
+          category: cat.category,
+          amount: cat.predicted,
+          trend: cat.trend,
+        })) || [],
+        recurringExpenses: newExpenseTypeData?.recurring.amount || 0,
+        variableExpenses: newExpenseTypeData?.variable.amount || 0,
+        transactionPatterns: newBehavior?.slice(0, 3).map(b => ({
+          type: b.type,
+          avgAmount: b.currentAvg,
+          trend: b.trend,
+        })) || [],
+        anomaliesDetected: anomalies?.length || 0,
+        savingsOpportunities: savingsOpportunities?.length || 0,
+      });
 
       // Update only the prediction-related states
       setForecastData(newForecast);
@@ -854,7 +1047,7 @@ export default function PredictionsPage() {
                     size="sm"
                     className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
                     onClick={() => {
-                      // handleExportPDF();
+                      handleExportPDF();
                       setExportDropdownOpen(false);
                     }}
                   >
@@ -865,7 +1058,7 @@ export default function PredictionsPage() {
                     size="sm"
                     className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
                     onClick={() => {
-                      // handleExportCSV();
+                      handleExportCSV();
                       setExportDropdownOpen(false);
                     }}
                   >

@@ -11,15 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
-  ArrowRight,
-  Calendar,
   TrendingUp,
   TrendingDown,
   Brain,
   CheckCircle,
   XCircle,
   Clock,
-  FileText,
   AlertTriangle,
 } from "lucide-react";
 import type { PredictionHistory } from "../_lib/types";
@@ -176,58 +173,184 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
                   {getStatusBadge(selectedItem.status)}
                 </div>
 
-                {/* Performance Metrics */}
-                <div className="mb-6">
-                  <h4 className="text-[15px] font-bold text-gray-900 mb-3">Performance Metrics</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {selectedItem.accuracy && (
-                      <div className="border border-gray-100 rounded-lg p-4 bg-white">
-                        <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
-                          Accuracy
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg font-bold text-gray-900">{selectedItem.accuracy}%</span>
-                          {selectedItem.accuracy >= 90 ? (
-                            <TrendingUp size={16} className="text-emerald-500" />
-                          ) : (
-                            <TrendingDown size={16} className="text-amber-500" />
+                {/* Projected Growth Metrics */}
+                {(selectedItem.projectedIncome || selectedItem.projectedExpenses || selectedItem.projectedSavings) && (
+                  <div className="mb-6">
+                    <h4 className="text-[15px] font-bold text-gray-900 mb-3">Projected Metrics</h4>
+                    <div className="grid grid-cols-3 gap-3">
+                      {selectedItem.projectedIncome !== undefined && (
+                        <div className="border border-gray-100 rounded-lg p-4 bg-white">
+                          <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
+                            Income
+                          </div>
+                          <div className="text-lg font-bold text-gray-900">
+                            ₱{selectedItem.projectedIncome.toLocaleString()}
+                          </div>
+                          {selectedItem.incomeGrowth !== undefined && (
+                            <div className={`text-xs flex items-center gap-1 mt-1 ${
+                              selectedItem.incomeGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'
+                            }`}>
+                              {selectedItem.incomeGrowth >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                              {Math.abs(selectedItem.incomeGrowth).toFixed(1)}%
+                            </div>
                           )}
                         </div>
-                      </div>
-                    )}
-                    <div className="border border-gray-100 rounded-lg p-4 bg-white">
-                      <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
-                        Data Points
-                      </div>
-                      <div className="text-lg font-bold text-gray-900">{selectedItem.dataPoints}</div>
-                    </div>
-                    <div className="border border-gray-100 rounded-lg p-4 bg-white">
-                      <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
-                        Insights Generated
-                      </div>
-                      <div className="text-lg font-bold text-gray-900">{selectedItem.insights}</div>
-                    </div>
-                    <div className="border border-gray-100 rounded-lg p-4 bg-white">
-                      <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
-                        Model Version
-                      </div>
-                      <div className="text-sm font-medium text-gray-900">{selectedItem.model}</div>
+                      )}
+                      {selectedItem.projectedExpenses !== undefined && (
+                        <div className="border border-gray-100 rounded-lg p-4 bg-white">
+                          <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
+                            Expenses
+                          </div>
+                          <div className="text-lg font-bold text-gray-900">
+                            ₱{selectedItem.projectedExpenses.toLocaleString()}
+                          </div>
+                          {selectedItem.expenseGrowth !== undefined && (
+                            <div className={`text-xs flex items-center gap-1 mt-1 ${
+                              selectedItem.expenseGrowth <= 0 ? 'text-emerald-600' : 'text-red-600'
+                            }`}>
+                              {selectedItem.expenseGrowth >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                              {Math.abs(selectedItem.expenseGrowth).toFixed(1)}%
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {selectedItem.projectedSavings !== undefined && (
+                        <div className="border border-gray-100 rounded-lg p-4 bg-white">
+                          <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
+                            Savings
+                          </div>
+                          <div className="text-lg font-bold text-gray-900">
+                            ₱{selectedItem.projectedSavings.toLocaleString()}
+                          </div>
+                          {selectedItem.savingsGrowth !== undefined && (
+                            <div className={`text-xs flex items-center gap-1 mt-1 ${
+                              selectedItem.savingsGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'
+                            }`}>
+                              {selectedItem.savingsGrowth >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                              {Math.abs(selectedItem.savingsGrowth).toFixed(1)}%
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
+                )}
 
-                {/* Analysis Details */}
+                {/* Category Spending Forecast */}
+                {selectedItem.topCategories && selectedItem.topCategories.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-[15px] font-bold text-gray-900 mb-3">Top Categories</h4>
+                    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                      <div className="divide-y divide-gray-100">
+                        {selectedItem.topCategories.map((cat, idx) => (
+                          <div key={idx} className="flex justify-between items-center p-3">
+                            <span className="text-sm text-gray-700">{cat.category}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-semibold text-gray-900">
+                                ₱{cat.amount.toLocaleString()}
+                              </span>
+                              {cat.trend === "up" && <TrendingUp size={14} className="text-red-500" />}
+                              {cat.trend === "down" && <TrendingDown size={14} className="text-emerald-500" />}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Expense Type Forecast */}
+                {(selectedItem.recurringExpenses !== undefined || selectedItem.variableExpenses !== undefined) && (
+                  <div className="mb-6">
+                    <h4 className="text-[15px] font-bold text-gray-900 mb-3">Expense Breakdown</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {selectedItem.recurringExpenses !== undefined && (
+                        <div className="border border-gray-100 rounded-lg p-4 bg-white">
+                          <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
+                            Recurring
+                          </div>
+                          <div className="text-lg font-bold text-gray-900">
+                            ₱{selectedItem.recurringExpenses.toLocaleString()}
+                          </div>
+                        </div>
+                      )}
+                      {selectedItem.variableExpenses !== undefined && (
+                        <div className="border border-gray-100 rounded-lg p-4 bg-white">
+                          <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
+                            Variable
+                          </div>
+                          <div className="text-lg font-bold text-gray-900">
+                            ₱{selectedItem.variableExpenses.toLocaleString()}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Transaction Behavior Insights */}
+                {selectedItem.transactionPatterns && selectedItem.transactionPatterns.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-[15px] font-bold text-gray-900 mb-3">Transaction Patterns</h4>
+                    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                      <div className="divide-y divide-gray-100">
+                        {selectedItem.transactionPatterns.map((pattern, idx) => (
+                          <div key={idx} className="flex justify-between items-center p-3">
+                            <span className="text-sm text-gray-700">{pattern.type}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-semibold text-gray-900">
+                                ₱{pattern.avgAmount.toLocaleString()}
+                              </span>
+                              {pattern.trend === "up" && <TrendingUp size={14} className="text-emerald-500" />}
+                              {pattern.trend === "down" && <TrendingDown size={14} className="text-red-500" />}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Analysis Summary */}
                 <div className="mb-6">
                   <h4 className="text-[15px] font-bold text-gray-900 mb-3 flex items-center gap-2">
                     <Brain size={16} className="text-emerald-500" />
-                    Analysis Details
+                    Analysis Summary
                   </h4>
                   <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                     <div className="p-5 space-y-0 divide-y divide-gray-100">
-                      <DetailRow label="Processing Time" value="2.4 seconds" />
-                      <DetailRow label="Confidence Level" value="High" />
-                      <DetailRow label="Categories Analyzed" value="8" />
-                      <DetailRow label="Model Type" value="Prophet ML" />
+                      {selectedItem.accuracy && (
+                        <DetailRow 
+                          label="Confidence" 
+                          value={`${selectedItem.accuracy.toFixed(1)}%`} 
+                        />
+                      )}
+                      <DetailRow 
+                        label="Data Points" 
+                        value={selectedItem.dataPoints.toString()} 
+                      />
+                      {selectedItem.categoriesAnalyzed !== undefined && (
+                        <DetailRow 
+                          label="Categories" 
+                          value={selectedItem.categoriesAnalyzed.toString()} 
+                        />
+                      )}
+                      {selectedItem.anomaliesDetected !== undefined && (
+                        <DetailRow 
+                          label="Anomalies" 
+                          value={selectedItem.anomaliesDetected.toString()} 
+                        />
+                      )}
+                      {selectedItem.savingsOpportunities !== undefined && (
+                        <DetailRow 
+                          label="Opportunities" 
+                          value={selectedItem.savingsOpportunities.toString()} 
+                        />
+                      )}
+                      <DetailRow 
+                        label="Insights" 
+                        value={selectedItem.insights.toString()} 
+                      />
                     </div>
                   </div>
                 </div>
@@ -239,7 +362,7 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
                     <div>
                       <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Error Details</h4>
                       <p className="text-[11px] leading-relaxed">
-                        Prediction failed due to insufficient data. Please ensure you have at least 30 days of transaction history.
+                        {selectedItem.errorMessage || "Prediction failed due to insufficient data. Please ensure you have at least 30 days of transaction history."}
                       </p>
                     </div>
                   </div>

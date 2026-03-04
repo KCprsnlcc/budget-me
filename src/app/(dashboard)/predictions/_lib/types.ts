@@ -70,12 +70,28 @@ export interface TransactionBehaviorInsight {
 export interface PredictionHistory {
   id: string;
   date: string;
-  type: "monthly" | "weekly" | "category" | "anomaly" | "full";
+  type: "spending" | "income-expense" | "savings" | "trends" | "goals" | "predictions";
   status: "completed" | "failed" | "processing";
   accuracy?: number;
   insights: number;
   dataPoints: number;
   model: string;
+  // Actual prediction data
+  projectedIncome?: number;
+  projectedExpenses?: number;
+  projectedSavings?: number;
+  incomeGrowth?: number;
+  expenseGrowth?: number;
+  savingsGrowth?: number;
+  categoriesAnalyzed?: number;
+  topCategories?: Array<{ category: string; amount: number; trend: string }>;
+  recurringExpenses?: number;
+  variableExpenses?: number;
+  transactionPatterns?: Array<{ type: string; avgAmount: number; trend: string }>;
+  anomaliesDetected?: number;
+  savingsOpportunities?: number;
+  confidenceLevel?: "low" | "medium" | "high" | "very high";
+  errorMessage?: string;
 }
 
 /**

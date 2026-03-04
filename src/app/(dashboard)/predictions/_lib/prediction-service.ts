@@ -652,16 +652,46 @@ export async function fetchPredictionHistory(userId: string): Promise<Prediction
     return [];
   }
 
-  return (data || []).map((report) => ({
-    id: report.id,
-    date: report.created_at,
-    type: report.report_type || "monthly",
-    status: "completed",
-    accuracy: report.accuracy_score,
-    insights: report.insights?.length || 0,
-    dataPoints: report.data_points || 0,
-    model: report.model_version || "Prophet v1.0",
-  }));
+  return (data || []).map((report) => {
+    // Calculate confidence level based on accuracy score
+    let confidenceLevel: "low" | "medium" | "high" | "very high" = "medium";
+    if (report.accuracy_score) {
+      if (report.accuracy_score >= 90) confidenceLevel = "very high";
+      else if (report.accuracy_score >= 80) confidenceLevel = "high";
+      else if (report.accuracy_score >= 70) confidenceLevel = "medium";
+      else confidenceLevel = "low";
+    }
+
+    // Extract prediction data from JSON field
+    const predictionData = report.prediction_data || {};
+
+    return {
+      id: report.id,
+      date: report.created_at,
+      type: report.report_type || "monthly",
+      status: "completed",
+      accuracy: report.accuracy_score,
+      insights: report.insights?.length || 0,
+      dataPoints: report.data_points || 0,
+      model: report.model_version || "Prophet v1.0",
+      confidenceLevel,
+      errorMessage: report.error_message,
+      // Prediction data
+      projectedIncome: predictionData.projectedIncome,
+      projectedExpenses: predictionData.projectedExpenses,
+      projectedSavings: predictionData.projectedSavings,
+      incomeGrowth: predictionData.incomeGrowth,
+      expenseGrowth: predictionData.expenseGrowth,
+      savingsGrowth: predictionData.savingsGrowth,
+      categoriesAnalyzed: predictionData.categoriesAnalyzed,
+      topCategories: predictionData.topCategories,
+      recurringExpenses: predictionData.recurringExpenses,
+      variableExpenses: predictionData.variableExpenses,
+      transactionPatterns: predictionData.transactionPatterns,
+      anomaliesDetected: predictionData.anomaliesDetected,
+      savingsOpportunities: predictionData.savingsOpportunities,
+    };
+  });
 }
 
 /**
@@ -674,6 +704,19 @@ export async function savePrediction(
     insights: unknown[];
     dataPoints: number;
     accuracy?: number;
+    projectedIncome?: number;
+    projectedExpenses?: number;
+    projectedSavings?: number;
+    incomeGrowth?: number;
+    expenseGrowth?: number;
+    savingsGrowth?: number;
+    categoriesAnalyzed?: number;
+    topCategories?: Array<{ category: string; amount: number; trend: string }>;
+    recurringExpenses?: number;
+    variableExpenses?: number;
+    transactionPatterns?: Array<{ type: string; avgAmount: number; trend: string }>;
+    anomaliesDetected?: number;
+    savingsOpportunities?: number;
   }
 ): Promise<{ success: boolean; error?: string }> {
   const { error } = await supabase
@@ -681,15 +724,38 @@ export async function savePrediction(
     .insert({
       user_id: userId,
       report_type: prediction.type,
+      timeframe: "month", // Default to month for predictions
       insights: prediction.insights,
       data_points: prediction.dataPoints,
       accuracy_score: prediction.accuracy,
       model_version: "Prophet v1.1",
+      // Store prediction data as JSON
+      prediction_data: {
+        projectedIncome: prediction.projectedIncome,
+        projectedExpenses: prediction.projectedExpenses,
+        projectedSavings: prediction.projectedSavings,
+        incomeGrowth: prediction.incomeGrowth,
+        expenseGrowth: prediction.expenseGrowth,
+        savingsGrowth: prediction.savingsGrowth,
+        categoriesAnalyzed: prediction.categoriesAnalyzed,
+        topCategories: prediction.topCategories,
+        recurringExpenses: prediction.recurringExpenses,
+        variableExpenses: prediction.variableExpenses,
+        transactionPatterns: prediction.transactionPatterns,
+        anomaliesDetected: prediction.anomaliesDetected,
+        savingsOpportunities: prediction.savingsOpportunities,
+      },
     });
 
   if (error) {
-    console.error("Error saving prediction:", error);
-    return { success: false, error: error.message };
+    console.error("Error saving prediction - Full error:", {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+      error: error
+    });
+    return { success: false, error: error.message || error.details || error.hint || "Failed to save prediction" };
   }
 
   return { success: true };
