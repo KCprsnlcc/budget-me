@@ -23,17 +23,27 @@ function getDateRange(timeframe: 'month' | 'quarter' | 'year') {
 
   switch (timeframe) {
     case 'month':
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      // Last 30 days
+      const monthAgo = new Date(now);
+      monthAgo.setDate(monthAgo.getDate() - 30);
+      startDate = monthAgo.toISOString().split('T')[0];
       break;
     case 'quarter':
-      const quarterStart = Math.floor(now.getMonth() / 3) * 3;
-      startDate = new Date(now.getFullYear(), quarterStart, 1).toISOString().split('T')[0];
+      // Last 3 months (90 days)
+      const quarterAgo = new Date(now);
+      quarterAgo.setDate(quarterAgo.getDate() - 90);
+      startDate = quarterAgo.toISOString().split('T')[0];
       break;
     case 'year':
-      startDate = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+      // Last 12 months (365 days)
+      const yearAgo = new Date(now);
+      yearAgo.setDate(yearAgo.getDate() - 365);
+      startDate = yearAgo.toISOString().split('T')[0];
       break;
     default:
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const defaultAgo = new Date(now);
+      defaultAgo.setDate(defaultAgo.getDate() - 30);
+      startDate = defaultAgo.toISOString().split('T')[0];
   }
 
   return { startDate, endDate };

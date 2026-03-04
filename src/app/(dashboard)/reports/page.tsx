@@ -17,10 +17,13 @@ import {
   MoreHorizontal,
   Wand2,
   AlertTriangle,
+  Calendar,
+  Activity,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { AnomalyDetailsModal } from "./_components";
 import type { AnomalyAlert, AIInsight, ReportSettings, AnomalyDetails } from "./_components/types";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -39,6 +42,11 @@ import {
   type ReportAIInsightResponse,
 } from "./_lib/report-insights-service";
 import { checkAIUsage, incrementAIUsage, type AIUsageStatus } from "../_lib/ai-rate-limit-service";
+import {
+  generateIncomeExpenseForecast,
+  generateCategoryForecast,
+} from "../predictions/_lib/prediction-service";
+import type { MonthlyForecast, CategoryPrediction } from "../predictions/_lib/types";
 
 export default function ReportsPage() {
   const { user } = useAuth();
@@ -63,6 +71,13 @@ export default function ReportsPage() {
   const [chartData, setChartData] = useState<any>(null);
   const [aiInsights, setAiInsights] = useState<ReportAIInsightResponse | null>(null);
   const [hasGeneratedInsights, setHasGeneratedInsights] = useState(false);
+  
+  // Prediction data states
+  const [predictionData, setPredictionData] = useState<{
+    forecast: { historical: MonthlyForecast[]; predicted: MonthlyForecast[]; summary: any } | null;
+    categories: CategoryPrediction[];
+  }>({ forecast: null, categories: [] });
+  const [loadingPredictions, setLoadingPredictions] = useState(false);
   
   // AI Rate Limit State
   const [rateLimitStatus, setRateLimitStatus] = useState<AIUsageStatus | null>(null);
@@ -114,6 +129,11 @@ export default function ReportsPage() {
         setAiInsights(null);
         setHasGeneratedInsights(false);
       }
+      
+      // Fetch prediction data if predictions report type is selected
+      if (reportSettings.reportType === 'predictions') {
+        await fetchPredictionData();
+      }
     } catch (error) {
       console.error("Error fetching report data:", error);
       toast.error("Failed to load report data", {
@@ -123,6 +143,28 @@ export default function ReportsPage() {
       setLoading(false);
     }
   }, [user?.id, reportSettings.timeframe, reportSettings.reportType]);
+
+  // Fetch prediction data from predictions service
+  const fetchPredictionData = useCallback(async () => {
+    if (!user?.id) return;
+
+    setLoadingPredictions(true);
+    try {
+      const [forecast, categories] = await Promise.all([
+        generateIncomeExpenseForecast(user.id),
+        generateCategoryForecast(user.id),
+      ]);
+
+      setPredictionData({ forecast, categories });
+    } catch (error) {
+      console.error("Error fetching prediction data:", error);
+      toast.error("Failed to load predictions", {
+        description: "Please try again later",
+      });
+    } finally {
+      setLoadingPredictions(false);
+    }
+  }, [user?.id]);
 
   // Initial data fetch
   useEffect(() => {
@@ -372,63 +414,77 @@ export default function ReportsPage() {
           <p className="text-xs text-slate-500 mt-0.5 font-light">Customize your report parameters and display options</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pointer-events-auto">
+        <div className={`grid grid-cols-1 gap-4 pointer-events-auto ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'}`}>
           <div className="pointer-events-auto">
             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+              <BarChart3 size={12} />
               Report Type
             </label>
-            <select 
+            <FilterDropdown
               value={reportSettings.reportType}
-              onChange={(e) => {
-                setReportSettings((prev: ReportSettings) => ({ ...prev, reportType: e.target.value as any }));
+              onChange={(value) => {
+                setReportSettings((prev: ReportSettings) => ({ ...prev, reportType: value as any }));
               }}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-            >
-              <option value="spending">Spending by Category</option>
-              <option value="income-expense">Income vs Expense</option>
-              <option value="savings">Savings Analysis</option>
-              <option value="trends">Spending Trends</option>
-              <option value="goals">Goals Progress</option>
-              <option value="predictions">Future Predictions</option>
-            </select>
+              options={[
+                { value: "spending", label: "Spending by Category", icon: PieChart },
+                { value: "income-expense", label: "Income vs Expense", icon: TrendingUp },
+                { value: "savings", label: "Savings Analysis", icon: Wallet },
+                { value: "trends", label: "Spending Trends", icon: Activity },
+                { value: "goals", label: "Goals Progress", icon: Flag },
+                { value: "predictions", label: "Future Predictions", icon: LineChart },
+              ]}
+              placeholder="Select report type"
+              allowEmpty={false}
+              hideSearch={true}
+            />
           </div>
 
           <div className="pointer-events-auto">
             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+              <Calendar size={12} />
               Timeframe
             </label>
-            <select 
+            <FilterDropdown
               value={reportSettings.timeframe}
-              onChange={(e) => {
-                setReportSettings((prev: ReportSettings) => ({ ...prev, timeframe: e.target.value as any }));
+              onChange={(value) => {
+                setReportSettings((prev: ReportSettings) => ({ ...prev, timeframe: value as any }));
               }}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-            >
-              <option value="month">Last 30 Days</option>
-              <option value="quarter">Last 3 Months</option>
-              <option value="year">Last 12 Months</option>
-            </select>
+              options={[
+                { value: "month", label: "Last 30 Days" },
+                { value: "quarter", label: "Last 3 Months" },
+                { value: "year", label: "Last 12 Months" },
+              ]}
+              placeholder="Select timeframe"
+              allowEmpty={false}
+              hideSearch={true}
+            />
           </div>
 
-          <div className="pointer-events-auto">
-            <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
-              Chart Type
-            </label>
-            <select 
-              value={reportSettings.chartType}
-              onChange={(e) => {
-                setReportSettings((prev: ReportSettings) => ({ ...prev, chartType: e.target.value as any }));
-              }}
-              className="h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-emerald-500 w-full"
-            >
-              <option value="pie">Pie Chart</option>
-              <option value="donut">Donut Chart</option>
-              <option value="column">Bar Chart</option>
-              <option value="bar">Bar Chart (Alternative)</option>
-              <option value="line">Line Chart</option>
-              <option value="area">Area Chart</option>
-            </select>
-          </div>
+          {viewMode === 'grid' && (
+            <div className="pointer-events-auto">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                <BarChart2 size={12} />
+                Chart Type
+              </label>
+              <FilterDropdown
+                value={reportSettings.chartType}
+                onChange={(value) => {
+                  setReportSettings((prev: ReportSettings) => ({ ...prev, chartType: value as any }));
+                }}
+                options={[
+                  { value: "pie", label: "Pie Chart", icon: PieChart },
+                  { value: "donut", label: "Donut Chart", icon: PieChart },
+                  { value: "column", label: "Bar Chart", icon: BarChart2 },
+                  { value: "bar", label: "Bar Chart (Alternative)", icon: BarChart2 },
+                  { value: "line", label: "Line Chart", icon: LineChart },
+                  { value: "area", label: "Area Chart", icon: Activity },
+                ]}
+                placeholder="Select chart type"
+                allowEmpty={false}
+                hideSearch={true}
+              />
+            </div>
+          )}
         </div>
       </Card>
 
@@ -528,10 +584,11 @@ export default function ReportsPage() {
 
       {/* AI Financial Insights Section */}
       <Card className="p-6 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6">
           <div>
             <h3 className="text-sm font-semibold text-slate-900">AI Financial Insights</h3>
             <p className="text-xs text-slate-500 mt-0.5 font-light">Smart recommendations powered by machine learning</p>
+            <p className="text-[10px] text-emerald-600 mt-1 font-medium">✓ Free - doesn't count towards AI usage limit</p>
           </div>
           <div className="flex items-center gap-2">
             <Button 
@@ -778,53 +835,45 @@ export default function ReportsPage() {
 
                       {/* Render based on chart type */}
                       {(reportSettings.chartType === 'pie' || reportSettings.chartType === 'donut') && (
-                        <div className="flex flex-col items-center gap-4">
-                          {/* Circular representation */}
-                          <div className="relative w-48 h-48">
-                            <svg viewBox="0 0 100 100" className="transform -rotate-90">
-                              {chartData.categories.reduce((acc: any, cat: any, idx: number) => {
-                                const prevPercentage = acc.total;
-                                const circumference = 2 * Math.PI * (reportSettings.chartType === 'donut' ? 35 : 40);
-                                const offset = circumference - (cat.percentage / 100) * circumference;
-                                const rotation = (prevPercentage / 100) * 360;
-                                
-                                acc.elements.push(
-                                  <circle
-                                    key={idx}
-                                    cx="50"
-                                    cy="50"
-                                    r={reportSettings.chartType === 'donut' ? 35 : 40}
-                                    fill="none"
-                                    stroke={cat.color}
-                                    strokeWidth={reportSettings.chartType === 'donut' ? 12 : 40}
-                                    strokeDasharray={circumference}
-                                    strokeDashoffset={offset}
-                                    className="transition-all"
-                                    style={{ transform: `rotate(${rotation}deg)`, transformOrigin: '50% 50%' }}
-                                  />
-                                );
-                                acc.total += cat.percentage;
-                                return acc;
-                              }, { elements: [], total: 0 }).elements}
-                            </svg>
-                            {reportSettings.chartType === 'donut' && (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="text-center">
-                                  <p className="text-sm font-bold text-slate-900">100%</p>
-                                  <p className="text-xs text-slate-500">Total</p>
+                        <div className="flex flex-col items-center gap-6">
+                          {/* Donut Chart with Gradient */}
+                          <div className="flex items-center gap-6 mb-6">
+                            <div className="w-32 h-32 sm:w-40 sm:h-40 mx-auto rounded-full flex-shrink-0 relative"
+                                 style={{ 
+                                   background: `conic-gradient(${chartData.categories.map((cat: any, idx: number) => {
+                                     const prevPercentage = chartData.categories.slice(0, idx).reduce((sum: number, c: any) => sum + c.percentage, 0);
+                                     const currentPercentage = prevPercentage + cat.percentage;
+                                     // Use shades of emerald green
+                                     const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                                     const color = emeraldShades[idx % emeraldShades.length];
+                                     return `${color} ${prevPercentage}% ${currentPercentage}%`;
+                                   }).join(', ')})`
+                                 }}>
+                              {reportSettings.chartType === 'donut' && (
+                                <div className="absolute inset-0 m-auto w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                                  <span className="text-xs text-slate-400 font-medium">Total</span>
+                                  <span className="text-lg sm:text-xl font-bold text-slate-900">
+                                    ₱{(chartData.total / 1000).toFixed(1)}k
+                                  </span>
                                 </div>
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
                           {/* Legend */}
-                          <div className="grid grid-cols-2 gap-2 w-full">
-                            {chartData.categories.map((cat: any, idx: number) => (
-                              <div key={idx} className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: cat.color }} />
-                                <span className="text-xs text-slate-700 truncate">{cat.name}</span>
-                                <span className="text-xs text-slate-500 ml-auto">{cat.percentage.toFixed(1)}%</span>
-                              </div>
-                            ))}
+                          <div className="space-y-3 w-full">
+                            {chartData.categories.map((cat: any, idx: number) => {
+                              const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                              const color = emeraldShades[idx % emeraldShades.length];
+                              return (
+                                <div key={idx} className="flex items-center justify-between text-xs">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                                    <span className="text-slate-600">{cat.name}</span>
+                                  </div>
+                                  <span className="font-medium text-slate-900">₱{cat.amount.toLocaleString()}</span>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
@@ -832,48 +881,66 @@ export default function ReportsPage() {
                       {(reportSettings.chartType === 'column' || reportSettings.chartType === 'bar') && (
                         <div className="space-y-4">
                           {reportSettings.chartType === 'column' ? (
-                            /* Vertical bars */
-                            <div className="flex items-end justify-between gap-2 h-64 border-b border-l border-slate-200 pl-2 pb-2">
-                              {chartData.categories.map((cat: any, idx: number) => (
-                                <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-                                  <div className="relative w-full flex flex-col justify-end items-center h-full group">
-                                    <div 
-                                      className="w-full rounded-t transition-all hover:opacity-80 cursor-pointer"
-                                      style={{ 
-                                        height: `${cat.percentage}%`,
-                                        backgroundColor: cat.color 
-                                      }}
-                                    />
-                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                                      ₱{cat.amount.toLocaleString()}
+                            /* Vertical bars with grid lines */
+                            <div className="relative h-64">
+                              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none px-2">
+                                <div className="w-full h-px bg-slate-100/50" />
+                                <div className="w-full h-px bg-slate-100/50" />
+                                <div className="w-full h-px bg-slate-100/50" />
+                                <div className="w-full h-px bg-slate-100/50" />
+                                <div className="w-full h-px bg-slate-100/50" />
+                              </div>
+                              <div className="relative h-full flex items-end justify-between gap-2 px-2 border-b border-slate-50">
+                                {chartData.categories.map((cat: any, idx: number) => {
+                                  const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                                  const color = emeraldShades[idx % emeraldShades.length];
+                                  return (
+                                    <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
+                                      <div className="relative w-full flex items-end justify-center h-full">
+                                        <div 
+                                          className="w-full max-w-[40px] rounded-t-[2px] transition-all hover:opacity-80 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1 cursor-pointer"
+                                          style={{ 
+                                            height: `${cat.percentage}%`,
+                                            backgroundColor: color
+                                          }}
+                                        />
+                                      </div>
                                     </div>
-                                  </div>
-                                  <span className="text-xs text-slate-600 text-center truncate w-full">{cat.name}</span>
-                                </div>
-                              ))}
+                                  );
+                                })}
+                              </div>
+                              <div className="flex justify-between mt-4 text-[10px] font-medium text-slate-400 px-2 uppercase tracking-wider">
+                                {chartData.categories.map((cat: any, idx: number) => (
+                                  <span key={idx} className="text-center truncate flex-1">{cat.name.slice(0, 3)}</span>
+                                ))}
+                              </div>
                             </div>
                           ) : (
                             /* Horizontal bars */
                             <div className="space-y-3">
-                              {chartData.categories.map((cat: any, idx: number) => (
-                                <div key={idx} className="space-y-2">
-                                  <div className="flex justify-between text-xs">
-                                    <span className="font-medium text-slate-700">{cat.name}</span>
-                                    <span className="text-slate-500">
-                                      ₱{cat.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })} ({cat.percentage.toFixed(1)}%)
-                                    </span>
+                              {chartData.categories.map((cat: any, idx: number) => {
+                                const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                                const color = emeraldShades[idx % emeraldShades.length];
+                                return (
+                                  <div key={idx} className="space-y-2">
+                                    <div className="flex justify-between text-xs">
+                                      <span className="font-medium text-slate-700">{cat.name}</span>
+                                      <span className="text-slate-500">
+                                        ₱{cat.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })} ({cat.percentage.toFixed(1)}%)
+                                      </span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 rounded-full h-3">
+                                      <div 
+                                        className="h-3 rounded-full transition-all hover:opacity-80 cursor-pointer"
+                                        style={{ 
+                                          width: `${cat.percentage}%`,
+                                          backgroundColor: color 
+                                        }}
+                                      />
+                                    </div>
                                   </div>
-                                  <div className="w-full bg-slate-100 rounded-full h-3">
-                                    <div 
-                                      className="h-3 rounded-full transition-all hover:opacity-80 cursor-pointer"
-                                      style={{ 
-                                        width: `${cat.percentage}%`,
-                                        backgroundColor: cat.color 
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           )}
                         </div>
@@ -881,69 +948,64 @@ export default function ReportsPage() {
 
                       {(reportSettings.chartType === 'line' || reportSettings.chartType === 'area') && (
                         <div className="space-y-4">
-                          <div className="relative h-64 border-b border-l border-slate-200 pl-2 pb-2">
-                            <svg className="w-full h-full" preserveAspectRatio="none">
-                              {/* Grid lines */}
-                              {[0, 25, 50, 75, 100].map((y) => (
-                                <line
-                                  key={y}
-                                  x1="0"
-                                  y1={`${100 - y}%`}
-                                  x2="100%"
-                                  y2={`${100 - y}%`}
-                                  stroke="#e2e8f0"
-                                  strokeWidth="1"
-                                />
-                              ))}
-                              
-                              {/* Line/Area path */}
-                              <path
-                                d={chartData.categories.map((cat: any, idx: number) => {
-                                  const x = (idx / (chartData.categories.length - 1)) * 100;
-                                  const y = 100 - cat.percentage;
-                                  return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
-                                }).join(' ')}
-                                fill="none"
-                                stroke="#10b981"
-                                strokeWidth="2"
-                                vectorEffect="non-scaling-stroke"
-                              />
-                              
-                              {reportSettings.chartType === 'area' && (
+                          <div className="relative h-64">
+                            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none px-2">
+                              <div className="w-full h-px bg-slate-100/50" />
+                              <div className="w-full h-px bg-slate-100/50" />
+                              <div className="w-full h-px bg-slate-100/50" />
+                              <div className="w-full h-px bg-slate-100/50" />
+                              <div className="w-full h-px bg-slate-100/50" />
+                            </div>
+                            <div className="relative h-full border-b border-slate-50 px-2 pb-2">
+                              <svg className="w-full h-full" preserveAspectRatio="none">
+                                {/* Line/Area path */}
                                 <path
-                                  d={`${chartData.categories.map((cat: any, idx: number) => {
+                                  d={chartData.categories.map((cat: any, idx: number) => {
                                     const x = (idx / (chartData.categories.length - 1)) * 100;
                                     const y = 100 - cat.percentage;
                                     return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
-                                  }).join(' ')} L 100 100 L 0 100 Z`}
-                                  fill="#10b981"
-                                  fillOpacity="0.2"
+                                  }).join(' ')}
+                                  fill="none"
+                                  stroke="#10b981"
+                                  strokeWidth="2"
+                                  vectorEffect="non-scaling-stroke"
                                 />
-                              )}
-                              
-                              {/* Data points */}
-                              {chartData.categories.map((cat: any, idx: number) => {
-                                const x = (idx / (chartData.categories.length - 1)) * 100;
-                                const y = 100 - cat.percentage;
-                                return (
-                                  <g key={idx}>
+                                
+                                {reportSettings.chartType === 'area' && (
+                                  <path
+                                    d={`${chartData.categories.map((cat: any, idx: number) => {
+                                      const x = (idx / (chartData.categories.length - 1)) * 100;
+                                      const y = 100 - cat.percentage;
+                                      return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                    }).join(' ')} L 100 100 L 0 100 Z`}
+                                    fill="#10b981"
+                                    fillOpacity="0.1"
+                                  />
+                                )}
+                                
+                                {/* Data points */}
+                                {chartData.categories.map((cat: any, idx: number) => {
+                                  const x = (idx / (chartData.categories.length - 1)) * 100;
+                                  const y = 100 - cat.percentage;
+                                  return (
                                     <circle
+                                      key={idx}
                                       cx={`${x}%`}
                                       cy={`${y}%`}
                                       r="4"
-                                      fill={cat.color}
+                                      fill="#10b981"
                                       className="cursor-pointer hover:r-6 transition-all"
                                     />
-                                  </g>
-                                );
-                              })}
-                            </svg>
+                                  );
+                                })}
+                              </svg>
+                            </div>
                           </div>
                           {/* X-axis labels */}
-                          <div className="flex justify-between px-2">
+                          <div className="flex justify-between px-2 mt-4">
                             {chartData.categories.map((cat: any, idx: number) => (
-                              <span key={idx} className="text-xs text-slate-600 text-center truncate" style={{ maxWidth: `${100 / chartData.categories.length}%` }}>
-                                {cat.name}
+                              <span key={idx} className="text-[10px] font-medium text-slate-400 uppercase tracking-wider text-center truncate" style={{ maxWidth: `${100 / chartData.categories.length}%` }}>
+                                {cat.name.slice(0, 3)}
                               </span>
                             ))}
                           </div>
@@ -970,47 +1032,214 @@ export default function ReportsPage() {
               ) : (
                 <div className="space-y-6">
                   <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="text-center">
+                    <div className="text-center p-3 rounded-lg bg-slate-50">
                       <p className="text-lg font-bold text-emerald-600">
                         ₱{chartData.totals?.income.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                       </p>
-                      <p className="text-xs text-slate-500">Total Income</p>
+                      <p className="text-[10px] text-slate-500 mt-1">Total Income</p>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center p-3 rounded-lg bg-slate-50">
                       <p className="text-lg font-bold text-red-600">
                         ₱{chartData.totals?.expenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                       </p>
-                      <p className="text-xs text-slate-500">Total Expenses</p>
+                      <p className="text-[10px] text-slate-500 mt-1">Total Expenses</p>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center p-3 rounded-lg bg-slate-50">
                       <p className="text-lg font-bold text-blue-600">
                         ₱{chartData.totals?.netSavings.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                       </p>
-                      <p className="text-xs text-slate-500">Net Savings</p>
+                      <p className="text-[10px] text-slate-500 mt-1">Net Savings</p>
                     </div>
                   </div>
-                  <div className="space-y-3">
-                    {chartData.monthly.map((month: any, idx: number) => (
-                      <div key={idx} className="space-y-2">
-                        <div className="flex justify-between text-xs">
-                          <span className="font-medium text-slate-700">{month.month}</span>
-                          <span className="text-slate-500">
-                            Income: ₱{month.income.toLocaleString()} | Expenses: ₱{month.expenses.toLocaleString()}
-                          </span>
-                        </div>
-                        <div className="flex gap-1">
-                          <div 
-                            className="h-8 bg-emerald-500 rounded transition-all"
-                            style={{ width: `${(month.income / (chartData.totals?.income || 1)) * 100}%` }}
-                          />
-                          <div 
-                            className="h-8 bg-red-500 rounded transition-all"
-                            style={{ width: `${(month.expenses / (chartData.totals?.income || 1)) * 100}%` }}
-                          />
+
+                  {/* Render based on chart type */}
+                  {(reportSettings.chartType === 'pie' || reportSettings.chartType === 'donut') && (
+                    <div className="flex flex-col items-center gap-6">
+                      <div className="flex items-center gap-6 mb-6">
+                        <div className="w-32 h-32 sm:w-40 sm:h-40 mx-auto rounded-full flex-shrink-0 relative"
+                             style={{ 
+                               background: `conic-gradient(#10b981 0% ${(chartData.totals.income / (chartData.totals.income + chartData.totals.expenses)) * 100}%, #ef4444 ${(chartData.totals.income / (chartData.totals.income + chartData.totals.expenses)) * 100}% 100%)`
+                             }}>
+                          {reportSettings.chartType === 'donut' && (
+                            <div className="absolute inset-0 m-auto w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                              <span className="text-xs text-slate-400 font-medium">Total</span>
+                              <span className="text-lg sm:text-xl font-bold text-slate-900">
+                                ₱{((chartData.totals.income + chartData.totals.expenses) / 1000).toFixed(1)}k
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="space-y-3 w-full">
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <span className="text-slate-600">Income</span>
+                          </div>
+                          <span className="font-medium text-slate-900">₱{chartData.totals.income.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-red-500" />
+                            <span className="text-slate-600">Expenses</span>
+                          </div>
+                          <span className="font-medium text-slate-900">₱{chartData.totals.expenses.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {(reportSettings.chartType === 'column' || reportSettings.chartType === 'bar') && (
+                    <div className="space-y-3">
+                      {chartData.monthly.map((month: any, idx: number) => (
+                        <div key={idx} className="space-y-2">
+                          <div className="flex justify-between text-xs">
+                            <span className="font-medium text-slate-700">{month.month}</span>
+                            <span className="text-slate-500 text-[10px]">
+                              Income: ₱{month.income.toLocaleString()} | Expenses: ₱{month.expenses.toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="flex gap-1 h-8">
+                            <div 
+                              className="bg-emerald-500 rounded-[2px] transition-all hover:opacity-80"
+                              style={{ width: `${(month.income / (chartData.totals?.income || 1)) * 100}%` }}
+                            />
+                            <div 
+                              className="bg-red-500 rounded-[2px] transition-all hover:opacity-80"
+                              style={{ width: `${(month.expenses / (chartData.totals?.income || 1)) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {(reportSettings.chartType === 'line' || reportSettings.chartType === 'area') && (
+                    <div className="space-y-4">
+                      <div className="relative h-64">
+                        <div className="absolute inset-0 flex flex-col justify-between pointer-events-none px-2">
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                        </div>
+                        <div className="relative h-full border-b border-slate-50 px-2 pb-2">
+                          <svg className="w-full h-full" preserveAspectRatio="none">
+                            {/* Calculate max value for scaling */}
+                            {(() => {
+                              const maxValue = Math.max(...chartData.monthly.map((m: any) => Math.max(m.income, m.expenses)));
+                              return (
+                                <>
+                                  {/* Income line */}
+                                  <path
+                                    d={chartData.monthly.map((m: any, idx: number) => {
+                                      const x = (idx / (chartData.monthly.length - 1)) * 100;
+                                      const y = 100 - ((m.income / maxValue) * 100);
+                                      return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                    }).join(' ')}
+                                    fill="none"
+                                    stroke="#10b981"
+                                    strokeWidth="2"
+                                    vectorEffect="non-scaling-stroke"
+                                  />
+                                  
+                                  {/* Expense line */}
+                                  <path
+                                    d={chartData.monthly.map((m: any, idx: number) => {
+                                      const x = (idx / (chartData.monthly.length - 1)) * 100;
+                                      const y = 100 - ((m.expenses / maxValue) * 100);
+                                      return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                    }).join(' ')}
+                                    fill="none"
+                                    stroke="#ef4444"
+                                    strokeWidth="2"
+                                    vectorEffect="non-scaling-stroke"
+                                  />
+
+                                  {reportSettings.chartType === 'area' && (
+                                    <>
+                                      {/* Income area */}
+                                      <path
+                                        d={`${chartData.monthly.map((m: any, idx: number) => {
+                                          const x = (idx / (chartData.monthly.length - 1)) * 100;
+                                          const y = 100 - ((m.income / maxValue) * 100);
+                                          return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                        }).join(' ')} L 100 100 L 0 100 Z`}
+                                        fill="#10b981"
+                                        fillOpacity="0.1"
+                                      />
+                                      {/* Expense area */}
+                                      <path
+                                        d={`${chartData.monthly.map((m: any, idx: number) => {
+                                          const x = (idx / (chartData.monthly.length - 1)) * 100;
+                                          const y = 100 - ((m.expenses / maxValue) * 100);
+                                          return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                        }).join(' ')} L 100 100 L 0 100 Z`}
+                                        fill="#ef4444"
+                                        fillOpacity="0.1"
+                                      />
+                                    </>
+                                  )}
+                                  
+                                  {/* Income data points */}
+                                  {chartData.monthly.map((m: any, idx: number) => {
+                                    const x = (idx / (chartData.monthly.length - 1)) * 100;
+                                    const y = 100 - ((m.income / maxValue) * 100);
+                                    return (
+                                      <circle
+                                        key={`income-${idx}`}
+                                        cx={`${x}%`}
+                                        cy={`${y}%`}
+                                        r="4"
+                                        fill="#10b981"
+                                        className="cursor-pointer hover:r-6 transition-all"
+                                      />
+                                    );
+                                  })}
+                                  
+                                  {/* Expense data points */}
+                                  {chartData.monthly.map((m: any, idx: number) => {
+                                    const x = (idx / (chartData.monthly.length - 1)) * 100;
+                                    const y = 100 - ((m.expenses / maxValue) * 100);
+                                    return (
+                                      <circle
+                                        key={`expense-${idx}`}
+                                        cx={`${x}%`}
+                                        cy={`${y}%`}
+                                        r="4"
+                                        fill="#ef4444"
+                                        className="cursor-pointer hover:r-6 transition-all"
+                                      />
+                                    );
+                                  })}
+                                </>
+                              );
+                            })()}
+                          </svg>
+                        </div>
+                      </div>
+                      {/* X-axis labels */}
+                      <div className="flex justify-between px-2 mt-4">
+                        {chartData.monthly.map((m: any, idx: number) => (
+                          <span key={idx} className="text-[10px] font-medium text-slate-400 uppercase tracking-wider text-center truncate" style={{ maxWidth: `${100 / chartData.monthly.length}%` }}>
+                            {m.month}
+                          </span>
+                        ))}
+                      </div>
+                      {/* Legend */}
+                      <div className="flex items-center justify-center gap-6 mt-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                          <span className="text-xs text-slate-600">Income</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-red-500" />
+                          <span className="text-xs text-slate-600">Expenses</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </>
@@ -1031,33 +1260,145 @@ export default function ReportsPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="text-center mb-6">
+                  <div className="text-center mb-6 p-4 rounded-lg bg-slate-50">
                     <p className="text-2xl font-bold text-slate-900">
                       ₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                     </p>
-                    <p className="text-xs text-slate-500">Total Savings ({chartData.rate?.toFixed(1)}% rate)</p>
+                    <p className="text-xs text-slate-500 mt-1">Total Savings ({chartData.rate?.toFixed(1)}% rate)</p>
                   </div>
-                  <div className="space-y-3">
-                    {chartData.funds.map((fund: any, idx: number) => (
-                      <div key={idx} className="space-y-2">
-                        <div className="flex justify-between text-xs">
-                          <span className="font-medium text-slate-700">{fund.name}</span>
-                          <span className="text-slate-500">
-                            ₱{fund.amount.toLocaleString()} / ₱{fund.target.toLocaleString()} ({fund.percentage.toFixed(1)}%)
-                          </span>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-2">
-                          <div 
-                            className="h-2 rounded-full transition-all"
-                            style={{ 
-                              width: `${Math.min(100, fund.percentage)}%`,
-                              backgroundColor: fund.color 
-                            }}
-                          />
+
+                  {/* Render based on chart type */}
+                  {(reportSettings.chartType === 'bar' || reportSettings.chartType === 'column') && (
+                    <div className="space-y-3">
+                      {chartData.funds.map((fund: any, idx: number) => {
+                        const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                        const color = emeraldShades[idx % emeraldShades.length];
+                        return (
+                          <div key={idx} className="space-y-2">
+                            <div className="flex justify-between text-xs">
+                              <span className="font-medium text-slate-700">{fund.name}</span>
+                              <span className="text-slate-500 text-[10px]">
+                                ₱{fund.amount.toLocaleString()} / ₱{fund.target.toLocaleString()} ({fund.percentage.toFixed(1)}%)
+                              </span>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-3">
+                              <div 
+                                className="h-3 rounded-full transition-all hover:opacity-80"
+                                style={{ 
+                                  width: `${Math.min(100, fund.percentage)}%`,
+                                  backgroundColor: color 
+                                }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {(reportSettings.chartType === 'pie' || reportSettings.chartType === 'donut') && (
+                    <div className="flex flex-col items-center gap-6">
+                      <div className="flex items-center gap-6 mb-6">
+                        <div className="w-32 h-32 sm:w-40 sm:h-40 mx-auto rounded-full flex-shrink-0 relative"
+                             style={{ 
+                               background: `conic-gradient(${chartData.funds.map((fund: any, idx: number) => {
+                                 const prevPercentage = chartData.funds.slice(0, idx).reduce((sum: number, f: any) => sum + (f.amount / chartData.total) * 100, 0);
+                                 const currentPercentage = prevPercentage + (fund.amount / chartData.total) * 100;
+                                 const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                                 const color = emeraldShades[idx % emeraldShades.length];
+                                 return `${color} ${prevPercentage}% ${currentPercentage}%`;
+                               }).join(', ')})`
+                             }}>
+                          {reportSettings.chartType === 'donut' && (
+                            <div className="absolute inset-0 m-auto w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                              <span className="text-xs text-slate-400 font-medium">Total</span>
+                              <span className="text-lg sm:text-xl font-bold text-slate-900">
+                                ₱{(chartData.total / 1000).toFixed(1)}k
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="space-y-3 w-full">
+                        {chartData.funds.map((fund: any, idx: number) => {
+                          const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                          const color = emeraldShades[idx % emeraldShades.length];
+                          return (
+                            <div key={idx} className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                                <span className="text-slate-600">{fund.name}</span>
+                              </div>
+                              <span className="font-medium text-slate-900">₱{fund.amount.toLocaleString()}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {(reportSettings.chartType === 'line' || reportSettings.chartType === 'area') && (
+                    <div className="space-y-4">
+                      <div className="relative h-64">
+                        <div className="absolute inset-0 flex flex-col justify-between pointer-events-none px-2">
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                        </div>
+                        <div className="relative h-full border-b border-slate-50 px-2 pb-2">
+                          <svg className="w-full h-full" preserveAspectRatio="none">
+                            <path
+                              d={chartData.funds.map((fund: any, idx: number) => {
+                                const x = (idx / (chartData.funds.length - 1)) * 100;
+                                const y = 100 - fund.percentage;
+                                return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                              }).join(' ')}
+                              fill="none"
+                              stroke="#10b981"
+                              strokeWidth="2"
+                              vectorEffect="non-scaling-stroke"
+                            />
+                            
+                            {reportSettings.chartType === 'area' && (
+                              <path
+                                d={`${chartData.funds.map((fund: any, idx: number) => {
+                                  const x = (idx / (chartData.funds.length - 1)) * 100;
+                                  const y = 100 - fund.percentage;
+                                  return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                }).join(' ')} L 100 100 L 0 100 Z`}
+                                fill="#10b981"
+                                fillOpacity="0.1"
+                              />
+                            )}
+                            
+                            {chartData.funds.map((fund: any, idx: number) => {
+                              const x = (idx / (chartData.funds.length - 1)) * 100;
+                              const y = 100 - fund.percentage;
+                              return (
+                                <circle
+                                  key={idx}
+                                  cx={`${x}%`}
+                                  cy={`${y}%`}
+                                  r="4"
+                                  fill="#10b981"
+                                  className="cursor-pointer hover:r-6 transition-all"
+                                />
+                              );
+                            })}
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="flex justify-between px-2 mt-4">
+                        {chartData.funds.map((fund: any, idx: number) => (
+                          <span key={idx} className="text-[10px] font-medium text-slate-400 uppercase tracking-wider text-center truncate" style={{ maxWidth: `${100 / chartData.funds.length}%` }}>
+                            {fund.name.slice(0, 8)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </>
@@ -1079,40 +1420,153 @@ export default function ReportsPage() {
               ) : (
                 <div className="space-y-4">
                   <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="text-center">
+                    <div className="text-center p-3 rounded-lg bg-slate-50">
                       <p className="text-lg font-bold text-slate-900">{chartData.totalGoals}</p>
-                      <p className="text-xs text-slate-500">Total Goals</p>
+                      <p className="text-[10px] text-slate-500 mt-1">Total Goals</p>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center p-3 rounded-lg bg-slate-50">
                       <p className="text-lg font-bold text-emerald-600">{chartData.completedGoals}</p>
-                      <p className="text-xs text-slate-500">Completed</p>
+                      <p className="text-[10px] text-slate-500 mt-1">Completed</p>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center p-3 rounded-lg bg-slate-50">
                       <p className="text-lg font-bold text-amber-600">{chartData.nearingCompletion}</p>
-                      <p className="text-xs text-slate-500">Nearing</p>
+                      <p className="text-[10px] text-slate-500 mt-1">Nearing</p>
                     </div>
                   </div>
-                  <div className="space-y-3">
-                    {chartData.goals.map((goal: any, idx: number) => (
-                      <div key={idx} className="space-y-2">
-                        <div className="flex justify-between text-xs">
-                          <span className="font-medium text-slate-700">{goal.name}</span>
-                          <span className="text-slate-500">
-                            ₱{goal.current.toLocaleString()} / ₱{goal.target.toLocaleString()} ({goal.percentage.toFixed(1)}%)
-                          </span>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-2">
-                          <div 
-                            className="h-2 rounded-full transition-all"
-                            style={{ 
-                              width: `${Math.min(100, goal.percentage)}%`,
-                              backgroundColor: goal.color 
-                            }}
-                          />
+
+                  {/* Render based on chart type */}
+                  {(reportSettings.chartType === 'bar' || reportSettings.chartType === 'column') && (
+                    <div className="space-y-3">
+                      {chartData.goals.map((goal: any, idx: number) => {
+                        const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                        const color = emeraldShades[idx % emeraldShades.length];
+                        return (
+                          <div key={idx} className="space-y-2">
+                            <div className="flex justify-between text-xs">
+                              <span className="font-medium text-slate-700">{goal.name}</span>
+                              <span className="text-slate-500 text-[10px]">
+                                ₱{goal.current.toLocaleString()} / ₱{goal.target.toLocaleString()} ({goal.percentage.toFixed(1)}%)
+                              </span>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-3">
+                              <div 
+                                className="h-3 rounded-full transition-all hover:opacity-80"
+                                style={{ 
+                                  width: `${Math.min(100, goal.percentage)}%`,
+                                  backgroundColor: color 
+                                }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {(reportSettings.chartType === 'pie' || reportSettings.chartType === 'donut') && (
+                    <div className="flex flex-col items-center gap-6">
+                      <div className="flex items-center gap-6 mb-6">
+                        <div className="w-32 h-32 sm:w-40 sm:h-40 mx-auto rounded-full flex-shrink-0 relative"
+                             style={{ 
+                               background: `conic-gradient(${chartData.goals.map((goal: any, idx: number) => {
+                                 const totalCurrent = chartData.goals.reduce((sum: number, g: any) => sum + g.current, 0);
+                                 const prevPercentage = chartData.goals.slice(0, idx).reduce((sum: number, g: any) => sum + (g.current / totalCurrent) * 100, 0);
+                                 const currentPercentage = prevPercentage + (goal.current / totalCurrent) * 100;
+                                 const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                                 const color = emeraldShades[idx % emeraldShades.length];
+                                 return `${color} ${prevPercentage}% ${currentPercentage}%`;
+                               }).join(', ')})`
+                             }}>
+                          {reportSettings.chartType === 'donut' && (
+                            <div className="absolute inset-0 m-auto w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                              <span className="text-xs text-slate-400 font-medium">Goals</span>
+                              <span className="text-lg sm:text-xl font-bold text-slate-900">
+                                {chartData.totalGoals}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="space-y-3 w-full">
+                        {chartData.goals.map((goal: any, idx: number) => {
+                          const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                          const color = emeraldShades[idx % emeraldShades.length];
+                          return (
+                            <div key={idx} className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                                <span className="text-slate-600">{goal.name}</span>
+                              </div>
+                              <span className="font-medium text-slate-900">₱{goal.current.toLocaleString()}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {(reportSettings.chartType === 'line' || reportSettings.chartType === 'area') && (
+                    <div className="space-y-4">
+                      <div className="relative h-64">
+                        <div className="absolute inset-0 flex flex-col justify-between pointer-events-none px-2">
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                        </div>
+                        <div className="relative h-full border-b border-slate-50 px-2 pb-2">
+                          <svg className="w-full h-full" preserveAspectRatio="none">
+                            <path
+                              d={chartData.goals.map((goal: any, idx: number) => {
+                                const x = (idx / (chartData.goals.length - 1)) * 100;
+                                const y = 100 - goal.percentage;
+                                return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                              }).join(' ')}
+                              fill="none"
+                              stroke="#10b981"
+                              strokeWidth="2"
+                              vectorEffect="non-scaling-stroke"
+                            />
+                            
+                            {reportSettings.chartType === 'area' && (
+                              <path
+                                d={`${chartData.goals.map((goal: any, idx: number) => {
+                                  const x = (idx / (chartData.goals.length - 1)) * 100;
+                                  const y = 100 - goal.percentage;
+                                  return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                }).join(' ')} L 100 100 L 0 100 Z`}
+                                fill="#10b981"
+                                fillOpacity="0.1"
+                              />
+                            )}
+                            
+                            {chartData.goals.map((goal: any, idx: number) => {
+                              const x = (idx / (chartData.goals.length - 1)) * 100;
+                              const y = 100 - goal.percentage;
+                              return (
+                                <circle
+                                  key={idx}
+                                  cx={`${x}%`}
+                                  cy={`${y}%`}
+                                  r="4"
+                                  fill="#10b981"
+                                  className="cursor-pointer hover:r-6 transition-all"
+                                />
+                              );
+                            })}
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="flex justify-between px-2 mt-4">
+                        {chartData.goals.map((goal: any, idx: number) => (
+                          <span key={idx} className="text-[10px] font-medium text-slate-400 uppercase tracking-wider text-center truncate" style={{ maxWidth: `${100 / chartData.goals.length}%` }}>
+                            {goal.name.slice(0, 8)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </>
@@ -1132,34 +1586,659 @@ export default function ReportsPage() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {chartData.categories.map((cat: any, idx: number) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: cat.color }}
-                        />
-                        <span className="text-sm font-medium text-slate-700">{cat.name}</span>
+                <div className="space-y-4">
+                  {/* Default card view - always show regardless of chart type */}
+                  {(reportSettings.chartType === 'column' || reportSettings.chartType === 'bar') && (
+                    <div className="space-y-3">
+                      {chartData.categories.map((cat: any, idx: number) => {
+                        const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                        const color = emeraldShades[idx % emeraldShades.length];
+                        return (
+                          <div key={idx} className="flex items-center justify-between p-4 rounded-lg border border-slate-200 bg-white hover:shadow-sm transition-all">
+                            <div className="flex items-center gap-3">
+                              <div 
+                                className="w-2 h-2 rounded-full"
+                                style={{ backgroundColor: color }}
+                              />
+                              <span className="text-xs font-medium text-slate-700">{cat.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-xs font-bold ${
+                                cat.trend === 'up' ? 'text-red-600' : 
+                                cat.trend === 'down' ? 'text-emerald-600' : 'text-slate-600'
+                              }`}>
+                                {cat.change > 0 ? '+' : ''}{cat.change.toFixed(1)}%
+                              </span>
+                              {cat.trend === 'up' ? <ArrowUp size={14} className="text-red-600" /> :
+                               cat.trend === 'down' ? <ArrowUp size={14} className="text-emerald-600 rotate-180" /> :
+                               <ArrowRight size={14} className="text-slate-600" />}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {(reportSettings.chartType === 'pie' || reportSettings.chartType === 'donut') && (
+                    <div className="flex flex-col items-center gap-6">
+                      <div className="flex items-center gap-6 mb-6">
+                        <div className="w-32 h-32 sm:w-40 sm:h-40 mx-auto rounded-full flex-shrink-0 relative"
+                             style={{ 
+                               background: `conic-gradient(${chartData.categories.map((cat: any, idx: number) => {
+                                 const totalChange = chartData.categories.reduce((sum: number, c: any) => sum + Math.abs(c.change), 0);
+                                 const prevPercentage = chartData.categories.slice(0, idx).reduce((sum: number, c: any) => sum + (Math.abs(c.change) / totalChange) * 100, 0);
+                                 const currentPercentage = prevPercentage + (Math.abs(cat.change) / totalChange) * 100;
+                                 const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                                 const color = emeraldShades[idx % emeraldShades.length];
+                                 return `${color} ${prevPercentage}% ${currentPercentage}%`;
+                               }).join(', ')})`
+                             }}>
+                          {reportSettings.chartType === 'donut' && (
+                            <div className="absolute inset-0 m-auto w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                              <span className="text-xs text-slate-400 font-medium">Trends</span>
+                              <span className="text-lg sm:text-xl font-bold text-slate-900">
+                                {chartData.categories.length}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-sm font-bold ${
-                          cat.trend === 'up' ? 'text-red-600' : 
-                          cat.trend === 'down' ? 'text-emerald-600' : 'text-slate-600'
-                        }`}>
-                          {cat.change > 0 ? '+' : ''}{cat.change.toFixed(1)}%
-                        </span>
-                        {cat.trend === 'up' ? <ArrowUp size={16} className="text-red-600" /> :
-                         cat.trend === 'down' ? <ArrowUp size={16} className="text-emerald-600 rotate-180" /> :
-                         <ArrowRight size={16} className="text-slate-600" />}
+                      <div className="space-y-3 w-full">
+                        {chartData.categories.map((cat: any, idx: number) => {
+                          const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                          const color = emeraldShades[idx % emeraldShades.length];
+                          return (
+                            <div key={idx} className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                                <span className="text-slate-600">{cat.name}</span>
+                              </div>
+                              <span className={`font-medium ${
+                                cat.trend === 'up' ? 'text-red-600' : 
+                                cat.trend === 'down' ? 'text-emerald-600' : 'text-slate-600'
+                              }`}>
+                                {cat.change > 0 ? '+' : ''}{cat.change.toFixed(1)}%
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  ))}
+                  )}
+
+                  {(reportSettings.chartType === 'line' || reportSettings.chartType === 'area') && (
+                    <div className="space-y-4">
+                      <div className="relative h-64">
+                        <div className="absolute inset-0 flex flex-col justify-between pointer-events-none px-2">
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                        </div>
+                        <div className="relative h-full border-b border-slate-50 px-2 pb-2">
+                          <svg className="w-full h-full" preserveAspectRatio="none">
+                            {/* Calculate max absolute change for scaling */}
+                            {(() => {
+                              const maxChange = Math.max(...chartData.categories.map((c: any) => Math.abs(c.change)));
+                              return (
+                                <>
+                                  <path
+                                    d={chartData.categories.map((cat: any, idx: number) => {
+                                      const x = (idx / (chartData.categories.length - 1)) * 100;
+                                      const y = 50 - ((cat.change / maxChange) * 40); // Center at 50%, scale to ±40%
+                                      return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                    }).join(' ')}
+                                    fill="none"
+                                    stroke="#10b981"
+                                    strokeWidth="2"
+                                    vectorEffect="non-scaling-stroke"
+                                  />
+                                  
+                                  {reportSettings.chartType === 'area' && (
+                                    <path
+                                      d={`${chartData.categories.map((cat: any, idx: number) => {
+                                        const x = (idx / (chartData.categories.length - 1)) * 100;
+                                        const y = 50 - ((cat.change / maxChange) * 40);
+                                        return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                      }).join(' ')} L 100 50 L 0 50 Z`}
+                                      fill="#10b981"
+                                      fillOpacity="0.1"
+                                    />
+                                  )}
+                                  
+                                  {/* Zero line */}
+                                  <line x1="0" y1="50%" x2="100%" y2="50%" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="4 4" />
+                                  
+                                  {chartData.categories.map((cat: any, idx: number) => {
+                                    const x = (idx / (chartData.categories.length - 1)) * 100;
+                                    const y = 50 - ((cat.change / maxChange) * 40);
+                                    return (
+                                      <circle
+                                        key={idx}
+                                        cx={`${x}%`}
+                                        cy={`${y}%`}
+                                        r="4"
+                                        fill={cat.trend === 'up' ? '#ef4444' : cat.trend === 'down' ? '#10b981' : '#64748b'}
+                                        className="cursor-pointer hover:r-6 transition-all"
+                                      />
+                                    );
+                                  })}
+                                </>
+                              );
+                            })()}
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="flex justify-between px-2 mt-4">
+                        {chartData.categories.map((cat: any, idx: number) => (
+                          <span key={idx} className="text-[10px] font-medium text-slate-400 uppercase tracking-wider text-center truncate" style={{ maxWidth: `${100 / chartData.categories.length}%` }}>
+                            {cat.name.slice(0, 8)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Future Predictions Chart */}
+          {reportSettings.reportType === 'predictions' && (
+            <>
+              {loadingPredictions ? (
+                <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
+                    <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">Loading Predictions...</h4>
+                  <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
+                    Analyzing your financial data with AI
+                  </p>
+                </div>
+              ) : !predictionData.forecast || (!predictionData.forecast.historical.length && !predictionData.forecast.predicted.length) ? (
+                <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
+                    <TrendingUp size={24} className="sm:w-8 sm:h-8 text-slate-300" />
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Prediction Data</h4>
+                  <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
+                    Add more transactions to generate AI-powered financial forecasts.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="text-center p-3 rounded-lg bg-slate-50">
+                      <p className="text-lg font-bold text-emerald-600">
+                        ₱{(predictionData.forecast?.predicted[0]?.income || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[10px] text-slate-500 mt-1">Projected Income</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-slate-50">
+                      <p className="text-lg font-bold text-red-600">
+                        ₱{(predictionData.forecast?.predicted[0]?.expense || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[10px] text-slate-500 mt-1">Projected Expenses</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-slate-50">
+                      <p className="text-lg font-bold text-blue-600">
+                        {predictionData.forecast?.summary?.confidence || 0}%
+                      </p>
+                      <p className="text-[10px] text-slate-500 mt-1">Confidence</p>
+                    </div>
+                  </div>
+
+                  {/* Render based on chart type */}
+                  {(reportSettings.chartType === 'line' || reportSettings.chartType === 'area') && (
+                    <div className="space-y-4">
+                      <div className="relative h-64">
+                        <div className="absolute inset-0 flex flex-col justify-between pointer-events-none px-2">
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                          <div className="w-full h-px bg-slate-100/50" />
+                        </div>
+                        <div className="relative h-full border-b border-slate-50 px-2 pb-2">
+                          <svg className="w-full h-full" preserveAspectRatio="none">
+                            {(() => {
+                              const allData = [...(predictionData.forecast?.historical || []), ...(predictionData.forecast?.predicted || [])];
+                              const maxValue = Math.max(...allData.map((m: any) => Math.max(m.income, m.expense)));
+                              const historicalLength = predictionData.forecast?.historical?.length || 0;
+                              return (
+                                <>
+                                  {/* Income line */}
+                                  <path
+                                    d={allData.map((m: any, idx: number) => {
+                                      const x = (idx / (allData.length - 1)) * 100;
+                                      const y = 100 - ((m.income / maxValue) * 100);
+                                      return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                    }).join(' ')}
+                                    fill="none"
+                                    stroke="#10b981"
+                                    strokeWidth="2"
+                                    strokeDasharray={historicalLength > 0 ? `${(historicalLength / allData.length) * 100} 0` : "0"}
+                                    vectorEffect="non-scaling-stroke"
+                                  />
+                                  
+                                  {/* Income prediction line (dashed) */}
+                                  {predictionData.forecast?.predicted && predictionData.forecast.predicted.length > 0 && predictionData.forecast?.historical && predictionData.forecast.historical.length > 0 && (
+                                    <path
+                                      d={[predictionData.forecast.historical[predictionData.forecast.historical.length - 1], ...predictionData.forecast.predicted].map((m: any, idx: number) => {
+                                        const startIdx = predictionData.forecast!.historical.length - 1;
+                                        const x = ((startIdx + idx) / (allData.length - 1)) * 100;
+                                        const y = 100 - ((m.income / maxValue) * 100);
+                                        return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                      }).join(' ')}
+                                      fill="none"
+                                      stroke="#10b981"
+                                      strokeWidth="2"
+                                      strokeDasharray="5,5"
+                                      vectorEffect="non-scaling-stroke"
+                                    />
+                                  )}
+                                  
+                                  {/* Expense line */}
+                                  <path
+                                    d={allData.map((m: any, idx: number) => {
+                                      const x = (idx / (allData.length - 1)) * 100;
+                                      const y = 100 - ((m.expense / maxValue) * 100);
+                                      return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                    }).join(' ')}
+                                    fill="none"
+                                    stroke="#ef4444"
+                                    strokeWidth="2"
+                                    strokeDasharray={historicalLength > 0 ? `${(historicalLength / allData.length) * 100} 0` : "0"}
+                                    vectorEffect="non-scaling-stroke"
+                                  />
+                                  
+                                  {/* Expense prediction line (dashed) */}
+                                  {predictionData.forecast?.predicted && predictionData.forecast.predicted.length > 0 && predictionData.forecast?.historical && predictionData.forecast.historical.length > 0 && (
+                                    <path
+                                      d={[predictionData.forecast.historical[predictionData.forecast.historical.length - 1], ...predictionData.forecast.predicted].map((m: any, idx: number) => {
+                                        const startIdx = predictionData.forecast!.historical.length - 1;
+                                        const x = ((startIdx + idx) / (allData.length - 1)) * 100;
+                                        const y = 100 - ((m.expense / maxValue) * 100);
+                                        return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                      }).join(' ')}
+                                      fill="none"
+                                      stroke="#ef4444"
+                                      strokeWidth="2"
+                                      strokeDasharray="5,5"
+                                      vectorEffect="non-scaling-stroke"
+                                    />
+                                  )}
+
+                                  {reportSettings.chartType === 'area' && (
+                                    <>
+                                      {/* Income area */}
+                                      <path
+                                        d={`${allData.map((m: any, idx: number) => {
+                                          const x = (idx / (allData.length - 1)) * 100;
+                                          const y = 100 - ((m.income / maxValue) * 100);
+                                          return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                        }).join(' ')} L 100 100 L 0 100 Z`}
+                                        fill="#10b981"
+                                        fillOpacity="0.1"
+                                      />
+                                      {/* Expense area */}
+                                      <path
+                                        d={`${allData.map((m: any, idx: number) => {
+                                          const x = (idx / (allData.length - 1)) * 100;
+                                          const y = 100 - ((m.expense / maxValue) * 100);
+                                          return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                        }).join(' ')} L 100 100 L 0 100 Z`}
+                                        fill="#ef4444"
+                                        fillOpacity="0.1"
+                                      />
+                                    </>
+                                  )}
+                                  
+                                  {/* Data points */}
+                                  {allData.map((m: any, idx: number) => {
+                                    const x = (idx / (allData.length - 1)) * 100;
+                                    const yIncome = 100 - ((m.income / maxValue) * 100);
+                                    const yExpense = 100 - ((m.expense / maxValue) * 100);
+                                    const isPredicted = idx >= historicalLength;
+                                    return (
+                                      <g key={idx}>
+                                        <circle
+                                          cx={`${x}%`}
+                                          cy={`${yIncome}%`}
+                                          r="4"
+                                          fill="#10b981"
+                                          fillOpacity={isPredicted ? 0.6 : 1}
+                                          className="cursor-pointer hover:r-6 transition-all"
+                                        />
+                                        <circle
+                                          cx={`${x}%`}
+                                          cy={`${yExpense}%`}
+                                          r="4"
+                                          fill="#ef4444"
+                                          fillOpacity={isPredicted ? 0.6 : 1}
+                                          className="cursor-pointer hover:r-6 transition-all"
+                                        />
+                                      </g>
+                                    );
+                                  })}
+                                </>
+                              );
+                            })()}
+                          </svg>
+                        </div>
+                      </div>
+                      {/* X-axis labels */}
+                      <div className="flex justify-between px-2 mt-4">
+                        {[...(predictionData.forecast?.historical || []), ...(predictionData.forecast?.predicted || [])].map((m: any, idx: number) => (
+                          <span key={idx} className="text-[10px] font-medium text-slate-400 uppercase tracking-wider text-center truncate" style={{ maxWidth: `${100 / ((predictionData.forecast?.historical?.length || 0) + (predictionData.forecast?.predicted?.length || 0))}%` }}>
+                            {m.month}
+                          </span>
+                        ))}
+                      </div>
+                      {/* Legend */}
+                      <div className="flex items-center justify-center gap-6 mt-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                          <span className="text-xs text-slate-600">Income</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-red-500" />
+                          <span className="text-xs text-slate-600">Expenses</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-0.5 border-t-2 border-dashed border-slate-400" />
+                          <span className="text-xs text-slate-600">Predicted</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {(reportSettings.chartType === 'column' || reportSettings.chartType === 'bar') && predictionData.forecast?.predicted && (
+                    <div className="space-y-3">
+                      {predictionData.forecast.predicted.map((month: any, idx: number) => (
+                        <div key={idx} className="space-y-2">
+                          <div className="flex justify-between text-xs">
+                            <span className="font-medium text-slate-700">{month.month}</span>
+                            <span className="text-slate-500 text-[10px]">
+                              Income: ₱{month.income.toLocaleString()} | Expenses: ₱{month.expense.toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="flex gap-1 h-8">
+                            <div 
+                              className="bg-emerald-500 rounded-[2px] transition-all hover:opacity-80"
+                              style={{ width: `${(month.income / (month.income + month.expense)) * 100}%` }}
+                            />
+                            <div 
+                              className="bg-red-500 rounded-[2px] transition-all hover:opacity-80"
+                              style={{ width: `${(month.expense / (month.income + month.expense)) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {(reportSettings.chartType === 'pie' || reportSettings.chartType === 'donut') && predictionData.categories.length > 0 && (
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-semibold text-slate-900">Category Predictions</h4>
+                      <div className="flex flex-col items-center gap-6">
+                        <div className="flex items-center gap-6 mb-6">
+                          <div className="w-32 h-32 sm:w-40 sm:h-40 mx-auto rounded-full flex-shrink-0 relative"
+                               style={{ 
+                                 background: `conic-gradient(${predictionData.categories.map((cat: any, idx: number) => {
+                                   const total = predictionData.categories.reduce((sum: number, c: any) => sum + c.predicted, 0);
+                                   const prevPercentage = predictionData.categories.slice(0, idx).reduce((sum: number, c: any) => sum + (c.predicted / total) * 100, 0);
+                                   const currentPercentage = prevPercentage + (cat.predicted / total) * 100;
+                                   const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                                   const color = emeraldShades[idx % emeraldShades.length];
+                                   return `${color} ${prevPercentage}% ${currentPercentage}%`;
+                                 }).join(', ')})`
+                               }}>
+                            {reportSettings.chartType === 'donut' && (
+                              <div className="absolute inset-0 m-auto w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                                <span className="text-xs text-slate-400 font-medium">Total</span>
+                                <span className="text-lg sm:text-xl font-bold text-slate-900">
+                                  {predictionData.categories.length}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="space-y-3 w-full">
+                          {predictionData.categories.slice(0, 5).map((cat: any, idx: number) => {
+                            const emeraldShades = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+                            const color = emeraldShades[idx % emeraldShades.length];
+                            return (
+                              <div key={idx} className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                                  <span className="text-slate-600">{cat.category}</span>
+                                </div>
+                                <span className="font-medium text-slate-900">₱{cat.predicted.toLocaleString()}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </>
           )}
             </>
+          )}
+        </Card>
+      )}
+
+      {/* Table View Section */}
+      {viewMode === "table" && (
+        <Card className="overflow-hidden hover:shadow-md transition-all">
+          <div className="p-6 border-b border-slate-100">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">
+                {reportSettings.reportType === 'spending' ? 'Spending by Category' :
+                 reportSettings.reportType === 'income-expense' ? 'Income vs Expenses' :
+                 reportSettings.reportType === 'savings' ? 'Savings Analysis' :
+                 reportSettings.reportType === 'trends' ? 'Spending Trends' :
+                 reportSettings.reportType === 'goals' ? 'Goals Progress' : 'Financial Overview'}
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5 font-light">
+                {reportSettings.timeframe === 'month' ? 'Last 30 days' :
+                 reportSettings.timeframe === 'quarter' ? 'Last 3 months' : 'Last 12 months'}
+              </p>
+            </div>
+          </div>
+
+          {!chartData ? (
+            <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
+                <Table size={24} className="sm:w-8 sm:h-8 text-slate-300" />
+              </div>
+              <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Data Available</h4>
+              <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
+                Add transactions to see your financial data in table format.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              {/* Spending by Category Table */}
+              {reportSettings.reportType === 'spending' && chartData.categories && chartData.categories.length > 0 && (
+                <table className="w-full">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Category</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Percentage</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {chartData.categories.map((cat: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{cat.name}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600 text-right">₱{cat.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600 text-right">{cat.percentage.toFixed(1)}%</td>
+                      </tr>
+                    ))}
+                    <tr className="bg-slate-50 font-semibold">
+                      <td className="px-6 py-4 text-sm text-slate-900">Total</td>
+                      <td className="px-6 py-4 text-sm text-slate-900 text-right">₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                      <td className="px-6 py-4 text-sm text-slate-900 text-right">100%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              )}
+
+              {/* Income vs Expense Table */}
+              {reportSettings.reportType === 'income-expense' && chartData.monthly && chartData.monthly.length > 0 && (
+                <table className="w-full">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Month</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Income</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Expenses</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Net Savings</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {chartData.monthly.map((month: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{month.month}</td>
+                        <td className="px-6 py-4 text-sm text-emerald-600 text-right">₱{month.income.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-6 py-4 text-sm text-red-600 text-right">₱{month.expenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-6 py-4 text-sm text-blue-600 text-right">₱{(month.income - month.expenses).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                      </tr>
+                    ))}
+                    <tr className="bg-slate-50 font-semibold">
+                      <td className="px-6 py-4 text-sm text-slate-900">Total</td>
+                      <td className="px-6 py-4 text-sm text-emerald-600 text-right">₱{chartData.totals?.income.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                      <td className="px-6 py-4 text-sm text-red-600 text-right">₱{chartData.totals?.expenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                      <td className="px-6 py-4 text-sm text-blue-600 text-right">₱{chartData.totals?.netSavings.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              )}
+
+              {/* Savings Analysis Table */}
+              {reportSettings.reportType === 'savings' && chartData.funds && chartData.funds.length > 0 && (
+                <table className="w-full">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Fund Name</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Current Amount</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Target Amount</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Progress</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {chartData.funds.map((fund: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{fund.name}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600 text-right">₱{fund.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600 text-right">₱{fund.target.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600 text-right">{fund.percentage.toFixed(1)}%</td>
+                      </tr>
+                    ))}
+                    <tr className="bg-slate-50 font-semibold">
+                      <td className="px-6 py-4 text-sm text-slate-900">Total</td>
+                      <td className="px-6 py-4 text-sm text-slate-900 text-right">₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                      <td className="px-6 py-4 text-sm text-slate-900 text-right" colSpan={2}>Savings Rate: {chartData.rate?.toFixed(1)}%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              )}
+
+              {/* Goals Progress Table */}
+              {reportSettings.reportType === 'goals' && chartData.goals && chartData.goals.length > 0 && (
+                <table className="w-full">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Goal Name</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Current Amount</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Target Amount</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Progress</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {chartData.goals.map((goal: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{goal.name}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600 text-right">₱{goal.current.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600 text-right">₱{goal.target.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600 text-right">{goal.percentage.toFixed(1)}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {/* Trends Table */}
+              {reportSettings.reportType === 'trends' && chartData.categories && chartData.categories.length > 0 && (
+                <table className="w-full">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Category</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Change</th>
+                      <th className="px-6 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Trend</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {chartData.categories.map((cat: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{cat.name}</td>
+                        <td className={`px-6 py-4 text-sm text-right font-semibold ${
+                          cat.trend === 'up' ? 'text-red-600' : 
+                          cat.trend === 'down' ? 'text-emerald-600' : 'text-slate-600'
+                        }`}>
+                          {cat.change > 0 ? '+' : ''}{cat.change.toFixed(1)}%
+                        </td>
+                        <td className="px-6 py-4 text-sm text-center">
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                            cat.trend === 'up' ? 'bg-red-50 text-red-700' : 
+                            cat.trend === 'down' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-700'
+                          }`}>
+                            {cat.trend === 'up' ? '↑ Increasing' : cat.trend === 'down' ? '↓ Decreasing' : '→ Stable'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {/* Future Predictions Table */}
+              {reportSettings.reportType === 'predictions' && predictionData.forecast && (
+                <table className="w-full">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Month</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Projected Income</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Projected Expenses</th>
+                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Net Savings</th>
+                      <th className="px-6 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Confidence</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {predictionData.forecast.predicted.map((month: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{month.month}</td>
+                        <td className="px-6 py-4 text-sm text-emerald-600 text-right">₱{month.income.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-6 py-4 text-sm text-red-600 text-right">₱{month.expense.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-6 py-4 text-sm text-blue-600 text-right">₱{(month.income - month.expense).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-6 py-4 text-sm text-center">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+                            {month.confidence || predictionData.forecast?.summary?.confidence || 0}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
           )}
         </Card>
       )}
