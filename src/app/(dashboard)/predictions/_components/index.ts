@@ -1,5 +1,6 @@
 export { HistoryModal } from "./history-modal";
 export { DetailedBreakdownModal } from "./detailed-breakdown-modal";
+export { AIFinancialIntelligence } from "./ai-financial-intelligence";
 
 // Export types and services from lib
 export * from "../_lib/types";

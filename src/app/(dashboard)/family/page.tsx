@@ -149,6 +149,7 @@ export default function FamilyPage() {
   const familyName = familyData?.name || "Family";
   const [activeGoalFilter, setActiveGoalFilter] = useState("all");
   const [hoveredBar, setHoveredBar] = useState<{ month: string; type: 'budget' | 'actual' | 'target' | 'saved'; value: number } | null>(null);
+  const [mobileChartTab, setMobileChartTab] = useState<'health' | 'savings'>('health');
 
   // Modal states
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
@@ -568,11 +569,35 @@ export default function FamilyPage() {
                   </Card>
                 </div>
 
+                {/* Mobile Chart Tabs */}
+                <div className="flex p-1 bg-slate-100 rounded-lg lg:hidden mb-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`flex-1 text-xs transition-colors ${
+                      mobileChartTab === 'health' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                    onClick={() => setMobileChartTab('health')}
+                  >
+                    Goals Health
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`flex-1 text-xs transition-colors ${
+                      mobileChartTab === 'savings' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                    onClick={() => setMobileChartTab('savings')}
+                  >
+                    Savings Progress
+                  </Button>
+                </div>
+
                 {/* Charts and Analytics Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                   {/* Family Goals Health */}
                   {goalsHealth.length > 0 ? (
-                    <Card className="p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
+                    <Card className={`p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer ${mobileChartTab === 'savings' ? 'hidden lg:block' : ''}`}>
                       <div className="mb-4">
                         <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Family Goals Health</h3>
                         <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 font-light">Track your family goal completion status</p>
@@ -614,7 +639,7 @@ export default function FamilyPage() {
                       </div>
                     </Card>
                   ) : (
-                    <Card className="p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
+                    <Card className={`p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer ${mobileChartTab === 'savings' ? 'hidden lg:block' : ''}`}>
                       <div className="mb-4">
                         <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Family Goals Health</h3>
                         <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 font-light">Track your family goal completion status</p>
@@ -635,7 +660,7 @@ export default function FamilyPage() {
                   )}
 
                   {/* Family Goals Savings Progress Chart */}
-                  <Card className="p-4 sm:p-6 lg:col-span-2 hover:shadow-md transition-all group cursor-pointer">
+                  <Card className={`p-4 sm:p-6 lg:col-span-2 hover:shadow-md transition-all group cursor-pointer ${mobileChartTab === 'health' ? 'hidden lg:block' : ''}`}>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-8">
                       <div>
                         <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Family Goals Savings Progress</h3>
