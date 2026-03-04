@@ -80,6 +80,8 @@ export default function ChatbotPage() {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | undefined>(undefined);
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const exportDropdownRef = useRef<HTMLDivElement>(null);
   
   // File upload state
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
@@ -88,6 +90,20 @@ export default function ChatbotPage() {
 
   // AI Rate Limit State
   const [rateLimitStatus, setRateLimitStatus] = useState<AIUsageStatus | null>(null);
+
+  // Close export dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+        setExportDropdownOpen(false);
+      }
+    };
+
+    if (exportDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [exportDropdownOpen]);
 
   // Fetch available models and chat history on mount
   useEffect(() => {
@@ -631,98 +647,100 @@ export default function ChatbotPage() {
   if (loading || authLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
-        <div className="max-w-7xl mx-auto h-[calc(100vh-140px)] min-h-[600px] space-y-6 animate-fade-in">
+        <div className="max-w-7xl mx-auto h-[calc(100vh-140px)] min-h-[600px] space-y-4 sm:space-y-6 animate-fade-in">
           {/* Messenger Container Skeleton */}
           <Card className="flex h-full overflow-hidden rounded-xl border border-slate-200/60 shadow-sm">
             {/* Main Chat Area Skeleton */}
             <main className="flex-1 flex flex-col min-w-0 bg-white relative">
               {/* Header Skeleton */}
-              <header className="h-16 flex items-center justify-between px-6 bg-white/80 backdrop-blur-sm flex-shrink-0 z-10 border-b border-slate-100">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 flex items-center justify-center">
-                      <Skeleton width={28} height={28} borderRadius={4} />
+              <header className="h-14 sm:h-16 flex items-center justify-between px-4 sm:px-6 bg-white/80 backdrop-blur-sm flex-shrink-0 z-10 border-b border-slate-100">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center shrink-0">
+                      <Skeleton width={24} height={24} borderRadius={4} className="sm:w-7 sm:h-7" />
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Skeleton width={120} height={14} />
-                        <Skeleton width={30} height={12} borderRadius={2} />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <Skeleton width={100} height={12} className="sm:w-[120px] sm:h-[14px]" />
+                        <Skeleton width={25} height={10} borderRadius={2} className="sm:w-[30px] sm:h-[12px]" />
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  {/* Model Selector Skeleton */}
-                  <Skeleton width={140} height={32} borderRadius={4} />
-                  <div className="h-8 w-px bg-slate-200 mx-1" />
+                <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                  {/* Model Selector Skeleton - Hidden on mobile */}
+                  <div className="hidden sm:block">
+                    <Skeleton width={140} height={32} borderRadius={4} />
+                  </div>
+                  <div className="hidden sm:block h-8 w-px bg-slate-200 mx-1" />
                   {/* Clear Chat Button Skeleton */}
-                  <Skeleton width={40} height={40} borderRadius={8} />
+                  <Skeleton width={32} height={32} borderRadius={8} className="sm:w-10 sm:h-10" />
                   {/* Export Chat Button Skeleton */}
-                  <Skeleton width={40} height={40} borderRadius={8} />
+                  <Skeleton width={32} height={32} borderRadius={8} className="sm:w-10 sm:h-10" />
                 </div>
               </header>
 
               {/* Messages Area Skeleton */}
-              <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
                 {/* Welcome Message Skeleton */}
                 <div className="mx-auto max-w-3xl flex justify-start">
-                  <div className="flex gap-3">
-                    <Skeleton width={32} height={32} borderRadius={50} />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton width="80%" height={14} />
-                      <Skeleton width="100%" height={14} />
-                      <Skeleton width="90%" height={14} />
-                      <Skeleton width="70%" height={14} />
+                  <div className="flex gap-2 sm:gap-3">
+                    <Skeleton width={28} height={28} borderRadius={50} className="sm:w-8 sm:h-8" />
+                    <div className="flex-1 space-y-1.5 sm:space-y-2">
+                      <Skeleton width="80%" height={12} className="sm:h-[14px]" />
+                      <Skeleton width="100%" height={12} className="sm:h-[14px]" />
+                      <Skeleton width="90%" height={12} className="sm:h-[14px]" />
+                      <Skeleton width="70%" height={12} className="sm:h-[14px]" />
                     </div>
                   </div>
                 </div>
 
                 {/* User Message Skeleton */}
                 <div className="mx-auto max-w-3xl flex justify-end">
-                  <div className="max-w-[85%] space-y-2">
-                    <Skeleton width="100%" height={14} />
+                  <div className="max-w-[90%] sm:max-w-[85%] space-y-1.5 sm:space-y-2">
+                    <Skeleton width="100%" height={12} className="sm:h-[14px]" />
                   </div>
-                  <Skeleton width={32} height={32} borderRadius={50} />
+                  <Skeleton width={28} height={28} borderRadius={50} className="sm:w-8 sm:h-8 ml-2" />
                 </div>
 
                 {/* Assistant Response Skeleton */}
                 <div className="mx-auto max-w-3xl flex justify-start">
-                  <div className="flex gap-3">
-                    <Skeleton width={32} height={32} borderRadius={50} />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton width="100%" height={14} />
-                      <Skeleton width="90%" height={14} />
-                      <Skeleton width="85%" height={14} />
-                      <Skeleton width="80%" height={14} />
-                      <Skeleton width="75%" height={14} />
-                      <Skeleton width="70%" height={14} />
+                  <div className="flex gap-2 sm:gap-3">
+                    <Skeleton width={28} height={28} borderRadius={50} className="sm:w-8 sm:h-8" />
+                    <div className="flex-1 space-y-1.5 sm:space-y-2">
+                      <Skeleton width="100%" height={12} className="sm:h-[14px]" />
+                      <Skeleton width="90%" height={12} className="sm:h-[14px]" />
+                      <Skeleton width="85%" height={12} className="sm:h-[14px]" />
+                      <Skeleton width="80%" height={12} className="sm:h-[14px]" />
+                      <Skeleton width="75%" height={12} className="sm:h-[14px]" />
+                      <Skeleton width="70%" height={12} className="sm:h-[14px]" />
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Input Area Skeleton */}
-              <div className="p-3 bg-white border-t border-slate-100 relative z-20 flex-shrink-0">
+              <div className="p-2 sm:p-3 bg-white border-t border-slate-100 relative z-20 flex-shrink-0">
                 <div className="mx-auto max-w-3xl">
-                  <div className="relative flex items-end gap-2 bg-slate-50 border border-slate-200/60 rounded-3xl p-2">
+                  <div className="relative flex items-end gap-1.5 sm:gap-2 bg-slate-50 border border-slate-200/60 rounded-3xl p-1.5 sm:p-2">
                     {/* Attachment Button Skeleton */}
-                    <Skeleton width={40} height={40} borderRadius={50} />
+                    <Skeleton width={32} height={32} borderRadius={50} className="sm:w-10 sm:h-10" />
                     
                     {/* Textarea Skeleton */}
                     <div className="flex-1">
-                      <Skeleton height={32} borderRadius={4} />
+                      <Skeleton height={28} borderRadius={4} className="sm:h-8" />
                     </div>
 
                     {/* Send Button Skeleton */}
-                    <Skeleton width={40} height={40} borderRadius={50} />
+                    <Skeleton width={32} height={32} borderRadius={50} className="sm:w-10 sm:h-10" />
                   </div>
 
-                  <div className="mt-2 flex items-center justify-center gap-1.5">
-                    <Skeleton width={100} height={10} />
-                    <Skeleton width={10} height={10} />
-                    <Skeleton width={60} height={10} />
-                    <Skeleton width={50} height={10} />
+                  <div className="mt-1.5 sm:mt-2 flex items-center justify-center gap-1 sm:gap-1.5">
+                    <Skeleton width={80} height={8} className="sm:w-[100px] sm:h-[10px]" />
+                    <Skeleton width={8} height={8} className="sm:w-[10px] sm:h-[10px]" />
+                    <Skeleton width={50} height={8} className="sm:w-[60px] sm:h-[10px]" />
+                    <Skeleton width={40} height={8} className="sm:w-[50px] sm:h-[10px]" />
                   </div>
                 </div>
               </div>
@@ -734,24 +752,24 @@ export default function ChatbotPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto h-[calc(100vh-140px)] min-h-[600px] space-y-6 animate-fade-in">
+    <div className="max-w-7xl mx-auto h-[calc(100vh-140px)] min-h-[600px] space-y-4 sm:space-y-6 animate-fade-in">
       {/* Messenger Container */}
       <Card className="flex h-full overflow-hidden rounded-xl border border-slate-200/60 shadow-sm">
         {/* Main Chat Area */}
         <main className="flex-1 flex flex-col min-w-0 bg-white relative">
           {/* Header */}
-          <header className="h-16 flex items-center justify-between px-6 bg-white/80 backdrop-blur-sm flex-shrink-0 z-10 border-b border-slate-100">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 flex items-center justify-center text-emerald-500">
-                  <Bot size={28} />
+          <header className="h-14 sm:h-16 flex items-center justify-between px-4 sm:px-6 bg-white/80 backdrop-blur-sm flex-shrink-0 z-10 border-b border-slate-100">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-emerald-500 shrink-0">
+                  <Bot size={24} className="sm:w-7 sm:h-7" />
                 </div>
-                <div>
-                  <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                    BudgetSense AI
+                <div className="min-w-0">
+                  <h2 className="text-xs sm:text-sm font-semibold text-slate-800 flex items-center gap-1.5 sm:gap-2 truncate">
+                    <span className="truncate">BudgetSense AI</span>
                     <Badge
                       variant="brand"
-                      className="px-2 py-0.5 text-emerald-600 text-[10px]  tracking-wide uppercase bg-transparent border-0 rounded-none"
+                      className="px-1.5 sm:px-2 py-0.5 text-emerald-600 text-[9px] sm:text-[10px] tracking-wide uppercase bg-transparent border-0 rounded-none shrink-0"
                     >
                       Beta
                     </Badge>
@@ -760,74 +778,85 @@ export default function ChatbotPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-px bg-slate-200 mx-1" />
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              <div className="hidden sm:block h-8 w-px bg-slate-200 mx-1" />
 
-              {/* Model Selector Dropdown */}
-              <ModelSelectorDropdown
-                selectedModel={selectedModel}
-                onSelectModel={handleModelChange}
-                models={models}
-              />
+              {/* Model Selector Dropdown - Hidden on mobile */}
+              <div className="hidden sm:block">
+                <ModelSelectorDropdown
+                  selectedModel={selectedModel}
+                  onSelectModel={handleModelChange}
+                  models={models}
+                />
+              </div>
 
-              <div className="h-8 w-px bg-slate-200 mx-1" />
+              <div className="hidden sm:block h-8 w-px bg-slate-200 mx-1" />
 
               {/* Clear Chat Button */}
               <button
                 onClick={() => setClearChatModalOpen(true)}
                 disabled={isPending}
-                className="p-2 text-slate-400 hover:text-red-500 rounded-lg transition-colors disabled:opacity-50"
+                className="p-1.5 sm:p-2 text-slate-400 hover:text-red-500 rounded-lg transition-colors disabled:opacity-50"
                 title="Clear Chat"
               >
-                <Trash2 size={20} />
+                <Trash2 size={18} className="sm:w-5 sm:h-5" />
               </button>
 
-              {/* Export Chat Dropdown */}
-              <div className="relative group">
+              {/* Export Chat Dropdown - Clickable for mobile/tablet */}
+              <div className="relative" ref={exportDropdownRef}>
                 <Button 
                   variant="ghost" 
                   size="sm"
                   disabled={isPending || messages.length === 0}
-                  className="p-2 text-slate-400 hover:text-slate-600 disabled:opacity-50"
+                  className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 disabled:opacity-50"
+                  onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
                 >
-                  <Download size={20} />
-                  <MoreHorizontal size={12} />
+                  <Download size={18} className="sm:w-5 sm:h-5" />
+                  <MoreHorizontal size={10} className="sm:w-3 sm:h-3 ml-0.5" />
                 </Button>
-                {/* Dropdown */}
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 hidden group-hover:block z-50">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50" 
-                    onClick={handleExportPDF}
-                    disabled={messages.length === 0}
-                  >
-                    <span className="text-rose-500">PDF</span> Export as PDF
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50" 
-                    onClick={handleExportCSV}
-                    disabled={messages.length === 0}
-                  >
-                    <span className="text-emerald-500">CSV</span> Export as CSV
-                  </Button>
-                </div>
+                {/* Dropdown - Show on click for mobile/tablet, hover for desktop */}
+                {exportDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-44 sm:w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full justify-start text-[10px] sm:text-xs text-slate-600 hover:bg-slate-50 gap-2" 
+                      onClick={() => {
+                        handleExportPDF();
+                        setExportDropdownOpen(false);
+                      }}
+                      disabled={messages.length === 0}
+                    >
+                      <span className="text-rose-500 font-semibold">PDF</span> Export as PDF
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full justify-start text-[10px] sm:text-xs text-slate-600 hover:bg-slate-50 gap-2" 
+                      onClick={() => {
+                        handleExportCSV();
+                        setExportDropdownOpen(false);
+                      }}
+                      disabled={messages.length === 0}
+                    >
+                      <span className="text-emerald-500 font-semibold">CSV</span> Export as CSV
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </header>
 
           {/* Error Banner */}
           {error && (
-            <div className="bg-red-50 border-b border-red-100 px-6 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-red-700">
-                <AlertCircle size={16} />
-                <span className="text-sm">{error}</span>
+            <div className="bg-red-50 border-b border-red-100 px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-red-700 min-w-0">
+                <AlertCircle size={14} className="sm:w-4 sm:h-4 shrink-0" />
+                <span className="text-xs sm:text-sm truncate">{error}</span>
               </div>
               <button 
                 onClick={dismissError}
-                className="text-red-500 hover:text-red-700 text-sm font-medium"
+                className="text-red-500 hover:text-red-700 text-xs sm:text-sm font-medium shrink-0 ml-2"
               >
                 Dismiss
               </button>
@@ -837,7 +866,7 @@ export default function ChatbotPage() {
           {/* Messages Container */}
           <div
             id="chat-messages"
-            className="flex-1 overflow-y-auto p-6 space-y-8 relative scroll-smooth bg-white scrollbar-thin"
+            className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 relative scroll-smooth bg-white scrollbar-thin"
           >
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-slate-400">
@@ -853,24 +882,24 @@ export default function ChatbotPage() {
                   }`}
                 >
                   {/* Message Content */}
-                  <div className={`${msg.role === "user" ? "max-w-[85%]" : "space-y-3 flex-1"} relative group`}>
+                  <div className={`${msg.role === "user" ? "max-w-[90%] sm:max-w-[85%]" : "space-y-2 sm:space-y-3 flex-1"} relative group`}>
                     {/* Message Bubble */}
                     <div
                       className={`${
                         msg.role === "assistant"
                           ? "rounded-[2rem] rounded-tl-sm text-slate-800 transition-all"
-                          : "bg-emerald-500 text-white rounded-[2rem] rounded-tr-sm px-6 py-3.5 shadow-sm"
+                          : "bg-emerald-500 text-white rounded-[2rem] rounded-tr-sm px-4 sm:px-6 py-2.5 sm:py-3.5 shadow-sm"
                       }`}
                     >
                       {/* File Attachment */}
                       {msg.attachment && (
-                        <div className={`mb-2 p-2 rounded-lg ${msg.role === "user" ? "bg-emerald-600" : "bg-slate-100"}`}>
-                          <div className="flex items-center gap-2">
-                            <Paperclip size={16} className={msg.role === "user" ? "text-emerald-200" : "text-slate-500"} />
-                            <span className={`text-sm truncate ${msg.role === "user" ? "text-white" : "text-slate-700"}`}>
+                        <div className={`mb-1.5 sm:mb-2 p-1.5 sm:p-2 rounded-lg ${msg.role === "user" ? "bg-emerald-600" : "bg-slate-100"}`}>
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <Paperclip size={14} className={`sm:w-4 sm:h-4 ${msg.role === "user" ? "text-emerald-200" : "text-slate-500"}`} />
+                            <span className={`text-xs sm:text-sm truncate ${msg.role === "user" ? "text-white" : "text-slate-700"}`}>
                               {msg.attachment.name}
                             </span>
-                            <span className={`text-xs ${msg.role === "user" ? "text-emerald-200" : "text-slate-500"}`}>
+                            <span className={`text-[10px] sm:text-xs ${msg.role === "user" ? "text-emerald-200" : "text-slate-500"}`}>
                               ({(msg.attachment.size / 1024).toFixed(1)} KB)
                             </span>
                           </div>
@@ -880,42 +909,42 @@ export default function ChatbotPage() {
                     </div>
 
                     {/* Copy Button as Footer */}
-                    <div className={`flex gap-2 ${msg.role === "assistant" ? "opacity-100 justify-start" : "opacity-0 justify-end"} group-hover:opacity-100 transition-all duration-200`}>
+                    <div className={`flex gap-1.5 sm:gap-2 ${msg.role === "assistant" ? "opacity-100 justify-start" : "opacity-0 justify-end"} group-hover:opacity-100 transition-all duration-200`}>
                       {/* Share Button - Only for Assistant Messages */}
                       {msg.role === "assistant" && msg.content && (
                         <button
                           onClick={() => handleShareMessage(msg.content)}
-                          className="p-1.5 hover:opacity-80 transition-opacity"
+                          className="p-1 sm:p-1.5 hover:opacity-80 transition-opacity"
                           title="Share message"
                         >
-                          <Share size={14} className="text-slate-400" />
+                          <Share size={12} className="sm:w-[14px] sm:h-[14px] text-slate-400" />
                         </button>
                       )}
                       
                       <button 
                         onClick={() => handleCopyMessage(msg.content || "", msg.id)}
-                        className="p-1.5 hover:opacity-80 transition-opacity"
+                        className="p-1 sm:p-1.5 hover:opacity-80 transition-opacity"
                         title="Copy message"
                       >
                         {copiedMessageId === msg.id ? (
-                          <Check size={14} className="text-emerald-500" />
+                          <Check size={12} className="sm:w-[14px] sm:h-[14px] text-emerald-500" />
                         ) : (
-                          <Copy size={14} className="text-slate-400" />
+                          <Copy size={12} className="sm:w-[14px] sm:h-[14px] text-slate-400" />
                         )}
                       </button>
                     </div>
 
                     {/* Suggestion Chips - Only for first assistant message with dynamic suggestions */}
                     {msg.role === "assistant" && index === 0 && dynamicSuggestions.length > 0 && (
-                      <div className="flex flex-wrap gap-2 pt-1">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-1">
                         {dynamicSuggestions.map((suggestion, idx) => (
                           <button
                             key={idx}
                             onClick={() => handleSuggestionClick(suggestion)}
-                            className="px-5 py-2.5 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 rounded-full text-xs text-slate-600 transition-all shadow-sm flex items-center gap-2 group cursor-pointer"
+                            className="px-3 sm:px-5 py-2 sm:py-2.5 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 rounded-full text-[10px] sm:text-xs text-slate-600 transition-all shadow-sm flex items-center gap-1.5 sm:gap-2 group cursor-pointer"
                           >
-                            <Lightbulb size={14} className="text-slate-400" />
-                            {suggestion}
+                            <Lightbulb size={12} className="sm:w-[14px] sm:h-[14px] text-slate-400" />
+                            <span className="truncate max-w-[200px] sm:max-w-none">{suggestion}</span>
                           </button>
                         ))}
                       </div>
@@ -929,12 +958,12 @@ export default function ChatbotPage() {
           </div>
 
           {/* Input Area */}
-          <div className="p-3 bg-white border-t border-slate-100 relative z-20 flex-shrink-0">
+          <div className="p-2 sm:p-3 bg-white border-t border-slate-100 relative z-20 flex-shrink-0">
             <div className="mx-auto max-w-3xl">
               {/* Attached File Preview */}
               {attachedFile && (
-                <div className="mb-2 flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-                  <div className="flex-shrink-0 w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                <div className="mb-2 flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2">
+                  <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
                     {attachedFile.type.startsWith('image/') ? (
                       <img 
                         src={URL.createObjectURL(attachedFile)} 
@@ -942,34 +971,34 @@ export default function ChatbotPage() {
                         className="w-full h-full object-cover rounded-lg"
                       />
                     ) : attachedFile.type.includes('pdf') ? (
-                      <FileText size={16} className="text-emerald-600" />
+                      <FileText size={14} className="sm:w-4 sm:h-4 text-emerald-600" />
                     ) : attachedFile.type.includes('word') || attachedFile.type.includes('document') ? (
-                      <FileText size={16} className="text-emerald-600" />
+                      <FileText size={14} className="sm:w-4 sm:h-4 text-emerald-600" />
                     ) : attachedFile.type.includes('excel') || attachedFile.type.includes('spreadsheet') ? (
-                      <FileText size={16} className="text-emerald-600" />
+                      <FileText size={14} className="sm:w-4 sm:h-4 text-emerald-600" />
                     ) : attachedFile.type.includes('powerpoint') || attachedFile.type.includes('presentation') ? (
-                      <FileText size={16} className="text-emerald-600" />
+                      <FileText size={14} className="sm:w-4 sm:h-4 text-emerald-600" />
                     ) : attachedFile.type.includes('text') || attachedFile.type.includes('code') ? (
-                      <FileCode size={16} className="text-emerald-600" />
+                      <FileCode size={14} className="sm:w-4 sm:h-4 text-emerald-600" />
                     ) : (
-                      <Paperclip size={16} className="text-emerald-600" />
+                      <Paperclip size={14} className="sm:w-4 sm:h-4 text-emerald-600" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-700 truncate">{attachedFile.name}</p>
-                    <p className="text-xs text-slate-500">{(attachedFile.size / 1024).toFixed(1)} KB</p>
+                    <p className="text-xs sm:text-sm font-medium text-slate-700 truncate">{attachedFile.name}</p>
+                    <p className="text-[10px] sm:text-xs text-slate-500">{(attachedFile.size / 1024).toFixed(1)} KB</p>
                   </div>
                   <button
                     onClick={handleRemoveFile}
-                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                    className="p-1 sm:p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
                     disabled={isSending}
                   >
-                    <X size={16} />
+                    <X size={14} className="sm:w-4 sm:h-4" />
                   </button>
                 </div>
               )}
 
-              <div className="relative flex items-end gap-2 bg-slate-50 border border-slate-200/60 rounded-3xl p-2 focus-within:border-slate-300 transition-all shadow-sm">
+              <div className="relative flex items-end gap-1.5 sm:gap-2 bg-slate-50 border border-slate-200/60 rounded-3xl p-1.5 sm:p-2 focus-within:border-slate-300 transition-all shadow-sm">
                 {/* Hidden File Input */}
                 <input
                   ref={fileInputRef}
@@ -983,9 +1012,9 @@ export default function ChatbotPage() {
                 <button 
                   onClick={handleFileSelect}
                   disabled={isSending || uploadingFile}
-                  className="p-2 text-slate-400 hover:text-emerald-500 rounded-full transition-colors flex-shrink-0 disabled:opacity-50"
+                  className="p-1.5 sm:p-2 text-slate-400 hover:text-emerald-500 rounded-full transition-colors flex-shrink-0 disabled:opacity-50"
                 >
-                  <Paperclip size={20} />
+                  <Paperclip size={18} className="sm:w-5 sm:h-5" />
                 </button>
 
                 <textarea
@@ -1002,7 +1031,7 @@ export default function ChatbotPage() {
                         : "Message BudgetSense..."}
                   rows={1}
                   disabled={isSending || !rateLimitStatus?.canUseAI}
-                  className="w-full bg-transparent border-none text-sm text-slate-600 placeholder-slate-400 focus:outline-none resize-none py-1.5 max-h-32 leading-relaxed disabled:opacity-50"
+                  className="w-full bg-transparent border-none text-xs sm:text-sm text-slate-600 placeholder-slate-400 focus:outline-none resize-none py-1.5 max-h-32 leading-relaxed disabled:opacity-50"
                 />
 
                 {/* Send Button */}
@@ -1010,17 +1039,17 @@ export default function ChatbotPage() {
                   onClick={handleSend}
                   disabled={(!input.trim() && !attachedFile) || isSending || !rateLimitStatus?.canUseAI}
                   title={!rateLimitStatus?.canUseAI ? "Daily AI limit reached (25/day)" : ""}
-                  className="p-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-full transition-all shadow-sm hover:shadow-md flex-shrink-0"
+                  className="p-1.5 sm:p-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-full transition-all shadow-sm hover:shadow-md flex-shrink-0"
                 >
                   {isSending ? (
-                    <Loader2 size={20} className="animate-spin" />
+                    <Loader2 size={18} className="sm:w-5 sm:h-5 animate-spin" />
                   ) : (
-                    <Send size={20} />
+                    <Send size={18} className="sm:w-5 sm:h-5" />
                   )}
                 </button>
               </div>
 
-              <div className="mt-2 flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-medium">
+              <div className="mt-1.5 sm:mt-2 flex items-center justify-center gap-1 sm:gap-1.5 text-[9px] sm:text-[10px] text-slate-400 font-medium">
                 <span className="flex items-center gap-1">
                   <ShieldCheck size={10} />
                   Private & Secure
