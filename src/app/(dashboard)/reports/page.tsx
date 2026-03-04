@@ -16,6 +16,7 @@ import {
   LineChart,
   MoreHorizontal,
   Wand2,
+  AlertTriangle,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,30 +93,26 @@ export default function ReportsPage() {
 
     setLoading(true);
     try {
-      // Fetch summary, anomalies, and chart data in parallel
-      const [summary, anomalyData, chart] = await Promise.all([
+      // Fetch summary, anomalies, chart data, and cached insights in parallel
+      const [summary, anomalyData, chart, cachedInsights] = await Promise.all([
         fetchReportSummary(user.id, reportSettings.timeframe),
         fetchAnomalyAlerts(user.id, reportSettings.timeframe),
         fetchReportChartData(user.id, reportSettings.reportType, reportSettings.timeframe),
+        fetchCachedReportInsights(user.id, reportSettings.reportType, reportSettings.timeframe),
       ]);
 
       setSummaryData(summary);
       setAnomalies(anomalyData);
       setChartData(chart);
 
-      // Try to fetch cached AI insights
-      try {
-        const cachedInsights = await fetchCachedReportInsights(
-          user.id,
-          reportSettings.reportType,
-          reportSettings.timeframe
-        );
-        if (cachedInsights) {
-          setAiInsights(cachedInsights);
-          setHasGeneratedInsights(true);
-        }
-      } catch (error) {
-        console.error("Error fetching cached insights:", error);
+      // Auto-load cached insights if available
+      if (cachedInsights) {
+        setAiInsights(cachedInsights);
+        setHasGeneratedInsights(true);
+      } else {
+        // Reset insights state if no cached data
+        setAiInsights(null);
+        setHasGeneratedInsights(false);
       }
     } catch (error) {
       console.error("Error fetching report data:", error);
@@ -442,15 +439,22 @@ export default function ReportsPage() {
             <h3 className="text-sm font-semibold text-slate-900">Anomaly Detection</h3>
             <p className="text-xs text-slate-500 mt-0.5 font-light">AI-powered transaction monitoring</p>
           </div>
-          <Badge variant="warning" className="text-[10px] px-2.5 py-1">
-            {anomalies.filter(a => a.status === 'active').length} Active Alerts
-          </Badge>
+          {anomalies.length > 0 && (
+            <Badge variant="warning" className="text-[10px] px-2.5 py-1">
+              {anomalies.filter(a => a.status === 'active').length} Active Alerts
+            </Badge>
+          )}
         </div>
 
         {anomalies.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-sm text-slate-500">No anomalies detected</p>
-            <p className="text-xs text-slate-400 mt-1">Your spending patterns look normal</p>
+          <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
+              <AlertTriangle size={24} className="sm:w-8 sm:h-8 text-slate-300" />
+            </div>
+            <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Anomalies Detected</h4>
+            <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
+              Your spending patterns look normal. Anomalies will appear here when unusual activity is detected.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -529,74 +533,197 @@ export default function ReportsPage() {
             <h3 className="text-sm font-semibold text-slate-900">AI Financial Insights</h3>
             <p className="text-xs text-slate-500 mt-0.5 font-light">Smart recommendations powered by machine learning</p>
           </div>
-          <Button 
-            size="sm" 
-            onClick={handleGenerateAIInsights} 
-            className="text-xs h-8 sm:h-9 px-3 sm:px-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isGeneratingInsights || !rateLimitStatus?.canUseAI}
-            title={!rateLimitStatus?.canUseAI ? "Daily limit reached" : ""}
-          >
-            {isGeneratingInsights ? (
-              <>
-                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5" />
-                <span>Generating...</span>
-              </>
-            ) : (
-              <>
-                <Wand2 size={14} className="mr-1.5" />
-                <span>{hasGeneratedInsights ? "Regenerate" : "Generate AI Insights"}</span>
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              size="sm" 
+              onClick={handleGenerateAIInsights} 
+              className="text-xs h-8 sm:h-9 px-3 sm:px-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isGeneratingInsights || !rateLimitStatus?.canUseAI}
+              title={!rateLimitStatus?.canUseAI ? "Daily limit reached" : ""}
+            >
+              {isGeneratingInsights ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <Wand2 size={14} className="mr-1.5" />
+                  <span>{hasGeneratedInsights ? "Regenerate Insights" : "Generate Report Insights"}</span>
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
-        {!hasGeneratedInsights ? (
-          <div className="text-center py-12">
-            <Wand2 size={48} className="mx-auto text-slate-300 mb-4" />
-            <h4 className="text-sm font-semibold text-slate-700 mb-2">No AI Insights Generated</h4>
-            <p className="text-xs text-slate-500 mb-4 max-w-md mx-auto">
-              Click "Generate AI Insights" to analyze your financial report and receive personalized recommendations.
-            </p>
+        {!hasGeneratedInsights || !aiInsights ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* Savings Opportunity Card - No Data */}
+            <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+              <div className="p-5 sm:p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center">
+                    <Wallet size={20} className="text-slate-400" strokeWidth={1.5} />
+                  </div>
+                  <span className="text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider">Savings Opportunities</span>
+                </div>
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <Wallet size={32} className="text-slate-300 mb-3" />
+                  <p className="text-xs sm:text-sm text-slate-600 mb-1 font-medium">No savings insights available</p>
+                  <p className="text-[10px] sm:text-xs text-slate-400">Generate to see opportunities</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Budget Recommendation Card - No Data */}
+            <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+              <div className="p-5 sm:p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center">
+                    <BarChart3 size={20} className="text-slate-400" strokeWidth={1.5} />
+                  </div>
+                  <span className="text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider">Budget Recommendations</span>
+                </div>
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <BarChart3 size={32} className="text-slate-300 mb-3" />
+                  <p className="text-xs sm:text-sm text-slate-600 mb-1 font-medium">No budget insights available</p>
+                  <p className="text-[10px] sm:text-xs text-slate-400">Generate AI insights to see analysis</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Trend Analysis Card - No Data */}
+            <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+              <div className="p-5 sm:p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center">
+                    <LineChart size={20} className="text-slate-400" strokeWidth={1.5} />
+                  </div>
+                  <span className="text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider">Trend Analysis</span>
+                </div>
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <LineChart size={32} className="text-slate-300 mb-3" />
+                  <p className="text-xs sm:text-sm text-slate-600 mb-1 font-medium">No trend analysis available</p>
+                  <p className="text-[10px] sm:text-xs text-slate-400">Generate AI insights to see patterns</p>
+                </div>
+              </div>
+            </div>
           </div>
         ) : aiInsights ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {aiInsights.insights.slice(0, 4).map((insight, idx) => (
-              <Card key={idx} className="p-5 hover:shadow-md transition-all group h-full cursor-pointer">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="text-slate-500 p-2 rounded-lg">
-                    {insight.type === 'savings-opportunity' ? <Wallet size={20} strokeWidth={1.5} /> :
-                     insight.type === 'budget-recommendation' ? <BarChart3 size={20} strokeWidth={1.5} /> :
-                     <LineChart size={20} strokeWidth={1.5} />}
+          <div className="space-y-6">
+            {/* Risk Assessment Summary */}
+            {aiInsights.riskLevel && (
+              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+                        <AlertTriangle className={`w-5 h-5 ${
+                          aiInsights.riskLevel === 'high' ? 'text-red-600' :
+                          aiInsights.riskLevel === 'medium' ? 'text-amber-600' :
+                          'text-emerald-600'
+                        }`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-slate-900 mb-1">Financial Health Assessment</h4>
+                        <p className="text-xs text-slate-600 leading-relaxed">{aiInsights.summary}</p>
+                      </div>
+                    </div>
+                    <span className={`text-[10px] px-2.5 py-1 shrink-0 font-semibold ${
+                      aiInsights.riskLevel === 'high' ? 'text-red-600' :
+                      aiInsights.riskLevel === 'medium' ? 'text-amber-600' :
+                      'text-emerald-600'
+                    }`}>
+                      {aiInsights.riskLevel.toUpperCase()}
+                    </span>
                   </div>
-                  <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{insight.title}</span>
-                </div>
-                <p className="text-[13px] text-slate-700 leading-relaxed font-medium">
-                  {insight.description}
-                </p>
-                <div className="mt-4 space-y-2">
-                  <div className="flex items-center gap-2 text-[10px] text-slate-600 font-semibold">
-                    <span className="text-slate-400">Recommendation:</span>
-                    <span>{insight.recommendation}</span>
-                  </div>
-                  <div className="flex items-center gap-4 text-[10px] text-slate-500">
-                    <span className="font-semibold uppercase tracking-wider">Timeframe:</span>
-                    <span className="text-slate-600">{insight.timeHorizon}</span>
-                  </div>
-                  {insight.potentialSavings && (
-                    <div className="flex items-center gap-4 text-[10px] text-slate-500">
-                      <span className="font-semibold uppercase tracking-wider">Potential Savings:</span>
-                      <span className="text-emerald-600 font-bold">₱{insight.potentialSavings}/mo</span>
+                  {aiInsights.riskAnalysis && (
+                    <div className="pt-4 border-t border-slate-100">
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {aiInsights.riskAnalysis}
+                      </p>
                     </div>
                   )}
                 </div>
-              </Card>
-            ))}
+              </div>
+            )}
+
+            {/* Recommendations Grid */}
+            {aiInsights.recommendations && aiInsights.recommendations.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold text-slate-900 mb-4">Recommended Actions</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {aiInsights.recommendations.slice(0, 4).map((rec, idx) => (
+                    <div key={idx} className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm hover:shadow-md transition-all">
+                      <div className="p-5">
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <div className={`w-2 h-2 rounded-full shrink-0 ${
+                              rec.priority === 'high' ? 'bg-red-500' :
+                              rec.priority === 'medium' ? 'bg-amber-500' : 'bg-blue-500'
+                            }`} />
+                            <h5 className="text-xs font-semibold text-slate-900 truncate">
+                              {rec.title}
+                            </h5>
+                          </div>
+                          <span className={`text-[9px] px-2 py-0.5 shrink-0 font-semibold ${
+                            rec.priority === 'high' ? 'text-red-600' :
+                            rec.priority === 'medium' ? 'text-amber-600' :
+                            'text-blue-600'
+                          }`}>
+                            {rec.priority}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                          {rec.description}
+                        </p>
+                        <div className="space-y-2 pt-3 border-t border-slate-100">
+                          <div className="flex items-center gap-2 text-[10px]">
+                            <span className="text-slate-400 font-medium">Category:</span>
+                            <span className="text-slate-700 capitalize">{rec.category}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px]">
+                            <span className="text-slate-400 font-medium">Timeframe:</span>
+                            <span className="text-slate-700">{rec.timeHorizon}</span>
+                          </div>
+                          {rec.potentialSavings && (
+                            <div className="flex items-center gap-2 text-[10px]">
+                              <span className="text-slate-400 font-medium">Potential Savings:</span>
+                              <span className="text-emerald-600 font-semibold">₱{rec.potentialSavings.toLocaleString()}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actionable Steps */}
+            {aiInsights.actionableSteps && aiInsights.actionableSteps.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold text-slate-900 mb-4">Next Steps</h4>
+                <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm divide-y divide-slate-100">
+                  {aiInsights.actionableSteps.map((step, idx) => (
+                    <div key={idx} className="p-4 hover:bg-slate-50 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-semibold">
+                          {idx + 1}
+                        </div>
+                        <p className="text-xs text-slate-700 leading-relaxed flex-1 pt-0.5">{step}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : null}
       </Card>
 
       {/* Charts Section */}
-      {viewMode === "grid" && chartData && (
+      {viewMode === "grid" && (
         <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -614,187 +741,425 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* Spending by Category Chart */}
-          {reportSettings.reportType === 'spending' && chartData.categories && (
-            <div className="space-y-4">
-              <div className="text-center mb-6">
-                <p className="text-2xl font-bold text-slate-900">
-                  ₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
-                </p>
-                <p className="text-xs text-slate-500">Total Spending</p>
+          {/* No Data State for Charts */}
+          {!chartData ? (
+            <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
+                <BarChart3 size={24} className="sm:w-8 sm:h-8 text-slate-300" />
               </div>
-              <div className="space-y-3">
-                {chartData.categories.map((cat: any, idx: number) => (
-                  <div key={idx} className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="font-medium text-slate-700">{cat.name}</span>
-                      <span className="text-slate-500">
-                        ₱{cat.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })} ({cat.percentage.toFixed(1)}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2">
-                      <div 
-                        className="h-2 rounded-full transition-all"
-                        style={{ 
-                          width: `${cat.percentage}%`,
-                          backgroundColor: cat.color 
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Chart Data Available</h4>
+              <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
+                Add transactions to see your financial data visualized in charts.
+              </p>
             </div>
-          )}
+          ) : (
+            <>
+              {/* Spending by Category Chart */}
+              {reportSettings.reportType === 'spending' && (
+                <>
+                  {!chartData.categories || chartData.categories.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
+                        <PieChart size={24} className="sm:w-8 sm:h-8 text-slate-300" />
+                      </div>
+                      <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Spending Data</h4>
+                      <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
+                        Add transactions to see spending breakdown by category.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="text-center mb-6">
+                        <p className="text-2xl font-bold text-slate-900">
+                          ₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                        </p>
+                        <p className="text-xs text-slate-500">Total Spending</p>
+                      </div>
+
+                      {/* Render based on chart type */}
+                      {(reportSettings.chartType === 'pie' || reportSettings.chartType === 'donut') && (
+                        <div className="flex flex-col items-center gap-4">
+                          {/* Circular representation */}
+                          <div className="relative w-48 h-48">
+                            <svg viewBox="0 0 100 100" className="transform -rotate-90">
+                              {chartData.categories.reduce((acc: any, cat: any, idx: number) => {
+                                const prevPercentage = acc.total;
+                                const circumference = 2 * Math.PI * (reportSettings.chartType === 'donut' ? 35 : 40);
+                                const offset = circumference - (cat.percentage / 100) * circumference;
+                                const rotation = (prevPercentage / 100) * 360;
+                                
+                                acc.elements.push(
+                                  <circle
+                                    key={idx}
+                                    cx="50"
+                                    cy="50"
+                                    r={reportSettings.chartType === 'donut' ? 35 : 40}
+                                    fill="none"
+                                    stroke={cat.color}
+                                    strokeWidth={reportSettings.chartType === 'donut' ? 12 : 40}
+                                    strokeDasharray={circumference}
+                                    strokeDashoffset={offset}
+                                    className="transition-all"
+                                    style={{ transform: `rotate(${rotation}deg)`, transformOrigin: '50% 50%' }}
+                                  />
+                                );
+                                acc.total += cat.percentage;
+                                return acc;
+                              }, { elements: [], total: 0 }).elements}
+                            </svg>
+                            {reportSettings.chartType === 'donut' && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-center">
+                                  <p className="text-sm font-bold text-slate-900">100%</p>
+                                  <p className="text-xs text-slate-500">Total</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          {/* Legend */}
+                          <div className="grid grid-cols-2 gap-2 w-full">
+                            {chartData.categories.map((cat: any, idx: number) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: cat.color }} />
+                                <span className="text-xs text-slate-700 truncate">{cat.name}</span>
+                                <span className="text-xs text-slate-500 ml-auto">{cat.percentage.toFixed(1)}%</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {(reportSettings.chartType === 'column' || reportSettings.chartType === 'bar') && (
+                        <div className="space-y-4">
+                          {reportSettings.chartType === 'column' ? (
+                            /* Vertical bars */
+                            <div className="flex items-end justify-between gap-2 h-64 border-b border-l border-slate-200 pl-2 pb-2">
+                              {chartData.categories.map((cat: any, idx: number) => (
+                                <div key={idx} className="flex-1 flex flex-col items-center gap-2">
+                                  <div className="relative w-full flex flex-col justify-end items-center h-full group">
+                                    <div 
+                                      className="w-full rounded-t transition-all hover:opacity-80 cursor-pointer"
+                                      style={{ 
+                                        height: `${cat.percentage}%`,
+                                        backgroundColor: cat.color 
+                                      }}
+                                    />
+                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                                      ₱{cat.amount.toLocaleString()}
+                                    </div>
+                                  </div>
+                                  <span className="text-xs text-slate-600 text-center truncate w-full">{cat.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            /* Horizontal bars */
+                            <div className="space-y-3">
+                              {chartData.categories.map((cat: any, idx: number) => (
+                                <div key={idx} className="space-y-2">
+                                  <div className="flex justify-between text-xs">
+                                    <span className="font-medium text-slate-700">{cat.name}</span>
+                                    <span className="text-slate-500">
+                                      ₱{cat.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })} ({cat.percentage.toFixed(1)}%)
+                                    </span>
+                                  </div>
+                                  <div className="w-full bg-slate-100 rounded-full h-3">
+                                    <div 
+                                      className="h-3 rounded-full transition-all hover:opacity-80 cursor-pointer"
+                                      style={{ 
+                                        width: `${cat.percentage}%`,
+                                        backgroundColor: cat.color 
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {(reportSettings.chartType === 'line' || reportSettings.chartType === 'area') && (
+                        <div className="space-y-4">
+                          <div className="relative h-64 border-b border-l border-slate-200 pl-2 pb-2">
+                            <svg className="w-full h-full" preserveAspectRatio="none">
+                              {/* Grid lines */}
+                              {[0, 25, 50, 75, 100].map((y) => (
+                                <line
+                                  key={y}
+                                  x1="0"
+                                  y1={`${100 - y}%`}
+                                  x2="100%"
+                                  y2={`${100 - y}%`}
+                                  stroke="#e2e8f0"
+                                  strokeWidth="1"
+                                />
+                              ))}
+                              
+                              {/* Line/Area path */}
+                              <path
+                                d={chartData.categories.map((cat: any, idx: number) => {
+                                  const x = (idx / (chartData.categories.length - 1)) * 100;
+                                  const y = 100 - cat.percentage;
+                                  return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                }).join(' ')}
+                                fill="none"
+                                stroke="#10b981"
+                                strokeWidth="2"
+                                vectorEffect="non-scaling-stroke"
+                              />
+                              
+                              {reportSettings.chartType === 'area' && (
+                                <path
+                                  d={`${chartData.categories.map((cat: any, idx: number) => {
+                                    const x = (idx / (chartData.categories.length - 1)) * 100;
+                                    const y = 100 - cat.percentage;
+                                    return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                  }).join(' ')} L 100 100 L 0 100 Z`}
+                                  fill="#10b981"
+                                  fillOpacity="0.2"
+                                />
+                              )}
+                              
+                              {/* Data points */}
+                              {chartData.categories.map((cat: any, idx: number) => {
+                                const x = (idx / (chartData.categories.length - 1)) * 100;
+                                const y = 100 - cat.percentage;
+                                return (
+                                  <g key={idx}>
+                                    <circle
+                                      cx={`${x}%`}
+                                      cy={`${y}%`}
+                                      r="4"
+                                      fill={cat.color}
+                                      className="cursor-pointer hover:r-6 transition-all"
+                                    />
+                                  </g>
+                                );
+                              })}
+                            </svg>
+                          </div>
+                          {/* X-axis labels */}
+                          <div className="flex justify-between px-2">
+                            {chartData.categories.map((cat: any, idx: number) => (
+                              <span key={idx} className="text-xs text-slate-600 text-center truncate" style={{ maxWidth: `${100 / chartData.categories.length}%` }}>
+                                {cat.name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
 
           {/* Income vs Expense Chart */}
-          {reportSettings.reportType === 'income-expense' && chartData.monthly && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="text-center">
-                  <p className="text-lg font-bold text-emerald-600">
-                    ₱{chartData.totals?.income.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+          {reportSettings.reportType === 'income-expense' && (
+            <>
+              {!chartData.monthly || chartData.monthly.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
+                    <BarChart2 size={24} className="sm:w-8 sm:h-8 text-slate-300" />
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Income/Expense Data</h4>
+                  <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
+                    Add income and expense transactions to see monthly comparisons.
                   </p>
-                  <p className="text-xs text-slate-500">Total Income</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-lg font-bold text-red-600">
-                    ₱{chartData.totals?.expenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-xs text-slate-500">Total Expenses</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-lg font-bold text-blue-600">
-                    ₱{chartData.totals?.netSavings.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-xs text-slate-500">Net Savings</p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                {chartData.monthly.map((month: any, idx: number) => (
-                  <div key={idx} className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="font-medium text-slate-700">{month.month}</span>
-                      <span className="text-slate-500">
-                        Income: ₱{month.income.toLocaleString()} | Expenses: ₱{month.expenses.toLocaleString()}
-                      </span>
+              ) : (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-emerald-600">
+                        ₱{chartData.totals?.income.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-xs text-slate-500">Total Income</p>
                     </div>
-                    <div className="flex gap-1">
-                      <div 
-                        className="h-8 bg-emerald-500 rounded transition-all"
-                        style={{ width: `${(month.income / (chartData.totals?.income || 1)) * 100}%` }}
-                      />
-                      <div 
-                        className="h-8 bg-red-500 rounded transition-all"
-                        style={{ width: `${(month.expenses / (chartData.totals?.income || 1)) * 100}%` }}
-                      />
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-red-600">
+                        ₱{chartData.totals?.expenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-xs text-slate-500">Total Expenses</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-blue-600">
+                        ₱{chartData.totals?.netSavings.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-xs text-slate-500">Net Savings</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div className="space-y-3">
+                    {chartData.monthly.map((month: any, idx: number) => (
+                      <div key={idx} className="space-y-2">
+                        <div className="flex justify-between text-xs">
+                          <span className="font-medium text-slate-700">{month.month}</span>
+                          <span className="text-slate-500">
+                            Income: ₱{month.income.toLocaleString()} | Expenses: ₱{month.expenses.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex gap-1">
+                          <div 
+                            className="h-8 bg-emerald-500 rounded transition-all"
+                            style={{ width: `${(month.income / (chartData.totals?.income || 1)) * 100}%` }}
+                          />
+                          <div 
+                            className="h-8 bg-red-500 rounded transition-all"
+                            style={{ width: `${(month.expenses / (chartData.totals?.income || 1)) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* Savings Analysis Chart */}
-          {reportSettings.reportType === 'savings' && chartData.funds && (
-            <div className="space-y-4">
-              <div className="text-center mb-6">
-                <p className="text-2xl font-bold text-slate-900">
-                  ₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
-                </p>
-                <p className="text-xs text-slate-500">Total Savings ({chartData.rate?.toFixed(1)}% rate)</p>
-              </div>
-              <div className="space-y-3">
-                {chartData.funds.map((fund: any, idx: number) => (
-                  <div key={idx} className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="font-medium text-slate-700">{fund.name}</span>
-                      <span className="text-slate-500">
-                        ₱{fund.amount.toLocaleString()} / ₱{fund.target.toLocaleString()} ({fund.percentage.toFixed(1)}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2">
-                      <div 
-                        className="h-2 rounded-full transition-all"
-                        style={{ 
-                          width: `${Math.min(100, fund.percentage)}%`,
-                          backgroundColor: fund.color 
-                        }}
-                      />
-                    </div>
+          {reportSettings.reportType === 'savings' && (
+            <>
+              {!chartData.funds || chartData.funds.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
+                    <Wallet size={24} className="sm:w-8 sm:h-8 text-slate-300" />
                   </div>
-                ))}
-              </div>
-            </div>
+                  <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Savings Data</h4>
+                  <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
+                    Create savings goals to track your progress and analyze savings patterns.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="text-center mb-6">
+                    <p className="text-2xl font-bold text-slate-900">
+                      ₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-xs text-slate-500">Total Savings ({chartData.rate?.toFixed(1)}% rate)</p>
+                  </div>
+                  <div className="space-y-3">
+                    {chartData.funds.map((fund: any, idx: number) => (
+                      <div key={idx} className="space-y-2">
+                        <div className="flex justify-between text-xs">
+                          <span className="font-medium text-slate-700">{fund.name}</span>
+                          <span className="text-slate-500">
+                            ₱{fund.amount.toLocaleString()} / ₱{fund.target.toLocaleString()} ({fund.percentage.toFixed(1)}%)
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2">
+                          <div 
+                            className="h-2 rounded-full transition-all"
+                            style={{ 
+                              width: `${Math.min(100, fund.percentage)}%`,
+                              backgroundColor: fund.color 
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* Goals Progress Chart */}
-          {reportSettings.reportType === 'goals' && chartData.goals && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="text-center">
-                  <p className="text-lg font-bold text-slate-900">{chartData.totalGoals}</p>
-                  <p className="text-xs text-slate-500">Total Goals</p>
+          {reportSettings.reportType === 'goals' && (
+            <>
+              {!chartData.goals || chartData.goals.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
+                    <Flag size={24} className="sm:w-8 sm:h-8 text-slate-300" />
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Goals Data</h4>
+                  <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
+                    Create financial goals to track your progress and achievements.
+                  </p>
                 </div>
-                <div className="text-center">
-                  <p className="text-lg font-bold text-emerald-600">{chartData.completedGoals}</p>
-                  <p className="text-xs text-slate-500">Completed</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-lg font-bold text-amber-600">{chartData.nearingCompletion}</p>
-                  <p className="text-xs text-slate-500">Nearing</p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                {chartData.goals.map((goal: any, idx: number) => (
-                  <div key={idx} className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="font-medium text-slate-700">{goal.name}</span>
-                      <span className="text-slate-500">
-                        ₱{goal.current.toLocaleString()} / ₱{goal.target.toLocaleString()} ({goal.percentage.toFixed(1)}%)
-                      </span>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-slate-900">{chartData.totalGoals}</p>
+                      <p className="text-xs text-slate-500">Total Goals</p>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2">
-                      <div 
-                        className="h-2 rounded-full transition-all"
-                        style={{ 
-                          width: `${Math.min(100, goal.percentage)}%`,
-                          backgroundColor: goal.color 
-                        }}
-                      />
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-emerald-600">{chartData.completedGoals}</p>
+                      <p className="text-xs text-slate-500">Completed</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-amber-600">{chartData.nearingCompletion}</p>
+                      <p className="text-xs text-slate-500">Nearing</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div className="space-y-3">
+                    {chartData.goals.map((goal: any, idx: number) => (
+                      <div key={idx} className="space-y-2">
+                        <div className="flex justify-between text-xs">
+                          <span className="font-medium text-slate-700">{goal.name}</span>
+                          <span className="text-slate-500">
+                            ₱{goal.current.toLocaleString()} / ₱{goal.target.toLocaleString()} ({goal.percentage.toFixed(1)}%)
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2">
+                          <div 
+                            className="h-2 rounded-full transition-all"
+                            style={{ 
+                              width: `${Math.min(100, goal.percentage)}%`,
+                              backgroundColor: goal.color 
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* Trends Chart */}
-          {reportSettings.reportType === 'trends' && chartData.categories && (
-            <div className="space-y-3">
-              {chartData.categories.map((cat: any, idx: number) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: cat.color }}
-                    />
-                    <span className="text-sm font-medium text-slate-700">{cat.name}</span>
+          {reportSettings.reportType === 'trends' && (
+            <>
+              {!chartData.categories || chartData.categories.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4">
+                    <LineChart size={24} className="sm:w-8 sm:h-8 text-slate-300" />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm font-bold ${
-                      cat.trend === 'up' ? 'text-red-600' : 
-                      cat.trend === 'down' ? 'text-emerald-600' : 'text-slate-600'
-                    }`}>
-                      {cat.change > 0 ? '+' : ''}{cat.change.toFixed(1)}%
-                    </span>
-                    {cat.trend === 'up' ? <ArrowUp size={16} className="text-red-600" /> :
-                     cat.trend === 'down' ? <ArrowUp size={16} className="text-emerald-600 rotate-180" /> :
-                     <ArrowRight size={16} className="text-slate-600" />}
-                  </div>
+                  <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Trend Data</h4>
+                  <p className="text-[10px] sm:text-xs text-slate-500 mb-3 sm:mb-4 max-w-md px-4">
+                    Add more transactions over time to see spending trends and patterns.
+                  </p>
                 </div>
-              ))}
-            </div>
+              ) : (
+                <div className="space-y-3">
+                  {chartData.categories.map((cat: any, idx: number) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: cat.color }}
+                        />
+                        <span className="text-sm font-medium text-slate-700">{cat.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-bold ${
+                          cat.trend === 'up' ? 'text-red-600' : 
+                          cat.trend === 'down' ? 'text-emerald-600' : 'text-slate-600'
+                        }`}>
+                          {cat.change > 0 ? '+' : ''}{cat.change.toFixed(1)}%
+                        </span>
+                        {cat.trend === 'up' ? <ArrowUp size={16} className="text-red-600" /> :
+                         cat.trend === 'down' ? <ArrowUp size={16} className="text-emerald-600 rotate-180" /> :
+                         <ArrowRight size={16} className="text-slate-600" />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+            </>
           )}
         </Card>
       )}
