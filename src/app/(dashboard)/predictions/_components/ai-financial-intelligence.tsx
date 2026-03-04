@@ -13,9 +13,11 @@ import {
   Lightbulb,
   ArrowRight,
 } from "lucide-react";
+import { useRef, useEffect } from "react";
+
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 interface AIInsights {
   summary: string;
@@ -86,32 +88,43 @@ export function AIFinancialIntelligence({
   onGenerateAIInsights,
   onToggleDetailedInsights,
 }: AIFinancialIntelligenceProps) {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (contentRef.current && typeof window !== 'undefined') {
+      const isMobileOrTablet = window.innerWidth < 1024;
+      if (isMobileOrTablet) {
+        contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }, [detailedInsights]);
+
   if (!hasGeneratedInsights) {
     return (
-      <Card className="p-6 mb-8 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-        <div className="flex items-center justify-between mb-8">
+      <Card className="p-4 sm:p-6 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">
+            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">
               AI Financial Intelligence
             </h3>
-            <p className="text-xs text-slate-500 mt-1 font-light">Deep analysis of your spending habits and financial future</p>
+            <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Deep analysis of your spending habits and financial future</p>
           </div>
           <Button 
             size="sm" 
             onClick={onGenerateAIInsights} 
-            className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-xs h-8 sm:h-9 px-3 sm:px-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
             disabled={isGeneratingInsights || !hasGeneratedPredictions || !rateLimitStatus?.canUseAI}
             title={!rateLimitStatus?.canUseAI ? "Daily limit reached" : !hasGeneratedPredictions ? "Generate predictions first" : ""}
           >
             {isGeneratingInsights ? (
               <>
-                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
-                Generating...
+                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5" />
+                <span>Generating...</span>
               </>
             ) : (
               <>
-                <Wand2 size={14} />
-                Generate AI Insights
+                <Wand2 size={14} className="mr-1.5" />
+                <span>Generate AI Insights</span>
               </>
             )}
           </Button>
@@ -125,12 +138,12 @@ export function AIFinancialIntelligence({
               <div className="text-slate-300">
                 <Clapperboard size={20} strokeWidth={1.5} />
               </div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Financial Summary</span>
+              <span className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider">Financial Summary</span>
             </div>
             <div className="flex flex-col items-center justify-center py-6 text-center">
               <Brain size={32} className="text-slate-300 mb-3" />
-              <p className="text-xs text-slate-500 mb-1">No AI insights available</p>
-              <p className="text-[10px] text-slate-400">Generate to see analysis</p>
+              <p className="text-xs sm:text-sm text-slate-500 mb-1">No AI insights available</p>
+              <p className="text-[10px] sm:text-xs text-slate-400">Generate to see analysis</p>
             </div>
           </Card>
 
@@ -140,12 +153,12 @@ export function AIFinancialIntelligence({
               <div className="text-slate-300">
                 <Shield size={20} strokeWidth={1.5} />
               </div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Risk Level: Unknown</span>
+              <span className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider">Risk Level: Unknown</span>
             </div>
             <div className="flex flex-col items-center justify-center py-6 text-center">
               <Shield size={32} className="text-slate-300 mb-3" />
-              <p className="text-xs text-slate-500 mb-1">No risk assessment available</p>
-              <p className="text-[10px] text-slate-400">Generate AI insights to see analysis</p>
+              <p className="text-xs sm:text-sm text-slate-500 mb-1">No risk assessment available</p>
+              <p className="text-[10px] sm:text-xs text-slate-400">Generate AI insights to see analysis</p>
             </div>
           </Card>
 
@@ -155,12 +168,12 @@ export function AIFinancialIntelligence({
               <div className="text-slate-300">
                 <Star size={20} strokeWidth={1.5} />
               </div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Growth Potential</span>
+              <span className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider">Growth Potential</span>
             </div>
             <div className="flex flex-col items-center justify-center py-6 text-center">
               <TrendingUp size={32} className="text-slate-300 mb-3" />
-              <p className="text-xs text-slate-500 mb-1">No growth analysis available</p>
-              <p className="text-[10px] text-slate-400">Generate AI insights to see opportunities</p>
+              <p className="text-xs sm:text-sm text-slate-500 mb-1">No growth analysis available</p>
+              <p className="text-[10px] sm:text-xs text-slate-400">Generate AI insights to see opportunities</p>
             </div>
           </Card>
         </div>
@@ -169,40 +182,41 @@ export function AIFinancialIntelligence({
   }
 
   return (
-    <Card className="p-6 mb-8 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
-        <div>
-          <h3 className="text-sm font-semibold text-slate-900">
-            AI Financial Intelligence
-          </h3>
-          <p className="text-xs text-slate-500 mt-1 font-light">Deep analysis of your spending habits and financial future</p>
+    <Card className="p-4 sm:p-6 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+      <div ref={contentRef} className="flex-1 overflow-y-auto lg:overflow-visible scroll-smooth">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div>
+            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">
+              AI Financial Intelligence
+            </h3>
+            <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Deep analysis of your spending habits and financial future</p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <Button variant="outline" size="sm" onClick={onToggleDetailedInsights} className="text-xs h-8 sm:h-9 px-3 sm:px-4 w-full sm:w-auto">
+              <ArrowRight size={14} className={`mr-1.5 transition-transform ${detailedInsights ? "rotate-180" : ""}`} />
+              <span>{detailedInsights ? "View Less" : "View More"}</span>
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={onGenerateAIInsights} 
+              className="text-xs h-8 sm:h-9 px-3 sm:px-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+              disabled={isGeneratingInsights || !rateLimitStatus?.canUseAI}
+              title={!rateLimitStatus?.canUseAI ? "Daily limit reached" : ""}
+            >
+              {isGeneratingInsights ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <Wand2 size={14} className="mr-1.5" />
+                  <span>Regenerate</span>
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" onClick={onToggleDetailedInsights} className="text-xs h-9 px-4">
-            <ArrowRight size={14} className={`transition-transform ${detailedInsights ? "rotate-180" : ""}`} />
-            {detailedInsights ? "View Less" : "View More"}
-          </Button>
-          <Button 
-            size="sm" 
-            onClick={onGenerateAIInsights} 
-            className="text-xs h-9 px-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isGeneratingInsights || !rateLimitStatus?.canUseAI}
-            title={!rateLimitStatus?.canUseAI ? "Daily limit reached" : ""}
-          >
-            {isGeneratingInsights ? (
-              <>
-                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Wand2 size={14} />
-                Regenerate
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
 
       {/* Initial Grid: Key Highlights */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -212,14 +226,14 @@ export function AIFinancialIntelligence({
             <div className="text-slate-500">
               <Clapperboard size={20} strokeWidth={1.5} />
             </div>
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Financial Summary</span>
+            <span className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">Financial Summary</span>
           </div>
           {aiInsights?.summary ? (
             <>
               <p className="text-[13px] text-slate-700 leading-relaxed font-medium">
                 {aiInsights.summary}
               </p>
-              <div className="mt-4 flex items-center gap-2 text-[10px] text-slate-600 font-semibold">
+              <div className="mt-4 flex items-center gap-2 text-[10px] sm:text-xs text-slate-600 font-semibold">
                 <Star size={12} />
                 {savingsOpportunities.length > 0 
                   ? `${savingsOpportunities.length} savings opportunities detected`
@@ -230,8 +244,8 @@ export function AIFinancialIntelligence({
           ) : (
             <div className="flex flex-col items-center justify-center py-6 text-center">
               <Brain size={32} className="text-slate-300 mb-3" />
-              <p className="text-xs text-slate-500 mb-2">No AI insights available</p>
-              <p className="text-[10px] text-slate-400">Click "Regenerate" to generate insights</p>
+              <p className="text-xs sm:text-sm text-slate-500 mb-2">No AI insights available</p>
+              <p className="text-[10px] sm:text-xs text-slate-400">Click "Regenerate" to generate insights</p>
             </div>
           )}
         </Card>
@@ -242,7 +256,7 @@ export function AIFinancialIntelligence({
             <div className="text-slate-500">
               <Shield size={20} strokeWidth={1.5} />
             </div>
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+            <span className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">
               Risk Level: {aiInsights?.riskLevel ? aiInsights.riskLevel.charAt(0).toUpperCase() + aiInsights.riskLevel.slice(1) : "Unknown"}
             </span>
           </div>
@@ -267,8 +281,8 @@ export function AIFinancialIntelligence({
           ) : (
             <div className="flex flex-col items-center justify-center py-6 text-center">
               <Shield size={32} className="text-slate-300 mb-3" />
-              <p className="text-xs text-slate-500 mb-2">No risk assessment available</p>
-              <p className="text-[10px] text-slate-400">Generate AI insights to see risk analysis</p>
+              <p className="text-xs sm:text-sm text-slate-500 mb-2">No risk assessment available</p>
+              <p className="text-[10px] sm:text-xs text-slate-400">Generate AI insights to see risk analysis</p>
             </div>
           )}
         </Card>
@@ -279,14 +293,14 @@ export function AIFinancialIntelligence({
             <div className="text-slate-500">
               <Star size={20} strokeWidth={1.5} />
             </div>
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Growth Potential</span>
+            <span className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider">Growth Potential</span>
           </div>
           {aiInsights?.growthPotential ? (
             <>
               <p className="text-[13px] text-slate-700 leading-relaxed font-medium mb-3">
                 {aiInsights.growthAnalysis || `Potential savings of ${aiInsights.growthPotential} identified through spending optimization and category analysis.`}
               </p>
-              <div className="mt-4 flex items-center gap-2 text-[10px] text-slate-600 font-semibold">
+              <div className="mt-4 flex items-center gap-2 text-[10px] sm:text-xs text-slate-600 font-semibold">
                 <TrendingUp size={12} />
                 {savingsOpportunities.length > 0 
                   ? `${savingsOpportunities.length} optimization ${savingsOpportunities.length === 1 ? 'opportunity' : 'opportunities'} available`
@@ -299,8 +313,8 @@ export function AIFinancialIntelligence({
           ) : (
             <div className="flex flex-col items-center justify-center py-6 text-center">
               <TrendingUp size={32} className="text-slate-300 mb-3" />
-              <p className="text-xs text-slate-500 mb-2">No growth analysis available</p>
-              <p className="text-[10px] text-slate-400">Generate AI insights to see opportunities</p>
+              <p className="text-xs sm:text-sm text-slate-500 mb-2">No growth analysis available</p>
+              <p className="text-[10px] sm:text-xs text-slate-400">Generate AI insights to see opportunities</p>
             </div>
           )}
         </Card>
@@ -308,32 +322,32 @@ export function AIFinancialIntelligence({
 
       {/* Detailed Expansion (Hidden by default) */}
       {detailedInsights && (
-        <div className="space-y-6 pt-6 border-t border-slate-100 animate-fade-in">
+        <div className="space-y-4 sm:space-y-6 pt-4 sm:pt-6 pb-4 sm:pb-8 border-t border-slate-100 animate-fade-in">
           {aiInsights?.recommendations && aiInsights.recommendations.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* Actionable Recommendations */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <ListChecks size={16} className="text-emerald-500" />
+              <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 lg:p-6">
+                <h4 className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider sm:tracking-widest flex items-center gap-2">
+                  <ListChecks size={14} className="text-emerald-500 sm:w-4 sm:h-4" />
                   Smart Recommendations
                 </h4>
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {aiInsights.recommendations.slice(0, 3).map((rec, idx) => (
-                    <div key={idx} className="flex gap-4 p-4 rounded-xl border border-slate-100 hover:bg-slate-50 hover:shadow-sm transition-all group">
-                      <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div key={idx} className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-slate-100 hover:bg-slate-50 active:bg-slate-100 hover:shadow-sm transition-all group">
+                      <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-200 text-slate-600 text-[10px] sm:text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                         {idx + 1}
                       </span>
-                      <div>
-                        <p className="text-sm font-semibold text-slate-800 mb-1">{rec.title}</p>
-                        <p className="text-xs text-slate-500 leading-relaxed font-light">{rec.description}</p>
-                        <div className="flex items-center gap-2 mt-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs sm:text-sm font-semibold text-slate-800 mb-1 leading-snug">{rec.title}</p>
+                        <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-light">{rec.description}</p>
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2">
                           <Badge 
                             variant={rec.priority === "high" ? "danger" : rec.priority === "medium" ? "warning" : "neutral"}
-                            className="text-[9px] px-2 py-0.5 bg-transparent"
+                            className="text-[9px] px-1.5 sm:px-2 py-0.5 bg-transparent"
                           >
                             {rec.priority} priority
                           </Badge>
-                          <span className="text-[9px] text-slate-400">{rec.category}</span>
+                          <span className="text-[9px] text-slate-400 truncate">{rec.category}</span>
                         </div>
                       </div>
                     </div>
@@ -342,36 +356,36 @@ export function AIFinancialIntelligence({
               </div>
 
               {/* Deep Risk Assessment */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <ShieldCheck size={16} className="text-amber-500" />
+              <div className="space-y-3 sm:space-y-4 lg:col-span-2">
+                <h4 className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider sm:tracking-widest flex items-center gap-2 px-3 sm:px-0">
+                  <ShieldCheck size={14} className="text-amber-500 sm:w-4 sm:h-4" />
                   Risk Mitigation Strategies
                 </h4>
                 {aiInsights?.riskMitigationStrategies && aiInsights.riskMitigationStrategies.length > 0 ? (
-                  <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
+                  <Card className="p-3 sm:p-4 lg:p-5 hover:shadow-md active:shadow-lg transition-all group cursor-pointer">
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
                         <Badge 
                           variant={
                             aiInsights.riskLevel === "low" ? "success" : 
                             aiInsights.riskLevel === "medium" ? "warning" : "danger"
                           } 
-                          className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-transparent"
+                          className="px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest bg-transparent w-fit"
                         >
                           {aiInsights.riskLevel} Risk Environment
                         </Badge>
-                        <span className="text-[10px] text-slate-400 font-mono">
+                        <span className="text-[10px] sm:text-xs text-slate-400 font-mono">
                           SCORE: {aiInsights.riskScore}/100
                         </span>
                       </div>
-                      <div className="space-y-4">
+                      <div className="space-y-2 sm:space-y-3 lg:space-y-4">
                         {aiInsights.riskMitigationStrategies.slice(0, 2).map((strategy, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl border border-slate-100">
-                            <div className={`mt-1 w-2 h-2 rounded-full ${
+                          <div key={idx} className="flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg sm:rounded-xl border border-slate-100 bg-white">
+                            <div className={`mt-1 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 ${
                               strategy.impact === "high" ? "bg-red-500" : 
                               strategy.impact === "medium" ? "bg-amber-500" : "bg-emerald-500"
                             }`}></div>
-                            <p className="text-[11px] text-slate-600 leading-relaxed">
+                            <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed">
                               <span className="text-slate-900 font-bold">{strategy.strategy}:</span> {strategy.description}
                             </p>
                           </div>
@@ -380,21 +394,21 @@ export function AIFinancialIntelligence({
                     </div>
                   </Card>
                 ) : (
-                  <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
-                    <div className="flex flex-col items-center justify-center py-8 text-center">
-                      <ShieldCheck size={32} className="text-slate-300 mb-3" />
-                      <p className="text-xs text-slate-500 mb-2">No risk strategies available</p>
-                      <p className="text-[10px] text-slate-400">Generate AI insights to see mitigation strategies</p>
+                  <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
+                    <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center">
+                      <ShieldCheck size={28} className="text-slate-300 mb-3 sm:w-8 sm:h-8" />
+                      <p className="text-xs sm:text-sm text-slate-500 mb-2">No risk strategies available</p>
+                      <p className="text-[10px] sm:text-xs text-slate-400 px-4">Generate AI insights to see mitigation strategies</p>
                     </div>
                   </Card>
                 )}
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Lightbulb size={48} className="text-slate-300 mb-4" />
-              <h4 className="text-sm font-semibold text-slate-700 mb-2">No Detailed Insights Available</h4>
-              <p className="text-xs text-slate-500 mb-4 max-w-md">
+            <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center px-4">
+              <Lightbulb size={40} className="text-slate-300 mb-3 sm:w-12 sm:h-12 sm:mb-4" />
+              <h4 className="text-xs sm:text-sm font-semibold text-slate-700 mb-2">No Detailed Insights Available</h4>
+              <p className="text-xs sm:text-sm text-slate-500 mb-4 max-w-md">
                 Click the "Regenerate" button above to generate comprehensive AI insights including recommendations and risk strategies.
               </p>
             </div>
@@ -402,82 +416,82 @@ export function AIFinancialIntelligence({
 
           {/* Long-term Opportunity Map */}
           {aiInsights?.longTermOpportunities && aiInsights.longTermOpportunities.length > 0 ? (
-            <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div className="flex items-center gap-3">
+            <Card className="p-4 sm:p-5 lg:p-6 hover:shadow-md active:shadow-lg transition-all group cursor-pointer">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div className="text-slate-500">
-                    <File size={22} strokeWidth={1.5} />
+                    <File size={18} strokeWidth={1.5} className="sm:w-5 sm:h-5 lg:w-[22px] lg:h-[22px]" />
                   </div>
                   <div>
-                    <h4 className="text-[13px] font-bold text-slate-900">Long-term Opportunity Map</h4>
-                    <p className="text-[10px] text-slate-500">AI-identified wealth building opportunities</p>
+                    <h4 className="text-xs sm:text-[13px] font-bold text-slate-900">Long-term Opportunity Map</h4>
+                    <p className="text-[10px] sm:text-xs text-slate-500">AI-identified wealth building opportunities</p>
                   </div>
                 </div>
-                <Badge variant="neutral" className="px-3 py-1 bg-transparent border border-slate-200 text-[10px] font-medium text-slate-600">
+                <Badge variant="neutral" className="px-2.5 sm:px-3 py-1 bg-transparent border border-slate-200 text-[10px] sm:text-xs font-medium text-slate-600 w-fit">
                   {aiInsights.longTermOpportunities.length} {aiInsights.longTermOpportunities.length === 1 ? 'Opportunity' : 'Opportunities'}
                 </Badge>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                 {aiInsights.longTermOpportunities.map((opp, idx) => (
-                  <div key={idx} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <h5 className="text-sm font-semibold text-slate-800 leading-tight">{opp.opportunity}</h5>
-                      <Badge variant="success" className="text-[9px] px-2 py-0.5 whitespace-nowrap flex-shrink-0 bg-transparent">
+                  <div key={idx} className="bg-white p-3 sm:p-4 rounded-lg sm:rounded-xl shadow-sm border border-slate-100 hover:shadow-md active:shadow-lg transition-all">
+                    <div className="flex items-start justify-between gap-2 mb-2 sm:mb-3">
+                      <h5 className="text-xs sm:text-sm font-semibold text-slate-800 leading-tight flex-1">{opp.opportunity}</h5>
+                      <Badge variant="success" className="text-[9px] px-1.5 sm:px-2 py-0.5 whitespace-nowrap flex-shrink-0 bg-transparent">
                         {opp.potentialReturn}
                       </Badge>
                     </div>
-                    <p className="text-xs text-slate-600 leading-relaxed mb-3">{opp.description}</p>
-                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-2 sm:mb-3">{opp.description}</p>
+                    <div className="flex items-center gap-1.5 sm:gap-2 pt-2 border-t border-slate-100">
                       <span className="text-[9px] text-slate-400 uppercase">Timeframe:</span>
-                      <span className="text-[10px] text-slate-600 font-medium">{opp.timeframe}</span>
+                      <span className="text-[10px] sm:text-xs text-slate-600 font-medium">{opp.timeframe}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </Card>
           ) : forecastData && forecastData.predicted.length > 0 ? (
-            <Card className="p-6 hover:shadow-md transition-all group cursor-pointer">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div className="flex items-center gap-3">
+            <Card className="p-4 sm:p-5 lg:p-6 hover:shadow-md active:shadow-lg transition-all group cursor-pointer">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div className="text-slate-500">
-                    <File size={22} strokeWidth={1.5} />
+                    <File size={18} strokeWidth={1.5} className="sm:w-5 sm:h-5 lg:w-[22px] lg:h-[22px]" />
                   </div>
                   <div>
-                    <h4 className="text-[13px] font-bold text-slate-900">Long-term Opportunity Map</h4>
-                    <p className="text-[10px] text-slate-500">Predicted wealth accumulation markers</p>
+                    <h4 className="text-xs sm:text-[13px] font-bold text-slate-900">Long-term Opportunity Map</h4>
+                    <p className="text-[10px] sm:text-xs text-slate-500">Predicted wealth accumulation markers</p>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Badge variant="neutral" className="px-3 py-1 bg-white border border-slate-200 text-[10px] font-medium text-slate-600">
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="neutral" className="px-2.5 sm:px-3 py-1 bg-white border border-slate-200 text-[10px] sm:text-xs font-medium text-slate-600">
                     {forecastData.summary.trendDirection === "up" ? "Growth Trend" : "Stable Trend"}
                   </Badge>
-                  <Badge variant="neutral" className="px-3 py-1 bg-white border border-slate-200 text-[10px] font-medium text-slate-600">
+                  <Badge variant="neutral" className="px-2.5 sm:px-3 py-1 bg-white border border-slate-200 text-[10px] sm:text-xs font-medium text-slate-600">
                     {forecastData.summary.confidence}% Confidence
                   </Badge>
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+                <div className="bg-white p-2.5 sm:p-3 rounded-lg sm:rounded-xl shadow-sm border border-slate-100">
                   <span className="text-[9px] text-slate-400 uppercase block mb-1">6-Month Goal</span>
-                  <span className="text-sm font-bold text-slate-800">
+                  <span className="text-xs sm:text-sm font-bold text-slate-800 break-all">
                     {formatCurrency(forecastData.summary.maxSavings * 6)}
                   </span>
                 </div>
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                <div className="bg-white p-2.5 sm:p-3 rounded-lg sm:rounded-xl shadow-sm border border-slate-100">
                   <span className="text-[9px] text-slate-400 uppercase block mb-1">1-Year Projection</span>
-                  <span className="text-sm font-bold text-slate-800">
+                  <span className="text-xs sm:text-sm font-bold text-slate-800 break-all">
                     {formatCurrency(forecastData.summary.maxSavings * 12)}
                   </span>
                 </div>
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                <div className="bg-white p-2.5 sm:p-3 rounded-lg sm:rounded-xl shadow-sm border border-slate-100">
                   <span className="text-[9px] text-slate-400 uppercase block mb-1">Avg Growth</span>
-                  <span className="text-sm font-bold text-slate-800">
+                  <span className="text-xs sm:text-sm font-bold text-slate-800">
                     {forecastData.summary.avgGrowth > 0 ? "+" : ""}{forecastData.summary.avgGrowth.toFixed(1)}%
                   </span>
                 </div>
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                <div className="bg-white p-2.5 sm:p-3 rounded-lg sm:rounded-xl shadow-sm border border-slate-100">
                   <span className="text-[9px] text-slate-400 uppercase block mb-1">Trend Strength</span>
-                  <span className="text-sm font-bold text-slate-800">
+                  <span className="text-xs sm:text-sm font-bold text-slate-800">
                     {((forecastData.summary.trendStrength || 0) * 100).toFixed(0)}%
                   </span>
                 </div>
@@ -486,6 +500,7 @@ export function AIFinancialIntelligence({
           ) : null}
         </div>
       )}
+      </div>
     </Card>
   );
 }
