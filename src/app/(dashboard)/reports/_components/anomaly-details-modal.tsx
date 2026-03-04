@@ -26,11 +26,11 @@ import { Stepper } from "./stepper";
 import type { AnomalyDetails } from "./types";
 
 interface AnomalyDetailsModalProps {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
-  anomaly: AnomalyDetails | null;
-  onDismissAnomaly?: (anomalyId: string) => void;
-  onResolveAnomaly?: (anomalyId: string) => void;
+  anomalyDetails: AnomalyDetails | null;
+  onDismiss?: (anomalyId: string) => void;
+  onResolve?: (anomalyId: string) => void;
 }
 
 const STEPS = ["Overview", "Details", "Actions"];
@@ -49,11 +49,11 @@ const TYPE_ICONS = {
 };
 
 export function AnomalyDetailsModal({
-  open,
+  isOpen,
   onClose,
-  anomaly,
-  onDismissAnomaly,
-  onResolveAnomaly,
+  anomalyDetails,
+  onDismiss,
+  onResolve,
 }: AnomalyDetailsModalProps) {
   const [step, setStep] = useState(1);
 
@@ -80,26 +80,26 @@ export function AnomalyDetailsModal({
   }, []);
 
   const handleDismiss = useCallback(() => {
-    if (anomaly && onDismissAnomaly) {
-      onDismissAnomaly(anomaly.anomaly.id);
+    if (anomalyDetails && onDismiss) {
+      onDismiss(anomalyDetails.anomaly.id);
       handleClose();
     }
-  }, [anomaly, onDismissAnomaly, handleClose]);
+  }, [anomalyDetails, onDismiss, handleClose]);
 
   const handleResolve = useCallback(() => {
-    if (anomaly && onResolveAnomaly) {
-      onResolveAnomaly(anomaly.anomaly.id);
+    if (anomalyDetails && onResolve) {
+      onResolve(anomalyDetails.anomaly.id);
       handleClose();
     }
-  }, [anomaly, onResolveAnomaly, handleClose]);
+  }, [anomalyDetails, onResolve, handleClose]);
 
-  if (!anomaly) return null;
+  if (!anomalyDetails) return null;
 
-  const { anomaly: anomalyData, relatedTransactions, historicalData, recommendations } = anomaly;
+  const { anomaly: anomalyData, relatedTransactions, historicalData, recommendations } = anomalyDetails;
   const TypeIcon = TYPE_ICONS[anomalyData.type];
 
   return (
-    <Modal open={open} onClose={handleClose} className="max-w-[520px]">
+    <Modal open={isOpen} onClose={handleClose} className="max-w-[520px]">
       {/* Header */}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">

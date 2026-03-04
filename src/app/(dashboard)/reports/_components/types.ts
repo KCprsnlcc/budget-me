@@ -26,7 +26,7 @@ export interface AIInsight {
 
 export interface ReportSettings {
   reportType: 'spending' | 'income-expense' | 'savings' | 'trends' | 'goals' | 'predictions';
-  timeframe: 'month' | 'quarter' | 'year' | 'custom';
+  timeframe: 'month' | 'quarter' | 'year';
   chartType: 'pie' | 'donut' | 'column' | 'bar' | 'line' | 'area';
   categories: string[];
   accounts: string[];
