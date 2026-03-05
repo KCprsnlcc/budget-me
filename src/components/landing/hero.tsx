@@ -105,38 +105,42 @@ export function Hero() {
 
         {/* Tech Specs Marquee */}
         <div className="relative max-w-5xl mx-auto">
-          {/* Edge Fades */}
-          <div className="absolute left-[-20px] top-0 bottom-0 w-40 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
+          {/* Edge Fades - COMMENTED OUT FOR RESTORATION */}
+          {/* <div className="absolute left-[-20px] top-0 bottom-0 w-40 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
           <div className="absolute right-[-20px] top-0 bottom-0 w-40 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
-          <div className="absolute bottom-[-40px] left-0 right-0 h-32 bg-gradient-to-t from-white via-white/40 to-transparent z-10 pointer-events-none" />
+          <div className="absolute bottom-[-40px] left-0 right-0 h-32 bg-gradient-to-t from-white via-white/40 to-transparent z-10 pointer-events-none" /> */}
 
           <div className="relative overflow-hidden py-12">
-            <div className="flex animate-marquee gap-24 items-start w-max px-4">
-              {/* Triple repeat for seamless loop */}
-              {[...Array(3)].map((_, repeatIdx) =>
-                TECH_SPECS.map((spec) => {
-                  const Icon = ICON_MAP[spec.icon];
-                  return (
-                    <div
-                      key={`${repeatIdx}-${spec.title}`}
-                      className="w-72 shrink-0 group hover:translate-y-[-2px] transition-transform duration-300"
-                    >
-                      <div className="text-slate-900 text-[11px] font-bold mb-2 flex items-center gap-2 uppercase tracking-tight">
-                        {Icon && (
-                          <Icon
-                            size={16}
-                            className="text-emerald-500 group-hover:scale-110 transition-transform"
-                          />
-                        )}
-                        {spec.title}
-                      </div>
-                      <p className="text-[11px] text-slate-500 leading-relaxed uppercase tracking-wider">
-                        {spec.description}
-                      </p>
+            {/* MARQUEE ANIMATION COMMENTED OUT - Static display with single row */}
+            {/* <div className="flex animate-marquee gap-24 items-start w-max px-4"> */}
+            <div className="flex gap-24 items-start justify-center px-4">
+              {/* Triple repeat for seamless loop - COMMENTED OUT */}
+              {/* {[...Array(3)].map((_, repeatIdx) => */}
+              {TECH_SPECS.map((spec) => {
+                const Icon = ICON_MAP[spec.icon];
+                return (
+                  <div
+                    key={spec.title}
+                    // HOVER ANIMATION COMMENTED OUT - Restore by adding to className: group hover:translate-y-[-2px] transition-transform duration-300
+                    className="w-72 shrink-0"
+                  >
+                    <div className="text-slate-900 text-[11px] font-bold mb-2 flex items-center gap-2 uppercase tracking-tight">
+                      {Icon && (
+                        <Icon
+                          size={16}
+                          // HOVER ANIMATION COMMENTED OUT - Restore by adding to className: group-hover:scale-110 transition-transform
+                          className="text-emerald-500"
+                        />
+                      )}
+                      {spec.title}
                     </div>
-                  );
-                })
-              )}
+                    <p className="text-[11px] text-slate-500 leading-relaxed uppercase tracking-wider">
+                      {spec.description}
+                    </p>
+                  </div>
+                );
+              })}
+              {/* )} */}
             </div>
           </div>
 
