@@ -462,37 +462,114 @@ export default function ReportsPage() {
   if (loading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
-        <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
+          {/* Page Header Skeleton */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
             <div>
-              <Skeleton width={200} height={32} className="mb-2" />
-              <Skeleton width={300} height={16} />
+              <Skeleton width={180} height={28} className="mb-2 sm:w-48 sm:h-8" />
+              <Skeleton width={280} height={14} className="sm:w-80 sm:h-4" />
             </div>
-            <div className="flex gap-3">
-              <Skeleton width={100} height={36} borderRadius={4} />
-              <Skeleton width={100} height={36} borderRadius={4} />
-              <Skeleton width={120} height={36} borderRadius={4} />
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <Skeleton width={140} height={32} borderRadius={4} className="order-2 sm:order-1" />
+              <Skeleton width={80} height={32} borderRadius={4} />
+              <Skeleton width={100} height={32} borderRadius={4} />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i} className="p-5">
-                <div className="flex justify-between items-start mb-4">
-                  <Skeleton width={40} height={40} borderRadius={8} />
-                  <Skeleton width={80} height={20} borderRadius={10} />
+          {/* Scrollable Content Area - Skeleton */}
+          <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0">
+            {/* Summary Cards Skeleton */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="p-4 sm:p-5">
+                  <div className="flex justify-between items-start mb-3 sm:mb-4">
+                    <Skeleton width={36} height={36} borderRadius={8} className="sm:w-10 sm:h-10" />
+                    <Skeleton width={70} height={18} borderRadius={10} className="sm:w-20" />
+                  </div>
+                  <Skeleton width={100} height={14} className="mb-2 sm:w-28" />
+                  <Skeleton width={120} height={22} className="sm:w-32 sm:h-6" />
+                  <Skeleton width={150} height={12} className="sm:w-40" />
+                </Card>
+              ))}
+            </div>
+
+            {/* Report Settings Skeleton */}
+            <Card className="p-4 sm:p-5">
+              <div className="mb-3 sm:mb-4">
+                <Skeleton width={140} height={14} className="mb-2 sm:w-40" />
+                <Skeleton width={240} height={12} className="sm:w-80" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i}>
+                    <Skeleton width={100} height={12} className="mb-2 sm:w-32" />
+                    <Skeleton height={36} borderRadius={4} className="sm:h-10" />
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Anomaly Detection Skeleton */}
+            <Card className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <div>
+                  <Skeleton width={160} height={14} className="mb-2 sm:w-48" />
+                  <Skeleton width={200} height={12} className="sm:w-64" />
                 </div>
-                <Skeleton width={100} height={16} className="mb-2" />
-                <Skeleton width={120} height={24} />
-                <Skeleton width={150} height={12} />
-              </Card>
-            ))}
-          </div>
+              </div>
+              <div className="flex gap-2 mb-4 sm:mb-6 border-b border-slate-200">
+                <Skeleton width={80} height={32} className="sm:w-24" />
+                <Skeleton width={80} height={32} className="sm:w-24" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="border border-slate-200 rounded-xl p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <Skeleton width={80} height={12} className="sm:w-24" />
+                      <Skeleton width={16} height={16} borderRadius={4} />
+                    </div>
+                    <Skeleton width="100%" height={14} className="mb-2" />
+                    <Skeleton width="90%" height={12} className="mb-3" />
+                    <div className="flex justify-between items-center pt-3 border-t border-slate-100">
+                      <Skeleton width={80} height={12} className="sm:w-24" />
+                      <div className="flex gap-2">
+                        <Skeleton width={60} height={24} borderRadius={4} />
+                        <Skeleton width={60} height={24} borderRadius={4} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
 
-          <Card className="p-6">
-            <Skeleton width={150} height={16} className="mb-6" />
-            <Skeleton height={400} borderRadius={8} />
-          </Card>
+            {/* AI Insights Skeleton */}
+            <Card className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <div>
+                  <Skeleton width={180} height={14} className="mb-2 sm:w-48" />
+                  <Skeleton width={220} height={12} className="sm:w-80" />
+                </div>
+                <Skeleton width={160} height={32} borderRadius={4} className="sm:w-48" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="border border-slate-200 rounded-xl p-4 sm:p-5">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Skeleton width={36} height={36} borderRadius={8} className="sm:w-10 sm:h-10" />
+                      <Skeleton width={140} height={12} className="sm:w-48" />
+                    </div>
+                    <Skeleton width="100%" height={80} className="sm:h-24" />
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Chart Skeleton */}
+            <Card className="p-4 sm:p-6">
+              <Skeleton width={150} height={16} className="mb-4 sm:mb-6 sm:w-48" />
+              <Skeleton height={300} borderRadius={8} className="sm:h-96" />
+            </Card>
+          </div>
         </div>
       </SkeletonTheme>
     );
@@ -526,19 +603,19 @@ export default function ReportsPage() {
   });
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+    <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
         <div>
-          <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">Reports</h2>
-          <p className="text-sm text-slate-500 mt-1 font-light">Generate detailed financial reports and insights.</p>
+          <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">Reports</h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 font-light">Generate detailed financial reports and insights.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <div className="flex bg-slate-100 p-1 rounded-lg">
             <Button 
               variant="ghost" 
               size="sm" 
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+              className={`flex-1 sm:flex-none px-3 py-1 text-xs font-medium rounded-md transition-colors ${
                 viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
               }`}
               onClick={() => setViewMode('table')}
@@ -549,7 +626,7 @@ export default function ReportsPage() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+              className={`flex-1 sm:flex-none px-3 py-1 text-xs font-medium rounded-md transition-colors ${
                 viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
               }`}
               onClick={() => setViewMode('grid')}
@@ -558,7 +635,7 @@ export default function ReportsPage() {
               Charts
             </Button>
           </div>
-          <div className="relative" ref={exportDropdownRef}>
+          <div className="relative flex-1 sm:flex-none" ref={exportDropdownRef}>
             <Button 
               variant="outline" 
               size="sm" 
@@ -600,6 +677,9 @@ export default function ReportsPage() {
         </div>
       </div>
 
+      {/* Scrollable Content Area for Mobile/Tablet */}
+      <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth">
+
       {/* Summary Cards */}
       {summaryData && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -632,10 +712,10 @@ export default function ReportsPage() {
       )}
 
       {/* Report Settings Panel */}
-      <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
-        <div className="mb-4">
-          <h3 className="text-sm font-semibold text-slate-900">Report Settings</h3>
-          <p className="text-xs text-slate-500 mt-0.5 font-light">Customize your report parameters and display options</p>
+      <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
+        <div className="mb-3 sm:mb-4">
+          <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Report Settings</h3>
+          <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 font-light">Customize your report parameters and display options</p>
         </div>
 
         <div className={`grid grid-cols-1 gap-4 pointer-events-auto ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'}`}>
@@ -713,19 +793,19 @@ export default function ReportsPage() {
       </Card>
 
       {/* Anomaly Alerts Section */}
-      <Card className="p-6 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-        <div className="flex items-center justify-between mb-6">
+      <Card className="p-4 sm:p-6 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">Anomaly Detection</h3>
-            <p className="text-xs text-slate-500 mt-0.5 font-light">AI-powered transaction monitoring</p>
+            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Anomaly Detection</h3>
+            <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 font-light">AI-powered transaction monitoring</p>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-slate-200">
+        <div className="flex gap-2 mb-4 sm:mb-6 border-b border-slate-200 overflow-x-auto">
           <button
             onClick={() => setAnomalyTab("active")}
-            className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors relative whitespace-nowrap ${
               anomalyTab === "active"
                 ? "text-emerald-600 border-b-2 border-emerald-600"
                 : "text-slate-500 hover:text-slate-700"
@@ -735,7 +815,7 @@ export default function ReportsPage() {
           </button>
           <button
             onClick={() => setAnomalyTab("resolved")}
-            className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors relative whitespace-nowrap ${
               anomalyTab === "resolved"
                 ? "text-emerald-600 border-b-2 border-emerald-600"
                 : "text-slate-500 hover:text-slate-700"
@@ -766,10 +846,10 @@ export default function ReportsPage() {
                     className={`bg-white rounded-xl border-l-4 ${
                       anomaly.severity === 'high' ? 'border-l-red-500' :
                       anomaly.severity === 'medium' ? 'border-l-amber-500' : 'border-l-blue-500'
-                    } shadow-sm p-4 hover:shadow-md transition-all group cursor-pointer`}
+                    } shadow-sm p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer`}
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <div className={`text-[10px] font-bold ${
+                      <div className={`text-[9px] sm:text-[10px] font-bold ${
                         anomaly.severity === 'high' ? 'text-red-600' :
                         anomaly.severity === 'medium' ? 'text-amber-600' : 'text-blue-600'
                       } uppercase tracking-wider`}>
@@ -779,29 +859,29 @@ export default function ReportsPage() {
                         anomaly.severity === 'high' ? 'text-red-600' :
                         anomaly.severity === 'medium' ? 'text-amber-600' : 'text-blue-600'
                       }`}>
-                        {anomaly.type === 'unusual-spending' ? <TrendingUp size={16} /> : <RefreshCw size={16} />}
+                        {anomaly.type === 'unusual-spending' ? <TrendingUp size={14} className="sm:w-4 sm:h-4" /> : <RefreshCw size={14} className="sm:w-4 sm:h-4" />}
                       </div>
                     </div>
                     
-                    <h4 className="text-sm font-bold text-slate-800 mb-1">{anomaly.title}</h4>
-                    <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-800 mb-1">{anomaly.title}</h4>
+                    <p className="text-[10px] sm:text-[11px] text-slate-500 leading-relaxed mb-3">
                       {anomaly.description}
                     </p>
                     
                     <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-slate-500">{anomaly.category}</span>
+                        <span className="text-[9px] sm:text-[10px] text-slate-500">{anomaly.category}</span>
                         {anomaly.amount && (
-                          <span className="text-[10px] font-medium text-slate-700">
+                          <span className="text-[9px] sm:text-[10px] font-medium text-slate-700">
                             ₱{typeof anomaly.amount === 'number' ? anomaly.amount.toFixed(2) : anomaly.amount}
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 sm:gap-2">
                         <Button 
                           variant="ghost" 
                           size="xs" 
-                          className={`${
+                          className={`text-[10px] sm:text-xs px-2 py-1 h-auto ${
                             anomaly.severity === 'high' ? 'text-red-600 hover:text-red-700' :
                             anomaly.severity === 'medium' ? 'text-amber-600 hover:text-amber-700' : 'text-blue-600 hover:text-blue-700'
                           }`}
@@ -815,13 +895,13 @@ export default function ReportsPage() {
                         <Button 
                           variant="ghost" 
                           size="xs" 
-                          className={`${
+                          className={`text-[10px] sm:text-xs px-2 py-1 h-auto ${
                             anomaly.severity === 'high' ? 'text-red-600 hover:text-red-700' :
                             anomaly.severity === 'medium' ? 'text-amber-600 hover:text-amber-700' : 'text-blue-600 hover:text-blue-700'
                           }`}
                           onClick={() => handleAnomalyDetails(anomaly.id)}
                         >
-                          Details <ArrowRight size={12} />
+                          Details <ArrowRight size={10} className="sm:w-3 sm:h-3 ml-0.5" />
                         </Button>
                       </div>
                     </div>
@@ -850,38 +930,38 @@ export default function ReportsPage() {
                 {resolvedAnomalies.slice(0, 6).map((anomaly: any) => (
                   <div
                     key={anomaly.id} 
-                    className="bg-white rounded-xl border-l-4 border-l-emerald-500 shadow-sm p-4 hover:shadow-md transition-all"
+                    className="bg-white rounded-xl border-l-4 border-l-emerald-500 shadow-sm p-3 sm:p-4 hover:shadow-md transition-all"
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
+                      <div className="text-[9px] sm:text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
                         {anomaly.status === "resolved" ? "Resolved" : "Dismissed"}
                       </div>
                       <div className="text-emerald-600">
-                        <CheckCircle size={16} />
+                        <CheckCircle size={14} className="sm:w-4 sm:h-4" />
                       </div>
                     </div>
                     
-                    <h4 className="text-sm font-bold text-slate-800 mb-1">{anomaly.title}</h4>
-                    <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-800 mb-1">{anomaly.title}</h4>
+                    <p className="text-[10px] sm:text-[11px] text-slate-500 leading-relaxed mb-3">
                       {anomaly.description}
                     </p>
                     
                     <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-slate-500">{anomaly.category}</span>
+                        <span className="text-[9px] sm:text-[10px] text-slate-500">{anomaly.category}</span>
                         {anomaly.amount && (
-                          <span className="text-[10px] font-medium text-slate-700">
+                          <span className="text-[9px] sm:text-[10px] font-medium text-slate-700">
                             ₱{typeof anomaly.amount === 'number' ? anomaly.amount.toFixed(2) : anomaly.amount}
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] text-slate-400">
+                      <div className="text-[9px] sm:text-[10px] text-slate-400">
                         {anomaly.resolvedAt && new Date(anomaly.resolvedAt).toLocaleDateString()}
                       </div>
                     </div>
                     {anomaly.resolutionNotes && (
                       <div className="mt-2 pt-2 border-t border-slate-100">
-                        <p className="text-[10px] text-slate-500 italic">{anomaly.resolutionNotes}</p>
+                        <p className="text-[9px] sm:text-[10px] text-slate-500 italic">{anomaly.resolutionNotes}</p>
                       </div>
                     )}
                   </div>
@@ -893,18 +973,18 @@ export default function ReportsPage() {
       </Card>
 
       {/* AI Financial Insights Section */}
-      <Card className="p-6 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6">
+      <Card className="p-4 sm:p-6 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">AI Financial Insights</h3>
-            <p className="text-xs text-slate-500 mt-0.5 font-light">Smart recommendations powered by machine learning</p>
-            <p className="text-[10px] text-emerald-600 mt-1 font-medium">✓ Free - doesn't count towards AI usage limit</p>
+            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">AI Financial Insights</h3>
+            <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 font-light">Smart recommendations powered by machine learning</p>
+            <p className="text-[9px] sm:text-[10px] text-emerald-600 mt-1 font-medium">✓ Free - doesn't count towards AI usage limit</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button 
               size="sm" 
               onClick={handleGenerateAIInsights} 
-              className="text-xs h-8 sm:h-9 px-3 sm:px-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 sm:flex-none text-xs h-8 sm:h-9 px-3 sm:px-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isGeneratingInsights || !rateLimitStatus?.canUseAI}
               title={!rateLimitStatus?.canUseAI ? "Daily limit reached" : ""}
             >
@@ -916,7 +996,8 @@ export default function ReportsPage() {
               ) : (
                 <>
                   <Wand2 size={14} className="mr-1.5" />
-                  <span>{hasGeneratedInsights ? "Regenerate Insights" : "Generate Report Insights"}</span>
+                  <span className="hidden sm:inline">{hasGeneratedInsights ? "Regenerate Insights" : "Generate Report Insights"}</span>
+                  <span className="sm:hidden">{hasGeneratedInsights ? "Regenerate" : "Generate"}</span>
                 </>
               )}
             </Button>
@@ -927,76 +1008,76 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Savings Opportunity Card - No Data */}
             <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-              <div className="p-5 sm:p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-                    <Wallet size={20} className="text-slate-400" strokeWidth={1.5} />
+              <div className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center">
+                    <Wallet size={18} className="sm:w-5 sm:h-5 text-slate-400" strokeWidth={1.5} />
                   </div>
-                  <span className="text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider">Savings Opportunities</span>
+                  <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-slate-700 uppercase tracking-wider">Savings Opportunities</span>
                 </div>
-                <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <Wallet size={32} className="text-slate-300 mb-3" />
-                  <p className="text-xs sm:text-sm text-slate-600 mb-1 font-medium">No savings insights available</p>
-                  <p className="text-[10px] sm:text-xs text-slate-400">Generate to see opportunities</p>
+                <div className="flex flex-col items-center justify-center py-4 sm:py-6 text-center">
+                  <Wallet size={28} className="sm:w-8 sm:h-8 text-slate-300 mb-2 sm:mb-3" />
+                  <p className="text-[10px] sm:text-xs md:text-sm text-slate-600 mb-1 font-medium">No savings insights available</p>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-slate-400">Generate to see opportunities</p>
                 </div>
               </div>
             </div>
 
             {/* Budget Recommendation Card - No Data */}
             <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-              <div className="p-5 sm:p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-                    <BarChart3 size={20} className="text-slate-400" strokeWidth={1.5} />
+              <div className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center">
+                    <BarChart3 size={18} className="sm:w-5 sm:h-5 text-slate-400" strokeWidth={1.5} />
                   </div>
-                  <span className="text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider">Budget Recommendations</span>
+                  <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-slate-700 uppercase tracking-wider">Budget Recommendations</span>
                 </div>
-                <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <BarChart3 size={32} className="text-slate-300 mb-3" />
-                  <p className="text-xs sm:text-sm text-slate-600 mb-1 font-medium">No budget insights available</p>
-                  <p className="text-[10px] sm:text-xs text-slate-400">Generate AI insights to see analysis</p>
+                <div className="flex flex-col items-center justify-center py-4 sm:py-6 text-center">
+                  <BarChart3 size={28} className="sm:w-8 sm:h-8 text-slate-300 mb-2 sm:mb-3" />
+                  <p className="text-[10px] sm:text-xs md:text-sm text-slate-600 mb-1 font-medium">No budget insights available</p>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-slate-400">Generate AI insights to see analysis</p>
                 </div>
               </div>
             </div>
 
             {/* Trend Analysis Card - No Data */}
             <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-              <div className="p-5 sm:p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-                    <LineChart size={20} className="text-slate-400" strokeWidth={1.5} />
+              <div className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center">
+                    <LineChart size={18} className="sm:w-5 sm:h-5 text-slate-400" strokeWidth={1.5} />
                   </div>
-                  <span className="text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider">Trend Analysis</span>
+                  <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-slate-700 uppercase tracking-wider">Trend Analysis</span>
                 </div>
-                <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <LineChart size={32} className="text-slate-300 mb-3" />
-                  <p className="text-xs sm:text-sm text-slate-600 mb-1 font-medium">No trend analysis available</p>
-                  <p className="text-[10px] sm:text-xs text-slate-400">Generate AI insights to see patterns</p>
+                <div className="flex flex-col items-center justify-center py-4 sm:py-6 text-center">
+                  <LineChart size={28} className="sm:w-8 sm:h-8 text-slate-300 mb-2 sm:mb-3" />
+                  <p className="text-[10px] sm:text-xs md:text-sm text-slate-600 mb-1 font-medium">No trend analysis available</p>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-slate-400">Generate AI insights to see patterns</p>
                 </div>
               </div>
             </div>
           </div>
         ) : aiInsights ? (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Risk Assessment Summary */}
             {aiInsights.riskLevel && (
               <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-start justify-between gap-4 mb-4">
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
-                        <AlertTriangle className={`w-5 h-5 ${
+                <div className="p-4 sm:p-5 md:p-6">
+                  <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <div className="flex items-start gap-2 sm:gap-3 flex-1 w-full">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0">
+                        <AlertTriangle className={`w-4 h-4 sm:w-5 sm:h-5 ${
                           aiInsights.riskLevel === 'high' ? 'text-red-600' :
                           aiInsights.riskLevel === 'medium' ? 'text-amber-600' :
                           'text-emerald-600'
                         }`} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-slate-900 mb-1">Financial Health Assessment</h4>
-                        <p className="text-xs text-slate-600 leading-relaxed">{aiInsights.summary}</p>
+                        <h4 className="text-xs sm:text-sm font-semibold text-slate-900 mb-1">Financial Health Assessment</h4>
+                        <p className="text-[10px] sm:text-xs text-slate-600 leading-relaxed">{aiInsights.summary}</p>
                       </div>
                     </div>
-                    <span className={`text-[10px] px-2.5 py-1 shrink-0 font-semibold ${
+                    <span className={`text-[9px] sm:text-[10px] px-2 sm:px-2.5 py-1 shrink-0 font-semibold ${
                       aiInsights.riskLevel === 'high' ? 'text-red-600' :
                       aiInsights.riskLevel === 'medium' ? 'text-amber-600' :
                       'text-emerald-600'
@@ -1005,8 +1086,8 @@ export default function ReportsPage() {
                     </span>
                   </div>
                   {aiInsights.riskAnalysis && (
-                    <div className="pt-4 border-t border-slate-100">
-                      <p className="text-xs text-slate-600 leading-relaxed">
+                    <div className="pt-3 sm:pt-4 border-t border-slate-100">
+                      <p className="text-[10px] sm:text-xs text-slate-600 leading-relaxed">
                         {aiInsights.riskAnalysis}
                       </p>
                     </div>
@@ -1018,22 +1099,22 @@ export default function ReportsPage() {
             {/* Recommendations Grid */}
             {aiInsights.recommendations && aiInsights.recommendations.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold text-slate-900 mb-4">Recommended Actions</h4>
+                <h4 className="text-xs sm:text-sm font-semibold text-slate-900 mb-3 sm:mb-4">Recommended Actions</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {aiInsights.recommendations.slice(0, 4).map((rec, idx) => (
                     <div key={idx} className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm hover:shadow-md transition-all">
-                      <div className="p-5">
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <div className={`w-2 h-2 rounded-full shrink-0 ${
+                      <div className="p-4 sm:p-5">
+                        <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
+                          <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+                            <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shrink-0 ${
                               rec.priority === 'high' ? 'bg-red-500' :
                               rec.priority === 'medium' ? 'bg-amber-500' : 'bg-blue-500'
                             }`} />
-                            <h5 className="text-xs font-semibold text-slate-900 truncate">
+                            <h5 className="text-[10px] sm:text-xs font-semibold text-slate-900 truncate">
                               {rec.title}
                             </h5>
                           </div>
-                          <span className={`text-[9px] px-2 py-0.5 shrink-0 font-semibold ${
+                          <span className={`text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 shrink-0 font-semibold ${
                             rec.priority === 'high' ? 'text-red-600' :
                             rec.priority === 'medium' ? 'text-amber-600' :
                             'text-blue-600'
@@ -1041,20 +1122,20 @@ export default function ReportsPage() {
                             {rec.priority}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                        <p className="text-[10px] sm:text-xs text-slate-600 leading-relaxed mb-3 sm:mb-4">
                           {rec.description}
                         </p>
-                        <div className="space-y-2 pt-3 border-t border-slate-100">
-                          <div className="flex items-center gap-2 text-[10px]">
+                        <div className="space-y-1.5 sm:space-y-2 pt-2 sm:pt-3 border-t border-slate-100">
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px]">
                             <span className="text-slate-400 font-medium">Category:</span>
                             <span className="text-slate-700 capitalize">{rec.category}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-[10px]">
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px]">
                             <span className="text-slate-400 font-medium">Timeframe:</span>
                             <span className="text-slate-700">{rec.timeHorizon}</span>
                           </div>
                           {rec.potentialSavings && (
-                            <div className="flex items-center gap-2 text-[10px]">
+                            <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px]">
                               <span className="text-slate-400 font-medium">Potential Savings:</span>
                               <span className="text-emerald-600 font-semibold">₱{rec.potentialSavings.toLocaleString()}</span>
                             </div>
@@ -1070,15 +1151,15 @@ export default function ReportsPage() {
             {/* Actionable Steps */}
             {aiInsights.actionableSteps && aiInsights.actionableSteps.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold text-slate-900 mb-4">Next Steps</h4>
+                <h4 className="text-xs sm:text-sm font-semibold text-slate-900 mb-3 sm:mb-4">Next Steps</h4>
                 <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm divide-y divide-slate-100">
                   {aiInsights.actionableSteps.map((step, idx) => (
-                    <div key={idx} className="p-4 hover:bg-slate-50 transition-colors">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-semibold">
+                    <div key={idx} className="p-3 sm:p-4 hover:bg-slate-50 transition-colors">
+                      <div className="flex items-start gap-2 sm:gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] sm:text-xs font-semibold">
                           {idx + 1}
                         </div>
-                        <p className="text-xs text-slate-700 leading-relaxed flex-1 pt-0.5">{step}</p>
+                        <p className="text-[10px] sm:text-xs text-slate-700 leading-relaxed flex-1 pt-0.5">{step}</p>
                       </div>
                     </div>
                   ))}
@@ -1102,16 +1183,16 @@ export default function ReportsPage() {
       {/* Table View Section */}
       {viewMode === "table" && (
         <Card className="overflow-hidden hover:shadow-md transition-all">
-          <div className="p-6 border-b border-slate-100">
+          <div className="p-4 sm:p-6 border-b border-slate-100">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-900">
                 {reportSettings.reportType === 'spending' ? 'Spending by Category' :
                  reportSettings.reportType === 'income-expense' ? 'Income vs Expenses' :
                  reportSettings.reportType === 'savings' ? 'Savings Analysis' :
                  reportSettings.reportType === 'trends' ? 'Spending Trends' :
                  reportSettings.reportType === 'goals' ? 'Goals Progress' : 'Financial Overview'}
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5 font-light">
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 font-light">
                 {reportSettings.timeframe === 'month' ? 'Last 30 days' :
                  reportSettings.timeframe === 'quarter' ? 'Last 3 months' : 'Last 12 months'}
               </p>
@@ -1135,23 +1216,23 @@ export default function ReportsPage() {
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Category</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Percentage</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Category</th>
+                      <th className="px-4 sm:px-6 py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
+                      <th className="px-4 sm:px-6 py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Percentage</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {chartData.categories.map((cat: any, idx: number) => (
                       <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{cat.name}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600 text-right">₱{cat.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600 text-right">{cat.percentage.toFixed(1)}%</td>
+                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-slate-900">{cat.name}</td>
+                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-600 text-right">₱{cat.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-600 text-right">{cat.percentage.toFixed(1)}%</td>
                       </tr>
                     ))}
                     <tr className="bg-slate-50 font-semibold">
-                      <td className="px-6 py-4 text-sm text-slate-900">Total</td>
-                      <td className="px-6 py-4 text-sm text-slate-900 text-right">₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                      <td className="px-6 py-4 text-sm text-slate-900 text-right">100%</td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-900">Total</td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-900 text-right">₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-900 text-right">100%</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1307,6 +1388,7 @@ export default function ReportsPage() {
           )}
         </Card>
       )}
+      </div>
 
       {/* Anomaly Details Modal */}
       {showAnomalyModal && selectedAnomaly && (
