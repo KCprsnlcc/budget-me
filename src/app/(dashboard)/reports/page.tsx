@@ -357,9 +357,6 @@ export default function ReportsPage() {
   // Handle export PDF
   const handleExportPDF = useCallback(() => {
     if (!summaryData || !chartData) {
-      toast.error("No data to export", {
-        description: "Please wait for data to load",
-      });
       return;
     }
 
@@ -404,23 +401,14 @@ export default function ReportsPage() {
       };
 
       exportReportToPDF(exportData);
-      toast.success("Report exported successfully", {
-        description: "PDF file has been downloaded.",
-      });
     } catch (error) {
       console.error("Error exporting report:", error);
-      toast.error("Failed to export report", {
-        description: "Please try again later",
-      });
     }
   }, [summaryData, chartData, anomalies, aiInsights, reportSettings]);
 
   // Handle export CSV
   const handleExportCSV = useCallback(() => {
     if (!summaryData || !chartData) {
-      toast.error("No data to export", {
-        description: "Please wait for data to load",
-      });
       return;
     }
 
@@ -465,14 +453,8 @@ export default function ReportsPage() {
       };
 
       exportReportToCSV(exportData);
-      toast.success("Report exported successfully", {
-        description: "CSV files have been downloaded.",
-      });
     } catch (error) {
       console.error("Error exporting report:", error);
-      toast.error("Failed to export report", {
-        description: "Please try again later",
-      });
     }
   }, [summaryData, chartData, anomalies, aiInsights, reportSettings]);
 

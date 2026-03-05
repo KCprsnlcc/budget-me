@@ -481,9 +481,6 @@ export default function PredictionsPage() {
   // Export handlers
   const handleExportCSV = useCallback(() => {
     if (!forecastData && categoryPredictions.length === 0 && !aiInsights) {
-      toast.error("No prediction data to export", {
-        description: "Please generate predictions first.",
-      });
       return;
     }
 
@@ -544,17 +541,10 @@ export default function PredictionsPage() {
     } : null;
 
     exportPredictionsToCSV(forecastExportData, categoryExportData, aiInsightsExportData);
-    
-    toast.success("Predictions exported successfully", {
-      description: "CSV files have been downloaded.",
-    });
   }, [forecastData, categoryPredictions, aiInsights]);
 
   const handleExportPDF = useCallback(() => {
     if (!forecastData && categoryPredictions.length === 0 && !aiInsights) {
-      toast.error("No prediction data to export", {
-        description: "Please generate predictions first.",
-      });
       return;
     }
 
@@ -625,10 +615,6 @@ export default function PredictionsPage() {
     } : null;
 
     exportPredictionsToPDF(forecastExportData, categoryExportData, exportSummary, aiInsightsExportData);
-    
-    toast.success("Predictions exported successfully", {
-      description: "PDF file has been downloaded.",
-    });
   }, [forecastData, categoryPredictions, aiInsights]);
 
   const handleGeneratePredictions = useCallback(async () => {
