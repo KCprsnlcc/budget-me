@@ -73,10 +73,14 @@ export default function ReportsPage() {
   // Export dropdown state
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   
   // Loading states
   const [loading, setLoading] = useState(true);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  
+  // Scroll indicator state
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   
   // Real data states
   const [summaryData, setSummaryData] = useState<any>(null);
@@ -109,6 +113,40 @@ export default function ReportsPage() {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [exportDropdownOpen]);
+
+  // Check if content is scrollable and show indicator
+  useEffect(() => {
+    const checkScrollable = () => {
+      if (contentRef.current && typeof window !== 'undefined') {
+        const isMobileOrTablet = window.innerWidth < 1024;
+        const isScrollable = contentRef.current.scrollHeight > contentRef.current.clientHeight;
+        setShowScrollIndicator(isMobileOrTablet && isScrollable);
+      }
+    };
+
+    checkScrollable();
+    window.addEventListener('resize', checkScrollable);
+    return () => window.removeEventListener('resize', checkScrollable);
+  }, [loading]);
+
+  // Handle scroll to hide indicator
+  useEffect(() => {
+    const handleScroll = () => {
+      if (contentRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
+        const isNearBottom = scrollHeight - scrollTop - clientHeight < 50;
+        if (isNearBottom) {
+          setShowScrollIndicator(false);
+        }
+      }
+    };
+
+    const currentRef = contentRef.current;
+    if (currentRef) {
+      currentRef.addEventListener('scroll', handleScroll);
+      return () => currentRef.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
 
   // Fetch AI rate limit status
   useEffect(() => {
@@ -466,29 +504,28 @@ export default function ReportsPage() {
           {/* Page Header Skeleton */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
             <div>
-              <Skeleton width={180} height={28} className="mb-2 sm:w-48 sm:h-8" />
-              <Skeleton width={280} height={14} className="sm:w-80 sm:h-4" />
+              <Skeleton width={150} height={24} className="mb-2 sm:w-48 sm:h-8" />
+              <Skeleton width={220} height={12} className="sm:w-80 sm:h-4" />
             </div>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <Skeleton width={140} height={32} borderRadius={4} className="order-2 sm:order-1" />
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <Skeleton width="100%" height={32} borderRadius={4} className="sm:w-32" />
               <Skeleton width={80} height={32} borderRadius={4} />
-              <Skeleton width={100} height={32} borderRadius={4} />
             </div>
           </div>
 
           {/* Scrollable Content Area - Skeleton */}
           <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0">
             {/* Summary Cards Skeleton */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Card key={i} className="p-4 sm:p-5">
                   <div className="flex justify-between items-start mb-3 sm:mb-4">
-                    <Skeleton width={36} height={36} borderRadius={8} className="sm:w-10 sm:h-10" />
-                    <Skeleton width={70} height={18} borderRadius={10} className="sm:w-20" />
+                    <Skeleton width={32} height={32} borderRadius={8} className="sm:w-10 sm:h-10" />
+                    <Skeleton width={60} height={16} borderRadius={10} className="sm:w-20" />
                   </div>
-                  <Skeleton width={100} height={14} className="mb-2 sm:w-28" />
-                  <Skeleton width={120} height={22} className="sm:w-32 sm:h-6" />
-                  <Skeleton width={150} height={12} className="sm:w-40" />
+                  <Skeleton width={90} height={12} className="mb-2 sm:w-28" />
+                  <Skeleton width={100} height={20} className="sm:w-32 sm:h-6" />
+                  <Skeleton width={130} height={10} className="sm:w-40" />
                 </Card>
               ))}
             </div>
@@ -496,14 +533,14 @@ export default function ReportsPage() {
             {/* Report Settings Skeleton */}
             <Card className="p-4 sm:p-5">
               <div className="mb-3 sm:mb-4">
-                <Skeleton width={140} height={14} className="mb-2 sm:w-40" />
-                <Skeleton width={240} height={12} className="sm:w-80" />
+                <Skeleton width={120} height={12} className="mb-2 sm:w-40" />
+                <Skeleton width={200} height={10} className="sm:w-80" />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i}>
-                    <Skeleton width={100} height={12} className="mb-2 sm:w-32" />
-                    <Skeleton height={36} borderRadius={4} className="sm:h-10" />
+                    <Skeleton width={80} height={10} className="mb-2 sm:w-32" />
+                    <Skeleton height={32} borderRadius={4} className="sm:h-10" />
                   </div>
                 ))}
               </div>
@@ -513,28 +550,28 @@ export default function ReportsPage() {
             <Card className="p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div>
-                  <Skeleton width={160} height={14} className="mb-2 sm:w-48" />
-                  <Skeleton width={200} height={12} className="sm:w-64" />
+                  <Skeleton width={140} height={12} className="mb-2 sm:w-48" />
+                  <Skeleton width={180} height={10} className="sm:w-64" />
                 </div>
               </div>
               <div className="flex gap-2 mb-4 sm:mb-6 border-b border-slate-200">
-                <Skeleton width={80} height={32} className="sm:w-24" />
-                <Skeleton width={80} height={32} className="sm:w-24" />
+                <Skeleton width={70} height={28} className="sm:w-24 sm:h-8" />
+                <Skeleton width={70} height={28} className="sm:w-24 sm:h-8" />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 {Array.from({ length: 2 }).map((_, i) => (
-                  <div key={i} className="border border-slate-200 rounded-xl p-4">
+                  <div key={i} className="border border-slate-200 rounded-xl p-3 sm:p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <Skeleton width={80} height={12} className="sm:w-24" />
-                      <Skeleton width={16} height={16} borderRadius={4} />
+                      <Skeleton width={70} height={10} className="sm:w-24" />
+                      <Skeleton width={14} height={14} borderRadius={4} />
                     </div>
-                    <Skeleton width="100%" height={14} className="mb-2" />
-                    <Skeleton width="90%" height={12} className="mb-3" />
+                    <Skeleton width="100%" height={12} className="mb-2" />
+                    <Skeleton width="90%" height={10} className="mb-3" />
                     <div className="flex justify-between items-center pt-3 border-t border-slate-100">
-                      <Skeleton width={80} height={12} className="sm:w-24" />
+                      <Skeleton width={70} height={10} className="sm:w-24" />
                       <div className="flex gap-2">
-                        <Skeleton width={60} height={24} borderRadius={4} />
-                        <Skeleton width={60} height={24} borderRadius={4} />
+                        <Skeleton width={50} height={20} borderRadius={4} />
+                        <Skeleton width={50} height={20} borderRadius={4} />
                       </div>
                     </div>
                   </div>
@@ -546,19 +583,19 @@ export default function ReportsPage() {
             <Card className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div>
-                  <Skeleton width={180} height={14} className="mb-2 sm:w-48" />
-                  <Skeleton width={220} height={12} className="sm:w-80" />
+                  <Skeleton width={160} height={12} className="mb-2 sm:w-48" />
+                  <Skeleton width={200} height={10} className="sm:w-80" />
                 </div>
-                <Skeleton width={160} height={32} borderRadius={4} className="sm:w-48" />
+                <Skeleton width="100%" height={28} borderRadius={4} className="sm:w-48 sm:h-9" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="border border-slate-200 rounded-xl p-4 sm:p-5">
-                    <div className="flex items-center gap-3 mb-4">
-                      <Skeleton width={36} height={36} borderRadius={8} className="sm:w-10 sm:h-10" />
-                      <Skeleton width={140} height={12} className="sm:w-48" />
+                    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                      <Skeleton width={32} height={32} borderRadius={8} className="sm:w-10 sm:h-10" />
+                      <Skeleton width={120} height={10} className="sm:w-48" />
                     </div>
-                    <Skeleton width="100%" height={80} className="sm:h-24" />
+                    <Skeleton width="100%" height={60} className="sm:h-24" />
                   </div>
                 ))}
               </div>
@@ -566,8 +603,8 @@ export default function ReportsPage() {
 
             {/* Chart Skeleton */}
             <Card className="p-4 sm:p-6">
-              <Skeleton width={150} height={16} className="mb-4 sm:mb-6 sm:w-48" />
-              <Skeleton height={300} borderRadius={8} className="sm:h-96" />
+              <Skeleton width={130} height={14} className="mb-4 sm:mb-6 sm:w-48" />
+              <Skeleton height={240} borderRadius={8} className="sm:h-96" />
             </Card>
           </div>
         </div>
@@ -610,8 +647,8 @@ export default function ReportsPage() {
           <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">Reports</h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 font-light">Generate detailed financial reports and insights.</p>
         </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <div className="flex bg-slate-100 p-1 rounded-lg">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="flex bg-slate-100 p-1 rounded-lg flex-1 sm:flex-none">
             <Button 
               variant="ghost" 
               size="sm" 
@@ -635,11 +672,11 @@ export default function ReportsPage() {
               Charts
             </Button>
           </div>
-          <div className="relative flex-1 sm:flex-none" ref={exportDropdownRef}>
+          <div className="relative" ref={exportDropdownRef}>
             <Button 
               variant="outline" 
               size="sm" 
-              className="w-full sm:w-auto"
+              className="px-3 py-1"
               onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
             >
               <Download size={14} className="sm:mr-1" />
@@ -678,7 +715,20 @@ export default function ReportsPage() {
       </div>
 
       {/* Scrollable Content Area for Mobile/Tablet */}
-      <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth">
+      <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth"
+        ref={contentRef}
+      >
+        {/* Scroll Indicator for Mobile/Tablet */}
+        {showScrollIndicator && (
+          <div className="lg:hidden fixed bottom-20 sm:bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-bounce">
+            <div className="bg-emerald-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 text-xs font-medium">
+              <span>Scroll down</span>
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+        )}
 
       {/* Summary Cards */}
       {summaryData && (
@@ -1213,26 +1263,26 @@ export default function ReportsPage() {
             <div className="overflow-x-auto">
               {/* Spending by Category Table */}
               {reportSettings.reportType === 'spending' && chartData.categories && chartData.categories.length > 0 && (
-                <table className="w-full">
+                <table className="w-full min-w-[500px]">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-4 sm:px-6 py-3 text-left text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Category</th>
-                      <th className="px-4 sm:px-6 py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
-                      <th className="px-4 sm:px-6 py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Percentage</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Category</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Percentage</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {chartData.categories.map((cat: any, idx: number) => (
                       <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-slate-900">{cat.name}</td>
-                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-600 text-right">₱{cat.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-600 text-right">{cat.percentage.toFixed(1)}%</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-medium text-slate-900">{cat.name}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-600 text-right">₱{cat.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-600 text-right">{cat.percentage.toFixed(1)}%</td>
                       </tr>
                     ))}
                     <tr className="bg-slate-50 font-semibold">
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-900">Total</td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-900 text-right">₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-900 text-right">100%</td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-900">Total</td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-900 text-right">₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-900 text-right">100%</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1240,29 +1290,29 @@ export default function ReportsPage() {
 
               {/* Income vs Expense Table */}
               {reportSettings.reportType === 'income-expense' && chartData.monthly && chartData.monthly.length > 0 && (
-                <table className="w-full">
+                <table className="w-full min-w-[600px]">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Month</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Income</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Expenses</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Net Savings</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Month</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Income</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Expenses</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Net Savings</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {chartData.monthly.map((month: any, idx: number) => (
                       <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{month.month}</td>
-                        <td className="px-6 py-4 text-sm text-emerald-600 text-right">₱{month.income.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-6 py-4 text-sm text-red-600 text-right">₱{month.expenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-6 py-4 text-sm text-blue-600 text-right">₱{(month.income - month.expenses).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-medium text-slate-900">{month.month}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-emerald-600 text-right">₱{month.income.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-red-600 text-right">₱{month.expenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-blue-600 text-right">₱{(month.income - month.expenses).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
                       </tr>
                     ))}
                     <tr className="bg-slate-50 font-semibold">
-                      <td className="px-6 py-4 text-sm text-slate-900">Total</td>
-                      <td className="px-6 py-4 text-sm text-emerald-600 text-right">₱{chartData.totals?.income.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                      <td className="px-6 py-4 text-sm text-red-600 text-right">₱{chartData.totals?.expenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                      <td className="px-6 py-4 text-sm text-blue-600 text-right">₱{chartData.totals?.netSavings.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-900">Total</td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-emerald-600 text-right">₱{chartData.totals?.income.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-red-600 text-right">₱{chartData.totals?.expenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-blue-600 text-right">₱{chartData.totals?.netSavings.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1270,28 +1320,28 @@ export default function ReportsPage() {
 
               {/* Savings Analysis Table */}
               {reportSettings.reportType === 'savings' && chartData.funds && chartData.funds.length > 0 && (
-                <table className="w-full">
+                <table className="w-full min-w-[600px]">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Fund Name</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Current Amount</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Target Amount</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Progress</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Fund Name</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Current Amount</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Target Amount</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Progress</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {chartData.funds.map((fund: any, idx: number) => (
                       <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{fund.name}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600 text-right">₱{fund.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600 text-right">₱{fund.target.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600 text-right">{fund.percentage.toFixed(1)}%</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-medium text-slate-900">{fund.name}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-600 text-right">₱{fund.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-600 text-right">₱{fund.target.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-600 text-right">{fund.percentage.toFixed(1)}%</td>
                       </tr>
                     ))}
                     <tr className="bg-slate-50 font-semibold">
-                      <td className="px-6 py-4 text-sm text-slate-900">Total</td>
-                      <td className="px-6 py-4 text-sm text-slate-900 text-right">₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                      <td className="px-6 py-4 text-sm text-slate-900 text-right" colSpan={2}>Savings Rate: {chartData.rate?.toFixed(1)}%</td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-900">Total</td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-900 text-right">₱{chartData.total?.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-900 text-right" colSpan={2}>Savings Rate: {chartData.rate?.toFixed(1)}%</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1299,22 +1349,22 @@ export default function ReportsPage() {
 
               {/* Goals Progress Table */}
               {reportSettings.reportType === 'goals' && chartData.goals && chartData.goals.length > 0 && (
-                <table className="w-full">
+                <table className="w-full min-w-[600px]">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Goal Name</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Current Amount</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Target Amount</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Progress</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Goal Name</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Current Amount</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Target Amount</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Progress</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {chartData.goals.map((goal: any, idx: number) => (
                       <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{goal.name}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600 text-right">₱{goal.current.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600 text-right">₱{goal.target.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600 text-right">{goal.percentage.toFixed(1)}%</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-medium text-slate-900">{goal.name}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-600 text-right">₱{goal.current.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-600 text-right">₱{goal.target.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-slate-600 text-right">{goal.percentage.toFixed(1)}%</td>
                       </tr>
                     ))}
                   </tbody>
@@ -1323,26 +1373,26 @@ export default function ReportsPage() {
 
               {/* Trends Table */}
               {reportSettings.reportType === 'trends' && chartData.categories && chartData.categories.length > 0 && (
-                <table className="w-full">
+                <table className="w-full min-w-[500px]">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Category</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Change</th>
-                      <th className="px-6 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Trend</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Category</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Change</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Trend</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {chartData.categories.map((cat: any, idx: number) => (
                       <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{cat.name}</td>
-                        <td className={`px-6 py-4 text-sm text-right font-semibold ${
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-medium text-slate-900">{cat.name}</td>
+                        <td className={`px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-right font-semibold ${
                           cat.trend === 'up' ? 'text-red-600' : 
                           cat.trend === 'down' ? 'text-emerald-600' : 'text-slate-600'
                         }`}>
                           {cat.change > 0 ? '+' : ''}{cat.change.toFixed(1)}%
                         </td>
-                        <td className="px-6 py-4 text-sm text-center">
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-center">
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium ${
                             cat.trend === 'up' ? 'bg-red-50 text-red-700' : 
                             cat.trend === 'down' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-700'
                           }`}>
@@ -1357,25 +1407,25 @@ export default function ReportsPage() {
 
               {/* Future Predictions Table */}
               {reportSettings.reportType === 'predictions' && predictionData.forecast && (
-                <table className="w-full">
+                <table className="w-full min-w-[700px]">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Month</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Projected Income</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Projected Expenses</th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Net Savings</th>
-                      <th className="px-6 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Confidence</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Month</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Projected Income</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Projected Expenses</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Net Savings</th>
+                      <th className="px-3 sm:px-6 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider">Confidence</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {predictionData.forecast.predicted.map((month: any, idx: number) => (
                       <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{month.month}</td>
-                        <td className="px-6 py-4 text-sm text-emerald-600 text-right">₱{month.income.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-6 py-4 text-sm text-red-600 text-right">₱{month.expense.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-6 py-4 text-sm text-blue-600 text-right">₱{(month.income - month.expense).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                        <td className="px-6 py-4 text-sm text-center">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-medium text-slate-900">{month.month}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-emerald-600 text-right">₱{month.income.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-red-600 text-right">₱{month.expense.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-blue-600 text-right">₱{(month.income - month.expense).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-center">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-emerald-50 text-emerald-700">
                             {month.confidence || predictionData.forecast?.summary?.confidence || 0}%
                           </span>
                         </td>
