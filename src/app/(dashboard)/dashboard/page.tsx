@@ -470,12 +470,13 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Card key={i} className="p-3 sm:p-4">
-                  <div className="flex justify-between items-start mb-3 sm:mb-4">
-                    <Skeleton width={36} height={36} borderRadius={8} className="sm:w-[40px] sm:h-[40px]" />
-                    <Skeleton width={50} height={18} borderRadius={10} className="sm:w-[60px] sm:h-[20px]" />
+                  <div className="flex justify-between items-start mb-2">
+                    <Skeleton width={60} height={12} />
+                    <Skeleton width={16} height={16} circle />
                   </div>
-                  <Skeleton width={90} height={10} className="sm:w-[100px] sm:h-[12px] mb-2" />
-                  <Skeleton width={110} height={20} className="sm:w-[120px] sm:h-[24px]" />
+                  <Skeleton width="80%" height={16} className="mb-1" />
+                  <Skeleton width="100%" height={12} className="mb-3" />
+                  <Skeleton width={60} height={10} />
                 </Card>
               ))}
             </div>
@@ -524,8 +525,8 @@ export default function DashboardPage() {
                 <Skeleton width={90} height={14} className="sm:w-[100px] sm:h-[16px]" />
                 <Skeleton width={120} height={12} className="sm:w-[140px] mt-1" />
               </div>
-              <div className="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
-                <Skeleton width={100} height={100} borderRadius="50%" className="sm:w-[128px] sm:h-[128px] mx-auto" />
+              <div className="flex items-center justify-center mb-4 sm:mb-6">
+                <Skeleton width={128} height={128} borderRadius="50%" className="sm:w-[160px] sm:h-[160px]" />
               </div>
               <div className="space-y-2 sm:space-y-3 max-h-24 sm:max-h-28 overflow-y-auto">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -896,9 +897,8 @@ export default function DashboardPage() {
             </Card>
           )}
 
-          {/* Expense Categories - Show on desktop or when categories tab is active */}
-          {(activeChartTab === 'categories' || !activeChartTab) && (
-            <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
+          {/* Expense Categories - Show on desktop or when categories tab is active on mobile */}
+          <Card className={`p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer ${activeChartTab === 'overview' ? 'hidden lg:flex' : ''}`}>
               <div className="mb-4 sm:mb-6">
                 <h3 className="text-sm font-semibold text-slate-900">Categories</h3>
                 <p className="text-xs text-slate-500 mt-0.5 font-light">All-time expense breakdown</p>
@@ -937,7 +937,6 @@ export default function DashboardPage() {
                 </>
               )}
             </Card>
-          )}
         </div>
       </div>
 
