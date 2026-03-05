@@ -840,6 +840,26 @@ export async function sendInvitation(
     return { error: "You cannot invite yourself." };
   }
 
+  // Check if the invitee is already a family owner
+  const { data: inviteeProfile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (inviteeProfile) {
+    // Check if this user is an owner of any family
+    const { data: ownedFamilies } = await supabase
+      .from("families")
+      .select("id, name")
+      .eq("created_by", inviteeProfile.id)
+      .limit(1);
+
+    if (ownedFamilies && ownedFamilies.length > 0) {
+      return { error: "This user is already a family owner and cannot be invited to another family." };
+    }
+  }
+
   // Check if email user is already a member of this family
   const { data: existingMembers } = await supabase
     .from("family_members")
@@ -935,6 +955,17 @@ export async function respondToInvitation(
   }
 
   if (accept) {
+    // Check if the user is already a family owner
+    const { data: ownedFamilies } = await supabase
+      .from("families")
+      .select("id, name")
+      .eq("created_by", userId)
+      .limit(1);
+
+    if (ownedFamilies && ownedFamilies.length > 0) {
+      return { error: "You are already a family owner and cannot join another family. Please transfer or delete your family first." };
+    }
+
     // Get the inviter's role and family info to determine the new member's role
     const { data: family, error: familyErr } = await supabase
       .from("families")
@@ -1035,6 +1066,17 @@ export async function sendJoinRequest(
   userId: string,
   message?: string
 ): Promise<{ error: string | null }> {
+  // Check if the user is already a family owner
+  const { data: ownedFamilies } = await supabase
+    .from("families")
+    .select("id, name")
+    .eq("created_by", userId)
+    .limit(1);
+
+  if (ownedFamilies && ownedFamilies.length > 0) {
+    return { error: "You are already a family owner and cannot join another family. Please transfer or delete your family first." };
+  }
+
   // Check if request already exists
   const { data: existing } = await supabase
     .from("family_join_requests")
@@ -1103,6 +1145,17 @@ export async function respondToJoinRequest(
   }
 
   if (approve) {
+    // Check if the requester is a family owner
+    const { data: ownedFamilies } = await supabase
+      .from("families")
+      .select("id, name")
+      .eq("created_by", request.user_id)
+      .limit(1);
+
+    if (ownedFamilies && ownedFamilies.length > 0) {
+      return { error: "This user is a family owner and cannot join another family." };
+    }
+
     // Check if user already has a membership record (could be removed/inactive)
     const { data: existingMembership, error: checkErr } = await supabase
       .from("family_members")
