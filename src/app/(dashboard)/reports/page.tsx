@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, memo, useEffect } from "react";
+import { useState, useCallback, memo, useEffect, useRef } from "react";
 import {
   BarChart3,
   Download,
@@ -50,6 +50,11 @@ import {
   generateCategoryForecast,
 } from "../predictions/_lib/prediction-service";
 import type { MonthlyForecast, CategoryPrediction } from "../predictions/_lib/types";
+import {
+  exportReportToPDF,
+  exportReportToCSV,
+  type ReportExportData,
+} from "@/lib/export-utils";
 
 export default function ReportsPage() {
   const { user } = useAuth();
@@ -64,6 +69,10 @@ export default function ReportsPage() {
     categories: ["housing", "food", "transport", "utilities", "other"],
     accounts: ["checking", "chase"],
   });
+  
+  // Export dropdown state
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const exportDropdownRef = useRef<HTMLDivElement>(null);
   
   // Loading states
   const [loading, setLoading] = useState(true);
@@ -86,6 +95,20 @@ export default function ReportsPage() {
   
   // AI Rate Limit State
   const [rateLimitStatus, setRateLimitStatus] = useState<AIUsageStatus | null>(null);
+
+  // Close export dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+        setExportDropdownOpen(false);
+      }
+    };
+
+    if (exportDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [exportDropdownOpen]);
 
   // Fetch AI rate limit status
   useEffect(() => {
@@ -331,6 +354,128 @@ export default function ReportsPage() {
     setShowAnomalyModal(false);
   }, [user?.id, reportSettings.timeframe]);
 
+  // Handle export PDF
+  const handleExportPDF = useCallback(() => {
+    if (!summaryData || !chartData) {
+      toast.error("No data to export", {
+        description: "Please wait for data to load",
+      });
+      return;
+    }
+
+    try {
+      // Get date range string
+      const dateRangeMap = {
+        month: "Last 30 Days",
+        quarter: "Last 3 Months",
+        year: "Last 12 Months",
+      };
+
+      // Prepare export data
+      const exportData: ReportExportData = {
+        summary: summaryData,
+        settings: {
+          reportType: reportSettings.reportType,
+          timeframe: reportSettings.timeframe,
+          chartType: reportSettings.chartType,
+          dateRange: dateRangeMap[reportSettings.timeframe],
+        },
+        anomalies: anomalies.map(a => ({
+          id: a.id,
+          title: a.title,
+          description: a.description,
+          severity: a.severity,
+          type: a.type,
+          category: a.category || "",
+          amount: a.amount || null,
+          detectedAt: a.timestamp || new Date().toISOString(),
+        })),
+        chartData,
+        aiInsights: aiInsights ? {
+          summary: aiInsights.summary,
+          riskLevel: aiInsights.riskLevel,
+          riskScore: aiInsights.riskScore,
+          riskAnalysis: aiInsights.riskAnalysis,
+          growthPotential: "",
+          growthAnalysis: "",
+          recommendations: aiInsights.recommendations || [],
+          actionableSteps: aiInsights.actionableSteps || [],
+        } : null,
+      };
+
+      exportReportToPDF(exportData);
+      toast.success("Report exported successfully", {
+        description: "PDF file has been downloaded.",
+      });
+    } catch (error) {
+      console.error("Error exporting report:", error);
+      toast.error("Failed to export report", {
+        description: "Please try again later",
+      });
+    }
+  }, [summaryData, chartData, anomalies, aiInsights, reportSettings]);
+
+  // Handle export CSV
+  const handleExportCSV = useCallback(() => {
+    if (!summaryData || !chartData) {
+      toast.error("No data to export", {
+        description: "Please wait for data to load",
+      });
+      return;
+    }
+
+    try {
+      // Get date range string
+      const dateRangeMap = {
+        month: "Last 30 Days",
+        quarter: "Last 3 Months",
+        year: "Last 12 Months",
+      };
+
+      // Prepare export data
+      const exportData: ReportExportData = {
+        summary: summaryData,
+        settings: {
+          reportType: reportSettings.reportType,
+          timeframe: reportSettings.timeframe,
+          chartType: reportSettings.chartType,
+          dateRange: dateRangeMap[reportSettings.timeframe],
+        },
+        anomalies: anomalies.map(a => ({
+          id: a.id,
+          title: a.title,
+          description: a.description,
+          severity: a.severity,
+          type: a.type,
+          category: a.category || "",
+          amount: a.amount || null,
+          detectedAt: a.timestamp || new Date().toISOString(),
+        })),
+        chartData,
+        aiInsights: aiInsights ? {
+          summary: aiInsights.summary,
+          riskLevel: aiInsights.riskLevel,
+          riskScore: aiInsights.riskScore,
+          riskAnalysis: aiInsights.riskAnalysis,
+          growthPotential: "",
+          growthAnalysis: "",
+          recommendations: aiInsights.recommendations || [],
+          actionableSteps: aiInsights.actionableSteps || [],
+        } : null,
+      };
+
+      exportReportToCSV(exportData);
+      toast.success("Report exported successfully", {
+        description: "CSV files have been downloaded.",
+      });
+    } catch (error) {
+      console.error("Error exporting report:", error);
+      toast.error("Failed to export report", {
+        description: "Please try again later",
+      });
+    }
+  }, [summaryData, chartData, anomalies, aiInsights, reportSettings]);
+
   // Loading state
   if (loading) {
     return (
@@ -431,12 +576,44 @@ export default function ReportsPage() {
               Charts
             </Button>
           </div>
-          <div className="relative group">
-            <Button variant="outline" size="sm">
-              <Download size={16} />
+          <div className="relative" ref={exportDropdownRef}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full sm:w-auto"
+              onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+            >
+              <Download size={14} className="sm:mr-1" />
               <span className="hidden sm:inline">Export</span>
-              <MoreHorizontal size={12} />
+              <MoreHorizontal size={12} className="ml-1" />
             </Button>
+            {/* Dropdown */}
+            {exportDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                  onClick={() => {
+                    handleExportPDF();
+                    setExportDropdownOpen(false);
+                  }}
+                >
+                  <span className="text-rose-500 mr-2">PDF</span> Export as PDF
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                  onClick={() => {
+                    handleExportCSV();
+                    setExportDropdownOpen(false);
+                  }}
+                >
+                  <span className="text-emerald-500 mr-2">CSV</span> Export as CSV
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
