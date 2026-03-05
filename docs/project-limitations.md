@@ -64,12 +64,15 @@ if (sortedMonths.length < 2) {
 **The AI chatbot can only READ your data, it cannot CREATE, UPDATE, or DELETE anything.**
 
 ### What the Chatbot CAN Do ✅
+- View your complete user profile (name, email, phone, date of birth)
+- Access all your financial accounts (bank accounts, credit cards, cash, etc.) with current balances
 - View your transactions, budgets, and goals
-- Answer questions about your spending patterns
+- Answer questions about your spending patterns and account balances
 - Give financial advice based on your data
 - Analyze uploaded receipts and bills (image analysis)
-- Explain your financial situation
+- Explain your financial situation across all accounts
 - Provide recommendations and insights
+- Reference specific account information when answering questions
 
 ### What the Chatbot CANNOT Do ❌
 - Add new transactions for you
@@ -80,38 +83,83 @@ if (sortedMonths.length < 2) {
 - Modify any database records
 
 
-### Example Scenario
+### Example Scenarios
+
+**Scenario 1: Viewing Account Information ✅**
+
+**User:** "What's my total balance across all accounts?"
+
+**Chatbot Response:** 
+```
+Based on your current accounts:
+- BDO Savings (Default): ₱25,000
+- Cash Wallet: ₱3,500
+- GCash: ₱1,200
+
+Your total balance is ₱29,700. Your BDO Savings account holds 
+the majority of your funds at 84% of your total balance.
+```
+
+**Scenario 2: Profile Information ✅**
+
+**User:** "What's my registered phone number?"
+
+**Chatbot Response:** 
+```
+Your registered phone number is +63 912 345 6789. You can update 
+this in the Settings page under the Profile tab if needed.
+```
+
+**Scenario 3: Cannot Modify Data ❌**
 
 **User:** "Add a ₱500 grocery expense for today"
 
 **Chatbot Response:** 
 ```
-I can see your transaction history, but I cannot add transactions 
-directly. Please use the Transactions page to add this expense. 
-Would you like me to guide you through the process?
+I can see your transaction history and accounts, but I cannot add 
+transactions directly. Please use the Transactions page to add this 
+expense. Would you like me to guide you through the process?
 ```
 
 ### Technical Reason
 
 The chatbot doesn't have **"tool calling" or "function calling"** capabilities:
-- It only has **read-only access** to your database
+- It has **read-only access** to your complete financial data including:
+  - User profile information (name, email, phone, date of birth)
+  - All financial accounts with balances and details
+  - Transaction history, budgets, goals, and family members
 - No API endpoints for data modification are exposed to the AI
 - This is a **security feature** to prevent accidental data changes
 - Modern AI agents (like ChatGPT with plugins) can call functions, but our implementation does not support this
+- The chatbot can VIEW and ANALYZE all your data but cannot CREATE, UPDATE, or DELETE anything
 
 ### Code Reference
 ```typescript
 // src/app/(dashboard)/chatbot/_lib/chatbot-service.ts
-// Chatbot only fetches user context, cannot modify it
+// Chatbot fetches complete user context including profile and accounts
 const { data: userData } = await fetchUserFinancialContext(userId);
-// No write operations available to the AI
+
+// src/app/(dashboard)/chatbot/_lib/user-data-service.ts
+// Includes profile data
+profile: {
+  fullName, email, phone, dateOfBirth, avatarUrl
+}
+
+// Includes all financial accounts
+accounts: [{
+  id, name, type, balance, isDefault, institution
+}]
+
+// No write operations available to the AI - read-only access
 ```
 
 ### Impact on Users
 - Users must manually add/edit data through the UI
-- Chatbot is for **information and advice only**, not automation
-- No risk of AI accidentally deleting your financial data
+- Chatbot is for **information, analysis, and advice only**, not automation
+- Can ask chatbot about account balances, profile info, and financial summaries
+- No risk of AI accidentally modifying or deleting your financial data
 - Requires extra steps to act on chatbot suggestions
+- Great for getting insights and understanding your finances, but not for data entry
 
 ### Future Enhancement Possibility
 To enable data modification, we would need to implement:

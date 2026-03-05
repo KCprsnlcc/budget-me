@@ -9,6 +9,21 @@ const supabase = createClient();
 // ---------------------------------------------------------------------------
 
 export interface UserFinancialContext {
+  profile: {
+    fullName: string | null;
+    email: string;
+    phone: string | null;
+    dateOfBirth: string | null;
+    avatarUrl: string | null;
+  };
+  accounts: Array<{
+    id: string;
+    name: string;
+    type: string;
+    balance: number;
+    isDefault: boolean;
+    institution: string | null;
+  }>;
   summary: {
     totalBalance: number;
     monthlyIncome: number;
@@ -120,6 +135,41 @@ export async function fetchUserFinancialContext(
   userId: string
 ): Promise<{ data: UserFinancialContext | null; error: string | null }> {
   try {
+    // Fetch user profile
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("full_name, email, phone, date_of_birth, avatar_url")
+      .eq("id", userId)
+      .single();
+
+    const profile = {
+      fullName: profileData?.full_name ?? null,
+      email: profileData?.email ?? "",
+      phone: profileData?.phone ?? null,
+      dateOfBirth: profileData?.date_of_birth ?? null,
+      avatarUrl: profileData?.avatar_url ?? null,
+    };
+
+    // Fetch accounts with full details
+    const { data: accountsData } = await supabase
+      .from("accounts")
+      .select("id, account_name, account_type, balance, is_default, institution_name")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .order("is_default", { ascending: false })
+      .order("created_at", { ascending: true });
+
+    const accounts = (accountsData ?? []).map((acc) => ({
+      id: acc.id,
+      name: acc.account_name,
+      type: acc.account_type,
+      balance: Number(acc.balance ?? 0),
+      isDefault: acc.is_default ?? false,
+      institution: acc.institution_name ?? null,
+    }));
+
+    const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
+
     // Fetch dashboard summary
     const { data: summaryData } = await supabase
       .from("transactions")
@@ -127,18 +177,6 @@ export async function fetchUserFinancialContext(
       .eq("user_id", userId)
       .eq("status", "completed")
       .order("date", { ascending: false });
-
-    // Fetch accounts for total balance
-    const { data: accountsData } = await supabase
-      .from("accounts")
-      .select("balance")
-      .eq("user_id", userId)
-      .eq("status", "active");
-
-    const totalBalance = (accountsData ?? []).reduce(
-      (sum, a) => sum + Number(a.balance ?? 0),
-      0
-    );
 
     // Calculate income/expenses from all-time data
     let totalIncome = 0;
@@ -310,6 +348,8 @@ export async function fetchUserFinancialContext(
       .slice(0, 5);
 
     const context: UserFinancialContext = {
+      profile,
+      accounts,
       summary: {
         totalBalance,
         monthlyIncome: totalIncome,
@@ -335,11 +375,31 @@ export async function fetchUserFinancialContext(
 // ---------------------------------------------------------------------------
 
 export function formatUserContextForAI(context: UserFinancialContext): string {
-  const { summary, recentTransactions, budgets, goals, familyMembers, topCategories } = context;
+  const { profile, accounts, summary, recentTransactions, budgets, goals, familyMembers, topCategories } = context;
 
   let formatted = `## User's Financial Overview
 
-**Account Summary:**
+**User Profile:**
+- Name: ${profile.fullName || "Not set"}
+- Email: ${profile.email}
+- Phone: ${profile.phone || "Not set"}
+- Date of Birth: ${profile.dateOfBirth || "Not set"}
+
+**Financial Accounts:**
+`;
+
+  if (accounts.length > 0) {
+    accounts.forEach((acc) => {
+      const defaultBadge = acc.isDefault ? " (Default)" : "";
+      const institution = acc.institution ? ` - ${acc.institution}` : "";
+      formatted += `- ${acc.name}${defaultBadge}: ₱${acc.balance.toLocaleString()} (${acc.type})${institution}\n`;
+    });
+    formatted += `\n`;
+  } else {
+    formatted += `- No accounts set up yet\n\n`;
+  }
+
+  formatted += `**Account Summary:**
 - Total Balance: ₱${summary.totalBalance.toLocaleString()}
 - Total Income: ₱${summary.monthlyIncome.toLocaleString()}
 - Total Expenses: ₱${summary.monthlyExpenses.toLocaleString()}
