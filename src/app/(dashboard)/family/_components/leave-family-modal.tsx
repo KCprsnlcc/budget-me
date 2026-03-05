@@ -231,20 +231,32 @@ export function LeaveFamilyModal({
         </div>
       </ModalBody>
 
-      <ModalFooter className="px-6 py-4">
-        <Button variant="outline" size="sm" className="flex-1" onClick={handleClose} disabled={submitting}>
+      <ModalFooter className="flex justify-between px-4 sm:px-6 lg:px-8 py-3 sm:py-4 sticky bottom-0 bg-white z-10 lg:static">
+        <button
+          onClick={handleClose}
+          disabled={submitting}
+          className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Cancel
-        </Button>
+        </button>
         {(!isOwner || showTransferStep) && (
-          <Button 
-            variant="destructive" 
-            size="sm" 
-            className="flex-1" 
+          <button
             onClick={handleConfirm}
             disabled={confirmationText !== "LEAVE" || submitting || (isOwner && !selectedSuccessorId)}
+            className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-sm bg-red-500 hover:bg-red-600 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
-            {submitting ? (<><Loader2 size={14} className="animate-spin" /> Leaving...</>) : ("Leave Family")}
-          </Button>
+            {submitting ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Leaving...
+              </>
+            ) : (
+              "Leave Family"
+            )}
+          </button>
         )}
       </ModalFooter>
     </Modal>

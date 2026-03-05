@@ -311,43 +311,48 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
       </ModalBody>
 
       {/* Footer */}
-      <ModalFooter className="px-5 py-3.5">
-        <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
+      <ModalFooter className="flex justify-between px-4 sm:px-6 lg:px-8 py-3 sm:py-4 sticky bottom-0 bg-white z-10 lg:static">
+        {currentStep > 1 ? (
+          <button
             onClick={handleBack}
-            disabled={currentStep === 1}
-            className="flex items-center gap-2"
+            className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 flex items-center"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={14} className="mr-1.5 sm:mr-2" />
             Back
-          </Button>
-          <div className="flex items-center gap-2">
-            {canDeleteFamily && onDeleteFamily && currentStep === 2 && (
-              <Button
-                variant="outline"
-                onClick={handleDeleteFamily}
-                className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50"
-              >
-                <Trash2 size={16} />
-                Delete
-              </Button>
-            )}
-            <Button
-              onClick={handleNext}
-              disabled={!canContinue || submitting}
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
+          </button>
+        ) : (
+          <div />
+        )}
+        <div className="flex items-center gap-2">
+          {canDeleteFamily && onDeleteFamily && currentStep === 2 && (
+            <button
+              onClick={handleDeleteFamily}
+              className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-sm bg-white border border-red-200 text-red-600 hover:bg-red-50 flex items-center"
             >
-              {currentStep === 2 ? (
-                submitting ? (<><Loader2 size={14} className="animate-spin" /> Saving...</>) : (<> <Check size={16} /> Update Family</>)
-              ) : (
-                <>
-                  Next
-                  <ArrowRight size={16} />
-                </>
-              )}
-            </Button>
-          </div>
+              <Trash2 size={14} className="mr-1.5 sm:mr-2" />
+              Delete
+            </button>
+          )}
+          <button
+            onClick={handleNext}
+            disabled={!canContinue || submitting}
+            className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-sm bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          >
+            {submitting ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Saving...
+              </>
+            ) : (
+              <>
+                {currentStep === 2 ? "Update Family" : "Continue"}
+                {currentStep < 2 && <ArrowRight size={14} className="ml-1.5 sm:ml-2" />}
+              </>
+            )}
+          </button>
         </div>
       </ModalFooter>
     </Modal>
