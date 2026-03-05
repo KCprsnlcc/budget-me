@@ -502,12 +502,22 @@ export default function ChatbotPage() {
   }, []);
 
   const renderMessageContent = (content: string | undefined, role: MessageRole, messageId: string) => {
-    const isTyping = role === "assistant" && typingMessageId === messageId;
-    
     // Handle undefined content
     const safeContent = content || "";
     
-    // Custom components for markdown rendering
+    // Only apply typing effect to assistant messages that match the typing ID
+    const isTyping = role === "assistant" && typingMessageId === messageId;
+    
+    // For user messages, always render immediately without typing effect
+    if (role === "user") {
+      return (
+        <div className="text-sm leading-relaxed text-white whitespace-pre-wrap break-words">
+          {safeContent}
+        </div>
+      );
+    }
+    
+    // Custom components for markdown rendering (assistant messages only)
     const components = {
       // Style tables
       table: ({ children }: any) => (
