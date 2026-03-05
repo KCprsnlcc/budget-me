@@ -6,18 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  PenSquare,
   Wallet,
-  ClipboardCheck,
-  ArrowUp,
-  ArrowDown,
   Check,
   ArrowLeft,
   ArrowRight,
-  Info,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Stepper } from "./stepper";
 import type { Account, AccountColor } from "./types";
 import { ACCOUNT_COLORS } from "./constants";
 
@@ -28,11 +24,7 @@ interface EditAccountModalProps {
   onEdit: (account: Account) => void;
 }
 
-const STEPS = [
-  { number: 1, label: "Details" },
-  { number: 2, label: "Adjustment" },
-  { number: 3, label: "Review" },
-];
+const STEPS = ["Details", "Balance", "Review"];
 
 type AdjustmentType = "deposit" | "withdrawal" | null;
 
@@ -88,23 +80,18 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
       if (account) {
         const colorName = ACCOUNT_COLORS.find(c => c.color === color)?.twColor || "emerald";
         
-        // Calculate balance adjustment if needed
-        const balanceChange = calculateNewBalance() - currentBalance;
-        
         onEdit({
           ...account,
           name,
           color: colorName,
           balance: calculateNewBalance(),
         });
-        
-        // Note: Balance adjustment transaction is handled in the parent component's onEdit handler
       }
       handleClose();
     } else {
       setStep((s) => Math.min(s + 1, 3));
     }
-  }, [step, account, name, color, currentBalance, calculateNewBalance, onEdit, handleClose]);
+  }, [step, account, name, color, calculateNewBalance, onEdit, handleClose]);
 
   const handleBack = useCallback(() => {
     setStep((s) => Math.max(s - 1, 1));
@@ -115,295 +102,279 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
   const adjustmentValue = parseFloat(adjustmentAmount) || 0;
 
   return (
-    <Modal open={open} onClose={handleClose} className="max-w-lg">
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
-        <div className="flex items-center justify-between w-full">
-          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
-            {step === 1 && "Edit Details"}
-            {step === 2 && "Balance Adjustment"}
-            {step === 3 && "Review Changes"}
-          </span>
-          <span className="text-[10px] text-gray-400 font-medium tracking-wide ml-4">
-            Step {step} of 3
-          </span>
-        </div>
-      </ModalHeader>
+    <Modal open={open} onClose={handleClose} className="w-[95vw] sm:w-[90vw] max-w-[800px]">
+      <div className="flex flex-col bg-white rounded-2xl overflow-hidden">
+        {/* Header */}
+        <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
+          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Edit Account</span>
+        </ModalHeader>
 
-        {/* Stepper */}
-        <Stepper steps={STEPS} currentStep={step} />
-
-      <ModalBody className="max-h-[60vh] bg-[#F9FAFB]/30">
-          {/* Step 1: Account Details */}
-          {step === 1 && (
-            <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="mb-5">
-                <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
-                  <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
-                    <PenSquare size={14} />
-                  </div>
-                  Edit Account Details
-                </h2>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">
-                    Account Name <span className="text-gray-400">*</span>
-                  </Label>
-                  <Input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Account name"
-                    className="mt-1.5 h-10 text-[13px]"
-                  />
+        {/* Body */}
+        <ModalBody className="max-h-[60vh] bg-[#F9FAFB]/30 p-4 sm:p-6">
+          <div className="max-w-2xl mx-auto">
+            {/* Step 1: Account Details */}
+            {step === 1 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="text-center mb-8 px-2">
+                  <h1 className="text-xl sm:text-2xl font-bold text-[#111827] mb-2">Edit Account Details</h1>
+                  <p className="text-gray-500 text-sm">Update your account information</p>
                 </div>
 
-                <div>
-                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Account Type</Label>
-                  <div className="mt-1.5 p-3 rounded-lg bg-white border border-gray-200 text-sm text-gray-700">
-                    {account?.type ? account.type.charAt(0).toUpperCase() + account.type.slice(1) : "-"}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Current Balance</Label>
-                  <div className="mt-1.5 p-3 rounded-lg bg-white border border-gray-200 text-sm font-semibold text-gray-900">
-                    ₱{currentBalance.toFixed(2)}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">Color Theme</Label>
-                  <div className="flex gap-2.5 flex-wrap mt-2">
-                    {ACCOUNT_COLORS.map((c) => (
-                      <button
-                        key={c.color}
-                        type="button"
-                        onClick={() => setColor(c.color)}
-                        className={cn(
-                          "w-7 h-7 rounded-full border-2 transition-all",
-                          color === c.color
-                            ? "border-gray-900 scale-110"
-                            : "border-transparent hover:scale-105"
-                        )}
-                        style={{ backgroundColor: c.color }}
-                        aria-label={c.name}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Balance Adjustment */}
-          {step === 2 && (
-            <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="mb-5">
-                <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
-                  <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
-                    <Wallet size={14} />
-                  </div>
-                  Balance Adjustment
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <button
-                  onClick={() => setAdjustmentType(adjustmentType === "deposit" ? null : "deposit")}
-                  className={cn(
-                    "relative p-4 rounded-xl border text-left transition-all cursor-pointer",
-                    adjustmentType === "deposit"
-                      ? "border-emerald-500 ring-1 ring-emerald-500 bg-white"
-                      : "border-gray-200 hover:border-gray-300 bg-white"
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="text-emerald-600 flex items-center justify-center">
-                      <ArrowUp size={16} />
-                    </div>
-                    <div>
-                      <div className="text-[12px] font-semibold text-gray-900">Deposit</div>
-                      <div className="text-[9px] text-gray-500">Add funds</div>
-                    </div>
-                  </div>
-                  {adjustmentType === "deposit" && (
-                    <div className="absolute top-3 right-3 w-[18px] h-[18px] rounded-full bg-emerald-500 flex items-center justify-center text-white">
-                      <Check size={9} />
-                    </div>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => setAdjustmentType(adjustmentType === "withdrawal" ? null : "withdrawal")}
-                  className={cn(
-                    "relative p-4 rounded-xl border text-left transition-all cursor-pointer",
-                    adjustmentType === "withdrawal"
-                      ? "border-red-500 ring-1 ring-red-500 bg-white"
-                      : "border-gray-200 hover:border-gray-300 bg-white"
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="text-red-600 flex items-center justify-center">
-                      <ArrowDown size={16} />
-                    </div>
-                    <div>
-                      <div className="text-[12px] font-semibold text-gray-900">Withdrawal</div>
-                      <div className="text-[9px] text-gray-500">Remove funds</div>
-                    </div>
-                  </div>
-                  {adjustmentType === "withdrawal" && (
-                    <div className="absolute top-3 right-3 w-[18px] h-[18px] rounded-full bg-red-500 flex items-center justify-center text-white">
-                      <Check size={9} />
-                    </div>
-                  )}
-                </button>
-              </div>
-
-              {adjustmentType && (
-                <div className="space-y-4 animate-in fade-in duration-300">
+                <div className="border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm p-4 sm:p-6 space-y-5">
                   <div>
-                    <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">
-                      Amount <span className="text-gray-400">*</span>
-                    </Label>
-                    <div className="relative mt-1.5">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">₱</span>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={adjustmentAmount}
-                        onChange={(e) => setAdjustmentAmount(e.target.value)}
-                        placeholder="0.00"
-                        className="pl-7 h-10 text-[13px]"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-[11px] font-semibold text-gray-700 uppercase tracking-wide">
-                      Reason <span className="text-gray-400">*</span>
+                    <Label className="text-xs sm:text-sm font-semibold text-gray-700">
+                      Account Name <span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      value={adjustmentReason}
-                      onChange={(e) => setAdjustmentReason(e.target.value)}
-                      placeholder="e.g., Salary deposit, Expense refund"
-                      className="mt-1.5 h-10 text-[13px]"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Account name"
+                      className="mt-1.5 h-10 sm:h-11 text-sm border-gray-200 focus:border-emerald-500 focus:ring-emerald-500/10"
                     />
                   </div>
 
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-white border border-gray-200">
-                    <Info size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-[11px] text-gray-500">
-                      This adjustment will be recorded as a transaction for tracking purposes.
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {!adjustmentType && (
-                <div className="flex items-start gap-2 p-3 rounded-lg bg-white border border-gray-200">
-                  <Info size={14} className="text-blue-400 flex-shrink-0 mt-0.5" />
-                  <span className="text-[11px] text-gray-600">
-                    Select an adjustment type above if you want to modify the account balance. Otherwise, click Continue to proceed.
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Step 3: Review */}
-          {step === 3 && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="mb-5">
-                <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
-                  <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
-                    <ClipboardCheck size={14} />
-                  </div>
-                  Review Changes
-                </h2>
-              </div>
-
-              <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
-                <div className="flex items-center gap-4 p-5 border-b border-gray-100">
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-white"
-                    style={{ backgroundColor: color }}
-                  >
-                    <Wallet size={20} />
-                  </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-[15px]">{name}</h3>
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-white text-gray-500 uppercase tracking-widest border border-gray-200 inline-block mt-1">
-                      {account?.type}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-5 space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Current Balance</span>
-                    <span className="font-bold text-gray-900 text-sm">₱{currentBalance.toFixed(2)}</span>
-                  </div>
-                  {adjustmentType && (
-                    <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">
-                        {adjustmentType === "deposit" ? "Deposit" : "Withdrawal"}
-                      </span>
-                      <span className={cn(
-                        "font-bold text-sm",
-                        adjustmentType === "deposit" ? "text-emerald-600" : "text-red-600"
-                      )}>
-                        {adjustmentType === "deposit" ? "+" : "-"}₱{adjustmentValue.toFixed(2)}
-                      </span>
+                    <Label className="text-xs sm:text-sm font-semibold text-gray-700">Account Type</Label>
+                    <div className="mt-1.5 p-3 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-700">
+                      {account?.type ? account.type.charAt(0).toUpperCase() + account.type.slice(1) : "-"}
                     </div>
-                  )}
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">New Balance</span>
-                    <span className="font-bold text-gray-900 text-sm">₱{newBalance.toFixed(2)}</span>
                   </div>
-                  {adjustmentType && (
-                    <div className="flex justify-between items-center py-2 border-t border-gray-100">
-                      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Reason</span>
-                      <span className="text-[11px] text-gray-500 text-right">{adjustmentReason}</span>
+
+                  <div>
+                    <Label className="text-xs sm:text-sm font-semibold text-gray-700">Current Balance</Label>
+                    <div className="mt-1.5 p-3 rounded-lg bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-900">
+                      ₱{currentBalance.toFixed(2)}
                     </div>
-                  )}
+                  </div>
+
+                  <div>
+                    <Label className="text-xs sm:text-sm font-semibold text-gray-700">Color Theme</Label>
+                    <div className="flex gap-2 sm:gap-3 mt-1.5">
+                      {ACCOUNT_COLORS.map((c) => (
+                        <button
+                          key={c.color}
+                          type="button"
+                          onClick={() => setColor(c.color)}
+                          className={cn(
+                            "w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 transition-all",
+                            color === c.color
+                              ? "border-gray-900 scale-110"
+                              : "border-transparent hover:scale-105"
+                          )}
+                          style={{ backgroundColor: c.color }}
+                          aria-label={c.name}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-      </ModalBody>
+            )}
+
+            {/* Step 2: Balance Adjustment */}
+            {step === 2 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="text-center mb-8 px-2">
+                  <h1 className="text-xl sm:text-2xl font-bold text-[#111827] mb-2">Balance Adjustment</h1>
+                  <p className="text-gray-500 text-sm">Adjust your account balance (optional)</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <button
+                    onClick={() => setAdjustmentType(adjustmentType === "deposit" ? null : "deposit")}
+                    className={cn(
+                      "relative p-4 rounded-xl border text-left transition-all cursor-pointer",
+                      adjustmentType === "deposit"
+                        ? "border-emerald-500 ring-1 ring-emerald-500 bg-white"
+                        : "border-gray-200 hover:border-gray-300 bg-white"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-emerald-600 flex items-center justify-center">
+                        <ArrowUp size={18} />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900">Deposit</div>
+                        <div className="text-xs text-gray-500">Add funds</div>
+                      </div>
+                    </div>
+                    {adjustmentType === "deposit" && (
+                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white">
+                        <Check size={12} />
+                      </div>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => setAdjustmentType(adjustmentType === "withdrawal" ? null : "withdrawal")}
+                    className={cn(
+                      "relative p-4 rounded-xl border text-left transition-all cursor-pointer",
+                      adjustmentType === "withdrawal"
+                        ? "border-red-500 ring-1 ring-red-500 bg-white"
+                        : "border-gray-200 hover:border-gray-300 bg-white"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-red-600 flex items-center justify-center">
+                        <ArrowDown size={18} />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900">Withdrawal</div>
+                        <div className="text-xs text-gray-500">Remove funds</div>
+                      </div>
+                    </div>
+                    {adjustmentType === "withdrawal" && (
+                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white">
+                        <Check size={12} />
+                      </div>
+                    )}
+                  </button>
+                </div>
+
+                {adjustmentType && (
+                  <div className="border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm p-4 sm:p-6 space-y-4 animate-in fade-in duration-300">
+                    <div>
+                      <Label className="text-xs sm:text-sm font-semibold text-gray-700">
+                        Amount <span className="text-red-500">*</span>
+                      </Label>
+                      <div className="relative mt-1.5">
+                        <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">₱</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={adjustmentAmount}
+                          onChange={(e) => setAdjustmentAmount(e.target.value)}
+                          placeholder="0.00"
+                          className="pl-8 sm:pl-9 h-10 sm:h-11 text-sm border-gray-200 focus:border-emerald-500 focus:ring-emerald-500/10"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs sm:text-sm font-semibold text-gray-700">
+                        Reason <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        value={adjustmentReason}
+                        onChange={(e) => setAdjustmentReason(e.target.value)}
+                        placeholder="e.g., Salary deposit, Expense refund"
+                        className="mt-1.5 h-10 sm:h-11 text-sm border-gray-200 focus:border-emerald-500 focus:ring-emerald-500/10"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {!adjustmentType && (
+                  <div className="border border-gray-200 rounded-xl p-3 sm:p-4 bg-white">
+                    <p className="text-xs text-gray-600">
+                      Select an adjustment type above if you want to modify the account balance. Otherwise, click Continue to proceed.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 3: Review */}
+            {step === 3 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="text-center mb-8 px-2">
+                  <h1 className="text-xl sm:text-2xl font-bold text-[#111827] mb-2">Review Changes</h1>
+                  <p className="text-gray-500 text-sm">Confirm your account updates</p>
+                </div>
+
+                <div className="border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm divide-y divide-gray-100">
+                  <div className="p-4 sm:p-5">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white"
+                        style={{ backgroundColor: color }}
+                      >
+                        <Wallet size={20} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-gray-900 text-base truncate">{name}</h3>
+                        <span className="text-xs font-medium text-gray-600 uppercase tracking-wider">
+                          {account?.type}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3">
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-xs sm:text-sm text-gray-500">Current Balance</span>
+                      <span className="font-semibold text-gray-900 text-sm">₱{currentBalance.toFixed(2)}</span>
+                    </div>
+                    {adjustmentType && (
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-xs sm:text-sm text-gray-500">
+                          {adjustmentType === "deposit" ? "Deposit" : "Withdrawal"}
+                        </span>
+                        <span className={cn(
+                          "font-semibold text-sm",
+                          adjustmentType === "deposit" ? "text-emerald-600" : "text-red-600"
+                        )}>
+                          {adjustmentType === "deposit" ? "+" : "-"}₱{adjustmentValue.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center py-2 border-t border-gray-100">
+                      <span className="text-xs sm:text-sm text-gray-500">New Balance</span>
+                      <span className="font-bold text-gray-900 text-sm">₱{newBalance.toFixed(2)}</span>
+                    </div>
+                    {adjustmentType && (
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-xs sm:text-sm text-gray-500">Reason</span>
+                        <span className="text-xs text-gray-600 text-right max-w-[200px]">{adjustmentReason}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="border border-gray-200 rounded-xl p-3 sm:p-4 bg-white">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-0.5 text-sm">Ready to update</h4>
+                      <p className="text-xs text-gray-700">
+                        Your account changes will be saved immediately.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </ModalBody>
 
         {/* Footer */}
-      <ModalFooter className="justify-between">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleBack}
-            disabled={step === 1}
-            className={cn("text-xs", step === 1 && "invisible")}
-          >
-            <ArrowLeft size={14} className="mr-1" /> Back
-          </Button>
-
-          <Button
-            size="sm"
+        <ModalFooter className="flex justify-between px-4 sm:px-6 py-3 sm:py-4 bg-white border-t border-gray-100">
+          {step > 1 ? (
+            <button
+              onClick={handleBack}
+              className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 flex items-center"
+            >
+              <ArrowLeft size={14} className="mr-1.5 sm:mr-2" />
+              Back
+            </button>
+          ) : (
+            <div />
+          )}
+          <button
             onClick={handleNext}
             disabled={!canProceed()}
             className={cn(
-              "text-xs bg-emerald-500 hover:bg-emerald-600",
-              step === 3 && "shadow-lg shadow-emerald-500/25"
+              "px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-sm flex items-center",
+              "bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
             )}
           >
-            {step === 3 ? (
-              <>
-                <Check size={14} className="mr-1.5" /> Save Changes
-              </>
-            ) : (
-              <>
-                Continue <ArrowRight size={14} className="ml-1" />
-              </>
-            )}
-          </Button>
-      </ModalFooter>
+            {step === 3 ? "Save Changes" : "Continue"}
+            {step < 3 && <ArrowRight size={14} className="ml-1.5 sm:ml-2" />}
+          </button>
+        </ModalFooter>
+      </div>
     </Modal>
   );
 }

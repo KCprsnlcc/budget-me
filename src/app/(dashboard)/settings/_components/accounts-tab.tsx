@@ -9,6 +9,8 @@ import { ACCOUNT_TYPES } from "./constants";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth/auth-context";
 import { getUserAccounts, createAccount, updateAccount, deleteAccount, setDefaultAccount } from "../_lib/settings-service";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 export function AccountsTab() {
   const { user } = useAuth();
@@ -182,9 +184,39 @@ export function AccountsTab() {
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-        </div>
+        <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white border border-slate-200 rounded-xl p-5">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton width={40} height={40} borderRadius={8} />
+                    <div>
+                      <Skeleton width={120} height={14} className="mb-1" />
+                      <Skeleton width={100} height={12} />
+                    </div>
+                  </div>
+                  <Skeleton width={60} height={20} borderRadius={12} />
+                </div>
+
+                <div className="mb-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Skeleton width={100} height={12} />
+                      <Skeleton width={80} height={12} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-50 flex justify-center gap-3">
+                  <Skeleton width={32} height={32} borderRadius={6} />
+                  <Skeleton width={32} height={32} borderRadius={6} />
+                  <Skeleton width={32} height={32} borderRadius={6} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </SkeletonTheme>
       ) : accounts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {accounts.map((account) => {

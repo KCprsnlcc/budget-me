@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/components/auth/auth-context";
 import { getUserProfile, updateUserProfile, uploadProfilePicture } from "../_lib/settings-service";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 export function ProfileTab() {
   const { user } = useAuth();
@@ -139,9 +141,52 @@ export function ProfileTab() {
 
   if (isLoading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-      </div>
+      <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+        <div className="p-6 space-y-8 animate-in fade-in duration-300">
+          {/* Profile Picture Section Skeleton */}
+          <div className="flex items-center gap-6 pb-6 border-b border-slate-100">
+            <Skeleton circle width={80} height={80} />
+            <div className="flex-1">
+              <Skeleton width={150} height={14} className="mb-2" />
+              <Skeleton width={200} height={10} />
+            </div>
+          </div>
+
+          {/* Profile Form Skeleton */}
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Skeleton width={80} height={12} />
+                <Skeleton height={40} borderRadius={8} />
+              </div>
+              <div className="space-y-2">
+                <Skeleton width={80} height={12} />
+                <Skeleton height={40} borderRadius={8} />
+              </div>
+              <div className="space-y-2">
+                <Skeleton width={100} height={12} />
+                <Skeleton height={40} borderRadius={8} />
+              </div>
+              <div className="space-y-2">
+                <Skeleton width={90} height={12} />
+                <Skeleton height={40} borderRadius={8} />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Skeleton width={100} height={12} />
+                <Skeleton height={40} borderRadius={8} />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+              <Skeleton width={120} height={12} />
+              <div className="flex items-center gap-3">
+                <Skeleton width={70} height={36} borderRadius={6} />
+                <Skeleton width={110} height={36} borderRadius={6} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </SkeletonTheme>
     );
   }
 
