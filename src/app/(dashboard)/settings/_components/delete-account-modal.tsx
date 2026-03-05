@@ -23,7 +23,7 @@ export function DeleteAccountModal({ open, onClose, account, onDelete }: DeleteA
     onClose();
   }, [onClose]);
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (account) {
       onDelete(account.id);
     }

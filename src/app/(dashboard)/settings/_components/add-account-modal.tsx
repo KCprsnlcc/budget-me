@@ -100,18 +100,27 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
     }
   }, [step, workflow, accountType, formData.name]);
 
-  const handleNext = useCallback(() => {
+  const handleNext = useCallback(async () => {
     if (step === 5) {
       // Submit
+      const colorName =
+        formData.color === "#10B981"
+          ? "emerald"
+          : formData.color === "#3B82F6"
+          ? "blue"
+          : formData.color === "#F59E0B"
+          ? "amber"
+          : formData.color === "#EF4444"
+          ? "red"
+          : formData.color === "#8B5CF6"
+          ? "purple"
+          : "slate";
+
       onAdd({
         name: formData.name,
         type: accountType!,
         balance: parseFloat(formData.balance) || 0,
-        color: formData.color === "#10B981" ? "emerald" :
-               formData.color === "#3B82F6" ? "blue" :
-               formData.color === "#F59E0B" ? "amber" :
-               formData.color === "#EF4444" ? "red" :
-               formData.color === "#8B5CF6" ? "purple" : "slate",
+        color: colorName,
         isDefault: formData.isDefault,
         institution: formData.institution,
         description: formData.description,

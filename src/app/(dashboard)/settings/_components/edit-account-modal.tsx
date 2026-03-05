@@ -83,22 +83,28 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
     return currentBalance;
   }, [currentBalance, adjustmentType, adjustmentAmount]);
 
-  const handleNext = useCallback(() => {
+  const handleNext = useCallback(async () => {
     if (step === 3) {
       if (account) {
         const colorName = ACCOUNT_COLORS.find(c => c.color === color)?.twColor || "emerald";
+        
+        // Calculate balance adjustment if needed
+        const balanceChange = calculateNewBalance() - currentBalance;
+        
         onEdit({
           ...account,
           name,
           color: colorName,
           balance: calculateNewBalance(),
         });
+        
+        // Note: Balance adjustment transaction is handled in the parent component's onEdit handler
       }
       handleClose();
     } else {
       setStep((s) => Math.min(s + 1, 3));
     }
-  }, [step, account, name, color, calculateNewBalance, onEdit, handleClose]);
+  }, [step, account, name, color, currentBalance, calculateNewBalance, onEdit, handleClose]);
 
   const handleBack = useCallback(() => {
     setStep((s) => Math.max(s - 1, 1));

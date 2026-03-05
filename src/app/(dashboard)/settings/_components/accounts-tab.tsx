@@ -1,76 +1,139 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Plus, Wallet, Star, Pencil, Trash2 } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { Plus, Wallet, Star, Pencil, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Account } from "./types";
 import { AddAccountModal, DeleteAccountModal, EditAccountModal } from "./index";
 import { ACCOUNT_TYPES } from "./constants";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/auth/auth-context";
+import { getUserAccounts, createAccount, updateAccount, deleteAccount, setDefaultAccount } from "../_lib/settings-service";
 
 export function AccountsTab() {
-  const [accounts, setAccounts] = useState<Account[]>([
-    {
-      id: "1",
-      name: "Main Checking",
-      type: "checking",
-      balance: 2500.00,
-      color: "emerald",
-      isDefault: true,
-      institution: "BPI",
-    },
-    {
-      id: "2",
-      name: "Emergency Savings",
-      type: "savings",
-      balance: 5000.00,
-      color: "blue",
-      isDefault: false,
-      institution: "Metrobank",
-    },
-  ]);
-
+  const { user } = useAuth();
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
-  const handleAdd = useCallback((newAccount: Omit<Account, "id">) => {
-    const account: Account = {
-      ...newAccount,
-      id: Date.now().toString(),
-    };
-    setAccounts((prev) => {
-      if (account.isDefault) {
-        return prev.map((a) => ({ ...a, isDefault: false })).concat(account);
+  // Load accounts
+  useEffect(() => {
+    async function loadAccounts() {
+      if (!user?.id) return;
+
+      setIsLoading(true);
+      try {
+        const data = await getUserAccounts(user.id);
+        setAccounts(data);
+      } catch (error) {
+        console.error("Error loading accounts:", error);
+      } finally {
+        setIsLoading(false);
       }
-      return [...prev, account];
-    });
-  }, []);
+    }
 
-  const handleEdit = useCallback((updatedAccount: Account) => {
-    setAccounts((prev) =>
-      prev.map((a) => {
-        if (a.id === updatedAccount.id) {
-          return updatedAccount;
+    loadAccounts();
+  }, [user]);
+
+  const handleAdd = useCallback(async (newAccount: Omit<Account, "id">) => {
+    if (!user?.id) return;
+
+    try {
+      const result = await createAccount(user.id, newAccount);
+      
+      if (result.success && result.accountId) {
+        // Reload accounts
+        const data = await getUserAccounts(user.id);
+        setAccounts(data);
+      }
+    } catch (error) {
+      console.error("Error creating account:", error);
+    }
+  }, [user]);
+
+  const handleEdit = useCallback(async (updatedAccount: Account) => {
+    if (!user?.id) return;
+
+    try {
+      // Check if balance changed
+      const originalAccount = accounts.find(a => a.id === updatedAccount.id);
+      const balanceChanged = originalAccount && originalAccount.balance !== updatedAccount.balance;
+      
+      if (balanceChanged) {
+        const balanceDiff = updatedAccount.balance - originalAccount.balance;
+        const adjustmentType = balanceDiff > 0 ? "deposit" : "withdrawal";
+        const adjustmentAmount = Math.abs(balanceDiff);
+        
+        // Import the adjustment function
+        const { adjustAccountBalance } = await import("../_lib/settings-service");
+        
+        // Adjust balance with transaction
+        const adjustResult = await adjustAccountBalance(
+          user.id,
+          updatedAccount.id,
+          adjustmentAmount,
+          adjustmentType,
+          "Manual balance adjustment from settings"
+        );
+        
+        if (!adjustResult.success) {
+          return;
         }
-        if (updatedAccount.isDefault && a.id !== updatedAccount.id) {
-          return { ...a, isDefault: false };
-        }
-        return a;
-      })
-    );
-  }, []);
+      }
+      
+      // Update other account details
+      const result = await updateAccount(user.id, updatedAccount.id, {
+        name: updatedAccount.name,
+        color: updatedAccount.color,
+        isDefault: updatedAccount.isDefault,
+        institution: updatedAccount.institution,
+        description: updatedAccount.description,
+      });
+      
+      if (result.success) {
+        // Reload accounts
+        const data = await getUserAccounts(user.id);
+        setAccounts(data);
+      }
+    } catch (error) {
+      console.error("Error updating account:", error);
+    }
+  }, [user, accounts]);
 
-  const handleDelete = useCallback((accountId: string) => {
-    setAccounts((prev) => prev.filter((a) => a.id !== accountId));
-  }, []);
+  const handleDelete = useCallback(async (accountId: string) => {
+    if (!user?.id) return;
 
-  const handleSetDefault = useCallback((accountId: string) => {
-    setAccounts((prev) =>
-      prev.map((a) => ({ ...a, isDefault: a.id === accountId }))
-    );
-  }, []);
+    try {
+      const result = await deleteAccount(user.id, accountId);
+      
+      if (result.success) {
+        // Reload accounts
+        const data = await getUserAccounts(user.id);
+        setAccounts(data);
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+    }
+  }, [user]);
+
+  const handleSetDefault = useCallback(async (accountId: string) => {
+    if (!user?.id) return;
+
+    try {
+      const result = await setDefaultAccount(user.id, accountId);
+      
+      if (result.success) {
+        // Reload accounts
+        const data = await getUserAccounts(user.id);
+        setAccounts(data);
+      }
+    } catch (error) {
+      console.error("Error setting default account:", error);
+    }
+  }, [user]);
 
   const openAddModal = useCallback(() => {
     setAddModalOpen(true);
@@ -117,8 +180,12 @@ export function AccountsTab() {
         </Button>
       </div>
 
-      {/* Accounts Grid */}
-      {accounts.length > 0 ? (
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+        </div>
+      ) : accounts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {accounts.map((account) => {
             const Icon = getIconComponent(account.type);

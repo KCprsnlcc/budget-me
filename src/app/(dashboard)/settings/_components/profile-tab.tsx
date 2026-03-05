@@ -1,20 +1,73 @@
 "use client";
 
-import { useState } from "react";
-import { Camera, Lock, Info } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Camera, Lock, Info, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/components/auth/auth-context";
+import { getUserProfile, updateUserProfile, uploadProfilePicture } from "../_lib/settings-service";
 
 export function ProfileTab() {
-  const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    phone: "+1 (555) 123-4567",
-    dateOfBirth: "1990-05-15",
-    email: "john@budgetme.app",
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [originalData, setOriginalData] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    dateOfBirth: "",
+    email: "",
+    avatarUrl: "",
   });
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    dateOfBirth: "",
+    email: "",
+  });
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Load profile data
+  useEffect(() => {
+    async function loadProfile() {
+      if (!user?.id) return;
+
+      setIsLoading(true);
+      try {
+        const profile = await getUserProfile(user.id);
+        if (profile) {
+          const [firstName = "", lastName = ""] = (profile.full_name || "").split(" ");
+          const data = {
+            firstName,
+            lastName,
+            phone: profile.phone || "",
+            dateOfBirth: profile.date_of_birth || "",
+            email: profile.email || user.email || "",
+            avatarUrl: profile.avatar_url || "",
+          };
+          setOriginalData(data);
+          setFormData({
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phone: data.phone,
+            dateOfBirth: data.dateOfBirth,
+            email: data.email,
+          });
+          setAvatarUrl(data.avatarUrl);
+        }
+      } catch (error) {
+        console.error("Error loading profile:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadProfile();
+  }, [user]);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -23,20 +76,74 @@ export function ProfileTab() {
 
   const handleCancel = () => {
     setFormData({
-      firstName: "John",
-      lastName: "Doe",
-      phone: "+1 (555) 123-4567",
-      dateOfBirth: "1990-05-15",
-      email: "john@budgetme.app",
+      firstName: originalData.firstName,
+      lastName: originalData.lastName,
+      phone: originalData.phone,
+      dateOfBirth: originalData.dateOfBirth,
+      email: originalData.email,
     });
     setHasChanges(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle save
-    setHasChanges(false);
+    if (!user?.id) return;
+
+    setIsSaving(true);
+    try {
+      const result = await updateUserProfile(user.id, formData);
+      
+      if (result.success) {
+        setOriginalData({
+          ...originalData,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          dateOfBirth: formData.dateOfBirth,
+        });
+        setHasChanges(false);
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    // Validate file
+    if (!file.type.startsWith("image/")) {
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const result = await uploadProfilePicture(user.id, file);
+      
+      if (result.success && result.url) {
+        setAvatarUrl(result.url);
+      }
+    } catch (error) {
+      console.error("Error uploading picture:", error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-8 animate-in fade-in duration-300">
@@ -44,28 +151,41 @@ export function ProfileTab() {
       <div className="flex items-center gap-6 pb-6 border-b border-slate-100">
         <div className="relative group">
           <div className="w-20 h-20 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center overflow-hidden">
-            <img
-              src={`https://ui-avatars.com/api/?name=${formData.firstName}+${formData.lastName}&background=10b981&color=fff`}
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <img
+                src={`https://ui-avatars.com/api/?name=${formData.firstName}+${formData.lastName}&background=10b981&color=fff`}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
-          <button className="absolute bottom-0 right-0 bg-white border border-slate-200 rounded-full p-1.5 shadow-sm text-slate-500 hover:text-emerald-500 transition-colors cursor-pointer">
-            <Camera size={14} />
-          </button>
+          <label className="absolute bottom-0 right-0 bg-white border border-slate-200 rounded-full p-1.5 shadow-sm text-slate-500 hover:text-emerald-500 transition-colors cursor-pointer">
+            {isUploading ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Camera size={14} />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+              disabled={isUploading}
+            />
+          </label>
         </div>
         <div>
           <h4 className="text-sm font-semibold text-slate-900 mb-2">Profile Picture</h4>
-          <div className="flex flex-col gap-2">
-            <Button variant="outline" size="sm" className="text-xs w-fit">
-              <Camera size={14} className="mr-2" />
-              Upload New Picture
-            </Button>
-            <p className="text-[10px] text-slate-400 flex items-center">
-              <Info size={10} className="mr-1" />
-              JPEG, PNG, GIF, or WebP (max 5MB)
-            </p>
-          </div>
+          <p className="text-[10px] text-slate-400 flex items-center">
+            <Info size={10} className="mr-1" />
+            JPEG, PNG, GIF, or WebP (max 5MB)
+          </p>
         </div>
       </div>
 
@@ -139,12 +259,24 @@ export function ProfileTab() {
               variant="outline"
               size="sm"
               onClick={handleCancel}
-              disabled={!hasChanges}
+              disabled={!hasChanges || isSaving}
             >
               Cancel
             </Button>
-            <Button type="submit" size="sm" className="bg-emerald-500 hover:bg-emerald-600" disabled={!hasChanges}>
-              Save Changes
+            <Button 
+              type="submit" 
+              size="sm" 
+              className="bg-emerald-500 hover:bg-emerald-600" 
+              disabled={!hasChanges || isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 size={14} className="mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </div>
         </div>
