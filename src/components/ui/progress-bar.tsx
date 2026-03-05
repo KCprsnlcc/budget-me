@@ -32,22 +32,21 @@ export function ProgressBar({
   const percentage = Math.min((value / max) * 100, 100);
 
   return (
-    // <div
-    //   className={cn(
-    //     "w-full h-1.5 bg-slate-100 rounded-full overflow-hidden",
-    //     className
-    //   )}
-    //   role="progressbar"
-    //   aria-valuenow={value}
-    //   aria-valuemin={0}
-    //   aria-valuemax={max}
-    //   {...props}
-    // >
-    //   <div
-    //     className={cn(fillVariants({ color }))}
-    //     style={{ width: `${percentage}%` }}
-    //   />
-    // </div>
-    null
+    <div
+      className={cn(
+        "w-full h-1.5 bg-slate-100 rounded-full overflow-hidden",
+        className
+      )}
+      role="progressbar"
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={max}
+      {...props}
+    >
+      <div
+        className={cn(fillVariants({ color }))}
+        style={{ width: `${percentage}%` }}
+      />
+    </div>
   );
 }
