@@ -235,37 +235,59 @@ export async function fetchUserFinancialContext(
     });
 
     // Fetch family members
-    let familyData: any[] = [];
+    let familyMembers: any[] = [];
     try {
-      const { data: data, error: familyError } = await supabase
+      // First, get the user's family membership
+      const { data: userFamilyData, error: userFamilyError } = await supabase
         .from("family_members")
-        .select(
-          `
-          id, role,
-          families!inner ( id, family_name ),
-          profiles!inner ( id, full_name, email )
-        `
-        )
+        .select("family_id, role")
         .eq("user_id", userId)
-        .eq("status", "active");
+        .eq("status", "active")
+        .single();
 
-      if (familyError) {
-        console.error('Family members query error:', familyError);
-        // Continue without family data if query fails
+      if (userFamilyError || !userFamilyData) {
+        // User is not in a family, continue without family data
+        familyMembers = [];
       } else {
-        familyData = data || [];
+        // Fetch all family members for this family
+        const { data: membersData, error: membersError } = await supabase
+          .from("family_members")
+          .select("id, user_id, role")
+          .eq("family_id", userFamilyData.family_id)
+          .eq("status", "active");
+
+        if (membersError) {
+          console.error('Family members query error:', membersError);
+          familyMembers = [];
+        } else {
+          // Fetch profiles for all members
+          const memberUserIds = (membersData ?? []).map((m: any) => m.user_id);
+          
+          if (memberUserIds.length > 0) {
+            const { data: profilesData } = await supabase
+              .from("profiles")
+              .select("id, full_name, email")
+              .in("id", memberUserIds);
+
+            const profileMap: Record<string, any> = {};
+            for (const p of profilesData ?? []) {
+              profileMap[p.id] = p;
+            }
+
+            familyMembers = (membersData ?? []).map((row: any) => ({
+              id: row.id,
+              name: profileMap[row.user_id]?.full_name ?? null,
+              email: profileMap[row.user_id]?.email ?? "",
+              role: row.role,
+            }));
+          }
+        }
       }
     } catch (error) {
       console.error('Family members fetch error:', error);
       // Continue without family data if fetch fails
+      familyMembers = [];
     }
-
-    const familyMembers = familyData.map((row: any) => ({
-      id: row.id,
-      name: row.profiles?.full_name ?? null,
-      email: row.profiles?.email ?? "",
-      role: row.role,
-    }));
 
     // Calculate top spending categories from recent transactions
     const expenseTransactions = recentTransactions.filter((t) => t.type === "expense");

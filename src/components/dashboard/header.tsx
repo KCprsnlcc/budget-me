@@ -73,77 +73,76 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
   if (!user || loading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
-        <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 sticky top-0 animate-fade-in">
-          <div className="flex items-center gap-2 md:gap-4">
+        <header className="h-12 sm:h-14 bg-white border-b border-slate-100 flex items-center justify-between px-3 sm:px-4 md:px-6 shrink-0 z-20 sticky top-0 animate-fade-in">
+          <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
             {/* Mobile menu */}
-            <Skeleton width={32} height={32} borderRadius={8} />
+            <Skeleton width={28} height={28} borderRadius={8} className="sm:w-8 sm:h-8" />
             
             {/* Breadcrumb */}
-            <nav className="flex items-center text-xs text-slate-500 overflow-hidden">
-              <Skeleton width={16} height={16} className="h-4 w-auto shrink-0" />
-              <Skeleton width={12} height={12} className="mx-1 md:mx-2 text-slate-400 hidden sm:block" />
-              <Skeleton width={100} height={14} className="hidden sm:block" />
-              <Skeleton width={12} height={12} className="mx-1 md:mx-2 text-slate-400" />
-              <Skeleton width={120} height={14} />
+            <nav className="flex items-center text-xs text-slate-500 overflow-hidden min-w-0 flex-1">
+              <Skeleton width={14} height={14} className="h-3 sm:h-4 w-auto shrink-0" />
+              <Skeleton width={10} height={10} className="mx-1 md:mx-2 text-slate-400 hidden sm:block" />
+              <Skeleton width={80} height={12} className="hidden sm:block" />
+              <Skeleton width={10} height={10} className="mx-1 md:mx-2 text-slate-400" />
+              <Skeleton width={100} height={12} className="sm:w-32" />
             </nav>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
             {/* User Menu Skeleton */}
-            <Skeleton width={120} height={36} borderRadius={8} />
+            <Skeleton width={100} height={32} borderRadius={8} className="sm:w-32 sm:h-9" />
           </div>
         </header>
       </SkeletonTheme>
     );
   }
 
-  
   return (
-    <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 sticky top-0">
-      <div className="flex items-center gap-2 md:gap-4">
+    <header className="h-12 sm:h-14 md:h-14 bg-white border-b border-slate-100 flex items-center justify-between px-3 sm:px-4 md:px-6 shrink-0 z-20 sticky top-0">
+      <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
         {/* Mobile menu */}
         <button
-          className="md:hidden text-slate-500 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 cursor-pointer"
+          className="md:hidden text-slate-500 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-slate-50 active:bg-slate-100 cursor-pointer transition-colors touch-manipulation"
           onClick={onMobileMenuOpen}
           aria-label="Open menu"
         >
-          <Menu size={20} />
+          <Menu size={18} className="sm:w-5 sm:h-5" />
         </button>
 
         {/* Breadcrumb */}
-        <nav className="flex items-center text-xs text-slate-500 overflow-hidden">
-          <Logo variant="icon" size="sm" className="h-4 w-auto shrink-0" />
-          <ChevronRight size={12} className="mx-1 md:mx-2 text-slate-400 hidden sm:block" />
-          <span className="hover:text-slate-800 cursor-pointer hidden sm:block">
+        <nav className="flex items-center text-xs text-slate-500 overflow-hidden min-w-0 flex-1">
+          <Logo variant="icon" size="sm" className="h-3 sm:h-4 w-auto shrink-0" />
+          <ChevronRight size={10} className="mx-1 md:mx-2 text-slate-400 hidden sm:block sm:w-3 sm:h-3" />
+          <span className="hover:text-slate-800 cursor-pointer hidden sm:block truncate transition-colors">
             {pageMeta.category}
           </span>
-          <ChevronRight size={12} className="mx-1 md:mx-2 text-slate-400" />
-          <span className="font-medium text-slate-800 truncate">
+          <ChevronRight size={10} className="mx-1 md:mx-2 text-slate-400 sm:w-3 sm:h-3" />
+          <span className="font-medium text-slate-800 truncate text-[11px] sm:text-xs">
             {pageMeta.title}
           </span>
         </nav>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
         {/* User Menu */}
         {user && (
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors min-h-[44px] cursor-pointer"
+              className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-slate-50 active:bg-slate-100 transition-colors min-h-[40px] sm:min-h-[44px] cursor-pointer touch-manipulation"
               aria-label="User menu"
               aria-expanded={isUserMenuOpen}
             >
-              <UserAvatar user={user} size="md" />
+              <UserAvatar user={user} size="sm" className="w-7 h-7 sm:w-8 sm:h-8" />
               <div className="hidden md:block text-left">
-                <div className="text-xs font-medium text-slate-700 truncate max-w-[120px]">
+                <div className="text-xs font-medium text-slate-700 truncate max-w-[100px] lg:max-w-[120px]">
                   {user.user_metadata?.full_name || user.email || "User"}
                 </div>
-                <div className="text-[10px] text-slate-500 truncate max-w-[120px]">
+                <div className="text-[10px] text-slate-500 truncate max-w-[100px] lg:max-w-[120px]">
                   {user.email}
                 </div>
               </div>
-              <ChevronDown size={14} className="text-slate-400" />
+              <ChevronDown size={12} className="text-slate-400 sm:w-[14px] sm:h-[14px]" />
             </button>
 
             {/* Dropdown */}
@@ -155,11 +154,11 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
                   onClick={() => setIsUserMenuOpen(false)}
                 />
                 {/* Menu */}
-                <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg border border-slate-200 shadow-lg z-40 py-1">
-                  <div className="px-3 py-2 border-b border-slate-100">
+                <div className="absolute right-0 top-full mt-1 w-44 sm:w-48 md:w-52 bg-white rounded-lg border border-slate-200 shadow-lg z-40 py-1">
+                  <div className="px-2.5 sm:px-3 py-2 border-b border-slate-100">
                     <div className="flex items-center gap-2">
-                      <UserAvatar user={user} size="sm" />
-                      <div className="text-left">
+                      <UserAvatar user={user} size="sm" className="w-7 h-7 sm:w-8 sm:h-8" />
+                      <div className="text-left flex-1 min-w-0">
                         <div className="text-xs font-medium text-slate-700 truncate">
                           {user.user_metadata?.full_name || user.email || "User"}
                         </div>
@@ -177,7 +176,7 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
                       });
                     }}
                     disabled={isSigningOut}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full flex items-center gap-2 px-2.5 sm:px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer min-h-[40px] sm:min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                   >
                     {isSigningOut ? (
                       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
@@ -188,7 +187,7 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
                       </SkeletonTheme>
                     ) : (
                       <>
-                        <LogOut size={14} />
+                        <LogOut size={13} className="sm:w-[14px] sm:h-[14px]" />
                         Sign out
                       </>
                     )}
