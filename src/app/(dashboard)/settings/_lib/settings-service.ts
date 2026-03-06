@@ -81,9 +81,10 @@ export async function uploadProfilePicture(
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
     // Upload to Supabase Storage
+    // Path must include userId as folder to match RLS policy
     const fileExt = file.name.split(".").pop();
-    const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `${userId}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from("profile-pictures")

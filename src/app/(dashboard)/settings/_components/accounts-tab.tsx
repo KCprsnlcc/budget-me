@@ -244,7 +244,7 @@ export function AccountsTab() {
                       </div>
                     </div>
                     {account.isDefault && (
-                      <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200 shrink-0 ml-2">
+                      <span className="px-2 py-0.5 text-[10px] font-semibold text-emerald-700 rounded-full border border-emerald-200 shrink-0 ml-2">
                         Default
                       </span>
                     )}
