@@ -214,7 +214,7 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                   <p className="text-gray-500 text-sm">Enter the information for your {selectedType?.label.toLowerCase()}</p>
                 </div>
 
-                <div className="border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm p-4 sm:p-6 space-y-5">
+                <div className="border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
                   <div>
                     <Label className="text-xs sm:text-sm font-semibold text-gray-700">
                       Account Name <span className="text-red-500">*</span>
@@ -223,7 +223,7 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder={`e.g., ${selectedType?.label === "Credit Card" ? "BPI Credit Card" : "Main Checking"}`}
-                      className="mt-1.5 h-10 sm:h-11 text-sm border-gray-200 focus:border-emerald-500 focus:ring-emerald-500/10"
+                      className="mt-1.5 sm:mt-2 h-10 sm:h-11 text-sm border-gray-200 focus:border-emerald-500 focus:ring-emerald-500/10"
                     />
                   </div>
 
@@ -231,7 +231,7 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                     <Label className="text-xs sm:text-sm font-semibold text-gray-700">
                       Initial Balance <span className="text-red-500">*</span>
                     </Label>
-                    <div className="relative mt-1.5">
+                    <div className="relative mt-1.5 sm:mt-2">
                       <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm">₱</span>
                       <Input
                         type="number"
@@ -242,22 +242,22 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                         className="pl-8 sm:pl-9 h-10 sm:h-11 text-sm border-gray-200 focus:border-emerald-500 focus:ring-emerald-500/10"
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Current funds available in this account</p>
+                    <p className="text-xs sm:text-[13px] text-gray-500 mt-1">Current funds available in this account</p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-4">
                     <div>
                       <Label className="text-xs sm:text-sm font-semibold text-gray-700">Institution (Optional)</Label>
                       <Input
                         value={formData.institution}
                         onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
                         placeholder="e.g., BPI, BDO"
-                        className="mt-1.5 h-10 sm:h-11 text-sm border-gray-200 focus:border-emerald-500 focus:ring-emerald-500/10"
+                        className="mt-1.5 sm:mt-2 h-10 sm:h-11 text-sm border-gray-200 focus:border-emerald-500 focus:ring-emerald-500/10"
                       />
                     </div>
                     <div>
                       <Label className="text-xs sm:text-sm font-semibold text-gray-700">Color Theme</Label>
-                      <div className="flex gap-2 sm:gap-3 mt-1.5">
+                      <div className="flex gap-2 sm:gap-3 mt-1.5 sm:mt-2">
                         {ACCOUNT_COLORS.map((c) => (
                           <button
                             key={c.color}
@@ -282,7 +282,7 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       rows={3}
                       placeholder="Notes about this account..."
-                      className="w-full mt-1.5 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border border-gray-200 rounded-xl resize-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                      className="w-full mt-1.5 sm:mt-2 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border border-gray-200 rounded-xl resize-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                     />
                   </div>
 
@@ -308,53 +308,53 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
                 </div>
 
                 <div className="border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm divide-y divide-gray-100">
-                  <div className="p-4 sm:p-5">
+                  <div className="p-4 sm:p-5 md:p-6">
                     <div className="flex items-center gap-3 sm:gap-4">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-white border border-gray-100 shadow-sm shrink-0">
                         {selectedType && <selectedType.icon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: formData.color }} />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-bold text-gray-900 text-base truncate">{formData.name || "New Account"}</h3>
-                        <span className="text-xs font-medium text-gray-600 uppercase tracking-wider">
+                        <h3 className="font-bold text-gray-900 text-base sm:text-lg truncate">{formData.name || "New Account"}</h3>
+                        <span className="text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wider">
                           {accountType}
                         </span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3">
-                    <div className="flex justify-between items-center py-2">
+                  <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 sm:space-y-4">
+                    <div className="flex justify-between items-center py-2 sm:py-3">
                       <span className="text-xs sm:text-sm text-gray-500">Initial Balance</span>
-                      <span className="font-semibold text-gray-900 text-sm">
+                      <span className="font-semibold text-gray-900 text-sm sm:text-base">
                         ₱{parseFloat(formData.balance || "0").toLocaleString("en-PH", { minimumFractionDigits: 2 })}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-2">
+                    <div className="flex justify-between items-center py-2 sm:py-3">
                       <span className="text-xs sm:text-sm text-gray-500">Institution</span>
-                      <span className="font-medium text-gray-700 text-sm truncate ml-4">{formData.institution || "—"}</span>
+                      <span className="font-medium text-gray-700 text-sm sm:text-base truncate ml-4">{formData.institution || "—"}</span>
                     </div>
-                    <div className="flex justify-between items-center py-2">
+                    <div className="flex justify-between items-center py-2 sm:py-3">
                       <span className="text-xs sm:text-sm text-gray-500">Color Theme</span>
                       <div className="flex items-center gap-2">
                         <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full" style={{ backgroundColor: formData.color }} />
-                        <span className="font-medium text-gray-700 text-sm">{colorName}</span>
+                        <span className="font-medium text-gray-700 text-sm sm:text-base">{colorName}</span>
                       </div>
                     </div>
-                    <div className="flex justify-between items-center py-2">
+                    <div className="flex justify-between items-center py-2 sm:py-3">
                       <span className="text-xs sm:text-sm text-gray-500">Default Account</span>
-                      <span className="font-medium text-gray-700 text-sm">{formData.isDefault ? "Yes" : "No"}</span>
+                      <span className="font-medium text-gray-700 text-sm sm:text-base">{formData.isDefault ? "Yes" : "No"}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="border border-gray-200 rounded-xl p-3 sm:p-4 bg-white">
-                  <div className="flex items-start gap-2.5">
+                  <div className="flex items-start gap-2.5 sm:gap-3">
                     <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-0.5 text-sm">Ready to create</h4>
-                      <p className="text-xs text-gray-700">
+                      <h4 className="font-semibold text-gray-900 mb-0.5 sm:mb-1 text-sm sm:text-base">Ready to create</h4>
+                      <p className="text-xs sm:text-sm text-gray-700">
                         Your account will be created and ready to use immediately.
                       </p>
                     </div>

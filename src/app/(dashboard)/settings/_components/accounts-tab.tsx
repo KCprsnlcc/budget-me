@@ -1,16 +1,25 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Plus, Wallet, Star, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Wallet, Star, Pencil, Trash2, Loader2, CreditCard, TrendingUp, Wallet2, PiggyBank, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Account } from "./types";
 import { AddAccountModal, DeleteAccountModal, EditAccountModal } from "./index";
-import { ACCOUNT_TYPES } from "./constants";
+import { ACCOUNT_TYPES, ACCOUNT_COLORS } from "./constants";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth/auth-context";
 import { getUserAccounts, createAccount, updateAccount, deleteAccount, setDefaultAccount } from "../_lib/settings-service";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+
+// Account type icon mapping
+const ACCOUNT_TYPE_ICONS = {
+  checking: Landmark,
+  savings: PiggyBank,
+  credit: CreditCard,
+  investment: TrendingUp,
+  cash: Wallet2,
+};
 
 export function AccountsTab() {
   const { user } = useAuth();
@@ -152,20 +161,12 @@ export function AccountsTab() {
   }, []);
 
   const getIconComponent = (type: string) => {
-    const accountType = ACCOUNT_TYPES.find((t) => t.type === type);
-    return accountType?.icon || Wallet;
+    return ACCOUNT_TYPE_ICONS[type as keyof typeof ACCOUNT_TYPE_ICONS] || Wallet;
   };
 
-  const getColorClass = (color: string) => {
-    const colorMap: Record<string, string> = {
-      emerald: "bg-emerald-100 text-emerald-600",
-      blue: "bg-blue-100 text-blue-600",
-      amber: "bg-amber-100 text-amber-600",
-      red: "bg-red-100 text-red-600",
-      purple: "bg-purple-100 text-purple-600",
-      slate: "bg-slate-100 text-slate-600",
-    };
-    return colorMap[color] || colorMap.emerald;
+  const getColorHex = (color: string) => {
+    const colorObj = ACCOUNT_COLORS.find((c) => c.twColor === color);
+    return colorObj?.color || "#10B981";
   };
 
   return (
@@ -221,51 +222,89 @@ export function AccountsTab() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {accounts.map((account) => {
             const Icon = getIconComponent(account.type);
-            const iconClass = getColorClass(account.color);
+            const iconColor = getColorHex(account.color);
 
             return (
               <div
                 key={account.id}
-                className="group bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md transition-all cursor-pointer"
+                className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-all"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg text-slate-600">
-                      <Icon size={20} />
+                {/* Header Section */}
+                <div className="p-4 sm:p-5 bg-[#F9FAFB]/50 border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-white border border-gray-100 shadow-sm shrink-0">
+                        <Icon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: iconColor }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm sm:text-base font-bold text-slate-900 truncate">{account.name}</h4>
+                        <p className="text-xs sm:text-sm font-medium text-slate-600 uppercase tracking-wider capitalize">
+                          {account.type}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-slate-900">{account.name}</h4>
-                      <p className="text-xs text-slate-500 capitalize">{account.type} Account</p>
-                    </div>
+                    {account.isDefault && (
+                      <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200 shrink-0 ml-2">
+                        Default
+                      </span>
+                    )}
                   </div>
-                  {account.isDefault && (
-                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200">
-                      Default
+                </div>
+
+                {/* Details Section */}
+                <div className="p-4 sm:p-5 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs sm:text-sm text-slate-500">Current Balance</span>
+                    <span className="font-semibold text-slate-900 text-sm sm:text-base">
+                      ₱{account.balance.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
                     </span>
+                  </div>
+                  
+                  {account.institution && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-slate-500">Institution</span>
+                      <span className="font-medium text-slate-700 text-xs sm:text-sm truncate ml-4 max-w-[150px]">
+                        {account.institution}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {account.description && (
+                    <div className="pt-2 border-t border-slate-100">
+                      <p className="text-xs text-slate-600 line-clamp-2">{account.description}</p>
+                    </div>
                   )}
                 </div>
 
-                  <div className="mb-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-slate-500">Current Balance</span>
-                        <span className="font-medium text-slate-900">
-                          ₱{account.balance.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-50 flex justify-center gap-3">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => openEditModal(account)}>
+                {/* Actions Section */}
+                <div className="px-4 sm:px-5 pb-4 pt-2 border-t border-slate-100 flex justify-center gap-3">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 hover:bg-slate-100" 
+                    title="Edit" 
+                    onClick={() => openEditModal(account)}
+                  >
                     <Pencil size={16} />
                   </Button>
                   {!account.isDefault && (
-                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Set as Default" onClick={() => handleSetDefault(account.id)}>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 hover:bg-amber-50 hover:text-amber-600" 
+                      title="Set as Default" 
+                      onClick={() => handleSetDefault(account.id)}
+                    >
                       <Star size={16} />
                     </Button>
                   )}
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => openDeleteModal(account)}>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50" 
+                    title="Delete" 
+                    onClick={() => openDeleteModal(account)}
+                  >
                     <Trash2 size={16} />
                   </Button>
                 </div>
