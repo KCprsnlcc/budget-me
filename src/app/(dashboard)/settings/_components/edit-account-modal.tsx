@@ -47,6 +47,8 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [color, setColor] = useState<AccountColor>("#10B981");
+  const [institution, setInstitution] = useState("");
+  const [description, setDescription] = useState("");
   const [adjustmentType, setAdjustmentType] = useState<AdjustmentType>(null);
   const [adjustmentAmount, setAdjustmentAmount] = useState("");
   const [adjustmentReason, setAdjustmentReason] = useState("");
@@ -58,6 +60,8 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
       setCurrentBalance(account.balance);
       const colorHex = ACCOUNT_COLORS.find(c => c.twColor === account.color)?.color || "#10B981";
       setColor(colorHex as AccountColor);
+      setInstitution(account.institution || "");
+      setDescription(account.description || "");
       setStep(1);
       setAdjustmentType(null);
       setAdjustmentAmount("");
@@ -100,13 +104,15 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
           name,
           color: colorName,
           balance: calculateNewBalance(),
+          institution: institution || undefined,
+          description: description || undefined,
         });
       }
       handleClose();
     } else {
       setStep((s) => Math.min(s + 1, 3));
     }
-  }, [step, account, name, color, calculateNewBalance, onEdit, handleClose]);
+  }, [step, account, name, color, institution, description, calculateNewBalance, onEdit, handleClose]);
 
   const handleBack = useCallback(() => {
     setStep((s) => Math.max(s - 1, 1));
@@ -184,6 +190,27 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
                         />
                       ))}
                     </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs sm:text-sm font-semibold text-gray-700">Institution (Optional)</Label>
+                    <Input
+                      value={institution}
+                      onChange={(e) => setInstitution(e.target.value)}
+                      placeholder="e.g., BPI, BDO"
+                      className="mt-1.5 sm:mt-2 h-10 sm:h-11 text-sm border-gray-200 focus:border-emerald-500 focus:ring-emerald-500/10"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-xs sm:text-sm font-semibold text-gray-700">Description (Optional)</Label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      rows={3}
+                      placeholder="Notes about this account..."
+                      className="w-full mt-1.5 sm:mt-2 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border border-gray-200 rounded-xl resize-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                    />
                   </div>
                 </div>
               </div>

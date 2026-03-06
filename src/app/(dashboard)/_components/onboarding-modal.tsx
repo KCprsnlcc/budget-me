@@ -217,6 +217,8 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
             color: colorName,
             is_default: formData.isDefault,
             status: "active",
+            institution_name: formData.institution || null,
+            description: formData.description || null,
             created_at: getPhilippinesNow(),
             updated_at: getPhilippinesNow(),
           })
@@ -633,6 +635,12 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
                       <span className="text-xs sm:text-sm text-gray-500">Default Account</span>
                       <span className="font-medium text-gray-700 text-sm sm:text-base">{formData.isDefault ? "Yes" : "No"}</span>
                     </div>
+                    {formData.description && (
+                      <div className="flex flex-col py-2 sm:py-3 border-t border-gray-100">
+                        <span className="text-xs sm:text-sm text-gray-500 mb-1.5">Description</span>
+                        <span className="font-medium text-gray-700 text-sm sm:text-base">{formData.description}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
