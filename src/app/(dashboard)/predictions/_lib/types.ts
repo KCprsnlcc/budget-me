@@ -24,6 +24,8 @@ export interface MonthlyForecast {
   trend?: number;
   seasonality?: number;
   changepoint?: boolean;
+  // Year to ensure uniqueness when same month appears in different years
+  year?: number;
 }
 
 /**

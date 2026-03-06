@@ -279,13 +279,18 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
   const trendStrength = (incomeForecast.trendStrength + expenseForecast.trendStrength) / 2;
 
   // Build historical array
-  const historical: MonthlyForecast[] = sortedMonths.map((month, i) => ({
-    month: formatInPhilippines(new Date(month + "-01"), 'MMM'),
-    income: incomeData[i],
-    expense: expenseData[i],
-    type: i === sortedMonths.length - 1 ? "current" : "historical",
-    changepoint: changepoints.includes(formatInPhilippines(new Date(month + "-01"), 'MMM')),
-  }));
+  const historical: MonthlyForecast[] = sortedMonths.map((month, i) => {
+    const date = new Date(month + "-01");
+    return {
+      month: formatInPhilippines(date, 'MMM'),
+      income: incomeData[i],
+      expense: expenseData[i],
+      type: i === sortedMonths.length - 1 ? "current" : "historical",
+      changepoint: changepoints.includes(formatInPhilippines(date, 'MMM')),
+      // Add year to ensure uniqueness
+      year: date.getFullYear(),
+    };
+  });
 
   // Build predicted array with confidence intervals
   const lastDate = new Date(sortedMonths[sortedMonths.length - 1] + "-01");
@@ -303,6 +308,8 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
       incomeLower: Math.round(Math.max(0, incomeForecast.lower[i])),
       expenseUpper: Math.round(expenseForecast.upper[i]),
       expenseLower: Math.round(Math.max(0, expenseForecast.lower[i])),
+      // Add year to ensure uniqueness
+      year: predDate.getFullYear(),
     };
   });
 

@@ -33,11 +33,13 @@ import {
   ShieldCheck,
   File,
   ListChecks,
+  Calendar,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Button } from "@/components/ui/button";
+import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { toast } from "sonner";
 import { 
   HistoryModal,
@@ -112,7 +114,9 @@ export default function PredictionsPage() {
   const [hasGeneratedInsights, setHasGeneratedInsights] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
-  const [hoveredBar, setHoveredBar] = useState<{month: string, type: 'income' | 'expense', value: number, dataType: 'historical' | 'predicted'} | null>(null);
+  const [hoveredBar, setHoveredBar] = useState<{month: string, year?: number, type: 'income' | 'expense', value: number, dataType: 'historical' | 'predicted', index: number} | null>(null);
+  const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [isFilteringYear, setIsFilteringYear] = useState(false);
   
   // Responsive state management
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
@@ -478,6 +482,16 @@ export default function PredictionsPage() {
     setDetailedInsights(prev => !prev);
   }, []);
 
+  // Handle year filter change with skeleton loader
+  const handleYearChange = useCallback((year: string) => {
+    setIsFilteringYear(true);
+    setSelectedYear(year);
+    // Show skeleton for 300ms to give visual feedback
+    setTimeout(() => {
+      setIsFilteringYear(false);
+    }, 300);
+  }, []);
+
   // Export handlers
   const handleExportCSV = useCallback(() => {
     if (!forecastData && categoryPredictions.length === 0 && !aiInsights) {
@@ -841,9 +855,17 @@ export default function PredictionsPage() {
     ...(forecastData?.predicted || []),
   ];
 
+  // Extract unique years from chart data
+  const availableYears = Array.from(new Set(chartData.map(d => d.year).filter(Boolean))).sort();
+  
+  // Filter chart data by selected year
+  const filteredChartData = selectedYear === "all" || selectedYear === "" 
+    ? chartData 
+    : chartData.filter(d => d.year?.toString() === selectedYear);
+
   // Calculate percentages for visualization
   const maxChartValue = Math.max(
-    ...chartData.map((d) => Math.max(d.income, d.expense)),
+    ...filteredChartData.map((d) => Math.max(d.income, d.expense)),
     1
   );
 
@@ -1329,6 +1351,25 @@ export default function PredictionsPage() {
             <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Prophet ML predictions with confidence intervals</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+            {/* Year Filter */}
+            {availableYears.length > 0 && (
+              <div className="w-32">
+                <FilterDropdown
+                  value={selectedYear}
+                  onChange={handleYearChange}
+                  options={availableYears.map(year => ({
+                    value: year?.toString() || '',
+                    label: year?.toString() || '',
+                    icon: Calendar,
+                  }))}
+                  placeholder="Select Year"
+                  emptyLabel="All Years"
+                  allowEmpty={true}
+                  hideSearch={true}
+                  className="text-[10px] sm:text-xs"
+                />
+              </div>
+            )}
             <div className="flex items-center gap-1 sm:gap-1.5">
               <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-slate-200"></div>
               <span className="text-[9px] sm:text-[10px] font-medium text-slate-500">Historical Income</span>
@@ -1344,6 +1385,25 @@ export default function PredictionsPage() {
           </div>
         </div>
 
+        {isFilteringYear ? (
+          // Skeleton loader while filtering
+          <div className="animate-pulse">
+            <div className="relative h-48 sm:h-60 flex items-end justify-between gap-1 sm:gap-2 px-2 border-b border-slate-50">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div key={i} className="flex gap-1 h-full items-end flex-1 justify-center">
+                  <div className="w-3 sm:w-5 bg-slate-200 rounded-t-[2px]" style={{ height: `${Math.random() * 60 + 20}%` }} />
+                  <div className="w-3 sm:w-5 bg-slate-200 rounded-t-[2px]" style={{ height: `${Math.random() * 60 + 20}%` }} />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between mt-3 sm:mt-4 px-2 sm:px-4">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div key={i} className="w-8 h-3 bg-slate-200 rounded" />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <>
         <div className="relative h-48 sm:h-60 flex items-end justify-between gap-1 sm:gap-2 px-2 border-b border-slate-50">
           {/* Grid lines */}
           <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
@@ -1354,24 +1414,24 @@ export default function PredictionsPage() {
             <div className="w-full h-px bg-slate-100/50" />
           </div>
           
-          {chartData.map((d) => {
+          {filteredChartData.map((d, i) => {
             const incomeHeight = maxChartValue > 0 ? (d.income / maxChartValue) * 100 : 0;
             const expenseHeight = maxChartValue > 0 ? (d.expense / maxChartValue) * 100 : 0;
             
             return (
-              <div key={d.month} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
+              <div key={`${d.month}-${d.year || ''}-${d.type}-${i}`} className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
                 {d.type === "predicted" ? (
                   <>
                     <div
                       className="w-3 sm:w-5 bg-slate-200 border-2 border-emerald-500 border-dashed rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
                       style={{ height: `${incomeHeight}%` }}
-                      onMouseEnter={() => setHoveredBar({ month: d.month, type: 'income', value: d.income, dataType: 'predicted' })}
+                      onMouseEnter={() => setHoveredBar({ month: d.month, year: d.year, type: 'income', value: d.income, dataType: 'predicted', index: i })}
                       onMouseLeave={() => setHoveredBar(null)}
                     />
                     <div
                       className="w-3 sm:w-5 bg-emerald-500/90 border-2 border-emerald-500/30 border-dashed rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
                       style={{ height: `${expenseHeight}%` }}
-                      onMouseEnter={() => setHoveredBar({ month: d.month, type: 'expense', value: d.expense, dataType: 'predicted' })}
+                      onMouseEnter={() => setHoveredBar({ month: d.month, year: d.year, type: 'expense', value: d.expense, dataType: 'predicted', index: i })}
                       onMouseLeave={() => setHoveredBar(null)}
                     />
                   </>
@@ -1380,20 +1440,20 @@ export default function PredictionsPage() {
                     <div
                       className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
                       style={{ height: `${incomeHeight}%` }}
-                      onMouseEnter={() => setHoveredBar({ month: d.month, type: 'income', value: d.income, dataType: 'historical' })}
+                      onMouseEnter={() => setHoveredBar({ month: d.month, year: d.year, type: 'income', value: d.income, dataType: 'historical', index: i })}
                       onMouseLeave={() => setHoveredBar(null)}
                     />
                     <div
                       className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
                       style={{ height: `${expenseHeight}%` }}
-                      onMouseEnter={() => setHoveredBar({ month: d.month, type: 'expense', value: d.expense, dataType: 'historical' })}
+                      onMouseEnter={() => setHoveredBar({ month: d.month, year: d.year, type: 'expense', value: d.expense, dataType: 'historical', index: i })}
                       onMouseLeave={() => setHoveredBar(null)}
                     />
                   </>
                 )}
                 
                 {/* Tooltip */}
-                {hoveredBar && hoveredBar.month === d.month && (
+                {hoveredBar && hoveredBar.index === i && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-[10px] sm:text-xs rounded shadow-sm whitespace-nowrap z-50">
                     <div className="font-medium text-slate-700">{hoveredBar.month}</div>
                     <div className="flex items-center gap-1">
@@ -1415,19 +1475,21 @@ export default function PredictionsPage() {
           })}
         </div>
         <div className="flex justify-between mt-3 sm:mt-4 text-[9px] sm:text-[10px] font-medium text-slate-400 px-2 sm:px-4 uppercase tracking-wider">
-          {chartData.map((d, i) => (
+          {filteredChartData.map((d, i) => (
             <span 
-              key={d.month} 
+              key={`${d.month}-${d.year || ''}-${d.type}-${i}`} 
               className={`${
                 d.type === "current" ? "text-slate-600" : 
                 d.type === "predicted" ? "text-emerald-600" : "text-slate-400"
-              } truncate`}
+              } truncate flex flex-col items-center`}
             >
-              <span className="hidden sm:inline">{d.month}</span>
-              <span className="sm:hidden">{d.month.slice(0, 3)}</span>
+              <span className="hidden sm:inline">{d.month} {d.year ? `'${d.year.toString().slice(-2)}` : ''}</span>
+              <span className="sm:hidden">{d.month.slice(0, 3)}{d.year ? `'${d.year.toString().slice(-2)}` : ''}</span>
             </span>
           ))}
         </div>
+        </>
+        )}
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-100 gap-3 sm:gap-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 w-full sm:w-auto">
