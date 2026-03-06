@@ -104,8 +104,8 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
           name,
           color: colorName,
           balance: calculateNewBalance(),
-          institution: institution || undefined,
-          description: description || undefined,
+          institution: institution.trim() || undefined,
+          description: description.trim() || undefined,
         });
       }
       handleClose();

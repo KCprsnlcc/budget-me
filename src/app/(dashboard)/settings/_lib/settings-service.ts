@@ -257,8 +257,8 @@ export async function updateAccount(
     if (updates.name !== undefined) updateData.account_name = updates.name;
     if (updates.color !== undefined) updateData.color = updates.color;
     if (updates.isDefault !== undefined) updateData.is_default = updates.isDefault;
-    if (updates.institution !== undefined) updateData.institution_name = updates.institution;
-    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.institution !== undefined) updateData.institution_name = updates.institution || null;
+    if (updates.description !== undefined) updateData.description = updates.description || null;
 
     const { error } = await supabase
       .from("accounts")
