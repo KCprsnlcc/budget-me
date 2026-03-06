@@ -317,53 +317,19 @@ export async function fetchFamilyMembers(
       profileMap[p.id] = p;
     }
     
-    // Find users without profiles and try to sync them
+    // For users without profiles, create a placeholder entry
     const usersWithoutProfiles = userIds.filter(id => !profileMap[id]);
     
     if (usersWithoutProfiles.length > 0) {
-      // Try to get user metadata and create missing profiles
       for (const userId of usersWithoutProfiles) {
-        try {
-          const { data: userData } = await supabase.rpc('get_user_metadata', { 
-            user_id: userId 
-          });
-          
-          if (userData && userData.length > 0) {
-            const user = userData[0];
-            
-            // Create the missing profile
-            const { error: insertError } = await supabase
-              .from("profiles")
-              .insert({
-                id: userId,
-                full_name: user.full_name,
-                email: user.email,
-                avatar_url: user.avatar_url || user.picture,
-                updated_at: new Date().toISOString()
-              });
-            
-            if (!insertError) {
-              // Add to profile map
-              profileMap[userId] = {
-                id: userId,
-                full_name: user.full_name,
-                email: user.email,
-                avatar_url: user.avatar_url || user.picture,
-                last_login: null
-              };
-            }
-          }
-        } catch (error) {
-          console.error(`Failed to sync profile for user ${userId}:`, error);
-          // Create a basic profile entry
-          profileMap[userId] = {
-            id: userId,
-            full_name: null,
-            email: null,
-            avatar_url: null,
-            last_login: null
-          };
-        }
+        // Create a placeholder profile entry
+        profileMap[userId] = {
+          id: userId,
+          full_name: "Unknown Member",
+          email: null,
+          avatar_url: null,
+          last_login: null
+        };
       }
     }
   }
@@ -970,6 +936,31 @@ export async function respondToInvitation(
 
     if (ownedFamilies && ownedFamilies.length > 0) {
       return { error: "You are already a family owner and cannot join another family. Please transfer or delete your family first." };
+    }
+
+    // Ensure user has a profile before adding to family
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (!userProfile) {
+      // Get user data from auth to create profile
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user && user.id === userId) {
+        // Create profile for the user
+        await supabase
+          .from("profiles")
+          .insert({
+            id: userId,
+            full_name: user.user_metadata?.full_name || null,
+            email: user.email || null,
+            avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+            updated_at: new Date().toISOString()
+          });
+      }
     }
 
     // Get the inviter's role and family info to determine the new member's role
