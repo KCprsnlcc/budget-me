@@ -100,11 +100,11 @@ function getInsightVisuals(type: InsightItem["type"]) {
 function getBudgetVisuals(status: string) {
   switch (status) {
     case "Over Budget":
-      return { statusColor: "text-red-600", statusBg: "bg-red-50", progressColor: "bg-red-500" };
+      return { statusColor: "text-red-600", progressColor: "bg-red-500" };
     case "Warning":
-      return { statusColor: "text-amber-600", statusBg: "bg-amber-50", progressColor: "bg-amber-500" };
+      return { statusColor: "text-amber-600", progressColor: "bg-amber-500" };
     default:
-      return { statusColor: "text-emerald-600", statusBg: "bg-emerald-50", progressColor: "bg-emerald-500" };
+      return { statusColor: "text-emerald-600", progressColor: "bg-emerald-500" };
   }
 }
 
@@ -132,7 +132,6 @@ type StatType = {
   change: string;
   trend: "up" | "down";
   icon: React.ComponentType<any>;
-  iconBg: string;
   iconColor: string;
 };
 
@@ -221,32 +220,24 @@ export default function DashboardPage() {
     switch (type) {
       case 'success':
         return {
-          bgColor: 'bg-emerald-50',
-          iconBg: 'bg-emerald-500',
           textColor: 'text-emerald-700',
           borderColor: 'border-emerald-200',
           icon: 'fa-check-circle'
         };
       case 'warning':
         return {
-          bgColor: 'bg-amber-50',
-          iconBg: 'bg-amber-500',
           textColor: 'text-amber-700',
           borderColor: 'border-amber-200',
           icon: 'fa-exclamation-triangle'
         };
       case 'danger':
         return {
-          bgColor: 'bg-rose-50',
-          iconBg: 'bg-rose-500',
           textColor: 'text-rose-700',
           borderColor: 'border-rose-200',
           icon: 'fa-exclamation-circle'
         };
       default:
         return {
-          bgColor: 'bg-blue-50',
-          iconBg: 'bg-blue-500',
           textColor: 'text-blue-700',
           borderColor: 'border-blue-200',
           icon: 'fa-info-circle'
@@ -280,7 +271,6 @@ export default function DashboardPage() {
         change: fmtChange(summary.balanceChange),
         trend: (summary.balanceChange ?? 0) >= 0 ? "up" as const : "down" as const,
         icon: Wallet,
-        iconBg: "bg-emerald-50",
         iconColor: "text-emerald-600",
       },
       {
@@ -289,7 +279,6 @@ export default function DashboardPage() {
         change: fmtChange(summary.incomeChange),
         trend: (summary.incomeChange ?? 0) >= 0 ? "up" as const : "down" as const,
         icon: TrendingUp,
-        iconBg: "bg-blue-50",
         iconColor: "text-blue-600",
       },
       {
@@ -298,7 +287,6 @@ export default function DashboardPage() {
         change: fmtChange(summary.expenseChange),
         trend: (summary.expenseChange ?? 0) >= 0 ? "up" as const : "down" as const,
         icon: CreditCard,
-        iconBg: "bg-orange-50",
         iconColor: "text-orange-600",
       },
       {
@@ -307,7 +295,6 @@ export default function DashboardPage() {
         change: fmtChange(summary.savingsRateChange),
         trend: (summary.savingsRateChange ?? 0) >= 0 ? "up" as const : "down" as const,
         icon: PiggyBank,
-        iconBg: "bg-purple-50",
         iconColor: "text-purple-600",
       },
     ];
@@ -674,7 +661,7 @@ export default function DashboardPage() {
                     className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border border-slate-200 shrink-0"
                   />
                 ) : (
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-emerald-500 shrink-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-emerald-500 shrink-0">
                     <Users size={18} className="sm:w-5 sm:h-5" />
                   </div>
                 )}
@@ -705,7 +692,7 @@ export default function DashboardPage() {
         ) : (
           <Card className="p-4 sm:p-6 border border-slate-100">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-slate-400 shrink-0">
                 <Users size={18} className="sm:w-5 sm:h-5" />
               </div>
               <div className="flex-1 min-w-0">
@@ -759,7 +746,7 @@ export default function DashboardPage() {
         ) : (
           <Card className="p-6 sm:p-8 border border-slate-100">
             <div className="flex flex-col items-center gap-4 text-center">
-              <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+              <div className="w-12 h-12 flex items-center justify-center text-slate-400">
                 <Icon icon="material-symbols:insights" width={24} height={24} />
               </div>
               <div>
@@ -786,7 +773,7 @@ export default function DashboardPage() {
       ) : (
         <Card className="p-6 sm:p-8 border border-slate-100">
           <div className="flex flex-col items-center gap-4 text-center">
-            <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+            <div className="w-12 h-12 flex items-center justify-center text-slate-400">
               <BarChart3 size={24} />
             </div>
             <div>
@@ -892,7 +879,7 @@ export default function DashboardPage() {
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center h-48 sm:h-60 text-center">
-                  <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
+                  <div className="w-12 h-12 flex items-center justify-center text-slate-400 mb-4">
                     <BarChart3 size={24} />
                   </div>
                   <h4 className="text-sm font-medium text-slate-800 mb-1">No Chart Data</h4>
@@ -1002,7 +989,7 @@ export default function DashboardPage() {
                       {changeStr} {trend.trend === 'down' ? 'less' : trend.trend === 'up' ? 'more' : ''}
                     </div>
                   </div>
-                  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${vis.iconColor}`}>
+                  <div className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center ${vis.iconColor}`}>
                     <PhilippinePeso size={18} className="sm:w-5 sm:h-5" />
                   </div>
                 </Card>
@@ -1012,7 +999,7 @@ export default function DashboardPage() {
         ) : (
           <Card className="p-6 sm:p-8 border border-slate-100">
             <div className="flex flex-col items-center gap-4 text-center">
-              <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+              <div className="w-12 h-12 flex items-center justify-center text-slate-400">
                 <BarChart3 size={24} />
               </div>
               <div>
@@ -1044,7 +1031,6 @@ export default function DashboardPage() {
               className="text-slate-400 hover:text-slate-600"
               onClick={() => window.location.href = '/budgets'}
             >
-              <FileText size={12} />
               Manage
             </Button>
           </div>
@@ -1058,7 +1044,7 @@ export default function DashboardPage() {
                   <div key={item.id} className="group">
                     <div className="flex justify-between items-center mb-2">
                       <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-slate-600">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-slate-600">
                           <BudgetIcon size={14} className="sm:w-4 sm:h-4" />
                         </div>
                         <div>
@@ -1068,7 +1054,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="text-right">
                         <div className="text-xs font-bold text-slate-800">{Math.round(item.percentage)}%</div>
-                        <div className={`text-[9px] sm:text-[10px] font-medium ${vis.statusColor} ${vis.statusBg} px-1.5 py-0.5 rounded inline-block`}>
+                        <div className={`text-[9px] sm:text-[10px] font-medium ${vis.statusColor}`}>
                           {item.status}
                         </div>
                       </div>
@@ -1084,7 +1070,7 @@ export default function DashboardPage() {
               })
             ) : (
               <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center">
-                <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
+                <div className="w-12 h-12 flex items-center justify-center text-slate-400 mb-4">
                   <PiggyBank size={24} />
                 </div>
                 <h4 className="text-sm font-medium text-slate-800 mb-1">No Active Budgets</h4>
@@ -1112,7 +1098,6 @@ export default function DashboardPage() {
               className="text-slate-400 hover:text-slate-600"
               onClick={() => window.location.href = '/transactions'}
             >
-              <Receipt size={12} />
               Manage
             </Button>
           </div>
@@ -1150,7 +1135,7 @@ export default function DashboardPage() {
               })
             ) : (
               <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center">
-                <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
+                <div className="w-12 h-12 flex items-center justify-center text-slate-400 mb-4">
                   <Receipt size={24} />
                 </div>
                 <h4 className="text-sm font-medium text-slate-800 mb-1">No Transactions Yet</h4>
