@@ -125,7 +125,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Tab Panels */}
-        <div className="min-h-[400px]">
+        <div className="min-h-[400px] max-h-[600px] overflow-y-auto">
           {activeTab === "profile" && <ProfileTab />}
           {activeTab === "accounts" && <AccountsTab />}
           {activeTab === "preferences" && <PreferencesTab />}

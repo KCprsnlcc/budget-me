@@ -35,7 +35,6 @@ import {
   ListChecks,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -1108,7 +1107,7 @@ export default function PredictionsPage() {
         <div>
           <div className="flex items-center gap-2 sm:gap-3">
             <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">AI Predictions</h2>
-            <span className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-slate-600 bg-slate-50 px-2 py-1 rounded-full">
+            <span className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-slate-600">
               <Cpu size={10} className="sm:w-3 sm:h-3" /> AI Powered
             </span>
           </div>
@@ -1195,7 +1194,7 @@ export default function PredictionsPage() {
           {/* Projected Income Growth Card - No Data */}
           <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-3 sm:mb-4">
-              <div className="text-slate-300 p-2 rounded-lg">
+              <div className="text-slate-300">
                 <TrendingUp size={20} className="sm:w-[22px] sm:h-[22px]" strokeWidth={1.5} />
               </div>
             </div>
@@ -1210,7 +1209,7 @@ export default function PredictionsPage() {
           {/* Projected Expense Growth Card - No Data */}
           <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-3 sm:mb-4">
-              <div className="text-slate-300 p-2 rounded-lg">
+              <div className="text-slate-300">
                 <ShoppingBag size={20} className="sm:w-[22px] sm:h-[22px]" strokeWidth={1.5} />
               </div>
             </div>
@@ -1225,7 +1224,7 @@ export default function PredictionsPage() {
           {/* Projected Savings Growth Card - No Data */}
           <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-3 sm:mb-4">
-              <div className="text-slate-300 p-2 rounded-lg">
+              <div className="text-slate-300">
                 <PiggyBank size={20} className="sm:w-[22px] sm:h-[22px]" strokeWidth={1.5} />
               </div>
             </div>
@@ -1242,13 +1241,13 @@ export default function PredictionsPage() {
         {/* Projected Income Growth Card */}
         <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-3 sm:mb-4">
-            <div className="text-slate-500 p-2 rounded-lg">
+            <div className="text-slate-500">
               <TrendingUp size={20} className="sm:w-[22px] sm:h-[22px]" strokeWidth={1.5} />
             </div>
-            <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
+            <div className={`flex items-center gap-1 text-[10px] font-medium ${
               ((forecastData?.predicted?.[0]?.income || 0) - (forecastData?.historical?.[forecastData?.historical.length - 1]?.income || 0)) >= 0 
-                ? "text-emerald-700 border-emerald-100" 
-                : "text-red-700 border-red-100"
+                ? "text-emerald-700" 
+                : "text-red-700"
             }`}>
               {((forecastData?.predicted?.[0]?.income || 0) - (forecastData?.historical?.[forecastData?.historical.length - 1]?.income || 0)) >= 0 ? <ArrowUp size={10} className="sm:w-3 sm:h-3" /> : <ArrowDown size={10} className="sm:w-3 sm:h-3" />}
               {((forecastData?.predicted?.[0]?.income || 0) - (forecastData?.historical?.[forecastData?.historical.length - 1]?.income || 0)) >= 0 ? "+" : ""}
@@ -1269,13 +1268,13 @@ export default function PredictionsPage() {
         {/* Projected Expense Growth Card */}
         <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-3 sm:mb-4">
-            <div className="text-slate-500 p-2 rounded-lg">
+            <div className="text-slate-500">
               <ShoppingBag size={20} className="sm:w-[22px] sm:h-[22px]" strokeWidth={1.5} />
             </div>
-            <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
+            <div className={`flex items-center gap-1 text-[10px] font-medium ${
               ((forecastData?.predicted?.[0]?.expense || 0) - (forecastData?.historical?.[forecastData?.historical.length - 1]?.expense || 0)) <= 0 
-                ? "text-emerald-700 border-emerald-100" 
-                : "text-amber-700 border-amber-100"
+                ? "text-emerald-700" 
+                : "text-amber-700"
             }`}>
               {((forecastData?.predicted?.[0]?.expense || 0) - (forecastData?.historical?.[forecastData?.historical.length - 1]?.expense || 0)) <= 0 ? <ArrowDown size={10} className="sm:w-3 sm:h-3" /> : <ArrowUp size={10} className="sm:w-3 sm:h-3" />}
               {((forecastData?.predicted?.[0]?.expense || 0) - (forecastData?.historical?.[forecastData?.historical.length - 1]?.expense || 0)) <= 0 ? "" : "+"}
@@ -1296,15 +1295,15 @@ export default function PredictionsPage() {
         {/* Projected Savings Growth Card */}
         <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-3 sm:mb-4">
-            <div className="text-slate-500 p-2 rounded-lg">
+            <div className="text-slate-500">
               <PiggyBank size={20} className="sm:w-[22px] sm:h-[22px]" strokeWidth={1.5} />
             </div>
-            <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${
+            <div className={`flex items-center gap-1 text-[10px] font-medium ${
               ((forecastData?.predicted?.[0]?.income || 0) - (forecastData?.predicted?.[0]?.expense || 0)) >= (forecastData?.predicted?.[0]?.income || 0) * 0.10 
-                ? "text-emerald-700 border-emerald-100" 
+                ? "text-emerald-700" 
                 : ((forecastData?.predicted?.[0]?.income || 0) - (forecastData?.predicted?.[0]?.expense || 0)) >= (forecastData?.predicted?.[0]?.income || 0) * 0.05
-                ? "text-amber-700 border-amber-100"
-                : "text-red-700 border-red-100"
+                ? "text-amber-700"
+                : "text-red-700"
             }`}>
               <ChartBar size={10} className="sm:w-3 sm:h-3" />
               {forecastData?.predicted?.[0]?.income && forecastData.predicted[0].income > 0 
@@ -1580,12 +1579,13 @@ export default function PredictionsPage() {
                         </td>
                         <td className="px-3 sm:px-6 py-3 sm:py-4">
                           <div className="flex justify-center">
-                            <Badge 
-                              variant={pred.trend === "up" ? "warning" : pred.trend === "down" ? "success" : "neutral"} 
-                              className="px-1.5 sm:px-2 py-0.5 rounded-full text-[8px] sm:text-[9px]"
-                            >
+                            <span className={`text-[8px] sm:text-[9px] ${
+                              pred.trend === "up" ? "text-amber-600" : 
+                              pred.trend === "down" ? "text-emerald-600" : 
+                              "text-slate-600"
+                            }`}>
                               {pred.trend === "up" ? "Increasing" : pred.trend === "down" ? "Decreasing" : "Stable"}
-                            </Badge>
+                            </span>
                           </div>
                         </td>
                         <td className="px-3 sm:px-6 py-3 sm:py-4">

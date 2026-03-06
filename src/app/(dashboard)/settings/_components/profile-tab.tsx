@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Camera, Lock, Info, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DateSelector } from "@/components/ui/date-selector";
 import { useAuth } from "@/components/auth/auth-context";
 import { getUserProfile, updateUserProfile, uploadProfilePicture } from "../_lib/settings-service";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -32,6 +33,16 @@ export function ProfileTab() {
   });
   const [avatarUrl, setAvatarUrl] = useState("");
   const [hasChanges, setHasChanges] = useState(false);
+  
+  // Ref for auto-scroll
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to top when tab loads
+  useEffect(() => {
+    if (!isLoading && containerRef.current) {
+      containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [isLoading]);
 
   // Load profile data
   useEffect(() => {
@@ -191,7 +202,7 @@ export function ProfileTab() {
   }
 
   return (
-    <div className="p-6 space-y-8 animate-in fade-in duration-300">
+    <div ref={containerRef} className="p-6 space-y-8 animate-in fade-in duration-300">
       {/* Profile Picture Section */}
       <div className="flex items-center gap-6 pb-6 border-b border-slate-100">
         <div className="relative group">
@@ -269,11 +280,10 @@ export function ProfileTab() {
           </div>
           <div className="space-y-2">
             <Label className="text-xs font-medium text-slate-700">Date of Birth</Label>
-            <Input
-              type="date"
+            <DateSelector
               value={formData.dateOfBirth}
-              onChange={(e) => handleChange("dateOfBirth", e.target.value)}
-              className="h-10"
+              onChange={(value) => handleChange("dateOfBirth", value)}
+              placeholder="Select date of birth"
             />
           </div>
 

@@ -23,7 +23,6 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TypingEffect } from "@/components/ui/typing-effect";
 import { TypingMarkdown } from "@/components/ui/typing-markdown";
@@ -777,12 +776,9 @@ export default function ChatbotPage() {
                 <div className="min-w-0">
                   <h2 className="text-xs sm:text-sm font-semibold text-slate-800 flex items-center gap-1.5 sm:gap-2 truncate">
                     <span className="truncate">BudgetSense AI</span>
-                    <Badge
-                      variant="brand"
-                      className="px-1.5 sm:px-2 py-0.5 text-emerald-600 text-[9px] sm:text-[10px] tracking-wide uppercase bg-transparent border-0 rounded-none shrink-0"
-                    >
+                    <span className="text-emerald-600 text-[9px] sm:text-[10px] tracking-wide uppercase shrink-0">
                       Beta
-                    </Badge>
+                    </span>
                   </h2>
                 </div>
               </div>

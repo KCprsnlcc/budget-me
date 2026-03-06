@@ -58,7 +58,7 @@ export function PreferencesTab() {
       <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-5 hover:shadow-md transition-all cursor-pointer">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg text-gray-600">
+            <div className="text-gray-600">
               <PhilippinePeso size={20} />
             </div>
             <div>
@@ -66,7 +66,7 @@ export function PreferencesTab() {
               <p className="text-[10px] text-gray-500">₱ PHP</p>
             </div>
           </div>
-          <span className="px-2 py-0.5 text-[10px] font-semibold bg-white text-emerald-700 rounded-full border border-emerald-200">
+          <span className="text-[10px] font-semibold text-emerald-700">
             Fixed
           </span>
         </div>
@@ -82,7 +82,7 @@ export function PreferencesTab() {
       {/* Info Card */}
       <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-5 hover:shadow-md transition-all cursor-pointer">
         <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg text-blue-500">
+          <div className="text-blue-500">
             <Info size={18} />
           </div>
           <div>

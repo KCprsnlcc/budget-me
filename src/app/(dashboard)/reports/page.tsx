@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { AnomalyDetailsModal, ReportCharts } from "./_components";
 import type { AnomalyAlert, ReportSettings, AnomalyDetails } from "./_components/types";
@@ -617,19 +616,19 @@ export default function ReportsPage() {
     return (
       <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex justify-between items-start mb-4">
-          <div className="p-2 rounded-lg text-slate-600">
+          <div className="text-slate-600">
             <Icon size={22} strokeWidth={1.5} />
           </div>
           {change && (
-            <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-700 border-emerald-100 px-2 py-1 rounded-full border">
+            <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-700">
               <ArrowUp size={12} />
               {change}
             </div>
           )}
           {badge && (
-            <Badge variant="warning" className="text-[9px] px-2 py-1">
+            <span className="text-[9px] text-amber-600">
               {badge}
-            </Badge>
+            </span>
           )}
         </div>
         <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">{label}</div>
@@ -1060,8 +1059,8 @@ export default function ReportsPage() {
             <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
               <div className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center">
-                    <Wallet size={18} className="sm:w-5 sm:h-5 text-slate-400" strokeWidth={1.5} />
+                  <div className="text-slate-400">
+                    <Wallet size={18} className="sm:w-5 sm:h-5" strokeWidth={1.5} />
                   </div>
                   <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-slate-700 uppercase tracking-wider">Savings Opportunities</span>
                 </div>
@@ -1077,8 +1076,8 @@ export default function ReportsPage() {
             <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
               <div className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center">
-                    <BarChart3 size={18} className="sm:w-5 sm:h-5 text-slate-400" strokeWidth={1.5} />
+                  <div className="text-slate-400">
+                    <BarChart3 size={18} className="sm:w-5 sm:h-5" strokeWidth={1.5} />
                   </div>
                   <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-slate-700 uppercase tracking-wider">Budget Recommendations</span>
                 </div>
@@ -1094,8 +1093,8 @@ export default function ReportsPage() {
             <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
               <div className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center">
-                    <LineChart size={18} className="sm:w-5 sm:h-5 text-slate-400" strokeWidth={1.5} />
+                  <div className="text-slate-400">
+                    <LineChart size={18} className="sm:w-5 sm:h-5" strokeWidth={1.5} />
                   </div>
                   <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-slate-700 uppercase tracking-wider">Trend Analysis</span>
                 </div>
@@ -1115,7 +1114,7 @@ export default function ReportsPage() {
                 <div className="p-4 sm:p-5 md:p-6">
                   <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
                     <div className="flex items-start gap-2 sm:gap-3 flex-1 w-full">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0">
+                      <div className="shrink-0">
                         <AlertTriangle className={`w-4 h-4 sm:w-5 sm:h-5 ${
                           aiInsights.riskLevel === 'high' ? 'text-red-600' :
                           aiInsights.riskLevel === 'medium' ? 'text-amber-600' :
@@ -1127,7 +1126,7 @@ export default function ReportsPage() {
                         <p className="text-[10px] sm:text-xs text-slate-600 leading-relaxed">{aiInsights.summary}</p>
                       </div>
                     </div>
-                    <span className={`text-[9px] sm:text-[10px] px-2 sm:px-2.5 py-1 shrink-0 font-semibold ${
+                    <span className={`text-[9px] sm:text-[10px] shrink-0 font-semibold ${
                       aiInsights.riskLevel === 'high' ? 'text-red-600' :
                       aiInsights.riskLevel === 'medium' ? 'text-amber-600' :
                       'text-emerald-600'
@@ -1164,7 +1163,7 @@ export default function ReportsPage() {
                               {rec.title}
                             </h5>
                           </div>
-                          <span className={`text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 shrink-0 font-semibold ${
+                          <span className={`text-[8px] sm:text-[9px] shrink-0 font-semibold ${
                             rec.priority === 'high' ? 'text-red-600' :
                             rec.priority === 'medium' ? 'text-amber-600' :
                             'text-blue-600'
@@ -1392,9 +1391,9 @@ export default function ReportsPage() {
                           {cat.change > 0 ? '+' : ''}{cat.change.toFixed(1)}%
                         </td>
                         <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-center">
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium ${
-                            cat.trend === 'up' ? 'bg-red-50 text-red-700' : 
-                            cat.trend === 'down' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-700'
+                          <span className={`inline-flex items-center gap-1 text-[10px] sm:text-xs font-medium ${
+                            cat.trend === 'up' ? 'text-red-700' : 
+                            cat.trend === 'down' ? 'text-emerald-700' : 'text-slate-700'
                           }`}>
                             {cat.trend === 'up' ? '↑ Increasing' : cat.trend === 'down' ? '↓ Decreasing' : '→ Stable'}
                           </span>
@@ -1425,7 +1424,7 @@ export default function ReportsPage() {
                         <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-red-600 text-right">₱{month.expense.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
                         <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-blue-600 text-right">₱{(month.income - month.expense).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
                         <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-center">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-emerald-50 text-emerald-700">
+                          <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-medium text-emerald-700">
                             {month.confidence || predictionData.forecast?.summary?.confidence || 0}%
                           </span>
                         </td>
