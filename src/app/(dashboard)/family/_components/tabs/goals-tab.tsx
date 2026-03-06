@@ -245,7 +245,7 @@ export function GoalsTab({
   const overallStatus = getOverallStatus();
 
   // Get permissions for family goals
-  const permissions = getGoalPermissions(currentUserRole, isOwner, undefined, currentUserId);
+  const permissions = getGoalPermissions(currentUserRole || 'Viewer', isOwner, undefined, currentUserId);
 
   if (isLoading || isGoalOperationLoading) {
     return (
