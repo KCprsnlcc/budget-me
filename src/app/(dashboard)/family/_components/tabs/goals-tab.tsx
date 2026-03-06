@@ -725,7 +725,6 @@ export function GoalsTab({
           setContributeModalOpen(false);
           await onRefreshGoals?.();
         }}
-        onContribute={onContributeGoal}
       />
 
       <ViewGoalModal
