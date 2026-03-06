@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const token = searchParams.get("token");
-  const next = searchParams.get("next") ?? "/dashboard";
+  let next = searchParams.get("next") ?? "/dashboard";
   const type = searchParams.get("type"); // signup, recovery, magiclink, etc.
 
   if (code) {
@@ -38,6 +38,38 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (!error) {
+      // Check if user is admin and redirect accordingly
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user && next === "/dashboard") {
+        // Check if user is admin
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role_name")
+          .eq("user_id", user.id)
+          .eq("role_name", "admin")
+          .eq("is_active", true)
+          .maybeSingle();
+        
+        let isAdmin = !!roleData;
+        
+        // Fallback to profiles table if no role found in user_roles
+        if (!isAdmin) {
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .maybeSingle();
+          
+          isAdmin = profileData?.role === "admin";
+        }
+        
+        // Redirect admin users to admin dashboard
+        if (isAdmin) {
+          next = "/admin/dashboard";
+        }
+      }
+      
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalEnv = process.env.NODE_ENV === "development";
       
