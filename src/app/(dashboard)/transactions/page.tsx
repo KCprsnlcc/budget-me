@@ -166,7 +166,7 @@ const SummaryCard = memo(({ item }: { item: SummaryType }) => {
   return (
     <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
       <div className="flex justify-between items-start mb-4">
-        <div className="text-slate-500 p-2 rounded-lg">
+        <div className="text-slate-500 p-2">
           {Icon && <Icon size={22} strokeWidth={1.5} />}
         </div>
         {item.change && (
@@ -205,7 +205,7 @@ const TransactionCard = memo(({
     <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
-          <div className="text-lg p-2 rounded-lg">
+          <div className="text-lg p-2">
             {tx.category_icon ? <tx.category_icon size={20} /> : <FileText size={20} />}
           </div>
           <div>
@@ -781,7 +781,7 @@ export default function TransactionsPage() {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-48 sm:h-60 text-center px-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
                   <TrendingUp size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Transaction Data</h4>
@@ -828,7 +828,7 @@ export default function TransactionsPage() {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center px-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
                   <ShoppingCart size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Category Data</h4>
