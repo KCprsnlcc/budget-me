@@ -9,7 +9,7 @@ import {
   fetchCategoryBreakdown,
   fetchMonthlyChart,
   fetchSpendingTrends,
-  fetchPendingInvitations,
+  fetchLatestInvitation,
   fetchInsights,
   acceptInvitation,
   declineInvitation,
@@ -19,9 +19,9 @@ import {
   type CategoryBreakdownItem,
   type MonthlyChartPoint,
   type SpendingTrend,
-  type PendingInvitation,
   type InsightItem,
 } from "./dashboard-service";
+import type { Invitation } from "@/app/(dashboard)/family/_components/types";
 
 export function useDashboard() {
   const { user } = useAuth();
@@ -35,7 +35,7 @@ export function useDashboard() {
   const [categoryBreakdown, setCategoryBreakdown] = useState<CategoryBreakdownItem[]>([]);
   const [monthlyChart, setMonthlyChart] = useState<MonthlyChartPoint[]>([]);
   const [spendingTrends, setSpendingTrends] = useState<SpendingTrend[]>([]);
-  const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
+  const [latestInvitation, setLatestInvitation] = useState<Invitation | null>(null);
   const [insights, setInsights] = useState<InsightItem[]>([]);
 
   // ----- Loading / error -----
@@ -91,7 +91,7 @@ export function useDashboard() {
         categoryResult,
         chartResult,
         trendsResult,
-        invitesResult,
+        invitationResult,
         insightsResult,
       ] = await Promise.all([
         fetchDashboardSummary(userId),
@@ -100,7 +100,7 @@ export function useDashboard() {
         fetchCategoryBreakdown(userId),
         fetchMonthlyChart(userId, 6),
         fetchSpendingTrends(userId, 4),
-        fetchPendingInvitations(userId, userEmail),
+        fetchLatestInvitation(userEmail),
         fetchInsights(userId),
       ]);
 
@@ -110,7 +110,7 @@ export function useDashboard() {
       setCategoryBreakdown(categoryResult);
       setMonthlyChart(chartResult);
       setSpendingTrends(trendsResult);
-      setPendingInvitations(invitesResult);
+      setLatestInvitation(invitationResult);
       setInsights(insightsResult);
     } catch (err: any) {
       setError(err?.message ?? "Failed to load dashboard data.");
@@ -128,7 +128,7 @@ export function useDashboard() {
     async (invitationId: string) => {
       const { error } = await acceptInvitation(invitationId, userId);
       if (error) return { error };
-      setPendingInvitations((prev) => prev.filter((inv) => inv.id !== invitationId));
+      setLatestInvitation(null);
       // Refresh data after accepting
       fetchData();
       return { error: null };
@@ -140,7 +140,7 @@ export function useDashboard() {
     async (invitationId: string) => {
       const { error } = await declineInvitation(invitationId);
       if (error) return { error };
-      setPendingInvitations((prev) => prev.filter((inv) => inv.id !== invitationId));
+      setLatestInvitation(null);
       return { error: null };
     },
     []
@@ -203,7 +203,7 @@ export function useDashboard() {
     categoryBreakdown,
     monthlyChart,
     spendingTrends,
-    pendingInvitations,
+    latestInvitation,
     insights,
     // User info
     userName,

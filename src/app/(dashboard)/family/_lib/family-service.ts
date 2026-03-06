@@ -198,6 +198,7 @@ function mapInvitationRow(row: any): Invitation {
     familyName: family.family_name ?? "Unknown Family",
     inviterName: inviter.full_name || inviter.email || "Unknown Inviter",
     inviterEmail: inviter.email || "",
+    inviterAvatar: inviter.avatar_url || undefined,
     message: row.message ?? undefined,
     invitedAt: row.created_at,
     status: row.status as Invitation["status"],
@@ -614,7 +615,7 @@ export async function fetchUserInvitations(
   if (inviterIds.length > 0) {
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, full_name, email")
+      .select("id, full_name, email, avatar_url")
       .in("id", inviterIds);
     for (const p of profiles ?? []) {
       profileMap[p.id] = p;

@@ -90,6 +90,7 @@ export interface Invitation {
   familyName: string;
   inviterName: string;
   inviterEmail: string;
+  inviterAvatar?: string;
   message?: string;
   invitedAt: string;
   status: "pending" | "accepted" | "declined" | "expired";

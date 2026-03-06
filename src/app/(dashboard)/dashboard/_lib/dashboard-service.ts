@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/client";
 import { getPhilippinesNow, formatInPhilippines, formatDateForInput } from "@/lib/timezone";
 import { generateInsights, InsightData, InsightsTransaction, InsightsBudget } from "./insights-service";
 import { generateSpendingTrends, SpendingTrend as TrendServiceSpendingTrend } from "./trends-service";
+import { fetchUserInvitations } from "@/app/(dashboard)/family/_lib/family-service";
+import type { Invitation } from "@/app/(dashboard)/family/_components/types";
 
 const supabase = createClient();
 
@@ -64,13 +66,6 @@ export type SpendingTrend = {
   trend: "up" | "down" | "neutral";
   insight?: string;
   recommendation?: string;
-};
-
-export type PendingInvitation = {
-  id: string;
-  family_id: string;
-  family_name: string;
-  inviter_email: string;
 };
 
 export type InsightItem = {
@@ -326,30 +321,20 @@ export async function fetchSpendingTrends(
 }
 
 // ---------------------------------------------------------------------------
-// PENDING INVITATIONS — Family invitations for the current user
+// PENDING INVITATIONS — Fetch latest invitation for dashboard
 // ---------------------------------------------------------------------------
 
-export async function fetchPendingInvitations(
-  userId: string,
+export async function fetchLatestInvitation(
   userEmail: string
-): Promise<PendingInvitation[]> {
-  // Query by email since family_invitations uses email field
-  const { data } = await supabase
-    .from("family_invitations")
-    .select("id, family_id, email, status, families ( family_name ), profiles!family_invitations_invited_by_fkey ( email )")
-    .eq("email", userEmail)
-    .eq("status", "pending");
-
-  return (data ?? []).map((row: any) => {
-    const family = row.families as Record<string, any> | null;
-    const inviter = row.profiles as Record<string, any> | null;
-    return {
-      id: row.id,
-      family_id: row.family_id,
-      family_name: family?.family_name ?? "Unknown Family",
-      inviter_email: inviter?.email ?? "Unknown",
-    };
-  });
+): Promise<Invitation | null> {
+  const { data, error } = await fetchUserInvitations(userEmail);
+  
+  if (error || !data || data.length === 0) {
+    return null;
+  }
+  
+  // Return only the first (latest) invitation
+  return data[0];
 }
 
 // ---------------------------------------------------------------------------
@@ -360,48 +345,17 @@ export async function acceptInvitation(
   invitationId: string,
   userId: string
 ): Promise<{ error: string | null }> {
-  // Update invitation status
-  const { error: updateError } = await supabase
-    .from("family_invitations")
-    .update({ status: "accepted", responded_at: formatDateForInput(getPhilippinesNow()) })
-    .eq("id", invitationId);
-
-  if (updateError) return { error: updateError.message };
-
-  // Get family_id from invitation
-  const { data: inv } = await supabase
-    .from("family_invitations")
-    .select("family_id, role")
-    .eq("id", invitationId)
-    .single();
-
-  if (!inv) return { error: "Invitation not found." };
-
-  // Add user to family_members
-  const { error: memberError } = await supabase
-    .from("family_members")
-    .insert({
-      family_id: inv.family_id,
-      user_id: userId,
-      role: inv.role || "member",
-      status: "active",
-      joined_at: formatDateForInput(getPhilippinesNow()),
-    });
-
-  if (memberError) return { error: memberError.message };
-  return { error: null };
+  // Import the function from family-service to maintain consistency
+  const { respondToInvitation } = await import("@/app/(dashboard)/family/_lib/family-service");
+  return respondToInvitation(invitationId, userId, true);
 }
 
 export async function declineInvitation(
   invitationId: string
 ): Promise<{ error: string | null }> {
-  const { error } = await supabase
-    .from("family_invitations")
-    .update({ status: "declined", responded_at: formatDateForInput(getPhilippinesNow()) })
-    .eq("id", invitationId);
-
-  if (error) return { error: error.message };
-  return { error: null };
+  // Import the function from family-service to maintain consistency
+  const { respondToInvitation } = await import("@/app/(dashboard)/family/_lib/family-service");
+  return respondToInvitation(invitationId, "", false);
 }
 
 // ---------------------------------------------------------------------------

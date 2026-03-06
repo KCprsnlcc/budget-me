@@ -183,7 +183,7 @@ export default function DashboardPage() {
     categoryBreakdown,
     monthlyChart,
     spendingTrends,
-    pendingInvitations,
+    latestInvitation,
     insights,
     userName,
     greeting,
@@ -662,36 +662,46 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Pending Invitations */}
-        {pendingInvitations.length > 0 ? (
-          pendingInvitations.map((inv) => (
-            <Card key={inv.id} className="p-0.5 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/30 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="bg-white rounded-[10px] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
-                <div className="flex items-start gap-3 sm:gap-4">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 flex items-center justify-center text-emerald-500 shrink-0">
+        {/* Pending Invitations - Show only latest */}
+        {latestInvitation ? (
+          <Card className="p-4 sm:p-6 border border-slate-100">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3 sm:gap-4">
+                {latestInvitation.inviterAvatar ? (
+                  <img
+                    src={latestInvitation.inviterAvatar}
+                    alt={latestInvitation.inviterName}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border border-slate-200 shrink-0"
+                  />
+                ) : (
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-emerald-500 shrink-0">
                     <Users size={18} className="sm:w-5 sm:h-5" />
                   </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-medium text-slate-800 flex items-center gap-2 flex-wrap">
-                      Pending Invitation
-                      <Badge variant="success" className="text-[10px]">New</Badge>
-                    </h3>
-                    <p className="text-[10px] sm:text-xs text-slate-400 mt-1 leading-relaxed">
-                      You have been invited by{" "}
-                      <span className="text-slate-600 font-medium">{inv.inviter_email}</span> to
-                      join the{" "}
-                      <span className="text-slate-600 font-medium">{inv.family_name}</span> dashboard.
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xs sm:text-sm font-medium text-slate-800 flex items-center gap-2 flex-wrap">
+                    Pending Invitation
+                    <Badge variant="success" className="text-[10px]">New</Badge>
+                  </h3>
+                  <p className="text-[10px] sm:text-xs text-slate-400 mt-1 leading-relaxed">
+                    You have been invited by{" "}
+                    <span className="text-slate-600 font-medium">{latestInvitation.inviterName}</span> to
+                    join the{" "}
+                    <span className="text-slate-600 font-medium">{latestInvitation.familyName}</span> dashboard.
+                  </p>
+                  {latestInvitation.message && (
+                    <p className="text-[10px] sm:text-xs text-slate-600 italic mt-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-50 rounded-lg">
+                      &quot;{latestInvitation.message}&quot;
                     </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto pl-12 sm:pl-0">
-                  <Button variant="ghost" size="sm" className="text-xs" onClick={() => handleDeclineInvitation(inv.id)}>Decline</Button>
-                  <Button size="sm" className="text-xs" onClick={() => handleAcceptInvitation(inv.id)}>Accept Invitation</Button>
+                  )}
                 </div>
               </div>
-            </Card>
-          ))
+              <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto pl-12 sm:pl-0">
+                <Button variant="ghost" size="sm" className="text-xs" onClick={() => handleDeclineInvitation(latestInvitation.id)}>Decline</Button>
+                <Button size="sm" className="text-xs" onClick={() => handleAcceptInvitation(latestInvitation.id)}>Accept Invitation</Button>
+              </div>
+            </div>
+          </Card>
         ) : (
           <Card className="p-4 sm:p-6 border border-slate-100">
             <div className="flex items-center gap-3 sm:gap-4">

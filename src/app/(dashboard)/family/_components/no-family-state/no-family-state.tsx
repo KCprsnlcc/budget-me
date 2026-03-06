@@ -523,9 +523,17 @@ export function NoFamilyState({
                           <Card key={invitation.id} className="p-3 sm:p-4 border border-slate-200 bg-white">
                             <div className="flex items-start justify-between mb-2 sm:mb-3">
                               <div className="flex items-center gap-2 sm:gap-3">
-                                <div className="flex items-center justify-center text-slate-400">
-                                  <Mail size={14} className="sm:w-4 sm:h-4" />
-                                </div>
+                                {invitation.inviterAvatar ? (
+                                  <img
+                                    src={invitation.inviterAvatar}
+                                    alt={invitation.inviterName}
+                                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-slate-200"
+                                  />
+                                ) : (
+                                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-emerald-500">
+                                    <Mail size={14} className="sm:w-4 sm:h-4" />
+                                  </div>
+                                )}
                                 <div>
                                   <h4 className="text-xs sm:text-sm font-medium text-slate-900">{invitation.familyName}</h4>
                                   <p className="text-[10px] text-slate-500">
