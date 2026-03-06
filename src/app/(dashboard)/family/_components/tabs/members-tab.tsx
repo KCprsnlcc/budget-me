@@ -484,9 +484,17 @@ export function MembersTab({
                 <Card key={invitation.id} className="p-3 sm:p-4 bg-white shadow-sm border-slate-200">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100 italic font-serif text-sm sm:text-base">
-                        {invitation.familyName.charAt(0)}
-                      </div>
+                      {invitation.inviterAvatar ? (
+                        <img
+                          src={invitation.inviterAvatar}
+                          alt={invitation.inviterName}
+                          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-slate-200"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center text-emerald-600 border border-slate-200 italic font-serif text-sm sm:text-base">
+                          {invitation.inviterName.charAt(0)}
+                        </div>
+                      )}
                       <div>
                         <p className="text-xs sm:text-sm font-medium text-slate-900">{invitation.familyName}</p>
                         <p className="text-[10px] text-slate-500 font-light">
