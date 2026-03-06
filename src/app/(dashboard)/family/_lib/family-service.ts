@@ -93,16 +93,21 @@ function mapMemberRow(row: any): FamilyMember {
 }
 
 function mapGoalRow(row: any): SharedGoal {
-  const contributions: GoalContribution[] = (row.goal_contributions ?? []).map(
-    (c: any) => ({
+  const contributions: GoalContribution[] = (row.goal_contributions ?? [])
+    .map((c: any) => ({
       id: c.id,
       memberId: c.user_id,
       memberName: c.profiles?.full_name || c.profiles?.email || "Unknown Member",
       memberAvatar: c.profiles?.avatar_url || undefined,
       amount: Number(c.amount),
       date: c.contribution_date ?? c.created_at,
-    })
-  );
+    }))
+    // Sort contributions by date in descending order (latest first)
+    .sort((a: GoalContribution, b: GoalContribution) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateB - dateA; // Descending order
+    });
 
   // Map DB status to UI status
   let uiStatus: SharedGoal["status"];
