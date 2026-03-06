@@ -79,11 +79,28 @@ export async function fetchGoalsForPage(
   page: number = 1,
   pageSize: number = 20
 ): Promise<{ data: GoalType[]; error: string | null; count: number | null }> {
+  // First, check if user is part of a family
+  const { data: familyMember } = await supabase
+    .from("family_members")
+    .select("family_id")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .single();
+
+  const familyId = familyMember?.family_id;
+
+  // Build query to fetch both personal goals and family goals
   let query = supabase
     .from("goals")
     .select("*")
-    .eq("user_id", userId)
     .order("created_at", { ascending: false });
+
+  // Fetch personal goals OR family goals if user is in a family
+  if (familyId) {
+    query = query.or(`user_id.eq.${userId},and(is_family_goal.eq.true,family_id.eq.${familyId})`);
+  } else {
+    query = query.eq("user_id", userId);
+  }
 
   if (filters.status) {
     query = query.eq("status", filters.status);
@@ -100,8 +117,14 @@ export async function fetchGoalsForPage(
   // Get total count for pagination (apply same filters as main query)
   let countQuery = supabase
     .from("goals")
-    .select("count", { count: "exact", head: true })
-    .eq("user_id", userId);
+    .select("count", { count: "exact", head: true });
+
+  // Apply the same user/family filter to count query
+  if (familyId) {
+    countQuery = countQuery.or(`user_id.eq.${userId},and(is_family_goal.eq.true,family_id.eq.${familyId})`);
+  } else {
+    countQuery = countQuery.eq("user_id", userId);
+  }
 
   // Apply the same filters to count query
   if (filters.status) {
@@ -377,10 +400,29 @@ export type GoalSummary = {
 export async function fetchGoalSummary(
   userId: string
 ): Promise<GoalSummary> {
-  const { data } = await supabase
+  // First, check if user is part of a family
+  const { data: familyMember } = await supabase
+    .from("family_members")
+    .select("family_id")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .single();
+
+  const familyId = familyMember?.family_id;
+
+  // Build query to fetch both personal goals and family goals
+  let query = supabase
     .from("goals")
-    .select("status, current_amount, auto_contribute_amount")
-    .eq("user_id", userId);
+    .select("status, current_amount, auto_contribute_amount");
+
+  // Fetch personal goals OR family goals if user is in a family
+  if (familyId) {
+    query = query.or(`user_id.eq.${userId},and(is_family_goal.eq.true,family_id.eq.${familyId})`);
+  } else {
+    query = query.eq("user_id", userId);
+  }
+
+  const { data } = await query;
 
   let activeGoals = 0;
   let totalSaved = 0;

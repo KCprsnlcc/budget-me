@@ -796,6 +796,9 @@ export default function FamilyPage() {
               onViewGoal={(goalId) => { }}
               isLoading={tabSwitching}
               onRefreshGoals={refetch}
+              currentUserRole={currentUserRole}
+              isOwner={isOwner}
+              currentUserId={user?.id}
             />
           )}
         </div>

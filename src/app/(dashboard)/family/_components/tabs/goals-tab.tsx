@@ -22,6 +22,9 @@ import { DeleteGoalModal } from "@/app/(dashboard)/goals/_components/delete-goal
 // Import types for the modals
 import type { GoalType } from "@/app/(dashboard)/goals/_components/types";
 
+// Import permissions
+import { getGoalPermissions, type FamilyRoleFromHook } from "@/app/(dashboard)/goals/_lib/permissions";
+
 interface GoalsTabProps {
   goals: SharedGoal[];
   onFilter: (filter: string) => void;
@@ -33,6 +36,9 @@ interface GoalsTabProps {
   onViewGoal?: (goalId: string) => void;
   isLoading?: boolean;
   onRefreshGoals?: () => Promise<void>;
+  currentUserRole?: FamilyRoleFromHook;
+  isOwner?: boolean;
+  currentUserId?: string;
 }
 
 export function GoalsTab({
@@ -46,6 +52,9 @@ export function GoalsTab({
   onViewGoal,
   isLoading = false,
   onRefreshGoals,
+  currentUserRole,
+  isOwner = false,
+  currentUserId,
 }: GoalsTabProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [isGoalOperationLoading, setIsGoalOperationLoading] = useState(false);
@@ -235,6 +244,9 @@ export function GoalsTab({
   
   const overallStatus = getOverallStatus();
 
+  // Get permissions for family goals
+  const permissions = getGoalPermissions(currentUserRole, isOwner, undefined, currentUserId);
+
   if (isLoading || isGoalOperationLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
@@ -345,14 +357,20 @@ export function GoalsTab({
           </div>
           <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">No Goals Yet</h3>
           <p className="text-xs sm:text-sm text-slate-500 mb-4 sm:mb-6">
-            Start by creating your first family savings goal.
+            {permissions.canAdd 
+              ? "Start by creating your first family savings goal."
+              : "No family goals have been created yet."}
           </p>
-          <Button onClick={handleAddGoal} size="sm" className="h-8 sm:h-9">
-            <Flag size={14} className="mr-1 sm:w-4 sm:h-4" />
-            Create Goal
-          </Button>
+          {permissions.canAdd && (
+            <Button onClick={handleAddGoal} size="sm" className="h-8 sm:h-9">
+              <Flag size={14} className="mr-1 sm:w-4 sm:h-4" />
+              Create Goal
+            </Button>
+          )}
           <div className="text-[10px] sm:text-xs text-slate-400 mt-4">
-            Set shared financial objectives that your family can work towards together.
+            {permissions.canAdd 
+              ? "Set shared financial objectives that your family can work towards together."
+              : "Only owners and admins can create family goals."}
           </div>
         </div>
 
@@ -468,11 +486,13 @@ export function GoalsTab({
                 </div>
               )}
             </div>
-            <Button size="sm" onClick={handleAddGoal} className="h-8 text-xs flex-shrink-0">
-              <Flag size={14} className="mr-1" />
-              <span className="hidden sm:inline">Add</span>
-              <span className="sm:hidden">Add</span>
-            </Button>
+            {permissions.canAdd && (
+              <Button size="sm" onClick={handleAddGoal} className="h-8 text-xs flex-shrink-0">
+                <Flag size={14} className="mr-1" />
+                <span className="hidden sm:inline">Add</span>
+                <span className="sm:hidden">Add</span>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -544,24 +564,30 @@ export function GoalsTab({
                       {goal.status === "completed" && "Completed"}
                       {goal.status === "paused" && "Paused"}
                     </Badge>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 rounded-lg h-7 w-7 sm:h-8 sm:w-8"
-                        onClick={() => handleEditGoal(goal)}
-                      >
-                        <Edit size={14} className="sm:w-4 sm:h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="p-1.5 sm:p-2 text-slate-400 hover:text-red-600 rounded-lg h-7 w-7 sm:h-8 sm:w-8"
-                        onClick={() => handleDeleteGoal(goal)}
-                      >
-                        <Trash2 size={14} className="sm:w-4 sm:h-4" />
-                      </Button>
-                    </div>
+                    {(permissions.canEdit || permissions.canDelete) && (
+                      <div className="flex items-center gap-1">
+                        {permissions.canEdit && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 rounded-lg h-7 w-7 sm:h-8 sm:w-8"
+                            onClick={() => handleEditGoal(goal)}
+                          >
+                            <Edit size={14} className="sm:w-4 sm:h-4" />
+                          </Button>
+                        )}
+                        {permissions.canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="p-1.5 sm:p-2 text-slate-400 hover:text-red-600 rounded-lg h-7 w-7 sm:h-8 sm:w-8"
+                            onClick={() => handleDeleteGoal(goal)}
+                          >
+                            <Trash2 size={14} className="sm:w-4 sm:h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -655,18 +681,20 @@ export function GoalsTab({
 
                 {/* Quick Actions */}
                 <div className="flex items-center gap-2 mt-3 sm:mt-4 pt-3 border-t border-slate-100">
-                  <Button
-                    size="sm"
-                    className="text-xs py-1 px-2 sm:px-3 flex-1 h-7 sm:h-8"
-                    onClick={() => handleContributeGoal(goal)}
-                    disabled={goal.status === "completed"}
-                  >
-                    Contribute
-                  </Button>
+                  {permissions.canContribute && (
+                    <Button
+                      size="sm"
+                      className="text-xs py-1 px-2 sm:px-3 flex-1 h-7 sm:h-8"
+                      onClick={() => handleContributeGoal(goal)}
+                      disabled={goal.status === "completed"}
+                    >
+                      Contribute
+                    </Button>
+                  )}
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-xs h-7 sm:h-8 px-2" 
+                    className={`text-xs h-7 sm:h-8 px-2 ${!permissions.canContribute ? 'flex-1' : ''}`}
                     onClick={() => handleViewGoal(goal)}
                   >
                     View Details
@@ -704,24 +732,24 @@ export function GoalsTab({
         open={viewModalOpen}
         onClose={() => setViewModalOpen(false)}
         goal={selectedGoal as GoalType}
-        onEdit={() => {
+        onEdit={permissions.canEdit ? () => {
           setViewModalOpen(false);
           if (selectedGoal) {
             handleEditGoal(selectedGoal as SharedGoal);
           }
-        }}
-        onDelete={() => {
+        } : undefined}
+        onDelete={permissions.canDelete ? () => {
           setViewModalOpen(false);
           if (selectedGoal) {
             handleDeleteGoal(selectedGoal as SharedGoal);
           }
-        }}
-        onContribute={() => {
+        } : undefined}
+        onContribute={permissions.canContribute ? () => {
           setViewModalOpen(false);
           if (selectedGoal) {
             handleContributeGoal(selectedGoal as SharedGoal);
           }
-        }}
+        } : undefined}
       />
 
       <EditGoalModal
