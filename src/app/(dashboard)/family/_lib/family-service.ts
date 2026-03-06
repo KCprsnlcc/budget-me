@@ -185,6 +185,7 @@ function mapPublicFamilyRow(row: any): PublicFamily {
     description: row.description ?? "",
     memberCount: row._memberCount ?? 0,
     createdBy: row._createdByName ?? "Unknown",
+    creatorAvatar: row._creatorAvatar,
     createdAt: row.created_at,
     isPublic: true,
   };
@@ -571,17 +572,21 @@ export async function fetchPublicFamilies(
   const creatorIds = (data ?? []).map((f: any) => f.created_by);
   const { data: creatorProfiles } = await supabase
     .from("profiles")
-    .select("id, full_name, email")
+    .select("id, full_name, email, avatar_url")
     .in("id", creatorIds);
 
-  const creatorMap: Record<string, string> = {};
+  const creatorMap: Record<string, { name: string; avatar?: string }> = {};
   (creatorProfiles ?? []).forEach((p: any) => {
-    creatorMap[p.id] = p.full_name || p.email || "Unknown";
+    creatorMap[p.id] = {
+      name: p.full_name || p.email || "Unknown",
+      avatar: p.avatar_url || undefined,
+    };
   });
 
   const families = (data ?? []).map((row: any) => {
     row._memberCount = countMap[row.id] ?? 0;
-    row._createdByName = creatorMap[row.created_by] ?? "Unknown";
+    row._createdByName = creatorMap[row.created_by]?.name ?? "Unknown";
+    row._creatorAvatar = creatorMap[row.created_by]?.avatar;
     return mapPublicFamilyRow(row);
   });
 

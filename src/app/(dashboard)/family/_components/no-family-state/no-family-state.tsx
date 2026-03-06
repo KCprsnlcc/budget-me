@@ -380,7 +380,7 @@ export function NoFamilyState({
                                       className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-slate-200"
                                     />
                                   ) : (
-                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200">
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center text-emerald-500 border border-slate-200">
                                       <Users size={16} className="sm:w-5 sm:h-5" />
                                     </div>
                                   )}
@@ -464,10 +464,10 @@ export function NoFamilyState({
                                     <img
                                       src={family.creatorAvatar}
                                       alt={family.createdBy}
-                                      className="w-4 h-4 sm:w-5 sm:h-5 rounded-full object-cover border border-slate-100"
+                                      className="w-4 h-4 sm:w-5 sm:h-5 rounded-full object-cover border border-slate-200"
                                     />
                                   ) : (
-                                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-100 flex items-center justify-center text-[6px] sm:text-[8px] font-medium text-slate-400 border border-slate-100">
+                                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white flex items-center justify-center text-[6px] sm:text-[8px] font-medium text-emerald-600 border border-slate-200">
                                       {family.createdBy.split(' ').map(n => n[0]).join('').slice(0, 2)}
                                     </div>
                                   )}

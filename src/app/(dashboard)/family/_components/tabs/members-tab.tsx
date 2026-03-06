@@ -378,10 +378,10 @@ export function MembersTab({
                         <img
                           src={request.avatar}
                           alt={request.name}
-                          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-blue-100"
+                          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-slate-200"
                         />
                       ) : (
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-blue-100 flex items-center justify-center text-blue-700 font-medium text-xs sm:text-sm">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-emerald-600 font-medium text-xs sm:text-sm">
                           {request.name.split(' ').map(n => n[0]).join('')}
                         </div>
                       )}
