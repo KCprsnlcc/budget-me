@@ -49,19 +49,82 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/settings") ||
     request.nextUrl.pathname.startsWith("/accounts");
 
-  // Redirect authenticated users away from auth pages to dashboard
+  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
+
+  // Redirect authenticated users away from auth pages
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
+    
+    // Check if user is admin by querying user_roles or profiles table
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role_name")
+      .eq("user_id", user.id)
+      .eq("role_name", "admin")
+      .eq("is_active", true)
+      .maybeSingle();
+    
+    // Fallback to profiles table if no role found in user_roles
+    if (!roleData) {
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      
+      if (profileData?.role === "admin") {
+        url.pathname = "/admin/dashboard";
+        return NextResponse.redirect(url);
+      }
+    } else {
+      // User has admin role in user_roles table
+      url.pathname = "/admin/dashboard";
+      return NextResponse.redirect(url);
+    }
+    
+    // Default redirect to dashboard for regular users
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
   // Redirect unauthenticated users away from protected pages to login
-  if (!user && isDashboardRoute) {
+  if (!user && (isDashboardRoute || isAdminRoute)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirectTo", request.nextUrl.pathname);
     return NextResponse.redirect(url);
+  }
+
+  // Redirect non-admin users away from admin routes to dashboard
+  if (user && isAdminRoute) {
+    // Check if user is admin
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role_name")
+      .eq("user_id", user.id)
+      .eq("role_name", "admin")
+      .eq("is_active", true)
+      .maybeSingle();
+    
+    let isAdmin = !!roleData;
+    
+    // Fallback to profiles table if no role found in user_roles
+    if (!isAdmin) {
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      
+      isAdmin = profileData?.role === "admin";
+    }
+    
+    // Redirect non-admin users to dashboard
+    if (!isAdmin) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;

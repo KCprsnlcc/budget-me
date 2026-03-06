@@ -35,6 +35,41 @@ export const DASHBOARD_NAV: NavGroup[] = [
   },
 ];
 
+export const ADMIN_NAV: NavGroup[] = [
+  {
+    label: "Administration",
+    items: [
+      { label: "Dashboard", href: "/admin/dashboard", icon: "LayoutDashboard", module: "admin-dashboard" },
+      { label: "User Management", href: "/admin/users", icon: "Users", module: "admin-users" },
+    ],
+  },
+  {
+    label: "Module Management",
+    items: [
+      { label: "Transactions", href: "/admin/transactions", icon: "ArrowLeftRight", module: "admin-transactions" },
+      { label: "Budgets", href: "/admin/budgets", icon: "PieChart", module: "admin-budgets" },
+      { label: "Goals", href: "/admin/goals", icon: "Flag", module: "admin-goals" },
+      { label: "Family", href: "/admin/family", icon: "Users", module: "admin-family" },
+      { label: "Reports", href: "/admin/reports", icon: "BarChart3", module: "admin-reports" },
+    ],
+  },
+  {
+    label: "AI Management",
+    items: [
+      { label: "AI Predictions", href: "/admin/predictions", icon: "Wand2", module: "admin-predictions" },
+      { label: "BudgetSense AI", href: "/admin/chatbot", icon: "Bot", module: "admin-chatbot" },
+      { label: "AI Usage Activity", href: "/admin/ai-usage", icon: "Activity", module: "admin-ai-usage" },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { label: "System Analytics", href: "/admin/analytics", icon: "Activity", module: "admin-analytics" },
+      { label: "System Settings", href: "/admin/settings", icon: "Settings", module: "admin-settings" },
+    ],
+  },
+];
+
 export const FEATURES: Feature[] = [
   {
     title: "Expense Tracking",
