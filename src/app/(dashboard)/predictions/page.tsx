@@ -33,13 +33,11 @@ import {
   ShieldCheck,
   File,
   ListChecks,
-  Calendar,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Button } from "@/components/ui/button";
-import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { toast } from "sonner";
 import { 
   HistoryModal,
@@ -63,6 +61,7 @@ import {
   type SavingsOpportunity,
   type PredictionHistory,
 } from "./_components";
+import { ChartYearDropdown } from "./_components/chart-year-dropdown";
 import { useAuth } from "@/components/auth/auth-context";
 import { useState, useCallback, useEffect, useRef } from "react";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
@@ -856,7 +855,7 @@ export default function PredictionsPage() {
   ];
 
   // Extract unique years from chart data
-  const availableYears = Array.from(new Set(chartData.map(d => d.year).filter(Boolean))).sort();
+  const availableYears = Array.from(new Set(chartData.map(d => d.year).filter((year): year is number => typeof year === 'number'))).sort();
   
   // Filter chart data by selected year
   const filteredChartData = selectedYear === "all" || selectedYear === "" 
@@ -1351,25 +1350,6 @@ export default function PredictionsPage() {
             <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Prophet ML predictions with confidence intervals</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-            {/* Year Filter */}
-            {availableYears.length > 0 && (
-              <div className="w-32">
-                <FilterDropdown
-                  value={selectedYear}
-                  onChange={handleYearChange}
-                  options={availableYears.map(year => ({
-                    value: year?.toString() || '',
-                    label: year?.toString() || '',
-                    icon: Calendar,
-                  }))}
-                  placeholder="Select Year"
-                  emptyLabel="All Years"
-                  allowEmpty={true}
-                  hideSearch={true}
-                  className="text-[10px] sm:text-xs"
-                />
-              </div>
-            )}
             <div className="flex items-center gap-1 sm:gap-1.5">
               <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-slate-200"></div>
               <span className="text-[9px] sm:text-[10px] font-medium text-slate-500">Historical Income</span>
@@ -1382,6 +1362,14 @@ export default function PredictionsPage() {
               <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-emerald-500"></div>
               <span className="text-[9px] sm:text-[10px] font-medium text-slate-500">Expenses</span>
             </div>
+            {/* Year Filter - Badge style dropdown */}
+            {availableYears.length > 0 && (
+              <ChartYearDropdown
+                value={selectedYear}
+                onChange={handleYearChange}
+                years={availableYears}
+              />
+            )}
           </div>
         </div>
 
