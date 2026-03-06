@@ -404,7 +404,15 @@ export function NoFamilyState({
                               </p>
                               <div className="flex items-center justify-between text-[10px] sm:text-xs text-slate-500">
                                 <div className="flex items-center gap-1">
-                                  <User size={10} className="sm:w-3 sm:h-3" />
+                                  {request.createdByAvatar ? (
+                                    <img
+                                      src={request.createdByAvatar}
+                                      alt={request.createdBy}
+                                      className="w-3 h-3 sm:w-4 sm:h-4 rounded-full object-cover border border-slate-200"
+                                    />
+                                  ) : (
+                                    <User size={10} className="sm:w-3 sm:h-3" />
+                                  )}
                                   <span>{request.createdBy}</span>
                                 </div>
                                 <div className="flex items-center gap-1">

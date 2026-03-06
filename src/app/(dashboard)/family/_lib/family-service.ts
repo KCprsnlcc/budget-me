@@ -938,28 +938,62 @@ export async function respondToInvitation(
       return { error: "You are already a family owner and cannot join another family. Please transfer or delete your family first." };
     }
 
-    // Ensure user has a profile before adding to family
+    // Ensure user has a profile before adding to family (same logic as createFamily)
+    let profileExists = false;
     const { data: userProfile } = await supabase
       .from("profiles")
       .select("id")
       .eq("id", userId)
       .maybeSingle();
 
-    if (!userProfile) {
-      // Get user data from auth to create profile
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user && user.id === userId) {
-        // Create profile for the user
-        await supabase
-          .from("profiles")
-          .insert({
-            id: userId,
-            full_name: user.user_metadata?.full_name || null,
-            email: user.email || null,
-            avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
-            updated_at: new Date().toISOString()
-          });
+    if (userProfile) {
+      profileExists = true;
+    } else {
+      // Try to create profile from auth user metadata
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user && user.id === userId) {
+          const { error: profileErr } = await supabase
+            .from("profiles")
+            .insert({
+              id: userId,
+              full_name: user.user_metadata?.full_name || null,
+              email: user.email || null,
+              avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+              updated_at: new Date().toISOString()
+            });
+          
+          if (profileErr) {
+            console.error("Failed to create profile:", profileErr);
+            // Check if it's a duplicate key error (profile already exists)
+            if (profileErr.message?.includes('duplicate') || profileErr.message?.includes('already exists')) {
+              profileExists = true;
+            } else {
+              return { error: "Failed to create user profile. Please try again." };
+            }
+          } else {
+            profileExists = true;
+          }
+          
+          // Verify profile was created by reading it back
+          if (profileExists) {
+            const { data: verifyProfile } = await supabase
+              .from("profiles")
+              .select("id")
+              .eq("id", userId)
+              .maybeSingle();
+            
+            if (!verifyProfile) {
+              return { error: "Profile creation verification failed. Please try again." };
+            }
+          }
+        } else {
+          return { error: "Unable to verify user identity. Please try again." };
+        }
+      } catch (err) {
+        console.error("Error creating profile:", err);
+        return { error: "Failed to create user profile. Please try again." };
       }
     }
 
@@ -1074,6 +1108,43 @@ export async function sendJoinRequest(
     return { error: "You are already a family owner and cannot join another family. Please transfer or delete your family first." };
   }
 
+  // Ensure user has a profile before sending join request
+  const { data: existingProfile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (!existingProfile) {
+    // Try to create profile from auth user metadata
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user && user.id === userId) {
+        const { error: profileErr } = await supabase
+          .from("profiles")
+          .insert({
+            id: userId,
+            full_name: user.user_metadata?.full_name || null,
+            email: user.email || null,
+            avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+            updated_at: new Date().toISOString()
+          });
+        
+        if (profileErr) {
+          console.error("Failed to create profile:", profileErr);
+          // Check if it's a duplicate key error (profile already exists)
+          if (!profileErr.message?.includes('duplicate') && !profileErr.message?.includes('already exists')) {
+            return { error: "Failed to create user profile. Please try again." };
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error creating profile:", err);
+      // Continue anyway, profile might exist
+    }
+  }
+
   // Check if request already exists
   const { data: existing } = await supabase
     .from("family_join_requests")
@@ -1151,6 +1222,61 @@ export async function respondToJoinRequest(
 
     if (ownedFamilies && ownedFamilies.length > 0) {
       return { error: "This user is a family owner and cannot join another family." };
+    }
+
+    // Ensure requester has a profile before adding to family
+    let profileExists = false;
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", request.user_id)
+      .maybeSingle();
+
+    if (userProfile) {
+      profileExists = true;
+    } else {
+      // Create a basic profile for the requester
+      // Note: We can't access their auth metadata from here, so create a minimal profile
+      // The user's profile will be updated with their actual data when they log in
+      try {
+        const { error: profileErr } = await supabase
+          .from("profiles")
+          .insert({
+            id: request.user_id,
+            full_name: null,
+            email: null,
+            avatar_url: null,
+            updated_at: new Date().toISOString()
+          });
+        
+        if (profileErr) {
+          console.error("Failed to create profile:", profileErr);
+          // Check if it's a duplicate key error (profile already exists)
+          if (profileErr.message?.includes('duplicate') || profileErr.message?.includes('already exists')) {
+            profileExists = true;
+          } else {
+            return { error: "Failed to create user profile. Please try again." };
+          }
+        } else {
+          profileExists = true;
+        }
+        
+        // Verify profile was created by reading it back
+        if (profileExists) {
+          const { data: verifyProfile } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("id", request.user_id)
+            .maybeSingle();
+          
+          if (!verifyProfile) {
+            return { error: "Profile creation verification failed. Please try again." };
+          }
+        }
+      } catch (err) {
+        console.error("Error creating profile:", err);
+        return { error: "Failed to create user profile. Please try again." };
+      }
     }
 
     // Check if user already has a membership record (could be removed/inactive)
