@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { Account, AccountColor } from "./types";
 import { ACCOUNT_COLORS } from "./constants";
+import { Stepper } from "../../family/_components/stepper";
 
 interface EditAccountModalProps {
   open: boolean;
@@ -108,6 +109,9 @@ export function EditAccountModal({ open, onClose, account, onEdit }: EditAccount
         <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
           <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Edit Account</span>
         </ModalHeader>
+
+        {/* Stepper */}
+        <Stepper currentStep={step} totalSteps={3} labels={STEPS} />
 
         {/* Body */}
         <ModalBody className="max-h-[60vh] bg-[#F9FAFB]/30 p-4 sm:p-6">
