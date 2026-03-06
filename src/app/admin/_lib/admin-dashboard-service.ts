@@ -326,32 +326,32 @@ export async function fetchSystemActivity(days: number = 7): Promise<SystemActiv
       nextDate.setDate(nextDate.getDate() + 1);
       const nextDateStr = nextDate.toISOString().split("T")[0];
 
-      // New users
-      const { count: newUsers } = await supabase
+      // New users - using DATE() function for proper date comparison
+      const { data: newUsersData } = await supabase
         .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .gte("created_at", dateStr)
-        .lt("created_at", nextDateStr);
+        .select("id")
+        .gte("created_at", `${dateStr}T00:00:00`)
+        .lt("created_at", `${nextDateStr}T00:00:00`);
 
       // Transactions
-      const { count: transactions } = await supabase
+      const { data: transactionsData } = await supabase
         .from("transactions")
-        .select("id", { count: "exact", head: true })
-        .gte("created_at", dateStr)
-        .lt("created_at", nextDateStr);
+        .select("id")
+        .gte("created_at", `${dateStr}T00:00:00`)
+        .lt("created_at", `${nextDateStr}T00:00:00`);
 
       // AI requests
-      const { count: aiRequests } = await supabase
+      const { data: aiRequestsData } = await supabase
         .from("chatbot_messages")
-        .select("id", { count: "exact", head: true })
-        .gte("created_at", dateStr)
-        .lt("created_at", nextDateStr);
+        .select("id")
+        .gte("created_at", `${dateStr}T00:00:00`)
+        .lt("created_at", `${nextDateStr}T00:00:00`);
 
       activities.push({
         date: dateStr,
-        new_users: newUsers ?? 0,
-        transactions: transactions ?? 0,
-        ai_requests: aiRequests ?? 0,
+        new_users: newUsersData?.length ?? 0,
+        transactions: transactionsData?.length ?? 0,
+        ai_requests: aiRequestsData?.length ?? 0,
       });
     }
 

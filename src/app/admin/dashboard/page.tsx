@@ -29,6 +29,17 @@ import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
 // ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+type HoveredBar = {
+  date: string;
+  type: 'new_users' | 'transactions' | 'ai_requests';
+  value: number;
+  index: number;
+} | null;
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -66,6 +77,7 @@ export default function AdminDashboardPage() {
   const [systemActivity, setSystemActivity] = useState<SystemActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hoveredBar, setHoveredBar] = useState<HoveredBar>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -137,9 +149,9 @@ export default function AdminDashboardPage() {
     );
     return systemActivity.map((d) => ({
       date: d.date,
-      new_users: (d.new_users / maxValue) * 100,
-      transactions: (d.transactions / maxValue) * 100,
-      ai_requests: (d.ai_requests / maxValue) * 100,
+      new_users: d.new_users > 0 ? Math.max((d.new_users / maxValue) * 100, 5) : 0,
+      transactions: d.transactions > 0 ? Math.max((d.transactions / maxValue) * 100, 5) : 0,
+      ai_requests: d.ai_requests > 0 ? Math.max((d.ai_requests / maxValue) * 100, 5) : 0,
       new_users_value: d.new_users,
       transactions_value: d.transactions,
       ai_requests_value: d.ai_requests,
@@ -254,20 +266,31 @@ export default function AdminDashboardPage() {
           </h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {moduleStats.map((stat, index) => {
-            // Color palette - 8 distinct colors used throughout the codebase
-            const colors = [
-              { border: 'border-emerald-500', label: 'text-emerald-700', icon: 'text-emerald-600' },
-              { border: 'border-blue-500', label: 'text-blue-700', icon: 'text-blue-600' },
-              { border: 'border-purple-500', label: 'text-purple-700', icon: 'text-purple-600' },
-              { border: 'border-amber-500', label: 'text-amber-700', icon: 'text-amber-600' },
-              { border: 'border-red-500', label: 'text-red-700', icon: 'text-red-600' },
-              { border: 'border-indigo-500', label: 'text-indigo-700', icon: 'text-indigo-600' },
-              { border: 'border-pink-500', label: 'text-pink-700', icon: 'text-pink-600' },
-              { border: 'border-teal-500', label: 'text-teal-700', icon: 'text-teal-600' },
-            ];
+          {moduleStats.map((stat) => {
+            // Assign colors based on module type
+            const getColorScheme = (module: string) => {
+              const moduleLower = module.toLowerCase();
+              
+              // Green for Transactions & Family
+              if (moduleLower.includes('transaction') || moduleLower.includes('family')) {
+                return { border: 'border-emerald-500', label: 'text-emerald-700', icon: 'text-emerald-600' };
+              }
+              
+              // Orange for Budgets & Predictions
+              if (moduleLower.includes('budget') || moduleLower.includes('prediction')) {
+                return { border: 'border-amber-500', label: 'text-amber-700', icon: 'text-amber-600' };
+              }
+              
+              // Blue for Goals & Chatbot
+              if (moduleLower.includes('goal') || moduleLower.includes('chatbot')) {
+                return { border: 'border-blue-500', label: 'text-blue-700', icon: 'text-blue-600' };
+              }
+              
+              // Default fallback
+              return { border: 'border-slate-500', label: 'text-slate-700', icon: 'text-slate-600' };
+            };
             
-            const colorScheme = colors[index % colors.length];
+            const colorScheme = getColorScheme(stat.module);
             
             // Determine icon, route, and description based on module type
             const getModuleConfig = (module: string) => {
@@ -358,14 +381,17 @@ export default function AdminDashboardPage() {
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <div className="flex items-center gap-1 sm:gap-1.5">
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-slate-300 rounded-sm" />
               <span className="text-[10px] font-medium text-slate-400">New Users</span>
             </div>
             <div className="flex items-center gap-1 sm:gap-1.5">
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-slate-200 border-2 border-emerald-500 border-dashed rounded-sm" />
               <span className="text-[10px] font-medium text-slate-400">
                 AI Requests
               </span>
             </div>
             <div className="flex items-center gap-1 sm:gap-1.5">
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-emerald-500 rounded-sm" />
               <span className="text-[10px] font-medium text-slate-400">
                 Transactions
               </span>
@@ -395,21 +421,52 @@ export default function AdminDashboardPage() {
                     key={d.date}
                     className="flex gap-1 h-full items-end flex-1 justify-center z-10 group cursor-pointer relative"
                   >
-                    <div
-                      className="w-3 sm:w-5 rounded-t-[2px] transition-all hover:opacity-100"
-                      style={{ height: `${usersHeight}%` }}
-                      title={`${d.new_users_value} new users`}
-                    />
-                    <div
-                      className="w-3 sm:w-5 rounded-t-[2px] transition-all hover:opacity-100"
-                      style={{ height: `${aiRequestsHeight}%` }}
-                      title={`${d.ai_requests_value} AI requests`}
-                    />
-                    <div
-                      className="w-3 sm:w-5 rounded-t-[2px] transition-all hover:opacity-100"
-                      style={{ height: `${transactionsHeight}%` }}
-                      title={`${d.transactions_value} transactions`}
-                    />
+                    {d.new_users_value > 0 && (
+                      <div
+                        className="w-3 sm:w-5 bg-slate-300 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-slate-400 hover:ring-offset-1"
+                        style={{ height: `${usersHeight}%`, minHeight: '4px' }}
+                        onMouseEnter={() => setHoveredBar({ date: d.date, type: 'new_users', value: d.new_users_value, index: i })}
+                        onMouseLeave={() => setHoveredBar(null)}
+                      />
+                    )}
+                    {d.ai_requests_value > 0 && (
+                      <div
+                        className="w-3 sm:w-5 bg-slate-200 border-2 border-emerald-500 border-dashed rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
+                        style={{ height: `${aiRequestsHeight}%`, minHeight: '4px' }}
+                        onMouseEnter={() => setHoveredBar({ date: d.date, type: 'ai_requests', value: d.ai_requests_value, index: i })}
+                        onMouseLeave={() => setHoveredBar(null)}
+                      />
+                    )}
+                    {d.transactions_value > 0 && (
+                      <div
+                        className="w-3 sm:w-5 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
+                        style={{ height: `${transactionsHeight}%`, minHeight: '4px' }}
+                        onMouseEnter={() => setHoveredBar({ date: d.date, type: 'transactions', value: d.transactions_value, index: i })}
+                        onMouseLeave={() => setHoveredBar(null)}
+                      />
+                    )}
+                    
+                    {/* Tooltip */}
+                    {hoveredBar && hoveredBar.index === i && (
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-[10px] sm:text-xs rounded shadow-sm whitespace-nowrap z-50">
+                        <div className="font-medium text-slate-700">
+                          {new Date(hoveredBar.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
+                            hoveredBar.type === 'new_users' 
+                              ? 'bg-slate-300'
+                              : hoveredBar.type === 'ai_requests'
+                              ? 'bg-slate-200 border border-emerald-500'
+                              : 'bg-emerald-500'
+                          }`} />
+                          <span className="capitalize">
+                            {hoveredBar.type === 'new_users' ? 'New Users' : hoveredBar.type === 'ai_requests' ? 'AI Requests' : 'Transactions'}: {hoveredBar.value}
+                          </span>
+                        </div>
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
