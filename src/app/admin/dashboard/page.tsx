@@ -163,9 +163,12 @@ export default function AdminDashboardPage() {
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
           {/* Header Skeleton */}
-          <div>
-            <Skeleton width={200} height={28} className="mb-2" />
-            <Skeleton width={350} height={16} />
+          <div className="flex items-center justify-between">
+            <div>
+              <Skeleton width={180} height={28} className="mb-2 sm:w-[200px]" />
+              <Skeleton width={280} height={16} className="sm:w-[320px]" />
+            </div>
+            <Skeleton width={80} height={32} borderRadius={6} className="sm:w-[90px] sm:h-9" />
           </div>
 
           {/* Stats Grid Skeleton - 4 cards */}
@@ -173,25 +176,103 @@ export default function AdminDashboardPage() {
             {Array.from({ length: 4 }).map((_, i) => (
               <Card key={i} className="p-4 sm:p-5">
                 <div className="flex justify-between items-start mb-3 sm:mb-4">
-                  <Skeleton width={36} height={36} borderRadius={8} />
+                  <Skeleton width={20} height={20} className="sm:w-[22px] sm:h-[22px]" />
                 </div>
-                <Skeleton width={90} height={14} className="mb-2" />
-                <Skeleton width={110} height={24} />
+                <Skeleton width={90} height={12} className="mb-1 sm:w-[100px]" />
+                <Skeleton width={80} height={20} className="sm:w-[90px] sm:h-6" />
               </Card>
             ))}
           </div>
 
-          {/* Charts Skeleton */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            <Card className="p-4 sm:p-6">
-              <Skeleton width={150} height={16} className="mb-6" />
-              <Skeleton height={200} />
-            </Card>
-            <Card className="p-4 sm:p-6">
-              <Skeleton width={150} height={16} className="mb-6" />
-              <Skeleton height={200} />
-            </Card>
+          {/* Module Statistics Skeleton */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <Skeleton width={140} height={14} className="sm:w-[160px] sm:h-[16px]" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="p-3 sm:p-4 border-l-4 border-slate-200">
+                  <div className="flex justify-between items-start mb-1.5 sm:mb-2">
+                    <Skeleton width={80} height={10} className="sm:w-[90px] sm:h-[11px]" />
+                    <Skeleton width={14} height={14} className="sm:w-4 sm:h-4" />
+                  </div>
+                  <Skeleton width={100} height={14} className="mb-0.5 sm:mb-1 sm:w-[110px]" />
+                  <Skeleton width="90%" height={11} className="mb-2 sm:mb-3" />
+                  <Skeleton width={100} height={12} className="sm:w-[110px]" />
+                </Card>
+              ))}
+            </div>
           </div>
+
+          {/* System Activity Chart Skeleton */}
+          <Card className="p-4 sm:p-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+              <div>
+                <Skeleton width={180} height={14} className="mb-1 sm:w-[200px]" />
+                <Skeleton width={200} height={12} className="sm:w-[220px]" />
+              </div>
+              <div className="flex items-center gap-2 sm:gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-1 sm:gap-1.5">
+                    <Skeleton width={10} height={10} circle className="sm:w-3 sm:h-3" />
+                    <Skeleton width={70} height={10} className="sm:w-20" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <Skeleton height={192} className="sm:h-60" />
+            <div className="flex justify-between mt-3 sm:mt-4 px-2 sm:px-4">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <Skeleton key={i} width={30} height={10} className="sm:w-10" />
+              ))}
+            </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-100 gap-3 sm:gap-0">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Skeleton width={70} height={10} className="sm:w-20" />
+                  <Skeleton width={40} height={12} className="sm:w-12" />
+                </div>
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Skeleton width={80} height={10} className="sm:w-24" />
+                  <Skeleton width={40} height={12} className="sm:w-12" />
+                </div>
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Skeleton width={90} height={10} className="sm:w-28" />
+                  <Skeleton width={40} height={12} className="sm:w-12" />
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Recent User Activity Skeleton */}
+          <Card className="p-4 sm:p-6">
+            <div className="mb-4 sm:mb-6">
+              <Skeleton width={180} height={14} className="mb-0.5 sm:w-[200px]" />
+              <Skeleton width={220} height={12} className="sm:w-[250px]" />
+            </div>
+            <div className="space-y-2 sm:space-y-3">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <Card key={i} className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4">
+                  <Skeleton width={32} height={32} borderRadius="50%" className="sm:w-10 sm:h-10" />
+                  <Skeleton width={10} height={10} borderRadius="50%" className="sm:w-3 sm:h-3 -ml-5 sm:-ml-6 mt-4 sm:mt-5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between mb-1 sm:mb-2">
+                      <div className="flex-1 min-w-0 pr-2">
+                        <Skeleton width={120} height={14} className="mb-0.5 sm:w-[140px]" />
+                        <Skeleton width={160} height={10} className="sm:w-[180px]" />
+                      </div>
+                      <Skeleton width={60} height={10} className="sm:w-[70px]" />
+                    </div>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <Skeleton width={50} height={12} className="sm:w-[60px]" />
+                      <Skeleton width={60} height={12} className="sm:w-[70px]" />
+                      <Skeleton width={50} height={12} className="sm:w-[60px]" />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </Card>
         </div>
       </SkeletonTheme>
     );
