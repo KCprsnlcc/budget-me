@@ -368,7 +368,9 @@ export async function fetchFamilyGoals(
     )
     .eq("family_id", familyId)
     .eq("is_family_goal", true)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .order("contribution_date", { referencedTable: "goal_contributions", ascending: false })
+    .order("created_at", { referencedTable: "goal_contributions", ascending: false });
 
   if (error) return { data: [], error: error.message };
 
