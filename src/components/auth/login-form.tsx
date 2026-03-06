@@ -94,7 +94,43 @@ export function LoginForm() {
               setError(signInError.message);
               return;
             }
-            router.push(redirectTo);
+
+            // Check if user is admin and redirect accordingly
+            let finalRedirect = redirectTo;
+            if (redirectTo === "/dashboard") {
+              const { data: { user } } = await supabase.auth.getUser();
+              
+              if (user) {
+                // Check if user is admin
+                const { data: roleData } = await supabase
+                  .from("user_roles")
+                  .select("role_name")
+                  .eq("user_id", user.id)
+                  .eq("role_name", "admin")
+                  .eq("is_active", true)
+                  .maybeSingle();
+                
+                let isAdmin = !!roleData;
+                
+                // Fallback to profiles table if no role found in user_roles
+                if (!isAdmin) {
+                  const { data: profileData } = await supabase
+                    .from("profiles")
+                    .select("role")
+                    .eq("id", user.id)
+                    .maybeSingle();
+                  
+                  isAdmin = profileData?.role === "admin";
+                }
+                
+                // Redirect admin users to admin dashboard
+                if (isAdmin) {
+                  finalRedirect = "/admin/dashboard";
+                }
+              }
+            }
+
+            router.push(finalRedirect);
             router.refresh();
           });
         }}
