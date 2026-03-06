@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { ShieldCheck, Filter, MoreHorizontal, Calendar, TrendingUp, TrendingDown, Flag, Plus, Edit, Trash2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -503,9 +502,13 @@ export function GoalsTab({
               <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Overall Family Goal Progress</h3>
               <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">Your family has saved {overallProgressPercentage}% of your total goal targets.</p>
             </div>
-            <Badge variant={overallStatus.variant} className="text-[10px] sm:text-xs">
+            <span className={`text-[10px] sm:text-xs ${
+              overallStatus.variant === "success" ? "text-emerald-600" :
+              overallStatus.variant === "warning" ? "text-amber-600" :
+              "text-rose-600"
+            }`}>
               {overallStatus.text}
-            </Badge>
+            </span>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between text-[10px] sm:text-xs">
@@ -558,12 +561,17 @@ export function GoalsTab({
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <Badge className={getStatusColor(goal.status) + " px-1.5 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs"}>
+                    <span className={`text-[10px] sm:text-xs ${
+                      goal.status === "on-track" ? "text-emerald-600" :
+                      goal.status === "at-risk" ? "text-amber-600" :
+                      goal.status === "completed" ? "text-blue-600" :
+                      "text-slate-600"
+                    }`}>
                       {goal.status === "on-track" && "On Track"}
                       {goal.status === "at-risk" && "At Risk"}
                       {goal.status === "completed" && "Completed"}
                       {goal.status === "paused" && "Paused"}
-                    </Badge>
+                    </span>
                     {(permissions.canEdit || permissions.canDelete) && (
                       <div className="flex items-center gap-1">
                         {permissions.canEdit && (

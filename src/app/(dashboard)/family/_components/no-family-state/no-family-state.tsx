@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { Users, Plus, Search, Mail, Home, Check, Clock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CreateFamilyModal, InviteMemberModal } from "../index";
@@ -481,10 +480,9 @@ export function NoFamilyState({
                                   )}
                                   <span>Created by {family.createdBy}</span>
                                 </div>
-                                <div className="flex items-center gap-1.5 px-1.5 sm:px-2 py-0.5 bg-slate-50 rounded-full border border-slate-100 text-slate-400">
-                                  <div className="w-1 h-1 rounded-full bg-slate-300" />
-                                  <span>Public group</span>
-                                </div>
+                                <span className="text-slate-400">
+                                  Public group
+                                </span>
                               </div>
                             </Card>
                           ))}

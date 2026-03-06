@@ -166,14 +166,14 @@ const SummaryCard = memo(({ item }: { item: SummaryType }) => {
   return (
     <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
       <div className="flex justify-between items-start mb-4">
-        <div className="text-slate-500 p-2">
+        <div className="text-slate-500">
           {Icon && <Icon size={22} strokeWidth={1.5} />}
         </div>
         {item.change && (
           <div className={`flex items-center gap-1 text-[10px] font-medium ${
-            item.trend === "up" ? "text-emerald-700 border-emerald-100" : 
-            "text-red-700 border-red-100"
-          } px-2 py-1 rounded-full border`}>
+            item.trend === "up" ? "text-emerald-700" : 
+            "text-red-700"
+          }`}>
             {item.trend === "up" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
             {item.change}
           </div>
@@ -205,7 +205,7 @@ const TransactionCard = memo(({
     <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
-          <div className="text-lg p-2">
+          <div className="text-lg">
             {tx.category_icon ? <tx.category_icon size={20} /> : <FileText size={20} />}
           </div>
           <div>
@@ -214,9 +214,9 @@ const TransactionCard = memo(({
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <Badge variant={isIncome ? "info" : "success"} className="text-xs">
+          <span className={`text-xs font-medium ${isIncome ? "text-blue-600" : "text-emerald-600"}`}>
             {catName}
-          </Badge>
+          </span>
           <span className="text-xs text-slate-400">{formatDate(tx.date)}</span>
         </div>
       </div>
@@ -265,9 +265,9 @@ const TransactionRow = memo(({
       <TableCell className="px-6 py-4 text-slate-400">{formatDate(tx.date)}</TableCell>
       <TableCell className="px-6 py-4 font-medium text-slate-900">{tx.description ?? "—"}</TableCell>
       <TableCell className="px-6 py-4">
-        <Badge variant={isIncome ? "info" : "success"}>
+        <span className={`text-xs font-medium ${isIncome ? "text-blue-600" : "text-emerald-600"}`}>
           {tx.category_name ?? tx.type}
-        </Badge>
+        </span>
       </TableCell>
       <TableCell className="px-6 py-4 text-slate-500">{accountLabel(tx)}</TableCell>
       <TableCell className="px-6 py-4 text-right font-medium text-slate-900">

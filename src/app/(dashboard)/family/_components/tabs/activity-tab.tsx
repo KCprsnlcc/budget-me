@@ -4,7 +4,6 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from "react"
 import { Wallet, Flag, UserPlus, Filter, Clock, Search, RotateCcw, Download, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -407,7 +406,7 @@ export function ActivityTab({
             <Filter size={14} className="sm:w-4 sm:h-4" />
             <span className="font-medium text-[10px] sm:text-xs">Filters</span>
             {(searchQuery || activeFilter !== "" || monthFilter !== "all" || yearFilter !== "all") && (
-              <span className="bg-emerald-100 text-emerald-800 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+              <span className="text-emerald-800 text-[10px] sm:text-xs">
                 {filteredActivities.length} results
               </span>
             )}
@@ -555,7 +554,7 @@ export function ActivityTab({
                       </div>
                       <div className="flex items-center gap-1.5 sm:gap-2 ml-1 flex-shrink-0">
                         {isRealtime && (
-                          <span className="bg-emerald-100 text-emerald-800 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium">
+                          <span className="text-emerald-800 text-[10px] sm:text-xs font-medium">
                             New
                           </span>
                         )}
@@ -566,9 +565,9 @@ export function ActivityTab({
                     </div>
                     
                     <div className="flex items-center gap-1.5 sm:gap-2">
-                      <Badge className={`${getBadgeColor(activity.type)} text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 border font-medium`}>
+                      <span className="text-slate-700 text-[10px] sm:text-xs font-medium">
                         {activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
-                      </Badge>
+                      </span>
                       <span className="text-[10px] sm:text-xs text-slate-300">•</span>
                       <span className="text-[10px] sm:text-xs text-slate-500 capitalize">
                         {activity.details}

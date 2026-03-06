@@ -95,7 +95,7 @@ const BudgetRow = memo(({
     <Card className="bg-white group rounded-xl border border-slate-200/60 shadow-sm p-5 hover:shadow-md transition-all cursor-pointer">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg text-slate-600">
+          <div className="text-slate-600">
             <Briefcase size={20} />
           </div>
           <div>
@@ -103,9 +103,9 @@ const BudgetRow = memo(({
             <p className="text-[10px] text-slate-500 capitalize">{periodLabel} • {budget.expense_category_name ?? budget.category_name ?? "Uncategorized"}</p>
           </div>
         </div>
-        <Badge variant={health === "on-track" ? "success" : health === "caution" ? "warning" : "danger"}>
+        <span className={`text-xs font-medium ${health === "on-track" ? "text-emerald-600" : health === "caution" ? "text-amber-600" : "text-red-600"}`}>
           {health === "on-track" ? "On Track" : health === "caution" ? "Caution" : "At Risk"}
-        </Badge>
+        </span>
       </div>
       <div className="space-y-2">
         <div className="flex justify-between text-xs">
@@ -599,20 +599,20 @@ export default function BudgetsPage() {
           return (
             <Card key={item.label} className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex justify-between items-start mb-3 sm:mb-4">
-                <div className="text-slate-500 p-2 rounded-lg">
+                <div className="text-slate-500">
                   <Icon size={22} strokeWidth={1.5} />
                 </div>
                 {item.label === "Remaining" ? (
-                  <Badge variant={overallHealth === "on-track" ? "success" : overallHealth === "caution" ? "warning" : "danger"}>
+                  <span className={`text-xs font-medium ${overallHealth === "on-track" ? "text-emerald-600" : overallHealth === "caution" ? "text-amber-600" : "text-red-600"}`}>
                     {item.badge}
-                  </Badge>
+                  </span>
                 ) : (
                   <div className={`flex items-center gap-1 text-[10px] font-medium ${
-                    item.color === "emerald" ? "text-emerald-700 border-emerald-100" : 
-                    item.color === "blue" ? "text-blue-700 border-blue-100" :
-                    item.color === "amber" ? "text-amber-700 border-amber-100" :
-                    "text-slate-700 border-slate-100"
-                  } px-2 py-1 rounded-full border`}>
+                    item.color === "emerald" ? "text-emerald-700" : 
+                    item.color === "blue" ? "text-blue-700" :
+                    item.color === "amber" ? "text-amber-700" :
+                    "text-slate-700"
+                  }`}>
                     <TrendingUp size={12} /> {item.badge}
                   </div>
                 )}
@@ -720,7 +720,7 @@ export default function BudgetsPage() {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-48 sm:h-60 text-center px-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
                   <TrendingUp size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Budget Data</h4>
@@ -771,7 +771,7 @@ export default function BudgetsPage() {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center px-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
                   <PiggyBank size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Budget Allocation</h4>
@@ -794,9 +794,9 @@ export default function BudgetsPage() {
             <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Overall Budget Health</h3>
             <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">You have spent {overallPercentage}% of your total budget across all categories.</p>
           </div>
-          <Badge variant={overallHealth === "on-track" ? "success" : overallHealth === "caution" ? "warning" : "danger"} className="shrink-0">
+          <span className={`text-xs font-medium ${overallHealth === "on-track" ? "text-emerald-600" : overallHealth === "caution" ? "text-amber-600" : "text-red-600"}`}>
             {overallHealth === "on-track" ? "Healthy" : overallHealth === "caution" ? "Caution" : "At Risk"}
-          </Badge>
+          </span>
         </div>
         <div className="w-full bg-slate-100 rounded-full h-2.5 sm:h-3 mt-2 overflow-hidden">
           <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${Math.min(overallPercentage, 100)}%` }} />
@@ -939,7 +939,7 @@ export default function BudgetsPage() {
                       <tr key={budget.id} className="hover:bg-slate-50/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="text-slate-500 p-2 rounded-lg">
+                            <div className="text-slate-500">
                               <Briefcase size={16} strokeWidth={1.5} />
                             </div>
                             <div>
@@ -949,9 +949,9 @@ export default function BudgetsPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <Badge variant="neutral" className="text-xs">
+                          <span className="text-xs font-medium text-slate-600">
                             {budget.expense_category_name ?? budget.category_name ?? "Uncategorized"}
-                          </Badge>
+                          </span>
                         </td>
                         <td className="px-6 py-4 text-right font-medium text-slate-900">
                           ₱{budget.amount.toLocaleString()}
@@ -967,9 +967,9 @@ export default function BudgetsPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <Badge variant={health === "on-track" ? "success" : health === "caution" ? "warning" : "danger"}>
+                          <span className={`text-xs font-medium ${health === "on-track" ? "text-emerald-600" : health === "caution" ? "text-amber-600" : "text-red-600"}`}>
                             {health === "on-track" ? "On Track" : health === "caution" ? "Caution" : "At Risk"}
-                          </Badge>
+                          </span>
                         </td>
                         <td className="px-6 py-4 text-center">
                           <div className="flex items-center justify-center">

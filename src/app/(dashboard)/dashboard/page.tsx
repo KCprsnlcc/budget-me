@@ -154,13 +154,13 @@ const StatCard = memo(({ stat }: { stat: StatType }) => {
   return (
     <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
       <div className="flex justify-between items-start mb-3 sm:mb-4">
-        <div className="text-slate-500 p-1.5 sm:p-2 rounded-lg">
+        <div className="text-slate-500">
           <IconCmp size={20} className="sm:w-[22px] sm:h-[22px]" strokeWidth={1.5} />
         </div>
         {stat.change && (
-          <div className={`flex items-center gap-1 text-[10px] sm:text-[11px] font-medium ${stat.trend === "up" ? "text-emerald-700 border-emerald-100" :
-              "text-red-700 border-red-100"
-            } px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full border`}>
+          <div className={`flex items-center gap-1 text-[10px] sm:text-[11px] font-medium ${stat.trend === "up" ? "text-emerald-700" :
+              "text-red-700"
+            }`}>
             {stat.trend === "up" ? <ArrowUp size={10} className="sm:w-3 sm:h-3" /> : <ArrowDown size={10} className="sm:w-3 sm:h-3" />}
             {stat.change}
           </div>
@@ -668,7 +668,7 @@ export default function DashboardPage() {
                 <div className="flex-1 min-w-0">
                   <h3 className="text-xs sm:text-sm font-medium text-slate-800 flex items-center gap-2 flex-wrap">
                     Pending Invitation
-                    <Badge variant="success" className="text-[10px]">New</Badge>
+                    <span className="text-[10px] font-medium text-emerald-600">New</span>
                   </h3>
                   <p className="text-[10px] sm:text-xs text-slate-400 mt-1 leading-relaxed">
                     You have been invited by{" "}
@@ -1044,7 +1044,7 @@ export default function DashboardPage() {
                   <div key={item.id} className="group">
                     <div className="flex justify-between items-center mb-2">
                       <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-slate-600">
+                        <div className="text-slate-600">
                           <BudgetIcon size={14} className="sm:w-4 sm:h-4" />
                         </div>
                         <div>
@@ -1054,9 +1054,9 @@ export default function DashboardPage() {
                       </div>
                       <div className="text-right">
                         <div className="text-xs font-bold text-slate-800">{Math.round(item.percentage)}%</div>
-                        <div className={`text-[9px] sm:text-[10px] font-medium ${vis.statusColor}`}>
+                        <span className={`text-[9px] sm:text-[10px] font-medium ${vis.statusColor}`}>
                           {item.status}
-                        </div>
+                        </span>
                       </div>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">

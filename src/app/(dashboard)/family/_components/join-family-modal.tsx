@@ -95,7 +95,7 @@ export function JoinFamilyModal({ open, onClose, family, onSendRequest }: JoinFa
                         <div className="space-y-4">
                             <Card className="p-4 bg-slate-50 border-slate-200">
                                 <div className="flex items-start gap-3">
-                                    <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600">
+                                    <div className="text-emerald-600">
                                         <Users size={18} />
                                     </div>
                                     <div>

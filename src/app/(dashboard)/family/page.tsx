@@ -30,7 +30,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -313,7 +312,7 @@ export default function FamilyPage() {
   if (familyState === "error" && error) {
     return (
       <div className="max-w-6xl mx-auto text-center py-24 animate-fade-in">
-        <div className="w-16 h-16 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 flex items-center justify-center mx-auto mb-4">
           <Users className="text-rose-500" size={32} />
         </div>
         <h3 className="text-lg font-semibold text-slate-900 mb-2">Something went wrong</h3>
@@ -401,7 +400,7 @@ export default function FamilyPage() {
               <div>
                 <h3 className="text-xs sm:text-sm font-medium text-slate-800 flex items-center gap-2">
                   Pending Invitation
-                  <Badge variant="success" className="text-[10px]">New</Badge>
+                  <span className="text-emerald-600 text-[10px]">New</span>
                 </h3>
                 <p className="text-[10px] sm:text-xs text-slate-400 mt-1 leading-relaxed">
                   You have been invited by <span className="text-slate-600 font-medium">{invitations[0].inviterEmail}</span> to join the <span className="text-slate-600 font-medium">{invitations[0].familyName}</span> dashboard.
@@ -521,7 +520,7 @@ export default function FamilyPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
                     <div className="flex justify-between items-start mb-3 sm:mb-4">
-                      <div className="text-slate-500 p-2 rounded-lg">
+                      <div className="text-slate-500">
                         <Users size={20} strokeWidth={1.5} className="sm:w-[22px] sm:h-[22px]" />
                       </div>
                     </div>
@@ -532,7 +531,7 @@ export default function FamilyPage() {
 
                   <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
                     <div className="flex justify-between items-start mb-3 sm:mb-4">
-                      <div className="text-slate-500 p-2 rounded-lg">
+                      <div className="text-slate-500">
                         <Wallet size={20} strokeWidth={1.5} className="sm:w-[22px] sm:h-[22px]" />
                       </div>
                     </div>
@@ -542,7 +541,7 @@ export default function FamilyPage() {
 
                   <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
                     <div className="flex justify-between items-start mb-3 sm:mb-4">
-                      <div className="text-slate-500 p-2 rounded-lg">
+                      <div className="text-slate-500">
                         <ShoppingBag size={20} strokeWidth={1.5} className="sm:w-[22px] sm:h-[22px]" />
                       </div>
                     </div>
@@ -552,13 +551,13 @@ export default function FamilyPage() {
 
                   <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
                     <div className="flex justify-between items-start mb-3 sm:mb-4">
-                      <div className="text-slate-500 p-2 rounded-lg">
+                      <div className="text-slate-500">
                         <Flag size={20} strokeWidth={1.5} className="sm:w-[22px] sm:h-[22px]" />
                       </div>
                       {(overviewStats?.goalsProgress ?? 0) > 0 && (
-                        <div className="text-[10px] font-medium text-purple-700 border-purple-100 px-2 py-1 rounded-full border">
+                        <span className="text-[10px] font-medium text-purple-700">
                           {overviewStats?.goalsProgress}%
-                        </div>
+                        </span>
                       )}
                     </div>
                     <div className="text-slate-500 text-[10px] sm:text-xs font-medium mb-1 uppercase tracking-wide">Shared Goals</div>
@@ -645,7 +644,7 @@ export default function FamilyPage() {
                         <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 font-light">Track your family goal completion status</p>
                       </div>
                       <div className="flex flex-col items-center justify-center h-48 sm:h-64 text-center">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-4">
                           <Flag size={20} className="sm:w-6 sm:h-6" />
                         </div>
                         <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Family Goals Yet</h4>
@@ -727,7 +726,7 @@ export default function FamilyPage() {
                       </>
                     ) : (
                       <div className="flex flex-col items-center justify-center h-60 text-center">
-                        <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4">
+                        <div className="w-12 h-12 flex items-center justify-center text-slate-400 mb-4">
                           <TrendingUp size={24} />
                         </div>
                         <h4 className="text-sm font-medium text-slate-800 mb-1">No Family Goals Data</h4>
@@ -923,7 +922,7 @@ export default function FamilyPage() {
                             className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-slate-200"
                           />
                         ) : (
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-slate-400">
                             <Users size={16} className="sm:w-5 sm:h-5" />
                           </div>
                         )}
@@ -934,13 +933,9 @@ export default function FamilyPage() {
                           </p>
                         </div>
                       </div>
-                      <Button
-                        size="sm"
-                        className="text-[10px] sm:text-xs bg-white text-slate-600 border border-slate-300 hover:bg-slate-50 cursor-default h-7 sm:h-8"
-                        disabled
-                      >
+                      <span className="text-[10px] sm:text-xs text-slate-600">
                         Pending
-                      </Button>
+                      </span>
                     </div>
                     <p className="text-[10px] sm:text-xs text-slate-600 mb-3 line-clamp-2">
                       {request.families?.description || "No description available"}
@@ -1010,16 +1005,15 @@ export default function FamilyPage() {
                             className="w-4 h-4 sm:w-5 sm:h-5 rounded-full object-cover border border-slate-100"
                           />
                         ) : (
-                          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-100 flex items-center justify-center text-[6px] sm:text-[8px] font-medium text-slate-400 border border-slate-100">
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[6px] sm:text-[8px] font-medium text-slate-400">
                             {family.createdBy.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
                         )}
                         <span>Created by {family.createdBy}</span>
                       </div>
-                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-50 rounded-full border border-slate-100 text-slate-400">
-                        <div className="w-1 h-1 rounded-full bg-slate-300" />
-                        <span>Public</span>
-                      </div>
+                      <span className="text-slate-400">
+                        Public
+                      </span>
                     </div>
                   </Card>
                 ))}

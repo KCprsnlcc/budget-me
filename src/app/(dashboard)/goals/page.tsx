@@ -106,7 +106,7 @@ const GoalCard = memo(({
       onClick={() => onView(goal)}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg text-slate-600`}>
+          <div className="text-slate-600">
             <Icon size={20} />
           </div>
           <div>
@@ -114,14 +114,14 @@ const GoalCard = memo(({
               {goal.name}
             </h3>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${goal.priority === "high" ? "text-red-600 border border-red-100" :
-                  goal.priority === "medium" ? "text-amber-600 border border-amber-100" :
-                    "text-slate-600 border border-slate-100"
+              <span className={`text-[10px] font-medium ${goal.priority === "high" ? "text-red-600" :
+                  goal.priority === "medium" ? "text-amber-600" :
+                    "text-slate-600"
                 }`}>
                 {goal.priority.charAt(0).toUpperCase() + goal.priority.slice(1)} Priority
               </span>
               {goal.isFamily && (
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-medium text-indigo-600 border border-indigo-100"
+                <span className="text-[9px] font-medium text-indigo-600"
                   title="Family Goal">
                   Family
                 </span>
@@ -129,9 +129,9 @@ const GoalCard = memo(({
             </div>
           </div>
         </div>
-        <Badge variant={goal.status === "completed" ? "success" : goal.status === "in_progress" ? "info" : "warning"}>
+        <span className={`text-xs font-medium ${goal.status === "completed" ? "text-emerald-600" : goal.status === "in_progress" ? "text-blue-600" : "text-amber-600"}`}>
           {goal.status === "completed" ? "Completed" : goal.status === "in_progress" ? "In Progress" : goal.status === "behind" ? "Behind" : "Overdue"}
-        </Badge>
+        </span>
       </div>
 
       <div className="space-y-3">
@@ -659,19 +659,19 @@ export default function GoalsPage() {
           return (
             <Card key={item.label} className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex justify-between items-start mb-3 sm:mb-4">
-                <div className="text-slate-500 p-2 rounded-lg">
+                <div className="text-slate-500">
                   <Icon size={22} strokeWidth={1.5} />
                 </div>
                 {index === 0 && (
-                  <div className={`flex items-center gap-1 text-[10px] font-medium ${color === "emerald" ? "text-emerald-700 border-emerald-100" :
-                      color === "blue" ? "text-blue-700 border-blue-100" :
-                        "text-amber-700 border-amber-100"
-                    } px-2 py-1 rounded-full border`}>
+                  <div className={`flex items-center gap-1 text-[10px] font-medium ${color === "emerald" ? "text-emerald-700" :
+                      color === "blue" ? "text-blue-700" :
+                        "text-amber-700"
+                    }`}>
                     <TrendingUp size={12} /> Active
                   </div>
                 )}
                 {index === 2 && (
-                  <Badge variant="success">On Track</Badge>
+                  <span className="text-xs font-medium text-emerald-600">On Track</span>
                 )}
               </div>
               <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">{item.label}</div>
@@ -679,7 +679,7 @@ export default function GoalsPage() {
                 <div className="text-xl font-semibold text-slate-900 tracking-tight">{item.value}</div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-2">
-                  <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-2">
+                  <div className="w-8 h-8 flex items-center justify-center text-slate-400 mb-2">
                     {index === 0 && <Flag size={16} />}
                     {index === 1 && <PiggyBank size={16} />}
                     {index === 2 && <TrendingUp size={16} />}
@@ -788,7 +788,7 @@ export default function GoalsPage() {
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-48 sm:h-60 text-center px-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
                 <TrendingUp size={20} className="sm:w-6 sm:h-6" />
               </div>
               <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Savings Data</h4>
@@ -833,7 +833,7 @@ export default function GoalsPage() {
             </>
           ) : (
             <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center px-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
                 <Flag size={20} className="sm:w-6 sm:h-6" />
               </div>
               <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Goals Yet</h4>
@@ -856,9 +856,9 @@ export default function GoalsPage() {
             <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Overall Goal Progress</h3>
             <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">You have saved {Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100)}% of your total goal targets.</p>
           </div>
-          <Badge variant={Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 75 ? "success" : Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 50 ? "warning" : "danger"}>
+          <span className={`text-xs font-medium ${Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 75 ? "text-emerald-600" : Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 50 ? "text-amber-600" : "text-red-600"}`}>
             {Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 75 ? "On Track" : Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100) >= 50 ? "Good Progress" : "Needs Attention"}
-          </Badge>
+          </span>
         </div>
         <div className="w-full bg-slate-100 rounded-full h-2.5 sm:h-3 mt-2 overflow-hidden">
           <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${Math.min(Math.round((summary?.totalSaved ?? 0) / (allGoals.reduce((s, g) => s + g.target, 0) || 1) * 100), 100)}%` }} />
@@ -1000,7 +1000,7 @@ export default function GoalsPage() {
                         <tr key={goal.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="text-slate-500 p-2 rounded-lg">
+                              <div className="text-slate-500">
                                 <Icon size={16} strokeWidth={1.5} />
                               </div>
                               <div>
@@ -1010,9 +1010,9 @@ export default function GoalsPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <Badge variant="neutral" className="text-xs">
+                            <span className="text-xs font-medium text-slate-600">
                               {goal.category}
-                            </Badge>
+                            </span>
                           </td>
                           <td className="px-6 py-4 text-right font-medium text-slate-900">
                             ${formatCurrency(goal.target)}
@@ -1026,9 +1026,9 @@ export default function GoalsPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <Badge variant={goal.status === "completed" ? "success" : goal.status === "in_progress" ? "info" : "warning"}>
+                            <span className={`text-xs font-medium ${goal.status === "completed" ? "text-emerald-600" : goal.status === "in_progress" ? "text-blue-600" : "text-amber-600"}`}>
                               {goal.status === "completed" ? "Completed" : goal.status === "in_progress" ? "In Progress" : goal.status === "behind" ? "Behind" : "Overdue"}
-                            </Badge>
+                            </span>
                           </td>
                           <td className="px-6 py-4 text-center text-slate-600">
                             {new Date(goal.deadline + "T00:00:00").toLocaleDateString("en-US", { month: "short", year: "numeric" })}

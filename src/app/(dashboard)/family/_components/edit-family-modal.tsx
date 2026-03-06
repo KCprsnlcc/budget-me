@@ -208,7 +208,7 @@ export function EditFamilyModal({ open, onClose, onDeleteFamily, onUpdateFamily,
                 <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
                   <PhilippinePeso className="text-emerald-600" size={16} />
                   <span className="text-sm font-medium text-slate-700">{DEFAULT_CURRENCY}</span>
-                  <span className="text-[9px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded ml-auto">
+                  <span className="text-[9px] text-slate-600 ml-auto">
                     Default
                   </span>
                 </div>
