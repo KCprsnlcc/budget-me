@@ -173,9 +173,14 @@ const GoalCard = memo(({
                 )}
               </div>
             ))}
+            {contributors.length > 3 && (
+              <div className="h-7 w-7 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-semibold text-slate-600">
+                +{contributors.length - 3}
+              </div>
+            )}
           </div>
           <span className="text-[10px] text-slate-500">
-            {contributors.length > 3 ? `+${contributors.length - 3} more` : `${contributors.length} contributor${contributors.length > 1 ? 's' : ''}`}
+            {contributors.length} contributor{contributors.length > 1 ? 's' : ''}
           </span>
         </div>
       )}
@@ -360,7 +365,7 @@ export default function GoalsPage() {
       
       for (const goal of goals) {
         if (goal.current > 0) { // Only fetch if goal has contributions
-          const { data, error } = await fetchGoalContributors(goal.id, 3);
+          const { data, error } = await fetchGoalContributors(goal.id, 100); // Fetch up to 100 to get accurate count
           if (error) {
             console.error(`Error fetching contributors for goal ${goal.id}:`, error);
           } else if (data && data.length > 0) {
