@@ -73,7 +73,7 @@ function mapMemberRow(row: any): FamilyMember {
   };
 
   return {
-    id: row.id,
+    id: row.user_id, // Use user_id instead of family_members.id for consistency
     name: fullName,
     email: email,
     initials,
