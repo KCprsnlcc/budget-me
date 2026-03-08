@@ -24,7 +24,7 @@ import {
   type UserActivity,
   type ModuleStats,
   type SystemActivity,
-} from "../_lib/admin-dashboard-service";
+} from "./_lib/admin-dashboard-service";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
