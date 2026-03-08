@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/components/auth/auth-context";
+import { toast } from "sonner";
 import {
   createGoal,
   updateGoal,
@@ -485,12 +486,24 @@ export function useFamily() {
       const oldRole = member?.role;
       const result = await updateMemberRole(memberId, newRole, userId || undefined);
       setMutating(false);
-      if (!result.error && member && oldRole && familyId) {
+      
+      if (result.error) {
+        toast.error("Failed to update role", {
+          description: result.error,
+        });
+        return { error: result.error };
+      }
+      
+      if (member && oldRole && familyId) {
         // Log role change activity
         await logRoleChanged(familyId, userId || "", member.name, memberId, oldRole, newRole);
         await fetchData();
+        toast.success("Role updated successfully", {
+          description: `${member.name}'s role has been changed from ${oldRole} to ${newRole}.`,
+        });
       }
-      return { error: result.error };
+      
+      return { error: null };
     },
     [userId, familyId, members, fetchData]
   );

@@ -79,11 +79,28 @@ export function MembersTab({
   // Get current user's role and permissions
   const currentUserMember = members.find(m => m.email === currentUserEmail);
   const currentUserRole = currentUserMember?.role;
-  const canManageRoles = currentUserRole === "Owner" || currentUserRole === "Admin";
+  const isOwner = currentUserRole === "Owner";
+  const isAdmin = currentUserRole === "Admin";
+  const canManageRoles = isOwner || isAdmin; // Owners and Admins can manage roles
   const canInviteMembers = currentUserRole === "Owner" || currentUserRole === "Admin";
   const canEditFamily = currentUserRole === "Owner" || currentUserRole === "Admin";
   const canDeleteFamily = currentUserRole === "Owner";
   const canApproveRequests = currentUserRole === "Owner" || currentUserRole === "Admin";
+
+  // Permission logic for managing member roles
+  const canManageMemberRole = (memberRole: string, memberEmail: string) => {
+    const isTargetCurrentUser = memberEmail === currentUserEmail;
+    
+    if (currentUserRole === "Owner") {
+      // Owner can manage anyone's role except their own
+      return !isTargetCurrentUser;
+    }
+    if (currentUserRole === "Admin") {
+      // Admin can manage Members, Viewers, and other Admins, but not their own role or the Owner
+      return memberRole !== "Owner" && !isTargetCurrentUser;
+    }
+    return false; // Members and Viewers cannot manage roles
+  };
 
   // Permission logic for removing members
   const canRemoveMember = (memberRole: string, memberEmail: string) => {
@@ -91,7 +108,7 @@ export function MembersTab({
     
     if (currentUserRole === "Owner") {
       // Owner can remove anyone except themselves
-      return memberRole !== "Owner" || !isTargetCurrentUser;
+      return !isTargetCurrentUser;
     }
     if (currentUserRole === "Admin") {
       // Admin can remove Members and Viewers, but not Owners or other Admins
@@ -637,14 +654,14 @@ export function MembersTab({
                         </div>
                       </div>
                       <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                        {/* Role Management Controls - Integrated into member row */}
-                        {canManageRoles && !isOwner && (
+                        {/* Role Management Controls - For Owners and Admins */}
+                        {canManageMemberRole(member.role, member.email) ? (
                           <div className="flex items-center gap-1.5 sm:gap-2">
                             <RoleDropdown
                               value={roleChanges[member.id] || member.role}
                               onChange={(value) => handleRoleChange(member.id, value)}
                               options={getRoleOptions(member.role)}
-                              disabled={!canManageRoles || (currentUserRole === "Admin" && member.role === "Owner")}
+                              disabled={false}
                               className="min-w"
                             />
                             
@@ -661,15 +678,11 @@ export function MembersTab({
                               </Button>
                             )}
                           </div>
-                        )}
-                        
-                        {/* Static Badge for non-manageable or owners viewing */}
-                        {(!canManageRoles || isOwner) && (
-                          <span className={`text-[10px] sm:text-xs font-medium ${
-                            member.role === "Owner" 
-                              ? "text-emerald-600" 
-                              : "text-slate-400"
-                          }`}>{member.role}</span>
+                        ) : (
+                          /* Static Badge for members that cannot be managed */
+                          <span className="text-[10px] sm:text-xs font-medium text-slate-600">
+                            {member.role}
+                          </span>
                         )}
                         
                         <div className="flex items-center gap-2">

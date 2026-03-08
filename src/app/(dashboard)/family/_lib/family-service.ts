@@ -73,7 +73,8 @@ function mapMemberRow(row: any): FamilyMember {
   };
 
   return {
-    id: row.user_id, // Use user_id instead of family_members.id for consistency
+    id: row.id, // Use family_members.id for role updates
+    user_id: row.user_id, // Keep user_id separate
     name: fullName,
     email: email,
     initials,
@@ -1433,15 +1434,64 @@ export async function updateMemberRole(
 
   const dbRole = roleMap[newRole] ?? "member";
 
-  // Fetch member record to get user_id and family_id for the RPC
+  // Fetch member record to get user_id, family_id, and current role
   const { data: member, error: fetchErr } = await supabase
     .from("family_members")
-    .select("user_id, family_id")
+    .select("user_id, family_id, role")
     .eq("id", memberId)
     .single();
 
   if (fetchErr || !member) {
     return { error: "Member not found." };
+  }
+
+  // Check if requesting user is trying to change their own role
+  if (requestingUserId && member.user_id === requestingUserId) {
+    return { error: "You cannot change your own role." };
+  }
+
+  // Fetch the family to check ownership
+  const { data: family, error: familyErr } = await supabase
+    .from("families")
+    .select("created_by")
+    .eq("id", member.family_id)
+    .single();
+
+  if (familyErr || !family) {
+    return { error: "Family not found." };
+  }
+
+  const isOwner = requestingUserId && family.created_by === requestingUserId;
+
+  // Check if requesting user is an admin
+  let isAdmin = false;
+  if (requestingUserId && !isOwner) {
+    const { data: requestingMember } = await supabase
+      .from("family_members")
+      .select("role")
+      .eq("family_id", member.family_id)
+      .eq("user_id", requestingUserId)
+      .eq("status", "active")
+      .single();
+
+    isAdmin = requestingMember?.role === "admin";
+  }
+
+  // Validate permissions
+  if (requestingUserId && !isOwner && !isAdmin) {
+    return { error: "Only family owners and admins can change member roles." };
+  }
+
+  // Admins can change roles of members, viewers, and other admins (but not their own)
+  if (isAdmin && !isOwner) {
+    // Admins cannot change owner roles
+    if (member.role === "owner") {
+      return { error: "Admins cannot change the owner's role." };
+    }
+    // Admins can only assign admin, member, or viewer roles (not owner)
+    if (dbRole !== "admin" && dbRole !== "member" && dbRole !== "viewer") {
+      return { error: "Admins can only assign Admin, Member, or Viewer roles." };
+    }
   }
 
   // Use the RPC function for permission-enforced role reassignment
@@ -1453,7 +1503,19 @@ export async function updateMemberRole(
       p_requesting_user_id: requestingUserId,
     });
 
-    if (rpcErr) return { error: rpcErr.message };
+    if (rpcErr) {
+      // Provide user-friendly error messages
+      if (rpcErr.message.includes("permission denied") || rpcErr.message.includes("policy")) {
+        return { error: "You don't have permission to change this member's role." };
+      }
+      if (rpcErr.message.includes("cannot change their own role")) {
+        return { error: "You cannot change your own role." };
+      }
+      if (rpcErr.message.includes("can only change roles of Members and Viewers")) {
+        return { error: "Admins can only change roles of Members and Viewers." };
+      }
+      return { error: rpcErr.message };
+    }
   } else {
     // Fallback: direct update when no requesting user context
     const { error } = await supabase
@@ -1467,7 +1529,13 @@ export async function updateMemberRole(
       })
       .eq("id", memberId);
 
-    if (error) return { error: error.message };
+    if (error) {
+      // Provide user-friendly error messages
+      if (error.message.includes("permission denied") || error.message.includes("policy")) {
+        return { error: "You don't have permission to change this member's role." };
+      }
+      return { error: error.message };
+    }
   }
 
   return { error: null };
