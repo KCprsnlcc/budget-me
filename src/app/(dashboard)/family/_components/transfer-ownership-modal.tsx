@@ -36,10 +36,10 @@ export function TransferOwnershipModal({
 
   // Filter out current owner from potential successors
   const eligibleMembers = familyMembers.filter(member => 
-    member.id !== currentOwnerId && member.status === "active"
+    member.user_id !== currentOwnerId && member.status === "active"
   );
 
-  const selectedMember = eligibleMembers.find(m => m.id === selectedMemberId);
+  const selectedMember = eligibleMembers.find(m => m.user_id === selectedMemberId);
 
   const reset = useCallback(() => {
     setCurrentStep(1);
@@ -129,12 +129,12 @@ export function TransferOwnershipModal({
               <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto">
                 {eligibleMembers.length > 0 ? (
                   eligibleMembers.map((member, idx) => {
-                    const selected = selectedMemberId === member.id;
+                    const selected = selectedMemberId === member.user_id;
                     return (
                       <button
                         key={member.id}
                         type="button"
-                        onClick={() => setSelectedMemberId(member.id)}
+                        onClick={() => setSelectedMemberId(member.user_id!)}
                         className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${
                           selected
                             ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"

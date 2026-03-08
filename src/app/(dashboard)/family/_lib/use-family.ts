@@ -368,11 +368,30 @@ export function useFamily() {
     return { error: result.error };
   }, [familyId, userId, familyData?.name, fetchData]);
 
-  const handleLeaveFamily = useCallback(async (): Promise<{
+  const handleLeaveFamily = useCallback(async (newOwnerId?: string): Promise<{
     error: string | null;
   }> => {
     if (!familyId || !userId) return { error: "Missing data." };
     setMutating(true);
+    
+    // If user is owner and newOwnerId is provided, transfer ownership first
+    if (newOwnerId && isOwner) {
+      const newOwner = members.find(m => m.user_id === newOwnerId);
+      const currentOwner = members.find(m => m.user_id === userId) || { name: "Current Owner" };
+      
+      // Transfer ownership first
+      const transferResult = await transferOwnership(familyId, newOwnerId, userId);
+      if (transferResult.error) {
+        setMutating(false);
+        return { error: transferResult.error };
+      }
+      
+      // Log ownership transfer
+      if (newOwner) {
+        await logOwnershipTransferred(familyId, userId, currentOwner.name, newOwner.name, newOwnerId);
+      }
+    }
+    
     const userName = user?.user_metadata?.full_name || user?.email || "A member";
     const result = await leaveFamily(familyId, userId);
     setMutating(false);
@@ -382,7 +401,7 @@ export function useFamily() {
       await fetchData();
     }
     return { error: result.error };
-  }, [familyId, userId, user, fetchData]);
+  }, [familyId, userId, isOwner, members, user, fetchData]);
 
   const handleSendInvitation = useCallback(
     async (form: InviteMemberData): Promise<{ error: string | null }> => {
@@ -550,8 +569,8 @@ export function useFamily() {
     async (newOwnerUserId: string): Promise<{ error: string | null }> => {
       if (!userId || !familyId) return { error: "Missing data." };
       setMutating(true);
-      const newOwner = members.find(m => m.id === newOwnerUserId);
-      const currentOwner = members.find(m => m.id === userId) || { name: "Current Owner" };
+      const newOwner = members.find(m => m.user_id === newOwnerUserId);
+      const currentOwner = members.find(m => m.user_id === userId) || { name: "Current Owner" };
       const result = await transferOwnership(familyId, newOwnerUserId, userId);
       setMutating(false);
       if (!result.error && newOwner && familyId) {

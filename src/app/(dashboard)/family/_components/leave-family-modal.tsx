@@ -37,8 +37,8 @@ export function LeaveFamilyModal({
   const isOwner = currentUserRole === "Owner";
   
   const eligibleSuccessors = familyMembers.filter(member => 
-    member.id !== currentUserId && 
-    member.id !== familyMembers.find(m => m.role === "Owner")?.id && 
+    member.user_id !== currentUserId && 
+    member.user_id !== familyMembers.find(m => m.role === "Owner")?.user_id && 
     member.status === "active"
   );
 
@@ -75,7 +75,7 @@ export function LeaveFamilyModal({
 
   if (!open) return null;
 
-  const selectedSuccessor = eligibleSuccessors.find(m => m.id === selectedSuccessorId);
+  const selectedSuccessor = eligibleSuccessors.find(m => m.user_id === selectedSuccessorId);
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-md">
@@ -124,12 +124,12 @@ export function LeaveFamilyModal({
               <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto mb-4">
                 {eligibleSuccessors.length > 0 ? (
                   eligibleSuccessors.map((member, idx) => {
-                    const selected = selectedSuccessorId === member.id;
+                    const selected = selectedSuccessorId === member.user_id;
                     return (
                       <button
                         key={member.id}
                         type="button"
-                        onClick={() => setSelectedSuccessorId(member.id)}
+                        onClick={() => setSelectedSuccessorId(member.user_id!)}
                         className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${
                           selected
                             ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
