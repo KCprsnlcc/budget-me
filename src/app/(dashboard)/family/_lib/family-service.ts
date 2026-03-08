@@ -1512,7 +1512,7 @@ export async function updateMemberRole(
         return { error: "You cannot change your own role." };
       }
       if (rpcErr.message.includes("can only change roles of Members and Viewers")) {
-        return { error: "Admins can only change roles of Members and Viewers." };
+        return { error: "Admins can only change roles of Admins, Members, and Viewers." };
       }
       return { error: rpcErr.message };
     }
