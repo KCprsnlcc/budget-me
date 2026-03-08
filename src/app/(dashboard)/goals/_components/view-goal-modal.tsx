@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useFamily } from "../../family/_lib/use-family";
 import { useAuth } from "@/components/auth/auth-context";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { cn } from "@/lib/utils";
 import {
   Modal,
@@ -417,26 +418,39 @@ export function ViewGoalModal({
                 
                 {contributors.length > 0 ? (
                   <div className="space-y-3">
-                    {contributors.map((contributor) => (
-                      <div key={contributor.user_id} className="p-3 rounded-lg border border-gray-200 bg-white">
-                        <div className="flex items-center gap-3">
-                          {/* Avatar */}
-                          <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xs font-semibold overflow-hidden">
-                            {contributor.avatar_url ? (
-                              <img src={contributor.avatar_url} alt={contributor.full_name} className="h-full w-full object-cover" />
-                            ) : (
-                              contributor.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <div className="text-sm font-medium text-gray-900">{contributor.full_name}</div>
-                            <div className="text-[10px] text-gray-500">
-                              Contributed {formatCurrency(contributor.total_contributed)}
+                    {contributors.map((contributor) => {
+                      // Create mock user for UserAvatar component
+                      const mockUser = {
+                        id: contributor.user_id,
+                        email: contributor.full_name,
+                        user_metadata: {
+                          full_name: contributor.full_name,
+                          avatar_url: contributor.avatar_url
+                        },
+                        app_metadata: {},
+                        created_at: "",
+                        aud: "authenticated"
+                      } as any;
+                      
+                      return (
+                        <div key={contributor.user_id} className="p-3 rounded-lg border border-gray-200 bg-white">
+                          <div className="flex items-center gap-3">
+                            {/* Avatar */}
+                            <UserAvatar 
+                              user={mockUser} 
+                              size="lg"
+                              className="ring-2 ring-white shadow-sm"
+                            />
+                            <div className="flex-1">
+                              <div className="text-sm font-medium text-gray-900">{contributor.full_name}</div>
+                              <div className="text-[10px] text-gray-500">
+                                Contributed {formatCurrency(contributor.total_contributed)}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="p-3 rounded-lg border border-gray-200 bg-white text-center">
@@ -449,26 +463,39 @@ export function ViewGoalModal({
                   <div className="mt-4">
                     <h5 className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Contribution History</h5>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {contributions.map((contribution) => (
-                        <div key={contribution.id} className="p-2 rounded border border-slate-100 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-[10px] font-semibold">
-                              {contribution.user_avatar ? (
-                                <img src={contribution.user_avatar} alt={contribution.user_name} className="h-full w-full object-cover rounded-full" />
-                              ) : (
-                                contribution.user_name.split(' ').map(n => n[0]).join('').toUpperCase()
-                              )}
+                      {contributions.map((contribution) => {
+                        // Create mock user for UserAvatar component
+                        const mockUser = {
+                          id: contribution.user_id,
+                          email: contribution.user_name,
+                          user_metadata: {
+                            full_name: contribution.user_name,
+                            avatar_url: contribution.user_avatar
+                          },
+                          app_metadata: {},
+                          created_at: "",
+                          aud: "authenticated"
+                        } as any;
+                        
+                        return (
+                          <div key={contribution.id} className="p-2 rounded border border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <UserAvatar 
+                                user={mockUser} 
+                                size="sm"
+                                className="ring-1 ring-white shadow-sm"
+                              />
+                              <div>
+                                <div className="text-xs font-medium text-slate-900">{contribution.user_name}</div>
+                                <div className="text-[9px] text-slate-500">{formatDate(contribution.contribution_date)}</div>
+                              </div>
                             </div>
-                            <div>
-                              <div className="text-xs font-medium text-slate-900">{contribution.user_name}</div>
-                              <div className="text-[9px] text-slate-500">{formatDate(contribution.contribution_date)}</div>
+                            <div className="text-xs font-semibold text-emerald-600">
+                              +{formatCurrency(contribution.amount)}
                             </div>
                           </div>
-                          <div className="text-xs font-semibold text-emerald-600">
-                            +{formatCurrency(contribution.amount)}
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}

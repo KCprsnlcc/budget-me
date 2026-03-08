@@ -901,8 +901,14 @@ export default function DashboardPage() {
                 <p className="text-xs text-slate-500 mt-0.5 font-light">All-time expense breakdown</p>
               </div>
               {categoryBreakdown.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8">
-                  <p className="text-xs text-slate-400 text-center">No expense data found.</p>
+                <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center px-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
+                    <ShoppingCart size={20} className="sm:w-6 sm:h-6" />
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Category Data</h4>
+                  <p className="text-[10px] sm:text-xs text-slate-400 max-w-sm mb-3 sm:mb-4">
+                    Add expense transactions to see your spending breakdown by category.
+                  </p>
                 </div>
               ) : (
                 <>
