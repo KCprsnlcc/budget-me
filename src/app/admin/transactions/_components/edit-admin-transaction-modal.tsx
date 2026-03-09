@@ -187,7 +187,7 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
     goal_id: "",
   });
 
-  // Load transaction data when modal opens
+  // Load transaction data and users when modal opens
   useEffect(() => {
     if (open && transaction) {
       setFormData({
@@ -263,35 +263,6 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
     setLoadingMore(false);
   }, [loadingMore, hasMore, page, userSearchQuery]);
 
-  // Trigger search when query changes - only when modal is open and on step 1
-  useEffect(() => {
-    if (open && currentStep === 1) {
-      const timeoutId = setTimeout(() => {
-        loadUsers(true);
-      }, 300); // Debounce search
-      return () => clearTimeout(timeoutId);
-    }
-  }, [userSearchQuery, open, currentStep]);
-
-  // Infinite scroll handler - only when modal is open and on step 1
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!userListRef.current || loadingMore || !hasMore) return;
-      
-      const { scrollTop, scrollHeight, clientHeight } = userListRef.current;
-      // Trigger when user scrolls near the bottom (within 50px)
-      if (scrollTop + clientHeight >= scrollHeight - 50) {
-        loadUsers(false);
-      }
-    };
-
-    const listElement = userListRef.current;
-    if (listElement && open && currentStep === 1) {
-      listElement.addEventListener('scroll', handleScroll);
-      return () => listElement.removeEventListener('scroll', handleScroll);
-    }
-  }, [loadingMore, hasMore, open, currentStep, loadUsers]);
-
   // Load user-specific data when user is selected
   const loadUserData = async (userId: string) => {
     const supabase = createClient();
@@ -351,6 +322,34 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
       .order("goal_name");
     setGoals(goalsData ?? []);
   };
+
+  // Trigger search when query changes - only when modal is open and on step 1
+  useEffect(() => {
+    if (open && currentStep === 1) {
+      const timeoutId = setTimeout(() => {
+        loadUsers(true);
+      }, 300); // Debounce search
+      return () => clearTimeout(timeoutId);
+    }
+  }, [userSearchQuery, open, currentStep]);
+  // Infinite scroll handler - only when modal is open and on step 1
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!userListRef.current || loadingMore || !hasMore) return;
+      
+      const { scrollTop, scrollHeight, clientHeight } = userListRef.current;
+      // Trigger when user scrolls near the bottom (within 50px)
+      if (scrollTop + clientHeight >= scrollHeight - 50) {
+        loadUsers(false);
+      }
+    };
+
+    const listElement = userListRef.current;
+    if (listElement && open && currentStep === 1) {
+      listElement.addEventListener('scroll', handleScroll);
+      return () => listElement.removeEventListener('scroll', handleScroll);
+    }
+  }, [loadingMore, hasMore, open, currentStep, loadUsers]);
 
   const handleClose = () => {
     setCurrentStep(1);
@@ -446,18 +445,6 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
     }
   };
 
-  if (!transaction) return null;
-
-  const selectedUser = users.find(u => u.id === formData.user_id);
-  const selectedType = TRANSACTION_TYPES.find(t => t.value === formData.type);
-  const selectedAccount = accounts.find(a => a.id === formData.account_id);
-  
-  const categories = formData.type === "income" ? incomeCategories : expenseCategories;
-  const categoryValue = formData.type === "income" ? formData.income_category_id : formData.expense_category_id;
-  const selectedCategory = categories.find(c => c.id === categoryValue);
-  const selectedGoal = goals.find(g => g.id === formData.goal_id);
-  const selectedBudget = budgets.find(b => b.id === formData.budget_id);
-
   // Helper: update field
   const updateField = useCallback(
     <K extends keyof FormData>(key: K, value: FormData[K]) => {
@@ -496,6 +483,18 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
       }
     }
   }, [formData.type, expenseCategories, updateField]);
+
+  if (!transaction) return null;
+
+  const selectedUser = users.find(u => u.id === formData.user_id);
+  const selectedType = TRANSACTION_TYPES.find(t => t.value === formData.type);
+  const selectedAccount = accounts.find(a => a.id === formData.account_id);
+  
+  const categories = formData.type === "income" ? incomeCategories : expenseCategories;
+  const categoryValue = formData.type === "income" ? formData.income_category_id : formData.expense_category_id;
+  const selectedCategory = categories.find(c => c.id === categoryValue);
+  const selectedGoal = goals.find(g => g.id === formData.goal_id);
+  const selectedBudget = budgets.find(b => b.id === formData.budget_id);
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-2xl">
