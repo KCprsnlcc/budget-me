@@ -13,7 +13,19 @@ import {
     Search,
     Brain,
     ClipboardCheck,
-    Sparkles,
+    Wand2,
+    AlertTriangle,
+    TrendingUp,
+    Lightbulb,
+    Shield,
+    Star,
+    BarChart3,
+    PieChart,
+    Wallet,
+    Activity,
+    Target,
+    Zap,
+    TrendingDown,
 } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import { createClient } from "@/lib/supabase/client";
@@ -27,6 +39,10 @@ import {
     generatePredictionSummary,
     savePrediction,
 } from "@/app/(dashboard)/predictions/_lib/prediction-service";
+import {
+    generateAIFinancialInsights,
+    type AIInsightResponse,
+} from "@/app/(dashboard)/predictions/_lib/ai-insights-service";
 
 interface AddAdminPredictionModalProps {
     open: boolean;
@@ -34,7 +50,7 @@ interface AddAdminPredictionModalProps {
     onSuccess: () => void;
 }
 
-const STEPS = ["User Select", "Generate", "Review"];
+const STEPS = ["User Select", "Type Select", "Generate", "Review"];
 
 type User = {
     id: string;
@@ -42,6 +58,25 @@ type User = {
     full_name: string | null;
     avatar_url: string | null;
 };
+
+type GenerationType = "predictions" | "financial_intelligence";
+
+const GENERATION_TYPES = [
+    {
+        id: "predictions" as GenerationType,
+        title: "AI Predictions",
+        subtitle: "AI Powered",
+        description: "Smart forecasts and insights powered by Prophet machine learning.",
+        icon: Brain,
+    },
+    {
+        id: "financial_intelligence" as GenerationType,
+        title: "AI Financial Intelligence",
+        subtitle: "Deep Analysis",
+        description: "Deep analysis of your spending habits and financial future with unique results based on saved data.",
+        icon: Wand2,
+    },
+];
 
 export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPredictionModalProps) {
     const [currentStep, setCurrentStep] = useState(1);
@@ -54,12 +89,14 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
     const [page, setPage] = useState(1);
     const [userSearchQuery, setUserSearchQuery] = useState("");
     const [selectedUserId, setSelectedUserId] = useState("");
+    const [selectedGenerationType, setSelectedGenerationType] = useState<GenerationType>("predictions");
     const [generationResult, setGenerationResult] = useState<{
         success: boolean;
         dataPoints: number;
         accuracy: number;
         insights: number;
         error?: string;
+        aiInsights?: AIInsightResponse;
     } | null>(null);
     const userListRef = useRef<HTMLDivElement>(null);
 
@@ -151,6 +188,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
         setCurrentStep(1);
         setUserSearchQuery("");
         setSelectedUserId("");
+        setSelectedGenerationType("predictions");
         setGenerationResult(null);
         onClose();
     };
@@ -164,6 +202,13 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
         }
 
         if (currentStep === 2) {
+            if (!selectedGenerationType) {
+                toast.error("Please select a generation type");
+                return;
+            }
+        }
+
+        if (currentStep === 3) {
             // Generate prediction for the user
             setGenerating(true);
             try {
@@ -178,10 +223,28 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                 const dataPoints = forecastData.historical.length + forecastData.predicted.length;
                 const accuracy = forecastData.summary.confidence;
 
+                // Generate AI insights if type is financial_intelligence
+                let aiInsights: AIInsightResponse | undefined;
+                if (selectedGenerationType === "financial_intelligence") {
+                    aiInsights = await generateAIFinancialInsights({
+                        userId: selectedUserId,
+                        forecastData,
+                        categoryPredictions,
+                        expenseTypes,
+                        behaviorInsights,
+                        summary,
+                    });
+                }
+
                 // Save the prediction
                 const result = await savePrediction(selectedUserId, {
-                    type: "predictions",
-                    insights: categoryPredictions.map(c => c.insight),
+                    type: selectedGenerationType,
+                    insights: aiInsights 
+                        ? [
+                            ...aiInsights.recommendations.map(r => r.description),
+                            ...aiInsights.riskMitigationStrategies.map(s => s.description),
+                          ]
+                        : categoryPredictions.map(c => c.insight),
                     dataPoints,
                     accuracy,
                     projectedIncome: summary.monthlyIncome,
@@ -215,8 +278,11 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                     success: result.success,
                     dataPoints,
                     accuracy: Math.round(accuracy),
-                    insights: categoryPredictions.length,
+                    insights: aiInsights 
+                        ? aiInsights.recommendations.length + aiInsights.riskMitigationStrategies.length
+                        : categoryPredictions.length,
                     error: result.error,
+                    aiInsights,
                 });
             } catch (error) {
                 setGenerationResult({
@@ -248,7 +314,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                         Generate Prediction
                     </span>
                     <span className="text-[10px] text-slate-400 font-medium tracking-wide">
-                        Step {currentStep} of 3
+                        Step {currentStep} of {STEPS.length}
                     </span>
                 </div>
             </ModalHeader>
@@ -352,18 +418,13 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                     </div>
                 )}
 
-                {/* Step 2: Generate */}
+                {/* Step 2: Type Select */}
                 {currentStep === 2 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
-                            <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
-                                <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
-                                    <Brain size={14} />
-                                </div>
-                                Generate Prediction
-                            </h2>
+                            <h2 className="text-[17px] font-bold text-gray-900 mb-1">Select Generation Type</h2>
                             <p className="text-[11px] text-gray-500">
-                                AI will analyze the user's transaction history and generate predictions.
+                                Choose the type of AI analysis to generate for this user.
                             </p>
                         </div>
 
@@ -391,37 +452,157 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                             </div>
                         )}
 
-                        {/* Generation Info */}
-                        <div className="space-y-3">
-                            {[
-                                { label: "Income vs Expenses Forecast", desc: "6-month historical analysis with Prophet-style forecasting" },
-                                { label: "Category Spending Forecast", desc: "Per-category spending predictions with confidence intervals" },
-                                { label: "Expense Type Analysis", desc: "Recurring vs variable expense classification" },
-                                { label: "Transaction Behavior", desc: "Pattern detection and trend analysis" },
-                            ].map((item, idx) => (
-                                <div key={idx} className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-lg">
-                                    <div className="w-8 h-8 rounded-lg border border-slate-100 bg-violet-50 flex items-center justify-center">
-                                        <Sparkles size={14} className="text-violet-500" />
-                                    </div>
+                        {/* Generation Type Cards */}
+                        <div className="grid grid-cols-1 gap-3">
+                            {GENERATION_TYPES.map((type, idx) => {
+                                const selected = selectedGenerationType === type.id;
+                                const Icon = type.icon;
+
+                                return (
+                                    <button
+                                        key={type.id}
+                                        type="button"
+                                        onClick={() => setSelectedGenerationType(type.id)}
+                                        className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${
+                                            selected
+                                                ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
+                                                : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                                        }`}
+                                        style={{ animationDelay: `${idx * 60}ms` }}
+                                    >
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white text-gray-400 border-gray-100">
+                                                <Icon size={18} />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <h3 className="text-[13px] font-bold text-gray-900">{type.title}</h3>
+                                                    <span className="text-[9px] px-2 py-0.5 rounded-full font-semibold bg-gray-100 text-gray-600">
+                                                        {type.subtitle}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] text-gray-500 leading-relaxed">{type.description}</p>
+                                            </div>
+                                            <div
+                                                className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
+                                                    selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                                                }`}
+                                            >
+                                                <Check size={10} />
+                                            </div>
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* Step 3: Generate */}
+                {currentStep === 3 && (
+                    <div className="animate-txn-in">
+                        <div className="mb-5">
+                            <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
+                                <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
+                                    {selectedGenerationType === "predictions" ? <Brain size={14} /> : <Wand2 size={14} />}
+                                </div>
+                                {selectedGenerationType === "predictions" ? "Generate AI Predictions" : "Generate AI Financial Intelligence"}
+                            </h2>
+                            <p className="text-[11px] text-gray-500">
+                                {selectedGenerationType === "predictions" 
+                                    ? "AI will analyze the user's transaction history and generate predictions."
+                                    : "AI will perform deep analysis of spending habits and financial patterns."}
+                            </p>
+                        </div>
+
+                        {/* Selected User Preview */}
+                        {selectedUser && (
+                            <div className="p-4 bg-white border border-slate-200 rounded-xl mb-5">
+                                <div className="flex items-center gap-3">
+                                    <UserAvatar
+                                        user={{
+                                            id: selectedUser.id,
+                                            email: selectedUser.email,
+                                            user_metadata: { full_name: selectedUser.full_name, avatar_url: selectedUser.avatar_url },
+                                            app_metadata: {},
+                                            created_at: "",
+                                            aud: "authenticated"
+                                        } as SupabaseUser}
+                                        size="lg"
+                                        className="ring-2 ring-white shadow-sm"
+                                    />
                                     <div>
-                                        <h4 className="text-xs font-semibold text-slate-900">{item.label}</h4>
-                                        <p className="text-[10px] text-slate-400">{item.desc}</p>
+                                        <h3 className="text-sm font-bold text-slate-900">{selectedUser.full_name || "No Name"}</h3>
+                                        <p className="text-xs text-slate-500">{selectedUser.email}</p>
                                     </div>
                                 </div>
-                            ))}
+                            </div>
+                        )}
+
+                        {/* Generation Info - Different based on type */}
+                        <div className="space-y-3">
+                            {selectedGenerationType === "predictions" ? (
+                                // AI Predictions - Prophet ML forecasting
+                                [
+                                    { label: "Income vs Expenses Forecast", desc: "6-month historical analysis with Prophet-style forecasting", icon: BarChart3 },
+                                    { label: "Category Spending Forecast", desc: "Per-category spending predictions with confidence intervals", icon: PieChart },
+                                    { label: "Expense Type Analysis", desc: "Recurring vs variable expense classification", icon: Wallet },
+                                    { label: "Transaction Behavior", desc: "Pattern detection and trend analysis", icon: Activity },
+                                ].map((item, idx) => {
+                                    const IconComponent = item.icon;
+                                    return (
+                                        <div key={idx} className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-lg">
+                                            <div className="w-8 h-8 rounded-lg border border-slate-100 bg-white flex items-center justify-center text-gray-400">
+                                                <IconComponent size={16} />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-xs font-semibold text-slate-900">{item.label}</h4>
+                                                <p className="text-[10px] text-slate-400">{item.desc}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                // AI Financial Intelligence - Comprehensive AI analysis
+                                [
+                                    { label: "Financial Health Summary", desc: "Comprehensive overview of current financial situation", icon: Target },
+                                    { label: "Risk Assessment & Analysis", desc: "Identify financial risks with mitigation strategies", icon: AlertTriangle },
+                                    { label: "Growth Potential Analysis", desc: "Discover opportunities for financial improvement", icon: TrendingUp },
+                                    { label: "Personalized Recommendations", desc: "AI-powered actionable advice prioritized by impact", icon: Lightbulb },
+                                    { label: "Long-term Opportunities", desc: "Strategic planning for future financial success", icon: Star },
+                                    { label: "Spending Pattern Insights", desc: "Deep analysis of transaction behaviors and trends", icon: Zap },
+                                ].map((item, idx) => {
+                                    const IconComponent = item.icon;
+                                    return (
+                                        <div key={idx} className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-lg">
+                                            <div className="w-8 h-8 rounded-lg border border-slate-100 bg-white flex items-center justify-center text-gray-400">
+                                                <IconComponent size={16} />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-xs font-semibold text-slate-900">{item.label}</h4>
+                                                <p className="text-[10px] text-slate-400">{item.desc}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
 
                         {generating && (
-                            <div className="flex items-center justify-center gap-3 p-6 mt-5 bg-violet-50 border border-violet-100 rounded-xl">
-                                <Loader2 size={20} className="animate-spin text-violet-500" />
-                                <span className="text-sm font-medium text-violet-700">Generating predictions...</span>
+                            <div className="flex items-center justify-center gap-3 p-6 mt-5 bg-white border border-slate-200 rounded-xl">
+                                <Loader2 size={20} className="animate-spin text-gray-400" />
+                                <span className="text-sm font-medium text-gray-700">
+                                    {selectedGenerationType === "predictions" 
+                                        ? "Generating predictions..." 
+                                        : "Generating AI financial intelligence..."}
+                                </span>
                             </div>
                         )}
                     </div>
                 )}
 
-                {/* Step 3: Review */}
-                {currentStep === 3 && (
+                {/* Step 4: Review */}
+                {currentStep === 4 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
                             <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
@@ -444,22 +625,154 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                     </div>
                                     <p className={`text-sm ${generationResult.success ? "text-emerald-700" : "text-red-700"}`}>
                                         {generationResult.success
-                                            ? "Prediction generated and saved successfully."
+                                            ? selectedGenerationType === "financial_intelligence"
+                                                ? "AI Financial Intelligence generated and saved successfully."
+                                                : "Prediction generated and saved successfully."
                                             : generationResult.error || "Failed to generate prediction."}
                                     </p>
                                 </div>
 
                                 {/* Summary */}
                                 {generationResult.success && (
-                                    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                                        <div className="p-5 space-y-0 divide-y divide-slate-100">
-                                            <ReviewRow label="User" value={selectedUser?.email || "Unknown"} />
-                                            <ReviewRow label="Data Points" value={generationResult.dataPoints.toString()} />
-                                            <ReviewRow label="Accuracy" value={`${generationResult.accuracy}%`} />
-                                            <ReviewRow label="Insights Generated" value={generationResult.insights.toString()} />
-                                            <ReviewRow label="Model" value="Prophet v1.1" />
+                                    <>
+                                        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                                            <div className="p-5 space-y-0 divide-y divide-slate-100">
+                                                <ReviewRow label="User" value={selectedUser?.email || "Unknown"} />
+                                                <ReviewRow label="Generation Type" value={GENERATION_TYPES.find(t => t.id === selectedGenerationType)?.title || "Unknown"} />
+                                                <ReviewRow label="Data Points" value={generationResult.dataPoints.toString()} />
+                                                <ReviewRow label="Accuracy" value={`${generationResult.accuracy}%`} />
+                                                <ReviewRow label="Insights Generated" value={generationResult.insights.toString()} />
+                                                <ReviewRow label="Model" value="Prophet v1.1" />
+                                            </div>
                                         </div>
-                                    </div>
+
+                                        {/* AI Insights Details - Only show for financial_intelligence */}
+                                        {selectedGenerationType === "financial_intelligence" && generationResult.aiInsights && (
+                                            <div className="space-y-4">
+                                                {/* Financial Summary */}
+                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                    <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                        <Wand2 size={14} className="text-violet-500" />
+                                                        Financial Summary
+                                                    </h3>
+                                                    <p className="text-xs text-slate-600 leading-relaxed">
+                                                        {generationResult.aiInsights.financialSummary}
+                                                    </p>
+                                                </div>
+
+                                                {/* Risk Assessment */}
+                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                    <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                        <AlertTriangle size={14} className={
+                                                            generationResult.aiInsights.riskLevel === "high" ? "text-red-500" :
+                                                            generationResult.aiInsights.riskLevel === "medium" ? "text-amber-500" :
+                                                            "text-emerald-500"
+                                                        } />
+                                                        Risk Assessment
+                                                    </h3>
+                                                    <div className="flex items-center gap-3 mb-3">
+                                                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                                                            generationResult.aiInsights.riskLevel === "high" ? "bg-red-100 text-red-700" :
+                                                            generationResult.aiInsights.riskLevel === "medium" ? "bg-amber-100 text-amber-700" :
+                                                            "bg-emerald-100 text-emerald-700"
+                                                        }`}>
+                                                            {generationResult.aiInsights.riskLevel.toUpperCase()} RISK
+                                                        </span>
+                                                        <span className="text-xs text-slate-500">
+                                                            Score: {generationResult.aiInsights.riskScore}/100
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-xs text-slate-600 leading-relaxed">
+                                                        {generationResult.aiInsights.riskAnalysis}
+                                                    </p>
+                                                </div>
+
+                                                {/* Growth Potential */}
+                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                    <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                        <TrendingUp size={14} className="text-emerald-500" />
+                                                        Growth Potential
+                                                    </h3>
+                                                    <div className="text-lg font-bold text-emerald-600 mb-2">
+                                                        {generationResult.aiInsights.growthPotential}
+                                                    </div>
+                                                    <p className="text-xs text-slate-600 leading-relaxed">
+                                                        {generationResult.aiInsights.growthAnalysis}
+                                                    </p>
+                                                </div>
+
+                                                {/* Recommendations */}
+                                                {generationResult.aiInsights.recommendations.length > 0 && (
+                                                    <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                        <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                            <Lightbulb size={14} className="text-amber-500" />
+                                                            Recommendations ({generationResult.aiInsights.recommendations.length})
+                                                        </h3>
+                                                        <div className="space-y-3">
+                                                            {generationResult.aiInsights.recommendations.slice(0, 3).map((rec, idx) => (
+                                                                <div key={idx} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
+                                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                                                        rec.priority === "high" ? "bg-red-100 text-red-600" :
+                                                                        rec.priority === "medium" ? "bg-amber-100 text-amber-600" :
+                                                                        "bg-blue-100 text-blue-600"
+                                                                    }`}>
+                                                                        <span className="text-[10px] font-bold">{idx + 1}</span>
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <h4 className="text-xs font-semibold text-slate-900 mb-1">{rec.title}</h4>
+                                                                        <p className="text-[10px] text-slate-600 leading-relaxed">{rec.description}</p>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Risk Mitigation Strategies */}
+                                                {generationResult.aiInsights.riskMitigationStrategies.length > 0 && (
+                                                    <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                        <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                            <Shield size={14} className="text-blue-500" />
+                                                            Risk Mitigation Strategies
+                                                        </h3>
+                                                        <div className="space-y-2">
+                                                            {generationResult.aiInsights.riskMitigationStrategies.slice(0, 3).map((strategy, idx) => (
+                                                                <div key={idx} className="flex items-start gap-2 text-xs">
+                                                                    <span className="text-blue-500 mt-0.5">•</span>
+                                                                    <div>
+                                                                        <span className="font-semibold text-slate-900">{strategy.strategy}:</span>
+                                                                        <span className="text-slate-600"> {strategy.description}</span>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Long-term Opportunities */}
+                                                {generationResult.aiInsights.longTermOpportunities.length > 0 && (
+                                                    <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                        <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                            <Star size={14} className="text-violet-500" />
+                                                            Long-term Opportunities
+                                                        </h3>
+                                                        <div className="space-y-3">
+                                                            {generationResult.aiInsights.longTermOpportunities.slice(0, 2).map((opp, idx) => (
+                                                                <div key={idx} className="p-3 bg-violet-50 rounded-lg">
+                                                                    <h4 className="text-xs font-semibold text-violet-900 mb-1">{opp.opportunity}</h4>
+                                                                    <p className="text-[10px] text-violet-700 mb-2">{opp.description}</p>
+                                                                    <div className="flex gap-3 text-[10px]">
+                                                                        <span className="text-violet-600">⏱ {opp.timeframe}</span>
+                                                                        <span className="text-violet-600">💰 {opp.potentialReturn}</span>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         ) : (
@@ -490,7 +803,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                     >
                         {generating ? (
                             <><Loader2 size={14} className="animate-spin" /> Generating...</>
-                        ) : currentStep === 2 ? (
+                        ) : currentStep === 3 ? (
                             <><Brain size={14} /> Generate & Continue</>
                         ) : (
                             <>Continue <ArrowRight size={14} /></>
