@@ -8,7 +8,7 @@ import {
     ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { Loader2, AlertTriangle, Shield, Home, GraduationCap, Plane, Car, TrendingUp, ArrowRight, Flag } from "lucide-react";
 import { toast } from "sonner";
 import type { AdminGoal } from "../_lib/types";
 import { deleteAdminGoal } from "../_lib/admin-goal-service";
@@ -54,15 +54,15 @@ export function DeleteAdminGoalModal({
 
     const progress = goal.progress_percentage ?? 0;
 
-    const categoryEmojis: Record<string, string> = {
-        emergency: "🚨",
-        vacation: "🏖️",
-        house: "🏠",
-        car: "🚗",
-        education: "📚",
-        retirement: "🏦",
-        debt: "💳",
-        general: "🎯",
+    const CATEGORY_ICONS: Record<string, React.ElementType> = {
+        emergency: Shield,
+        vacation: Plane,
+        house: Home,
+        car: Car,
+        education: GraduationCap,
+        retirement: TrendingUp,
+        debt: ArrowRight,
+        general: Flag,
     };
 
     return (
@@ -91,7 +91,13 @@ export function DeleteAdminGoalModal({
                             <div className="flex justify-between items-center py-2.5">
                                 <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Goal</span>
                                 <span className="text-sm font-bold text-slate-900">
-                                    {categoryEmojis[goal.category] ?? "🎯"} {goal.goal_name}
+                                    <div className="flex items-center gap-1.5">
+                                        {(() => {
+                                            const Icon = CATEGORY_ICONS[goal.category] || Flag;
+                                            return <Icon size={14} className="text-slate-500" />;
+                                        })()}
+                                        <span>{goal.goal_name}</span>
+                                    </div>
                                 </span>
                             </div>
                             <div className="flex justify-between items-center py-2.5">

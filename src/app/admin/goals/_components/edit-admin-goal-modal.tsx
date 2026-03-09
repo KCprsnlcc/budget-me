@@ -10,47 +10,83 @@ import {
     ArrowLeft,
     ArrowRight,
     Check,
-    PenSquare,
-    ClipboardCheck,
     Search,
     Users,
     Eye,
+    Shield,
+    Home,
+    GraduationCap,
+    Plane,
+    Car,
+    TrendingUp,
+    Flag,
+    Info,
+    CheckCircle,
+    AlertTriangle,
 } from "lucide-react";
 import { DateSelector } from "@/components/ui/date-selector";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
+import { Checkbox } from "@/components/ui/checkbox";
 import { createClient } from "@/lib/supabase/client";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { updateAdminGoal } from "../_lib/admin-goal-service";
 import type { AdminGoal, AdminGoalFormState, GoalPriority, GoalCategory } from "../_lib/types";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import Skeleton from "react-loading-skeleton";
+import { cn } from "@/lib/utils";
 
-interface EditAdminGoalModalProps {
-    open: boolean;
-    onClose: () => void;
-    goal: AdminGoal | null;
-    onSuccess: () => void;
-}
+const STEPS = ["User Select", "Category", "Details", "Review"];
 
-const STEPS = ["User Select", "Details", "Review"];
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+    emergency: Shield,
+    vacation: Plane,
+    house: Home,
+    car: Car,
+    education: GraduationCap,
+    retirement: TrendingUp,
+    debt: ArrowRight,
+    general: Flag,
+};
 
-const GOAL_CATEGORIES: { value: GoalCategory; label: string; emoji: string; desc: string }[] = [
-    { value: "emergency", label: "Emergency Fund", emoji: "🚨", desc: "Safety net for unexpected expenses" },
-    { value: "vacation", label: "Vacation", emoji: "🏖️", desc: "Travel and vacation savings" },
-    { value: "house", label: "House", emoji: "🏠", desc: "Home purchase or renovation" },
-    { value: "car", label: "Car", emoji: "🚗", desc: "Vehicle purchase or maintenance" },
-    { value: "education", label: "Education", emoji: "📚", desc: "Tuition, courses, or training" },
-    { value: "retirement", label: "Retirement", emoji: "🏦", desc: "Long-term retirement savings" },
-    { value: "debt", label: "Debt Payment", emoji: "💳", desc: "Paying off debt or loans" },
-    { value: "general", label: "General", emoji: "🎯", desc: "General savings goal" },
+const GOAL_CATEGORIES: { value: GoalCategory; label: string; desc: string }[] = [
+    { value: "emergency", label: "Emergency Fund", desc: "Build a safety net for unexpected expenses" },
+    { value: "vacation", label: "Vacation", desc: "Save for travel and leisure activities" },
+    { value: "house", label: "Housing", desc: "Save for home purchase or renovation" },
+    { value: "car", label: "Transportation", desc: "Save for vehicle purchase or maintenance" },
+    { value: "education", label: "Education", desc: "Fund education and learning expenses" },
+    { value: "retirement", label: "Retirement", desc: "Build long-term retirement savings" },
+    { value: "debt", label: "Debt Payoff", desc: "Pay off loans and credit obligations" },
+    { value: "general", label: "General", desc: "Other savings goals and objectives" },
 ];
 
 const GOAL_PRIORITIES: { value: GoalPriority; label: string }[] = [
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-    { value: "urgent", label: "Urgent" },
+    { value: "high", label: "High Priority" },
+    { value: "medium", label: "Medium Priority" },
+    { value: "low", label: "Low Priority" },
 ];
+
+const formatCurrency = (amount: string | number): string => {
+    const num = typeof amount === "string" ? parseFloat(amount) || 0 : amount;
+    return new Intl.NumberFormat("en-PH", {
+        style: "currency",
+        currency: "PHP",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(num);
+};
+
+const formatDate = (dateString: string): string => {
+    if (!dateString) return "No date set";
+    try {
+        return new Date(dateString + "T00:00:00").toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        });
+    } catch {
+        return "Invalid date";
+    }
+};
 
 type UserOption = {
     id: string;
@@ -64,8 +100,15 @@ type FamilyOption = {
     family_name: string;
 };
 
+interface EditAdminGoalModalProps {
+    open: boolean;
+    onClose: () => void;
+    goal: AdminGoal | null;
+    onSuccess: () => void;
+}
+
 export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdminGoalModalProps) {
-    const [currentStep, setCurrentStep] = useState(1);
+    const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState<UserOption[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
@@ -74,9 +117,10 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
     const [page, setPage] = useState(1);
     const [userSearchQuery, setUserSearchQuery] = useState("");
     const [families, setFamilies] = useState<FamilyOption[]>([]);
+    const [saveError, setSaveError] = useState<string | null>(null);
     const userListRef = useRef<HTMLDivElement>(null);
 
-    const [formData, setFormData] = useState<AdminGoalFormState>({
+    const [form, setForm] = useState<AdminGoalFormState>({
         user_id: "",
         goal_name: "",
         description: "",
@@ -95,7 +139,7 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
     // Populate form when goal changes
     useEffect(() => {
         if (goal && open) {
-            setFormData({
+            setForm({
                 user_id: goal.user_id,
                 goal_name: goal.goal_name,
                 description: goal.description ?? "",
@@ -166,15 +210,17 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
         setLoadingMore(false);
     }, [loadingMore, hasMore, page, userSearchQuery]);
 
+    // Trigger search when query changes
     useEffect(() => {
-        if (open && currentStep === 1) {
+        if (open && step === 1) {
             const timeoutId = setTimeout(() => {
                 loadUsers(true);
             }, 300);
             return () => clearTimeout(timeoutId);
         }
-    }, [userSearchQuery, open, currentStep]);
+    }, [userSearchQuery, open, step]);
 
+    // Infinite scroll
     useEffect(() => {
         const handleScroll = () => {
             if (!userListRef.current || loadingMore || !hasMore) return;
@@ -185,12 +231,13 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
         };
 
         const listElement = userListRef.current;
-        if (listElement && open && currentStep === 1) {
+        if (listElement && open && step === 1) {
             listElement.addEventListener("scroll", handleScroll);
             return () => listElement.removeEventListener("scroll", handleScroll);
         }
-    }, [loadingMore, hasMore, open, currentStep, loadUsers]);
+    }, [loadingMore, hasMore, open, step, loadUsers]);
 
+    // Load families for the selected user
     const loadUserFamilies = async (userId: string) => {
         const supabase = createClient();
         const { data } = await supabase
@@ -209,46 +256,52 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
         setFamilies(familyList);
     };
 
-    const handleClose = () => {
-        setCurrentStep(1);
+    const handleClose = useCallback(() => {
+        setStep(1);
         setUserSearchQuery("");
         setFamilies([]);
+        setSaveError(null);
         onClose();
-    };
+    }, [onClose]);
 
     const handleNext = async () => {
-        if (currentStep === 1) {
-            if (!formData.user_id) {
+        if (step === 1) {
+            if (!form.user_id) {
                 toast.error("Please select a user");
                 return;
             }
-            await loadUserFamilies(formData.user_id);
+            await loadUserFamilies(form.user_id);
         }
-        if (currentStep === 2) {
-            if (!formData.goal_name.trim()) {
+        if (step === 3) {
+            if (!form.goal_name.trim()) {
                 toast.error("Please enter a goal name");
                 return;
             }
-            if (!formData.target_amount || parseFloat(formData.target_amount) <= 0) {
+            if (!form.target_amount || parseFloat(form.target_amount) <= 0) {
                 toast.error("Target amount must be greater than 0");
                 return;
             }
         }
-        setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
+        if (step >= STEPS.length) {
+            handleSubmit();
+            return;
+        }
+        setStep((prev) => Math.min(prev + 1, STEPS.length));
     };
 
     const handleBack = () => {
-        setCurrentStep((prev) => Math.max(prev - 1, 1));
+        setStep((prev) => Math.max(prev - 1, 1));
     };
 
     const handleSubmit = async () => {
         if (!goal) return;
         try {
             setLoading(true);
-            const { error } = await updateAdminGoal(goal.id, formData);
+            setSaveError(null);
+            const { error } = await updateAdminGoal(goal.id, form);
 
             if (error) {
-                toast.error(error);
+                setSaveError(error);
                 return;
             }
 
@@ -256,48 +309,61 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
             handleClose();
             onSuccess();
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Failed to update goal");
+            setSaveError(error instanceof Error ? error.message : "Failed to update goal");
         } finally {
             setLoading(false);
         }
     };
 
-    const selectedUser = users.find((u) => u.id === formData.user_id);
-    const selectedCategory = GOAL_CATEGORIES.find((c) => c.value === formData.category);
-    const selectedPrio = GOAL_PRIORITIES.find((p) => p.value === formData.priority);
-    const selectedFamily = families.find((f) => f.id === formData.family_id);
-
     const updateField = useCallback(
         <K extends keyof AdminGoalFormState>(key: K, value: AdminGoalFormState[K]) => {
-            setFormData((prev) => ({ ...prev, [key]: value }));
+            setForm((prev) => ({ ...prev, [key]: value }));
         },
         []
     );
 
+    const selectCategory = useCallback((category: GoalCategory) => {
+        updateField("category", category);
+    }, [updateField]);
+
+    if (!goal) return null;
+
+    const canContinue =
+        (step === 1 && form.user_id !== "") ||
+        (step === 2 && form.category !== "general") ||
+        (step === 3 && form.goal_name !== "" && form.target_amount !== "") ||
+        step === 4;
+
+    const selectedUser = users.find((u) => u.id === form.user_id);
+    const selectedCategory = GOAL_CATEGORIES.find((c) => c.value === form.category);
+    const selectedPrio = GOAL_PRIORITIES.find((p) => p.value === form.priority);
+    const selectedFamily = families.find((f) => f.id === form.family_id);
+
     return (
-        <Modal open={open} onClose={handleClose} className="max-w-2xl">
-            <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-slate-100">
+        <Modal open={open} onClose={handleClose} className="max-w-[520px]">
+            <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
                 <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                         Edit Goal
                     </span>
-                    <span className="text-[10px] text-slate-400 font-medium tracking-wide">
-                        Step {currentStep} of 3
+                    <span className="text-[10px] text-gray-400 font-medium tracking-wide">
+                        Step {step} of 4
                     </span>
                 </div>
             </ModalHeader>
 
-            <Stepper steps={STEPS} currentStep={currentStep} />
+            <Stepper steps={STEPS} currentStep={step} />
 
             <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
                 {/* Step 1: User Select */}
-                {currentStep === 1 && (
+                {step === 1 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
                             <h2 className="text-[17px] font-bold text-gray-900 mb-1">Select User</h2>
                             <p className="text-[11px] text-gray-500">Change or confirm the user for this goal.</p>
                         </div>
 
+                        {/* Search Input */}
                         <div className="relative mb-4">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input
@@ -305,7 +371,7 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                                 placeholder="Search users by name or email..."
                                 value={userSearchQuery}
                                 onChange={(e) => setUserSearchQuery(e.target.value)}
-                                className="w-full pl-9 pr-3.5 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+                                className="w-full pl-9 pr-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                             />
                         </div>
 
@@ -316,9 +382,9 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                                 ))}
                             </div>
                         ) : (
-                            <div ref={userListRef} className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
+                            <div ref={userListRef} className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto pr-1">
                                 {users.map((user, idx) => {
-                                    const selected = formData.user_id === user.id;
+                                    const selected = form.user_id === user.id;
                                     const supabaseUser: SupabaseUser = {
                                         id: user.id,
                                         email: user.email,
@@ -332,11 +398,13 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                                         <button
                                             key={user.id}
                                             type="button"
-                                            onClick={() => setFormData({ ...formData, user_id: user.id })}
-                                            className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${selected
+                                            onClick={() => updateField("user_id", user.id)}
+                                            className={cn(
+                                                "relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white",
+                                                selected
                                                     ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
                                                     : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
-                                                }`}
+                                            )}
                                             style={{ animationDelay: `${idx * 60}ms` }}
                                         >
                                             <div className="flex items-start gap-4">
@@ -346,8 +414,10 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                                                     <p className="text-[11px] text-gray-500 leading-relaxed">{user.email}</p>
                                                 </div>
                                                 <div
-                                                    className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
-                                                        }`}
+                                                    className={cn(
+                                                        "w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200",
+                                                        selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                                                    )}
                                                 >
                                                     <Check size={10} />
                                                 </div>
@@ -374,194 +444,173 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                     </div>
                 )}
 
-                {/* Step 2: Goal Details */}
-                {currentStep === 2 && (
+                {/* Step 2: Category Selection */}
+                {step === 2 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
-                            <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
-                                <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
-                                    <PenSquare size={14} />
-                                </div>
-                                Goal Details
-                            </h2>
+                            <h2 className="text-[17px] font-bold text-gray-900 mb-1">Goal Category</h2>
+                            <p className="text-[11px] text-gray-500">
+                                Current: <span className="font-semibold text-emerald-600">{GOAL_CATEGORIES.find(cat => cat.value === goal.category)?.label || "Other"}</span>
+                            </p>
                         </div>
-                        <div className="space-y-5">
-                            {/* Goal Name */}
+
+                        <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto pr-1">
+                            {GOAL_CATEGORIES.map((category, idx) => {
+                                const IconComponent = CATEGORY_ICONS[category.value];
+                                const selected = form.category === category.value;
+                                return (
+                                    <button
+                                        key={category.value}
+                                        type="button"
+                                        onClick={() => selectCategory(category.value)}
+                                        className={cn(
+                                            "relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white",
+                                            selected
+                                                ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
+                                                : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                                        )}
+                                        style={{ animationDelay: `${idx * 60}ms` }}
+                                    >
+                                        <div className="flex items-start gap-4">
+                                            <div
+                                                className={cn(
+                                                    "w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white",
+                                                    selected
+                                                        ? "text-gray-700 border-gray-200"
+                                                        : "text-gray-400 border-gray-100"
+                                                )}
+                                            >
+                                                {IconComponent ? <IconComponent size={18} /> : null}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{category.label}</h3>
+                                                <p className="text-[11px] text-gray-500 leading-relaxed">{category.desc}</p>
+                                            </div>
+                                            <div
+                                                className={cn(
+                                                    "w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200",
+                                                    selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                                                )}
+                                            >
+                                                <Check size={10} />
+                                            </div>
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* Step 3: Goal Details */}
+                {step === 3 && (
+                    <div className="space-y-4 animate-txn-in">
+                        <div>
+                            <h4 className="text-sm font-semibold text-slate-900 mb-2">Goal Details</h4>
+                            <p className="text-xs text-slate-500">Update your goal parameters</p>
+                        </div>
+
+                        <div className="space-y-4">
                             <div>
-                                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
-                                    Goal Name <span className="text-gray-400">*</span>
-                                </label>
+                                <label className="block text-xs font-medium text-slate-700 mb-1.5">Goal Name <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
-                                    value={formData.goal_name}
+                                    value={form.goal_name}
                                     onChange={(e) => updateField("goal_name", e.target.value)}
-                                    className="w-full px-3.5 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                                    placeholder="e.g., Emergency Fund, Dream Vacation..."
+                                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                                    placeholder="e.g., Emergency Fund"
                                 />
                             </div>
 
-                            {/* Category */}
-                            <div>
-                                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
-                                    Category <span className="text-gray-400">*</span>
-                                </label>
-                                <div className="grid grid-cols-2 gap-2.5">
-                                    {GOAL_CATEGORIES.map((cat) => {
-                                        const selected = formData.category === cat.value;
-                                        return (
-                                            <button
-                                                key={cat.value}
-                                                type="button"
-                                                onClick={() => updateField("category", cat.value)}
-                                                className={`relative p-3 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${selected
-                                                        ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
-                                                        : "border-gray-200 hover:border-gray-300"
-                                                    }`}
-                                            >
-                                                <div className="flex items-center gap-2.5">
-                                                    <span className="text-lg">{cat.emoji}</span>
-                                                    <div className="flex-1 min-w-0">
-                                                        <h3 className="text-[12px] font-bold text-gray-900">{cat.label}</h3>
-                                                        <p className="text-[10px] text-gray-400 truncate">{cat.desc}</p>
-                                                    </div>
-                                                    <div
-                                                        className={`w-[16px] h-[16px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
-                                                            }`}
-                                                    >
-                                                        <Check size={8} />
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* Target + Current Amount */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
-                                        Target Amount <span className="text-gray-400">*</span>
-                                    </label>
+                                    <label className="block text-xs font-medium text-slate-700 mb-1.5">Target Amount <span className="text-red-500">*</span></label>
                                     <div className="relative">
-                                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">₱</span>
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₱</span>
                                         <input
                                             type="number"
-                                            step="0.01"
-                                            value={formData.target_amount}
+                                            value={form.target_amount}
                                             onChange={(e) => updateField("target_amount", e.target.value)}
-                                            className="w-full pl-7 pr-4 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+                                            className="w-full pl-6 pr-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                                             placeholder="0.00"
                                         />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
-                                        Current Amount
-                                    </label>
+                                    <label className="block text-xs font-medium text-slate-700 mb-1.5">Current Amount</label>
                                     <div className="relative">
-                                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">₱</span>
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₱</span>
                                         <input
                                             type="number"
-                                            step="0.01"
-                                            value={formData.current_amount}
+                                            value={form.current_amount}
                                             onChange={(e) => updateField("current_amount", e.target.value)}
-                                            className="w-full pl-7 pr-4 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+                                            className="w-full pl-6 pr-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                                             placeholder="0.00"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Priority */}
-                            <div>
-                                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
-                                    Priority
-                                </label>
-                                <div className="grid grid-cols-4 gap-2">
-                                    {GOAL_PRIORITIES.map((prio) => {
-                                        const selected = formData.priority === prio.value;
-                                        return (
-                                            <button
-                                                key={prio.value}
-                                                type="button"
-                                                onClick={() => updateField("priority", prio.value)}
-                                                className={`px-3 py-2 rounded-lg border text-[12px] font-semibold transition-all ${selected
-                                                        ? "border-emerald-500 shadow-[0_0_0_1px_#10b981] bg-white"
-                                                        : "border-gray-200 hover:border-gray-300 bg-white"
-                                                    }`}
-                                            >
-                                                {prio.label}
-                                            </button>
-                                        );
-                                    })}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-700 mb-1.5">Monthly Contribution</label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₱</span>
+                                        <input
+                                            type="number"
+                                            value={form.auto_contribute_amount}
+                                            onChange={(e) => updateField("auto_contribute_amount", e.target.value)}
+                                            className="w-full pl-6 pr-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-700 mb-1.5">Priority</label>
+                                    <SearchableDropdown
+                                        value={form.priority}
+                                        onChange={(value) => updateField("priority", value as GoalPriority)}
+                                        options={GOAL_PRIORITIES.map((priority) => ({
+                                            value: priority.value,
+                                            label: priority.label,
+                                        }))}
+                                        placeholder="Select priority"
+                                        allowEmpty={false}
+                                        hideSearch={true}
+                                    />
                                 </div>
                             </div>
 
-                            {/* Target Date */}
                             <div>
-                                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
-                                    Target Date <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
-                                </label>
+                                <label className="block text-xs font-medium text-slate-700 mb-1.5">Deadline</label>
                                 <DateSelector
-                                    value={formData.target_date}
+                                    value={form.target_date}
                                     onChange={(value) => updateField("target_date", value)}
-                                    placeholder="Select target date"
-                                    className="w-full"
+                                    placeholder="Select date"
                                 />
                             </div>
 
-                            {/* Auto Contribute */}
-                            <div>
-                                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
-                                    Monthly Auto-Contribute <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
-                                </label>
-                                <div className="relative">
-                                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">₱</span>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        value={formData.auto_contribute_amount}
-                                        onChange={(e) => updateField("auto_contribute_amount", e.target.value)}
-                                        className="w-full pl-7 pr-4 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                                        placeholder="0.00"
-                                    />
-                                </div>
+                            <div className="space-y-3">
+                                <Checkbox
+                                    id="isFamily"
+                                    checked={form.is_family_goal || false}
+                                    onChange={(checked) => updateField("is_family_goal", checked)}
+                                    disabled={families.length === 0}
+                                    label="This is a family goal"
+                                />
+                                <Checkbox
+                                    id="isPublic"
+                                    checked={form.is_public || false}
+                                    onChange={(checked) => updateField("is_public", checked)}
+                                    label="This is a public goal"
+                                />
                             </div>
 
-                            {/* Toggles */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <label className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-white cursor-pointer hover:border-gray-300 transition-all">
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.is_family_goal}
-                                        onChange={(e) => updateField("is_family_goal", e.target.checked)}
-                                        className="w-4 h-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500/20"
-                                    />
-                                    <span className="text-[12px] font-semibold text-gray-900 flex items-center gap-1.5">
-                                        <Users size={12} className="text-gray-400" /> Family Goal
-                                    </span>
-                                </label>
-                                <label className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-white cursor-pointer hover:border-gray-300 transition-all">
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.is_public}
-                                        onChange={(e) => updateField("is_public", e.target.checked)}
-                                        className="w-4 h-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500/20"
-                                    />
-                                    <span className="text-[12px] font-semibold text-gray-900 flex items-center gap-1.5">
-                                        <Eye size={12} className="text-gray-400" /> Public Goal
-                                    </span>
-                                </label>
-                            </div>
-
-                            {formData.is_family_goal && families.length > 0 && (
+                            {form.is_family_goal && families.length > 0 && (
                                 <div>
-                                    <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
-                                        Select Family
-                                    </label>
+                                    <label className="block text-xs font-medium text-slate-700 mb-1.5">Select Family</label>
                                     <SearchableDropdown
-                                        value={formData.family_id}
+                                        value={form.family_id}
                                         onChange={(value) => updateField("family_id", value)}
                                         options={families.map((f) => ({
                                             value: f.id,
@@ -569,75 +618,108 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                                             icon: Users,
                                         }))}
                                         placeholder="Select family..."
-                                        className="w-full"
                                         allowEmpty={false}
                                     />
                                 </div>
                             )}
 
-                            {/* Description */}
                             <div>
-                                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
-                                    Description <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
-                                </label>
+                                <label className="block text-xs font-medium text-slate-700 mb-1.5">Notes</label>
                                 <textarea
-                                    rows={2}
-                                    value={formData.description}
-                                    onChange={(e) => updateField("description", e.target.value)}
-                                    className="w-full px-3.5 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg resize-none transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                                    placeholder="Describe this goal..."
+                                    value={form.notes}
+                                    onChange={(e) => updateField("notes", e.target.value)}
+                                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 transition-colors focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 min-h-[80px]"
+                                    placeholder="Add any additional details or notes"
                                 />
                             </div>
 
-                            {/* Notes */}
-                            <div>
-                                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
-                                    Notes <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
-                                </label>
-                                <textarea
-                                    rows={2}
-                                    value={formData.notes}
-                                    onChange={(e) => updateField("notes", e.target.value)}
-                                    className="w-full px-3.5 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg resize-none transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                                    placeholder="Any additional notes..."
-                                />
+                            <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
+                                <Info size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
+                                <div>
+                                    <div className="font-medium text-sm text-gray-900">Goal Impact</div>
+                                    <div className="text-xs text-gray-600">
+                                        Changes will affect all future tracking and calculations
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* Step 3: Review */}
-                {currentStep === 3 && (
-                    <div className="animate-txn-in">
-                        <div className="mb-5">
-                            <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
-                                <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
-                                    <ClipboardCheck size={14} />
-                                </div>
-                                Review Changes
-                            </h2>
-                            <p className="text-[11px] text-gray-500 mt-0.5 ml-[42px]">Review the changes before saving.</p>
+                {/* Step 4: Review */}
+                {step === 4 && (
+                    <div className="space-y-4 animate-txn-in">
+                        <div>
+                            <h4 className="text-sm font-semibold text-slate-900 mb-2">Review Changes</h4>
+                            <p className="text-xs text-slate-500">Confirm your goal updates before saving</p>
                         </div>
 
-                        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                             <div className="p-5 space-y-0 divide-y divide-gray-100">
-                                <ReviewRow label="User" value={selectedUser?.full_name || selectedUser?.email || "—"} />
-                                <ReviewRow label="Goal Name" value={formData.goal_name} />
-                                <ReviewRow label="Category" value={`${selectedCategory?.emoji ?? "🎯"} ${selectedCategory?.label ?? formData.category}`} />
-                                <ReviewRow label="Target Amount" value={`₱${parseFloat(formData.target_amount || "0").toLocaleString()}`} />
-                                <ReviewRow label="Current Amount" value={`₱${parseFloat(formData.current_amount || "0").toLocaleString()}`} />
-                                <ReviewRow label="Priority" value={selectedPrio?.label ?? formData.priority} />
-                                <ReviewRow label="Target Date" value={formData.target_date ? new Date(formData.target_date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "None"} />
-                                {formData.auto_contribute_amount && (
-                                    <ReviewRow label="Auto-Contribute" value={`₱${parseFloat(formData.auto_contribute_amount).toLocaleString()} / month`} />
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">User</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">{selectedUser?.full_name || selectedUser?.email || "—"}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Goal Name</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">{form.goal_name || "Untitled Goal"}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Target Amount</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">{formatCurrency(form.target_amount || "0")}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Current Amount</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">{formatCurrency(form.current_amount || "0")}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Monthly Contribution</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">{formatCurrency(form.auto_contribute_amount || "0")}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Category</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">
+                                        {GOAL_CATEGORIES.find((cat) => cat.value === form.category)?.label || "Other"}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Priority</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">
+                                        {GOAL_PRIORITIES.find((p) => p.value === form.priority)?.label || "Medium"}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Deadline</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">{formatDate(form.target_date)}</span>
+                                </div>
+                                {form.is_family_goal && selectedFamily && (
+                                    <div className="flex justify-between items-center py-2.5">
+                                        <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Family Goal</span>
+                                        <span className="text-[13px] font-semibold text-gray-700 flex items-center gap-2">
+                                            <Users size={14} /> {selectedFamily.family_name}
+                                        </span>
+                                    </div>
                                 )}
-                                <ReviewRow label="Family Goal" value={formData.is_family_goal ? "Yes" : "No"} />
-                                {formData.is_family_goal && selectedFamily && (
-                                    <ReviewRow label="Family" value={selectedFamily.family_name} />
-                                )}
-                                <ReviewRow label="Public" value={formData.is_public ? "Yes" : "No"} />
-                                {formData.description && <ReviewRow label="Description" value={formData.description} italic />}
-                                {formData.notes && <ReviewRow label="Notes" value={formData.notes} italic />}
+                            </div>
+                        </div>
+
+                        {saveError && (
+                            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
+                                <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
+                                <div>
+                                    <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Error</h4>
+                                    <p className="text-[11px] leading-relaxed">{saveError}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="p-3 rounded-lg bg-white border border-gray-200 flex items-start gap-3">
+                            <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-amber-500" />
+                            <div>
+                                <div className="font-medium text-sm text-gray-900">Goal Impact</div>
+                                <div className="text-xs text-gray-600">
+                                    Changes will affect all future tracking and calculations
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -645,53 +727,31 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
             </ModalBody>
 
             {/* Footer */}
-            <ModalFooter className="px-6 py-4">
-                {currentStep > 1 && (
-                    <Button variant="outline" size="sm" className="flex-1" onClick={handleBack} disabled={loading}>
-                        <ArrowLeft size={14} /> Back
-                    </Button>
-                )}
-                {currentStep < STEPS.length ? (
-                    <Button
-                        size="sm"
-                        className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
-                        onClick={handleNext}
-                    >
-                        Next <ArrowRight size={14} />
-                    </Button>
-                ) : (
-                    <Button
-                        size="sm"
-                        className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
-                        onClick={handleSubmit}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <>
-                                <Loader2 size={14} className="animate-spin" /> Saving...
-                            </>
-                        ) : (
-                            <>
-                                <Check size={14} /> Save Changes
-                            </>
-                        )}
-                    </Button>
-                )}
+            <ModalFooter className="flex justify-between">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBack}
+                    className={cn("transition-all", step === 1 ? "invisible" : "")}
+                >
+                    <ArrowLeft size={14} className="mr-1" />
+                    Back
+                </Button>
+                <div className="flex-1" />
+                <Button
+                    size="sm"
+                    onClick={handleNext}
+                    disabled={!canContinue || loading}
+                    className="bg-emerald-500 hover:bg-emerald-600"
+                >
+                    {step === 4 ? (
+                        loading ? (<><Loader2 size={14} className="animate-spin mr-1" /> Saving...</>) : (<>Save Changes <ArrowRight size={14} className="ml-1" /></>)
+                    ) : (
+                        <>Continue <ArrowRight size={14} className="ml-1" /></>
+                    )}
+                </Button>
             </ModalFooter>
         </Modal>
-    );
-}
-
-function ReviewRow({ label, value, italic }: { label: string; value: string; italic?: boolean }) {
-    return (
-        <div className="flex justify-between items-center py-2.5 gap-4">
-            <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold flex-shrink-0">
-                {label}
-            </span>
-            <span className={`text-[13px] font-semibold text-slate-700 text-right truncate ${italic ? "italic" : ""}`}>
-                {value}
-            </span>
-        </div>
     );
 }
 
