@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { fetchAdminChatMessages, fetchAdminChatbotStats, fetchAllUsers, fetchDistinctModels } from "./admin-chatbot-service";
-import type { AdminChatMessage, AdminChatbotStats, AdminChatbotFilters } from "./types";
+import { fetchAdminChatSessions, fetchAdminChatbotStats, fetchAllUsers, fetchDistinctModels } from "./admin-chatbot-service";
+import type { AdminChatSession, AdminChatbotStats, AdminChatbotFilters } from "./types";
 
 export function useAdminChatbot() {
-    const [messages, setMessages] = useState<AdminChatMessage[]>([]);
+    const [sessions, setSessions] = useState<AdminChatSession[]>([]);
     const [stats, setStats] = useState<AdminChatbotStats | null>(null);
     const [users, setUsers] = useState<{ id: string; email: string; full_name: string | null }[]>([]);
     const [availableModels, setAvailableModels] = useState<string[]>([]);
@@ -49,30 +49,30 @@ export function useAdminChatbot() {
         setError(null);
 
         try {
-            const [msgResult, statsData, usersData, modelsData] = await Promise.all([
-                fetchAdminChatMessages(filters, currentPage, pageSize),
+            const [sessionResult, statsData, usersData, modelsData] = await Promise.all([
+                fetchAdminChatSessions(filters, currentPage, pageSize, search),
                 (stats && !forceRefreshStats) ? Promise.resolve(stats) : fetchAdminChatbotStats(),
                 users.length > 0 ? Promise.resolve(users) : fetchAllUsers(),
                 availableModels.length > 0 ? Promise.resolve(availableModels) : fetchDistinctModels(),
             ]);
 
-            if (msgResult.error) {
-                setError(msgResult.error);
+            if (sessionResult.error) {
+                setError(sessionResult.error);
             } else {
-                setMessages(msgResult.data);
-                setTotalCount(msgResult.count ?? 0);
+                setSessions(sessionResult.data);
+                setTotalCount(sessionResult.count);
             }
 
             if (!stats || forceRefreshStats) setStats(statsData);
             if (users.length === 0) setUsers(usersData);
             if (availableModels.length === 0) setAvailableModels(modelsData);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to fetch chatbot messages");
+            setError(err instanceof Error ? err.message : "Failed to fetch chatbot sessions");
         } finally {
             setLoading(false);
             setTableLoading(false);
         }
-    }, [filters, currentPage, pageSize, stats, users, availableModels]);
+    }, [filters, currentPage, pageSize, search, stats, users, availableModels]);
 
     // Initial load
     useEffect(() => {
@@ -84,20 +84,7 @@ export function useAdminChatbot() {
         if (!loading) {
             fetchData(true);
         }
-    }, [filters, currentPage, pageSize]);
-
-    // Search filter (client-side)
-    const filteredMessages = useMemo(() => {
-        if (!search) return messages;
-        const lowerSearch = search.toLowerCase();
-        return messages.filter(
-            (msg) =>
-                msg.content?.toLowerCase().includes(lowerSearch) ||
-                msg.user_email?.toLowerCase().includes(lowerSearch) ||
-                msg.user_name?.toLowerCase().includes(lowerSearch) ||
-                msg.model?.toLowerCase().includes(lowerSearch)
-        );
-    }, [messages, search]);
+    }, [filters, currentPage, pageSize, search]);
 
     const resetFilters = useCallback(() => {
         const now = new Date();
@@ -142,7 +129,7 @@ export function useAdminChatbot() {
     }, []);
 
     return {
-        messages: filteredMessages,
+        sessions,
         stats,
         users,
         availableModels,

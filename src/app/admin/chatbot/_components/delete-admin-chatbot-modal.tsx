@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import {
     Modal,
     ModalHeader,
@@ -8,61 +8,66 @@ import {
     ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import type { AdminChatMessage } from "../_lib/types";
-import { deleteAdminChatMessage } from "../_lib/admin-chatbot-service";
+import { Loader2, AlertTriangle, MessageSquare } from "lucide-react";
+import { deleteUserChatSession } from "../_lib/admin-chatbot-service";
+import type { AdminChatSession } from "../_lib/types";
+import { UserAvatar } from "@/components/shared/user-avatar";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { format } from "date-fns";
 
 interface DeleteAdminChatbotModalProps {
     open: boolean;
     onClose: () => void;
-    message: AdminChatMessage | null;
-    onSuccess?: () => void;
+    session: AdminChatSession | null;
+    onSuccess: () => void;
 }
 
-export function DeleteAdminChatbotModal({
-    open,
-    onClose,
-    message,
-    onSuccess,
-}: DeleteAdminChatbotModalProps) {
+export function DeleteAdminChatbotModal({ open, onClose, session, onSuccess }: DeleteAdminChatbotModalProps) {
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async () => {
-        if (!message) return;
+        if (!session) return;
 
         try {
             setLoading(true);
-            const { error } = await deleteAdminChatMessage(message.id);
+            const { error } = await deleteUserChatSession(session.user_id);
 
             if (error) {
                 toast.error(error);
                 return;
             }
 
-            toast.success("Message deleted permanently");
+            toast.success("Chat session deleted permanently");
             onClose();
-            onSuccess?.();
+            onSuccess();
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Failed to delete message");
+            toast.error(error instanceof Error ? error.message : "Failed to delete chat session");
         } finally {
             setLoading(false);
         }
     };
 
-    if (!message) return null;
+    if (!session) return null;
 
-    const isAssistant = message.role === "assistant";
-    const truncatedContent = message.content.length > 100
-        ? message.content.slice(0, 100) + "..."
-        : message.content;
+    const mockUser: SupabaseUser = {
+        id: session.user_id,
+        email: session.user_email,
+        user_metadata: {
+            full_name: session.user_name,
+            avatar_url: session.user_avatar,
+        },
+        app_metadata: {},
+        created_at: "",
+        aud: "authenticated",
+    } as SupabaseUser;
 
     return (
         <Modal open={open} onClose={onClose} className="max-w-md">
             {/* Header */}
             <ModalHeader onClose={onClose} className="px-5 py-3.5 bg-white border-b border-slate-100">
                 <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                    Delete Message
+                    Delete Chat Session
                 </span>
             </ModalHeader>
 
@@ -71,40 +76,37 @@ export function DeleteAdminChatbotModal({
                 <div className="text-center animate-txn-in">
                     {/* Warning Message */}
                     <h2 className="text-lg font-bold text-slate-900 mb-3">
-                        Delete Message Permanently?
+                        Delete Chat Session Permanently?
                     </h2>
                     <p className="text-sm text-slate-500 mb-6 max-w-xs mx-auto leading-relaxed">
-                        This action cannot be undone. The message will be permanently deleted from the chat history.
+                        This action cannot be undone. All messages in this chat session will be permanently deleted.
                     </p>
 
-                    {/* Message Details */}
+                    {/* Session Details */}
                     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mx-auto max-w-sm">
                         <div className="p-5 space-y-0 divide-y divide-gray-100">
                             <div className="flex justify-between items-center py-2.5">
-                                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Role</span>
-                                <span className={`text-sm font-bold ${isAssistant ? "text-emerald-600" : "text-blue-600"}`}>
-                                    {isAssistant ? "Assistant" : "User"}
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center py-2.5">
                                 <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">User</span>
-                                <span className="text-sm font-semibold text-slate-700">{message.user_email ?? "Unknown"}</span>
-                            </div>
-                            {message.model && (
-                                <div className="flex justify-between items-center py-2.5">
-                                    <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Model</span>
-                                    <span className="text-sm font-semibold text-slate-700">{message.model}</span>
+                                <div className="flex items-center gap-2">
+                                    <UserAvatar user={mockUser} size="sm" className="ring-1 ring-white shadow-sm" />
+                                    <span className="text-sm font-semibold text-slate-700">{session.user_name || session.user_email}</span>
                                 </div>
-                            )}
+                            </div>
                             <div className="flex justify-between items-center py-2.5">
-                                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Date</span>
+                                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Total Messages</span>
+                                <span className="text-sm font-bold text-slate-900">{session.total_messages}</span>
+                            </div>
+                            <div className="flex justify-between items-center py-2.5">
+                                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">User / AI</span>
                                 <span className="text-sm font-semibold text-slate-700">
-                                    {new Date(message.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                    {session.user_messages} / {session.assistant_messages}
                                 </span>
                             </div>
-                            <div className="py-2.5">
-                                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold block mb-1">Content Preview</span>
-                                <p className="text-[11px] text-slate-600 leading-relaxed">{truncatedContent}</p>
+                            <div className="flex justify-between items-center py-2.5">
+                                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Last Active</span>
+                                <span className="text-sm font-semibold text-slate-700">
+                                    {format(new Date(session.last_message_at), "MMM dd, yyyy")}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -118,7 +120,7 @@ export function DeleteAdminChatbotModal({
                                     Irreversible Action
                                 </h4>
                                 <p className="text-[11px] leading-relaxed">
-                                    This message will be permanently deleted and cannot be recovered. This may affect the conversation context for the user.
+                                    All {session.total_messages} messages in this chat session will be permanently deleted and cannot be recovered.
                                 </p>
                             </div>
                         </div>

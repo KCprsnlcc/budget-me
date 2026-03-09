@@ -21,6 +21,22 @@ export type AdminChatMessage = {
     user_avatar?: string;
 };
 
+// A chat session represents all messages grouped by user
+export type AdminChatSession = {
+    user_id: string;
+    user_email: string;
+    user_name: string | null;
+    user_avatar: string | null;
+    total_messages: number;
+    user_messages: number;
+    assistant_messages: number;
+    last_message_preview: string;
+    last_message_role: "user" | "assistant";
+    first_message_at: string;
+    last_message_at: string;
+    models_used: string[];
+};
+
 export type AdminChatbotStats = {
     totalMessages: number;
     totalUserMessages: number;

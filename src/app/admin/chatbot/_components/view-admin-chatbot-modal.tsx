@@ -1,345 +1,380 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import {
-    Modal,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-} from "@/components/ui/modal";
+import { useState, useEffect, useRef } from "react";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import {
-    ArrowLeft,
-    ArrowRight,
-    Calendar,
-    User,
     Bot,
+    User,
+    Cpu,
     MessageSquare,
     Clock,
-    Cpu,
-    FileText,
     Paperclip,
+    Copy,
+    Check,
+    Share,
 } from "lucide-react";
-import { format } from "date-fns";
-import { Stepper } from "../../transactions/_components/stepper";
 import { UserAvatar } from "@/components/shared/user-avatar";
-import type { AdminChatMessage } from "../_lib/types";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-
-const STEPS = ["Overview", "Analysis"];
+import type { AdminChatSession, AdminChatMessage } from "../_lib/types";
+import { fetchUserChatMessages } from "../_lib/admin-chatbot-service";
+import { format } from "date-fns";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import Skeleton from "react-loading-skeleton";
 
 interface ViewAdminChatbotModalProps {
     open: boolean;
     onClose: () => void;
-    message: AdminChatMessage | null;
+    session: AdminChatSession | null;
 }
 
-export function ViewAdminChatbotModal({
-    open,
-    onClose,
-    message,
-}: ViewAdminChatbotModalProps) {
-    const [step, setStep] = useState(1);
+// Exact same markdown components as /chatbot page for assistant messages
+const assistantMarkdownComponents = {
+    table: ({ children }: any) => (
+        <div className="overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm my-4">
+            <div className="overflow-x-auto">
+                <table className="w-full text-xs">{children}</table>
+            </div>
+        </div>
+    ),
+    thead: ({ children }: any) => (
+        <thead className="bg-slate-50/50 border-b border-slate-100">{children}</thead>
+    ),
+    th: ({ children, align }: any) => (
+        <th
+            className={`px-5 py-3 font-semibold text-slate-500 uppercase tracking-wider ${align === "right" ? "text-right" : "text-left"
+                }`}
+        >
+            {children}
+        </th>
+    ),
+    tbody: ({ children }: any) => (
+        <tbody className="divide-y divide-slate-50">{children}</tbody>
+    ),
+    tr: ({ children }: any) => (
+        <tr className="hover:bg-slate-50 transition-colors">{children}</tr>
+    ),
+    td: ({ children, align }: any) => (
+        <td
+            className={`px-5 py-3 ${align === "right" ? "text-right text-slate-900 font-semibold" : "text-slate-500"
+                }`}
+        >
+            {children}
+        </td>
+    ),
+    h1: ({ children }: any) => (
+        <h1 className="text-xl font-bold mt-6 mb-4 text-slate-900">{children}</h1>
+    ),
+    h2: ({ children }: any) => (
+        <h2 className="text-lg font-bold mt-5 mb-3 text-slate-900">{children}</h2>
+    ),
+    h3: ({ children }: any) => (
+        <h3 className="text-base font-bold mt-4 mb-2 text-slate-900">{children}</h3>
+    ),
+    h4: ({ children }: any) => (
+        <h4 className="text-sm font-semibold mt-3 mb-2 text-slate-900">{children}</h4>
+    ),
+    ul: ({ children }: any) => (
+        <ul className="space-y-1 mb-4">{children}</ul>
+    ),
+    ol: ({ children }: any) => (
+        <ol className="space-y-1 mb-4 list-decimal list-inside">{children}</ol>
+    ),
+    li: ({ children }: any) => (
+        <li className="flex items-start gap-2 text-slate-700">{children}</li>
+    ),
+    p: ({ children }: any) => (
+        <p className="mb-2 text-slate-700">{children}</p>
+    ),
+    blockquote: ({ children }: any) => (
+        <blockquote className="border-l-4 border-slate-300 pl-4 py-2 my-4 text-slate-600">
+            {children}
+        </blockquote>
+    ),
+    code: ({ inline, children }: any) => (
+        <code
+            className={`${inline
+                ? "bg-slate-100 px-1 py-0.5 rounded text-slate-800 text-xs"
+                : "block bg-slate-900 text-slate-100 p-4 rounded-lg text-sm my-4"
+                }`}
+        >
+            {children}
+        </code>
+    ),
+    strong: ({ children }: any) => (
+        <strong className="font-semibold text-slate-900">{children}</strong>
+    ),
+    a: ({ href, children }: any) => (
+        <a href={href} className="text-emerald-500 hover:text-emerald-600 underline">
+            {children}
+        </a>
+    ),
+};
 
-    const reset = useCallback(() => {
-        setStep(1);
-    }, []);
-
-    const handleClose = useCallback(() => {
-        reset();
-        onClose();
-    }, [reset, onClose]);
-
-    const createMockUser = (msg: AdminChatMessage): SupabaseUser => {
-        return {
-            id: msg.user_id,
-            email: msg.user_email || "",
-            user_metadata: {
-                full_name: msg.user_name,
-                avatar_url: msg.user_avatar,
-            },
-            app_metadata: {},
-            aud: "authenticated",
-            created_at: msg.created_at,
-        } as SupabaseUser;
-    };
-
-    if (!message) return null;
-
+function ChatBubble({ message, copiedId, onCopy }: { message: AdminChatMessage; copiedId: string | null; onCopy: (id: string, content: string) => void }) {
     const isAssistant = message.role === "assistant";
-    const truncatedContent = message.content.length > 200
-        ? message.content.slice(0, 200) + "..."
-        : message.content;
 
     return (
-        <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-            {/* Header */}
-            <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                        Message Details
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-medium tracking-wide">
-                        Step {step} of 2
-                    </span>
+        <div className={`mx-auto max-w-full ${isAssistant ? "flex justify-start" : "flex justify-end"}`}>
+            {/* Message Content */}
+            <div className={`${isAssistant ? "space-y-2 flex-1" : "max-w-[90%] sm:max-w-[85%]"} relative group`}>
+                {/* Message Bubble — exact same classes as /chatbot page */}
+                <div
+                    className={`${isAssistant
+                        ? "rounded-[2rem] rounded-tl-sm text-slate-800 transition-all"
+                        : "bg-emerald-500 text-white rounded-[2rem] rounded-tr-sm px-4 sm:px-6 py-2.5 sm:py-3.5 shadow-sm"
+                        }`}
+                >
+                    {/* File Attachment */}
+                    {message.attachment && (
+                        <div className={`mb-1.5 sm:mb-2 p-1.5 sm:p-2 rounded-lg ${isAssistant ? "bg-slate-100" : "bg-emerald-600"}`}>
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                <Paperclip size={14} className={`sm:w-4 sm:h-4 ${isAssistant ? "text-slate-500" : "text-emerald-200"}`} />
+                                <span className={`text-xs sm:text-sm truncate ${isAssistant ? "text-slate-700" : "text-white"}`}>
+                                    {message.attachment.name}
+                                </span>
+                                <span className={`text-[10px] sm:text-xs ${isAssistant ? "text-slate-500" : "text-emerald-200"}`}>
+                                    ({(message.attachment.size / 1024).toFixed(1)} KB)
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Message content — matches /chatbot: user = plain text, assistant = markdown */}
+                    {isAssistant ? (
+                        <div className="text-sm leading-relaxed text-slate-700">
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={assistantMarkdownComponents}
+                            >
+                                {message.content}
+                            </ReactMarkdown>
+                        </div>
+                    ) : (
+                        <div className="text-sm leading-relaxed text-white whitespace-pre-wrap break-words">
+                            {message.content}
+                        </div>
+                    )}
+                </div>
+
+                {/* Copy button footer — same as /chatbot page */}
+                <div className={`flex gap-1.5 sm:gap-2 ${isAssistant ? "opacity-100 justify-start" : "opacity-0 justify-end"} group-hover:opacity-100 transition-all duration-200`}>
+                    <button
+                        onClick={() => onCopy(message.id, message.content)}
+                        className="p-1 sm:p-1.5 hover:opacity-80 transition-opacity"
+                        title="Copy message"
+                    >
+                        {copiedId === message.id ? (
+                            <Check size={12} className="sm:w-[14px] sm:h-[14px] text-emerald-500" />
+                        ) : (
+                            <Copy size={12} className="sm:w-[14px] sm:h-[14px] text-slate-400" />
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function MessagesSkeleton() {
+    return (
+        <div className="space-y-6 sm:space-y-8">
+            {/* User message skeleton */}
+            <div className="flex justify-end">
+                <div className="max-w-[80%]">
+                    <Skeleton height={44} borderRadius={32} width={240} />
+                </div>
+            </div>
+            {/* Assistant message skeleton */}
+            <div className="flex justify-start">
+                <div className="flex-1">
+                    <Skeleton height={80} borderRadius={32} />
+                    <div className="flex gap-2 mt-1">
+                        <Skeleton width={20} height={14} />
+                    </div>
+                </div>
+            </div>
+            {/* User */}
+            <div className="flex justify-end">
+                <div className="max-w-[80%]">
+                    <Skeleton height={44} borderRadius={32} width={200} />
+                </div>
+            </div>
+            {/* Assistant */}
+            <div className="flex justify-start">
+                <div className="flex-1">
+                    <Skeleton height={120} borderRadius={32} />
+                    <div className="flex gap-2 mt-1">
+                        <Skeleton width={20} height={14} />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatbotModalProps) {
+    const [messages, setMessages] = useState<AdminChatMessage[]>([]);
+    const [loadingMessages, setLoadingMessages] = useState(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+    const chatEndRef = useRef<HTMLDivElement>(null);
+
+    const handleCopy = (id: string, content: string) => {
+        navigator.clipboard.writeText(content);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    // Fetch all messages for this user's session
+    useEffect(() => {
+        if (open && session) {
+            setLoadingMessages(true);
+            fetchUserChatMessages(session.user_id).then(({ data, error }) => {
+                if (!error) {
+                    setMessages(data);
+                }
+                setLoadingMessages(false);
+            });
+        } else {
+            setMessages([]);
+        }
+    }, [open, session]);
+
+    // Auto-scroll to bottom when messages load
+    useEffect(() => {
+        if (messages.length > 0) {
+            chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [messages]);
+
+    if (!session) return null;
+
+    const mockUser: SupabaseUser = {
+        id: session.user_id,
+        email: session.user_email,
+        user_metadata: {
+            full_name: session.user_name,
+            avatar_url: session.user_avatar,
+        },
+        app_metadata: {},
+        created_at: "",
+        aud: "authenticated",
+    } as SupabaseUser;
+
+    // Group messages by date
+    const groupedMessages = messages
+        .filter(msg => msg.content && msg.content.trim() !== "")
+        .reduce<Record<string, AdminChatMessage[]>>((acc, msg) => {
+            const dateKey = format(new Date(msg.created_at), "MMM dd, yyyy");
+            if (!acc[dateKey]) acc[dateKey] = [];
+            acc[dateKey].push(msg);
+            return acc;
+        }, {});
+
+    return (
+        <Modal open={open} onClose={onClose} className="max-w-3xl">
+            {/* Header — matches chatbot page header style */}
+            <ModalHeader onClose={onClose} className="px-4 sm:px-6 py-3 bg-white/80 backdrop-blur-sm border-b border-slate-100">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <UserAvatar
+                        user={mockUser}
+                        size="lg"
+                        className="ring-2 ring-white shadow-sm flex-shrink-0"
+                    />
+                    <div className="min-w-0">
+                        <h3 className="text-xs sm:text-sm font-semibold text-slate-800 flex items-center gap-1.5 sm:gap-2 truncate">
+                            <span className="truncate">{session.user_name || session.user_email}</span>
+                        </h3>
+                        <div className="flex items-center gap-3 text-[10px] text-slate-400 mt-0.5">
+                            <span className="flex items-center gap-1">
+                                <MessageSquare size={10} />
+                                {session.total_messages} messages
+                            </span>
+                            <span className="flex items-center gap-1">
+                                <Clock size={10} />
+                                Last active {format(new Date(session.last_message_at), "MMM dd, h:mm a")}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </ModalHeader>
 
-            {/* Stepper */}
-            <Stepper steps={STEPS} currentStep={step} />
-
-            {/* Body */}
-            <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-                {/* STEP 1: Overview */}
-                {step === 1 && (
-                    <div className="space-y-6 animate-txn-in">
-                        {/* Message Header */}
-                        <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
-                            <div className="flex justify-center mb-3">
-                                {isAssistant ? (
-                                    <div className="w-14 h-14 rounded-full bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center">
-                                        <Bot size={28} className="text-emerald-500" />
-                                    </div>
-                                ) : (
-                                    <UserAvatar
-                                        user={createMockUser(message)}
-                                        size="xl"
-                                        className="ring-2 ring-white shadow-sm"
-                                    />
-                                )}
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-900">
-                                {isAssistant ? "BudgetSense AI" : message.user_name || "Unknown User"}
-                            </h3>
-                            <p className="text-sm text-slate-500 mb-3">
-                                {isAssistant ? "AI Assistant" : message.user_email || "Unknown"}
-                            </p>
-                            <div className="flex items-center justify-center gap-3">
-                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${isAssistant
-                                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                        : "bg-blue-50 text-blue-700 border border-blue-200"
-                                    }`}>
-                                    {isAssistant ? <Bot size={12} /> : <User size={12} />}
-                                    {isAssistant ? "Assistant" : "User"}
-                                </span>
-                                {message.model && (
-                                    <>
-                                        <span className="text-slate-300">•</span>
-                                        <span className="text-xs font-medium text-slate-600 flex items-center gap-1">
-                                            <Cpu size={12} />
-                                            {message.model}
-                                        </span>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Message Content */}
-                        <div>
-                            <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">
-                                Message Content
-                            </h4>
-                            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                                <div className="p-5">
-                                    <p className="text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap break-words max-h-64 overflow-y-auto">
-                                        {message.content}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Message Information */}
-                        <div>
-                            <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Message Information</h4>
-                            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                                <div className="p-5 space-y-0 divide-y divide-slate-100">
-                                    <DetailRow
-                                        label="Date"
-                                        value={format(new Date(message.created_at), "MMM dd, yyyy")}
-                                        icon={Calendar}
-                                    />
-                                    <DetailRow
-                                        label="Time"
-                                        value={format(new Date(message.created_at), "h:mm a")}
-                                        icon={Clock}
-                                    />
-                                    <DetailRow
-                                        label="Role"
-                                        value={isAssistant ? "Assistant" : "User"}
-                                        icon={isAssistant ? Bot : User}
-                                    />
-                                    {message.model && (
-                                        <DetailRow
-                                            label="Model"
-                                            value={message.model}
-                                            icon={Cpu}
-                                        />
-                                    )}
-                                    {message.attachment && (
-                                        <DetailRow
-                                            label="Attachment"
-                                            value={message.attachment.name}
-                                            icon={Paperclip}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+            {/* Session stats bar */}
+            <div className="px-4 sm:px-6 py-2.5 bg-slate-50/50 border-b border-slate-100 flex items-center gap-4 text-[10px]">
+                <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span className="text-slate-500">User:</span>
+                    <span className="font-semibold text-slate-700">{session.user_messages}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                    <span className="text-slate-500">Assistant:</span>
+                    <span className="font-semibold text-slate-700">{session.assistant_messages}</span>
+                </div>
+                {session.models_used.length > 0 && (
+                    <div className="flex items-center gap-1.5">
+                        <Cpu size={10} className="text-slate-400" />
+                        <span className="text-slate-500">Models:</span>
+                        <span className="font-semibold text-slate-700">{session.models_used.join(", ")}</span>
                     </div>
                 )}
+            </div>
 
-                {/* STEP 2: Analysis */}
-                {step === 2 && (
-                    <div className="space-y-6 animate-txn-in">
-                        {/* User Information */}
-                        <div>
-                            <h3 className="text-[15px] font-bold text-slate-900 mb-3">
-                                User Information
-                            </h3>
-                            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                                <div className="p-5 space-y-0 divide-y divide-slate-100">
-                                    <DetailRow
-                                        label="Email"
-                                        value={message.user_email || "Unknown"}
-                                        icon={User}
-                                    />
-                                    <DetailRow
-                                        label="Name"
-                                        value={message.user_name || "—"}
-                                        icon={User}
-                                    />
-                                    <DetailRow
-                                        label="User ID"
-                                        value={message.user_id}
-                                        icon={User}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Message Metadata */}
-                        <div>
-                            <h3 className="text-[15px] font-bold text-slate-900 mb-3">
-                                Message Metadata
-                            </h3>
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
-                                            <Clock size={16} className="text-slate-600" />
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-semibold text-slate-900">Created</div>
-                                            <div className="text-[10px] text-slate-400">
-                                                {format(new Date(message.created_at), "MMM dd, yyyy 'at' h:mm a")}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
-                                            <Clock size={16} className="text-slate-600" />
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-semibold text-slate-900">Last Updated</div>
-                                            <div className="text-[10px] text-slate-400">
-                                                {format(new Date(message.updated_at), "MMM dd, yyyy 'at' h:mm a")}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
-                                            <MessageSquare size={16} className={isAssistant ? "text-emerald-600" : "text-blue-600"} />
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-semibold text-slate-900">Message Role</div>
-                                            <div className="text-[10px] text-slate-400">
-                                                {isAssistant ? "AI assistant response" : "User message"}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span className="text-xs font-medium text-slate-600">
-                                        {isAssistant ? "Assistant" : "User"}
+            {/* Messages Container — exact same bg and spacing as /chatbot page */}
+            <ModalBody className="p-4 sm:p-6 bg-white max-h-[60vh] overflow-y-auto scroll-smooth scrollbar-thin">
+                {loadingMessages ? (
+                    <MessagesSkeleton />
+                ) : messages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center text-slate-400">
+                        <Bot size={48} className="mb-4 text-slate-300" />
+                        <p className="text-sm">No messages in this conversation.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-6 sm:space-y-8">
+                        {Object.entries(groupedMessages).map(([dateKey, msgs]) => (
+                            <div key={dateKey}>
+                                {/* Date separator */}
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="flex-1 h-px bg-slate-100" />
+                                    <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider px-2">
+                                        {dateKey}
                                     </span>
+                                    <div className="flex-1 h-px bg-slate-100" />
                                 </div>
 
-                                {message.suggestions && message.suggestions.length > 0 && (
-                                    <div className="p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
-                                                <FileText size={16} className="text-slate-600" />
-                                            </div>
-                                            <div className="text-sm font-semibold text-slate-900">Suggestions</div>
-                                        </div>
-                                        <div className="ml-11 space-y-1">
-                                            {message.suggestions.map((s, i) => (
-                                                <p key={i} className="text-[11px] text-slate-500">• {s}</p>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                                {/* Messages — same spacing as /chatbot page */}
+                                <div className="space-y-6 sm:space-y-8">
+                                    {msgs.map((msg) => (
+                                        <ChatBubble
+                                            key={msg.id}
+                                            message={msg}
+                                            copiedId={copiedId}
+                                            onCopy={handleCopy}
+                                        />
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-
-                        {/* Message ID */}
-                        <div>
-                            <h3 className="text-[15px] font-bold text-slate-900 mb-3">
-                                Message ID
-                            </h3>
-                            <div className="bg-[#F9FAFB]/50 rounded-lg p-4 border border-slate-100">
-                                <p className="text-[11px] text-slate-500 leading-relaxed font-mono break-all">
-                                    {message.id}
-                                </p>
-                            </div>
-                        </div>
+                        ))}
+                        <div ref={chatEndRef} />
+                        <div className="h-4" />
                     </div>
                 )}
             </ModalBody>
 
             {/* Footer */}
-            <ModalFooter className="flex justify-between">
-                {step > 1 ? (
-                    <Button variant="secondary" size="sm" onClick={() => setStep(1)}>
-                        <ArrowLeft size={14} /> Back
-                    </Button>
-                ) : (
-                    <div />
-                )}
+            <ModalFooter className="flex justify-between px-6 py-4">
+                <div className="text-[10px] text-slate-400">
+                    Conversation started {format(new Date(session.first_message_at), "MMM dd, yyyy")}
+                </div>
                 <Button
                     size="sm"
-                    onClick={() => {
-                        if (step === 2) {
-                            setStep(1);
-                        } else {
-                            setStep(2);
-                        }
-                    }}
+                    onClick={onClose}
                     className="bg-emerald-500 hover:bg-emerald-600"
                 >
-                    {step === 2 ? (
-                        <>Back to Overview <ArrowLeft size={14} /></>
-                    ) : (
-                        <>View Analysis <ArrowRight size={14} /></>
-                    )}
+                    Close
                 </Button>
             </ModalFooter>
         </Modal>
-    );
-}
-
-function DetailRow({ label, value, icon: Icon }: { label: string; value: string; icon: React.ElementType }) {
-    return (
-        <div className="flex justify-between items-center py-2.5">
-            <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold flex items-center gap-1.5">
-                <Icon size={12} className="text-slate-400" />
-                {label}
-            </span>
-            <span className="text-[13px] font-semibold text-slate-700 max-w-[60%] truncate text-right">{value}</span>
-        </div>
     );
 }

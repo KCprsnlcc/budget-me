@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import type { AdminChatMessage, AdminChatbotStats, AdminChatbotFilters } from "./types";
+import type { AdminChatMessage, AdminChatSession, AdminChatbotStats, AdminChatbotFilters } from "./types";
 
 const supabase = createClient();
 
@@ -21,41 +21,86 @@ function mapRow(row: Record<string, any>, profile?: Record<string, any> | null):
     };
 }
 
-// Fetch all chatbot messages with filters (admin view)
-export async function fetchAdminChatMessages(
+// Fetch chat sessions grouped by user (one row per user)
+export async function fetchAdminChatSessions(
     filters: AdminChatbotFilters = {},
     page: number = 1,
-    pageSize: number = 20
-): Promise<{ data: AdminChatMessage[]; error: string | null; count: number | null }> {
-    let query = supabase
-        .from("chatbot_messages")
-        .select("*", { count: "exact" })
-        .order("created_at", { ascending: false });
-
-    // Apply date filters
+    pageSize: number = 20,
+    search: string = ""
+): Promise<{ data: AdminChatSession[]; error: string | null; count: number }> {
+    // Build date filter for query
+    let dateFilter: { start?: string; end?: string } = {};
     if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
         const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01T00:00:00`;
         const endDate = new Date(filters.year as number, filters.month as number, 0);
         const end = `${filters.year}-${String(filters.month).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}T23:59:59`;
-        query = query.gte("created_at", start).lte("created_at", end);
+        dateFilter = { start, end };
     } else if (filters.year !== "all" && filters.year) {
-        query = query.gte("created_at", `${filters.year}-01-01T00:00:00`).lte("created_at", `${filters.year}-12-31T23:59:59`);
+        dateFilter = {
+            start: `${filters.year}-01-01T00:00:00`,
+            end: `${filters.year}-12-31T23:59:59`,
+        };
     }
 
+    // Fetch all messages that match filters (we need to aggregate by user)
+    let query = supabase
+        .from("chatbot_messages")
+        .select("id, user_id, role, content, model, created_at, attachment")
+        .order("created_at", { ascending: false });
+
+    if (dateFilter.start) query = query.gte("created_at", dateFilter.start);
+    if (dateFilter.end) query = query.lte("created_at", dateFilter.end);
     if (filters.role) query = query.eq("role", filters.role);
     if (filters.userId) query = query.eq("user_id", filters.userId);
     if (filters.model) query = query.eq("model", filters.model);
 
-    // Pagination
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
-    query = query.range(from, to);
+    const { data: rawData, error } = await query;
+    if (error) return { data: [], error: error.message, count: 0 };
 
-    const { data, error, count } = await query;
-    if (error) return { data: [], error: error.message, count: null };
+    // Group by user_id
+    const sessionMap = new Map<string, {
+        user_id: string;
+        total_messages: number;
+        user_messages: number;
+        assistant_messages: number;
+        last_message_content: string;
+        last_message_role: "user" | "assistant";
+        first_message_at: string;
+        last_message_at: string;
+        models_used: Set<string>;
+    }>();
 
-    // Fetch user profiles separately
-    const userIds = [...new Set((data ?? []).map((msg: any) => msg.user_id))];
+    for (const msg of rawData ?? []) {
+        const existing = sessionMap.get(msg.user_id);
+        if (!existing) {
+            sessionMap.set(msg.user_id, {
+                user_id: msg.user_id,
+                total_messages: 1,
+                user_messages: msg.role === "user" ? 1 : 0,
+                assistant_messages: msg.role === "assistant" ? 1 : 0,
+                last_message_content: msg.content,
+                last_message_role: msg.role,
+                first_message_at: msg.created_at,
+                last_message_at: msg.created_at,
+                models_used: msg.model ? new Set([msg.model]) : new Set(),
+            });
+        } else {
+            existing.total_messages++;
+            if (msg.role === "user") existing.user_messages++;
+            else existing.assistant_messages++;
+            if (msg.model) existing.models_used.add(msg.model);
+            // Track earliest/latest (data is descending, so first seen = latest)
+            if (msg.created_at < existing.first_message_at) existing.first_message_at = msg.created_at;
+            if (msg.created_at > existing.last_message_at) {
+                existing.last_message_at = msg.created_at;
+                existing.last_message_content = msg.content;
+                existing.last_message_role = msg.role;
+            }
+        }
+    }
+
+    // Get user profiles
+    const userIds = Array.from(sessionMap.keys());
     const { data: profiles } = userIds.length > 0
         ? await supabase.from("profiles").select("id, email, full_name, avatar_url").in("id", userIds)
         : { data: [] };
@@ -64,12 +109,70 @@ export async function fetchAdminChatMessages(
         (profiles ?? []).map((p: any) => [p.id, { email: p.email, full_name: p.full_name, avatar_url: p.avatar_url }])
     );
 
-    const mappedData = (data ?? []).map((row: any) => {
-        const profile = profileMap.get(row.user_id);
-        return mapRow(row, profile);
+    // Build sessions array
+    let sessions: AdminChatSession[] = Array.from(sessionMap.values()).map((s) => {
+        const profile = profileMap.get(s.user_id);
+        return {
+            user_id: s.user_id,
+            user_email: profile?.email ?? "Unknown",
+            user_name: profile?.full_name ?? null,
+            user_avatar: profile?.avatar_url ?? null,
+            total_messages: s.total_messages,
+            user_messages: s.user_messages,
+            assistant_messages: s.assistant_messages,
+            last_message_preview: s.last_message_content?.slice(0, 120) || "—",
+            last_message_role: s.last_message_role,
+            first_message_at: s.first_message_at,
+            last_message_at: s.last_message_at,
+            models_used: Array.from(s.models_used),
+        };
     });
 
-    return { data: mappedData, error: null, count: count ?? 0 };
+    // Sort by last message date (most recent first)
+    sessions.sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
+
+    // Apply search filter
+    if (search.trim()) {
+        const lowerSearch = search.toLowerCase();
+        sessions = sessions.filter(
+            (s) =>
+                s.user_email.toLowerCase().includes(lowerSearch) ||
+                s.user_name?.toLowerCase().includes(lowerSearch) ||
+                s.last_message_preview.toLowerCase().includes(lowerSearch)
+        );
+    }
+
+    const totalCount = sessions.length;
+
+    // Paginate
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize;
+    const paginatedSessions = sessions.slice(from, to);
+
+    return { data: paginatedSessions, error: null, count: totalCount };
+}
+
+// Fetch all messages for a specific user (for conversation view)
+export async function fetchUserChatMessages(
+    userId: string
+): Promise<{ data: AdminChatMessage[]; error: string | null }> {
+    const { data, error } = await supabase
+        .from("chatbot_messages")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: true });
+
+    if (error) return { data: [], error: error.message };
+
+    // Fetch user profile
+    const { data: profileData } = await supabase
+        .from("profiles")
+        .select("id, email, full_name, avatar_url")
+        .eq("id", userId)
+        .single();
+
+    const mappedData = (data ?? []).map((row: any) => mapRow(row, profileData));
+    return { data: mappedData, error: null };
 }
 
 // Fetch admin chatbot statistics
@@ -225,6 +328,13 @@ export async function fetchAdminChatbotStats(): Promise<AdminChatbotStats | null
 // Delete chatbot message (admin)
 export async function deleteAdminChatMessage(msgId: string): Promise<{ error: string | null }> {
     const { error } = await supabase.from("chatbot_messages").delete().eq("id", msgId);
+    if (error) return { error: error.message };
+    return { error: null };
+}
+
+// Delete all messages for a user session
+export async function deleteUserChatSession(userId: string): Promise<{ error: string | null }> {
+    const { error } = await supabase.from("chatbot_messages").delete().eq("user_id", userId);
     if (error) return { error: error.message };
     return { error: null };
 }
