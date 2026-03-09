@@ -23,6 +23,8 @@ import {
   Inbox,
   FileText,
   MoreHorizontal,
+  Plus,
+  Edit,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +39,8 @@ import {
 } from "@/components/ui/table";
 import { ViewAdminTransactionModal } from "./_components/view-admin-transaction-modal";
 import { DeleteAdminTransactionModal } from "./_components/delete-admin-transaction-modal";
+import { AddAdminTransactionModal } from "./_components/add-admin-transaction-modal";
+import { EditAdminTransactionModal } from "./_components/edit-admin-transaction-modal";
 import { useAdminTransactions } from "./_lib/use-admin-transactions";
 import type { AdminTransaction } from "./_lib/types";
 import { FilterTableSkeleton, TransactionCardSkeleton } from "@/components/ui/skeleton-filter-loaders";
@@ -110,10 +114,12 @@ SummaryCard.displayName = "SummaryCard";
 const TransactionCard = memo(({
   tx,
   onView,
+  onEdit,
   onDelete,
 }: {
   tx: AdminTransaction;
   onView: (tx: AdminTransaction) => void;
+  onEdit: (tx: AdminTransaction) => void;
   onDelete: (tx: AdminTransaction) => void;
 }) => {
   const isIncome = isIncomeType(tx);
@@ -165,6 +171,9 @@ const TransactionCard = memo(({
           <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(tx)}>
             <Eye size={16} />
           </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-600" title="Edit" onClick={() => onEdit(tx)}>
+            <Edit size={16} />
+          </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(tx)}>
             <Trash2 size={16} />
           </Button>
@@ -179,10 +188,12 @@ TransactionCard.displayName = "TransactionCard";
 const TransactionRow = memo(({
   tx,
   onView,
+  onEdit,
   onDelete,
 }: {
   tx: AdminTransaction;
   onView: (tx: AdminTransaction) => void;
+  onEdit: (tx: AdminTransaction) => void;
   onDelete: (tx: AdminTransaction) => void;
 }) => {
   const isIncome = isIncomeType(tx);
@@ -219,6 +230,9 @@ const TransactionRow = memo(({
           <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(tx)}>
             <Eye size={16} />
           </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-600" title="Edit" onClick={() => onEdit(tx)}>
+            <Edit size={16} />
+          </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(tx)}>
             <Trash2 size={16} />
           </Button>
@@ -233,6 +247,8 @@ TransactionRow.displayName = "TransactionRow";
 export default function AdminTransactionsPage() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedTx, setSelectedTx] = useState<AdminTransaction | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
@@ -286,6 +302,11 @@ export default function AdminTransactionsPage() {
   const handleView = useCallback((tx: AdminTransaction) => {
     setSelectedTx(tx);
     setViewModalOpen(true);
+  }, []);
+
+  const handleEdit = useCallback((tx: AdminTransaction) => {
+    setSelectedTx(tx);
+    setEditModalOpen(true);
   }, []);
 
   const handleDelete = useCallback((tx: AdminTransaction) => {
@@ -598,6 +619,15 @@ export default function AdminTransactionsPage() {
               )}
             </div>
           </div>
+          <Button
+            size="sm"
+            className="bg-emerald-500 hover:bg-emerald-600 order-2 w-full sm:w-auto"
+            onClick={() => setAddModalOpen(true)}
+          >
+            <Plus size={14} className="sm:mr-1" />
+            <span className="hidden sm:inline">Add Transaction</span>
+            <span className="sm:hidden">Add</span>
+          </Button>
         </div>
       </div>
 
@@ -947,6 +977,7 @@ export default function AdminTransactionsPage() {
                       key={tx.id}
                       tx={tx}
                       onView={handleView}
+                      onEdit={handleEdit}
                       onDelete={handleDelete}
                     />
                   ))
@@ -981,6 +1012,7 @@ export default function AdminTransactionsPage() {
                   key={tx.id}
                   tx={tx}
                   onView={handleView}
+                  onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
               ))
@@ -1003,6 +1035,7 @@ export default function AdminTransactionsPage() {
                   key={tx.id}
                   tx={tx}
                   onView={handleView}
+                  onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
               ))
@@ -1091,6 +1124,17 @@ export default function AdminTransactionsPage() {
         open={viewModalOpen}
         onClose={() => setViewModalOpen(false)}
         transaction={selectedTx}
+      />
+      <AddAdminTransactionModal
+        open={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onSuccess={refetch}
+      />
+      <EditAdminTransactionModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        transaction={selectedTx}
+        onSuccess={refetch}
       />
       <DeleteAdminTransactionModal
         open={deleteModalOpen}
