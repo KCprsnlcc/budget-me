@@ -26,6 +26,8 @@ import {
     Target,
     Zap,
     TrendingDown,
+    ArrowUp,
+    ArrowDown,
 } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import { createClient } from "@/lib/supabase/client";
@@ -97,6 +99,11 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
         insights: number;
         error?: string;
         aiInsights?: AIInsightResponse;
+        forecastData?: any;
+        categoryPredictions?: any[];
+        expenseTypes?: any;
+        behaviorInsights?: any[];
+        summary?: any;
     } | null>(null);
     const userListRef = useRef<HTMLDivElement>(null);
 
@@ -283,6 +290,11 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                         : categoryPredictions.length,
                     error: result.error,
                     aiInsights,
+                    forecastData,
+                    categoryPredictions,
+                    expenseTypes,
+                    behaviorInsights,
+                    summary,
                 });
             } catch (error) {
                 setGenerationResult({
@@ -544,10 +556,10 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                             {selectedGenerationType === "predictions" ? (
                                 // AI Predictions - Prophet ML forecasting
                                 [
-                                    { label: "Income vs Expenses Forecast", desc: "6-month historical analysis with Prophet-style forecasting", icon: BarChart3 },
-                                    { label: "Category Spending Forecast", desc: "Per-category spending predictions with confidence intervals", icon: PieChart },
-                                    { label: "Expense Type Analysis", desc: "Recurring vs variable expense classification", icon: Wallet },
-                                    { label: "Transaction Behavior", desc: "Pattern detection and trend analysis", icon: Activity },
+                                    { label: "Income vs Expenses Forecast", desc: "Prophet ML predictions with confidence intervals", icon: BarChart3 },
+                                    { label: "Category Spending Forecast", desc: "Detailed predictions for each spending category", icon: PieChart },
+                                    { label: "Expense Type Forecast", desc: "Analysis of recurring vs variable expenses", icon: Wallet },
+                                    { label: "Transaction Behavior Insight", desc: "Detailed transaction type analysis and predictions", icon: Activity },
                                 ].map((item, idx) => {
                                     const IconComponent = item.icon;
                                     return (
@@ -632,19 +644,213 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                     </p>
                                 </div>
 
-                                {/* Summary */}
+                                {/* Results */}
                                 {generationResult.success && (
                                     <>
-                                        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                                            <div className="p-5 space-y-0 divide-y divide-slate-100">
-                                                <ReviewRow label="User" value={selectedUser?.email || "Unknown"} />
-                                                <ReviewRow label="Generation Type" value={GENERATION_TYPES.find(t => t.id === selectedGenerationType)?.title || "Unknown"} />
-                                                <ReviewRow label="Data Points" value={generationResult.dataPoints.toString()} />
-                                                <ReviewRow label="Accuracy" value={`${generationResult.accuracy}%`} />
-                                                <ReviewRow label="Insights Generated" value={generationResult.insights.toString()} />
-                                                <ReviewRow label="Model" value="Prophet v1.1" />
+                                        {/* Predictions Results - Only show for predictions type */}
+                                        {selectedGenerationType === "predictions" && generationResult.summary && (
+                                            <div className="space-y-4">
+                                                {/* Summary Cards - Income, Expenses, Savings */}
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    {/* Projected Income Card */}
+                                                    <div className="bg-white border border-slate-200 rounded-xl p-4">
+                                                        <div className="flex justify-between items-start mb-3">
+                                                            <div className="text-slate-500">
+                                                                <TrendingUp size={20} strokeWidth={1.5} />
+                                                            </div>
+                                                            {generationResult.summary.incomeChange !== null && generationResult.summary.incomeChange !== undefined && (
+                                                                <div className={`flex items-center gap-1 text-[10px] font-medium ${
+                                                                    generationResult.summary.incomeChange >= 0 ? "text-emerald-700" : "text-red-700"
+                                                                }`}>
+                                                                    {generationResult.summary.incomeChange >= 0 ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
+                                                                    {generationResult.summary.incomeChange >= 0 ? "+" : ""}
+                                                                    {generationResult.summary.incomeChange.toFixed(1)}%
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="text-slate-500 text-[10px] font-medium mb-1 uppercase tracking-wide">Projected Income Growth</div>
+                                                        <div className="text-lg font-semibold text-slate-900 tracking-tight">
+                                                            ₱{generationResult.summary.monthlyIncome.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                                        </div>
+                                                        <div className="text-[10px] text-slate-500 mt-1">Next month projection</div>
+                                                    </div>
+
+                                                    {/* Projected Expense Card */}
+                                                    <div className="bg-white border border-slate-200 rounded-xl p-4">
+                                                        <div className="flex justify-between items-start mb-3">
+                                                            <div className="text-slate-500">
+                                                                <TrendingDown size={20} strokeWidth={1.5} />
+                                                            </div>
+                                                            {generationResult.summary.expenseChange !== null && generationResult.summary.expenseChange !== undefined && (
+                                                                <div className={`flex items-center gap-1 text-[10px] font-medium ${
+                                                                    generationResult.summary.expenseChange <= 0 ? "text-emerald-700" : "text-amber-700"
+                                                                }`}>
+                                                                    {generationResult.summary.expenseChange <= 0 ? <ArrowDown size={10} /> : <ArrowUp size={10} />}
+                                                                    {generationResult.summary.expenseChange <= 0 ? "" : "+"}
+                                                                    {generationResult.summary.expenseChange.toFixed(1)}%
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="text-slate-500 text-[10px] font-medium mb-1 uppercase tracking-wide">Projected Expense Growth</div>
+                                                        <div className="text-lg font-semibold text-slate-900 tracking-tight">
+                                                            ₱{generationResult.summary.monthlyExpenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                                        </div>
+                                                        <div className="text-[10px] text-slate-500 mt-1">Next month projection</div>
+                                                    </div>
+
+                                                    {/* Projected Savings Card */}
+                                                    <div className="bg-white border border-slate-200 rounded-xl p-4">
+                                                        <div className="flex justify-between items-start mb-3">
+                                                            <div className="text-slate-500">
+                                                                <Wallet size={20} strokeWidth={1.5} />
+                                                            </div>
+                                                            <div className={`flex items-center gap-1 text-[10px] font-medium ${
+                                                                generationResult.summary.netBalance >= generationResult.summary.monthlyIncome * 0.10 
+                                                                    ? "text-emerald-700" 
+                                                                    : generationResult.summary.netBalance >= generationResult.summary.monthlyIncome * 0.05
+                                                                    ? "text-amber-700"
+                                                                    : "text-red-700"
+                                                            }`}>
+                                                                <BarChart3 size={10} />
+                                                                {generationResult.summary.monthlyIncome > 0 
+                                                                    ? ((generationResult.summary.netBalance / generationResult.summary.monthlyIncome) * 100).toFixed(1)
+                                                                    : "0.0"}%
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-slate-500 text-[10px] font-medium mb-1 uppercase tracking-wide">Projected Savings Growth</div>
+                                                        <div className="text-lg font-semibold text-slate-900 tracking-tight">
+                                                            ₱{generationResult.summary.netBalance.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                                        </div>
+                                                        <div className="text-[10px] text-slate-500 mt-1">Next month projection</div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Income vs Expenses Summary */}
+                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                    <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                        <BarChart3 size={14} className="text-emerald-500" />
+                                                        Income vs Expenses Forecast
+                                                    </h3>
+                                                    <div className="grid grid-cols-3 gap-4">
+                                                        <div>
+                                                            <p className="text-[10px] text-slate-500 mb-1">Monthly Income</p>
+                                                            <p className="text-sm font-bold text-emerald-600">
+                                                                ₱{generationResult.summary.monthlyIncome.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] text-slate-500 mb-1">Monthly Expenses</p>
+                                                            <p className="text-sm font-bold text-red-600">
+                                                                ₱{generationResult.summary.monthlyExpenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] text-slate-500 mb-1">Net Balance</p>
+                                                            <p className={`text-sm font-bold ${generationResult.summary.netBalance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                                                                ₱{generationResult.summary.netBalance.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Category Predictions */}
+                                                {generationResult.categoryPredictions && generationResult.categoryPredictions.length > 0 && (
+                                                    <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                        <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                            <PieChart size={14} className="text-blue-500" />
+                                                            Category Spending Forecast ({generationResult.categoryPredictions.length})
+                                                        </h3>
+                                                        <div className="space-y-2">
+                                                            {generationResult.categoryPredictions.slice(0, 5).map((cat: any, idx: number) => (
+                                                                <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                                                                            <span className="text-[10px] font-bold">{idx + 1}</span>
+                                                                        </div>
+                                                                        <span className="text-xs font-semibold text-slate-900">{cat.category}</span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-3">
+                                                                        <span className="text-xs text-slate-600">
+                                                                            ₱{cat.predicted.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                                                        </span>
+                                                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                                                                            cat.trend === 'up' ? 'bg-red-100 text-red-700' :
+                                                                            cat.trend === 'down' ? 'bg-emerald-100 text-emerald-700' :
+                                                                            'bg-gray-100 text-gray-700'
+                                                                        }`}>
+                                                                            {cat.trend === 'up' ? '↑' : cat.trend === 'down' ? '↓' : '→'} {Math.abs(cat.changePercent)}%
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Expense Types */}
+                                                {generationResult.expenseTypes && (
+                                                    <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                        <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                            <Wallet size={14} className="text-violet-500" />
+                                                            Expense Type Forecast
+                                                        </h3>
+                                                        <div className="space-y-3">
+                                                            <div className="flex items-center justify-between p-3 bg-violet-50 rounded-lg">
+                                                                <div>
+                                                                    <p className="text-xs font-semibold text-violet-900">Recurring Expenses</p>
+                                                                    <p className="text-[10px] text-violet-600 mt-0.5">
+                                                                        {generationResult.expenseTypes.recurring.percentage}% of total
+                                                                    </p>
+                                                                </div>
+                                                                <p className="text-sm font-bold text-violet-900">
+                                                                    ₱{generationResult.expenseTypes.recurring.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                                                </p>
+                                                            </div>
+                                                            <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                                                                <div>
+                                                                    <p className="text-xs font-semibold text-amber-900">Variable Expenses</p>
+                                                                    <p className="text-[10px] text-amber-600 mt-0.5">
+                                                                        {generationResult.expenseTypes.variable.percentage}% of total
+                                                                    </p>
+                                                                </div>
+                                                                <p className="text-sm font-bold text-amber-900">
+                                                                    ₱{generationResult.expenseTypes.variable.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Transaction Behavior */}
+                                                {generationResult.behaviorInsights && generationResult.behaviorInsights.length > 0 && (
+                                                    <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                        <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                            <Activity size={14} className="text-emerald-500" />
+                                                            Transaction Behavior Insight
+                                                        </h3>
+                                                        <div className="space-y-2">
+                                                            {generationResult.behaviorInsights.slice(0, 4).map((behavior: any, idx: number) => (
+                                                                <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
+                                                                    <span className="text-xs font-semibold text-slate-900">{behavior.name || behavior.type}</span>
+                                                                    <div className="flex items-center gap-3">
+                                                                        <span className="text-xs text-slate-600">
+                                                                            Avg: ₱{behavior.currentAvg.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                                                        </span>
+                                                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                                                                            behavior.trend === 'up' ? 'bg-red-100 text-red-700' :
+                                                                            behavior.trend === 'down' ? 'bg-emerald-100 text-emerald-700' :
+                                                                            'bg-gray-100 text-gray-700'
+                                                                        }`}>
+                                                                            {behavior.trend === 'up' ? '↑' : behavior.trend === 'down' ? '↓' : '→'}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                        </div>
+                                        )}
 
                                         {/* AI Insights Details - Only show for financial_intelligence */}
                                         {selectedGenerationType === "financial_intelligence" && generationResult.aiInsights && (
@@ -823,15 +1029,6 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                 )}
             </ModalFooter>
         </Modal>
-    );
-}
-
-function ReviewRow({ label, value }: { label: string; value: string }) {
-    return (
-        <div className="flex justify-between items-center py-2.5">
-            <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">{label}</span>
-            <span className="text-[13px] font-semibold text-slate-700">{value}</span>
-        </div>
     );
 }
 
