@@ -13,6 +13,7 @@ export type MessageType = {
     size: number;
     url?: string;
   };
+  created_at?: string; // For pagination
 };
 
 export type AIModel = {

@@ -147,11 +147,8 @@ const SessionCard = memo(({
             {/* Last message preview */}
             <div className="mb-3 px-1">
                 <div className="flex items-start gap-2">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${session.last_message_role === "assistant"
-                        ? "bg-emerald-50 text-emerald-500"
-                        : "bg-blue-50 text-blue-500"
-                        }`}>
-                        {session.last_message_role === "assistant" ? <Bot size={8} /> : <User size={8} />}
+                    <div className="flex items-center justify-center flex-shrink-0 mt-0.5 text-slate-500">
+                        {session.last_message_role === "assistant" ? <Bot size={14} /> : <User size={14} />}
                     </div>
                     <p className="text-[12px] text-slate-600 leading-relaxed line-clamp-2 break-words">
                         {session.last_message_preview}
@@ -161,25 +158,6 @@ const SessionCard = memo(({
 
             {/* Footer stats */}
             <div className="flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                        <MessageSquare size={10} />
-                        {session.total_messages} msgs
-                    </span>
-                    <span className="text-[10px] text-blue-500 font-medium">
-                        {session.user_messages} user
-                    </span>
-                    <span className="text-[10px] text-emerald-500 font-medium">
-                        {session.assistant_messages} AI
-                    </span>
-                    {session.models_used.length > 0 && (
-                        <span className="text-[10px] text-slate-400 font-medium flex items-center gap-0.5">
-                            <Cpu size={9} />
-                            {session.models_used[0]}
-                        </span>
-                    )}
-                </div>
-
                 <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                     <Button variant="ghost" size="icon" className="h-7 w-7" title="View Conversation" onClick={() => onView(session)}>
                         <Eye size={14} />
@@ -230,34 +208,18 @@ const SessionRow = memo(({
                 </div>
             </TableCell>
             <TableCell className="px-6 py-4">
-                <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-slate-900">{session.total_messages}</span>
-                    <span className="text-[10px] text-slate-400">
-                        ({session.user_messages}u / {session.assistant_messages}ai)
-                    </span>
-                </div>
+                <span className="text-sm font-semibold text-slate-900">{session.total_messages}</span>
             </TableCell>
             <TableCell className="px-6 py-4 max-w-xs">
                 <div className="flex items-start gap-2">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${session.last_message_role === "assistant"
-                        ? "bg-emerald-50 text-emerald-500"
-                        : "bg-blue-50 text-blue-500"
-                        }`}>
-                        {session.last_message_role === "assistant" ? <Bot size={8} /> : <User size={8} />}
+                    <div className="flex items-center justify-center flex-shrink-0 mt-0.5 text-slate-500">
+                        {session.last_message_role === "assistant" ? <Bot size={14} /> : <User size={14} />}
                     </div>
                     <p className="text-[12px] text-slate-600 truncate">{session.last_message_preview}</p>
                 </div>
             </TableCell>
             <TableCell className="px-6 py-4 text-slate-500">
-                {session.models_used.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
-                        {session.models_used.map((m) => (
-                            <span key={m} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 flex items-center gap-0.5">
-                                <Cpu size={8} /> {m}
-                            </span>
-                        ))}
-                    </div>
-                ) : "—"}
+                {session.models_used.length > 0 ? session.models_used[0] : "—"}
             </TableCell>
             <TableCell className="px-6 py-4 text-slate-400 text-xs">
                 {formatRelativeTime(session.last_message_at)}
@@ -671,7 +633,7 @@ export default function AdminChatbotPage() {
                                 className="w-full pl-7 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
                             />
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
+                        <div className="grid grid-cols-2 md:grid-cols-3 xl:flex items-center gap-2 w-full xl:w-auto">
                             <FilterDropdown
                                 value={month === "all" ? "" : month.toString()}
                                 onChange={(v) => setMonth(v === "" ? "all" : Number(v))}
@@ -685,13 +647,6 @@ export default function AdminChatbotPage() {
                                 options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
                                 placeholder="All Years" className="w-full text-slate-900 text-xs sm:text-sm"
                                 allowEmpty={true} emptyLabel="All Years" hideSearch={true}
-                            />
-                            <FilterDropdown
-                                value={userFilter}
-                                onChange={(v) => setUserFilter(v)}
-                                options={users.map((u) => ({ value: u.id, label: u.email }))}
-                                placeholder="All Users" className="w-full text-xs sm:text-sm"
-                                allowEmpty={true} emptyLabel="All Users" hideSearch={false}
                             />
                             <FilterDropdown
                                 value={modelFilter}

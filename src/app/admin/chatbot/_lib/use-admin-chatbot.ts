@@ -16,7 +16,6 @@ export function useAdminChatbot() {
     const [month, setMonth] = useState<number | "all">("all");
     const [year, setYear] = useState<number | "all">("all");
     const [roleFilter, setRoleFilter] = useState("");
-    const [userFilter, setUserFilter] = useState("");
     const [modelFilter, setModelFilter] = useState("");
 
     // Pagination
@@ -33,10 +32,9 @@ export function useAdminChatbot() {
             month,
             year,
             role: roleFilter || undefined,
-            userId: userFilter || undefined,
             model: modelFilter || undefined,
         }),
-        [month, year, roleFilter, userFilter, modelFilter]
+        [month, year, roleFilter, modelFilter]
     );
 
     // Fetch data
@@ -91,7 +89,6 @@ export function useAdminChatbot() {
         setMonth(now.getMonth() + 1);
         setYear(now.getFullYear());
         setRoleFilter("");
-        setUserFilter("");
         setModelFilter("");
         setSearch("");
         setCurrentPage(1);
@@ -101,7 +98,6 @@ export function useAdminChatbot() {
         setMonth("all");
         setYear("all");
         setRoleFilter("");
-        setUserFilter("");
         setModelFilter("");
         setSearch("");
         setCurrentPage(1);
@@ -144,8 +140,6 @@ export function useAdminChatbot() {
         setYear,
         roleFilter,
         setRoleFilter,
-        userFilter,
-        setUserFilter,
         modelFilter,
         setModelFilter,
         resetFilters,

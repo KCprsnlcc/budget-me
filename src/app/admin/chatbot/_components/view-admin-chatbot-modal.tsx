@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import {
     Copy,
     Check,
     Share,
+    Loader2,
 } from "lucide-react";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -180,33 +181,44 @@ function ChatBubble({ message, copiedId, onCopy }: { message: AdminChatMessage; 
 function MessagesSkeleton() {
     return (
         <div className="space-y-6 sm:space-y-8">
-            {/* User message skeleton */}
+            {/* User message skeleton - right aligned */}
             <div className="flex justify-end">
-                <div className="max-w-[80%]">
-                    <Skeleton height={44} borderRadius={32} width={240} />
+                <div className="max-w-[90%] sm:max-w-[85%]">
+                    <Skeleton 
+                        height={56} 
+                        borderRadius={32} 
+                        width={240}
+                    />
                 </div>
             </div>
-            {/* Assistant message skeleton */}
+            
+            {/* Assistant message skeleton - left aligned, full width */}
             <div className="flex justify-start">
-                <div className="flex-1">
-                    <Skeleton height={80} borderRadius={32} />
-                    <div className="flex gap-2 mt-1">
-                        <Skeleton width={20} height={14} />
+                <div className="flex-1 space-y-2">
+                    <Skeleton height={96} borderRadius={32} />
+                    <div className="flex gap-2">
+                        <Skeleton width={16} height={16} circle />
                     </div>
                 </div>
             </div>
-            {/* User */}
+            
+            {/* User message skeleton */}
             <div className="flex justify-end">
-                <div className="max-w-[80%]">
-                    <Skeleton height={44} borderRadius={32} width={200} />
+                <div className="max-w-[90%] sm:max-w-[85%]">
+                    <Skeleton 
+                        height={48} 
+                        borderRadius={32} 
+                        width={200}
+                    />
                 </div>
             </div>
-            {/* Assistant */}
+            
+            {/* Assistant message skeleton */}
             <div className="flex justify-start">
-                <div className="flex-1">
-                    <Skeleton height={120} borderRadius={32} />
-                    <div className="flex gap-2 mt-1">
-                        <Skeleton width={20} height={14} />
+                <div className="flex-1 space-y-2">
+                    <Skeleton height={140} borderRadius={32} />
+                    <div className="flex gap-2">
+                        <Skeleton width={16} height={16} circle />
                     </div>
                 </div>
             </div>
@@ -217,8 +229,12 @@ function MessagesSkeleton() {
 export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatbotModalProps) {
     const [messages, setMessages] = useState<AdminChatMessage[]>([]);
     const [loadingMessages, setLoadingMessages] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     const handleCopy = (id: string, content: string) => {
         navigator.clipboard.writeText(content);
@@ -226,27 +242,71 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
         setTimeout(() => setCopiedId(null), 2000);
     };
 
-    // Fetch all messages for this user's session
+    // Fetch initial messages
     useEffect(() => {
         if (open && session) {
             setLoadingMessages(true);
-            fetchUserChatMessages(session.user_id).then(({ data, error }) => {
+            fetchUserChatMessages(session.user_id, 10).then(({ data, error, hasMore: more }) => {
                 if (!error) {
                     setMessages(data);
+                    setHasMore(more);
+                    setIsInitialLoad(false);
                 }
                 setLoadingMessages(false);
             });
         } else {
             setMessages([]);
+            setHasMore(false);
+            setIsInitialLoad(true);
         }
     }, [open, session]);
 
-    // Auto-scroll to bottom when messages load
+    // Auto-scroll to bottom on initial load only
     useEffect(() => {
-        if (messages.length > 0) {
-            chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (messages.length > 0 && !isInitialLoad) {
+            setTimeout(() => {
+                chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+                setIsInitialLoad(true);
+            }, 100);
         }
-    }, [messages]);
+    }, [messages.length, isInitialLoad]);
+
+    // Handle scroll for infinite loading
+    const handleScroll = useCallback(() => {
+        if (!chatContainerRef.current || loadingMore || !hasMore) return;
+
+        const { scrollTop } = chatContainerRef.current;
+
+        // Load more when scrolled near the top (within 100px) and not initial load
+        if (scrollTop < 100 && !isInitialLoad) {
+            setLoadingMore(true);
+            
+            // Get the oldest message timestamp
+            const oldestMessage = messages[0];
+            if (!oldestMessage) {
+                setLoadingMore(false);
+                return;
+            }
+
+            const beforeTimestamp = oldestMessage.created_at;
+
+            fetchUserChatMessages(session!.user_id, 10, beforeTimestamp).then(({ data, error, hasMore: more }) => {
+                if (!error && data.length > 0) {
+                    // Prepend older messages
+                    setMessages(prev => [...data, ...prev]);
+                    setHasMore(more);
+                    
+                    // Maintain scroll position
+                    setTimeout(() => {
+                        if (chatContainerRef.current) {
+                            chatContainerRef.current.scrollTop = 200;
+                        }
+                    }, 0);
+                }
+                setLoadingMore(false);
+            });
+        }
+    }, [messages, loadingMore, hasMore, session, isInitialLoad]);
 
     if (!session) return null;
 
@@ -322,44 +382,67 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
             </div>
 
             {/* Messages Container — exact same bg and spacing as /chatbot page */}
-            <ModalBody className="p-4 sm:p-6 bg-white max-h-[60vh] overflow-y-auto scroll-smooth scrollbar-thin">
-                {loadingMessages ? (
-                    <MessagesSkeleton />
-                ) : messages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-center text-slate-400">
-                        <Bot size={48} className="mb-4 text-slate-300" />
-                        <p className="text-sm">No messages in this conversation.</p>
-                    </div>
-                ) : (
-                    <div className="space-y-6 sm:space-y-8">
-                        {Object.entries(groupedMessages).map(([dateKey, msgs]) => (
-                            <div key={dateKey}>
-                                {/* Date separator */}
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="flex-1 h-px bg-slate-100" />
-                                    <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider px-2">
-                                        {dateKey}
-                                    </span>
-                                    <div className="flex-1 h-px bg-slate-100" />
+            <ModalBody className="p-0">
+                <div
+                    ref={chatContainerRef}
+                    onScroll={handleScroll}
+                    className="p-4 sm:p-6 bg-white max-h-[60vh] overflow-y-auto scroll-smooth scrollbar-thin"
+                >
+                    {loadingMessages ? (
+                        <MessagesSkeleton />
+                    ) : messages.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-center text-slate-400">
+                            <Bot size={48} className="mb-4 text-slate-300" />
+                            <p className="text-sm">No messages in this conversation.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-6 sm:space-y-8">
+                            {/* Loading more indicator at top */}
+                            {loadingMore && (
+                                <div className="space-y-4 sm:space-y-6">
+                                    {/* Skeleton for older messages being loaded */}
+                                    <div className="flex justify-end">
+                                        <div className="max-w-[90%] sm:max-w-[85%]">
+                                            <Skeleton height={48} borderRadius={32} width={200} />
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-start">
+                                        <div className="flex-1">
+                                            <Skeleton height={80} borderRadius={32} />
+                                        </div>
+                                    </div>
                                 </div>
+                            )}
 
-                                {/* Messages — same spacing as /chatbot page */}
-                                <div className="space-y-6 sm:space-y-8">
-                                    {msgs.map((msg) => (
-                                        <ChatBubble
-                                            key={msg.id}
-                                            message={msg}
-                                            copiedId={copiedId}
-                                            onCopy={handleCopy}
-                                        />
-                                    ))}
+                            {Object.entries(groupedMessages).map(([dateKey, msgs]) => (
+                                <div key={dateKey}>
+                                    {/* Date separator */}
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="flex-1 h-px bg-slate-100" />
+                                        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider px-2">
+                                            {dateKey}
+                                        </span>
+                                        <div className="flex-1 h-px bg-slate-100" />
+                                    </div>
+
+                                    {/* Messages — same spacing as /chatbot page */}
+                                    <div className="space-y-6 sm:space-y-8">
+                                        {msgs.map((msg) => (
+                                            <ChatBubble
+                                                key={msg.id}
+                                                message={msg}
+                                                copiedId={copiedId}
+                                                onCopy={handleCopy}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                        <div ref={chatEndRef} />
-                        <div className="h-4" />
-                    </div>
-                )}
+                            ))}
+                            <div ref={chatEndRef} />
+                            <div className="h-4" />
+                        </div>
+                    )}
+                </div>
             </ModalBody>
 
             {/* Footer */}

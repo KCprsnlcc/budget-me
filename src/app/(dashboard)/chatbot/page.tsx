@@ -73,6 +73,10 @@ export default function ChatbotPage() {
   const [isPending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const currentModel = models.find((m) => m.id === selectedModel) || models[0];
 
@@ -139,11 +143,13 @@ export default function ChatbotPage() {
         }
 
         // Fetch chat history from Supabase
-        const { data: history, error: historyError } = await fetchChatHistory(user.id);
+        const { data: history, error: historyError, hasMore: more } = await fetchChatHistory(user.id, 10);
         if (!historyError && history && history.length > 0) {
           // Filter out any messages with empty content
           const validMessages = history.filter(msg => msg.content && msg.content.trim() !== "");
           setMessages(validMessages);
+          setHasMore(more);
+          setIsInitialLoad(false);
           
           // Set suggestions from the first assistant message if it has them
           const firstAssistantMessage = validMessages.find(msg => msg.role === "assistant");
@@ -226,9 +232,50 @@ export default function ChatbotPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
+  // Only scroll to bottom on initial load
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+    if (messages.length > 0 && isInitialLoad) {
+      scrollToBottom();
+      setIsInitialLoad(false);
+    }
+  }, [messages, scrollToBottom, isInitialLoad]);
+
+  // Handle scroll for infinite loading
+  const handleScroll = useCallback(() => {
+    if (!messagesContainerRef.current || loadingMore || !hasMore || isSending) return;
+
+    const { scrollTop } = messagesContainerRef.current;
+
+    // Load more when scrolled near the top (within 100px)
+    if (scrollTop < 100 && user?.id && !isInitialLoad) {
+      setLoadingMore(true);
+      
+      // Get the oldest message timestamp
+      const oldestMessage = messages[0];
+      if (!oldestMessage || !oldestMessage.created_at) {
+        setLoadingMore(false);
+        return;
+      }
+
+      const beforeTimestamp = oldestMessage.created_at;
+
+      fetchChatHistory(user.id, 10, beforeTimestamp).then(({ data, error, hasMore: more }) => {
+        if (!error && data.length > 0) {
+          // Prepend older messages
+          setMessages(prev => [...data, ...prev]);
+          setHasMore(more);
+          
+          // Maintain scroll position
+          setTimeout(() => {
+            if (messagesContainerRef.current) {
+              messagesContainerRef.current.scrollTop = 200;
+            }
+          }, 0);
+        }
+        setLoadingMore(false);
+      });
+    }
+  }, [messages, loadingMore, hasMore, user, isSending, isInitialLoad]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -871,6 +918,8 @@ export default function ChatbotPage() {
 
           {/* Messages Container */}
           <div
+            ref={messagesContainerRef}
+            onScroll={handleScroll}
             id="chat-messages"
             className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 relative scroll-smooth bg-white scrollbar-thin"
           >
@@ -880,7 +929,25 @@ export default function ChatbotPage() {
                 <p className="text-sm">Start a conversation with BudgetSense AI</p>
               </div>
             ) : (
-              messages.filter(msg => msg.content && msg.content.trim() !== "").map((msg, index) => (
+              <>
+                {/* Loading more indicator at top */}
+                {loadingMore && (
+                  <div className="space-y-4">
+                    {/* Skeleton for older messages being loaded */}
+                    <div className="flex justify-end">
+                      <div className="max-w-[90%] sm:max-w-[85%]">
+                        <Skeleton height={48} borderRadius={32} width={200} />
+                      </div>
+                    </div>
+                    <div className="flex justify-start">
+                      <div className="flex-1">
+                        <Skeleton height={80} borderRadius={32} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {messages.filter(msg => msg.content && msg.content.trim() !== "").map((msg, index) => (
                 <div
                   key={msg.id}
                   className={`mx-auto max-w-3xl ${
@@ -957,7 +1024,8 @@ export default function ChatbotPage() {
                     )}
                   </div>
                 </div>
-              ))
+              ))}
+              </>
             )}
             <div ref={messagesEndRef} />
             <div className="h-4" />

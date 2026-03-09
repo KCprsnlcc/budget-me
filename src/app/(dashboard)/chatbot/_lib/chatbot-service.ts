@@ -397,27 +397,42 @@ export async function saveWelcomeMessage(userId: string, userProfile?: { fullNam
   }
 }
 
-// Fetch chat history from database
-export async function fetchChatHistory(userId: string): Promise<{ data: MessageType[]; error: string | null }> {
+// Fetch chat history from database with pagination
+export async function fetchChatHistory(
+  userId: string, 
+  limit: number = 20, 
+  before?: string
+): Promise<{ data: MessageType[]; error: string | null; hasMore: boolean }> {
   try {
     // Check if chatbot_messages table exists
-    const { data, error } = await supabase
+    let query = supabase
       .from("chatbot_messages")
       .select("*")
       .eq("user_id", userId)
-      .order("created_at", { ascending: true })
-      .limit(100);
+      .order("created_at", { ascending: false })
+      .limit(limit + 1); // Fetch one extra to check if there are more
+
+    // If before timestamp is provided, fetch messages before that timestamp
+    if (before) {
+      query = query.lt("created_at", before);
+    }
+
+    const { data, error } = await query;
 
     if (error?.message?.includes("does not exist")) {
       // Table doesn't exist, return empty array
-      return { data: [], error: null };
+      return { data: [], error: null, hasMore: false };
     }
 
     if (error) {
-      return { data: [], error: error.message };
+      return { data: [], error: error.message, hasMore: false };
     }
 
-    const messages: MessageType[] = (data || []).map((row) => ({
+    // Check if there are more messages
+    const hasMore = (data || []).length > limit;
+    const messages = (data || []).slice(0, limit);
+
+    const mappedMessages: MessageType[] = messages.map((row) => ({
       id: row.id,
       role: row.role as "assistant" | "user",
       content: row.content,
@@ -428,11 +443,13 @@ export async function fetchChatHistory(userId: string): Promise<{ data: MessageT
       model: row.model,
       suggestions: row.suggestions || [],
       attachment: row.attachment || undefined,
+      created_at: row.created_at, // Keep for pagination
     }));
 
-    return { data: messages, error: null };
+    // Reverse to show oldest first
+    return { data: mappedMessages.reverse(), error: null, hasMore };
   } catch (err) {
-    return { data: [], error: null }; // Graceful degradation
+    return { data: [], error: null, hasMore: false }; // Graceful degradation
   }
 }
 

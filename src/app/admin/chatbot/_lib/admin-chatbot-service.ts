@@ -152,17 +152,27 @@ export async function fetchAdminChatSessions(
     return { data: paginatedSessions, error: null, count: totalCount };
 }
 
-// Fetch all messages for a specific user (for conversation view)
+// Fetch all messages for a specific user (for conversation view) with pagination
 export async function fetchUserChatMessages(
-    userId: string
-): Promise<{ data: AdminChatMessage[]; error: string | null }> {
-    const { data, error } = await supabase
+    userId: string,
+    limit: number = 20,
+    before?: string
+): Promise<{ data: AdminChatMessage[]; error: string | null; hasMore: boolean }> {
+    let query = supabase
         .from("chatbot_messages")
         .select("*")
         .eq("user_id", userId)
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: false })
+        .limit(limit + 1); // Fetch one extra to check if there are more
 
-    if (error) return { data: [], error: error.message };
+    // If before timestamp is provided, fetch messages before that timestamp
+    if (before) {
+        query = query.lt("created_at", before);
+    }
+
+    const { data, error } = await query;
+
+    if (error) return { data: [], error: error.message, hasMore: false };
 
     // Fetch user profile
     const { data: profileData } = await supabase
@@ -171,8 +181,14 @@ export async function fetchUserChatMessages(
         .eq("id", userId)
         .single();
 
-    const mappedData = (data ?? []).map((row: any) => mapRow(row, profileData));
-    return { data: mappedData, error: null };
+    // Check if there are more messages
+    const hasMore = (data ?? []).length > limit;
+    const messages = (data ?? []).slice(0, limit);
+
+    const mappedData = messages.map((row: any) => mapRow(row, profileData));
+    
+    // Reverse to show oldest first
+    return { data: mappedData.reverse(), error: null, hasMore };
 }
 
 // Fetch admin chatbot statistics
