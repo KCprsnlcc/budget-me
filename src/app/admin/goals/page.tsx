@@ -746,7 +746,7 @@ export default function AdminGoalsPage() {
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 lg:grid-cols-4 xl:flex items-center gap-2 w-full flex-wrap">
+                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:flex items-center gap-2 w-full flex-wrap">
                             <FilterDropdown
                                 value={month === "all" ? "" : month.toString()}
                                 onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
@@ -765,16 +765,6 @@ export default function AdminGoalsPage() {
                                 className="w-full text-slate-900 text-xs sm:text-sm xl:w-28"
                                 allowEmpty={true}
                                 emptyLabel="All Years"
-                                hideSearch={true}
-                            />
-                            <FilterDropdown
-                                value={categoryFilter}
-                                onChange={(value) => setCategoryFilter(value)}
-                                options={Object.keys(CATEGORY_ICONS).map(k => ({ value: k, label: k.charAt(0).toUpperCase() + k.slice(1) }))}
-                                placeholder="All Categories"
-                                className="w-full text-xs sm:text-sm xl:w-36"
-                                allowEmpty={true}
-                                emptyLabel="All Categories"
                                 hideSearch={true}
                             />
                             <FilterDropdown
