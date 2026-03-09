@@ -7,9 +7,12 @@ import { useAuth } from "@/components/auth/auth-context";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ExternalLink } from "lucide-react";
 
 export function Sidebar() {
   const { user } = useAuth();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,6 +47,10 @@ export function Sidebar() {
               </div>
             ))}
           </nav>
+
+          <div className="px-3 pb-3">
+            <Skeleton width="100%" height={32} borderRadius={8} />
+          </div>
 
           <div className="p-3 border-t border-slate-200/50">
             <div className="flex items-center gap-2.5">
@@ -83,6 +90,16 @@ export function Sidebar() {
           </div>
         ))}
       </nav>
+
+      <div className="px-3 pb-3">
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-slate-600 bg-white hover:bg-slate-50 rounded-lg transition-colors border border-slate-200"
+        >
+          <ExternalLink size={14} />
+          Visit User Dashboard
+        </button>
+      </div>
 
       <UserProfileCard />
     </aside>

@@ -50,7 +50,6 @@ export const ADMIN_NAV: NavGroup[] = [
       { label: "Budgets", href: "/admin/budgets", icon: "PieChart", module: "admin-budgets" },
       { label: "Goals", href: "/admin/goals", icon: "Flag", module: "admin-goals" },
       { label: "Family", href: "/admin/family", icon: "Users", module: "admin-family" },
-      { label: "Reports", href: "/admin/reports", icon: "BarChart3", module: "admin-reports" },
     ],
   },
   {
