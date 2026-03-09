@@ -333,7 +333,7 @@ export default function UsersPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
             <div>
               <Skeleton width={180} height={28} className="mb-2" />
-              <Skeleton width={250} height={14} />
+              <Skeleton width={280} height={14} />
             </div>
             <div className="flex gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
               <Skeleton width={80} height={32} />
@@ -365,18 +365,7 @@ export default function UsersPage() {
                     <Skeleton width={150} height={10} />
                   </div>
                 </div>
-                <div className="relative h-48 sm:h-60 flex items-end justify-between gap-1 sm:gap-6 px-2 border-b border-slate-50">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="flex h-full items-end flex-1 justify-center">
-                      <Skeleton height={`${Math.random() * 60 + 40}%`} width={24} className="sm:w-8" />
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-between mt-3 sm:mt-4 px-2 sm:px-4">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} width={30} height={10} />
-                  ))}
-                </div>
+                <Skeleton height={192} className="sm:h-60" />
               </Card>
               <Card className="p-4 sm:p-6">
                 <Skeleton width={120} height={14} className="mb-2" />
@@ -400,35 +389,14 @@ export default function UsersPage() {
                 <Skeleton width={180} height={32} />
                 <Skeleton width={500} height={32} className="flex-1" />
                 <Skeleton width={70} height={28} />
+                <Skeleton width={70} height={28} />
               </div>
             </Card>
 
             {/* User Cards Skeleton */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i} className="p-4">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <Skeleton width={40} height={40} borderRadius="50%" />
-                      <div>
-                        <Skeleton width={110} height={14} className="mb-1" />
-                        <Skeleton width={140} height={10} />
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <Skeleton width={60} height={18} borderRadius={10} />
-                      <Skeleton width={80} height={10} />
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <Skeleton width={50} height={18} borderRadius={10} />
-                    <div className="flex items-center gap-1">
-                      <Skeleton width={32} height={32} borderRadius={4} />
-                      <Skeleton width={32} height={32} borderRadius={4} />
-                      <Skeleton width={32} height={32} borderRadius={4} />
-                    </div>
-                  </div>
-                </Card>
+                <UserCardSkeleton key={i} />
               ))}
             </div>
           </div>
