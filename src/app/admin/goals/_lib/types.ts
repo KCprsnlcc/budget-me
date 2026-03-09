@@ -78,7 +78,6 @@ export type AdminGoalFormState = {
     category: GoalCategory;
     target_date: string;
     is_family_goal: boolean;
-    is_public: boolean;
     auto_contribute_amount: string;
     notes: string;
     family_id: string;

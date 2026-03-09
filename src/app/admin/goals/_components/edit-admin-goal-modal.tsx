@@ -130,7 +130,6 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
         category: "general",
         target_date: "",
         is_family_goal: false,
-        is_public: false,
         auto_contribute_amount: "",
         notes: "",
         family_id: "",
@@ -149,7 +148,6 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                 category: goal.category,
                 target_date: goal.target_date ?? "",
                 is_family_goal: goal.is_family_goal,
-                is_public: goal.is_public,
                 auto_contribute_amount: goal.auto_contribute_amount > 0 ? goal.auto_contribute_amount.toString() : "",
                 notes: goal.notes ?? "",
                 family_id: goal.family_id ?? "",
@@ -590,36 +588,48 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                                 />
                             </div>
 
-                            <div className="space-y-3">
-                                <Checkbox
-                                    id="isFamily"
-                                    checked={form.is_family_goal || false}
-                                    onChange={(checked) => updateField("is_family_goal", checked)}
-                                    disabled={families.length === 0}
-                                    label="This is a family goal"
-                                />
-                                <Checkbox
-                                    id="isPublic"
-                                    checked={form.is_public || false}
-                                    onChange={(checked) => updateField("is_public", checked)}
-                                    label="This is a public goal"
-                                />
-                            </div>
+                            <Checkbox
+                                id="isFamily"
+                                checked={form.is_family_goal || false}
+                                onChange={(checked) => updateField("is_family_goal", checked)}
+                                disabled={families.length === 0}
+                                label="This is a family goal"
+                            />
 
                             {form.is_family_goal && families.length > 0 && (
-                                <div>
-                                    <label className="block text-xs font-medium text-slate-700 mb-1.5">Select Family</label>
-                                    <SearchableDropdown
-                                        value={form.family_id}
-                                        onChange={(value) => updateField("family_id", value)}
-                                        options={families.map((f) => ({
-                                            value: f.id,
-                                            label: f.family_name,
-                                            icon: Users,
-                                        }))}
-                                        placeholder="Select family..."
-                                        allowEmpty={false}
-                                    />
+                                <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
+                                    <Users size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
+                                    <div className="flex-1 space-y-3">
+                                        <div>
+                                            <div className="font-medium text-sm mb-1 text-gray-900">Family Goal</div>
+                                            <div className="text-xs text-gray-600">
+                                                This goal will be shared with the selected family for collaborative tracking.
+                                            </div>
+                                        </div>
+                                        <SearchableDropdown
+                                            value={form.family_id}
+                                            onChange={(value) => updateField("family_id", value)}
+                                            options={families.map((f) => ({
+                                                value: f.id,
+                                                label: f.family_name,
+                                                icon: Users,
+                                            }))}
+                                            placeholder="Select family..."
+                                            allowEmpty={false}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {families.length === 0 && (
+                                <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
+                                    <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
+                                    <div>
+                                        <div className="font-medium text-sm text-gray-900">No Family Available</div>
+                                        <div className="text-xs text-gray-600">
+                                            The selected user must be part of a family to create family goals.
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
