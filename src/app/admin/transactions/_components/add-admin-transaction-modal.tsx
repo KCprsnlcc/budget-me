@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Stepper } from "./stepper";
@@ -13,14 +13,37 @@ import {
   ClipboardCheck, 
   PenSquare, 
   AlertTriangle,
-  DollarSign,
   TrendingUp,
-  TrendingDown,
-  ArrowDownLeft,
-  ArrowUpRight,
-  Search
+  Search,
+  MinusCircle,
+  PlusCircle,
+  Flag,
+  PiggyBank,
+  Home,
+  Car,
+  Utensils,
+  ShoppingCart,
+  Zap,
+  Heart,
+  Film,
+  Package,
+  BookOpen,
+  Shield,
+  PhilippinePeso,
+  Laptop,
+  Building,
+  Briefcase,
+  Rocket,
+  Gift,
+  Banknote,
+  FileText,
+  CreditCard,
+  Wallet,
+  Building2,
+  Landmark,
 } from "lucide-react";
 import { DateSelector } from "@/components/ui/date-selector";
+import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
 import { createClient } from "@/lib/supabase/client";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -34,10 +57,9 @@ interface AddAdminTransactionModalProps {
 const STEPS = ["User Select", "Details", "Review"];
 
 const TRANSACTION_TYPES = [
-  { value: "income", label: "Income", desc: "Money received or earned", icon: TrendingUp, color: "text-emerald-500" },
-  { value: "expense", label: "Expense", desc: "Money spent or paid out", icon: TrendingDown, color: "text-red-500" },
-  { value: "cash_in", label: "Cash In", desc: "Cash deposit or transfer in", icon: ArrowDownLeft, color: "text-blue-500" },
-  { value: "cash_out", label: "Cash Out", desc: "Cash withdrawal or transfer out", icon: ArrowUpRight, color: "text-orange-500" },
+  { value: "expense", label: "Expense", desc: "Money spent on goods, services, or bills.", icon: MinusCircle },
+  { value: "income", label: "Income", desc: "Money received from salary, investments, or other sources.", icon: PlusCircle },
+  { value: "contribution", label: "Contribution", desc: "Money allocated to savings goals or investments.", icon: Flag },
 ];
 
 const STATUS_OPTIONS = [
@@ -45,6 +67,53 @@ const STATUS_OPTIONS = [
   { value: "pending", label: "Pending" },
   { value: "cancelled", label: "Cancelled" },
 ];
+
+// Helper function to convert emojis to Lucide icons
+function getLucideIcon(emoji: string): React.ComponentType<any> {
+  const iconMap: Record<string, React.ComponentType<any>> = {
+    "🏠": Home,
+    "🚗": Car,
+    "🍽️": Utensils,
+    "🛒": ShoppingCart,
+    "💡": Zap,
+    "⚕️": Heart,
+    "🎬": Film,
+    "🛍️": Package,
+    "📚": BookOpen,
+    "🛡️": Shield,
+    "🎯": Flag,
+    "💰": PhilippinePeso,
+    "💻": Laptop,
+    "📈": TrendingUp,
+    "🏢": Building,
+    "💼": Briefcase,
+    "🚀": Rocket,
+    "🎁": Gift,
+    "💵": Banknote,
+    "📋": FileText,
+  };
+  return iconMap[emoji] || FileText;
+}
+
+// Helper function to get account icon
+function getAccountIcon(accountName: string): React.ComponentType<any> {
+  const name = accountName.toLowerCase();
+  if (name.includes("bank") || name.includes("checking") || name.includes("savings")) return Building2;
+  if (name.includes("credit") || name.includes("card")) return CreditCard;
+  if (name.includes("cash") || name.includes("wallet")) return Wallet;
+  if (name.includes("investment") || name.includes("brokerage")) return TrendingUp;
+  if (name.includes("loan") || name.includes("mortgage")) return Landmark;
+  if (name.includes("utility") || name.includes("phone") || name.includes("internet")) return Zap;
+  if (name.includes("car") || name.includes("auto")) return Car;
+  if (name.includes("home") || name.includes("house")) return Home;
+  return FileText;
+}
+
+// Helper function to get budget icon from category
+function getBudgetIcon(categoryIcon: string | null | undefined): React.ComponentType<any> {
+  if (!categoryIcon) return FileText;
+  return getLucideIcon(categoryIcon);
+}
 
 type FormData = {
   user_id: string;
@@ -54,10 +123,11 @@ type FormData = {
   description: string;
   notes: string;
   status: string;
-  category: string;
   account_id: string;
   expense_category_id: string;
   income_category_id: string;
+  budget_id: string;
+  goal_id: string;
 };
 
 type User = {
@@ -67,15 +137,46 @@ type User = {
   avatar_url: string | null;
 };
 
+type AccountOption = {
+  id: string;
+  account_name: string;
+  account_number_masked: string | null;
+  balance: number;
+};
+
+type CategoryOption = {
+  id: string;
+  category_name: string;
+  icon: string | null;
+  color: string | null;
+};
+
+type BudgetOption = {
+  id: string;
+  budget_name: string;
+  category_icon?: string | null;
+};
+
+type GoalOption = {
+  id: string;
+  goal_name: string;
+};
+
 export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminTransactionModalProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
   const [userSearchQuery, setUserSearchQuery] = useState("");
-  const [accounts, setAccounts] = useState<any[]>([]);
-  const [expenseCategories, setExpenseCategories] = useState<any[]>([]);
-  const [incomeCategories, setIncomeCategories] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<AccountOption[]>([]);
+  const [expenseCategories, setExpenseCategories] = useState<CategoryOption[]>([]);
+  const [incomeCategories, setIncomeCategories] = useState<CategoryOption[]>([]);
+  const [budgets, setBudgets] = useState<BudgetOption[]>([]);
+  const [goals, setGoals] = useState<GoalOption[]>([]);
+  const userListRef = useRef<HTMLDivElement>(null);
   
   const [formData, setFormData] = useState<FormData>({
     user_id: "",
@@ -85,28 +186,76 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
     description: "",
     notes: "",
     status: "completed",
-    category: "",
     account_id: "",
     expense_category_id: "",
     income_category_id: "",
+    budget_id: "",
+    goal_id: "",
   });
 
   // Load users when modal opens
   useEffect(() => {
     if (open && users.length === 0) {
-      loadUsers();
+      loadUsers(true);
     }
   }, [open]);
 
-  const loadUsers = async () => {
-    setLoadingUsers(true);
+  // Infinite scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!userListRef.current || loadingMore || !hasMore) return;
+      
+      const { scrollTop, scrollHeight, clientHeight } = userListRef.current;
+      // Trigger when user scrolls near the bottom (within 50px)
+      if (scrollTop + clientHeight >= scrollHeight - 50) {
+        loadUsers(false);
+      }
+    };
+
+    const listElement = userListRef.current;
+    if (listElement && currentStep === 1) {
+      listElement.addEventListener('scroll', handleScroll);
+      return () => listElement.removeEventListener('scroll', handleScroll);
+    }
+  }, [loadingMore, hasMore, page, currentStep]);
+
+  const loadUsers = async (reset: boolean = false) => {
+    if (reset) {
+      setLoadingUsers(true);
+      setPage(1);
+      setUsers([]);
+      setHasMore(true);
+    } else {
+      if (loadingMore || !hasMore) return;
+      setLoadingMore(true);
+    }
+
     const supabase = createClient();
-    const { data } = await supabase
+    const pageSize = 10;
+    const currentPage = reset ? 1 : page;
+    const from = (currentPage - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error } = await supabase
       .from("profiles")
       .select("id, email, full_name, avatar_url")
-      .order("email");
-    setUsers(data ?? []);
+      .order("email")
+      .range(from, to);
+
+    if (!error && data) {
+      if (reset) {
+        setUsers(data);
+        setPage(2);
+      } else {
+        setUsers(prev => [...prev, ...data]);
+        setPage(prev => prev + 1);
+      }
+      // Check if we got a full page - if yes, there might be more
+      setHasMore(data.length === pageSize);
+    }
+
     setLoadingUsers(false);
+    setLoadingMore(false);
   };
 
   // Load user-specific data when user is selected
@@ -116,8 +265,9 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
     // Load accounts
     const { data: accountsData } = await supabase
       .from("accounts")
-      .select("id, account_name, account_number_masked")
+      .select("id, account_name, account_number_masked, balance")
       .eq("user_id", userId)
+      .eq("status", "active")
       .order("account_name");
     setAccounts(accountsData ?? []);
 
@@ -126,6 +276,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
       .from("expense_categories")
       .select("id, category_name, icon, color")
       .eq("user_id", userId)
+      .eq("is_active", true)
       .order("category_name");
     setExpenseCategories(expenseCatsData ?? []);
 
@@ -134,8 +285,37 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
       .from("income_categories")
       .select("id, category_name, icon, color")
       .eq("user_id", userId)
+      .eq("is_active", true)
       .order("category_name");
     setIncomeCategories(incomeCatsData ?? []);
+
+    // Load budgets
+    const { data: budgetsData } = await supabase
+      .from("budgets")
+      .select(`
+        id, 
+        budget_name,
+        expense_categories!budgets_category_id_fkey (
+          icon
+        )
+      `)
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .order("budget_name");
+    setBudgets((budgetsData ?? []).map((budget: any) => ({
+      id: budget.id,
+      budget_name: budget.budget_name,
+      category_icon: budget.expense_categories?.icon || null,
+    })));
+
+    // Load goals
+    const { data: goalsData } = await supabase
+      .from("goals")
+      .select("id, goal_name")
+      .eq("user_id", userId)
+      .eq("status", "in_progress")
+      .order("goal_name");
+    setGoals(goalsData ?? []);
   };
 
   const handleClose = () => {
@@ -149,14 +329,17 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
       description: "",
       notes: "",
       status: "completed",
-      category: "",
       account_id: "",
       expense_category_id: "",
       income_category_id: "",
+      budget_id: "",
+      goal_id: "",
     });
     setAccounts([]);
     setExpenseCategories([]);
     setIncomeCategories([]);
+    setBudgets([]);
+    setGoals([]);
     onClose();
   };
 
@@ -170,12 +353,21 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
       await loadUserData(formData.user_id);
     }
     if (currentStep === 2) {
-      if (!formData.type || !formData.amount || !formData.date) {
+      if (!formData.type || !formData.amount || !formData.date || !formData.account_id) {
         toast.error("Please fill in all required fields");
         return;
       }
       if (parseFloat(formData.amount) <= 0) {
         toast.error("Amount must be greater than 0");
+        return;
+      }
+      // Validate category based on type
+      if (formData.type === "income" && !formData.income_category_id) {
+        toast.error("Please select an income category");
+        return;
+      }
+      if ((formData.type === "expense" || formData.type === "contribution") && !formData.expense_category_id) {
+        toast.error("Please select an expense category");
         return;
       }
     }
@@ -200,13 +392,17 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
         notes: formData.notes || null,
         status: formData.status,
         account_id: formData.account_id || null,
+        budget_id: formData.budget_id || null,
+        goal_id: formData.goal_id || null,
+        income_category_id: null,
+        expense_category_id: null,
       };
 
       // Set category IDs based on type
-      if (formData.type === "expense" && formData.expense_category_id) {
-        payload.expense_category_id = formData.expense_category_id;
-      } else if ((formData.type === "income" || formData.type === "cash_in") && formData.income_category_id) {
+      if (formData.type === "income" && formData.income_category_id) {
         payload.income_category_id = formData.income_category_id;
+      } else if ((formData.type === "expense" || formData.type === "contribution") && formData.expense_category_id) {
+        payload.expense_category_id = formData.expense_category_id;
       }
 
       const { error } = await supabase.from("transactions").insert(payload);
@@ -226,9 +422,51 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
   const selectedUser = users.find(u => u.id === formData.user_id);
   const selectedType = TRANSACTION_TYPES.find(t => t.value === formData.type);
   const selectedAccount = accounts.find(a => a.id === formData.account_id);
-  const selectedCategory = formData.type === "expense" 
-    ? expenseCategories.find(c => c.id === formData.expense_category_id)
-    : incomeCategories.find(c => c.id === formData.income_category_id);
+  
+  const categories = formData.type === "income" ? incomeCategories : expenseCategories;
+  const categoryValue = formData.type === "income" ? formData.income_category_id : formData.expense_category_id;
+  const selectedCategory = categories.find(c => c.id === categoryValue);
+  const selectedGoal = goals.find(g => g.id === formData.goal_id);
+  const selectedBudget = budgets.find(b => b.id === formData.budget_id);
+
+  // Helper: update field
+  const updateField = useCallback(
+    <K extends keyof FormData>(key: K, value: FormData[K]) => {
+      setFormData((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
+
+  // Helper: auto-select contribution category when goal is selected for contribution type
+  const handleGoalSelectWithCategory = useCallback((value: string) => {
+    updateField("goal_id", value);
+    
+    if (formData.type === "contribution" && value) {
+      let contributionCategory = expenseCategories.find(cat => 
+        cat.category_name.toLowerCase() === "goal contribution" ||
+        cat.category_name.toLowerCase() === "contribution"
+      );
+      
+      if (!contributionCategory) {
+        contributionCategory = expenseCategories.find(cat => 
+          cat.category_name.toLowerCase() === "investments"
+        );
+      }
+      
+      if (!contributionCategory) {
+        contributionCategory = expenseCategories.find(cat => 
+          cat.category_name.toLowerCase().includes("goal") ||
+          cat.category_name.toLowerCase().includes("saving") ||
+          cat.category_name.toLowerCase().includes("investment")
+        );
+      }
+      
+      if (contributionCategory) {
+        updateField("expense_category_id", contributionCategory.id);
+        updateField("budget_id", "");
+      }
+    }
+  }, [formData.type, expenseCategories, updateField]);
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-2xl">
@@ -267,12 +505,13 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
             </div>
             
             {loadingUsers ? (
-              <div className="text-center py-8">
-                <Loader2 className="animate-spin mx-auto text-slate-400" size={24} />
-                <p className="text-sm text-slate-500 mt-2">Loading users...</p>
+              <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <UserCardSkeleton key={i} />
+                ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
+              <div ref={userListRef} className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
                 {users
                   .filter(user => {
                     if (!userSearchQuery.trim()) return true;
@@ -345,6 +584,15 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                     <p className="text-sm text-slate-500">No users found matching "{userSearchQuery}"</p>
                   </div>
                 )}
+                
+                {/* Loading more skeleton */}
+                {loadingMore && (
+                  <>
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <UserCardSkeleton key={`loading-${i}`} />
+                    ))}
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -354,8 +602,8 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
         {currentStep === 2 && (
           <div className="animate-txn-in">
             <div className="mb-5">
-              <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                <div className="w-[30px] h-[30px] rounded-lg border border-slate-100 flex items-center justify-center text-slate-400 bg-white">
+              <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
+                <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
                   <PenSquare size={14} />
                 </div>
                 Transaction Details
@@ -364,10 +612,10 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
             <div className="space-y-5">
               {/* Transaction Type */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                  Transaction Type <span className="text-slate-400">*</span>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Transaction Type <span className="text-gray-400">*</span>
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2">
                   {TRANSACTION_TYPES.map((type) => {
                     const Icon = type.icon;
                     const selected = formData.type === type.value;
@@ -375,16 +623,19 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                       <button
                         key={type.value}
                         type="button"
-                        onClick={() => setFormData({ ...formData, type: type.value })}
+                        onClick={() => updateField("type", type.value)}
                         className={`p-3 rounded-lg border text-left transition-all ${
                           selected
                             ? "border-emerald-500 bg-emerald-50"
-                            : "border-slate-200 hover:border-slate-300 bg-white"
+                            : "border-gray-200 hover:border-gray-300 bg-white"
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <Icon size={16} className={selected ? type.color : "text-slate-400"} />
-                          <span className="text-[12px] font-semibold text-slate-900">{type.label}</span>
+                          <Icon size={16} className={selected ? "text-emerald-600" : "text-gray-400"} />
+                          <div className="flex-1">
+                            <span className="text-[12px] font-semibold text-gray-900 block">{type.label}</span>
+                            <span className="text-[10px] text-gray-500">{type.desc}</span>
+                          </div>
                         </div>
                       </button>
                     );
@@ -392,134 +643,165 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 </div>
               </div>
 
-              {/* Amount and Date */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                    Amount <span className="text-slate-400">*</span>
-                  </label>
-                  <div className="relative">
-                    <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.amount}
-                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                      className="w-full pl-9 pr-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                    Date <span className="text-slate-400">*</span>
-                  </label>
-                  <DateSelector
-                    value={formData.date}
-                    onChange={(value) => setFormData({ ...formData, date: value })}
-                    placeholder="Select date"
-                    className="w-full"
+              {/* Amount */}
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Amount <span className="text-gray-400">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">₱</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.amount}
+                    onChange={(e) => updateField("amount", e.target.value)}
+                    className="w-full pl-7 pr-4 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+                    placeholder="0.00"
                   />
                 </div>
               </div>
 
-              {/* Description */}
+              {/* Date */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                  Description
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Date <span className="text-gray-400">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                  placeholder="Brief description"
+                <DateSelector
+                  value={formData.date}
+                  onChange={(value) => updateField("date", value)}
+                  placeholder="Select date"
+                  className="w-full"
                 />
               </div>
 
-              {/* Account and Category */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Category + Budget */}
+              <div className={`grid gap-4 ${formData.type === "expense" ? "grid-cols-2" : "grid-cols-1"}`}>
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                    Account
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                    Category {formData.type === "income" || formData.type === "expense" ? <span className="text-gray-400">*</span> : null}
                   </label>
-                  <select
-                    value={formData.account_id}
-                    onChange={(e) => setFormData({ ...formData, account_id: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                  >
-                    <option value="">Select account</option>
-                    {accounts.map((acc) => (
-                      <option key={acc.id} value={acc.id}>
-                        {acc.account_name} {acc.account_number_masked ? `(${acc.account_number_masked})` : ""}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                    Category
-                  </label>
-                  {formData.type === "expense" ? (
-                    <select
-                      value={formData.expense_category_id}
-                      onChange={(e) => setFormData({ ...formData, expense_category_id: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                    >
-                      <option value="">Select category</option>
-                      {expenseCategories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.icon} {cat.category_name}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <select
-                      value={formData.income_category_id}
-                      onChange={(e) => setFormData({ ...formData, income_category_id: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                    >
-                      <option value="">Select category</option>
-                      {incomeCategories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.icon} {cat.category_name}
-                        </option>
-                      ))}
-                    </select>
+                  <SearchableDropdown
+                    value={categoryValue}
+                    onChange={(value) => updateField(formData.type === "income" ? "income_category_id" : "expense_category_id", value)}
+                    options={categories.map((c) => ({
+                      value: c.id,
+                      label: c.category_name,
+                      icon: c.icon ? getLucideIcon(c.icon) : undefined,
+                    }))}
+                    placeholder={formData.type === "contribution" ? "Auto-selected from goal" : "Select category..."}
+                    className="w-full"
+                    allowEmpty={false}
+                    disabled={formData.type === "contribution"}
+                  />
+                  {formData.type === "contribution" && (
+                    <p className="text-[10px] text-gray-400 mt-1">
+                      Category is automatically selected based on the goal chosen
+                    </p>
                   )}
                 </div>
+                {formData.type === "expense" && (
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                      Budget
+                    </label>
+                    <SearchableDropdown
+                      value={formData.budget_id}
+                      onChange={(value) => updateField("budget_id", value)}
+                      options={budgets.map((b) => ({
+                        value: b.id,
+                        label: b.budget_name,
+                        icon: getBudgetIcon(b.category_icon),
+                      }))}
+                      placeholder="No budget"
+                      className="w-full"
+                      emptyLabel="No budget"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Goal */}
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Goal Contribution
+                </label>
+                <SearchableDropdown
+                  value={formData.goal_id}
+                  onChange={handleGoalSelectWithCategory}
+                  options={goals.map((g) => ({
+                    value: g.id,
+                    label: g.goal_name,
+                    icon: PiggyBank,
+                  }))}
+                  placeholder="No Goal"
+                  className="w-full"
+                  emptyLabel="No Goal"
+                />
+              </div>
+
+              {/* Account */}
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Account <span className="text-gray-400">*</span>
+                </label>
+                <SearchableDropdown
+                  value={formData.account_id}
+                  onChange={(value) => updateField("account_id", value)}
+                  options={accounts.map((a) => ({
+                    value: a.id,
+                    label: a.account_name,
+                    icon: getAccountIcon(a.account_name),
+                    subtitle: `Balance: ₱${a.balance.toFixed(2)}`,
+                  }))}
+                  placeholder="Select account..."
+                  className="w-full"
+                  allowEmpty={false}
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Description <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
+                </label>
+                <textarea
+                  rows={2}
+                  value={formData.description}
+                  onChange={(e) => updateField("description", e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg resize-none transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+                  placeholder="What was this transaction for?"
+                />
               </div>
 
               {/* Status */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Status
                 </label>
-                <select
+                <SearchableDropdown
                   value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                >
-                  {STATUS_OPTIONS.map((status) => (
-                    <option key={status.value} value={status.value}>
-                      {status.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(value) => updateField("status", value)}
+                  options={STATUS_OPTIONS.map((s) => ({
+                    value: s.value,
+                    label: s.label,
+                  }))}
+                  placeholder="Select status"
+                  className="w-full"
+                  allowEmpty={false}
+                  hideSearch={true}
+                />
               </div>
 
               {/* Notes */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                  Notes
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Notes <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
                 </label>
                 <textarea
                   value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  rows={3}
-                  className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06] resize-none"
+                  onChange={(e) => updateField("notes", e.target.value)}
+                  rows={2}
+                  className="w-full px-3.5 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06] resize-none"
                   placeholder="Additional notes..."
                 />
               </div>
@@ -545,7 +827,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 <div className="flex items-center justify-center gap-2 my-2">
                   {selectedType && (
                     <>
-                      <selectedType.icon size={20} className={selectedType.color} />
+                      <selectedType.icon size={20} className="text-emerald-600" />
                       <span className="text-[24px] font-bold text-slate-900">{selectedType.label}</span>
                     </>
                   )}
@@ -556,17 +838,44 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
               </div>
 
               {/* Review Details */}
-              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                <div className="p-5 space-y-0 divide-y divide-slate-100">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-5 space-y-0 divide-y divide-gray-100">
                   <ReviewRow label="User" value={selectedUser?.full_name || selectedUser?.email || "—"} />
                   <ReviewRow label="Amount" value={`₱${parseFloat(formData.amount || "0").toFixed(2)}`} />
-                  <ReviewRow label="Date" value={formData.date} />
-                  <ReviewRow label="Description" value={formData.description || "—"} />
+                  <ReviewRow label="Date" value={formData.date ? new Date(formData.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"} />
+                  <ReviewRow label="Category" value={selectedCategory?.category_name || "—"} />
                   <ReviewRow label="Account" value={selectedAccount?.account_name || "Not selected"} />
-                  <ReviewRow label="Category" value={selectedCategory?.category_name || "Not selected"} />
+                  {selectedAccount && (
+                    <ReviewRow 
+                      label="Current Balance" 
+                      value={`₱${selectedAccount.balance.toFixed(2)}`} 
+                    />
+                  )}
+                  {selectedAccount && (
+                    <ReviewRow 
+                      label="New Balance" 
+                      value={`₱${(selectedAccount.balance + (formData.type === "income" ? parseFloat(formData.amount || "0") : -parseFloat(formData.amount || "0"))).toFixed(2)}`} 
+                    />
+                  )}
+                  {selectedGoal && <ReviewRow label="Goal" value={selectedGoal.goal_name} />}
+                  {selectedBudget && formData.type === "expense" && <ReviewRow label="Budget" value={selectedBudget.budget_name} />}
+                  <ReviewRow label="Description" value={formData.description || "No description provided."} italic={!formData.description} />
                   <ReviewRow label="Notes" value={formData.notes || "—"} />
                 </div>
               </div>
+
+              {/* Budget Impact Notice */}
+              {formData.type === "expense" && selectedBudget && (
+                <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
+                  <TrendingUp size={16} className="flex-shrink-0 mt-px text-blue-500" />
+                  <div>
+                    <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Budget Impact</h4>
+                    <p className="text-[11px] leading-relaxed">
+                      This expense will add ₱{parseFloat(formData.amount || "0").toFixed(2)} to your <strong>{selectedBudget.budget_name}</strong> budget progress.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Warning Notice */}
               <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 items-start">
@@ -605,11 +914,28 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
   );
 }
 
-function ReviewRow({ label, value }: { label: string; value: string }) {
+function ReviewRow({ label, value, italic }: { label: string; value: string; italic?: boolean }) {
   return (
     <div className="flex justify-between items-center py-2.5">
-      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">{label}</span>
-      <span className="text-[13px] font-semibold text-slate-700">{value}</span>
+      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">{label}</span>
+      <span className={`text-[13px] font-semibold text-gray-700 ${italic ? "italic text-[11px] text-gray-500 max-w-[180px] text-right" : ""}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function UserCardSkeleton() {
+  return (
+    <div className="relative p-4 rounded-xl border border-slate-200 bg-white animate-pulse">
+      <div className="flex items-start gap-4">
+        <div className="w-10 h-10 rounded-full bg-slate-200 flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="h-4 bg-slate-200 rounded w-32 mb-2" />
+          <div className="h-3 bg-slate-200 rounded w-40" />
+        </div>
+        <div className="w-[18px] h-[18px] rounded-full bg-slate-200" />
+      </div>
     </div>
   );
 }
