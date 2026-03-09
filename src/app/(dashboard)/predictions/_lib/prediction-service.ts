@@ -734,6 +734,7 @@ export async function savePrediction(
     fullCategoryPredictions?: any[];
     fullExpenseTypes?: any;
     fullBehaviorInsights?: any[];
+    fullAIInsights?: any; // Full AI insights for financial_intelligence type
   }
 ): Promise<{ success: boolean; error?: string }> {
   const { error } = await supabase
@@ -766,6 +767,7 @@ export async function savePrediction(
         fullCategoryPredictions: prediction.fullCategoryPredictions,
         fullExpenseTypes: prediction.fullExpenseTypes,
         fullBehaviorInsights: prediction.fullBehaviorInsights,
+        fullAIInsights: prediction.fullAIInsights, // Save full AI insights
       },
     });
 

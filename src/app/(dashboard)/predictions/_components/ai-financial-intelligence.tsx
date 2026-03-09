@@ -341,10 +341,10 @@ export function AIFinancialIntelligence({
               <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 lg:p-6">
                 <h4 className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider sm:tracking-widest flex items-center gap-2">
                   <ListChecks size={14} className="text-emerald-500 sm:w-4 sm:h-4" />
-                  Smart Recommendations
+                  Smart Recommendations ({aiInsights.recommendations.length})
                 </h4>
                 <div className="space-y-2 sm:space-y-3">
-                  {aiInsights.recommendations.slice(0, 3).map((rec, idx) => (
+                  {aiInsights.recommendations.map((rec, idx) => (
                     <div key={idx} className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-slate-200 bg-white hover:shadow-sm transition-all group">
                       <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-500 text-white text-[10px] sm:text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                         {idx + 1}
@@ -372,7 +372,7 @@ export function AIFinancialIntelligence({
               <div className="space-y-3 sm:space-y-4 lg:col-span-2">
                 <h4 className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider sm:tracking-widest flex items-center gap-2 px-3 sm:px-0">
                   <ShieldCheck size={14} className="text-amber-500 sm:w-4 sm:h-4" />
-                  Risk Mitigation Strategies
+                  Risk Mitigation Strategies ({aiInsights?.riskMitigationStrategies?.length || 0})
                 </h4>
                 {aiInsights?.riskMitigationStrategies && aiInsights.riskMitigationStrategies.length > 0 ? (
                   <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm hover:shadow-md transition-all">
@@ -391,7 +391,7 @@ export function AIFinancialIntelligence({
                           </span>
                         </div>
                         <div className="space-y-2 sm:space-y-3 lg:space-y-4">
-                          {aiInsights.riskMitigationStrategies.slice(0, 2).map((strategy, idx) => (
+                          {aiInsights.riskMitigationStrategies.map((strategy, idx) => (
                             <div key={idx} className="flex items-start gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg sm:rounded-xl border border-slate-200 bg-white">
                               <div className={`mt-1 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 ${
                                 strategy.impact === "high" ? "bg-red-500" : 

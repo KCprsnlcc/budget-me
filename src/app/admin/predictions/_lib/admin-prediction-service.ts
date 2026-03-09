@@ -79,6 +79,9 @@ export async function fetchAdminReports(
         .select("*", { count: "exact" })
         .order("created_at", { ascending: false });
 
+    // Exclude financial_intelligence type - those belong in AI Insights table
+    query = query.neq("report_type", "financial_intelligence");
+
     // Apply filters
     if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
         const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01T00:00:00`;

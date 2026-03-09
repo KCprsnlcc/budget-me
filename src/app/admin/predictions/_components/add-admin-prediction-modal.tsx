@@ -279,6 +279,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                     fullCategoryPredictions: categoryPredictions,
                     fullExpenseTypes: expenseTypes,
                     fullBehaviorInsights: behaviorInsights,
+                    fullAIInsights: aiInsights, // Save full AI insights for financial_intelligence type
                 });
 
                 setGenerationResult({
