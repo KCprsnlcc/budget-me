@@ -222,11 +222,12 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
         const supabase = createClient();
         const { data } = await supabase
             .from("family_members")
-            .select("family_id, families!family_members_family_id_fkey(id, family_name)")
+            .select("family_id, role, families!family_members_family_id_fkey(id, family_name)")
             .eq("user_id", userId)
             .eq("status", "active");
 
         const familyList: FamilyOption[] = (data ?? [])
+            .filter((fm: any) => fm.role === "owner" || fm.role === "admin")
             .map((fm: any) => ({
                 id: fm.families?.id,
                 family_name: fm.families?.family_name ?? "Unknown Family",
@@ -588,7 +589,14 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
                             <Checkbox
                                 id="isFamily"
                                 checked={form.is_family_goal || false}
-                                onChange={(checked) => updateField("is_family_goal", checked)}
+                                onChange={(checked) => {
+                                    updateField("is_family_goal", checked);
+                                    if (checked && families.length > 0) {
+                                        updateField("family_id", families[0].id);
+                                    } else {
+                                        updateField("family_id", "");
+                                    }
+                                }}
                                 disabled={families.length === 0}
                                 label="This is a family goal"
                             />
@@ -596,24 +604,11 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
                             {form.is_family_goal && families.length > 0 && (
                                 <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
                                     <Users size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
-                                    <div className="flex-1 space-y-3">
-                                        <div>
-                                            <div className="font-medium text-sm mb-1 text-gray-900">Family Goal</div>
-                                            <div className="text-xs text-gray-600">
-                                                This goal will be shared with the selected family for collaborative tracking.
-                                            </div>
+                                    <div>
+                                        <div className="font-medium text-sm text-gray-900">Family Goal</div>
+                                        <div className="text-xs text-gray-600">
+                                            This goal will be shared with the <span className="font-semibold text-gray-900">{families[0].family_name}</span> family for collaborative tracking.
                                         </div>
-                                        <SearchableDropdown
-                                            value={form.family_id}
-                                            onChange={(value) => updateField("family_id", value)}
-                                            options={families.map((f) => ({
-                                                value: f.id,
-                                                label: f.family_name,
-                                                icon: Users,
-                                            }))}
-                                            placeholder="Select family..."
-                                            allowEmpty={false}
-                                        />
                                     </div>
                                 </div>
                             )}
@@ -622,9 +617,9 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
                                 <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
                                     <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
                                     <div>
-                                        <div className="font-medium text-sm text-gray-900">No Family Available</div>
+                                        <div className="font-medium text-sm text-gray-900">Not Eligible</div>
                                         <div className="text-xs text-gray-600">
-                                            The selected user must be part of a family to create family goals.
+                                            The selected user must be a family owner or admin to create family goals.
                                         </div>
                                     </div>
                                 </div>
