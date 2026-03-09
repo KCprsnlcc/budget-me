@@ -20,7 +20,6 @@ import {
     Inbox,
     MoreHorizontal,
     Plus,
-    Edit,
     Activity,
     Shield,
     AlertTriangle,
@@ -40,7 +39,6 @@ import {
 import { ViewAdminPredictionModal } from "./_components/view-admin-prediction-modal";
 import { DeleteAdminPredictionModal } from "./_components/delete-admin-prediction-modal";
 import { AddAdminPredictionModal } from "./_components/add-admin-prediction-modal";
-import { EditAdminPredictionModal } from "./_components/edit-admin-prediction-modal";
 import { useAdminPredictions } from "./_lib/use-admin-predictions";
 import type { AdminPredictionReport, AdminAIInsight } from "./_lib/types";
 import { FilterTableSkeleton } from "@/components/ui/skeleton-filter-loaders";
@@ -140,12 +138,10 @@ const SummaryCard = memo(function SummaryCard({ data }: { data: SummaryType }) {
 const ReportRow = memo(function ReportRow({
     report,
     onView,
-    onEdit,
     onDelete,
 }: {
     report: AdminPredictionReport;
     onView: (r: AdminPredictionReport) => void;
-    onEdit: (r: AdminPredictionReport) => void;
     onDelete: (r: AdminPredictionReport) => void;
 }) {
     const mockUser: User = {
@@ -195,9 +191,6 @@ const ReportRow = memo(function ReportRow({
                     <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(report)}>
                         <Eye size={16} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => onEdit(report)}>
-                        <Edit size={16} />
-                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(report)}>
                         <Trash2 size={16} />
                     </Button>
@@ -212,12 +205,10 @@ const ReportRow = memo(function ReportRow({
 const InsightRow = memo(function InsightRow({
     insight,
     onView,
-    onEdit,
     onDelete,
 }: {
     insight: AdminAIInsight;
     onView: (i: AdminAIInsight) => void;
-    onEdit: (i: AdminAIInsight) => void;
     onDelete: (i: AdminAIInsight) => void;
 }) {
     const mockUser: User = {
@@ -277,9 +268,6 @@ const InsightRow = memo(function InsightRow({
                     <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(insight)}>
                         <Eye size={16} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => onEdit(insight)}>
-                        <Edit size={16} />
-                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(insight)}>
                         <Trash2 size={16} />
                     </Button>
@@ -294,12 +282,10 @@ const InsightRow = memo(function InsightRow({
 const ReportCard = memo(function ReportCard({
     report,
     onView,
-    onEdit,
     onDelete,
 }: {
     report: AdminPredictionReport;
     onView: (r: AdminPredictionReport) => void;
-    onEdit: (r: AdminPredictionReport) => void;
     onDelete: (r: AdminPredictionReport) => void;
 }) {
     const mockUser: User = {
@@ -352,9 +338,6 @@ const ReportCard = memo(function ReportCard({
                     <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(report)}>
                         <Eye size={16} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => onEdit(report)}>
-                        <Edit size={16} />
-                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(report)}>
                         <Trash2 size={16} />
                     </Button>
@@ -369,12 +352,10 @@ const ReportCard = memo(function ReportCard({
 const InsightCard = memo(function InsightCard({
     insight,
     onView,
-    onEdit,
     onDelete,
 }: {
     insight: AdminAIInsight;
     onView: (i: AdminAIInsight) => void;
-    onEdit: (i: AdminAIInsight) => void;
     onDelete: (i: AdminAIInsight) => void;
 }) {
     const mockUser: User = {
@@ -437,9 +418,6 @@ const InsightCard = memo(function InsightCard({
                     <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(insight)}>
                         <Eye size={16} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => onEdit(insight)}>
-                        <Edit size={16} />
-                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(insight)}>
                         <Trash2 size={16} />
                     </Button>
@@ -497,7 +475,6 @@ export default function AdminPredictionsPage() {
     // Modals
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [addModalOpen, setAddModalOpen] = useState(false);
-    const [editModalOpen, setEditModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedReport, setSelectedReport] = useState<AdminPredictionReport | null>(null);
     const [selectedInsight, setSelectedInsight] = useState<AdminAIInsight | null>(null);
@@ -515,18 +492,6 @@ export default function AdminPredictionsPage() {
         setSelectedInsight(insight);
         setSelectedReport(null);
         setViewModalOpen(true);
-    }, []);
-
-    const handleEditReport = useCallback((report: AdminPredictionReport) => {
-        setSelectedReport(report);
-        setSelectedInsight(null);
-        setEditModalOpen(true);
-    }, []);
-
-    const handleEditInsight = useCallback((insight: AdminAIInsight) => {
-        setSelectedInsight(insight);
-        setSelectedReport(null);
-        setEditModalOpen(true);
     }, []);
 
     const handleDeleteReport = useCallback((report: AdminPredictionReport) => {
@@ -1079,7 +1044,6 @@ export default function AdminPredictionsPage() {
                                                 key={report.id}
                                                 report={report}
                                                 onView={handleViewReport}
-                                                onEdit={handleEditReport}
                                                 onDelete={handleDeleteReport}
                                             />
                                         ))
@@ -1089,7 +1053,6 @@ export default function AdminPredictionsPage() {
                                                 key={insight.id}
                                                 insight={insight}
                                                 onView={handleViewInsight}
-                                                onEdit={handleEditInsight}
                                                 onDelete={handleDeleteInsight}
                                             />
                                         ))
@@ -1124,7 +1087,6 @@ export default function AdminPredictionsPage() {
                                         key={report.id}
                                         report={report}
                                         onView={handleViewReport}
-                                        onEdit={handleEditReport}
                                         onDelete={handleDeleteReport}
                                     />
                                 ))
@@ -1134,7 +1096,6 @@ export default function AdminPredictionsPage() {
                                         key={insight.id}
                                         insight={insight}
                                         onView={handleViewInsight}
-                                        onEdit={handleEditInsight}
                                         onDelete={handleDeleteInsight}
                                     />
                                 ))
@@ -1157,7 +1118,6 @@ export default function AdminPredictionsPage() {
                                         key={report.id}
                                         report={report}
                                         onView={handleViewReport}
-                                        onEdit={handleEditReport}
                                         onDelete={handleDeleteReport}
                                     />
                                 ))
@@ -1167,7 +1127,6 @@ export default function AdminPredictionsPage() {
                                         key={insight.id}
                                         insight={insight}
                                         onView={handleViewInsight}
-                                        onEdit={handleEditInsight}
                                         onDelete={handleDeleteInsight}
                                     />
                                 ))
@@ -1262,14 +1221,6 @@ export default function AdminPredictionsPage() {
             <AddAdminPredictionModal
                 open={addModalOpen}
                 onClose={() => setAddModalOpen(false)}
-                onSuccess={refetch}
-            />
-            <EditAdminPredictionModal
-                open={editModalOpen}
-                onClose={() => setEditModalOpen(false)}
-                report={selectedReport}
-                insight={selectedInsight}
-                dataSource={dataSource}
                 onSuccess={refetch}
             />
             <DeleteAdminPredictionModal
