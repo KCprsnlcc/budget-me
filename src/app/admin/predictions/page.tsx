@@ -90,7 +90,7 @@ const ReportCardSkeleton = memo(function ReportCardSkeleton() {
                     </div>
                 </div>
             </div>
-            <div className="grid grid-cols-3 gap-3 mb-3">
+            <div className="grid grid-cols-2 gap-3 mb-3">
                 <div className="text-center p-2 bg-slate-50 rounded-lg">
                     <Skeleton width={30} height={12} className="mx-auto mb-1" />
                     <Skeleton width={40} height={9} className="mx-auto" />
@@ -98,10 +98,6 @@ const ReportCardSkeleton = memo(function ReportCardSkeleton() {
                 <div className="text-center p-2 bg-slate-50 rounded-lg">
                     <Skeleton width={35} height={12} className="mx-auto mb-1" />
                     <Skeleton width={45} height={9} className="mx-auto" />
-                </div>
-                <div className="text-center p-2 bg-slate-50 rounded-lg">
-                    <Skeleton width={40} height={12} className="mx-auto mb-1" />
-                    <Skeleton width={35} height={9} className="mx-auto" />
                 </div>
             </div>
             <div className="flex items-center justify-between pt-3 border-t border-slate-100">
@@ -127,11 +123,7 @@ const InsightCardSkeleton = memo(function InsightCardSkeleton() {
                     </div>
                 </div>
             </div>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-                <div className="text-center p-2 bg-slate-50 rounded-lg">
-                    <Skeleton width={60} height={12} className="mx-auto mb-1" />
-                    <Skeleton width={35} height={9} className="mx-auto" />
-                </div>
+            <div className="grid grid-cols-1 gap-3 mb-3">
                 <div className="text-center p-2 bg-slate-50 rounded-lg">
                     <Skeleton width={40} height={12} className="mx-auto mb-1" />
                     <Skeleton width={50} height={9} className="mx-auto" />
@@ -166,7 +158,7 @@ const TableRowSkeleton = memo(function TableRowSkeleton({ columns }: { columns: 
                 </div>
             </TableCell>
             {/* Conditional columns based on data source */}
-            {columns === 5 ? (
+            {columns === 4 && (
                 <>
                     {/* Data Points */}
                     <TableCell className="px-6 py-3 text-center">
@@ -175,13 +167,6 @@ const TableRowSkeleton = memo(function TableRowSkeleton({ columns }: { columns: 
                     {/* Accuracy */}
                     <TableCell className="px-6 py-3 text-center">
                         <Skeleton width={45} height={14} className="mx-auto" />
-                    </TableCell>
-                </>
-            ) : (
-                <>
-                    {/* Model */}
-                    <TableCell className="px-6 py-3">
-                        <Skeleton width={80} height={12} />
                     </TableCell>
                 </>
             )}
@@ -339,9 +324,6 @@ const InsightRow = memo(function InsightRow({
                     </div>
                 </div>
             </TableCell>
-            <TableCell className="px-6 py-3">
-                <span className="text-xs text-slate-600 font-medium">{insight.model_used || "—"}</span>
-            </TableCell>
             <TableCell className="px-6 py-3 text-center">
                 <div className="flex items-center justify-center gap-1">
                     <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(insight)}>
@@ -388,7 +370,7 @@ const ReportCard = memo(function ReportCard({
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mb-3">
+            <div className="grid grid-cols-2 gap-3 mb-3">
                 <div className="text-center p-2 bg-slate-50 rounded-lg">
                     <p className="text-xs font-bold text-slate-900">{report.data_points}</p>
                     <p className="text-[9px] text-slate-400 uppercase">Points</p>
@@ -401,10 +383,6 @@ const ReportCard = memo(function ReportCard({
                         {report.accuracy_score !== null ? `${Number(report.accuracy_score).toFixed(0)}%` : "—"}
                     </p>
                     <p className="text-[9px] text-slate-400 uppercase">Accuracy</p>
-                </div>
-                <div className="text-center p-2 bg-slate-50 rounded-lg">
-                    <p className="text-xs font-bold text-slate-700">{report.model_version || "—"}</p>
-                    <p className="text-[9px] text-slate-400 uppercase">Model</p>
                 </div>
             </div>
 
@@ -455,11 +433,7 @@ const InsightCard = memo(function InsightCard({
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-3">
-                <div className="text-center p-2 bg-slate-50 rounded-lg">
-                    <p className="text-xs font-bold text-slate-700">{insight.model_used || "—"}</p>
-                    <p className="text-[9px] text-slate-400 uppercase">Model</p>
-                </div>
+            <div className="grid grid-cols-1 gap-3 mb-3">
                 <div className="text-center p-2 bg-slate-50 rounded-lg">
                     <p className="text-xs font-bold text-emerald-600">
                         {insight.confidence_level ? `${(Number(insight.confidence_level) * 100).toFixed(0)}%` : "—"}
@@ -1084,9 +1058,6 @@ export default function AdminPredictionsPage() {
                                             </div>
                                         </TableHead>
                                         <TableHead className="px-6 py-3">User</TableHead>
-                                        {dataSource === "insights" && (
-                                            <TableHead className="px-6 py-3">Model</TableHead>
-                                        )}
                                         {dataSource === "reports" && (
                                             <>
                                                 <TableHead className="px-6 py-3 text-center">Data Points</TableHead>
@@ -1098,7 +1069,7 @@ export default function AdminPredictionsPage() {
                                 </TableHeader>
                                 <TableBody>
                                     {Array.from({ length: pageSize > 20 ? 20 : pageSize }).map((_, i) => (
-                                        <TableRowSkeleton key={i} columns={dataSource === "reports" ? 5 : 4} />
+                                        <TableRowSkeleton key={i} columns={4} />
                                     ))}
                                 </TableBody>
                             </Table>
@@ -1112,9 +1083,6 @@ export default function AdminPredictionsPage() {
                                             </div>
                                         </TableHead>
                                         <TableHead className="px-6 py-3">User</TableHead>
-                                        {dataSource === "insights" && (
-                                            <TableHead className="px-6 py-3">Model</TableHead>
-                                        )}
                                         {dataSource === "reports" && (
                                             <>
                                                 <TableHead className="px-6 py-3 text-center">Data Points</TableHead>
@@ -1127,7 +1095,7 @@ export default function AdminPredictionsPage() {
                                 <TableBody>
                                     {itemCount === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={dataSource === "reports" ? 5 : 4} className="px-6 py-12 text-center">
+                                            <TableCell colSpan={4} className="px-6 py-12 text-center">
                                                 <div className="flex flex-col items-center justify-center">
                                                     <Inbox size={32} className="text-slate-300 mb-2" />
                                                     <p className="text-sm text-slate-500">No {dataSource} match your filters</p>

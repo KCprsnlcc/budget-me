@@ -113,12 +113,12 @@ export function ViewAdminPredictionModal({
             <Stepper steps={STEPS} currentStep={step} />
 
             {/* Body */}
-            <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
+            <ModalBody className="px-5 py-5">
                 {/* STEP 1: Overview */}
                 {step === 1 && (
                     <div className="space-y-6 animate-txn-in">
                         {/* Header */}
-                        <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
+                        <div className="text-center p-6 border border-slate-200 rounded-xl">
                             <div className="flex justify-center mb-3">
                                 <UserAvatar
                                     user={createMockUser(userId, userEmail, userName, userAvatar)}
@@ -131,57 +131,27 @@ export function ViewAdminPredictionModal({
 
                             {dataSource === "reports" ? (
                                 <>
-                                    <div className="flex items-center justify-center gap-2 mb-2">
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-50 text-violet-700 text-xs font-semibold border border-violet-100">
-                                            <Brain size={12} /> {report!.report_type}
-                                        </span>
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 text-slate-600 text-xs font-semibold border border-slate-100">
-                                            {report!.timeframe}
-                                        </span>
-                                    </div>
                                     {report!.accuracy_score !== null && (
                                         <div className="text-[32px] font-bold my-2 text-emerald-500">
                                             {Number(report!.accuracy_score).toFixed(0)}%
                                         </div>
                                     )}
-                                    <div className="flex items-center justify-center gap-3">
+                                    <div className="flex items-center justify-center">
                                         <span className="text-xs font-medium text-slate-600">
                                             Accuracy Score
-                                        </span>
-                                        <span className="text-slate-300">•</span>
-                                        <span className="text-xs font-medium text-slate-600">
-                                            {report!.model_version || "Unknown Model"}
                                         </span>
                                     </div>
                                 </>
                             ) : (
                                 <>
-                                    <div className="flex items-center justify-center gap-2 mb-2">
-                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${insight!.processing_status === "completed"
-                                                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                                                : "bg-amber-50 text-amber-700 border-amber-100"
-                                            }`}>
-                                            {insight!.processing_status === "completed" ? <CheckCircle2 size={12} /> : <Activity size={12} />}
-                                            {insight!.processing_status || "Unknown"}
-                                        </span>
-                                        {insight!.anomaly_detected && (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-700 text-xs font-semibold border border-red-100">
-                                                <AlertTriangle size={12} /> Anomaly
-                                            </span>
-                                        )}
-                                    </div>
                                     {confidenceLevel !== null && (
-                                        <div className="text-[32px] font-bold my-2 text-violet-500">
+                                        <div className="text-[32px] font-bold my-2 text-emerald-500">
                                             {confidenceLevel.toFixed(0)}%
                                         </div>
                                     )}
-                                    <div className="flex items-center justify-center gap-3">
+                                    <div className="flex items-center justify-center">
                                         <span className="text-xs font-medium text-slate-600">
                                             Confidence Level
-                                        </span>
-                                        <span className="text-slate-300">•</span>
-                                        <span className="text-xs font-medium text-slate-600">
-                                            {insight!.model_used || "Unknown Model"}
                                         </span>
                                     </div>
                                 </>
@@ -217,11 +187,6 @@ export function ViewAdminPredictionModal({
                                                 value={report!.data_points.toString()}
                                                 icon={Database}
                                             />
-                                            <DetailRow
-                                                label="Model"
-                                                value={report!.model_version || "—"}
-                                                icon={Brain}
-                                            />
                                         </>
                                     ) : (
                                         <>
@@ -231,19 +196,9 @@ export function ViewAdminPredictionModal({
                                                 icon={Sparkles}
                                             />
                                             <DetailRow
-                                                label="Model"
-                                                value={insight!.model_used || "—"}
-                                                icon={Brain}
-                                            />
-                                            <DetailRow
                                                 label="Status"
                                                 value={(insight!.processing_status || "Unknown").charAt(0).toUpperCase() + (insight!.processing_status || "Unknown").slice(1)}
                                                 icon={Activity}
-                                            />
-                                            <DetailRow
-                                                label="Access Count"
-                                                value={insight!.access_count.toString()}
-                                                icon={BarChart3}
                                             />
                                         </>
                                     )}
@@ -252,28 +207,16 @@ export function ViewAdminPredictionModal({
                         </div>
 
                         {/* Admin Status (insights only) */}
-                        {dataSource === "insights" && (
+                        {dataSource === "insights" && insight!.validation_notes && (
                             <div>
-                                <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Admin Status</h4>
+                                <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Admin Notes</h4>
                                 <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                                    <div className="p-5 space-y-0 divide-y divide-slate-100">
+                                    <div className="p-5">
                                         <DetailRow
-                                            label="Validated"
-                                            value={insight!.admin_validated ? "Yes" : "No"}
-                                            icon={Shield}
+                                            label="Notes"
+                                            value={insight!.validation_notes}
+                                            icon={FileText}
                                         />
-                                        <DetailRow
-                                            label="Anomaly Detected"
-                                            value={insight!.anomaly_detected ? "Yes" : "No"}
-                                            icon={AlertTriangle}
-                                        />
-                                        {insight!.validation_notes && (
-                                            <DetailRow
-                                                label="Notes"
-                                                value={insight!.validation_notes}
-                                                icon={FileText}
-                                            />
-                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -303,11 +246,11 @@ export function ViewAdminPredictionModal({
                                                 <>
                                                     {/* Summary Cards */}
                                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                        <div className="bg-white border border-slate-200 rounded-xl p-4">
+                                                        <div className="border border-slate-200 rounded-xl p-4">
                                                             <div className="flex justify-between items-start mb-3">
                                                                 <div className="text-slate-500"><TrendingUp size={20} strokeWidth={1.5} /></div>
                                                                 {summary.incomeChange !== null && summary.incomeChange !== undefined && (
-                                                                    <div className={`flex items-center gap-1 text-[10px] font-medium ${summary.incomeChange >= 0 ? "text-emerald-700" : "text-red-700"}`}>
+                                                                    <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-700">
                                                                         {summary.incomeChange >= 0 ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
                                                                         {summary.incomeChange >= 0 ? "+" : ""}{summary.incomeChange.toFixed(1)}%
                                                                     </div>
@@ -317,11 +260,11 @@ export function ViewAdminPredictionModal({
                                                             <div className="text-lg font-semibold text-slate-900 tracking-tight">₱{summary.monthlyIncome.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</div>
                                                             <div className="text-[10px] text-slate-500 mt-1">Next month projection</div>
                                                         </div>
-                                                        <div className="bg-white border border-slate-200 rounded-xl p-4">
+                                                        <div className="border border-slate-200 rounded-xl p-4">
                                                             <div className="flex justify-between items-start mb-3">
                                                                 <div className="text-slate-500"><TrendingDown size={20} strokeWidth={1.5} /></div>
                                                                 {summary.expenseChange !== null && summary.expenseChange !== undefined && (
-                                                                    <div className={`flex items-center gap-1 text-[10px] font-medium ${summary.expenseChange <= 0 ? "text-emerald-700" : "text-amber-700"}`}>
+                                                                    <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-700">
                                                                         {summary.expenseChange <= 0 ? <ArrowDown size={10} /> : <ArrowUp size={10} />}
                                                                         {summary.expenseChange <= 0 ? "" : "+"}{summary.expenseChange.toFixed(1)}%
                                                                     </div>
@@ -331,10 +274,10 @@ export function ViewAdminPredictionModal({
                                                             <div className="text-lg font-semibold text-slate-900 tracking-tight">₱{summary.monthlyExpenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</div>
                                                             <div className="text-[10px] text-slate-500 mt-1">Next month projection</div>
                                                         </div>
-                                                        <div className="bg-white border border-slate-200 rounded-xl p-4">
+                                                        <div className="border border-slate-200 rounded-xl p-4">
                                                             <div className="flex justify-between items-start mb-3">
                                                                 <div className="text-slate-500"><Wallet size={20} strokeWidth={1.5} /></div>
-                                                                <div className={`flex items-center gap-1 text-[10px] font-medium ${summary.netBalance >= summary.monthlyIncome * 0.10 ? "text-emerald-700" : summary.netBalance >= summary.monthlyIncome * 0.05 ? "text-amber-700" : "text-red-700"}`}>
+                                                                <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-700">
                                                                     <BarChart3 size={10} />
                                                                     {summary.monthlyIncome > 0 ? ((summary.netBalance / summary.monthlyIncome) * 100).toFixed(1) : "0.0"}%
                                                                 </div>
@@ -346,7 +289,7 @@ export function ViewAdminPredictionModal({
                                                     </div>
 
                                                     {/* Income vs Expenses */}
-                                                    <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                    <div className="border border-slate-200 rounded-xl p-5">
                                                         <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                             <BarChart3 size={14} className="text-emerald-500" />Income vs Expenses Forecast
                                                         </h3>
@@ -371,22 +314,22 @@ export function ViewAdminPredictionModal({
 
                                         {/* Category Predictions */}
                                         {report.prediction_data.fullCategoryPredictions && report.prediction_data.fullCategoryPredictions.length > 0 && (
-                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                            <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <PieChart size={14} className="text-blue-500" />Category Spending Forecast ({report.prediction_data.fullCategoryPredictions.length})
+                                                    <PieChart size={14} className="text-emerald-500" />Category Spending Forecast ({report.prediction_data.fullCategoryPredictions.length})
                                                 </h3>
                                                 <div className="space-y-2">
                                                     {report.prediction_data.fullCategoryPredictions.slice(0, 5).map((cat: any, idx: number) => (
-                                                        <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
+                                                        <div key={idx} className="flex items-center justify-between p-2 border border-slate-100 rounded-lg">
                                                             <div className="flex items-center gap-2">
-                                                                <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                                                                <div className="w-6 h-6 rounded-full text-emerald-600 flex items-center justify-center">
                                                                     <span className="text-[10px] font-bold">{idx + 1}</span>
                                                                 </div>
                                                                 <span className="text-xs font-semibold text-slate-900">{cat.category}</span>
                                                             </div>
                                                             <div className="flex items-center gap-3">
                                                                 <span className="text-xs text-slate-600">₱{cat.predicted.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</span>
-                                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${cat.trend === 'up' ? 'bg-red-100 text-red-700' : cat.trend === 'down' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-700'}`}>
+                                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${cat.trend === 'up' ? 'text-emerald-700' : cat.trend === 'down' ? 'text-emerald-700' : 'text-emerald-700'}`}>
                                                                     {cat.trend === 'up' ? '↑' : cat.trend === 'down' ? '↓' : '→'} {Math.abs(cat.changePercent)}%
                                                                 </span>
                                                             </div>
@@ -398,24 +341,24 @@ export function ViewAdminPredictionModal({
 
                                         {/* Expense Types */}
                                         {report.prediction_data.fullExpenseTypes && (
-                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                            <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <Wallet size={14} className="text-violet-500" />Expense Type Forecast
+                                                    <Wallet size={14} className="text-emerald-500" />Expense Type Forecast
                                                 </h3>
                                                 <div className="space-y-3">
-                                                    <div className="flex items-center justify-between p-3 bg-violet-50 rounded-lg">
+                                                    <div className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
                                                         <div>
-                                                            <p className="text-xs font-semibold text-violet-900">Recurring Expenses</p>
-                                                            <p className="text-[10px] text-violet-600 mt-0.5">{report.prediction_data.fullExpenseTypes.recurring.percentage}% of total</p>
+                                                            <p className="text-xs font-semibold text-slate-900">Recurring Expenses</p>
+                                                            <p className="text-[10px] text-slate-600 mt-0.5">{report.prediction_data.fullExpenseTypes.recurring.percentage}% of total</p>
                                                         </div>
-                                                        <p className="text-sm font-bold text-violet-900">₱{report.prediction_data.fullExpenseTypes.recurring.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</p>
+                                                        <p className="text-sm font-bold text-slate-900">₱{report.prediction_data.fullExpenseTypes.recurring.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</p>
                                                     </div>
-                                                    <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                                                    <div className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
                                                         <div>
-                                                            <p className="text-xs font-semibold text-amber-900">Variable Expenses</p>
-                                                            <p className="text-[10px] text-amber-600 mt-0.5">{report.prediction_data.fullExpenseTypes.variable.percentage}% of total</p>
+                                                            <p className="text-xs font-semibold text-slate-900">Variable Expenses</p>
+                                                            <p className="text-[10px] text-slate-600 mt-0.5">{report.prediction_data.fullExpenseTypes.variable.percentage}% of total</p>
                                                         </div>
-                                                        <p className="text-sm font-bold text-amber-900">₱{report.prediction_data.fullExpenseTypes.variable.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</p>
+                                                        <p className="text-sm font-bold text-slate-900">₱{report.prediction_data.fullExpenseTypes.variable.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -423,17 +366,17 @@ export function ViewAdminPredictionModal({
 
                                         {/* Transaction Behavior */}
                                         {report.prediction_data.fullBehaviorInsights && report.prediction_data.fullBehaviorInsights.length > 0 && (
-                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                            <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                     <Activity size={14} className="text-emerald-500" />Transaction Behavior Insight
                                                 </h3>
                                                 <div className="space-y-2">
                                                     {report.prediction_data.fullBehaviorInsights.slice(0, 4).map((behavior: any, idx: number) => (
-                                                        <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
+                                                        <div key={idx} className="flex items-center justify-between p-2 border border-slate-100 rounded-lg">
                                                             <span className="text-xs font-semibold text-slate-900">{behavior.name || behavior.type}</span>
                                                             <div className="flex items-center gap-3">
                                                                 <span className="text-xs text-slate-600">Avg: ₱{behavior.currentAvg.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</span>
-                                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${behavior.trend === 'up' ? 'bg-red-100 text-red-700' : behavior.trend === 'down' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-700'}`}>
+                                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${behavior.trend === 'up' ? 'text-emerald-700' : behavior.trend === 'down' ? 'text-emerald-700' : 'text-emerald-700'}`}>
                                                                     {behavior.trend === 'up' ? '↑' : behavior.trend === 'down' ? '↓' : '→'}
                                                                 </span>
                                                             </div>
@@ -446,20 +389,20 @@ export function ViewAdminPredictionModal({
                                 ) : report.report_type === "financial_intelligence" && report.prediction_data.fullAIInsights ? (
                                     <div className="space-y-4">
                                         {/* Financial Summary */}
-                                        <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                        <div className="border border-slate-200 rounded-xl p-5">
                                             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                <Wand2 size={14} className="text-violet-500" />Financial Summary
+                                                <Wand2 size={14} className="text-emerald-500" />Financial Summary
                                             </h3>
                                             <p className="text-xs text-slate-600 leading-relaxed">{report.prediction_data.fullAIInsights.financialSummary}</p>
                                         </div>
 
                                         {/* Risk Assessment */}
-                                        <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                        <div className="border border-slate-200 rounded-xl p-5">
                                             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                <AlertTriangle size={14} className={report.prediction_data.fullAIInsights.riskLevel === "high" ? "text-red-500" : report.prediction_data.fullAIInsights.riskLevel === "medium" ? "text-amber-500" : "text-emerald-500"} />Risk Assessment
+                                                <AlertTriangle size={14} className="text-emerald-500" />Risk Assessment
                                             </h3>
                                             <div className="flex items-center gap-3 mb-3">
-                                                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${report.prediction_data.fullAIInsights.riskLevel === "high" ? "bg-red-100 text-red-700" : report.prediction_data.fullAIInsights.riskLevel === "medium" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}>
+                                                <span className="text-xs font-semibold text-emerald-700">
                                                     {report.prediction_data.fullAIInsights.riskLevel.toUpperCase()} RISK
                                                 </span>
                                                 <span className="text-xs text-slate-500">Score: {report.prediction_data.fullAIInsights.riskScore}/100</span>
@@ -468,7 +411,7 @@ export function ViewAdminPredictionModal({
                                         </div>
 
                                         {/* Growth Potential */}
-                                        <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                        <div className="border border-slate-200 rounded-xl p-5">
                                             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                 <TrendingUp size={14} className="text-emerald-500" />Growth Potential
                                             </h3>
@@ -478,14 +421,14 @@ export function ViewAdminPredictionModal({
 
                                         {/* Recommendations */}
                                         {report.prediction_data.fullAIInsights.recommendations.length > 0 && (
-                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                            <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <Lightbulb size={14} className="text-amber-500" />Recommendations ({report.prediction_data.fullAIInsights.recommendations.length})
+                                                    <Lightbulb size={14} className="text-emerald-500" />Recommendations ({report.prediction_data.fullAIInsights.recommendations.length})
                                                 </h3>
                                                 <div className="space-y-3">
                                                     {report.prediction_data.fullAIInsights.recommendations.map((rec: any, idx: number) => (
-                                                        <div key={idx} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
-                                                            <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${rec.priority === "high" ? "bg-red-100 text-red-600" : rec.priority === "medium" ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"}`}>
+                                                        <div key={idx} className="flex gap-3 p-3 border border-slate-100 rounded-lg">
+                                                            <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-600">
                                                                 <span className="text-[10px] font-bold">{idx + 1}</span>
                                                             </div>
                                                             <div className="flex-1 min-w-0">
@@ -500,14 +443,14 @@ export function ViewAdminPredictionModal({
 
                                         {/* Risk Mitigation */}
                                         {report.prediction_data.fullAIInsights.riskMitigationStrategies.length > 0 && (
-                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                            <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <Shield size={14} className="text-blue-500" />Risk Mitigation Strategies ({report.prediction_data.fullAIInsights.riskMitigationStrategies.length})
+                                                    <Shield size={14} className="text-emerald-500" />Risk Mitigation Strategies ({report.prediction_data.fullAIInsights.riskMitigationStrategies.length})
                                                 </h3>
                                                 <div className="space-y-2">
                                                     {report.prediction_data.fullAIInsights.riskMitigationStrategies.map((strategy: any, idx: number) => (
                                                         <div key={idx} className="flex items-start gap-2 text-xs">
-                                                            <span className="text-blue-500 mt-0.5">•</span>
+                                                            <span className="text-emerald-500 mt-0.5">•</span>
                                                             <div>
                                                                 <span className="font-semibold text-slate-900">{strategy.strategy}:</span>
                                                                 <span className="text-slate-600"> {strategy.description}</span>
@@ -520,18 +463,18 @@ export function ViewAdminPredictionModal({
 
                                         {/* Long-term Opportunities */}
                                         {report.prediction_data.fullAIInsights.longTermOpportunities.length > 0 && (
-                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                            <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <Star size={14} className="text-violet-500" />Long-term Opportunities ({report.prediction_data.fullAIInsights.longTermOpportunities.length})
+                                                    <Star size={14} className="text-slate-500" />Long-term Opportunities ({report.prediction_data.fullAIInsights.longTermOpportunities.length})
                                                 </h3>
                                                 <div className="space-y-3">
                                                     {report.prediction_data.fullAIInsights.longTermOpportunities.map((opp: any, idx: number) => (
-                                                        <div key={idx} className="p-3 bg-violet-50 rounded-lg">
-                                                            <h4 className="text-xs font-semibold text-violet-900 mb-1">{opp.opportunity}</h4>
-                                                            <p className="text-[10px] text-violet-700 mb-2">{opp.description}</p>
+                                                        <div key={idx} className="p-3 border border-slate-200 rounded-lg">
+                                                            <h4 className="text-xs font-semibold text-slate-900 mb-1">{opp.opportunity}</h4>
+                                                            <p className="text-[10px] text-slate-600 mb-2">{opp.description}</p>
                                                             <div className="flex gap-3 text-[10px]">
-                                                                <span className="text-violet-600">⏱ {opp.timeframe}</span>
-                                                                <span className="text-violet-600">💰 {opp.potentialReturn}</span>
+                                                                <span className="text-slate-500">⏱ {opp.timeframe}</span>
+                                                                <span className="text-slate-500">💰 {opp.potentialReturn}</span>
                                                             </div>
                                                         </div>
                                                     ))}
@@ -571,9 +514,9 @@ export function ViewAdminPredictionModal({
                                         <>
                                             {/* Financial Summary */}
                                             {financialSummary && (
-                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                        <Wand2 size={14} className="text-violet-500" />Financial Summary
+                                                        <Wand2 size={14} className="text-emerald-500" />Financial Summary
                                                     </h3>
                                                     <p className="text-xs text-slate-600 leading-relaxed">{financialSummary}</p>
                                                 </div>
@@ -581,12 +524,12 @@ export function ViewAdminPredictionModal({
 
                                             {/* Risk Assessment */}
                                             {(riskLevel || riskScore || riskAnalysis) && (
-                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                        <AlertTriangle size={14} className={riskLevel === "high" ? "text-red-500" : riskLevel === "medium" ? "text-amber-500" : "text-emerald-500"} />Risk Assessment
+                                                        <AlertTriangle size={14} className="text-emerald-500" />Risk Assessment
                                                     </h3>
                                                     <div className="flex items-center gap-3 mb-3">
-                                                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${riskLevel === "high" ? "bg-red-100 text-red-700" : riskLevel === "medium" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}>
+                                                        <span className="text-xs font-semibold text-emerald-700">
                                                             {riskLevel.toUpperCase()} RISK
                                                         </span>
                                                         {riskScore > 0 && (
@@ -601,7 +544,7 @@ export function ViewAdminPredictionModal({
 
                                             {/* Growth Potential */}
                                             {(growthPotential || growthAnalysis) && (
-                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                         <TrendingUp size={14} className="text-emerald-500" />Growth Potential
                                                     </h3>
@@ -616,21 +559,21 @@ export function ViewAdminPredictionModal({
 
                                             {/* Recommendations */}
                                             {Array.isArray(recommendationsData) && recommendationsData.length > 0 && (
-                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                        <Lightbulb size={14} className="text-amber-500" />Recommendations ({recommendationsData.length})
+                                                        <Lightbulb size={14} className="text-emerald-500" />Recommendations ({recommendationsData.length})
                                                     </h3>
                                                     <div className="space-y-3">
                                                         {recommendationsData.map((rec: any, idx: number) => (
-                                                            <div key={idx} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
-                                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${rec.priority === "high" ? "bg-red-100 text-red-600" : rec.priority === "medium" ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"}`}>
+                                                            <div key={idx} className="flex gap-3 p-3 border border-slate-100 rounded-lg">
+                                                                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-600">
                                                                     <span className="text-[10px] font-bold">{idx + 1}</span>
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
                                                                     <h4 className="text-xs font-semibold text-slate-900 mb-1">{rec.title}</h4>
                                                                     <p className="text-[10px] text-slate-600 leading-relaxed">{rec.description}</p>
                                                                     {rec.category && (
-                                                                        <span className="inline-block mt-1 text-[9px] px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 font-medium">
+                                                                        <span className="inline-block mt-1 text-[9px] text-slate-600 font-medium">
                                                                             {rec.category}
                                                                         </span>
                                                                     )}
@@ -643,21 +586,21 @@ export function ViewAdminPredictionModal({
 
                                             {/* Risk Mitigation Strategies */}
                                             {Array.isArray(riskMitigationStrategies) && riskMitigationStrategies.length > 0 && (
-                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                        <Shield size={14} className="text-blue-500" />Risk Mitigation Strategies ({riskMitigationStrategies.length})
+                                                        <Shield size={14} className="text-emerald-500" />Risk Mitigation Strategies ({riskMitigationStrategies.length})
                                                     </h3>
                                                     <div className="space-y-2">
                                                         {riskMitigationStrategies.map((strategy: any, idx: number) => (
-                                                            <div key={idx} className="flex items-start gap-2 p-2 bg-blue-50 rounded-lg">
-                                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${strategy.impact === "high" ? "bg-blue-600 text-white" : strategy.impact === "medium" ? "bg-blue-400 text-white" : "bg-blue-200 text-blue-700"}`}>
+                                                            <div key={idx} className="flex items-start gap-2 p-2 border border-slate-200 rounded-lg">
+                                                                <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-slate-600">
                                                                     <span className="text-[9px] font-bold">{idx + 1}</span>
                                                                 </div>
                                                                 <div className="flex-1 text-xs">
                                                                     <span className="font-semibold text-slate-900">{strategy.strategy}:</span>
                                                                     <span className="text-slate-600"> {strategy.description}</span>
                                                                     {strategy.impact && (
-                                                                        <span className={`ml-2 text-[9px] px-1.5 py-0.5 rounded font-semibold ${strategy.impact === "high" ? "bg-blue-100 text-blue-700" : strategy.impact === "medium" ? "bg-blue-50 text-blue-600" : "bg-slate-100 text-slate-600"}`}>
+                                                                        <span className="ml-2 text-[9px] font-semibold text-slate-600">
                                                                             {strategy.impact} impact
                                                                         </span>
                                                                     )}
@@ -670,28 +613,28 @@ export function ViewAdminPredictionModal({
 
                                             {/* Long-term Opportunities */}
                                             {Array.isArray(longTermOpportunities) && longTermOpportunities.length > 0 && (
-                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                        <Star size={14} className="text-violet-500" />Long-term Opportunities ({longTermOpportunities.length})
+                                                        <Star size={14} className="text-slate-500" />Long-term Opportunities ({longTermOpportunities.length})
                                                     </h3>
                                                     <div className="space-y-3">
                                                         {longTermOpportunities.map((opp: any, idx: number) => (
-                                                            <div key={idx} className="p-3 bg-violet-50 rounded-lg">
+                                                            <div key={idx} className="p-3 border border-slate-200 rounded-lg">
                                                                 <div className="flex items-start gap-2 mb-2">
-                                                                    <div className="w-5 h-5 rounded-full bg-violet-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                                    <div className="w-5 h-5 rounded-full text-slate-600 flex items-center justify-center flex-shrink-0 mt-0.5">
                                                                         <span className="text-[9px] font-bold">{idx + 1}</span>
                                                                     </div>
-                                                                    <h4 className="text-xs font-semibold text-violet-900 flex-1">{opp.opportunity}</h4>
+                                                                    <h4 className="text-xs font-semibold text-slate-900 flex-1">{opp.opportunity}</h4>
                                                                 </div>
-                                                                <p className="text-[10px] text-violet-700 mb-2 pl-7">{opp.description}</p>
+                                                                <p className="text-[10px] text-slate-600 mb-2 pl-7">{opp.description}</p>
                                                                 <div className="flex gap-3 text-[10px] pl-7">
                                                                     {opp.timeframe && (
-                                                                        <span className="text-violet-600 flex items-center gap-1">
+                                                                        <span className="text-slate-500 flex items-center gap-1">
                                                                             <Clock size={10} /> {opp.timeframe}
                                                                         </span>
                                                                     )}
                                                                     {opp.potentialReturn && (
-                                                                        <span className="text-violet-600 flex items-center gap-1">
+                                                                        <span className="text-slate-500 flex items-center gap-1">
                                                                             <TrendingUp size={10} /> {opp.potentialReturn}
                                                                         </span>
                                                                     )}
@@ -701,39 +644,6 @@ export function ViewAdminPredictionModal({
                                                     </div>
                                                 </div>
                                             )}
-
-                                            {/* AI Service Metadata */}
-                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
-                                                <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <Sparkles size={14} className="text-violet-500" />AI Service Information
-                                                </h3>
-                                                <div className="grid grid-cols-2 gap-3 text-xs">
-                                                    <div>
-                                                        <span className="text-slate-500 block mb-1">Service</span>
-                                                        <span className="font-semibold text-slate-900">{insight.ai_service || "Unknown"}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-slate-500 block mb-1">Model</span>
-                                                        <span className="font-semibold text-slate-900">{insight.model_used || "Unknown"}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-slate-500 block mb-1">Generated</span>
-                                                        <span className="font-semibold text-slate-900">{format(new Date(insight.generated_at), "MMM dd, yyyy")}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-slate-500 block mb-1">Expires</span>
-                                                        <span className="font-semibold text-slate-900">{format(new Date(insight.expires_at), "MMM dd, yyyy")}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-slate-500 block mb-1">Access Count</span>
-                                                        <span className="font-semibold text-slate-900">{insight.access_count}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-slate-500 block mb-1">Confidence</span>
-                                                        <span className="font-semibold text-slate-900">{confidenceLevel ? `${confidenceLevel.toFixed(0)}%` : "—"}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </>
                                     ) : (
                                         <>

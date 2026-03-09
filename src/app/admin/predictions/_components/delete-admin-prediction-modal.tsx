@@ -97,12 +97,6 @@ export function DeleteAdminPredictionModal({
                                 <span className="text-sm font-semibold text-slate-700">{item.user_email ?? "Unknown"}</span>
                             </div>
                             <div className="flex justify-between items-center py-2.5">
-                                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Model</span>
-                                <span className="text-sm font-semibold text-slate-700">
-                                    {dataSource === "reports" ? (report!.model_version || "—") : (insight!.model_used || "—")}
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center py-2.5">
                                 <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Date</span>
                                 <span className="text-sm font-semibold text-slate-700">
                                     {new Date(createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
