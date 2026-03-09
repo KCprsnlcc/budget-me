@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Check } from "lucide-react";
 
 interface StepperProps {
@@ -7,48 +8,54 @@ interface StepperProps {
   currentStep: number;
 }
 
-export function Stepper({ steps, currentStep }: StepperProps) {
+export const Stepper = memo(function Stepper({ steps, currentStep }: StepperProps) {
   return (
-    <div className="px-5 py-4 bg-white border-b border-gray-100">
-      <div className="flex items-center justify-between">
-        {steps.map((step, index) => {
-          const stepNumber = index + 1;
-          const isActive = stepNumber === currentStep;
-          const isCompleted = stepNumber < currentStep;
+    <div
+      className="flex items-center justify-center px-5 py-3.5 bg-white border-b border-slate-100"
+      aria-label="Progress"
+    >
+      {steps.map((label, idx) => {
+        const stepNum = idx + 1;
+        const isActive = stepNum === currentStep;
+        const isCompleted = stepNum < currentStep;
 
-          return (
-            <div key={step} className="flex items-center flex-1">
-              <div className="flex flex-col items-center flex-1">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                    isCompleted
-                      ? "bg-emerald-500 text-white"
-                      : isActive
-                      ? "bg-emerald-500 text-white ring-4 ring-emerald-100"
-                      : "bg-gray-100 text-gray-400"
-                  }`}
-                >
-                  {isCompleted ? <Check size={14} /> : stepNumber}
-                </div>
-                <span
-                  className={`text-[10px] font-medium mt-1.5 uppercase tracking-wider ${
-                    isActive ? "text-gray-900" : "text-gray-400"
-                  }`}
-                >
-                  {step}
-                </span>
+        return (
+          <div key={label} className="flex items-center">
+            {idx > 0 && (
+              <div
+                className={`w-9 h-[1.5px] mx-1.5 mb-[18px] flex-shrink-0 transition-colors duration-300 ${
+                  isCompleted ? "bg-emerald-500" : "bg-slate-200"
+                }`}
+              />
+            )}
+            <div className="flex flex-col items-center">
+              <div
+                className={`w-[26px] h-[26px] rounded-full flex items-center justify-center text-[10px] font-semibold border-[1.5px] transition-all duration-300 relative z-[2] flex-shrink-0 ${
+                  isActive
+                    ? "border-emerald-500 bg-emerald-500 text-white shadow-[0_0_0_3px_rgba(16,185,129,0.1)]"
+                    : isCompleted
+                    ? "border-emerald-500 bg-emerald-500 text-white"
+                    : "border-slate-300 bg-white text-slate-400"
+                }`}
+                aria-current={isActive ? "step" : undefined}
+              >
+                {isCompleted ? <Check size={12} /> : stepNum}
               </div>
-              {index < steps.length - 1 && (
-                <div
-                  className={`h-px flex-1 mx-2 transition-all ${
-                    isCompleted ? "bg-emerald-500" : "bg-gray-200"
-                  }`}
-                />
-              )}
+              <span
+                className={`text-[9px] font-semibold mt-1 text-center uppercase tracking-[0.05em] transition-colors duration-200 ${
+                  isActive
+                    ? "text-emerald-500"
+                    : isCompleted
+                    ? "text-slate-600"
+                    : "text-slate-400"
+                }`}
+              >
+                {label}
+              </span>
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
-}
+});

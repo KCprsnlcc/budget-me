@@ -43,7 +43,14 @@ export type AdminTransactionStats = {
   topSpendingCategory: { name: string; amount: number } | null;
   pendingTransactions: number;
   monthOverMonthGrowth: number; // percentage
-  topUsers: { user_id: string; email: string; total_amount: number; transaction_count: number }[];
+  topUsers: { 
+    user_id: string; 
+    email: string; 
+    full_name?: string | null;
+    avatar_url?: string | null;
+    total_amount: number; 
+    transaction_count: number;
+  }[];
 };
 
 export type AdminTransactionFilters = {

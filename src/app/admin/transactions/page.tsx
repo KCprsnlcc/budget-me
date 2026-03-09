@@ -47,6 +47,8 @@ import {
   getTimestampString,
   type TransactionExportData,
 } from "@/lib/export-utils";
+import { UserAvatar } from "@/components/shared/user-avatar";
+import type { User } from "@supabase/supabase-js";
 
 type SummaryType = {
   label: string;
@@ -295,7 +297,7 @@ export default function AdminTransactionsPage() {
   const summaryItems: SummaryType[] = useMemo(() => {
     if (!stats) return [];
     
-    const growthTrend = stats.monthOverMonthGrowth >= 0 ? "up" : "down";
+    const growthTrend: "up" | "down" = stats.monthOverMonthGrowth >= 0 ? "up" : "down";
     const growthText = `${Math.abs(stats.monthOverMonthGrowth).toFixed(1)}% MoM`;
     
     return [
@@ -303,28 +305,28 @@ export default function AdminTransactionsPage() {
         label: "Total Transactions", 
         value: stats.totalTransactions.toLocaleString(), 
         change: growthText, 
-        trend: growthTrend as const, 
+        trend: growthTrend, 
         icon: Wallet 
       },
       { 
         label: "Active Users", 
         value: stats.activeUsers.toLocaleString(), 
         change: `${stats.pendingTransactions} pending`, 
-        trend: "up" as const, 
+        trend: "up", 
         icon: TrendingUp 
       },
       { 
         label: "Total Volume", 
         value: formatCurrency(stats.totalIncome + stats.totalExpenses), 
         change: `Avg ${formatCompact(stats.avgTransactionValue)}`, 
-        trend: "up" as const, 
+        trend: "up", 
         icon: ShoppingBag 
       },
       { 
         label: "Net Balance", 
         value: formatCurrency(stats.netBalance), 
         change: stats.topSpendingCategory ? stats.topSpendingCategory.name : "—", 
-        trend: stats.netBalance >= 0 ? "up" as const : "down" as const, 
+        trend: stats.netBalance >= 0 ? "up" : "down", 
         icon: PiggyBank 
       },
     ];
@@ -473,6 +475,31 @@ export default function AdminTransactionsPage() {
                 </div>
               </Card>
             </div>
+
+            {/* Top Users Skeleton */}
+            <Card className="p-4 sm:p-6">
+              <div className="mb-4 sm:mb-6">
+                <Skeleton width={200} height={14} className="mb-2" />
+                <Skeleton width={250} height={10} />
+              </div>
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Skeleton width={32} height={32} borderRadius="50%" />
+                      <div>
+                        <Skeleton width={120} height={14} className="mb-1" />
+                        <Skeleton width={80} height={10} />
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Skeleton width={80} height={14} className="mb-1" />
+                      <Skeleton width={60} height={10} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
 
             {/* Filters Skeleton */}
             <Card className="p-3 sm:p-4">
@@ -715,23 +742,47 @@ export default function AdminTransactionsPage() {
           </div>
           
           <div className="space-y-3">
-            {stats.topUsers.map((user, index) => (
-              <div key={user.user_id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">
-                    #{index + 1}
+            {stats.topUsers.map((user, index) => {
+              // Create mock user for UserAvatar component
+              const mockUser: User = {
+                id: user.user_id,
+                email: user.email,
+                user_metadata: {
+                  full_name: user.full_name,
+                  avatar_url: user.avatar_url
+                },
+                app_metadata: {},
+                created_at: "",
+                aud: "authenticated"
+              } as User;
+
+              return (
+                <div key={user.user_id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex-shrink-0">
+                      <UserAvatar 
+                        user={mockUser} 
+                        size="lg"
+                        className="ring-2 ring-white shadow-sm"
+                      />
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm">
+                        {index + 1}
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-slate-900 truncate">
+                        {user.full_name || user.email}
+                      </p>
+                      <p className="text-xs text-slate-500">{user.transaction_count} transactions</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-slate-900">{user.email}</p>
-                    <p className="text-xs text-slate-500">{user.transaction_count} transactions</p>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-sm font-semibold text-slate-900">{formatCurrency(user.total_amount)}</p>
+                    <p className="text-xs text-slate-500">Total Volume</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-slate-900">{formatCurrency(user.total_amount)}</p>
-                  <p className="text-xs text-slate-500">Total Volume</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
       )}

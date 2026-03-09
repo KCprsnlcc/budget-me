@@ -12,11 +12,22 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   ArrowRight,
+  Calendar,
+  User,
+  CreditCard,
+  Tag,
+  FileText,
+  Clock,
+  TrendingUp,
+  DollarSign,
 } from "lucide-react";
+import { format } from "date-fns";
 import { Stepper } from "./stepper";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import type { AdminTransaction } from "../_lib/types";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
-const STEPS = ["Overview", "User Info"];
+const STEPS = ["Overview", "Analysis"];
 
 interface ViewAdminTransactionModalProps {
   open: boolean;
@@ -40,6 +51,21 @@ export function ViewAdminTransactionModal({
     onClose();
   }, [reset, onClose]);
 
+  // Helper function to convert transaction user data to Supabase User format for UserAvatar
+  const createMockUser = (transaction: AdminTransaction): SupabaseUser => {
+    return {
+      id: transaction.user_id,
+      email: transaction.user_email || "",
+      user_metadata: {
+        full_name: transaction.user_name,
+        avatar_url: transaction.user_avatar,
+      },
+      app_metadata: {},
+      aud: "authenticated",
+      created_at: transaction.created_at,
+    } as SupabaseUser;
+  };
+
   if (!transaction) return null;
 
   const isIncome = transaction.type === "income" || transaction.type === "cash_in";
@@ -49,12 +75,12 @@ export function ViewAdminTransactionModal({
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
       {/* Header */}
-      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
+      <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+          <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
             Transaction Details
           </span>
-          <span className="text-[10px] text-gray-400 font-medium tracking-wide">
+          <span className="text-[10px] text-slate-400 font-medium tracking-wide">
             Step {step} of 2
           </span>
         </div>
@@ -68,11 +94,17 @@ export function ViewAdminTransactionModal({
         {/* STEP 1: Overview */}
         {step === 1 && (
           <div className="space-y-6 animate-txn-in">
-            {/* Amount Display */}
-            <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-gray-200">
-              <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                Transaction Amount
+            {/* Transaction Header */}
+            <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
+              <div className="flex justify-center mb-3">
+                <UserAvatar 
+                  user={createMockUser(transaction)} 
+                  size="xl"
+                  className="ring-2 ring-white shadow-sm"
+                />
               </div>
+              <h3 className="text-lg font-bold text-slate-900">{transaction.user_name || "No Name"}</h3>
+              <p className="text-sm text-slate-500 mb-3">{transaction.user_email || "Unknown User"}</p>
               <div
                 className={`text-[32px] font-bold my-2 ${
                   isIncome ? "text-emerald-500" : "text-red-500"
@@ -80,77 +112,165 @@ export function ViewAdminTransactionModal({
               >
                 {isIncome ? "+" : "-"}₱{absAmount}
               </div>
-              <span className="text-xs font-semibold px-2 py-1 rounded bg-white text-gray-500 uppercase tracking-wider inline-block mt-2 border border-gray-100">
-                {isIncome ? "Income" : "Expense"}
-              </span>
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-xs font-medium text-slate-600">
+                  {isIncome ? "Income" : "Expense"}
+                </span>
+                <span className="text-slate-300">•</span>
+                <span className="text-xs font-medium text-slate-600">
+                  {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                </span>
+              </div>
             </div>
 
-            {/* Transaction Details */}
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-              <div className="p-5 space-y-0 divide-y divide-gray-100">
-                <DetailRow label="Date" value={new Date(transaction.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} />
-                <DetailRow label="User" value={transaction.user_email ?? "Unknown User"} />
-                <DetailRow label="Account" value={transaction.account_name ? `${transaction.account_name}${transaction.account_number_masked ? ` ${transaction.account_number_masked}` : ""}` : "\u2014"} />
-                <DetailRow label="Category">
-                  <Badge variant={isIncome ? "info" : "success"}>{catName}</Badge>
-                </DetailRow>
-                <DetailRow label="Status">
-                  <Badge variant={transaction.status === "completed" ? "success" : "warning"}>
-                    {transaction.status}
-                  </Badge>
-                </DetailRow>
-                <DetailRow label="Description" value={transaction.description ?? "\u2014"} />
-                {transaction.notes && (
-                  <DetailRow label="Notes" value={transaction.notes} />
-                )}
+            {/* Transaction Information */}
+            <div>
+              <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Transaction Information</h4>
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-5 space-y-0 divide-y divide-slate-100">
+                  <DetailRow 
+                    label="Date" 
+                    value={format(new Date(transaction.date + "T00:00:00"), "MMM dd, yyyy")} 
+                    icon={Calendar} 
+                  />
+                  <DetailRow 
+                    label="Category" 
+                    value={catName}
+                    icon={Tag} 
+                  />
+                  <DetailRow 
+                    label="Account" 
+                    value={transaction.account_name ? `${transaction.account_name}${transaction.account_number_masked ? ` ${transaction.account_number_masked}` : ""}` : "—"} 
+                    icon={CreditCard} 
+                  />
+                  <DetailRow 
+                    label="Description" 
+                    value={transaction.description || "—"} 
+                    icon={FileText} 
+                  />
+                  {transaction.notes && (
+                    <DetailRow 
+                      label="Notes" 
+                      value={transaction.notes} 
+                      icon={FileText} 
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Transaction Status */}
+            <div>
+              <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Transaction Status</h4>
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-5 space-y-0 divide-y divide-slate-100">
+                  <DetailRow 
+                    label="Status" 
+                    value={transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                    icon={Clock} 
+                  />
+                  <DetailRow 
+                    label="Recurring" 
+                    value={transaction.is_recurring ? "Yes" : "No"}
+                    icon={TrendingUp} 
+                  />
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* STEP 2: User Info */}
+        {/* STEP 2: Analysis */}
         {step === 2 && (
           <div className="space-y-6 animate-txn-in">
             {/* User Information */}
             <div>
-              <h3 className="text-[15px] font-bold text-gray-900 mb-3">
+              <h3 className="text-[15px] font-bold text-slate-900 mb-3">
                 User Information
               </h3>
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                <div className="p-5 space-y-0 divide-y divide-gray-100">
-                  {transaction.user_avatar && (
-                    <div className="flex justify-between items-center py-2.5">
-                      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Avatar</span>
-                      <img 
-                        src={transaction.user_avatar} 
-                        alt={transaction.user_name || transaction.user_email || "User"} 
-                        className="w-10 h-10 rounded-full object-cover border-2 border-gray-100"
-                      />
-                    </div>
-                  )}
-                  <DetailRow label="Email" value={transaction.user_email ?? "Unknown"} />
-                  <DetailRow label="Name" value={transaction.user_name ?? "—"} />
-                  <DetailRow label="User ID" value={transaction.user_id} />
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-5 space-y-0 divide-y divide-slate-100">
+                  <DetailRow 
+                    label="Email" 
+                    value={transaction.user_email || "Unknown"} 
+                    icon={User} 
+                  />
+                  <DetailRow 
+                    label="Name" 
+                    value={transaction.user_name || "—"} 
+                    icon={User} 
+                  />
+                  <DetailRow 
+                    label="User ID" 
+                    value={transaction.user_id} 
+                    icon={User} 
+                  />
                 </div>
               </div>
             </div>
 
             {/* Transaction Metadata */}
             <div>
-              <h3 className="text-[15px] font-bold text-gray-900 mb-3">
+              <h3 className="text-[15px] font-bold text-slate-900 mb-3">
                 Transaction Metadata
               </h3>
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                <div className="p-5 space-y-0 divide-y divide-gray-100">
-                  <DetailRow label="Transaction ID" value={transaction.id} />
-                  <DetailRow label="Created At" value={new Date(transaction.created_at).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })} />
-                  <DetailRow label="Updated At" value={new Date(transaction.updated_at).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })} />
-                  <DetailRow label="Recurring">
-                    <Badge variant={transaction.is_recurring ? "info" : "neutral"}>
-                      {transaction.is_recurring ? "Yes" : "No"}
-                    </Badge>
-                  </DetailRow>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
+                      <Clock size={16} className="text-slate-600" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">Created</div>
+                      <div className="text-[10px] text-slate-400">
+                        {format(new Date(transaction.created_at), "MMM dd, yyyy 'at' h:mm a")}
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
+                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
+                      <Clock size={16} className="text-slate-600" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">Last Updated</div>
+                      <div className="text-[10px] text-slate-400">
+                        {format(new Date(transaction.updated_at), "MMM dd, yyyy 'at' h:mm a")}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
+                      <DollarSign size={16} className={isIncome ? "text-emerald-600" : "text-red-600"} />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">Transaction Type</div>
+                      <div className="text-[10px] text-slate-400">
+                        {isIncome ? "Income transaction" : "Expense transaction"}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs font-medium text-slate-600">
+                    {isIncome ? "Income" : "Expense"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Transaction ID */}
+            <div>
+              <h3 className="text-[15px] font-bold text-slate-900 mb-3">
+                Transaction ID
+              </h3>
+              <div className="bg-[#F9FAFB]/50 rounded-lg p-4 border border-slate-100">
+                <p className="text-[11px] text-slate-500 leading-relaxed font-mono break-all">
+                  {transaction.id}
+                </p>
               </div>
             </div>
           </div>
@@ -180,7 +300,7 @@ export function ViewAdminTransactionModal({
           {step === 2 ? (
             <>Back to Overview <ArrowLeft size={14} /></>
           ) : (
-            <>View User Info <ArrowRight size={14} /></>
+            <>View Analysis <ArrowRight size={14} /></>
           )}
         </Button>
       </ModalFooter>
@@ -188,23 +308,14 @@ export function ViewAdminTransactionModal({
   );
 }
 
-function DetailRow({
-  label,
-  value,
-  children,
-}: {
-  label: string;
-  value?: string;
-  children?: React.ReactNode;
-}) {
+function DetailRow({ label, value, icon: Icon }: { label: string; value: string; icon: React.ElementType }) {
   return (
     <div className="flex justify-between items-center py-2.5">
-      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">
+      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold flex items-center gap-1.5">
+        <Icon size={12} className="text-slate-400" />
         {label}
       </span>
-      {children ?? (
-        <span className="text-[13px] font-semibold text-gray-700">{value}</span>
-      )}
+      <span className="text-[13px] font-semibold text-slate-700">{value}</span>
     </div>
   );
 }

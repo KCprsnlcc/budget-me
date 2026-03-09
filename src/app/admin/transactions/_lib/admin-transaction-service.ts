@@ -276,21 +276,26 @@ export async function fetchAdminTransactionStats(): Promise<AdminTransactionStat
     .sort((a, b) => b[1].total_amount - a[1].total_amount)
     .slice(0, 5);
 
-  // Fetch user emails
+  // Fetch user profiles with full data
   const topUserIds = sortedUsers.map(([userId]) => userId);
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, email")
+    .select("id, email, full_name, avatar_url")
     .in("id", topUserIds);
 
-  const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p.email]));
+  const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
 
-  const topUsers = sortedUsers.map(([userId, data]) => ({
-    user_id: userId,
-    email: profileMap.get(userId) ?? "Unknown",
-    total_amount: data.total_amount,
-    transaction_count: data.transaction_count,
-  }));
+  const topUsers = sortedUsers.map(([userId, data]) => {
+    const profile = profileMap.get(userId);
+    return {
+      user_id: userId,
+      email: profile?.email ?? "Unknown",
+      full_name: profile?.full_name,
+      avatar_url: profile?.avatar_url,
+      total_amount: data.total_amount,
+      transaction_count: data.transaction_count,
+    };
+  });
 
   return {
     totalTransactions: totalTransactions ?? 0,
