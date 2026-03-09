@@ -247,7 +247,12 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
         setUsers(data);
         setPage(2);
       } else {
-        setUsers(prev => [...prev, ...data]);
+        // Prevent duplicates by filtering out users that already exist
+        setUsers(prev => {
+          const existingIds = new Set(prev.map(u => u.id));
+          const newUsers = data.filter(u => !existingIds.has(u.id));
+          return [...prev, ...newUsers];
+        });
         setPage(prev => prev + 1);
       }
       // Check if we got a full page - if yes, there might be more

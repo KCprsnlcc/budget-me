@@ -35,12 +35,10 @@ export function UserAvatar({ user, size = "md", className = "", showName = false
         // First check if user is authenticated
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          console.log("No active session, skipping profile fetch");
           setIsLoading(false);
           return;
         }
         
-        console.log("Fetching profile for user ID:", user.id);
         const { data, error } = await supabase
           .from("profiles")
           .select("avatar_url, full_name")
@@ -56,7 +54,6 @@ export function UserAvatar({ user, size = "md", className = "", showName = false
           });
           // Don't set profile, will fall back to user metadata
         } else {
-          console.log("Profile fetched successfully:", data);
           setProfile(data);
         }
       } catch (error) {
