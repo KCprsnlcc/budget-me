@@ -6,6 +6,10 @@ import { Card } from './card';
 
 // Table skeleton loader for filter changes
 export function FilterTableSkeleton({ rows = 10, columns = 6 }: { rows?: number; columns?: number }) {
+  // Clamp rows and columns to safe values to prevent RangeError
+  const safeRows = Math.min(Math.max(1, rows || 10), 50);
+  const safeColumns = Math.min(Math.max(1, columns || 6), 20);
+  
   return (
     <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
       <div className="overflow-hidden">
@@ -13,7 +17,7 @@ export function FilterTableSkeleton({ rows = 10, columns = 6 }: { rows?: number;
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                {Array.from({ length: columns }).map((_, i) => (
+                {Array.from({ length: safeColumns }).map((_, i) => (
                   <th key={i} className="px-6 py-4">
                     <Skeleton width={80} height={12} />
                   </th>
@@ -21,9 +25,9 @@ export function FilterTableSkeleton({ rows = 10, columns = 6 }: { rows?: number;
               </tr>
             </thead>
             <tbody>
-              {Array.from({ length: rows }).map((_, i) => (
+              {Array.from({ length: safeRows }).map((_, i) => (
                 <tr key={i} className="border-b border-slate-100">
-                  {Array.from({ length: columns }).map((_, j) => (
+                  {Array.from({ length: safeColumns }).map((_, j) => (
                     <td key={j} className="px-6 py-4">
                       <Skeleton width={j === 0 ? 120 : 80} height={16} />
                     </td>
@@ -40,10 +44,13 @@ export function FilterTableSkeleton({ rows = 10, columns = 6 }: { rows?: number;
 
 // Grid skeleton loader for filter changes
 export function FilterGridSkeleton({ items = 6 }: { items?: number }) {
+  // Clamp items to safe value to prevent RangeError
+  const safeItems = Math.min(Math.max(1, items || 6), 50);
+  
   return (
     <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array.from({ length: items }).map((_, i) => (
+        {Array.from({ length: safeItems }).map((_, i) => (
           <div key={i} className="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -121,9 +128,12 @@ export function TransactionCardSkeleton() {
 
 // Budget-specific grid skeleton (matches initial page load design)
 export function BudgetFilterGridSkeleton({ items = 6 }: { items?: number }) {
+  // Clamp items to safe value to prevent RangeError
+  const safeItems = Math.min(Math.max(1, items || 6), 50);
+  
   return (
     <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
-      {Array.from({ length: items }).map((_, i) => (
+      {Array.from({ length: safeItems }).map((_, i) => (
         <div key={i} className="bg-white rounded-xl border border-slate-200/60 shadow-sm p-5">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -159,9 +169,12 @@ export function BudgetFilterGridSkeleton({ items = 6 }: { items?: number }) {
 
 // Goal-specific grid skeleton (matches initial page load design exactly)
 export function GoalFilterGridSkeleton({ items = 6 }: { items?: number }) {
+  // Clamp items to safe value to prevent RangeError
+  const safeItems = Math.min(Math.max(1, items || 6), 50);
+  
   return (
     <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
-      {Array.from({ length: items }).map((_, i) => (
+      {Array.from({ length: safeItems }).map((_, i) => (
         <Card key={i} className="p-5">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -253,10 +266,13 @@ export function GoalCardSkeleton() {
 
 // User-specific grid skeleton for filter changes
 export function UserFilterGridSkeleton({ items = 6 }: { items?: number }) {
+  // Clamp items to safe value to prevent RangeError
+  const safeItems = Math.min(Math.max(1, items || 6), 50);
+  
   return (
     <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array.from({ length: items }).map((_, i) => (
+        {Array.from({ length: safeItems }).map((_, i) => (
           <div key={i} className="bg-white rounded-xl border border-slate-200/60 shadow-sm p-4">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
