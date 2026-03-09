@@ -564,7 +564,7 @@ export default function AdminTransactionsPage() {
                 }`}
                 onClick={() => setViewMode('table')}
               >
-                <TableIcon size={14} className="mr-1" />
+                <TableIcon size={14} />
                 Table
               </Button>
               <Button
@@ -575,7 +575,7 @@ export default function AdminTransactionsPage() {
                 }`}
                 onClick={() => setViewMode('grid')}
               >
-                <Grid3X3 size={14} className="mr-1" />
+                <Grid3X3 size={14} />
                 Grid
               </Button>
             </div>
@@ -586,9 +586,9 @@ export default function AdminTransactionsPage() {
                 className="w-full sm:w-auto"
                 onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
               >
-                <Download size={14} className="sm:mr-1" />
+                <Download size={14} className="sm" />
                 <span className="hidden sm:inline">Export</span>
-                <MoreHorizontal size={12} className="ml-1" />
+                <MoreHorizontal size={12}/>
               </Button>
               {/* Dropdown */}
               {exportDropdownOpen && (

@@ -520,7 +520,7 @@ export default function AdminFamilyPage() {
                                     }`}
                                 onClick={() => setViewMode('table')}
                             >
-                                <TableIcon size={14} className="mr-1" />
+                                <TableIcon size={14} />
                                 Table
                             </Button>
                             <Button
@@ -530,7 +530,7 @@ export default function AdminFamilyPage() {
                                     }`}
                                 onClick={() => setViewMode('grid')}
                             >
-                                <Grid3X3 size={14} className="mr-1" />
+                                <Grid3X3 size={14}/>
                                 Grid
                             </Button>
                         </div>

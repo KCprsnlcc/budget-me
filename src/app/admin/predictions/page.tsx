@@ -2,11 +2,10 @@
 
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
-import { memo, useState, useCallback, useMemo } from "react";
+import { memo, useState, useCallback, useMemo, useRef } from "react";
 import {
     Search,
     Filter,
-    Download,
     Brain,
     TrendingUp,
     ArrowUp,
@@ -22,15 +21,10 @@ import {
     MoreHorizontal,
     Plus,
     Edit,
-    BarChart3,
-    Sparkles,
     Activity,
     Shield,
     AlertTriangle,
     CheckCircle2,
-    Users,
-    Database,
-    Layers,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,7 +43,7 @@ import { AddAdminPredictionModal } from "./_components/add-admin-prediction-moda
 import { EditAdminPredictionModal } from "./_components/edit-admin-prediction-modal";
 import { useAdminPredictions } from "./_lib/use-admin-predictions";
 import type { AdminPredictionReport, AdminAIInsight } from "./_lib/types";
-import { FilterTableSkeleton, TransactionCardSkeleton } from "@/components/ui/skeleton-filter-loaders";
+import { FilterTableSkeleton } from "@/components/ui/skeleton-filter-loaders";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User } from "@supabase/supabase-js";
 
@@ -69,15 +63,6 @@ const MONTH_NAMES = [
 function formatDate(dateStr: string): string {
     const d = new Date(dateStr);
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
-
-function formatDateTime(dateStr: string): string {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
-}
-
-function formatCurrency(amount: number): string {
-    return `₱${amount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 // ──────────────────────────── Skeleton Components ────────────────────────────
@@ -131,25 +116,21 @@ const PredictionCardSkeleton = memo(function PredictionCardSkeleton() {
 const SummaryCard = memo(function SummaryCard({ data }: { data: SummaryType }) {
     const Icon = data.icon;
     return (
-        <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
-            <div className="flex items-start justify-between">
-                <div className="space-y-2 sm:space-y-3">
-                    <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wide">{data.label}</p>
-                    <p className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{data.value}</p>
-                    <div className="flex items-center gap-1.5">
-                        <div className={`flex items-center gap-0.5 text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full ${data.trend === "up" ? "text-emerald-700 bg-emerald-50" : "text-red-700 bg-red-50"
-                            }`}>
-                            {data.trend === "up" ? <ArrowUp size={10} className="sm:w-3 sm:h-3" /> : <ArrowDown size={10} className="sm:w-3 sm:h-3" />}
-                            {data.change}
-                        </div>
-                    </div>
+        <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
+            <div className="flex justify-between items-start mb-4">
+                <div className="text-slate-500">
+                    {Icon && <Icon size={22} strokeWidth={1.5} />}
                 </div>
-                {Icon && (
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[10px] bg-violet-50 flex items-center justify-center shrink-0 group-hover:bg-violet-100 transition-colors">
-                        <Icon size={18} className="sm:w-5 sm:h-5 text-violet-500" />
+                {data.change && (
+                    <div className={`flex items-center gap-1 text-[10px] font-medium ${data.trend === "up" ? "text-emerald-700" : "text-red-700"
+                        }`}>
+                        {data.trend === "up" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                        {data.change}
                     </div>
                 )}
             </div>
+            <div className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">{data.label}</div>
+            <div className="text-xl font-semibold text-slate-900 tracking-tight">{data.value}</div>
         </Card>
     );
 });
@@ -191,7 +172,7 @@ const ReportRow = memo(function ReportRow({
                 </div>
             </TableCell>
             <TableCell className="px-6 py-3">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 text-xs font-semibold border border-violet-100">
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
                     <Brain size={10} /> {report.report_type}
                 </span>
             </TableCell>
@@ -210,16 +191,16 @@ const ReportRow = memo(function ReportRow({
                 )}
             </TableCell>
             <TableCell className="px-6 py-3 text-center">
-                <div className="flex items-center justify-center gap-1.5">
-                    <button onClick={() => onView(report)} className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-all">
-                        <Eye size={13} />
-                    </button>
-                    <button onClick={() => onEdit(report)} className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:text-blue-600 hover:border-blue-200 transition-all">
-                        <Edit size={13} />
-                    </button>
-                    <button onClick={() => onDelete(report)} className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:text-red-600 hover:border-red-200 transition-all">
-                        <Trash2 size={13} />
-                    </button>
+                <div className="flex items-center justify-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(report)}>
+                        <Eye size={16} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => onEdit(report)}>
+                        <Edit size={16} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(report)}>
+                        <Trash2 size={16} />
+                    </Button>
                 </div>
             </TableCell>
         </TableRow>
@@ -266,9 +247,9 @@ const InsightRow = memo(function InsightRow({
                 <span className="text-xs text-slate-600 font-medium">{insight.model_used || "—"}</span>
             </TableCell>
             <TableCell className="px-6 py-3 text-center">
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${insight.processing_status === "completed"
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                    : "bg-amber-50 text-amber-700 border-amber-100"
+                <span className={`inline-flex items-center gap-1 text-xs font-semibold ${insight.processing_status === "completed"
+                    ? "text-emerald-700"
+                    : "text-amber-700"
                     }`}>
                     {insight.processing_status === "completed" ? <CheckCircle2 size={10} /> : <Activity size={10} />}
                     {insight.processing_status || "Unknown"}
@@ -277,12 +258,12 @@ const InsightRow = memo(function InsightRow({
             <TableCell className="px-6 py-3 text-center">
                 <div className="flex items-center justify-center gap-2">
                     {insight.admin_validated && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-100">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700">
                             <Shield size={9} /> Validated
                         </span>
                     )}
                     {insight.anomaly_detected && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-[10px] font-semibold border border-red-100">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-700">
                             <AlertTriangle size={9} /> Anomaly
                         </span>
                     )}
@@ -292,16 +273,16 @@ const InsightRow = memo(function InsightRow({
                 </div>
             </TableCell>
             <TableCell className="px-6 py-3 text-center">
-                <div className="flex items-center justify-center gap-1.5">
-                    <button onClick={() => onView(insight)} className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-all">
-                        <Eye size={13} />
-                    </button>
-                    <button onClick={() => onEdit(insight)} className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:text-blue-600 hover:border-blue-200 transition-all">
-                        <Edit size={13} />
-                    </button>
-                    <button onClick={() => onDelete(insight)} className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:text-red-600 hover:border-red-200 transition-all">
-                        <Trash2 size={13} />
-                    </button>
+                <div className="flex items-center justify-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(insight)}>
+                        <Eye size={16} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => onEdit(insight)}>
+                        <Edit size={16} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(insight)}>
+                        <Trash2 size={16} />
+                    </Button>
                 </div>
             </TableCell>
         </TableRow>
@@ -340,7 +321,7 @@ const ReportCard = memo(function ReportCard({
                         <p className="text-[10px] text-slate-400 truncate">{report.user_email}</p>
                     </div>
                 </div>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 text-xs font-semibold border border-violet-100">
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
                     <Brain size={10} /> {report.report_type}
                 </span>
             </div>
@@ -367,16 +348,16 @@ const ReportCard = memo(function ReportCard({
 
             <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                 <span className="text-[10px] text-slate-400">{formatDate(report.created_at)}</span>
-                <div className="flex items-center gap-1.5">
-                    <button onClick={() => onView(report)} className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-all">
-                        <Eye size={13} />
-                    </button>
-                    <button onClick={() => onEdit(report)} className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:text-blue-600 hover:border-blue-200 transition-all">
-                        <Edit size={13} />
-                    </button>
-                    <button onClick={() => onDelete(report)} className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:text-red-600 hover:border-red-200 transition-all">
-                        <Trash2 size={13} />
-                    </button>
+                <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(report)}>
+                        <Eye size={16} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => onEdit(report)}>
+                        <Edit size={16} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(report)}>
+                        <Trash2 size={16} />
+                    </Button>
                 </div>
             </div>
         </Card>
@@ -415,9 +396,9 @@ const InsightCard = memo(function InsightCard({
                         <p className="text-[10px] text-slate-400 truncate">{insight.user_email}</p>
                     </div>
                 </div>
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${insight.processing_status === "completed"
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                    : "bg-amber-50 text-amber-700 border-amber-100"
+                <span className={`inline-flex items-center gap-1 text-xs font-semibold ${insight.processing_status === "completed"
+                    ? "text-emerald-700"
+                    : "text-amber-700"
                     }`}>
                     {insight.processing_status === "completed" ? <CheckCircle2 size={10} /> : <Activity size={10} />}
                     {insight.processing_status || "Unknown"}
@@ -430,7 +411,7 @@ const InsightCard = memo(function InsightCard({
                     <p className="text-[9px] text-slate-400 uppercase">Model</p>
                 </div>
                 <div className="text-center p-2 bg-slate-50 rounded-lg">
-                    <p className="text-xs font-bold text-violet-600">
+                    <p className="text-xs font-bold text-emerald-600">
                         {insight.confidence_level ? `${(Number(insight.confidence_level) * 100).toFixed(0)}%` : "—"}
                     </p>
                     <p className="text-[9px] text-slate-400 uppercase">Confidence</p>
@@ -439,12 +420,12 @@ const InsightCard = memo(function InsightCard({
 
             <div className="flex items-center gap-2 mb-3">
                 {insight.admin_validated && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-100">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700">
                         <Shield size={9} /> Validated
                     </span>
                 )}
                 {insight.anomaly_detected && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-[10px] font-semibold border border-red-100">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-700">
                         <AlertTriangle size={9} /> Anomaly
                     </span>
                 )}
@@ -452,16 +433,16 @@ const InsightCard = memo(function InsightCard({
 
             <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                 <span className="text-[10px] text-slate-400">{formatDate(insight.generated_at)}</span>
-                <div className="flex items-center gap-1.5">
-                    <button onClick={() => onView(insight)} className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:text-emerald-600 hover:border-emerald-200 transition-all">
-                        <Eye size={13} />
-                    </button>
-                    <button onClick={() => onEdit(insight)} className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:text-blue-600 hover:border-blue-200 transition-all">
-                        <Edit size={13} />
-                    </button>
-                    <button onClick={() => onDelete(insight)} className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:text-red-600 hover:border-red-200 transition-all">
-                        <Trash2 size={13} />
-                    </button>
+                <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(insight)}>
+                        <Eye size={16} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => onEdit(insight)}>
+                        <Edit size={16} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(insight)}>
+                        <Trash2 size={16} />
+                    </Button>
                 </div>
             </div>
         </Card>
@@ -520,6 +501,8 @@ export default function AdminPredictionsPage() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedReport, setSelectedReport] = useState<AdminPredictionReport | null>(null);
     const [selectedInsight, setSelectedInsight] = useState<AdminAIInsight | null>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [hoveredBar, setHoveredBar] = useState<{ month: string, count: number } | null>(null);
 
     // Handlers
     const handleViewReport = useCallback((report: AdminPredictionReport) => {
@@ -567,21 +550,21 @@ export default function AdminPredictionsPage() {
                 value: stats.totalReports.toString(),
                 change: `${stats.monthOverMonthGrowth >= 0 ? "+" : ""}${stats.monthOverMonthGrowth.toFixed(0)}%`,
                 trend: stats.monthOverMonthGrowth >= 0 ? "up" : "down",
-                icon: BarChart3,
+                icon: Brain,
             },
             {
                 label: "Total Insights",
                 value: stats.totalInsights.toString(),
                 change: `${stats.activeUsers} users`,
                 trend: "up",
-                icon: Sparkles,
+                icon: TrendingUp,
             },
             {
                 label: "Avg Accuracy",
                 value: `${stats.avgAccuracy.toFixed(1)}%`,
                 change: stats.avgAccuracy >= 70 ? "High" : "Needs improvement",
                 trend: stats.avgAccuracy >= 70 ? "up" : "down",
-                icon: TrendingUp,
+                icon: Activity,
             },
             {
                 label: "Anomalies",
@@ -593,146 +576,366 @@ export default function AdminPredictionsPage() {
         ];
     }, [stats]);
 
+    // Normalize chart data for bar heights
+    const chartData = useMemo(() => {
+        if (!stats?.reportGrowth.length) return [];
+        const max = Math.max(...stats.reportGrowth.map((d) => d.count), 1);
+        return stats.reportGrowth.map((d) => ({
+            month: d.month,
+            height: (d.count / max) * 100,
+            count: d.count,
+        }));
+    }, [stats]);
+
+    // Build conic-gradient for source distribution donut
+    const sourceTotal = useMemo(() => {
+        if (!stats) return 0;
+        return stats.totalReports + stats.totalInsights;
+    }, [stats]);
+
+    const sourceDistribution = useMemo(() => {
+        if (!stats) return [];
+        return [
+            { type: "reports", count: stats.totalReports, percentage: sourceTotal > 0 ? ((stats.totalReports / sourceTotal) * 100).toFixed(1) : "0" },
+            { type: "insights", count: stats.totalInsights, percentage: sourceTotal > 0 ? ((stats.totalInsights / sourceTotal) * 100).toFixed(1) : "0" },
+        ];
+    }, [stats, sourceTotal]);
+
+    const sourceGradient = useMemo(() => {
+        if (!stats || sourceTotal === 0) return "conic-gradient(#e2e8f0 0% 100%)";
+        const colors: Record<string, string> = {
+            reports: "#10b981",
+            insights: "#3b82f6",
+        };
+        let acc = 0;
+        const stops = sourceDistribution.map((s) => {
+            const start = acc;
+            acc += (s.count / sourceTotal) * 100;
+            const color = colors[s.type] || "#94a3b8";
+            return `${color} ${start}% ${acc}%`;
+        });
+        return `conic-gradient(${stops.join(", ")})`;
+    }, [stats, sourceTotal, sourceDistribution]);
+
     // Items for current view
     const items = dataSource === "reports" ? reports : insights;
     const itemCount = items.length;
 
+    // ─── Loading State ──────────────────────────────────────────────
+    if (loading && !tableLoading) {
+        return (
+            <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+                <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
+                    {/* Header Skeleton */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
+                        <div>
+                            <Skeleton width={220} height={28} className="mb-2" />
+                            <Skeleton width={300} height={14} />
+                        </div>
+                        <div className="flex gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+                            <Skeleton width={80} height={32} />
+                            <Skeleton width={150} height={32} />
+                        </div>
+                    </div>
+
+                    {/* Scrollable Content Area */}
+                    <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0">
+                        {/* Summary Stats Skeleton */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {Array.from({ length: 4 }).map((_, i) => (
+                                <Card key={i} className="p-4 sm:p-5">
+                                    <div className="flex justify-between items-start mb-3 sm:mb-4">
+                                        <Skeleton width={36} height={36} borderRadius={8} />
+                                        <Skeleton width={70} height={18} borderRadius={10} />
+                                    </div>
+                                    <Skeleton width={90} height={14} className="mb-2" />
+                                    <Skeleton width={110} height={22} />
+                                </Card>
+                            ))}
+                        </div>
+
+                        {/* Charts Skeleton */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                            <Card className="lg:col-span-2 p-4 sm:p-6">
+                                <div className="flex items-center justify-between mb-6 sm:mb-8">
+                                    <div>
+                                        <Skeleton width={150} height={14} className="mb-2" />
+                                        <Skeleton width={120} height={10} />
+                                    </div>
+                                </div>
+                                <Skeleton height={192} className="sm:h-60" />
+                            </Card>
+                            <Card className="p-4 sm:p-6">
+                                <Skeleton width={120} height={14} className="mb-2" />
+                                <Skeleton width={140} height={10} className="mb-4 sm:mb-6" />
+                                <div className="space-y-3">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                        <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                            <div className="flex items-center gap-3">
+                                                <Skeleton width={32} height={32} borderRadius="50%" />
+                                                <div>
+                                                    <Skeleton width={120} height={14} className="mb-1" />
+                                                    <Skeleton width={80} height={10} />
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <Skeleton width={80} height={14} className="mb-1" />
+                                                <Skeleton width={60} height={10} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </Card>
+                        </div>
+
+                        {/* Data Source Tabs Skeleton */}
+                        <div className="flex items-center gap-2">
+                            <Skeleton width={150} height={36} borderRadius={8} />
+                            <Skeleton width={120} height={36} borderRadius={8} />
+                        </div>
+
+                        {/* Filters Skeleton */}
+                        <Card className="p-3 sm:p-4">
+                            <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
+                                <Skeleton width={50} height={14} />
+                                <Skeleton width={180} height={32} />
+                                <Skeleton width={500} height={32} className="flex-1" />
+                                <Skeleton width={70} height={28} />
+                            </div>
+                        </Card>
+
+                        {/* Cards Skeleton */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <PredictionCardSkeleton key={i} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </SkeletonTheme>
+        );
+    }
+
     return (
         <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
-            <div className="space-y-4 sm:space-y-6 pb-8">
+            <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
                     <div>
-                        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
-                            <Brain size={24} className="text-violet-500" />
-                            AI Predictions
-                            <span className="text-xs sm:text-sm font-normal text-slate-400 ml-2">
-                                ({totalCount} {dataSource})
-                            </span>
-                        </h1>
-                        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                            Manage AI prediction reports and insights across all users
-                        </p>
+                        <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">AI Predictions</h2>
+                        <p className="text-xs sm:text-sm text-slate-500 mt-1 font-light">Manage AI prediction reports and insights across all users.</p>
                     </div>
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <div className="flex items-center bg-slate-100 rounded-lg p-0.5 mr-2">
-                            <button
-                                onClick={() => setViewMode("table")}
-                                className={`p-1.5 sm:p-2 rounded-md transition-all ${viewMode === "table" ? "bg-white shadow-sm text-slate-900" : "text-slate-400 hover:text-slate-600"}`}
-                            >
-                                <TableIcon size={14} className="sm:w-4 sm:h-4" />
-                            </button>
-                            <button
-                                onClick={() => setViewMode("grid")}
-                                className={`p-1.5 sm:p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-white shadow-sm text-slate-900" : "text-slate-400 hover:text-slate-600"}`}
-                            >
-                                <Grid3X3 size={14} className="sm:w-4 sm:h-4" />
-                            </button>
+                    <div className="flex gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+                        <div className="flex gap-2 order-1 w-full sm:w-auto">
+                            <div className="flex bg-slate-100 p-1 rounded-lg flex-1 sm:flex-none">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                        }`}
+                                    onClick={() => setViewMode('table')}
+                                >
+                                    <TableIcon size={14} />
+                                    Table
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                        }`}
+                                    onClick={() => setViewMode('grid')}
+                                >
+                                    <Grid3X3 size={14} />
+                                    Grid
+                                </Button>
+                            </div>
                         </div>
-                        <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] sm:text-xs flex-1 sm:flex-none" onClick={() => setAddModalOpen(true)}>
-                            <Plus size={14} className="sm:w-4 sm:h-4" /> Generate Prediction
+                        <Button
+                            size="sm"
+                            className="bg-emerald-500 hover:bg-emerald-600 order-2 w-full sm:w-auto"
+                            onClick={() => setAddModalOpen(true)}
+                        >
+                            <Plus size={14} className="sm:mr-1" />
+                            <span className="hidden sm:inline">Generate Prediction</span>
+                            <span className="sm:hidden">Add</span>
                         </Button>
                     </div>
                 </div>
 
-                {/* Summary Cards */}
-                {loading ? (
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                            <SummaryCardSkeleton key={i} />
-                        ))}
-                    </div>
-                ) : stats && (
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                        {summaryCards.map((card, i) => (
-                            <SummaryCard key={i} data={card} />
-                        ))}
-                    </div>
-                )}
+                {/* Scrollable Content Area */}
+                <div
+                    ref={contentRef}
+                    className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth"
+                >
 
-                {/* Charts & Top Users */}
-                {!loading && stats && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {summaryCards.map((card) => (
+                            <SummaryCard key={card.label} data={card} />
+                        ))}
+                    </div>
+
+                    {/* Charts Section */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                         {/* Report Growth Chart */}
-                        <Card className="p-4 sm:p-5 col-span-2 hover:shadow-md transition-all group cursor-pointer">
-                            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wide mb-4">Report Growth (6 Months)</h3>
-                            <div className="flex items-end gap-2 h-32">
-                                {stats.reportGrowth.map((item, i) => {
-                                    const maxCount = Math.max(...stats.reportGrowth.map(g => g.count), 1);
-                                    const height = (item.count / maxCount) * 100;
-                                    return (
-                                        <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-                                            <span className="text-[10px] font-bold text-slate-700">{item.count}</span>
-                                            <div
-                                                className="w-full bg-violet-100 rounded-t-md transition-all hover:bg-violet-200"
-                                                style={{ height: `${Math.max(height, 4)}%` }}
-                                            />
-                                            <span className="text-[9px] text-slate-400 font-medium">{item.month}</span>
-                                        </div>
-                                    );
-                                })}
+                        <Card className="lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
+                            <div className="flex items-center justify-between mb-6 sm:mb-8">
+                                <div>
+                                    <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Report Growth</h3>
+                                    <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">6-month report creation volume.</p>
+                                </div>
                             </div>
+
+                            {chartData.length > 0 ? (
+                                <>
+                                    <div className="relative h-48 sm:h-60 flex items-end justify-between gap-1 sm:gap-6 px-2 border-b border-slate-50">
+                                        <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                                            <div className="w-full h-px bg-slate-100/50" />
+                                            <div className="w-full h-px bg-slate-100/50" />
+                                            <div className="w-full h-px bg-slate-100/50" />
+                                            <div className="w-full h-px bg-slate-100/50" />
+                                            <div className="w-full h-px bg-slate-100/50" />
+                                        </div>
+                                        {chartData.map((d) => (
+                                            <div key={d.month} className="flex h-full items-end flex-1 justify-center z-10 group cursor-pointer relative">
+                                                <div
+                                                    className="w-4 sm:w-6 md:w-8 bg-emerald-500 rounded-t-[2px] transition-all hover:opacity-100 hover:ring-2 hover:ring-emerald-400 hover:ring-offset-1"
+                                                    style={{ height: `${Math.max(d.height, 4)}%` }}
+                                                    onMouseEnter={() => setHoveredBar({ month: d.month, count: d.count })}
+                                                    onMouseLeave={() => setHoveredBar(null)}
+                                                />
+                                                {hoveredBar && hoveredBar.month === d.month && (
+                                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-[10px] sm:text-xs rounded shadow-sm whitespace-nowrap z-50">
+                                                        <div className="font-medium text-slate-700">{hoveredBar.month}</div>
+                                                        <div className="flex items-center gap-1">
+                                                            <span>Reports: {hoveredBar.count}</span>
+                                                        </div>
+                                                        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="flex justify-between mt-3 sm:mt-4 text-[9px] sm:text-[10px] font-medium text-slate-400 px-2 sm:px-4 uppercase tracking-wider">
+                                        {chartData.map((d, i) => (
+                                            <span key={d.month} className={`${i === chartData.length - 1 ? "text-slate-600" : ""} truncate`}>
+                                                <span className="hidden sm:inline">{d.month}</span>
+                                                <span className="sm:hidden">{d.month.slice(0, 3)}</span>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-48 sm:h-60 text-center px-4">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
+                                        <TrendingUp size={20} className="sm:w-6 sm:h-6" />
+                                    </div>
+                                    <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Growth Data</h4>
+                                    <p className="text-[10px] sm:text-xs text-slate-400 max-w-sm">
+                                        Report creation data will appear here.
+                                    </p>
+                                </div>
+                            )}
                         </Card>
 
-                        {/* Top Users */}
-                        <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
-                            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wide mb-4">Top Users</h3>
-                            <div className="space-y-3">
-                                {stats.topUsers.map((user, i) => {
-                                    const mockUser: User = {
-                                        id: user.user_id,
-                                        email: user.email,
-                                        user_metadata: { full_name: user.full_name, avatar_url: user.avatar_url },
-                                        app_metadata: {},
-                                        aud: "authenticated",
-                                        created_at: "",
-                                    } as User;
+                        {/* Source Distribution */}
+                        <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
+                            <div className="mb-4 sm:mb-6">
+                                <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Source Distribution</h3>
+                                <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Reports vs Insights breakdown.</p>
+                            </div>
 
-                                    return (
-                                        <div key={user.user_id} className="flex items-center gap-3">
-                                            <span className="text-[10px] font-bold text-slate-400 w-4">{i + 1}</span>
-                                            <UserAvatar user={mockUser} size="sm" className="ring-1 ring-white shadow-sm" />
-                                            <div className="min-w-0 flex-1">
+                            {sourceDistribution.length > 0 && sourceTotal > 0 ? (
+                                <>
+                                    <div className="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
+                                        <div
+                                            className="w-24 h-24 sm:w-32 sm:h-32 mx-auto rounded-full flex-shrink-0 relative"
+                                            style={{ background: sourceGradient }}
+                                        >
+                                            <div className="absolute inset-0 m-auto w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                                                <span className="text-[10px] sm:text-xs text-slate-400 font-medium">Total</span>
+                                                <span className="text-sm sm:text-xl font-bold text-slate-900">{sourceTotal}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2 sm:space-y-3 flex-1">
+                                        {sourceDistribution.map((source) => (
+                                            <div key={source.type} className="flex items-center justify-between text-[10px] sm:text-xs">
+                                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                                    <div
+                                                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
+                                                        style={{
+                                                            backgroundColor: source.type === "reports" ? "#10b981" : "#3b82f6",
+                                                        }}
+                                                    />
+                                                    <span className="text-slate-600 capitalize">{source.type}</span>
+                                                </div>
+                                                <span className="font-medium text-slate-900">{source.count} ({source.percentage}%)</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center px-4">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
+                                        <Brain size={20} className="sm:w-6 sm:h-6" />
+                                    </div>
+                                    <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Source Data</h4>
+                                    <p className="text-[10px] sm:text-xs text-slate-400 max-w-sm">
+                                        Source distribution will appear here.
+                                    </p>
+                                </div>
+                            )}
+                        </Card>
+                    </div>
+
+                    {/* Top Users Section */}
+                    <Card className="p-4 sm:p-6 hover:shadow-md transition-all">
+                        <div className="mb-4 sm:mb-6">
+                            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Top Users</h3>
+                            <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Most active users.</p>
+                        </div>
+                        <div className="space-y-3">
+                            {stats?.topUsers.map((user, i) => {
+                                const mockUser: User = {
+                                    id: user.user_id,
+                                    email: user.email,
+                                    user_metadata: { full_name: user.full_name, avatar_url: user.avatar_url },
+                                    app_metadata: {},
+                                    aud: "authenticated",
+                                    created_at: "",
+                                } as User;
+
+                                return (
+                                    <div key={user.user_id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div className="relative flex-shrink-0">
+                                                <UserAvatar 
+                                                    user={mockUser} 
+                                                    size="lg"
+                                                    className="ring-2 ring-white shadow-sm"
+                                                />
+                                                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm">
+                                                    {i + 1}
+                                                </div>
+                                            </div>
+                                            <div className="min-w-0">
                                                 <p className="text-sm font-medium text-slate-900 truncate">
                                                     {user.full_name || user.email}
                                                 </p>
                                                 <p className="text-xs text-slate-500">{user.report_count + user.insight_count} records</p>
                                             </div>
-                                            <div className="text-right flex-shrink-0">
-                                                <p className="text-sm font-semibold text-slate-900">{user.report_count} reports</p>
-                                                <p className="text-xs text-slate-500">{user.insight_count} insights</p>
-                                            </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        </Card>
-                    </div>
-                )}
-
-                {/* Data Source Tabs */}
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setDataSource("reports")}
-                        className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all border ${dataSource === "reports"
-                            ? "bg-violet-50 text-violet-700 border-violet-200"
-                            : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
-                            }`}
-                    >
-                        <BarChart3 size={13} className="inline-block mr-1.5 -mt-0.5" />
-                        Prediction Reports
-                    </button>
-                    <button
-                        onClick={() => setDataSource("insights")}
-                        className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all border ${dataSource === "insights"
-                            ? "bg-violet-50 text-violet-700 border-violet-200"
-                            : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
-                            }`}
-                    >
-                        <Sparkles size={13} className="inline-block mr-1.5 -mt-0.5" />
-                        AI Insights
-                    </button>
-                </div>
+                                        <div className="text-right flex-shrink-0">
+                                            <p className="text-sm font-semibold text-slate-900">{user.report_count} reports</p>
+                                            <p className="text-xs text-slate-500">{user.insight_count} insights</p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </Card>
 
                 {/* Filters */}
                 <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
@@ -754,7 +957,7 @@ export default function AdminPredictionsPage() {
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
+                        <div className="grid grid-cols-2 md:grid-cols-2 xl:flex items-center gap-2 w-full xl:w-auto">
                             <FilterDropdown
                                 value={month === "all" ? "" : month.toString()}
                                 onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
@@ -775,50 +978,29 @@ export default function AdminPredictionsPage() {
                                 emptyLabel="All Years"
                                 hideSearch={true}
                             />
-                            {dataSource === "reports" && (
-                                <FilterDropdown
-                                    value={reportTypeFilter}
-                                    onChange={(value) => setReportTypeFilter(value)}
-                                    options={[
-                                        { value: "spending", label: "Spending" },
-                                        { value: "income-expense", label: "Income vs Expense" },
-                                        { value: "predictions", label: "Predictions" },
-                                        { value: "trends", label: "Trends" },
-                                        { value: "savings", label: "Savings" },
-                                    ]}
-                                    placeholder="All Types"
-                                    className="w-full text-xs sm:text-sm"
-                                    allowEmpty={true}
-                                    emptyLabel="All Types"
-                                    hideSearch={true}
-                                />
-                            )}
-                            {dataSource === "insights" && (
-                                <FilterDropdown
-                                    value={statusFilter}
-                                    onChange={(value) => setStatusFilter(value)}
-                                    options={[
-                                        { value: "completed", label: "Completed" },
-                                        { value: "processing", label: "Processing" },
-                                        { value: "failed", label: "Failed" },
-                                    ]}
-                                    placeholder="All Status"
-                                    className="w-full text-xs sm:text-sm"
-                                    allowEmpty={true}
-                                    emptyLabel="All Status"
-                                    hideSearch={true}
-                                />
-                            )}
-                            <FilterDropdown
-                                value={userFilter}
-                                onChange={(value) => setUserFilter(value)}
-                                options={users.map((u) => ({ value: u.id, label: u.email }))}
-                                placeholder="All Users"
-                                className="w-full text-xs sm:text-sm"
-                                allowEmpty={true}
-                                emptyLabel="All Users"
-                                hideSearch={false}
-                            />
+                        </div>
+
+                        <div className="flex bg-slate-100 p-1 rounded-lg w-full xl:w-auto">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${
+                                    dataSource === 'reports' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                }`}
+                                onClick={() => setDataSource('reports')}
+                            >
+                                Prediction Reports
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${
+                                    dataSource === 'insights' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                }`}
+                                onClick={() => setDataSource('insights')}
+                            >
+                                AI Insights
+                            </Button>
                         </div>
 
                         <div className="flex-1"></div>
@@ -1067,36 +1249,38 @@ export default function AdminPredictionsPage() {
                         </div>
                     </div>
                 )}
-                {/* Modals */}
-                <ViewAdminPredictionModal
-                    open={viewModalOpen}
-                    onClose={() => setViewModalOpen(false)}
-                    report={selectedReport}
-                    insight={selectedInsight}
-                    dataSource={dataSource}
-                />
-                <AddAdminPredictionModal
-                    open={addModalOpen}
-                    onClose={() => setAddModalOpen(false)}
-                    onSuccess={refetch}
-                />
-                <EditAdminPredictionModal
-                    open={editModalOpen}
-                    onClose={() => setEditModalOpen(false)}
-                    report={selectedReport}
-                    insight={selectedInsight}
-                    dataSource={dataSource}
-                    onSuccess={refetch}
-                />
-                <DeleteAdminPredictionModal
-                    open={deleteModalOpen}
-                    onClose={() => setDeleteModalOpen(false)}
-                    report={selectedReport}
-                    insight={selectedInsight}
-                    dataSource={dataSource}
-                    onSuccess={refetch}
-                />
             </div>
+
+            {/* Modals */}
+            <ViewAdminPredictionModal
+                open={viewModalOpen}
+                onClose={() => setViewModalOpen(false)}
+                report={selectedReport}
+                insight={selectedInsight}
+                dataSource={dataSource}
+            />
+            <AddAdminPredictionModal
+                open={addModalOpen}
+                onClose={() => setAddModalOpen(false)}
+                onSuccess={refetch}
+            />
+            <EditAdminPredictionModal
+                open={editModalOpen}
+                onClose={() => setEditModalOpen(false)}
+                report={selectedReport}
+                insight={selectedInsight}
+                dataSource={dataSource}
+                onSuccess={refetch}
+            />
+            <DeleteAdminPredictionModal
+                open={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                report={selectedReport}
+                insight={selectedInsight}
+                dataSource={dataSource}
+                onSuccess={refetch}
+            />
+        </div>
         </SkeletonTheme>
     );
 }

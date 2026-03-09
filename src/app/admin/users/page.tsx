@@ -468,7 +468,7 @@ export default function UsersPage() {
                 }`}
                 onClick={() => setViewMode("table")}
               >
-                <TableIcon size={14} className="mr-1" />
+                <TableIcon size={14} />
                 Table
               </Button>
               <Button
@@ -479,13 +479,13 @@ export default function UsersPage() {
                 }`}
                 onClick={() => setViewMode("grid")}
               >
-                <Grid3X3 size={14} className="mr-1" />
+                <Grid3X3 size={14} />
                 Grid
               </Button>
             </div>
           </div>
           <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 order-2 w-full sm:w-auto" onClick={() => setAddModalOpen(true)}>
-            <Plus size={14} className="sm:mr-1" /> <span className="hidden sm:inline">Add User</span><span className="sm:hidden">Add</span>
+            <Plus size={14} className="sm" /> <span className="hidden sm:inline">Add User</span><span className="sm:hidden">Add</span>
           </Button>
         </div>
       </div>

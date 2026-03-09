@@ -589,7 +589,7 @@ export default function AdminBudgetsPage() {
                                     }`}
                                 onClick={() => setViewMode('table')}
                             >
-                                <TableIcon size={14} className="mr-1" />
+                                <TableIcon size={14}/>
                                 Table
                             </Button>
                             <Button
@@ -599,7 +599,7 @@ export default function AdminBudgetsPage() {
                                     }`}
                                 onClick={() => setViewMode('grid')}
                             >
-                                <Grid3X3 size={14} className="mr-1" />
+                                <Grid3X3 size={14}/>
                                 Grid
                             </Button>
                         </div>
@@ -610,7 +610,7 @@ export default function AdminBudgetsPage() {
                                 className="w-full sm:w-auto"
                                 onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
                             >
-                                <Download size={14} className="sm:mr-1" />
+                                <Download size={14}/>
                                 <span className="hidden sm:inline">Export</span>
                                 <MoreHorizontal size={12} className="ml-1" />
                             </Button>
@@ -637,7 +637,7 @@ export default function AdminBudgetsPage() {
                         className="bg-emerald-500 hover:bg-emerald-600 order-2 w-full sm:w-auto"
                         onClick={() => setAddModalOpen(true)}
                     >
-                        <Plus size={14} className="sm:mr-1" />
+                        <Plus size={14} className="sm" />
                         <span className="hidden sm:inline">Add Budget</span>
                         <span className="sm:hidden">Add</span>
                     </Button>

@@ -528,7 +528,7 @@ export default function AdminGoalsPage() {
                                     }`}
                                 onClick={() => setViewMode('table')}
                             >
-                                <TableIcon size={14} className="mr-1" />
+                                <TableIcon size={14} />
                                 Table
                             </Button>
                             <Button
@@ -538,7 +538,7 @@ export default function AdminGoalsPage() {
                                     }`}
                                 onClick={() => setViewMode('grid')}
                             >
-                                <Grid3X3 size={14} className="mr-1" />
+                                <Grid3X3 size={14} />
                                 Grid
                             </Button>
                         </div>
@@ -548,7 +548,7 @@ export default function AdminGoalsPage() {
                         className="bg-emerald-500 hover:bg-emerald-600 order-2 w-full sm:w-auto"
                         onClick={() => setAddModalOpen(true)}
                     >
-                        <Plus size={14} className="sm:mr-1" />
+                        <Plus size={14} className="sm" />
                         <span className="hidden sm:inline">Add Goal</span>
                         <span className="sm:hidden">Add</span>
                     </Button>
@@ -799,7 +799,7 @@ export default function AdminGoalsPage() {
                     <Card className="bg-white p-8 text-center shrink-0">
                         <p className="text-sm text-red-500 mb-3">{error}</p>
                         <Button variant="outline" size="sm" onClick={refetch}>
-                            <RotateCcw size={14} className="mr-2" /> Retry
+                            <RotateCcw size={14}/> Retry
                         </Button>
                     </Card>
                 )}
