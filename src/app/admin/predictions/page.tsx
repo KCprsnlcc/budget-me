@@ -157,8 +157,8 @@ const TableRowSkeleton = memo(function TableRowSkeleton({ columns }: { columns: 
                     </div>
                 </div>
             </TableCell>
-            {/* Conditional columns based on data source */}
-            {columns === 4 && (
+            {/* Conditional columns for reports only (Data Points & Accuracy) */}
+            {columns === 5 && (
                 <>
                     {/* Data Points */}
                     <TableCell className="px-6 py-3 text-center">
@@ -1069,7 +1069,7 @@ export default function AdminPredictionsPage() {
                                 </TableHeader>
                                 <TableBody>
                                     {Array.from({ length: pageSize > 20 ? 20 : pageSize }).map((_, i) => (
-                                        <TableRowSkeleton key={i} columns={4} />
+                                        <TableRowSkeleton key={i} columns={dataSource === "reports" ? 5 : 3} />
                                     ))}
                                 </TableBody>
                             </Table>
@@ -1095,7 +1095,7 @@ export default function AdminPredictionsPage() {
                                 <TableBody>
                                     {itemCount === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={4} className="px-6 py-12 text-center">
+                                            <TableCell colSpan={dataSource === "reports" ? 5 : 3} className="px-6 py-12 text-center">
                                                 <div className="flex flex-col items-center justify-center">
                                                     <Inbox size={32} className="text-slate-300 mb-2" />
                                                     <p className="text-sm text-slate-500">No {dataSource} match your filters</p>
