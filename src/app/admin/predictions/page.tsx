@@ -44,6 +44,7 @@ import { useAdminPredictions } from "./_lib/use-admin-predictions";
 import type { AdminPredictionReport, AdminAIInsight } from "./_lib/types";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User } from "@supabase/supabase-js";
+import { getSafeSkeletonCount } from "@/lib/utils";
 
 type SummaryType = {
     label: string;
@@ -1068,7 +1069,7 @@ export default function AdminPredictionsPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {Array.from({ length: pageSize > 20 ? 20 : pageSize }).map((_, i) => (
+                                    {Array.from({ length: getSafeSkeletonCount(pageSize, 10, 20) }).map((_, i) => (
                                         <TableRowSkeleton key={i} columns={dataSource === "reports" ? 5 : 3} />
                                     ))}
                                 </TableBody>
@@ -1130,7 +1131,7 @@ export default function AdminPredictionsPage() {
                     </Card>
                 ) : tableLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {Array.from({ length: pageSize > 20 ? 20 : pageSize }).map((_, i) => (
+                        {Array.from({ length: getSafeSkeletonCount(pageSize, 10, 20) }).map((_, i) => (
                             dataSource === "reports" ? (
                                 <ReportCardSkeleton key={i} />
                             ) : (

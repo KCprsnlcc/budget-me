@@ -47,7 +47,7 @@ import { useUsers } from "./_lib/use-users";
 import type { User } from "./_lib/types";
 import { FilterTableSkeleton, UserCardSkeleton } from "@/components/ui/skeleton-filter-loaders";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn, getSafeSkeletonCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -726,7 +726,7 @@ export default function UsersPage() {
         ) : viewMode === "table" ? (
           <Card className="overflow-hidden bg-white border border-slate-200 rounded-xl hover:shadow-md transition-all group cursor-pointer">
             {tableLoading ? (
-              <FilterTableSkeleton rows={pagination.pageSize} columns={5} />
+              <FilterTableSkeleton rows={getSafeSkeletonCount(pagination.pageSize)} columns={5} />
             ) : (
               <Table>
                 <TableHeader>
@@ -770,7 +770,7 @@ export default function UsersPage() {
           </Card>
         ) : tableLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: pagination.pageSize }).map((_, i) => (
+            {Array.from({ length: getSafeSkeletonCount(pagination.pageSize) }).map((_, i) => (
               <UserCardSkeleton key={i} />
             ))}
           </div>

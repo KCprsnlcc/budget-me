@@ -51,6 +51,7 @@ import {
   getTimestampString,
   type GoalExportData,
 } from "@/lib/export-utils";
+import { getSafeSkeletonCount } from "@/lib/utils";
 import type { GoalType } from "./_components/types";
 import { getGoalProgress, formatCurrency, formatDate } from "./_components/constants";
 import { useGoals } from "./_lib/use-goals";
@@ -978,7 +979,7 @@ export default function GoalsPage() {
       {viewMode === 'table' ? (
         <Card className="overflow-hidden">
           {tableLoading ? (
-            <FilterTableSkeleton rows={pageSize} columns={8} />
+            <FilterTableSkeleton rows={getSafeSkeletonCount(pageSize)} columns={8} />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -1065,7 +1066,7 @@ export default function GoalsPage() {
         </Card>
       ) : tableLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: pageSize }).map((_, i) => (
+          {Array.from({ length: getSafeSkeletonCount(pageSize) }).map((_, i) => (
             <GoalCardSkeleton key={i} />
           ))}
         </div>

@@ -52,6 +52,7 @@ import { ContributeAdminGoalModal } from "./_components/contribute-admin-goal-mo
 import { useAdminGoals } from "./_lib/use-admin-goals";
 import type { AdminGoal } from "./_lib/types";
 import { FilterTableSkeleton, TransactionCardSkeleton } from "@/components/ui/skeleton-filter-loaders";
+import { getSafeSkeletonCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User } from "@supabase/supabase-js";
 
@@ -816,7 +817,7 @@ export default function AdminGoalsPage() {
                 ) : viewMode === 'table' ? (
                     <Card className="bg-white overflow-hidden hover:shadow-md transition-all group shrink-0">
                         {tableLoading ? (
-                            <FilterTableSkeleton rows={pageSize} columns={6} />
+                            <FilterTableSkeleton rows={getSafeSkeletonCount(pageSize)} columns={6} />
                         ) : (
                             <div className="overflow-x-auto">
                                 <Table>
@@ -848,7 +849,7 @@ export default function AdminGoalsPage() {
                     </Card>
                 ) : tableLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 shrink-0">
-                        {Array.from({ length: pageSize }).map((_, i) => (
+                        {Array.from({ length: getSafeSkeletonCount(pageSize) }).map((_, i) => (
                             <TransactionCardSkeleton key={i} />
                         ))}
                     </div>

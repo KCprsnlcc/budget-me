@@ -62,6 +62,7 @@ import {
   getTimestampString,
   type BudgetExportData,
 } from "@/lib/export-utils";
+import { getSafeSkeletonCount } from "@/lib/utils";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { deriveBudgetHealth } from "./_components/types";
@@ -913,7 +914,7 @@ export default function BudgetsPage() {
       ) : viewMode === 'table' ? (
         <Card className="overflow-hidden">
           {tableLoading ? (
-            <FilterTableSkeleton rows={pageSize} columns={8} />
+            <FilterTableSkeleton rows={getSafeSkeletonCount(pageSize)} columns={8} />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">

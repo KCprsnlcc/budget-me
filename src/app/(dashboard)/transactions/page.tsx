@@ -76,6 +76,7 @@ import {
   getTimestampString,
   type TransactionExportData,
 } from "@/lib/export-utils";
+import { getSafeSkeletonCount } from "@/lib/utils";
 
 type SummaryType = {
   label: string;
@@ -959,7 +960,7 @@ export default function TransactionsPage() {
       ) : viewMode === 'table' ? (
         <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
           {tableLoading ? (
-            <FilterTableSkeleton rows={pageSize} columns={6} />
+            <FilterTableSkeleton rows={getSafeSkeletonCount(pageSize)} columns={6} />
           ) : (
             <Table>
               <TableHeader>
@@ -1014,7 +1015,7 @@ export default function TransactionsPage() {
         </Card>
       ) : tableLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: pageSize }).map((_, i) => (
+          {Array.from({ length: getSafeSkeletonCount(pageSize) }).map((_, i) => (
             <TransactionCardSkeleton key={i} />
           ))}
         </div>

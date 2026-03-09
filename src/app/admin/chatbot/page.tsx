@@ -50,6 +50,7 @@ import { FilterTableSkeleton, TransactionCardSkeleton } from "@/components/ui/sk
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { format } from "date-fns";
+import { getSafeSkeletonCount } from "@/lib/utils";
 
 type SummaryType = {
     label: string;
@@ -926,7 +927,7 @@ export default function AdminChatbotPage() {
                 ) : viewMode === 'table' ? (
                     <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
                         {tableLoading ? (
-                            <FilterTableSkeleton rows={pageSize} columns={6} />
+                            <FilterTableSkeleton rows={getSafeSkeletonCount(pageSize)} columns={6} />
                         ) : (
                             <Table>
                                 <TableHeader>
@@ -973,7 +974,7 @@ export default function AdminChatbotPage() {
                     </Card>
                 ) : tableLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {Array.from({ length: Math.min(Math.max(1, pageSize || 6), 50) }).map((_, i) => (
+                        {Array.from({ length: getSafeSkeletonCount(pageSize, 6) }).map((_, i) => (
                             <TransactionCardSkeleton key={i} />
                         ))}
                     </div>
