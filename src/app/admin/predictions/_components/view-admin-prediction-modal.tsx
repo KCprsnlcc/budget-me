@@ -547,152 +547,252 @@ export function ViewAdminPredictionModal({
                             </>
                         ) : dataSource === "insights" && insight ? (
                             <div className="space-y-4">
-                                {/* Check if insights field has the full AI data structure */}
-                                {insight.insights && typeof insight.insights === 'object' && insight.insights.financialSummary ? (
-                                    <>
-                                        {/* Financial Summary */}
-                                        <div className="bg-white border border-slate-200 rounded-xl p-5">
-                                            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                <Wand2 size={14} className="text-violet-500" />Financial Summary
-                                            </h3>
-                                            <p className="text-xs text-slate-600 leading-relaxed">{insight.insights.financialSummary}</p>
-                                        </div>
+                                {/* Extract data from JSONB fields based on actual database structure */}
+                                {(() => {
+                                    // Extract insights from JSONB field
+                                    const insightsData = insight.insights || {};
+                                    const riskData = insight.risk_assessment || {};
+                                    const recommendationsData = insight.recommendations || [];
+                                    const opportunityData = insight.opportunity_areas || {};
 
-                                        {/* Risk Assessment */}
-                                        {insight.risk_assessment && (
-                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
-                                                <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <AlertTriangle size={14} className={insight.risk_assessment.risk_level === "high" ? "text-red-500" : insight.risk_assessment.risk_level === "medium" ? "text-amber-500" : "text-emerald-500"} />Risk Assessment
-                                                </h3>
-                                                <div className="flex items-center gap-3 mb-3">
-                                                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${insight.risk_assessment.risk_level === "high" ? "bg-red-100 text-red-700" : insight.risk_assessment.risk_level === "medium" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}>
-                                                        {(insight.risk_assessment.risk_level || "Unknown").toUpperCase()} RISK
-                                                    </span>
-                                                    <span className="text-xs text-slate-500">Score: {insight.risk_assessment.risk_score || "—"}/100</span>
+                                    // Extract nested data
+                                    const financialSummary = insightsData.financial_summary || "";
+                                    const growthPotential = insightsData.growth_potential || "";
+                                    const growthAnalysis = insightsData.growth_analysis || "";
+                                    const riskLevel = riskData.risk_level || "medium";
+                                    const riskScore = riskData.risk_score || 0;
+                                    const riskAnalysis = riskData.risk_analysis || "";
+                                    const riskMitigationStrategies = opportunityData.risk_mitigation_strategies || [];
+                                    const longTermOpportunities = opportunityData.long_term_opportunities || [];
+
+                                    const hasCompleteData = financialSummary || growthPotential || recommendationsData.length > 0;
+
+                                    return hasCompleteData ? (
+                                        <>
+                                            {/* Financial Summary */}
+                                            {financialSummary && (
+                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                    <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                        <Wand2 size={14} className="text-violet-500" />Financial Summary
+                                                    </h3>
+                                                    <p className="text-xs text-slate-600 leading-relaxed">{financialSummary}</p>
                                                 </div>
-                                                {insight.insights.riskAnalysis && (
-                                                    <p className="text-xs text-slate-600 leading-relaxed">{insight.insights.riskAnalysis}</p>
-                                                )}
-                                            </div>
-                                        )}
+                                            )}
 
-                                        {/* Growth Potential */}
-                                        {insight.insights.growthPotential && (
-                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
-                                                <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <TrendingUp size={14} className="text-emerald-500" />Growth Potential
-                                                </h3>
-                                                <div className="text-lg font-bold text-emerald-600 mb-2">{insight.insights.growthPotential}</div>
-                                                {insight.insights.growthAnalysis && (
-                                                    <p className="text-xs text-slate-600 leading-relaxed">{insight.insights.growthAnalysis}</p>
-                                                )}
-                                            </div>
-                                        )}
+                                            {/* Risk Assessment */}
+                                            {(riskLevel || riskScore || riskAnalysis) && (
+                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                    <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                        <AlertTriangle size={14} className={riskLevel === "high" ? "text-red-500" : riskLevel === "medium" ? "text-amber-500" : "text-emerald-500"} />Risk Assessment
+                                                    </h3>
+                                                    <div className="flex items-center gap-3 mb-3">
+                                                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${riskLevel === "high" ? "bg-red-100 text-red-700" : riskLevel === "medium" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}>
+                                                            {riskLevel.toUpperCase()} RISK
+                                                        </span>
+                                                        {riskScore > 0 && (
+                                                            <span className="text-xs text-slate-500">Score: {riskScore}/100</span>
+                                                        )}
+                                                    </div>
+                                                    {riskAnalysis && (
+                                                        <p className="text-xs text-slate-600 leading-relaxed">{riskAnalysis}</p>
+                                                    )}
+                                                </div>
+                                            )}
 
-                                        {/* Recommendations */}
-                                        {insight.recommendations && Array.isArray(insight.recommendations) && insight.recommendations.length > 0 && (
-                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
-                                                <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <Lightbulb size={14} className="text-amber-500" />Recommendations ({insight.recommendations.length})
-                                                </h3>
-                                                <div className="space-y-3">
-                                                    {insight.recommendations.map((rec: any, idx: number) => (
-                                                        <div key={idx} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
-                                                            <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${rec.priority === "high" ? "bg-red-100 text-red-600" : rec.priority === "medium" ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"}`}>
-                                                                <span className="text-[10px] font-bold">{idx + 1}</span>
+                                            {/* Growth Potential */}
+                                            {(growthPotential || growthAnalysis) && (
+                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                    <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                        <TrendingUp size={14} className="text-emerald-500" />Growth Potential
+                                                    </h3>
+                                                    {growthPotential && (
+                                                        <div className="text-lg font-bold text-emerald-600 mb-2">{growthPotential}</div>
+                                                    )}
+                                                    {growthAnalysis && (
+                                                        <p className="text-xs text-slate-600 leading-relaxed">{growthAnalysis}</p>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Recommendations */}
+                                            {Array.isArray(recommendationsData) && recommendationsData.length > 0 && (
+                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                    <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                        <Lightbulb size={14} className="text-amber-500" />Recommendations ({recommendationsData.length})
+                                                    </h3>
+                                                    <div className="space-y-3">
+                                                        {recommendationsData.map((rec: any, idx: number) => (
+                                                            <div key={idx} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
+                                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${rec.priority === "high" ? "bg-red-100 text-red-600" : rec.priority === "medium" ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"}`}>
+                                                                    <span className="text-[10px] font-bold">{idx + 1}</span>
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <h4 className="text-xs font-semibold text-slate-900 mb-1">{rec.title}</h4>
+                                                                    <p className="text-[10px] text-slate-600 leading-relaxed">{rec.description}</p>
+                                                                    {rec.category && (
+                                                                        <span className="inline-block mt-1 text-[9px] px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 font-medium">
+                                                                            {rec.category}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                             </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <h4 className="text-xs font-semibold text-slate-900 mb-1">{rec.title}</h4>
-                                                                <p className="text-[10px] text-slate-600 leading-relaxed">{rec.description}</p>
-                                                            </div>
-                                                        </div>
-                                                    ))}
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
 
-                                        {/* Risk Mitigation Strategies */}
-                                        {insight.insights.riskMitigationStrategies && Array.isArray(insight.insights.riskMitigationStrategies) && insight.insights.riskMitigationStrategies.length > 0 && (
-                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
-                                                <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <Shield size={14} className="text-blue-500" />Risk Mitigation Strategies ({insight.insights.riskMitigationStrategies.length})
-                                                </h3>
-                                                <div className="space-y-2">
-                                                    {insight.insights.riskMitigationStrategies.map((strategy: any, idx: number) => (
-                                                        <div key={idx} className="flex items-start gap-2 text-xs">
-                                                            <span className="text-blue-500 mt-0.5">•</span>
-                                                            <div>
-                                                                <span className="font-semibold text-slate-900">{strategy.strategy}:</span>
-                                                                <span className="text-slate-600"> {strategy.description}</span>
+                                            {/* Risk Mitigation Strategies */}
+                                            {Array.isArray(riskMitigationStrategies) && riskMitigationStrategies.length > 0 && (
+                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                    <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                        <Shield size={14} className="text-blue-500" />Risk Mitigation Strategies ({riskMitigationStrategies.length})
+                                                    </h3>
+                                                    <div className="space-y-2">
+                                                        {riskMitigationStrategies.map((strategy: any, idx: number) => (
+                                                            <div key={idx} className="flex items-start gap-2 p-2 bg-blue-50 rounded-lg">
+                                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${strategy.impact === "high" ? "bg-blue-600 text-white" : strategy.impact === "medium" ? "bg-blue-400 text-white" : "bg-blue-200 text-blue-700"}`}>
+                                                                    <span className="text-[9px] font-bold">{idx + 1}</span>
+                                                                </div>
+                                                                <div className="flex-1 text-xs">
+                                                                    <span className="font-semibold text-slate-900">{strategy.strategy}:</span>
+                                                                    <span className="text-slate-600"> {strategy.description}</span>
+                                                                    {strategy.impact && (
+                                                                        <span className={`ml-2 text-[9px] px-1.5 py-0.5 rounded font-semibold ${strategy.impact === "high" ? "bg-blue-100 text-blue-700" : strategy.impact === "medium" ? "bg-blue-50 text-blue-600" : "bg-slate-100 text-slate-600"}`}>
+                                                                            {strategy.impact} impact
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
 
-                                        {/* Long-term Opportunities */}
-                                        {insight.opportunity_areas && Array.isArray(insight.opportunity_areas) && insight.opportunity_areas.length > 0 && (
-                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
-                                                <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <Star size={14} className="text-violet-500" />Long-term Opportunities ({insight.opportunity_areas.length})
-                                                </h3>
-                                                <div className="space-y-3">
-                                                    {insight.opportunity_areas.map((opp: any, idx: number) => (
-                                                        <div key={idx} className="p-3 bg-violet-50 rounded-lg">
-                                                            <h4 className="text-xs font-semibold text-violet-900 mb-1">{opp.opportunity}</h4>
-                                                            <p className="text-[10px] text-violet-700 mb-2">{opp.description}</p>
-                                                            <div className="flex gap-3 text-[10px]">
-                                                                <span className="text-violet-600">⏱ {opp.timeframe}</span>
-                                                                <span className="text-violet-600">💰 {opp.potentialReturn}</span>
+                                            {/* Long-term Opportunities */}
+                                            {Array.isArray(longTermOpportunities) && longTermOpportunities.length > 0 && (
+                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                    <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                        <Star size={14} className="text-violet-500" />Long-term Opportunities ({longTermOpportunities.length})
+                                                    </h3>
+                                                    <div className="space-y-3">
+                                                        {longTermOpportunities.map((opp: any, idx: number) => (
+                                                            <div key={idx} className="p-3 bg-violet-50 rounded-lg">
+                                                                <div className="flex items-start gap-2 mb-2">
+                                                                    <div className="w-5 h-5 rounded-full bg-violet-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                                        <span className="text-[9px] font-bold">{idx + 1}</span>
+                                                                    </div>
+                                                                    <h4 className="text-xs font-semibold text-violet-900 flex-1">{opp.opportunity}</h4>
+                                                                </div>
+                                                                <p className="text-[10px] text-violet-700 mb-2 pl-7">{opp.description}</p>
+                                                                <div className="flex gap-3 text-[10px] pl-7">
+                                                                    {opp.timeframe && (
+                                                                        <span className="text-violet-600 flex items-center gap-1">
+                                                                            <Clock size={10} /> {opp.timeframe}
+                                                                        </span>
+                                                                    )}
+                                                                    {opp.potentialReturn && (
+                                                                        <span className="text-violet-600 flex items-center gap-1">
+                                                                            <TrendingUp size={10} /> {opp.potentialReturn}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </>
-                                ) : (
-                                    <>
-                                        {/* Fallback: Show basic risk assessment and AI service info */}
-                                        {insight.risk_assessment && (
+                                            )}
+
+                                            {/* AI Service Metadata */}
                                             <div className="bg-white border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <Shield size={14} className={insight.risk_assessment?.risk_level === "high" ? "text-red-500" : insight.risk_assessment?.risk_level === "medium" ? "text-amber-500" : "text-emerald-500"} />Risk Assessment
+                                                    <Sparkles size={14} className="text-violet-500" />AI Service Information
                                                 </h3>
-                                                <div className="flex items-center gap-3 mb-3">
-                                                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${insight.risk_assessment?.risk_level === "high" ? "bg-red-100 text-red-700" : insight.risk_assessment?.risk_level === "medium" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}>
-                                                        {(insight.risk_assessment?.risk_level || "Unknown").toUpperCase()} RISK
-                                                    </span>
-                                                    <span className="text-xs text-slate-500">Score: {insight.risk_assessment?.risk_score || "—"}</span>
+                                                <div className="grid grid-cols-2 gap-3 text-xs">
+                                                    <div>
+                                                        <span className="text-slate-500 block mb-1">Service</span>
+                                                        <span className="font-semibold text-slate-900">{insight.ai_service || "Unknown"}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-slate-500 block mb-1">Model</span>
+                                                        <span className="font-semibold text-slate-900">{insight.model_used || "Unknown"}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-slate-500 block mb-1">Generated</span>
+                                                        <span className="font-semibold text-slate-900">{format(new Date(insight.generated_at), "MMM dd, yyyy")}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-slate-500 block mb-1">Expires</span>
+                                                        <span className="font-semibold text-slate-900">{format(new Date(insight.expires_at), "MMM dd, yyyy")}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-slate-500 block mb-1">Access Count</span>
+                                                        <span className="font-semibold text-slate-900">{insight.access_count}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-slate-500 block mb-1">Confidence</span>
+                                                        <span className="font-semibold text-slate-900">{confidenceLevel ? `${confidenceLevel.toFixed(0)}%` : "—"}</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        )}
-                                        <div className="bg-white border border-slate-200 rounded-xl p-5">
-                                            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                <Sparkles size={14} className="text-violet-500" />AI Service Information
-                                            </h3>
-                                            <div className="space-y-2 text-xs">
-                                                <div className="flex justify-between">
-                                                    <span className="text-slate-500">Service:</span>
-                                                    <span className="font-semibold text-slate-900">{insight.ai_service || "Unknown"}</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* Fallback: Show basic info when no detailed insights available */}
+                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                    <AlertTriangle size={14} className="text-amber-500" />No Detailed Insights Available
+                                                </h3>
+                                                <p className="text-xs text-slate-600 mb-4">This AI insight record doesn't contain detailed analysis data. It may be an older record or the data structure has changed.</p>
+                                            </div>
+
+                                            {/* Show basic risk assessment if available */}
+                                            {riskData && Object.keys(riskData).length > 0 && (
+                                                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                    <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                        <Shield size={14} className={riskLevel === "high" ? "text-red-500" : riskLevel === "medium" ? "text-amber-500" : "text-emerald-500"} />Risk Assessment
+                                                    </h3>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${riskLevel === "high" ? "bg-red-100 text-red-700" : riskLevel === "medium" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}>
+                                                            {riskLevel.toUpperCase()} RISK
+                                                        </span>
+                                                        {riskScore > 0 && (
+                                                            <span className="text-xs text-slate-500">Score: {riskScore}/100</span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-slate-500">Model:</span>
-                                                    <span className="font-semibold text-slate-900">{insight.model_used || "Unknown"}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-slate-500">Generated:</span>
-                                                    <span className="font-semibold text-slate-900">{format(new Date(insight.generated_at), "MMM dd, yyyy 'at' h:mm a")}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-slate-500">Expires:</span>
-                                                    <span className="font-semibold text-slate-900">{format(new Date(insight.expires_at), "MMM dd, yyyy 'at' h:mm a")}</span>
+                                            )}
+
+                                            {/* AI Service Information */}
+                                            <div className="bg-white border border-slate-200 rounded-xl p-5">
+                                                <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                                    <Sparkles size={14} className="text-violet-500" />AI Service Information
+                                                </h3>
+                                                <div className="space-y-2 text-xs">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-500">Service:</span>
+                                                        <span className="font-semibold text-slate-900">{insight.ai_service || "Unknown"}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-500">Model:</span>
+                                                        <span className="font-semibold text-slate-900">{insight.model_used || "Unknown"}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-500">Generated:</span>
+                                                        <span className="font-semibold text-slate-900">{format(new Date(insight.generated_at), "MMM dd, yyyy 'at' h:mm a")}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-500">Expires:</span>
+                                                        <span className="font-semibold text-slate-900">{format(new Date(insight.expires_at), "MMM dd, yyyy 'at' h:mm a")}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-500">Access Count:</span>
+                                                        <span className="font-semibold text-slate-900">{insight.access_count}</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </>
-                                )}
+                                        </>
+                                    );
+                                })()}
                             </div>
                         ) : (
                             <div className="text-center py-8">

@@ -24,6 +24,7 @@ import {
     Shield,
     AlertTriangle,
     CheckCircle2,
+    Wand2,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,6 @@ import { DeleteAdminPredictionModal } from "./_components/delete-admin-predictio
 import { AddAdminPredictionModal } from "./_components/add-admin-prediction-modal";
 import { useAdminPredictions } from "./_lib/use-admin-predictions";
 import type { AdminPredictionReport, AdminAIInsight } from "./_lib/types";
-import { FilterTableSkeleton } from "@/components/ui/skeleton-filter-loaders";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User } from "@supabase/supabase-js";
 
@@ -67,45 +67,155 @@ function formatDate(dateStr: string): string {
 
 const SummaryCardSkeleton = memo(function SummaryCardSkeleton() {
     return (
-        <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
-            <div className="flex items-start justify-between">
-                <div className="space-y-2 sm:space-y-3 flex-1">
-                    <Skeleton width={90} height={10} />
-                    <Skeleton width={120} height={24} />
-                    <Skeleton width={64} height={12} />
+        <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
+            <div className="flex justify-between items-start mb-4">
+                <Skeleton width={22} height={22} borderRadius={4} />
+                <Skeleton width={50} height={16} borderRadius={4} />
+            </div>
+            <Skeleton width={120} height={10} className="mb-1" />
+            <Skeleton width={80} height={20} />
+        </Card>
+    );
+});
+
+const ReportCardSkeleton = memo(function ReportCardSkeleton() {
+    return (
+        <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
+            <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3 flex-1">
+                    <Skeleton width={36} height={36} circle />
+                    <div className="flex-1">
+                        <Skeleton width={100} height={14} className="mb-1" />
+                        <Skeleton width={140} height={10} />
+                    </div>
                 </div>
-                <Skeleton width={36} height={36} borderRadius={10} />
+            </div>
+            <div className="grid grid-cols-3 gap-3 mb-3">
+                <div className="text-center p-2 bg-slate-50 rounded-lg">
+                    <Skeleton width={30} height={12} className="mx-auto mb-1" />
+                    <Skeleton width={40} height={9} className="mx-auto" />
+                </div>
+                <div className="text-center p-2 bg-slate-50 rounded-lg">
+                    <Skeleton width={35} height={12} className="mx-auto mb-1" />
+                    <Skeleton width={45} height={9} className="mx-auto" />
+                </div>
+                <div className="text-center p-2 bg-slate-50 rounded-lg">
+                    <Skeleton width={40} height={12} className="mx-auto mb-1" />
+                    <Skeleton width={35} height={9} className="mx-auto" />
+                </div>
+            </div>
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                <Skeleton width={80} height={10} />
+                <div className="flex items-center gap-1">
+                    <Skeleton width={32} height={32} borderRadius={8} />
+                    <Skeleton width={32} height={32} borderRadius={8} />
+                </div>
             </div>
         </Card>
     );
 });
 
-const PredictionCardSkeleton = memo(function PredictionCardSkeleton() {
+const InsightCardSkeleton = memo(function InsightCardSkeleton() {
     return (
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                    <Skeleton width={36} height={36} borderRadius="50%" />
-                    <div>
+                <div className="flex items-center gap-3 flex-1">
+                    <Skeleton width={36} height={36} circle />
+                    <div className="flex-1">
                         <Skeleton width={100} height={14} className="mb-1" />
-                        <Skeleton width={140} height={11} />
+                        <Skeleton width={140} height={10} />
                     </div>
                 </div>
-                <Skeleton width={70} height={22} borderRadius={100} />
             </div>
-            <div className="space-y-2">
-                <Skeleton width="100%" height={12} />
-                <Skeleton width="60%" height={12} />
+            <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="text-center p-2 bg-slate-50 rounded-lg">
+                    <Skeleton width={60} height={12} className="mx-auto mb-1" />
+                    <Skeleton width={35} height={9} className="mx-auto" />
+                </div>
+                <div className="text-center p-2 bg-slate-50 rounded-lg">
+                    <Skeleton width={40} height={12} className="mx-auto mb-1" />
+                    <Skeleton width={50} height={9} className="mx-auto" />
+                </div>
             </div>
-            <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
-                <Skeleton width={80} height={11} />
-                <div className="flex gap-1.5">
-                    <Skeleton width={28} height={28} borderRadius={8} />
-                    <Skeleton width={28} height={28} borderRadius={8} />
-                    <Skeleton width={28} height={28} borderRadius={8} />
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                <Skeleton width={80} height={10} />
+                <div className="flex items-center gap-1">
+                    <Skeleton width={32} height={32} borderRadius={8} />
+                    <Skeleton width={32} height={32} borderRadius={8} />
                 </div>
             </div>
         </Card>
+    );
+});
+
+const TableRowSkeleton = memo(function TableRowSkeleton({ columns }: { columns: number }) {
+    return (
+        <TableRow className="hover:bg-slate-50/50">
+            {/* Date */}
+            <TableCell className="px-6 py-3">
+                <Skeleton width={100} height={14} />
+            </TableCell>
+            {/* User */}
+            <TableCell className="px-6 py-3">
+                <div className="flex items-center gap-2.5">
+                    <Skeleton width={36} height={36} circle />
+                    <div>
+                        <Skeleton width={100} height={14} className="mb-1" />
+                        <Skeleton width={140} height={10} />
+                    </div>
+                </div>
+            </TableCell>
+            {/* Conditional columns based on data source */}
+            {columns === 5 ? (
+                <>
+                    {/* Data Points */}
+                    <TableCell className="px-6 py-3 text-center">
+                        <Skeleton width={40} height={14} className="mx-auto" />
+                    </TableCell>
+                    {/* Accuracy */}
+                    <TableCell className="px-6 py-3 text-center">
+                        <Skeleton width={45} height={14} className="mx-auto" />
+                    </TableCell>
+                </>
+            ) : (
+                <>
+                    {/* Model */}
+                    <TableCell className="px-6 py-3">
+                        <Skeleton width={80} height={12} />
+                    </TableCell>
+                </>
+            )}
+            {/* Actions */}
+            <TableCell className="px-6 py-3 text-center">
+                <div className="flex items-center justify-center gap-1">
+                    <Skeleton width={32} height={32} borderRadius={8} />
+                    <Skeleton width={32} height={32} borderRadius={8} />
+                </div>
+            </TableCell>
+        </TableRow>
+    );
+});
+
+const TopUserSkeleton = memo(function TopUserSkeleton() {
+    return (
+        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+            <div className="flex items-center gap-3">
+                <div className="relative flex-shrink-0">
+                    <Skeleton width={48} height={48} circle />
+                    <div className="absolute -bottom-1 -right-1">
+                        <Skeleton width={20} height={20} circle />
+                    </div>
+                </div>
+                <div className="min-w-0">
+                    <Skeleton width={120} height={14} className="mb-1" />
+                    <Skeleton width={80} height={12} />
+                </div>
+            </div>
+            <div className="text-right flex-shrink-0">
+                <Skeleton width={80} height={14} className="mb-1" />
+                <Skeleton width={70} height={12} />
+            </div>
+        </div>
     );
 });
 
@@ -166,11 +276,6 @@ const ReportRow = memo(function ReportRow({
                         <p className="text-[10px] text-slate-400 truncate">{report.user_email}</p>
                     </div>
                 </div>
-            </TableCell>
-            <TableCell className="px-6 py-3">
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
-                    <Brain size={10} /> {report.report_type}
-                </span>
             </TableCell>
             <TableCell className="px-6 py-3 text-center">
                 <span className="text-sm font-medium text-slate-700">{report.data_points}</span>
@@ -238,32 +343,6 @@ const InsightRow = memo(function InsightRow({
                 <span className="text-xs text-slate-600 font-medium">{insight.model_used || "—"}</span>
             </TableCell>
             <TableCell className="px-6 py-3 text-center">
-                <span className={`inline-flex items-center gap-1 text-xs font-semibold ${insight.processing_status === "completed"
-                    ? "text-emerald-700"
-                    : "text-amber-700"
-                    }`}>
-                    {insight.processing_status === "completed" ? <CheckCircle2 size={10} /> : <Activity size={10} />}
-                    {insight.processing_status || "Unknown"}
-                </span>
-            </TableCell>
-            <TableCell className="px-6 py-3 text-center">
-                <div className="flex items-center justify-center gap-2">
-                    {insight.admin_validated && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700">
-                            <Shield size={9} /> Validated
-                        </span>
-                    )}
-                    {insight.anomaly_detected && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-700">
-                            <AlertTriangle size={9} /> Anomaly
-                        </span>
-                    )}
-                    {!insight.admin_validated && !insight.anomaly_detected && (
-                        <span className="text-xs text-slate-400">—</span>
-                    )}
-                </div>
-            </TableCell>
-            <TableCell className="px-6 py-3 text-center">
                 <div className="flex items-center justify-center gap-1">
                     <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(insight)}>
                         <Eye size={16} />
@@ -307,9 +386,6 @@ const ReportCard = memo(function ReportCard({
                         <p className="text-[10px] text-slate-400 truncate">{report.user_email}</p>
                     </div>
                 </div>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
-                    <Brain size={10} /> {report.report_type}
-                </span>
             </div>
 
             <div className="grid grid-cols-3 gap-3 mb-3">
@@ -377,13 +453,6 @@ const InsightCard = memo(function InsightCard({
                         <p className="text-[10px] text-slate-400 truncate">{insight.user_email}</p>
                     </div>
                 </div>
-                <span className={`inline-flex items-center gap-1 text-xs font-semibold ${insight.processing_status === "completed"
-                    ? "text-emerald-700"
-                    : "text-amber-700"
-                    }`}>
-                    {insight.processing_status === "completed" ? <CheckCircle2 size={10} /> : <Activity size={10} />}
-                    {insight.processing_status || "Unknown"}
-                </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-3">
@@ -397,19 +466,6 @@ const InsightCard = memo(function InsightCard({
                     </p>
                     <p className="text-[9px] text-slate-400 uppercase">Confidence</p>
                 </div>
-            </div>
-
-            <div className="flex items-center gap-2 mb-3">
-                {insight.admin_validated && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700">
-                        <Shield size={9} /> Validated
-                    </span>
-                )}
-                {insight.anomaly_detected && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-700">
-                        <AlertTriangle size={9} /> Anomaly
-                    </span>
-                )}
             </div>
 
             <div className="flex items-center justify-between pt-3 border-t border-slate-100">
@@ -532,11 +588,11 @@ export default function AdminPredictionsPage() {
                 icon: Activity,
             },
             {
-                label: "Anomalies",
-                value: stats.anomaliesDetected.toString(),
-                change: `${stats.adminValidated} validated`,
-                trend: stats.anomaliesDetected > 5 ? "down" : "up",
-                icon: AlertTriangle,
+                label: "AI Confidence",
+                value: `${stats.avgConfidence.toFixed(1)}%`,
+                change: `${stats.totalInsights} insights`,
+                trend: stats.avgConfidence >= 80 ? "up" : "down",
+                icon: Shield,
             },
         ];
     }, [stats]);
@@ -621,6 +677,7 @@ export default function AdminPredictionsPage() {
 
                         {/* Charts Skeleton */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                            {/* Growth Chart Skeleton */}
                             <Card className="lg:col-span-2 p-4 sm:p-6">
                                 <div className="flex items-center justify-between mb-6 sm:mb-8">
                                     <div>
@@ -630,28 +687,38 @@ export default function AdminPredictionsPage() {
                                 </div>
                                 <Skeleton height={192} className="sm:h-60" />
                             </Card>
+                            
+                            {/* Source Distribution Skeleton */}
                             <Card className="p-4 sm:p-6">
-                                <Skeleton width={120} height={14} className="mb-2" />
-                                <Skeleton width={140} height={10} className="mb-4 sm:mb-6" />
-                                <div className="space-y-3">
-                                    {Array.from({ length: 5 }).map((_, i) => (
-                                        <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                            <div className="flex items-center gap-3">
-                                                <Skeleton width={32} height={32} borderRadius="50%" />
-                                                <div>
-                                                    <Skeleton width={120} height={14} className="mb-1" />
-                                                    <Skeleton width={80} height={10} />
-                                                </div>
+                                <Skeleton width={140} height={14} className="mb-2" />
+                                <Skeleton width={180} height={10} className="mb-4 sm:mb-6" />
+                                <div className="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
+                                    <Skeleton width={128} height={128} circle className="mx-auto" />
+                                </div>
+                                <div className="space-y-2 sm:space-y-3">
+                                    {Array.from({ length: 2 }).map((_, i) => (
+                                        <div key={i} className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Skeleton width={8} height={8} circle />
+                                                <Skeleton width={60} height={12} />
                                             </div>
-                                            <div className="text-right">
-                                                <Skeleton width={80} height={14} className="mb-1" />
-                                                <Skeleton width={60} height={10} />
-                                            </div>
+                                            <Skeleton width={80} height={12} />
                                         </div>
                                     ))}
                                 </div>
                             </Card>
                         </div>
+
+                        {/* Top Users Skeleton */}
+                        <Card className="p-4 sm:p-6">
+                            <Skeleton width={80} height={14} className="mb-2" />
+                            <Skeleton width={120} height={10} className="mb-4 sm:mb-6" />
+                            <div className="space-y-3">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <TopUserSkeleton key={i} />
+                                ))}
+                            </div>
+                        </Card>
 
                         {/* Data Source Tabs Skeleton */}
                         <div className="flex items-center gap-2">
@@ -672,7 +739,11 @@ export default function AdminPredictionsPage() {
                         {/* Cards Skeleton */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {Array.from({ length: 6 }).map((_, i) => (
-                                <PredictionCardSkeleton key={i} />
+                                dataSource === "reports" ? (
+                                    <ReportCardSkeleton key={i} />
+                                ) : (
+                                    <InsightCardSkeleton key={i} />
+                                )
                             ))}
                         </div>
                     </div>
@@ -720,7 +791,7 @@ export default function AdminPredictionsPage() {
                             className="bg-emerald-500 hover:bg-emerald-600 order-2 w-full sm:w-auto"
                             onClick={() => setAddModalOpen(true)}
                         >
-                            <Plus size={14} className="sm:mr-1" />
+                            <Plus size={14} className="sm" />
                             <span className="hidden sm:inline">Generate Prediction</span>
                             <span className="sm:hidden">Add</span>
                         </Button>
@@ -954,6 +1025,7 @@ export default function AdminPredictionsPage() {
                                 }`}
                                 onClick={() => setDataSource('reports')}
                             >
+                                <Brain size={14}/>
                                 Prediction Reports
                             </Button>
                             <Button
@@ -964,6 +1036,7 @@ export default function AdminPredictionsPage() {
                                 }`}
                                 onClick={() => setDataSource('insights')}
                             >
+                                <Wand2 size={14}/>
                                 AI Insights
                             </Button>
                         </div>
@@ -1002,7 +1075,33 @@ export default function AdminPredictionsPage() {
                 ) : viewMode === 'table' ? (
                     <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
                         {tableLoading ? (
-                            <FilterTableSkeleton rows={pageSize > 20 ? 20 : pageSize} columns={6} />
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="px-6 py-3">
+                                            <div className="flex items-center gap-1">
+                                                Date <MoreHorizontal size={12} className="rotate-90" />
+                                            </div>
+                                        </TableHead>
+                                        <TableHead className="px-6 py-3">User</TableHead>
+                                        {dataSource === "insights" && (
+                                            <TableHead className="px-6 py-3">Model</TableHead>
+                                        )}
+                                        {dataSource === "reports" && (
+                                            <>
+                                                <TableHead className="px-6 py-3 text-center">Data Points</TableHead>
+                                                <TableHead className="px-6 py-3 text-center">Accuracy</TableHead>
+                                            </>
+                                        )}
+                                        <TableHead className="px-6 py-3 text-center">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {Array.from({ length: pageSize > 20 ? 20 : pageSize }).map((_, i) => (
+                                        <TableRowSkeleton key={i} columns={dataSource === "reports" ? 5 : 4} />
+                                    ))}
+                                </TableBody>
+                            </Table>
                         ) : (
                             <Table>
                                 <TableHeader>
@@ -1013,22 +1112,22 @@ export default function AdminPredictionsPage() {
                                             </div>
                                         </TableHead>
                                         <TableHead className="px-6 py-3">User</TableHead>
-                                        <TableHead className="px-6 py-3">
-                                            {dataSource === "reports" ? "Type" : "Model"}
-                                        </TableHead>
-                                        <TableHead className="px-6 py-3 text-center">
-                                            {dataSource === "reports" ? "Data Points" : "Status"}
-                                        </TableHead>
-                                        <TableHead className="px-6 py-3 text-center">
-                                            {dataSource === "reports" ? "Accuracy" : "Flags"}
-                                        </TableHead>
+                                        {dataSource === "insights" && (
+                                            <TableHead className="px-6 py-3">Model</TableHead>
+                                        )}
+                                        {dataSource === "reports" && (
+                                            <>
+                                                <TableHead className="px-6 py-3 text-center">Data Points</TableHead>
+                                                <TableHead className="px-6 py-3 text-center">Accuracy</TableHead>
+                                            </>
+                                        )}
                                         <TableHead className="px-6 py-3 text-center">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {itemCount === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={6} className="px-6 py-12 text-center">
+                                            <TableCell colSpan={dataSource === "reports" ? 5 : 4} className="px-6 py-12 text-center">
                                                 <div className="flex flex-col items-center justify-center">
                                                     <Inbox size={32} className="text-slate-300 mb-2" />
                                                     <p className="text-sm text-slate-500">No {dataSource} match your filters</p>
@@ -1064,7 +1163,11 @@ export default function AdminPredictionsPage() {
                 ) : tableLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {Array.from({ length: pageSize > 20 ? 20 : pageSize }).map((_, i) => (
-                            <PredictionCardSkeleton key={i} />
+                            dataSource === "reports" ? (
+                                <ReportCardSkeleton key={i} />
+                            ) : (
+                                <InsightCardSkeleton key={i} />
+                            )
                         ))}
                     </div>
                 ) : (
