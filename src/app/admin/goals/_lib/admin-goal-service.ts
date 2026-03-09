@@ -284,6 +284,7 @@ export async function updateAdminGoal(goalId: string, form: AdminGoalFormState):
     const autoContributeAmount = parseFloat(form.auto_contribute_amount) || 0;
 
     const payload: Record<string, any> = {
+        user_id: form.user_id,
         goal_name: form.goal_name,
         target_amount: target,
         current_amount: currentAmount,
