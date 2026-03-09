@@ -171,7 +171,7 @@ const TransactionCard = memo(({
           <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(tx)}>
             <Eye size={16} />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-600" title="Edit" onClick={() => onEdit(tx)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => onEdit(tx)}>
             <Edit size={16} />
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(tx)}>
@@ -230,7 +230,7 @@ const TransactionRow = memo(({
           <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(tx)}>
             <Eye size={16} />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-600" title="Edit" onClick={() => onEdit(tx)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => onEdit(tx)}>
             <Edit size={16} />
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" title="Delete" onClick={() => onDelete(tx)}>

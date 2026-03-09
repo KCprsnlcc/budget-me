@@ -221,26 +221,7 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
     }
   }, [open, transaction]);
 
-  // Infinite scroll handler
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!userListRef.current || loadingMore || !hasMore) return;
-      
-      const { scrollTop, scrollHeight, clientHeight } = userListRef.current;
-      // Trigger when user scrolls near the bottom (within 50px)
-      if (scrollTop + clientHeight >= scrollHeight - 50) {
-        loadUsers(false);
-      }
-    };
-
-    const listElement = userListRef.current;
-    if (listElement && currentStep === 1) {
-      listElement.addEventListener('scroll', handleScroll);
-      return () => listElement.removeEventListener('scroll', handleScroll);
-    }
-  }, [loadingMore, hasMore, page, currentStep]);
-
-  const loadUsers = async (reset: boolean = false) => {
+  const loadUsers = useCallback(async (reset: boolean = false) => {
     if (reset) {
       setLoadingUsers(true);
       setPage(1);
@@ -257,11 +238,19 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
     const from = (currentPage - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("profiles")
       .select("id, email, full_name, avatar_url")
       .order("email")
       .range(from, to);
+
+    // Apply search filter if present
+    if (userSearchQuery.trim()) {
+      const searchTerm = userSearchQuery.toLowerCase();
+      query = query.or(`email.ilike.%${searchTerm}%,full_name.ilike.%${searchTerm}%`);
+    }
+
+    const { data, error } = await query;
 
     if (!error && data) {
       if (reset) {
@@ -282,7 +271,36 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
 
     setLoadingUsers(false);
     setLoadingMore(false);
-  };
+  }, [loadingMore, hasMore, page, userSearchQuery]);
+
+  // Trigger search when query changes - only when modal is open and on step 1
+  useEffect(() => {
+    if (open && currentStep === 1) {
+      const timeoutId = setTimeout(() => {
+        loadUsers(true);
+      }, 300); // Debounce search
+      return () => clearTimeout(timeoutId);
+    }
+  }, [userSearchQuery, open, currentStep]);
+
+  // Infinite scroll handler - only when modal is open and on step 1
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!userListRef.current || loadingMore || !hasMore) return;
+      
+      const { scrollTop, scrollHeight, clientHeight } = userListRef.current;
+      // Trigger when user scrolls near the bottom (within 50px)
+      if (scrollTop + clientHeight >= scrollHeight - 50) {
+        loadUsers(false);
+      }
+    };
+
+    const listElement = userListRef.current;
+    if (listElement && open && currentStep === 1) {
+      listElement.addEventListener('scroll', handleScroll);
+      return () => listElement.removeEventListener('scroll', handleScroll);
+    }
+  }, [loadingMore, hasMore, open, currentStep, loadUsers]);
 
   // Load user-specific data when user is selected
   const loadUserData = async (userId: string) => {
@@ -399,15 +417,17 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
         notes: formData.notes || null,
         status: formData.status,
         account_id: formData.account_id || null,
+        budget_id: formData.budget_id || null,
+        goal_id: formData.goal_id || null,
         expense_category_id: null,
         income_category_id: null,
       };
 
       // Set category IDs based on type
-      if (formData.type === "expense" && formData.expense_category_id) {
-        payload.expense_category_id = formData.expense_category_id;
-      } else if ((formData.type === "income" || formData.type === "cash_in") && formData.income_category_id) {
+      if (formData.type === "income" && formData.income_category_id) {
         payload.income_category_id = formData.income_category_id;
+      } else if ((formData.type === "expense" || formData.type === "contribution") && formData.expense_category_id) {
+        payload.expense_category_id = formData.expense_category_id;
       }
 
       const { error } = await supabase
@@ -485,16 +505,7 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
               </div>
             ) : (
               <div ref={userListRef} className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
-                {users
-                  .filter(user => {
-                    if (!userSearchQuery.trim()) return true;
-                    const query = userSearchQuery.toLowerCase();
-                    return (
-                      user.email.toLowerCase().includes(query) ||
-                      (user.full_name && user.full_name.toLowerCase().includes(query))
-                    );
-                  })
-                  .map((user, idx) => {
+                {users.map((user, idx) => {
                   const selected = formData.user_id === user.id;
                   
                   // Create mock Supabase user for UserAvatar
@@ -545,16 +556,11 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
                     </button>
                   );
                 })}
-                {users.filter(user => {
-                  if (!userSearchQuery.trim()) return true;
-                  const query = userSearchQuery.toLowerCase();
-                  return (
-                    user.email.toLowerCase().includes(query) ||
-                    (user.full_name && user.full_name.toLowerCase().includes(query))
-                  );
-                }).length === 0 && (
+                {users.length === 0 && (
                   <div className="text-center py-8">
-                    <p className="text-sm text-slate-500">No users found matching "{userSearchQuery}"</p>
+                    <p className="text-sm text-slate-500">
+                      {userSearchQuery ? `No users found matching "${userSearchQuery}"` : "No users found"}
+                    </p>
                   </div>
                 )}
                 

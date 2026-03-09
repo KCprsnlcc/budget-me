@@ -13,7 +13,7 @@ export function useAdminTransactions() {
   // Filters
   const [search, setSearch] = useState("");
   const [month, setMonth] = useState<number | "all">("all");
-  const [year, setYear] = useState<number | "all">(new Date().getFullYear());
+  const [year, setYear] = useState<number | "all">("all");
   const [typeFilter, setTypeFilter] = useState("");
   const [userFilter, setUserFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
