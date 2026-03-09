@@ -39,7 +39,7 @@ export function useAdminTransactions() {
   );
 
   // Fetch data
-  const fetchData = useCallback(async (showTableLoading = false) => {
+  const fetchData = useCallback(async (showTableLoading = false, forceRefreshStats = false) => {
     if (showTableLoading) {
       setTableLoading(true);
     } else {
@@ -50,7 +50,7 @@ export function useAdminTransactions() {
     try {
       const [txnResult, statsData, usersData] = await Promise.all([
         fetchAdminTransactions(filters, currentPage, pageSize),
-        stats ? Promise.resolve(stats) : fetchAdminTransactionStats(),
+        (stats && !forceRefreshStats) ? Promise.resolve(stats) : fetchAdminTransactionStats(),
         users.length > 0 ? Promise.resolve(users) : fetchAllUsers(),
       ]);
 
@@ -61,7 +61,7 @@ export function useAdminTransactions() {
         setTotalCount(txnResult.count ?? 0);
       }
 
-      if (!stats) setStats(statsData);
+      if (!stats || forceRefreshStats) setStats(statsData);
       if (users.length === 0) setUsers(usersData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch transactions");
@@ -119,8 +119,7 @@ export function useAdminTransactions() {
   }, []);
 
   const refetch = useCallback(() => {
-    setStats(null);
-    fetchData();
+    fetchData(false, true);
   }, [fetchData]);
 
   const nextPage = useCallback(() => {

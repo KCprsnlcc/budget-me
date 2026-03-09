@@ -39,7 +39,7 @@ export function useAdminBudgets() {
     );
 
     // Fetch data
-    const fetchData = useCallback(async (showTableLoading = false) => {
+    const fetchData = useCallback(async (showTableLoading = false, forceRefreshStats = false) => {
         if (showTableLoading) {
             setTableLoading(true);
         } else {
@@ -50,7 +50,7 @@ export function useAdminBudgets() {
         try {
             const [budgetResult, statsData, usersData] = await Promise.all([
                 fetchAdminBudgets(filters, currentPage, pageSize),
-                stats ? Promise.resolve(stats) : fetchAdminBudgetStats(),
+                (stats && !forceRefreshStats) ? Promise.resolve(stats) : fetchAdminBudgetStats(),
                 users.length > 0 ? Promise.resolve(users) : fetchAllUsers(),
             ]);
 
@@ -61,7 +61,7 @@ export function useAdminBudgets() {
                 setTotalCount(budgetResult.count ?? 0);
             }
 
-            if (!stats) setStats(statsData);
+            if (!stats || forceRefreshStats) setStats(statsData);
             if (users.length === 0) setUsers(usersData);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to fetch budgets");
@@ -119,8 +119,7 @@ export function useAdminBudgets() {
     }, []);
 
     const refetch = useCallback(() => {
-        setStats(null);
-        fetchData();
+        fetchData(false, true);
     }, [fetchData]);
 
     const nextPage = useCallback(() => {

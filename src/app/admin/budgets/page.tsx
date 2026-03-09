@@ -23,7 +23,7 @@ import {
     MoreHorizontal,
     Plus,
     Edit,
-    Target,
+    Flag,
     PieChart,
     Users,
     AlertTriangle,
@@ -128,7 +128,7 @@ const BudgetCard = memo(({
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
                     <div className="text-lg">
-                        <Target size={20} />
+                        <Flag size={20} />
                     </div>
                     <div>
                         <h4 className="text-sm font-semibold text-slate-900">{budget.budget_name}</h4>
@@ -240,8 +240,8 @@ const BudgetRow = memo(({
             </TableCell>
             <TableCell className="px-6 py-4">
                 <span className={`text-xs font-medium capitalize ${budget.status === "active" ? "text-emerald-600" :
-                        budget.status === "paused" ? "text-amber-600" :
-                            budget.status === "completed" ? "text-blue-600" : "text-slate-500"
+                    budget.status === "paused" ? "text-amber-600" :
+                        budget.status === "completed" ? "text-blue-600" : "text-slate-500"
                     }`}>
                     {budget.status}
                 </span>
@@ -377,7 +377,7 @@ export default function AdminBudgetsPage() {
                 value: stats.totalBudgets.toLocaleString(),
                 change: growthText,
                 trend: growthTrend,
-                icon: Target
+                icon: Flag
             },
             {
                 label: "Active Users",

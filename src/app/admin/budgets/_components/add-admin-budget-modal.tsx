@@ -256,6 +256,10 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                 toast.error("Start and end dates are required");
                 return;
             }
+            if (!formData.category_id) {
+                toast.error("Category is required");
+                return;
+            }
         }
         setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
     };
@@ -503,7 +507,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                             {/* Category */}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
-                                    Category <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
+                                    Category <span className="text-gray-400">*</span>
                                 </label>
                                 <SearchableDropdown
                                     value={formData.category_id}
@@ -515,7 +519,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                                     }))}
                                     placeholder="Select category..."
                                     className="w-full"
-                                    emptyLabel="No category"
+                                    allowEmpty={false}
                                 />
                             </div>
 
@@ -566,7 +570,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                                     <ReviewRow label="Amount" value={`₱${parseFloat(formData.amount || "0").toFixed(2)}`} />
                                     <ReviewRow label="Start Date" value={formData.start_date ? new Date(formData.start_date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"} />
                                     <ReviewRow label="End Date" value={formData.end_date ? new Date(formData.end_date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"} />
-                                    <ReviewRow label="Category" value={selectedCategory?.category_name || "None"} />
+                                    <ReviewRow label="Category" value={selectedCategory?.category_name || "—"} />
                                     <ReviewRow label="Description" value={formData.description || "No description provided."} italic={!formData.description} />
                                 </div>
                             </div>
