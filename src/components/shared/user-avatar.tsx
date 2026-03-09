@@ -6,7 +6,7 @@ import type { User } from "@supabase/supabase-js";
 
 interface UserAvatarProps {
   user: User | null;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   showName?: boolean;
 }
@@ -15,6 +15,7 @@ const sizeClasses = {
   sm: "w-6 h-6 text-[8px]",
   md: "w-7 h-7 text-[10px]",
   lg: "w-8 h-8 text-xs",
+  xl: "w-20 h-20 text-2xl",
 };
 
 export function UserAvatar({ user, size = "md", className = "", showName = false }: UserAvatarProps) {

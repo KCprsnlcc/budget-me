@@ -250,3 +250,69 @@ export function GoalCardSkeleton() {
     </SkeletonTheme>
   );
 }
+
+// User-specific grid skeleton for filter changes
+export function UserFilterGridSkeleton({ items = 6 }: { items?: number }) {
+  return (
+    <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: items }).map((_, i) => (
+          <div key={i} className="bg-white rounded-xl border border-slate-200/60 shadow-sm p-4">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <Skeleton width={40} height={40} borderRadius="50%" />
+                <div>
+                  <Skeleton width={110} height={14} className="mb-1" />
+                  <Skeleton width={140} height={10} />
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <Skeleton width={60} height={18} borderRadius={10} />
+                <Skeleton width={80} height={10} />
+              </div>
+            </div>
+            <div className="flex justify-between items-center">
+              <Skeleton width={50} height={18} borderRadius={10} />
+              <div className="flex items-center gap-1">
+                <Skeleton width={32} height={32} borderRadius={4} />
+                <Skeleton width={32} height={32} borderRadius={4} />
+                <Skeleton width={32} height={32} borderRadius={4} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </SkeletonTheme>
+  );
+}
+
+// Individual user card skeleton for filter changes
+export function UserCardSkeleton() {
+  return (
+    <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+      <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm p-4">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Skeleton width={40} height={40} borderRadius="50%" />
+            <div>
+              <Skeleton width={110} height={14} className="mb-1" />
+              <Skeleton width={140} height={10} />
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <Skeleton width={60} height={18} borderRadius={10} />
+            <Skeleton width={80} height={10} />
+          </div>
+        </div>
+        <div className="flex justify-between items-center">
+          <Skeleton width={50} height={18} borderRadius={10} />
+          <div className="flex items-center gap-1">
+            <Skeleton width={32} height={32} borderRadius={4} />
+            <Skeleton width={32} height={32} borderRadius={4} />
+            <Skeleton width={32} height={32} borderRadius={4} />
+          </div>
+        </div>
+      </div>
+    </SkeletonTheme>
+  );
+}
