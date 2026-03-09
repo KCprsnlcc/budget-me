@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Stepper } from "../../transactions/_components/stepper";
+import { Stepper } from "./stepper";
 import { toast } from "sonner";
 import {
     Loader2,
@@ -346,76 +346,87 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
 
                 {/* Step 2: Amount Selection */}
                 {currentStep === 2 && (
-                    <div className="animate-txn-in max-w-lg mx-auto">
-                        <div className="mb-6 text-center">
-                            <h2 className="text-[17px] font-bold text-gray-900 mb-1">Contribution Amount</h2>
-                            <p className="text-[11px] text-gray-500">How much would you like to contribute to {goal.goal_name}?</p>
+                    <div className="space-y-4 animate-txn-in">
+                        <div>
+                            <h4 className="text-sm font-semibold text-slate-900 mb-2">Contribution Amount</h4>
+                            <p className="text-xs text-slate-500">How much would you like to contribute to {goal.goal_name}?</p>
                         </div>
 
                         {/* Goal Summary */}
-                        <div className="bg-white rounded-xl p-4 border border-gray-200 mb-6 shadow-sm">
-                            <div className="flex justify-between items-center mb-4">
-                                <h4 className="text-sm font-bold text-gray-900 truncate">{goal.goal_name}</h4>
-                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full ring-1 ring-emerald-500/20">{goal.progress_percentage}% complete</span>
+                        <div className="bg-white rounded-lg p-4 border border-gray-200">
+                            <div className="mb-3">
+                                <h4 className="text-sm font-semibold text-gray-900">{goal.goal_name}</h4>
+                                <p className="text-xs text-gray-500">{goal.progress_percentage}% complete</p>
                             </div>
-
-                            <div className="space-y-2.5 text-xs">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Current Progress</span>
-                                    <span className="font-bold text-gray-900">{formatCurrency(goal.current_amount)}</span>
+                            
+                            <div className="space-y-2 text-xs">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Current Progress:</span>
+                                    <span className="font-medium text-gray-900">{formatCurrency(goal.current_amount)}</span>
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Target Amount</span>
-                                    <span className="font-bold text-gray-900">{formatCurrency(goal.target_amount)}</span>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Target:</span>
+                                    <span className="font-medium text-gray-900">{formatCurrency(goal.target_amount)}</span>
                                 </div>
-                                <div className="flex justify-between items-center pt-2.5 mt-2.5 border-t border-gray-100">
-                                    <span className="text-gray-500 font-medium">Remaining Need</span>
-                                    <span className="font-bold text-blue-600">{formatCurrency(remaining)}</span>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Remaining:</span>
+                                    <span className="font-medium text-gray-900">{formatCurrency(remaining)}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Amount Input */}
-                        <div className="mb-6">
-                            <label className="block text-[11px] font-bold text-gray-700 mb-2 uppercase tracking-wide">Enter Amount</label>
+                        <div>
+                            <label className="block text-xs font-medium text-slate-700 mb-1.5">Contribution Amount</label>
                             <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-lg">₱</span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₱</span>
                                 <input
                                     type="number"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
-                                    className="w-full pl-9 pr-4 py-3.5 text-xl font-bold text-gray-900 bg-white border border-gray-200 rounded-xl transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06] shadow-inner"
+                                    className="w-full pl-7 pr-4 py-3 text-lg font-semibold text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
                                     placeholder="0.00"
                                     min="0"
+                                    max={remaining.toString()}
                                     step="0.01"
                                 />
                             </div>
                             {parsedAmount > remaining && remaining > 0 && (
-                                <p className="text-[11px] text-amber-600 font-medium mt-2 flex items-center gap-1.5">
-                                    <AlertTriangle size={12} /> That amount exceeds the remaining goal target.
+                                <p className="text-xs text-amber-600 mt-1">
+                                    Amount exceeds remaining goal target
                                 </p>
                             )}
                         </div>
 
-                        {/* Quick Amounts */}
+                        {/* Quick Amount Buttons */}
                         <div>
-                            <p className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wide">Quick Select</p>
-                            <div className="grid grid-cols-4 gap-2.5">
+                            <p className="text-xs text-slate-500 mb-2">Quick amounts:</p>
+                            <div className="grid grid-cols-4 gap-2">
                                 {[
+                                    Math.min(25, remaining || 25),
                                     Math.min(50, remaining || 50),
                                     Math.min(100, remaining || 100),
-                                    Math.min(500, remaining || 500),
-                                    Math.min(goal.auto_contribute_amount || 1000, remaining || 1000)
+                                    Math.min(goal.auto_contribute_amount || 500, remaining || 500)
                                 ].map((quickAmount, idx) => (
                                     <button
                                         key={idx}
                                         type="button"
                                         onClick={() => setAmount(quickAmount.toString())}
-                                        className="py-2.5 px-2 text-[13px] font-bold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-white hover:text-emerald-600 hover:border-emerald-200 hover:shadow-sm transition-all"
+                                        className="p-2 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 hover:border-slate-300 transition-all"
                                     >
                                         ₱{quickAmount}
                                     </button>
                                 ))}
+                            </div>
+                        </div>
+
+                        <div className="p-3 rounded-lg bg-white border border-gray-200 flex items-start gap-3">
+                            <Info size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
+                            <div>
+                                <div className="font-medium text-sm text-gray-900">Contribution Impact</div>
+                                <div className="text-xs text-gray-600">
+                                    Your contribution will be immediately reflected in the goal progress
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -423,58 +434,76 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
 
                 {/* Step 3: Review */}
                 {currentStep === 3 && (
-                    <div className="animate-txn-in max-w-lg mx-auto">
-                        <div className="mb-6 text-center">
-                            <h2 className="text-[17px] font-bold text-gray-900 mb-1">Review Contribution</h2>
-                            <p className="text-[11px] text-gray-500">Confirm the details before finalizing the contribution.</p>
+                    <div className="space-y-4 animate-txn-in">
+                        <div>
+                            <h4 className="text-sm font-semibold text-slate-900 mb-2">Review Contribution</h4>
+                            <p className="text-xs text-slate-500">Confirm the details before finalizing the contribution.</p>
                         </div>
 
-                        {/* Big Amount Summary */}
-                        <div className="text-center py-8 bg-blue-50/50 rounded-2xl border border-blue-100 mb-6 shadow-sm">
-                            <div className="text-[10px] text-blue-500 font-bold uppercase tracking-widest mb-1">Adding Funds</div>
-                            <div className="text-4xl font-black text-gray-900 tracking-tight">{formatCurrency(parsedAmount)}</div>
-                            <div className="text-xs text-slate-500 mt-2 font-medium">to <span className="text-gray-900">{goal.goal_name}</span></div>
+                        {/* Contribution Summary */}
+                        <div className="text-center py-6 bg-[#F9FAFB]/50 rounded-xl border border-gray-200">
+                            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Contribution Amount</div>
+                            <div className="text-3xl font-bold text-gray-900">{formatCurrency(parsedAmount)}</div>
+                            <div className="text-xs text-gray-600 mt-1 font-medium">to {goal.goal_name}</div>
                         </div>
 
-                        {/* Dual Progress Impact */}
-                        <div className="grid grid-cols-2 gap-3 mb-6">
-                            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-sm relative overflow-hidden">
-                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Original State</div>
-                                <div className="text-lg font-bold text-gray-900 mb-0.5">{goal.progress_percentage}%</div>
-                                <div className="text-xs text-gray-500 font-medium">{formatCurrency(goal.current_amount)} saved</div>
+                        {/* Progress Impact */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="p-4 rounded-lg bg-white border border-gray-200">
+                                <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">Current Progress</div>
+                                <div className="text-sm font-semibold text-gray-900">{goal.progress_percentage}%</div>
+                                <div className="text-xs text-gray-500">{formatCurrency(goal.current_amount)}</div>
                             </div>
-                            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 shadow-sm relative overflow-hidden ring-1 ring-inset ring-emerald-500/10">
-                                <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-2">New State</div>
-                                <div className="text-lg font-bold text-emerald-700 mb-0.5">{newProgress}%</div>
-                                <div className="text-xs text-emerald-600 font-medium">{formatCurrency(goal.current_amount + parsedAmount)} saved</div>
-                                <div className="absolute right-0 bottom-0 opacity-10 translate-x-1/4 translate-y-1/4">
-                                    <CheckCircle size={64} className="text-emerald-500" />
-                                </div>
+                            <div className="p-4 rounded-lg bg-white border border-gray-200">
+                                <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">New Progress</div>
+                                <div className="text-sm font-semibold text-emerald-600">{newProgress}%</div>
+                                <div className="text-xs text-emerald-600">{formatCurrency(goal.current_amount + parsedAmount)}</div>
                             </div>
                         </div>
 
-                        {/* Table Summary */}
+                        {/* Goal Details */}
                         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                             <div className="p-5 space-y-0 divide-y divide-gray-100">
-                                <ReviewRow label="Goal Name" value={goal.goal_name} />
-                                <ReviewRow label="Target" value={formatCurrency(goal.target_amount)} />
-                                <ReviewRow label="Remaining Need" value={formatCurrency(newRemaining)} accent={newRemaining === 0 ? "emerald" : undefined} />
-                                <ReviewRow label="Deadline" value={formatDate(goal.target_date)} />
-                                <ReviewRow label="Target User" value={displayingUserParams.full_name || displayingUserParams.email || String(displayingUserParams)} />
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Goal Name</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">{goal.goal_name}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Target</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">{formatCurrency(goal.target_amount)}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Remaining</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">{formatCurrency(newRemaining)}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Deadline</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">{formatDate(goal.target_date)}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Contributor</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">{displayingUserParams.full_name || displayingUserParams.email || "Unknown"}</span>
+                                </div>
+                                {newProgress >= 100 && (
+                                    <div className="flex justify-between items-center py-2.5">
+                                        <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Status</span>
+                                        <span className="text-[13px] font-semibold text-emerald-600 flex items-center gap-2">
+                                            <CheckCircle size={14} /> Goal Completed!
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        {newProgress >= 100 && (
-                            <div className="mt-4 flex gap-3 p-3.5 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100/50 border border-emerald-200 text-emerald-800 items-start">
-                                <CheckCircle size={18} className="flex-shrink-0 mt-0.5 text-emerald-500" />
-                                <div>
-                                    <h4 className="font-bold text-xs uppercase tracking-wide mb-0.5 text-emerald-900">Goal Conquered!</h4>
-                                    <p className="text-[11px] leading-relaxed opacity-90">
-                                        This contribution will push the progress to or beyond 100% of the target amount!
-                                    </p>
-                                </div>
+                        <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
+                            <CheckCircle size={16} className="flex-shrink-0 mt-px text-emerald-500" />
+                            <div>
+                                <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Ready to Contribute</h4>
+                                <p className="text-[11px] leading-relaxed">
+                                    Your contribution will be processed immediately
+                                </p>
                             </div>
-                        )}
+                        </div>
                     </div>
                 )}
             </ModalBody>
@@ -515,20 +544,6 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                 )}
             </ModalFooter>
         </Modal>
-    );
-}
-
-function ReviewRow({ label, value, accent }: { label: string; value: string; accent?: "emerald" }) {
-    return (
-        <div className="flex justify-between items-center py-3 gap-4">
-            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold flex-shrink-0">
-                {label}
-            </span>
-            <span className={`text-[13px] font-bold truncate text-right ${accent === "emerald" ? "text-emerald-600" : "text-slate-700"
-                }`}>
-                {value}
-            </span>
-        </div>
     );
 }
 

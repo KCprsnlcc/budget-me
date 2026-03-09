@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Stepper } from "../../transactions/_components/stepper";
+import { Stepper } from "./stepper";
 import { toast } from "sonner";
 import {
     Loader2,

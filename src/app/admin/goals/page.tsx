@@ -99,8 +99,8 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 const SummaryCard = memo(({ item }: { item: SummaryType }) => {
     const Icon = item.icon;
     return (
-        <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
-            <div className="flex justify-between items-start mb-4">
+        <Card className="bg-white p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
+            <div className="flex justify-between items-start mb-3 sm:mb-4">
                 <div className="text-slate-500">
                     {Icon && <Icon size={22} strokeWidth={1.5} />}
                 </div>
@@ -137,7 +137,7 @@ const GoalCard = memo(({
     const Icon = CATEGORY_ICONS[goal.category] ?? Target;
 
     return (
-        <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
+        <Card className="bg-white p-4 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
                     <div className="text-slate-600">
@@ -162,9 +162,9 @@ const GoalCard = memo(({
                     </div>
                 </div>
                 <div className="flex flex-col items-end gap-2 shrink-0">
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${goal.status === "completed" ? "bg-emerald-100 text-emerald-700" :
-                        goal.status === "cancelled" ? "bg-red-100 text-red-700" :
-                            "bg-blue-100 text-blue-700"
+                    <span className={`text-[10px] font-medium ${goal.status === "completed" ? "text-emerald-600" :
+                        goal.status === "cancelled" ? "text-red-600" :
+                            "text-blue-600"
                         }`}>
                         {goal.status.replace("_", " ").toUpperCase()}
                     </span>
@@ -192,7 +192,7 @@ const GoalCard = memo(({
                 </div>
 
                 <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50" title="Contribute" onClick={() => onContribute(goal)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:text-emerald-700" title="Contribute" onClick={() => onContribute(goal)}>
                         <ArrowUpCircle size={16} />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(goal)}>
@@ -236,8 +236,8 @@ const GoalRow = memo(({
                     <div>
                         <div className="font-medium text-slate-900">{goal.goal_name}</div>
                         <div className={`text-[10px] font-medium leading-none mt-1`}>
-                            <span className={`px-1.5 py-0.5 rounded-sm ${goal.priority === "high" || goal.priority === "urgent" ? "bg-red-100 text-red-700" :
-                                "bg-slate-100 text-slate-600"
+                            <span className={`${goal.priority === "high" || goal.priority === "urgent" ? "text-red-600" :
+                                "text-slate-600"
                                 }`}>
                                 {goal.priority.toUpperCase()}
                             </span>
@@ -277,16 +277,16 @@ const GoalRow = memo(({
                 <span className="text-xs text-slate-400 font-normal">of ₱{goal.target_amount.toLocaleString()}</span>
             </TableCell>
             <TableCell className="px-6 py-4">
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${goal.status === "completed" ? "bg-emerald-100 text-emerald-700" :
-                    goal.status === "cancelled" ? "bg-red-100 text-red-700" :
-                        "bg-blue-100 text-blue-700"
+                <span className={`text-[10px] font-medium ${goal.status === "completed" ? "text-emerald-600" :
+                    goal.status === "cancelled" ? "text-red-600" :
+                        "text-blue-600"
                     }`}>
                     {goal.status.replace("_", " ").toUpperCase()}
                 </span>
             </TableCell>
             <TableCell className="px-6 py-4">
                 <div className="flex items-center justify-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50" title="Contribute" onClick={() => onContribute(goal)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:text-emerald-700" title="Contribute" onClick={() => onContribute(goal)}>
                         <ArrowUpCircle size={16} />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(goal)}>
@@ -567,7 +567,7 @@ export default function AdminGoalsPage() {
                 {/* Charts Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                     {/* Goal Growth Chart */}
-                    <Card className="lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
+                    <Card className="bg-white lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
                         <div className="flex items-center justify-between mb-6 sm:mb-8">
                             <div>
                                 <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Goal Creation Trend</h3>
@@ -628,7 +628,7 @@ export default function AdminGoalsPage() {
                     </Card>
 
                     {/* Category Distribution */}
-                    <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
+                    <Card className="bg-white p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
                         <div className="mb-4 sm:mb-6">
                             <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Category Distribution</h3>
                             <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Goal categories breakdown.</p>
@@ -675,7 +675,7 @@ export default function AdminGoalsPage() {
 
                 {/* Top Savers Section */}
                 {stats?.topSavers && stats.topSavers.length > 0 && (
-                    <Card className="p-4 sm:p-6 hover:shadow-md transition-all">
+                    <Card className="bg-white p-4 sm:p-6 hover:shadow-md transition-all">
                         <div className="mb-4 sm:mb-6">
                             <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Top Savers</h3>
                             <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Users with highest total saved amounts.</p>
@@ -727,7 +727,7 @@ export default function AdminGoalsPage() {
                 )}
 
                 {/* Filters */}
-                <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer flex-shrink-0">
+                <Card className="bg-white p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer flex-shrink-0">
                     <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
                         <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
                             <Filter size={14} className="sm:w-4 sm:h-4" />
@@ -778,47 +778,6 @@ export default function AdminGoalsPage() {
                                 hideSearch={true}
                             />
                             <FilterDropdown
-                                value={statusFilter}
-                                onChange={(value) => setStatusFilter(value)}
-                                options={[
-                                    { value: "in_progress", label: "In Progress" },
-                                    { value: "completed", label: "Completed" },
-                                    { value: "not_started", label: "Not Started" },
-                                    { value: "paused", label: "Paused" },
-                                    { value: "cancelled", label: "Cancelled" },
-                                ]}
-                                placeholder="All Status"
-                                className="w-full text-xs sm:text-sm xl:w-32"
-                                allowEmpty={true}
-                                emptyLabel="All Status"
-                                hideSearch={true}
-                            />
-                            <FilterDropdown
-                                value={priorityFilter}
-                                onChange={(value) => setPriorityFilter(value)}
-                                options={[
-                                    { value: "low", label: "Low" },
-                                    { value: "medium", label: "Medium" },
-                                    { value: "high", label: "High" },
-                                    { value: "urgent", label: "Urgent" },
-                                ]}
-                                placeholder="All Priority"
-                                className="w-full text-xs sm:text-sm xl:w-32"
-                                allowEmpty={true}
-                                emptyLabel="All Priority"
-                                hideSearch={true}
-                            />
-                            <FilterDropdown
-                                value={userFilter}
-                                onChange={(value) => setUserFilter(value)}
-                                options={users.map((u) => ({ value: u.id, label: u.email }))}
-                                placeholder="All Users"
-                                className="w-full text-xs sm:text-sm xl:flex-1 min-w-[150px]"
-                                allowEmpty={true}
-                                emptyLabel="All Users"
-                                hideSearch={false}
-                            />
-                            <FilterDropdown
                                 value={familyFilter}
                                 onChange={(value) => setFamilyFilter(value)}
                                 options={[
@@ -833,9 +792,13 @@ export default function AdminGoalsPage() {
                             />
                         </div>
 
-                        <div className="flex-shrink-0 ml-auto hidden xl:flex gap-2 w-auto">
-                            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs" title="Reset Filters" onClick={resetFiltersToAll}>
-                                <RotateCcw size={12} className="sm:mr-1" /> Reset
+                        <div className="flex-1"></div>
+                        <div className="flex items-center gap-2 w-full xl:w-auto">
+                            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to Current Month" onClick={resetFilters}>
+                                <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> Current
+                            </Button>
+                            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={resetFiltersToAll}>
+                                <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> All Time
                             </Button>
                         </div>
                     </div>
@@ -843,7 +806,7 @@ export default function AdminGoalsPage() {
 
                 {/* Error State */}
                 {error && !loading && (
-                    <Card className="p-8 text-center shrink-0">
+                    <Card className="bg-white p-8 text-center shrink-0">
                         <p className="text-sm text-red-500 mb-3">{error}</p>
                         <Button variant="outline" size="sm" onClick={refetch}>
                             <RotateCcw size={14} className="mr-2" /> Retry
@@ -853,7 +816,7 @@ export default function AdminGoalsPage() {
 
                 {/* Goals Display */}
                 {goals.length === 0 ? (
-                    <Card className="p-12 text-center shrink-0">
+                    <Card className="bg-white p-12 text-center shrink-0">
                         <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
                         <h3 className="text-sm font-semibold text-slate-700 mb-1">No goals found</h3>
                         <p className="text-xs text-slate-400 mb-4">
@@ -861,7 +824,7 @@ export default function AdminGoalsPage() {
                         </p>
                     </Card>
                 ) : viewMode === 'table' ? (
-                    <Card className="overflow-hidden hover:shadow-md transition-all group shrink-0">
+                    <Card className="bg-white overflow-hidden hover:shadow-md transition-all group shrink-0">
                         {tableLoading ? (
                             <FilterTableSkeleton rows={pageSize} columns={6} />
                         ) : (
