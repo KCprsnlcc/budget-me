@@ -19,7 +19,6 @@ import {
   PlusCircle,
   Flag,
   PiggyBank,
-  CheckCircle,
   Home,
   Car,
   Utensils,
@@ -63,12 +62,6 @@ const TRANSACTION_TYPES = [
   { value: "expense", label: "Expense", desc: "Money spent on goods, services, or bills.", icon: MinusCircle },
   { value: "income", label: "Income", desc: "Money received from salary, investments, or other sources.", icon: PlusCircle },
   { value: "contribution", label: "Contribution", desc: "Money allocated to savings goals or investments.", icon: Flag },
-];
-
-const STATUS_OPTIONS = [
-  { value: "completed", label: "Completed" },
-  { value: "pending", label: "Pending" },
-  { value: "cancelled", label: "Cancelled" },
 ];
 
 // Helper function to convert emojis to Lucide icons
@@ -125,7 +118,6 @@ type FormData = {
   date: string;
   description: string;
   notes: string;
-  status: string;
   account_id: string;
   expense_category_id: string;
   income_category_id: string;
@@ -188,7 +180,6 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
     date: new Date().toISOString().split("T")[0],
     description: "",
     notes: "",
-    status: "completed",
     account_id: "",
     expense_category_id: "",
     income_category_id: "",
@@ -206,7 +197,6 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
         date: transaction.date,
         description: transaction.description || "",
         notes: transaction.notes || "",
-        status: transaction.status,
         account_id: transaction.account_id || "",
         expense_category_id: transaction.expense_category_id || "",
         income_category_id: transaction.income_category_id || "",
@@ -385,12 +375,21 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
       }
     }
     if (currentStep === 2) {
-      if (!formData.type || !formData.amount || !formData.date) {
+      if (!formData.type || !formData.amount || !formData.date || !formData.account_id) {
         toast.error("Please fill in all required fields");
         return;
       }
       if (parseFloat(formData.amount) <= 0) {
         toast.error("Amount must be greater than 0");
+        return;
+      }
+      // Validate category based on type
+      if (formData.type === "income" && !formData.income_category_id) {
+        toast.error("Please select an income category");
+        return;
+      }
+      if ((formData.type === "expense" || formData.type === "contribution") && !formData.expense_category_id) {
+        toast.error("Please select an expense category");
         return;
       }
     }
@@ -415,7 +414,7 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
         date: formData.date,
         description: formData.description || null,
         notes: formData.notes || null,
-        status: formData.status,
+        status: "completed",
         account_id: formData.account_id || null,
         budget_id: formData.budget_id || null,
         goal_id: formData.goal_id || null,
@@ -452,9 +451,51 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
   const selectedUser = users.find(u => u.id === formData.user_id);
   const selectedType = TRANSACTION_TYPES.find(t => t.value === formData.type);
   const selectedAccount = accounts.find(a => a.id === formData.account_id);
-  const selectedCategory = formData.type === "expense" 
-    ? expenseCategories.find(c => c.id === formData.expense_category_id)
-    : incomeCategories.find(c => c.id === formData.income_category_id);
+  
+  const categories = formData.type === "income" ? incomeCategories : expenseCategories;
+  const categoryValue = formData.type === "income" ? formData.income_category_id : formData.expense_category_id;
+  const selectedCategory = categories.find(c => c.id === categoryValue);
+  const selectedGoal = goals.find(g => g.id === formData.goal_id);
+  const selectedBudget = budgets.find(b => b.id === formData.budget_id);
+
+  // Helper: update field
+  const updateField = useCallback(
+    <K extends keyof FormData>(key: K, value: FormData[K]) => {
+      setFormData((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
+
+  // Helper: auto-select contribution category when goal is selected for contribution type
+  const handleGoalSelectWithCategory = useCallback((value: string) => {
+    updateField("goal_id", value);
+    
+    if (formData.type === "contribution" && value) {
+      let contributionCategory = expenseCategories.find(cat => 
+        cat.category_name.toLowerCase() === "goal contribution" ||
+        cat.category_name.toLowerCase() === "contribution"
+      );
+      
+      if (!contributionCategory) {
+        contributionCategory = expenseCategories.find(cat => 
+          cat.category_name.toLowerCase() === "investments"
+        );
+      }
+      
+      if (!contributionCategory) {
+        contributionCategory = expenseCategories.find(cat => 
+          cat.category_name.toLowerCase().includes("goal") ||
+          cat.category_name.toLowerCase().includes("saving") ||
+          cat.category_name.toLowerCase().includes("investment")
+        );
+      }
+      
+      if (contributionCategory) {
+        updateField("expense_category_id", contributionCategory.id);
+        updateField("budget_id", "");
+      }
+    }
+  }, [formData.type, expenseCategories, updateField]);
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-2xl">
@@ -476,8 +517,8 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
         {currentStep === 1 && (
           <div className="animate-txn-in">
             <div className="mb-5">
-              <h2 className="text-[17px] font-bold text-slate-900 mb-1">Select User</h2>
-              <p className="text-[11px] text-slate-500">
+              <h2 className="text-[17px] font-bold text-gray-900 mb-1">Select User</h2>
+              <p className="text-[11px] text-gray-500">
                 Current user:{" "}
                 <span className="font-semibold text-emerald-600">
                   {transaction.user_email || "Unknown"}
@@ -493,7 +534,7 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
                 placeholder="Search users by name or email..."
                 value={userSearchQuery}
                 onChange={(e) => setUserSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+                className="w-full pl-9 pr-3.5 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
               />
             </div>
             
@@ -529,7 +570,7 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
                       className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${
                         selected
                           ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
-                          : "border-slate-200 hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                          : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
                       }`}
                       style={{ animationDelay: `${idx * 60}ms` }}
                     >
@@ -540,10 +581,10 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
                           className="ring-2 ring-white shadow-sm flex-shrink-0"
                         />
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-[13px] font-bold text-slate-900 mb-0.5">
+                          <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">
                             {user.full_name || "No Name"}
                           </h3>
-                          <p className="text-[11px] text-slate-500 leading-relaxed">{user.email}</p>
+                          <p className="text-[11px] text-gray-500 leading-relaxed">{user.email}</p>
                         </div>
                         <div
                           className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
@@ -581,8 +622,8 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
         {currentStep === 2 && (
           <div className="animate-txn-in">
             <div className="mb-5">
-              <h2 className="text-[17px] font-bold text-slate-900 mb-1 flex items-center gap-2.5">
-                <div className="w-[30px] h-[30px] rounded-lg border border-slate-100 flex items-center justify-center text-slate-400 bg-white">
+              <h2 className="text-[17px] font-bold text-gray-900 mb-1 flex items-center gap-2.5">
+                <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
                   <PenSquare size={14} />
                 </div>
                 Transaction Details
@@ -591,27 +632,47 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
             <div className="space-y-5">
               {/* Transaction Type */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                  Transaction Type <span className="text-slate-400">*</span>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Transaction Type <span className="text-gray-400">*</span>
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {TRANSACTION_TYPES.map((type) => {
+                <div className="grid grid-cols-1 gap-3">
+                  {TRANSACTION_TYPES.map((type, idx) => {
                     const Icon = type.icon;
                     const selected = formData.type === type.value;
                     return (
                       <button
                         key={type.value}
                         type="button"
-                        onClick={() => setFormData({ ...formData, type: type.value })}
-                        className={`p-3 rounded-lg border text-left transition-all ${
+                        onClick={() => updateField("type", type.value)}
+                        className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${
                           selected
-                            ? "border-emerald-500 bg-emerald-50"
-                            : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
+                            : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
                         }`}
+                        style={{ animationDelay: `${idx * 60}ms` }}
                       >
-                        <div className="flex items-center gap-2">
-                          <Icon size={16} className={selected ? "text-emerald-600" : "text-slate-400"} />
-                          <span className="text-[12px] font-semibold text-slate-900">{type.label}</span>
+                        <div className="flex items-start gap-4">
+                          <div
+                            className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white ${
+                              selected
+                                ? "text-gray-700 border-gray-200"
+                                : "text-gray-400 border-gray-100"
+                            }`}
+                          >
+                            <Icon size={18} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{type.label}</h3>
+                            <p className="text-[11px] text-gray-500 leading-relaxed">{type.desc}</p>
+                          </div>
+                          {/* Check indicator */}
+                          <div
+                            className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
+                              selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                            }`}
+                          >
+                            <Check size={10} />
+                          </div>
                         </div>
                       </button>
                     );
@@ -619,134 +680,146 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
                 </div>
               </div>
 
-              {/* Amount and Date */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                    Amount <span className="text-slate-400">*</span>
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">₱</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.amount}
-                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                      className="w-full pl-7 pr-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                    Date <span className="text-slate-400">*</span>
-                  </label>
-                  <DateSelector
-                    value={formData.date}
-                    onChange={(value) => setFormData({ ...formData, date: value })}
-                    placeholder="Select date"
-                    className="w-full"
+              {/* Amount */}
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Amount <span className="text-gray-400">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-xs">₱</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.amount}
+                    onChange={(e) => updateField("amount", e.target.value)}
+                    className="w-full pl-7 pr-4 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+                    placeholder="0.00"
                   />
                 </div>
               </div>
 
-              {/* Description */}
+              {/* Date */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                  Description
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Date <span className="text-gray-400">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                  placeholder="Brief description"
+                <DateSelector
+                  value={formData.date}
+                  onChange={(value) => updateField("date", value)}
+                  placeholder="Select date"
+                  className="w-full"
                 />
               </div>
 
-              {/* Account and Category */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Category + Budget */}
+              <div className={`grid gap-4 ${formData.type === "expense" ? "grid-cols-2" : "grid-cols-1"}`}>
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                    Account
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                    Category {formData.type === "income" || formData.type === "expense" ? <span className="text-gray-400">*</span> : null}
                   </label>
-                  <select
-                    value={formData.account_id}
-                    onChange={(e) => setFormData({ ...formData, account_id: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                  >
-                    <option value="">Select account</option>
-                    {accounts.map((acc) => (
-                      <option key={acc.id} value={acc.id}>
-                        {acc.account_name} {acc.account_number_masked ? `(${acc.account_number_masked})` : ""}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                    Category
-                  </label>
-                  {formData.type === "expense" ? (
-                    <select
-                      value={formData.expense_category_id}
-                      onChange={(e) => setFormData({ ...formData, expense_category_id: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                    >
-                      <option value="">Select category</option>
-                      {expenseCategories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.icon} {cat.category_name}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <select
-                      value={formData.income_category_id}
-                      onChange={(e) => setFormData({ ...formData, income_category_id: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                    >
-                      <option value="">Select category</option>
-                      {incomeCategories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.icon} {cat.category_name}
-                        </option>
-                      ))}
-                    </select>
+                  <SearchableDropdown
+                    value={categoryValue}
+                    onChange={(value) => updateField(formData.type === "income" ? "income_category_id" : "expense_category_id", value)}
+                    options={categories.map((c) => ({
+                      value: c.id,
+                      label: c.category_name,
+                      icon: c.icon ? getLucideIcon(c.icon) : undefined,
+                    }))}
+                    placeholder={formData.type === "contribution" ? "Auto-selected from goal" : "Select category..."}
+                    className="w-full"
+                    allowEmpty={false}
+                    disabled={formData.type === "contribution"}
+                  />
+                  {formData.type === "contribution" && (
+                    <p className="text-[10px] text-gray-400 mt-1">
+                      Category is automatically selected based on the goal chosen
+                    </p>
                   )}
                 </div>
+                {formData.type === "expense" && (
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                      Budget
+                    </label>
+                    <SearchableDropdown
+                      value={formData.budget_id}
+                      onChange={(value) => updateField("budget_id", value)}
+                      options={budgets.map((b) => ({
+                        value: b.id,
+                        label: b.budget_name,
+                        icon: getBudgetIcon(b.category_icon),
+                      }))}
+                      placeholder="No budget"
+                      className="w-full"
+                      emptyLabel="No budget"
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* Status */}
+              {/* Goal */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                  Status
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Goal Contribution
                 </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
-                >
-                  {STATUS_OPTIONS.map((status) => (
-                    <option key={status.value} value={status.value}>
-                      {status.label}
-                    </option>
-                  ))}
-                </select>
+                <SearchableDropdown
+                  value={formData.goal_id}
+                  onChange={handleGoalSelectWithCategory}
+                  options={goals.map((g) => ({
+                    value: g.id,
+                    label: g.goal_name,
+                    icon: PiggyBank,
+                  }))}
+                  placeholder="No Goal"
+                  className="w-full"
+                  emptyLabel="No Goal"
+                />
+              </div>
+
+              {/* Account */}
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Account <span className="text-gray-400">*</span>
+                </label>
+                <SearchableDropdown
+                  value={formData.account_id}
+                  onChange={(value) => updateField("account_id", value)}
+                  options={accounts.map((a) => ({
+                    value: a.id,
+                    label: a.account_name,
+                    icon: getAccountIcon(a.account_name),
+                    subtitle: `Balance: ₱${a.balance.toFixed(2)}`,
+                  }))}
+                  placeholder="Select account..."
+                  className="w-full"
+                  allowEmpty={false}
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Description <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
+                </label>
+                <textarea
+                  rows={2}
+                  value={formData.description}
+                  onChange={(e) => updateField("description", e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg resize-none transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+                  placeholder="What was this transaction for?"
+                />
               </div>
 
               {/* Notes */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
-                  Notes
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
+                  Notes <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
                 </label>
                 <textarea
                   value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  rows={3}
-                  className="w-full px-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06] resize-none"
+                  onChange={(e) => updateField("notes", e.target.value)}
+                  rows={2}
+                  className="w-full px-3.5 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06] resize-none"
                   placeholder="Additional notes..."
                 />
               </div>
@@ -768,7 +841,7 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
             <div className="space-y-4">
               {/* Transaction Type Display */}
               <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
-                <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Updated Transaction Type</div>
+                <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Transaction Type</div>
                 <div className="flex items-center justify-center gap-2 my-2">
                   {selectedType && (
                     <>
@@ -777,31 +850,55 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
                     </>
                   )}
                 </div>
-                <span className="text-xs font-semibold px-2 py-1 rounded bg-white text-slate-500 uppercase tracking-wider inline-block mt-2 border border-slate-100">
-                  {formData.status}
-                </span>
               </div>
 
               {/* Review Details */}
-              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                <div className="p-5 space-y-0 divide-y divide-slate-100">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-5 space-y-0 divide-y divide-gray-100">
                   <ReviewRow label="User" value={selectedUser?.full_name || selectedUser?.email || "—"} />
                   <ReviewRow label="Amount" value={`₱${parseFloat(formData.amount || "0").toFixed(2)}`} />
-                  <ReviewRow label="Date" value={formData.date} />
-                  <ReviewRow label="Description" value={formData.description || "—"} />
+                  <ReviewRow label="Date" value={formData.date ? new Date(formData.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"} />
+                  <ReviewRow label="Category" value={selectedCategory?.category_name || "—"} />
                   <ReviewRow label="Account" value={selectedAccount?.account_name || "Not selected"} />
-                  <ReviewRow label="Category" value={selectedCategory?.category_name || "Not selected"} />
+                  {selectedAccount && (
+                    <ReviewRow 
+                      label="Current Balance" 
+                      value={`₱${selectedAccount.balance.toFixed(2)}`} 
+                    />
+                  )}
+                  {selectedAccount && (
+                    <ReviewRow 
+                      label="New Balance" 
+                      value={`₱${(selectedAccount.balance + (formData.type === "income" ? parseFloat(formData.amount || "0") : -parseFloat(formData.amount || "0"))).toFixed(2)}`} 
+                    />
+                  )}
+                  {selectedGoal && <ReviewRow label="Goal" value={selectedGoal.goal_name} />}
+                  {selectedBudget && formData.type === "expense" && <ReviewRow label="Budget" value={selectedBudget.budget_name} />}
+                  <ReviewRow label="Description" value={formData.description || "No description provided."} italic={!formData.description} />
                   <ReviewRow label="Notes" value={formData.notes || "—"} />
                 </div>
               </div>
 
-              {/* Success Notice */}
+              {/* Budget Impact Notice */}
+              {formData.type === "expense" && selectedBudget && (
+                <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
+                  <TrendingUp size={16} className="flex-shrink-0 mt-px text-blue-500" />
+                  <div>
+                    <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Budget Impact</h4>
+                    <p className="text-[11px] leading-relaxed">
+                      This expense will add ₱{parseFloat(formData.amount || "0").toFixed(2)} to your <strong>{selectedBudget.budget_name}</strong> budget progress.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Warning Notice */}
               <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 items-start">
                 <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
                 <div>
-                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-slate-900">Changes Summary</h4>
+                  <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-slate-900">Action is final</h4>
                   <p className="text-[11px] leading-relaxed">
-                    Review your changes before saving. The transaction will be updated immediately.
+                    The transaction will be updated immediately. Please ensure all details are correct.
                   </p>
                 </div>
               </div>
@@ -824,7 +921,7 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
           </Button>
         ) : (
           <Button size="sm" onClick={handleSubmit} disabled={loading} className="bg-emerald-500 hover:bg-emerald-600">
-            {loading ? (<><Loader2 size={14} className="animate-spin" /> Saving...</>) : (<>Save Changes <Check size={14} /></>)}
+            {loading ? (<><Loader2 size={14} className="animate-spin" /> Updating...</>) : (<>Update Transaction <Check size={14} /></>)}
           </Button>
         )}
       </ModalFooter>
@@ -832,25 +929,27 @@ export function EditAdminTransactionModal({ open, onClose, transaction, onSucces
   );
 }
 
-function ReviewRow({ label, value }: { label: string; value: string }) {
+function ReviewRow({ label, value, italic }: { label: string; value: string; italic?: boolean }) {
   return (
     <div className="flex justify-between items-center py-2.5">
-      <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">{label}</span>
-      <span className="text-[13px] font-semibold text-slate-700">{value}</span>
+      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">{label}</span>
+      <span className={`text-[13px] font-semibold text-gray-700 ${italic ? "italic text-[11px] text-gray-500 max-w-[180px] text-right" : ""}`}>
+        {value}
+      </span>
     </div>
   );
 }
 
 function UserCardSkeleton() {
   return (
-    <div className="relative p-4 rounded-xl border border-slate-200 bg-white animate-pulse">
+    <div className="relative p-4 rounded-xl border border-gray-200 bg-white animate-pulse">
       <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-full bg-slate-200 flex-shrink-0" />
+        <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0" />
         <div className="flex-1 min-w-0">
-          <div className="h-4 bg-slate-200 rounded w-32 mb-2" />
-          <div className="h-3 bg-slate-200 rounded w-40" />
+          <div className="h-4 bg-gray-200 rounded w-32 mb-2" />
+          <div className="h-3 bg-gray-200 rounded w-40" />
         </div>
-        <div className="w-[18px] h-[18px] rounded-full bg-slate-200" />
+        <div className="w-[18px] h-[18px] rounded-full bg-gray-200" />
       </div>
     </div>
   );

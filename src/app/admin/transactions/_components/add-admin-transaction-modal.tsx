@@ -62,11 +62,7 @@ const TRANSACTION_TYPES = [
   { value: "contribution", label: "Contribution", desc: "Money allocated to savings goals or investments.", icon: Flag },
 ];
 
-const STATUS_OPTIONS = [
-  { value: "completed", label: "Completed" },
-  { value: "pending", label: "Pending" },
-  { value: "cancelled", label: "Cancelled" },
-];
+
 
 // Helper function to convert emojis to Lucide icons
 function getLucideIcon(emoji: string): React.ComponentType<any> {
@@ -122,7 +118,6 @@ type FormData = {
   date: string;
   description: string;
   notes: string;
-  status: string;
   account_id: string;
   expense_category_id: string;
   income_category_id: string;
@@ -185,7 +180,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
     date: new Date().toISOString().split("T")[0],
     description: "",
     notes: "",
-    status: "completed",
     account_id: "",
     expense_category_id: "",
     income_category_id: "",
@@ -350,7 +344,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
       date: new Date().toISOString().split("T")[0],
       description: "",
       notes: "",
-      status: "completed",
       account_id: "",
       expense_category_id: "",
       income_category_id: "",
@@ -412,7 +405,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
         date: formData.date,
         description: formData.description || null,
         notes: formData.notes || null,
-        status: formData.status,
+        status: "completed",
         account_id: formData.account_id || null,
         budget_id: formData.budget_id || null,
         goal_id: formData.goal_id || null,
@@ -510,8 +503,8 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
         {currentStep === 1 && (
           <div className="animate-txn-in">
             <div className="mb-5">
-              <h2 className="text-[17px] font-bold text-slate-900 mb-1">Select User</h2>
-              <p className="text-[11px] text-slate-500">Choose the user for this transaction.</p>
+              <h2 className="text-[17px] font-bold text-gray-900 mb-1">Select User</h2>
+              <p className="text-[11px] text-gray-500">Choose the user for this transaction.</p>
             </div>
             
             {/* Search Input */}
@@ -522,7 +515,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 placeholder="Search users by name or email..."
                 value={userSearchQuery}
                 onChange={(e) => setUserSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3.5 py-2.5 text-[13px] text-slate-900 bg-white border border-slate-200 rounded-lg transition-all hover:border-slate-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
+                className="w-full pl-9 pr-3.5 py-2.5 text-[13px] text-gray-900 bg-white border border-gray-200 rounded-lg transition-all hover:border-gray-300 focus:outline-none focus:border-emerald-500 focus:ring-[3px] focus:ring-emerald-500/[0.06]"
               />
             </div>
             
@@ -558,7 +551,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                       className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${
                         selected
                           ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
-                          : "border-slate-200 hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                          : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
                       }`}
                       style={{ animationDelay: `${idx * 60}ms` }}
                     >
@@ -569,10 +562,10 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                           className="ring-2 ring-white shadow-sm flex-shrink-0"
                         />
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-[13px] font-bold text-slate-900 mb-0.5">
+                          <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">
                             {user.full_name || "No Name"}
                           </h3>
-                          <p className="text-[11px] text-slate-500 leading-relaxed">{user.email}</p>
+                          <p className="text-[11px] text-gray-500 leading-relaxed">{user.email}</p>
                         </div>
                         <div
                           className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
@@ -623,8 +616,8 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Transaction Type <span className="text-gray-400">*</span>
                 </label>
-                <div className="grid grid-cols-1 gap-2">
-                  {TRANSACTION_TYPES.map((type) => {
+                <div className="grid grid-cols-1 gap-3">
+                  {TRANSACTION_TYPES.map((type, idx) => {
                     const Icon = type.icon;
                     const selected = formData.type === type.value;
                     return (
@@ -632,17 +625,34 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                         key={type.value}
                         type="button"
                         onClick={() => updateField("type", type.value)}
-                        className={`p-3 rounded-lg border text-left transition-all ${
+                        className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${
                           selected
-                            ? "border-emerald-500 bg-emerald-50"
-                            : "border-gray-200 hover:border-gray-300 bg-white"
+                            ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
+                            : "border-gray-200 hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
                         }`}
+                        style={{ animationDelay: `${idx * 60}ms` }}
                       >
-                        <div className="flex items-center gap-2">
-                          <Icon size={16} className={selected ? "text-emerald-600" : "text-gray-400"} />
-                          <div className="flex-1">
-                            <span className="text-[12px] font-semibold text-gray-900 block">{type.label}</span>
-                            <span className="text-[10px] text-gray-500">{type.desc}</span>
+                        <div className="flex items-start gap-4">
+                          <div
+                            className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white ${
+                              selected
+                                ? "text-gray-700 border-gray-200"
+                                : "text-gray-400 border-gray-100"
+                            }`}
+                          >
+                            <Icon size={18} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{type.label}</h3>
+                            <p className="text-[11px] text-gray-500 leading-relaxed">{type.desc}</p>
+                          </div>
+                          {/* Check indicator */}
+                          <div
+                            className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
+                              selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                            }`}
+                          >
+                            <Check size={10} />
                           </div>
                         </div>
                       </button>
@@ -781,25 +791,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 />
               </div>
 
-              {/* Status */}
-              <div>
-                <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
-                  Status
-                </label>
-                <SearchableDropdown
-                  value={formData.status}
-                  onChange={(value) => updateField("status", value)}
-                  options={STATUS_OPTIONS.map((s) => ({
-                    value: s.value,
-                    label: s.label,
-                  }))}
-                  placeholder="Select status"
-                  className="w-full"
-                  allowEmpty={false}
-                  hideSearch={true}
-                />
-              </div>
-
               {/* Notes */}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
@@ -840,9 +831,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                     </>
                   )}
                 </div>
-                <span className="text-xs font-semibold px-2 py-1 rounded bg-white text-slate-500 uppercase tracking-wider inline-block mt-2 border border-slate-100">
-                  {formData.status}
-                </span>
               </div>
 
               {/* Review Details */}
@@ -935,14 +923,14 @@ function ReviewRow({ label, value, italic }: { label: string; value: string; ita
 
 function UserCardSkeleton() {
   return (
-    <div className="relative p-4 rounded-xl border border-slate-200 bg-white animate-pulse">
+    <div className="relative p-4 rounded-xl border border-gray-200 bg-white animate-pulse">
       <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-full bg-slate-200 flex-shrink-0" />
+        <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0" />
         <div className="flex-1 min-w-0">
-          <div className="h-4 bg-slate-200 rounded w-32 mb-2" />
-          <div className="h-3 bg-slate-200 rounded w-40" />
+          <div className="h-4 bg-gray-200 rounded w-32 mb-2" />
+          <div className="h-3 bg-gray-200 rounded w-40" />
         </div>
-        <div className="w-[18px] h-[18px] rounded-full bg-slate-200" />
+        <div className="w-[18px] h-[18px] rounded-full bg-gray-200" />
       </div>
     </div>
   );
