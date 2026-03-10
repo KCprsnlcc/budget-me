@@ -72,7 +72,7 @@ const GOAL_ICONS: Record<string, React.ElementType> = {
   "airplane": Plane,
   "car": Car,
   "laptop": Flag,
-  "target": Flag,
+  "flag": Flag,
 };
 
 const GoalCard = memo(({
@@ -98,7 +98,7 @@ const GoalCard = memo(({
   showDelete?: boolean;
   showContribute?: boolean;
 }) => {
-  const Icon = GOAL_ICONS[goal.icon || "target"] || Flag;
+  const Icon = GOAL_ICONS[goal.icon || "flag"] || Flag;
   const progress = getGoalProgress(goal.current, goal.target);
   const remaining = goal.target - goal.current;
 
@@ -999,7 +999,7 @@ export default function GoalsPage() {
                   {goals.map((goal) => {
                       const progress = getGoalProgress(goal.current, goal.target);
                       const remaining = goal.target - goal.current;
-                      const Icon = GOAL_ICONS[goal.icon || "target"] || Flag;
+                      const Icon = GOAL_ICONS[goal.icon || "flag"] || Flag;
                       const _canEditRow = canEditGoalFn(goal, currentUserRole, isOwner, user?.id);
                       const _canDeleteRow = canDeleteGoalFn(goal, currentUserRole, isOwner, user?.id);
                       return (

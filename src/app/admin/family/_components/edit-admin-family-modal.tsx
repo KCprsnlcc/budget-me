@@ -8,7 +8,7 @@ import {
     ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Loader2, Home, FileText, Globe, Target, Info, ArrowRight, ArrowLeft, Check } from "lucide-react";
+import { Loader2, Home, FileText, Globe, Flag, Info, ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Stepper } from "../../transactions/_components/stepper";
 import type { AdminFamily } from "../_lib/types";
@@ -275,7 +275,7 @@ export function EditAdminFamilyModal({
                                 <h4 className="text-[11px] font-semibold text-gray-700 uppercase tracking-[0.04em]">Settings</h4>
 
                                 <ToggleRow
-                                    icon={Target}
+                                    icon={Flag}
                                     label="Goal Sharing"
                                     description="Members can share and collaborate on goals"
                                     checked={allowGoalSharing}

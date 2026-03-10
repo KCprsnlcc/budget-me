@@ -10,7 +10,6 @@ import {
   ArrowUp,
   ArrowDown,
   Brain,
-  Sparkles,
   PhilippinePeso,
   ShoppingBag,
   Utensils,

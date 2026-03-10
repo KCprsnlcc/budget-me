@@ -317,7 +317,7 @@ export function NoFamilyState({
                       <div key={index} className="space-y-2 sm:space-y-4">
                         <div className="flex items-center justify-center text-slate-600 mx-auto">
                           {feature.icon === "Widget" && <Home size={20} className="sm:w-6 sm:h-6" />}
-                          {feature.icon === "Target" && <Check size={20} className="sm:w-6 sm:h-6" />}
+                          {feature.icon === "Flag" && <Check size={20} className="sm:w-6 sm:h-6" />}
                           {feature.icon === "ShieldCheck" && <Users size={20} className="sm:w-6 sm:h-6" />}
                         </div>
                         <div>

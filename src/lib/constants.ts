@@ -140,7 +140,7 @@ export const MODULE_CARDS: ModuleCard[] = [
     title: "BudgetSense AI",
     description: "Your personal AI financial assistant for natural-language queries about your spending and budgets.",
     icon: "Bot",
-    secondaryIcon: "Sparkles",
+    secondaryIcon: "Wand2",
   },
   {
     title: "Family Finance",

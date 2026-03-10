@@ -7,7 +7,7 @@ import {
     Search,
     Filter,
     Download,
-    Target,
+    Flag,
     TrendingUp,
     ArrowUp,
     ArrowDown,
@@ -93,7 +93,7 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
     education: GraduationCap,
     retirement: PiggyBank,
     debt: ArrowRight,
-    general: Target,
+    general: Flag,
 };
 
 // Memoized components for better performance
@@ -135,7 +135,7 @@ const GoalCard = memo(({
     onContribute: (goal: AdminGoal) => void;
 }) => {
     const progress = goal.progress_percentage ?? 0;
-    const Icon = CATEGORY_ICONS[goal.category] ?? Target;
+    const Icon = CATEGORY_ICONS[goal.category] ?? Flag;
 
     return (
         <Card className="bg-white p-4 hover:shadow-md transition-all group cursor-pointer">
@@ -227,7 +227,7 @@ const GoalRow = memo(({
     onContribute: (goal: AdminGoal) => void;
 }) => {
     const progress = goal.progress_percentage ?? 0;
-    const Icon = CATEGORY_ICONS[goal.category] ?? Target;
+    const Icon = CATEGORY_ICONS[goal.category] ?? Flag;
 
     return (
         <TableRow className="group hover:bg-slate-50/80 transition-colors">
@@ -381,7 +381,7 @@ export default function AdminGoalsPage() {
                 value: stats.totalGoals.toLocaleString(),
                 change: growthText,
                 trend: growthTrend,
-                icon: Target
+                icon: Flag
             },
             {
                 label: "Active Saves",
@@ -660,10 +660,11 @@ export default function AdminGoalsPage() {
                                     ))}
                                 </div>
                             </>
+                        
                         ) : (
                             <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center px-4">
                                 <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
-                                    <Target size={20} className="sm:w-6 sm:h-6" />
+                                    <Flag size={20} className="sm:w-6 sm:h-6" />
                                 </div>
                                 <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Category Data</h4>
                                 <p className="text-[10px] sm:text-xs text-slate-400 max-w-sm">

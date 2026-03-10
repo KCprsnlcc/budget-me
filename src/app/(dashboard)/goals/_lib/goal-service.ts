@@ -55,7 +55,7 @@ function mapRow(row: Record<string, any>): GoalType {
     is_public: row.is_public ?? false,
     family_id: row.family_id ?? null,
     notes: row.notes ?? null,
-    icon: CATEGORY_ICONS[category] ?? "target",
+    icon: CATEGORY_ICONS[category] ?? "flag",
     created_at: row.created_at,
     updated_at: row.updated_at,
   };

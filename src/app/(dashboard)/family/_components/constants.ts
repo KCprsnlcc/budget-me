@@ -101,7 +101,7 @@ export const NO_FAMILY_FEATURES = [
     description: "Real-time dashboards showing combined household income and spending.",
   },
   {
-    icon: "Target",
+    icon: "Flag",
     title: "Shared Goals",
     description: "Set and track milestones for vacations, house savings, or emergency funds.",
   },

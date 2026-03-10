@@ -14,6 +14,7 @@ import {
     Brain,
     ClipboardCheck,
     Wand2,
+    Flag,
     AlertTriangle,
     TrendingUp,
     Lightbulb,
@@ -23,7 +24,6 @@ import {
     PieChart,
     Wallet,
     Activity,
-    Target,
     Zap,
     TrendingDown,
     ArrowUp,
@@ -640,7 +640,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                             ) : (
                                 // AI Financial Intelligence - Comprehensive AI analysis
                                 [
-                                    { label: "Financial Health Summary", desc: "Comprehensive overview of current financial situation", icon: Target },
+                                    { label: "Financial Health Summary", desc: "Comprehensive overview of current financial situation", icon: Flag },
                                     { label: "Risk Assessment & Analysis", desc: "Identify financial risks with mitigation strategies", icon: AlertTriangle },
                                     { label: "Growth Potential Analysis", desc: "Discover opportunities for financial improvement", icon: TrendingUp },
                                     { label: "Personalized Recommendations", desc: "AI-powered actionable advice prioritized by impact", icon: Lightbulb },

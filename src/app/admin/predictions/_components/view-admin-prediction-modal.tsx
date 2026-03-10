@@ -21,7 +21,7 @@ import {
     BarChart3,
     CheckCircle2,
     AlertTriangle,
-    Sparkles,
+    Wand2 as Wand2Icon,
     Database,
     Activity,
     ArrowUp,
@@ -193,7 +193,7 @@ export function ViewAdminPredictionModal({
                                             <DetailRow
                                                 label="AI Service"
                                                 value={insight!.ai_service || "—"}
-                                                icon={Sparkles}
+                                                icon={Wand2Icon}
                                             />
                                             <DetailRow
                                                 label="Status"
@@ -675,7 +675,7 @@ export function ViewAdminPredictionModal({
                                             {/* AI Service Information */}
                                             <div className="bg-white border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <Sparkles size={14} className="text-violet-500" />AI Service Information
+                                                    <Wand2Icon size={14} className="text-violet-500" />AI Service Information
                                                 </h3>
                                                 <div className="space-y-2 text-xs">
                                                     <div className="flex justify-between">

@@ -7,7 +7,7 @@ import {
     Search,
     Filter,
     BarChart2,
-    Target,
+    Flag,
     FileText,
     TrendingUp,
     BrainCircuit,
@@ -69,7 +69,7 @@ function getReportTypeIcon(type: string): React.ComponentType<any> {
         case 'income-expense': return BarChart2;
         case 'savings': return PiggyBank;
         case 'trends': return TrendingUp;
-        case 'goals': return Target;
+        case 'goals': return Flag;
         case 'predictions': return BrainCircuit;
         case 'financial_intelligence': return BrainCircuit;
         default: return FileText;
@@ -394,7 +394,7 @@ export default function AdminAnalyticsPage() {
                 value: stats.activeUsers.toLocaleString(),
                 change: `Across all timeframes`,
                 trend: "up",
-                icon: Target
+                icon: Flag
             },
             {
                 label: "Avg Confidence Level",

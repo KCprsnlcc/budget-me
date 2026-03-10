@@ -23,7 +23,7 @@ export const GOAL_CATEGORIES = [
   { key: "house" as GoalCategory, label: "Housing", icon: "home-2", description: "Save for home purchase or renovation" },
   { key: "car" as GoalCategory, label: "Transportation", icon: "car", description: "Save for vehicle purchase or maintenance" },
   { key: "education" as GoalCategory, label: "Education", icon: "graduation-cap", description: "Fund education and learning expenses" },
-  { key: "retirement" as GoalCategory, label: "Retirement", icon: "target", description: "Build long-term retirement savings" },
+  { key: "retirement" as GoalCategory, label: "Retirement", icon: "flag", description: "Build long-term retirement savings" },
   { key: "debt" as GoalCategory, label: "Debt Payoff", icon: "trending-up", description: "Pay off loans and credit obligations" },
   { key: "general" as GoalCategory, label: "General", icon: "flag", description: "Other savings goals and objectives" },
 ];

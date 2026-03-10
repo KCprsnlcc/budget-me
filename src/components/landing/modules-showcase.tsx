@@ -14,7 +14,6 @@ import {
   Trophy,
   Bot,
   FileText,
-  Sparkles,
   Shield,
   Sliders,
   ArrowUpRight,
@@ -38,7 +37,6 @@ const ICON_MAP: Record<string, React.ElementType> = {
   TrendingUp,
   Brain,
   FileText,
-  Sparkles,
   Shield,
   Sliders,
 };
