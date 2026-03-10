@@ -248,11 +248,11 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
     useEffect(() => {
         if (open && session) {
             setLoadingMessages(true);
+            setIsInitialLoad(true);
             fetchUserChatMessages(session.user_id, 10).then(({ data, error, hasMore: more }) => {
                 if (!error) {
                     setMessages(data);
                     setHasMore(more);
-                    setIsInitialLoad(false);
                 }
                 setLoadingMessages(false);
             });
@@ -265,27 +265,27 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
 
     // Auto-scroll to bottom on initial load only
     useEffect(() => {
-        if (messages.length > 0 && !isInitialLoad) {
+        if (messages.length > 0 && isInitialLoad) {
             setTimeout(() => {
                 chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-                setIsInitialLoad(true);
+                setIsInitialLoad(false);
             }, 100);
         }
     }, [messages.length, isInitialLoad]);
 
     // Handle scroll for infinite loading
     const handleScroll = useCallback(() => {
-        if (!chatContainerRef.current || loadingMore || !hasMore) return;
+        if (!chatContainerRef.current || loadingMore || !hasMore || loadingMessages) return;
 
-        const { scrollTop } = chatContainerRef.current;
+        const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
 
         // Load more when scrolled near the top (within 100px) and not initial load
-        if (scrollTop < 100 && !isInitialLoad) {
+        if (scrollTop < 100 && !isInitialLoad && messages.length > 0) {
             setLoadingMore(true);
             
             // Get the oldest message timestamp
             const oldestMessage = messages[0];
-            if (!oldestMessage) {
+            if (!oldestMessage || !oldestMessage.created_at) {
                 setLoadingMore(false);
                 return;
             }
@@ -294,21 +294,26 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
 
             fetchUserChatMessages(session!.user_id, 10, beforeTimestamp).then(({ data, error, hasMore: more }) => {
                 if (!error && data.length > 0) {
+                    // Store current scroll position relative to bottom
+                    const scrollFromBottom = scrollHeight - scrollTop - clientHeight;
+                    
                     // Prepend older messages
                     setMessages(prev => [...data, ...prev]);
                     setHasMore(more);
                     
-                    // Maintain scroll position
+                    // Maintain scroll position after new messages are added
                     setTimeout(() => {
                         if (chatContainerRef.current) {
-                            chatContainerRef.current.scrollTop = 200;
+                            const newScrollHeight = chatContainerRef.current.scrollHeight;
+                            const newScrollTop = newScrollHeight - scrollFromBottom - clientHeight;
+                            chatContainerRef.current.scrollTop = Math.max(newScrollTop, 200);
                         }
                     }, 0);
                 }
                 setLoadingMore(false);
             });
         }
-    }, [messages, loadingMore, hasMore, session, isInitialLoad]);
+    }, [messages, loadingMore, hasMore, session, isInitialLoad, loadingMessages]);
 
     if (!session) return null;
 
