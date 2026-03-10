@@ -186,14 +186,14 @@ function MessagesSkeleton() {
                 {/* User message skeleton - right aligned */}
                 <div className="flex justify-end">
                     <div className="max-w-[90%] sm:max-w-[85%]">
-                        <Skeleton 
-                            height={56} 
-                            borderRadius={32} 
+                        <Skeleton
+                            height={56}
+                            borderRadius={32}
                             width={240}
                         />
                     </div>
                 </div>
-                
+
                 {/* Assistant message skeleton - left aligned, full width */}
                 <div className="flex justify-start">
                     <div className="flex-1 space-y-2">
@@ -203,18 +203,18 @@ function MessagesSkeleton() {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* User message skeleton */}
                 <div className="flex justify-end">
                     <div className="max-w-[90%] sm:max-w-[85%]">
-                        <Skeleton 
-                            height={48} 
-                            borderRadius={32} 
+                        <Skeleton
+                            height={48}
+                            borderRadius={32}
                             width={200}
                         />
                     </div>
                 </div>
-                
+
                 {/* Assistant message skeleton */}
                 <div className="flex justify-start">
                     <div className="flex-1 space-y-2">
@@ -285,7 +285,7 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
         if (!chatContainerRef.current || loadingMessages) return;
 
         const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
-        
+
         // Show scroll-to-bottom button when user is not near the bottom (more than 100px from bottom)
         // Use a smaller threshold to prevent flickering
         const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
@@ -297,7 +297,7 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
         // Load more when scrolled near the top (within 100px) and not initial load
         if (scrollTop < 100 && !isInitialLoad && messages.length > 0) {
             setLoadingMore(true);
-            
+
             // Get the oldest message timestamp
             const oldestMessage = messages[0];
             if (!oldestMessage || !oldestMessage.created_at) {
@@ -308,22 +308,24 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
             const beforeTimestamp = oldestMessage.created_at;
 
             fetchUserChatMessages(session!.user_id, 10, beforeTimestamp).then(({ data, error, hasMore: more }) => {
-                if (!error && data.length > 0) {
-                    // Store current scroll position relative to bottom
-                    const scrollFromBottom = scrollHeight - scrollTop - clientHeight;
-                    
-                    // Prepend older messages
-                    setMessages(prev => [...data, ...prev]);
+                if (!error) {
+                    if (data.length > 0) {
+                        // Store current scroll position relative to bottom
+                        const scrollFromBottom = scrollHeight - scrollTop - clientHeight;
+
+                        // Prepend older messages
+                        setMessages(prev => [...data, ...prev]);
+
+                        // Maintain scroll position after new messages are added
+                        setTimeout(() => {
+                            if (chatContainerRef.current) {
+                                const newScrollHeight = chatContainerRef.current.scrollHeight;
+                                const newScrollTop = newScrollHeight - scrollFromBottom - clientHeight;
+                                chatContainerRef.current.scrollTop = Math.max(newScrollTop, 200);
+                            }
+                        }, 0);
+                    }
                     setHasMore(more);
-                    
-                    // Maintain scroll position after new messages are added
-                    setTimeout(() => {
-                        if (chatContainerRef.current) {
-                            const newScrollHeight = chatContainerRef.current.scrollHeight;
-                            const newScrollTop = newScrollHeight - scrollFromBottom - clientHeight;
-                            chatContainerRef.current.scrollTop = Math.max(newScrollTop, 200);
-                        }
-                    }, 0);
                 }
                 setLoadingMore(false);
             });

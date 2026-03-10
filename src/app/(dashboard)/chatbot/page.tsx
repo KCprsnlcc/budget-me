@@ -272,22 +272,24 @@ export default function ChatbotPage() {
       const beforeTimestamp = oldestMessage.created_at;
 
       fetchChatHistory(user!.id, 10, beforeTimestamp, false).then(({ data, error, hasMore: more }) => {
-        if (!error && data.length > 0) {
-          // Store current scroll position relative to bottom
-          const scrollFromBottom = scrollHeight - scrollTop - clientHeight;
+        if (!error) {
+          if (data.length > 0) {
+            // Store current scroll position relative to bottom
+            const scrollFromBottom = scrollHeight - scrollTop - clientHeight;
 
-          // Prepend older messages
-          setMessages(prev => [...data, ...prev]);
+            // Prepend older messages
+            setMessages(prev => [...data, ...prev]);
+
+            // Maintain scroll position after new messages are added
+            setTimeout(() => {
+              if (messagesContainerRef.current) {
+                const newScrollHeight = messagesContainerRef.current.scrollHeight;
+                const newScrollTop = newScrollHeight - scrollFromBottom - clientHeight;
+                messagesContainerRef.current.scrollTop = Math.max(newScrollTop, 200);
+              }
+            }, 0);
+          }
           setHasMore(more);
-
-          // Maintain scroll position after new messages are added
-          setTimeout(() => {
-            if (messagesContainerRef.current) {
-              const newScrollHeight = messagesContainerRef.current.scrollHeight;
-              const newScrollTop = newScrollHeight - scrollFromBottom - clientHeight;
-              messagesContainerRef.current.scrollTop = Math.max(newScrollTop, 200);
-            }
-          }, 0);
         }
         setLoadingMore(false);
       });
