@@ -310,7 +310,7 @@ export async function fetchAdminAnalytics(
 export async function fetchAdminAnalyticsStats(): Promise<AdminAnalyticsStats | null> {
     const { data: reports, count: totalReports } = await supabase
         .from("ai_reports")
-        .select("report_type, confidence_level, accuracy_score, data_points, generation_time_ms, user_id", { count: "exact" });
+        .select("report_type, timeframe, confidence_level, accuracy_score, data_points, generation_time_ms, user_id", { count: "exact" });
 
     if (!reports) return null;
 
@@ -324,6 +324,7 @@ export async function fetchAdminAnalyticsStats(): Promise<AdminAnalyticsStats | 
     let validGenTimeCount = 0;
 
     const typeMap = new Map<string, number>();
+    const timeframeMap = new Map<string, number>();
     const userTotals = new Map<string, number>();
 
     for (const r of reports) {
@@ -335,6 +336,9 @@ export async function fetchAdminAnalyticsStats(): Promise<AdminAnalyticsStats | 
         // Aggregate types
         typeMap.set(r.report_type, (typeMap.get(r.report_type) ?? 0) + 1);
 
+        // Aggregate timeframes
+        timeframeMap.set(r.timeframe, (timeframeMap.get(r.timeframe) ?? 0) + 1);
+
         // Aggregate users
         if (r.user_id) {
             userTotals.set(r.user_id, (userTotals.get(r.user_id) ?? 0) + 1);
@@ -343,6 +347,12 @@ export async function fetchAdminAnalyticsStats(): Promise<AdminAnalyticsStats | 
 
     const reportTypeDistribution = Array.from(typeMap.entries()).map(([type, count]) => ({
         type: type || 'unknown',
+        count,
+        percentage: Math.round((count / (reports.length || 1)) * 100),
+    }));
+
+    const timeframeDistribution = Array.from(timeframeMap.entries()).map(([timeframe, count]) => ({
+        timeframe: timeframe || 'unknown',
         count,
         percentage: Math.round((count / (reports.length || 1)) * 100),
     }));
@@ -378,6 +388,7 @@ export async function fetchAdminAnalyticsStats(): Promise<AdminAnalyticsStats | 
         totalDataPointsAnalyzed,
         avgGenerationTimeMs: validGenTimeCount ? totalGenTime / validGenTimeCount : 0,
         reportTypeDistribution,
+        timeframeDistribution,
         activeUsers: userTotals.size,
         topUsers,
     };
