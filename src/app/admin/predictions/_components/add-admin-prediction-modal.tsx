@@ -1054,13 +1054,13 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                 </div>
             </ModalBody>
 
-            <ModalFooter className="px-4 sm:px-6 py-3 sm:py-4 sticky bottom-0 z-10 lg:static">
+            <ModalFooter className="flex justify-between">
                 {currentStep > 1 ? (
-                    <Button variant="outline" size="sm" onClick={handleBack} disabled={loading || generating} className="text-xs sm:text-sm">
-                        <ArrowLeft size={13} className="sm:w-[14px] sm:h-[14px]" /> Back
+                    <Button variant="secondary" size="sm" onClick={handleBack} disabled={loading || generating}>
+                        <ArrowLeft size={14} /> Back
                     </Button>
                 ) : (
-                    <Button variant="outline" size="sm" onClick={handleClose} disabled={loading || generating} className="text-xs sm:text-sm">
+                    <Button variant="secondary" size="sm" onClick={handleClose} disabled={loading || generating}>
                         Cancel
                     </Button>
                 )}
@@ -1069,14 +1069,14 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                         size="sm"
                         onClick={handleNext}
                         disabled={loading || generating}
-                        className="bg-emerald-500 hover:bg-emerald-600 text-xs sm:text-sm"
+                        className="bg-emerald-500 hover:bg-emerald-600"
                     >
                         {generating ? (
-                            <><Loader2 size={13} className="sm:w-[14px] sm:h-[14px] animate-spin" /> Generating...</>
+                            <><Loader2 size={14} className="animate-spin" /> Generating...</>
                         ) : currentStep === 3 ? (
-                            <><Brain size={13} className="sm:w-[14px] sm:h-[14px]" /> Generate & Continue</>
+                            <><Brain size={14} /> Generate & Continue</>
                         ) : (
-                            <>Continue <ArrowRight size={13} className="sm:w-[14px] sm:h-[14px]" /></>
+                            <>Continue <ArrowRight size={14} /></>
                         )}
                     </Button>
                 ) : (
@@ -1086,9 +1086,9 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                             handleClose();
                             onSuccess();
                         }}
-                        className="bg-emerald-500 hover:bg-emerald-600 text-xs sm:text-sm"
+                        className="bg-emerald-500 hover:bg-emerald-600"
                     >
-                        <Check size={13} className="sm:w-[14px] sm:h-[14px]" /> Done
+                        <Check size={14} /> Done
                     </Button>
                 )}
             </ModalFooter>
