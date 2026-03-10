@@ -15,6 +15,8 @@ export function useAdminFamilies() {
     const [statusFilter, setStatusFilter] = useState("");
     const [visibilityFilter, setVisibilityFilter] = useState("");
     const [userFilter, setUserFilter] = useState("");
+    const [month, setMonth] = useState<number | "all">("all");
+    const [year, setYear] = useState<number | "all">("all");
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -30,8 +32,10 @@ export function useAdminFamilies() {
             status: statusFilter || undefined,
             visibility: visibilityFilter || undefined,
             userId: userFilter || undefined,
+            month,
+            year,
         }),
-        [statusFilter, visibilityFilter, userFilter]
+        [statusFilter, visibilityFilter, userFilter, month, year]
     );
 
     // Fetch data
@@ -96,9 +100,12 @@ export function useAdminFamilies() {
     }, [families, search]);
 
     const resetFilters = useCallback(() => {
+        const now = new Date();
         setStatusFilter("");
         setVisibilityFilter("");
         setUserFilter("");
+        setMonth(now.getMonth() + 1);
+        setYear(now.getFullYear());
         setSearch("");
         setCurrentPage(1);
     }, []);
@@ -107,6 +114,8 @@ export function useAdminFamilies() {
         setStatusFilter("");
         setVisibilityFilter("");
         setUserFilter("");
+        setMonth("all");
+        setYear("all");
         setSearch("");
         setCurrentPage(1);
     }, []);
@@ -150,6 +159,10 @@ export function useAdminFamilies() {
         setVisibilityFilter,
         userFilter,
         setUserFilter,
+        month,
+        setMonth,
+        year,
+        setYear,
         resetFilters,
         resetFiltersToAll,
         refetch,

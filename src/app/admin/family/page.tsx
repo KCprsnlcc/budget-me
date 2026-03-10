@@ -64,6 +64,11 @@ type SummaryType = {
     icon?: React.ComponentType<any>;
 };
 
+const MONTH_NAMES = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+];
+
 function formatDate(dateStr: string): string {
     const d = new Date(dateStr);
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -289,6 +294,7 @@ export default function AdminFamilyPage() {
     const [hoveredBar, setHoveredBar] = useState<{ month: string, count: number } | null>(null);
     const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
     const exportDropdownRef = useRef<HTMLDivElement>(null);
+    const currentYear = new Date().getFullYear();
 
     // Close export dropdown when clicking outside
     useEffect(() => {
@@ -319,6 +325,8 @@ export default function AdminFamilyPage() {
         setVisibilityFilter,
         userFilter,
         setUserFilter,
+        month, setMonth,
+        year, setYear,
         resetFilters,
         resetFiltersToAll,
         refetch,
@@ -852,16 +860,23 @@ export default function AdminFamilyPage() {
 
                         <div className="grid grid-cols-2 md:grid-cols-3 xl:flex items-center gap-2 w-full xl:w-auto">
                             <FilterDropdown
-                                value={statusFilter}
-                                onChange={(value) => setStatusFilter(value)}
-                                options={[
-                                    { value: "active", label: "Active" },
-                                    { value: "inactive", label: "Inactive" },
-                                ]}
-                                placeholder="All Status"
-                                className="w-full text-xs sm:text-sm"
+                                value={month === "all" ? "" : month.toString()}
+                                onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
+                                options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
+                                placeholder="All Months"
+                                className="w-full text-slate-900 text-xs sm:text-sm"
                                 allowEmpty={true}
-                                emptyLabel="All Status"
+                                emptyLabel="All Months"
+                                hideSearch={true}
+                            />
+                            <FilterDropdown
+                                value={year === "all" ? "" : year.toString()}
+                                onChange={(value) => setYear(value === "" ? "all" : Number(value))}
+                                options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
+                                placeholder="All Years"
+                                className="w-full text-slate-900 text-xs sm:text-sm"
+                                allowEmpty={true}
+                                emptyLabel="All Years"
                                 hideSearch={true}
                             />
                             <FilterDropdown
@@ -876,16 +891,6 @@ export default function AdminFamilyPage() {
                                 allowEmpty={true}
                                 emptyLabel="All Visibility"
                                 hideSearch={true}
-                            />
-                            <FilterDropdown
-                                value={userFilter}
-                                onChange={(value) => setUserFilter(value)}
-                                options={users.map((u) => ({ value: u.id, label: u.email }))}
-                                placeholder="All Creators"
-                                className="w-full text-xs sm:text-sm"
-                                allowEmpty={true}
-                                emptyLabel="All Creators"
-                                hideSearch={false}
                             />
                         </div>
 

@@ -100,4 +100,6 @@ export type AdminFamilyFilters = {
     status?: string;
     visibility?: string; // "public" | "private"
     userId?: string; // creator
+    month?: number | "all";
+    year?: number | "all";
 };

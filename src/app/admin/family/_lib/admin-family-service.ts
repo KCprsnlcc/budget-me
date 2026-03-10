@@ -86,6 +86,13 @@ export async function fetchAdminFamilies(
     if (filters.userId) {
         query = query.eq("created_by", filters.userId);
     }
+    if (filters.month && filters.month !== "all") {
+        query = query.filter("created_at", "gte", new Date(filters.year && filters.year !== "all" ? Number(filters.year) : new Date().getFullYear(), Number(filters.month) - 1, 1).toISOString());
+        query = query.filter("created_at", "lt", new Date(filters.year && filters.year !== "all" ? Number(filters.year) : new Date().getFullYear(), Number(filters.month), 1).toISOString());
+    } else if (filters.year && filters.year !== "all") {
+        query = query.filter("created_at", "gte", new Date(Number(filters.year), 0, 1).toISOString());
+        query = query.filter("created_at", "lt", new Date(Number(filters.year) + 1, 0, 1).toISOString());
+    }
 
     // Pagination
     const from = (page - 1) * pageSize;

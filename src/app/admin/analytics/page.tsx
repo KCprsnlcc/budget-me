@@ -901,7 +901,7 @@ export default function AdminAnalyticsPage() {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
+                            <div className="grid grid-cols-2 md:grid-cols-3 xl:flex items-center gap-2 w-full xl:w-auto">
                                 <FilterDropdown
                                     value={month === "all" ? "" : month.toString()}
                                     onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
@@ -938,16 +938,6 @@ export default function AdminAnalyticsPage() {
                                     allowEmpty={true}
                                     emptyLabel="All Types"
                                     hideSearch={true}
-                                />
-                                <FilterDropdown
-                                    value={userFilter}
-                                    onChange={(value) => setUserFilter(value)}
-                                    options={users.map((u) => ({ value: u.id, label: u.email }))}
-                                    placeholder="All Users"
-                                    className="w-full text-xs sm:text-sm"
-                                    allowEmpty={true}
-                                    emptyLabel="All Users"
-                                    hideSearch={false}
                                 />
                             </div>
 
