@@ -210,23 +210,27 @@ const AnalyticsCard = memo(({
     onView: (u: UserAnalyticsSummary) => void;
     onDelete: (u: UserAnalyticsSummary) => void;
 }) => {
+    const mockUser: User = {
+        id: userSummary.user_id,
+        email: userSummary.user_email,
+        user_metadata: {
+            full_name: userSummary.user_name,
+            avatar_url: userSummary.user_avatar
+        },
+        app_metadata: {},
+        created_at: "",
+        aud: "authenticated"
+    } as User;
+
     return (
         <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                    <div className="relative">
-                        {userSummary.user_avatar ? (
-                            <img
-                                src={userSummary.user_avatar}
-                                alt={userSummary.user_name || userSummary.user_email}
-                                className="w-12 h-12 rounded-full object-cover border-2 border-emerald-100"
-                            />
-                        ) : (
-                            <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-lg font-bold text-emerald-600">
-                                {(userSummary.user_name || userSummary.user_email || "?").charAt(0).toUpperCase()}
-                            </div>
-                        )}
-                    </div>
+                    <UserAvatar 
+                        user={mockUser} 
+                        size="lg"
+                        className="ring-2 ring-white shadow-sm"
+                    />
                     <div>
                         <h4 className="text-sm font-semibold text-slate-900">{userSummary.user_name || "Unknown User"}</h4>
                         <p className="text-xs text-slate-500 truncate max-w-[200px]">{userSummary.user_email}</p>
@@ -280,21 +284,27 @@ const AnalyticsRow = memo(({
     onView: (u: UserAnalyticsSummary) => void;
     onDelete: (u: UserAnalyticsSummary) => void;
 }) => {
+    const mockUser: User = {
+        id: userSummary.user_id,
+        email: userSummary.user_email,
+        user_metadata: {
+            full_name: userSummary.user_name,
+            avatar_url: userSummary.user_avatar
+        },
+        app_metadata: {},
+        created_at: "",
+        aud: "authenticated"
+    } as User;
+
     return (
         <TableRow className="group hover:bg-slate-50/80 transition-colors">
             <TableCell className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                    {userSummary.user_avatar ? (
-                        <img
-                            src={userSummary.user_avatar}
-                            alt={userSummary.user_name || userSummary.user_email}
-                            className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200"
-                        />
-                    ) : (
-                        <div className="w-8 h-8 rounded-full shrink-0 bg-emerald-100 flex items-center justify-center text-xs font-medium text-emerald-600">
-                            {(userSummary.user_name || userSummary.user_email || "?").charAt(0).toUpperCase()}
-                        </div>
-                    )}
+                    <UserAvatar 
+                        user={mockUser} 
+                        size="md"
+                        className="ring-2 ring-white shadow-sm"
+                    />
                     <div className="min-w-0">
                         <p className="font-medium text-slate-900 text-sm truncate">{userSummary.user_name || "Unknown User"}</p>
                         <p className="text-slate-500 text-xs truncate">{userSummary.user_email}</p>
