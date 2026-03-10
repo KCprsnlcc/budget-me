@@ -11,8 +11,16 @@ import 'react-loading-skeleton/dist/skeleton.css'
 
 const PAGE_TITLES: Record<string, { category: string; title: string }> = {
   "/admin": { category: "Admin", title: "Dashboard" },
+  "/admin/dashboard": { category: "Admin", title: "Dashboard" },
   "/admin/users": { category: "Admin", title: "User Management" },
-  "/admin/analytics": { category: "Admin", title: "System Analytics" },
+  "/admin/analytics": { category: "Admin", title: "User Analytics" },
+  "/admin/budgets": { category: "Admin", title: "Budget Management" },
+  "/admin/transactions": { category: "Admin", title: "Transaction Management" },
+  "/admin/goals": { category: "Admin", title: "Goal Management" },
+  "/admin/predictions": { category: "Admin", title: "AI Predictions" },
+  "/admin/ai-usage": { category: "Admin", title: "AI Usage Management" },
+  "/admin/chatbot": { category: "Admin", title: "Chatbot Management" },
+  "/admin/family": { category: "Admin", title: "Family Management" },
   "/admin/settings": { category: "Admin", title: "System Settings" },
 };
 
