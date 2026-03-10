@@ -24,9 +24,6 @@ import {
     ChevronLeft,
     ChevronRight,
     Inbox,
-    MoreHorizontal,
-    Plus,
-    Edit,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,8 +38,6 @@ import {
 } from "@/components/ui/table";
 import { ViewAdminAnalyticsModal } from "./_components/view-admin-analytics-modal";
 import { DeleteAdminAnalyticsModal } from "./_components/delete-admin-analytics-modal";
-import { AddAdminAnalyticsModal } from "./_components/add-admin-analytics-modal";
-import { EditAdminAnalyticsModal } from "./_components/edit-admin-analytics-modal";
 import { useAdminAnalytics } from "./_lib/use-admin-analytics";
 import type { AdminAnalyticsReport } from "./_lib/types";
 import { FilterTableSkeleton, TransactionCardSkeleton as AnalyticsCardSkeleton } from "@/components/ui/skeleton-filter-loaders";
@@ -102,12 +97,10 @@ SummaryCard.displayName = "SummaryCard";
 const AnalyticsCard = memo(({
     report,
     onView,
-    onEdit,
     onDelete,
 }: {
     report: AdminAnalyticsReport;
     onView: (r: AdminAnalyticsReport) => void;
-    onEdit: (r: AdminAnalyticsReport) => void;
     onDelete: (r: AdminAnalyticsReport) => void;
 }) => {
     const Icon = getReportTypeIcon(report.report_type);
@@ -161,9 +154,6 @@ const AnalyticsCard = memo(({
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500" title="View Details" onClick={() => onView(report)}>
                         <Eye size={16} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500" title="Edit" onClick={() => onEdit(report)}>
-                        <Edit size={16} />
-                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" title="Delete" onClick={() => onDelete(report)}>
                         <Trash2 size={16} />
                     </Button>
@@ -178,12 +168,10 @@ AnalyticsCard.displayName = "AnalyticsCard";
 const AnalyticsRow = memo(({
     report,
     onView,
-    onEdit,
     onDelete,
 }: {
     report: AdminAnalyticsReport;
     onView: (r: AdminAnalyticsReport) => void;
-    onEdit: (r: AdminAnalyticsReport) => void;
     onDelete: (r: AdminAnalyticsReport) => void;
 }) => {
     return (
@@ -225,9 +213,6 @@ const AnalyticsRow = memo(({
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500" title="View Details" onClick={() => onView(report)}>
                         <Eye size={16} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500" title="Edit" onClick={() => onEdit(report)}>
-                        <Edit size={16} />
-                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-500" title="Delete" onClick={() => onDelete(report)}>
                         <Trash2 size={16} />
                     </Button>
@@ -242,8 +227,6 @@ AnalyticsRow.displayName = "AnalyticsRow";
 export default function AdminAnalyticsPage() {
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [addModalOpen, setAddModalOpen] = useState(false);
-    const [editModalOpen, setEditModalOpen] = useState(false);
     const [selectedReport, setSelectedReport] = useState<AdminAnalyticsReport | null>(null);
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
     const contentRef = useRef<HTMLDivElement>(null);
@@ -280,11 +263,6 @@ export default function AdminAnalyticsPage() {
     const handleView = useCallback((r: AdminAnalyticsReport) => {
         setSelectedReport(r);
         setViewModalOpen(true);
-    }, []);
-
-    const handleEdit = useCallback((r: AdminAnalyticsReport) => {
-        setSelectedReport(r);
-        setEditModalOpen(true);
     }, []);
 
     const handleDelete = useCallback((r: AdminAnalyticsReport) => {
@@ -378,39 +356,29 @@ export default function AdminAnalyticsPage() {
                     <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">System Analytics Management</h2>
                     <p className="text-xs sm:text-sm text-slate-500 mt-1 font-light">View and manage all system analytics data and AI reports.</p>
                 </div>
-                <div className="flex gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
-                    <div className="flex gap-2 order-1 w-full sm:w-auto">
-                        <div className="flex bg-slate-100 p-1 rounded-lg flex-1 sm:flex-none">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                                    }`}
-                                onClick={() => setViewMode('table')}
-                            >
-                                <TableIcon size={14} />
-                                <span className="hidden sm:inline ml-1">Table</span>
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                                    }`}
-                                onClick={() => setViewMode('grid')}
-                            >
-                                <Grid3X3 size={14} />
-                                <span className="hidden sm:inline ml-1">Grid</span>
-                            </Button>
-                        </div>
+                <div className="flex gap-2 order-1 w-full sm:w-auto">
+                    <div className="flex bg-slate-100 p-1 rounded-lg flex-1 sm:flex-none">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                }`}
+                            onClick={() => setViewMode('table')}
+                        >
+                            <TableIcon size={14} />
+                            <span className="hidden sm:inline ml-1">Table</span>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                }`}
+                            onClick={() => setViewMode('grid')}
+                        >
+                            <Grid3X3 size={14} />
+                            <span className="hidden sm:inline ml-1">Grid</span>
+                        </Button>
                     </div>
-                    <Button
-                        size="sm"
-                        className="bg-emerald-500 hover:bg-emerald-600 order-2 w-full sm:w-auto text-white"
-                        onClick={() => setAddModalOpen(true)}
-                    >
-                        <Plus size={14} />
-                        <span className="ml-1">Add Report</span>
-                    </Button>
                 </div>
             </div>
 
@@ -727,7 +695,6 @@ export default function AdminAnalyticsPage() {
                                             key={report.id}
                                             report={report}
                                             onView={handleView}
-                                            onEdit={handleEdit}
                                             onDelete={handleDelete}
                                         />
                                     ))}
@@ -743,7 +710,6 @@ export default function AdminAnalyticsPage() {
                                     key={report.id}
                                     report={report}
                                     onView={handleView}
-                                    onEdit={handleEdit}
                                     onDelete={handleDelete}
                                 />
                             ))}
@@ -810,17 +776,6 @@ export default function AdminAnalyticsPage() {
                 />
             )}
             {selectedReport && (
-                <EditAdminAnalyticsModal
-                    isOpen={editModalOpen}
-                    onClose={() => {
-                        setEditModalOpen(false);
-                        setSelectedReport(null);
-                    }}
-                    report={selectedReport}
-                    onUpdated={refetch}
-                />
-            )}
-            {selectedReport && (
                 <DeleteAdminAnalyticsModal
                     isOpen={deleteModalOpen}
                     onClose={() => {
@@ -831,11 +786,6 @@ export default function AdminAnalyticsPage() {
                     onDeleted={refetch}
                 />
             )}
-            <AddAdminAnalyticsModal
-                open={addModalOpen}
-                onClose={() => setAddModalOpen(false)}
-                onAdded={refetch}
-            />
         </div>
     );
 }

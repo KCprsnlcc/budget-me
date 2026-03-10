@@ -14,7 +14,7 @@ export async function fetchAdminAnalytics(
         .select(
             `
       *,
-      profiles!ai_reports_user_id_fkey ( email, full_name, avatar_url )
+      profiles ( email, full_name, avatar_url )
     `,
             { count: "exact" }
         )
