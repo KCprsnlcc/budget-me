@@ -20,13 +20,13 @@ import {
     Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
-import { Stepper } from "../../transactions/_components/stepper";
+import { Stepper } from "./stepper";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { AdminFamily, AdminFamilyMember } from "../_lib/types";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { fetchFamilyMembers } from "../_lib/admin-family-service";
 
-const STEPS = ["Overview", "Members", "Settings"];
+const STEPS = ["Overview", "Analysis"];
 
 interface ViewAdminFamilyModalProps {
     open: boolean;
@@ -91,7 +91,7 @@ export function ViewAdminFamilyModal({
                         Family Details
                     </span>
                     <span className="text-[10px] text-slate-400 font-medium tracking-wide">
-                        Step {step} of 3
+                        Step {step} of 2
                     </span>
                 </div>
             </ModalHeader>
@@ -188,11 +188,12 @@ export function ViewAdminFamilyModal({
                     </div>
                 )}
 
-                {/* STEP 2: Members */}
+                {/* STEP 2: Analysis */}
                 {step === 2 && (
                     <div className="space-y-6 animate-txn-in">
+                        {/* Family Members */}
                         <div>
-                            <h3 className="text-[15px] font-bold text-slate-900 mb-1">Family Members</h3>
+                            <h3 className="text-[15px] font-bold text-slate-900 mb-3">Family Members</h3>
                             <p className="text-xs text-slate-500 mb-4">
                                 {members.length} member{members.length !== 1 ? "s" : ""} in this family
                             </p>
@@ -248,28 +249,68 @@ export function ViewAdminFamilyModal({
                                 </div>
                             )}
                         </div>
-                    </div>
-                )}
 
-                {/* STEP 3: Settings */}
-                {step === 3 && (
-                    <div className="space-y-6 animate-txn-in">
-                        {/* Family Settings */}
+                        {/* Family Metadata */}
                         <div>
-                            <h3 className="text-[15px] font-bold text-slate-900 mb-3">Family Settings</h3>
+                            <h3 className="text-[15px] font-bold text-slate-900 mb-3">Family Metadata</h3>
                             <div className="space-y-2">
-                                <SettingRow
-                                    icon={Globe}
-                                    label="Visibility"
-                                    value={family.is_public ? "Public" : "Private"}
-                                    description={family.is_public ? "Anyone can discover and request to join" : "Only invited members can join"}
-                                />
-                                <SettingRow
-                                    icon={Users}
-                                    label="Max Members"
-                                    value={`${family.max_members}`}
-                                    description="Maximum number of members allowed"
-                                />
+                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
+                                            <Globe size={16} className="text-slate-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-slate-900">Visibility</div>
+                                            <div className="text-[10px] text-slate-400">
+                                                {family.is_public ? "Anyone can discover and request to join" : "Only invited members can join"}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs font-medium text-slate-600">
+                                        {family.is_public ? "Public" : "Private"}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
+                                            <Users size={16} className="text-slate-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-slate-900">Max Members</div>
+                                            <div className="text-[10px] text-slate-400">Maximum number of members allowed</div>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs font-medium text-slate-600">{family.max_members}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
+                                            <Clock size={16} className="text-slate-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-slate-900">Created</div>
+                                            <div className="text-[10px] text-slate-400">
+                                                {format(new Date(family.created_at), "MMM dd, yyyy 'at' h:mm a")}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
+                                            <Clock size={16} className="text-slate-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-slate-900">Last Updated</div>
+                                            <div className="text-[10px] text-slate-400">
+                                                {format(new Date(family.updated_at), "MMM dd, yyyy 'at' h:mm a")}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -299,29 +340,29 @@ export function ViewAdminFamilyModal({
             {/* Footer */}
             <ModalFooter className="flex justify-between">
                 {step > 1 ? (
-                    <Button variant="secondary" size="sm" onClick={() => setStep((s) => s - 1)}>
+                    <Button variant="secondary" size="sm" onClick={() => setStep(1)}>
                         <ArrowLeft size={14} /> Back
                     </Button>
                 ) : (
                     <div />
                 )}
-                {step < 3 ? (
-                    <Button
-                        size="sm"
-                        onClick={() => setStep((s) => s + 1)}
-                        className="bg-emerald-500 hover:bg-emerald-600"
-                    >
-                        {step === 1 ? "View Members" : "View Settings"} <ArrowRight size={14} />
-                    </Button>
-                ) : (
-                    <Button
-                        size="sm"
-                        onClick={() => setStep(1)}
-                        className="bg-emerald-500 hover:bg-emerald-600"
-                    >
-                        Back to Overview <ArrowLeft size={14} />
-                    </Button>
-                )}
+                <Button
+                    size="sm"
+                    onClick={() => {
+                        if (step === 2) {
+                            setStep(1);
+                        } else {
+                            setStep(2);
+                        }
+                    }}
+                    className="bg-emerald-500 hover:bg-emerald-600"
+                >
+                    {step === 2 ? (
+                        <>Back to Overview <ArrowLeft size={14} /></>
+                    ) : (
+                        <>View Analysis <ArrowRight size={14} /></>
+                    )}
+                </Button>
             </ModalFooter>
         </Modal>
     );
@@ -335,33 +376,6 @@ function DetailRow({ label, value, icon: Icon }: { label: string; value: string;
                 {label}
             </span>
             <span className="text-[13px] font-semibold text-slate-700">{value}</span>
-        </div>
-    );
-}
-
-function SettingRow({
-    icon: Icon,
-    label,
-    value,
-    description,
-}: {
-    icon: React.ElementType;
-    label: string;
-    value: string;
-    description: string;
-}) {
-    return (
-        <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
-            <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
-                    <Icon size={16} className="text-slate-600" />
-                </div>
-                <div>
-                    <div className="text-sm font-semibold text-slate-900">{label}</div>
-                    <div className="text-[10px] text-slate-400">{description}</div>
-                </div>
-            </div>
-            <span className="text-xs font-medium text-slate-600">{value}</span>
         </div>
     );
 }
