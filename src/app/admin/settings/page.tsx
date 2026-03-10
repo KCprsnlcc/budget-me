@@ -596,14 +596,12 @@ export default function AdminSettingsPage() {
                 {activeTab === "backups" && (
                     <div className="space-y-4 sm:space-y-6">
                         {/* Backup Action Information */}
-                        <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
-                            <div className="flex items-start gap-2 sm:gap-3">
-                                <Shield size={16} className="text-emerald-500 mt-0.5 flex-shrink-0 sm:w-[18px] sm:h-[18px]" />
-                                <div className="text-[10px] sm:text-xs text-slate-600 leading-relaxed">
-                                    Manual backups are stored within the Supabase infrastructure. Each backup inventories <span className="font-semibold">all system tables</span>, records row counts as metadata, and generates a unique checksum for verification.
-                                </div>
+                        <div className="flex items-start gap-2 sm:gap-3 px-1">
+                            <Shield size={16} className="text-slate-500 mt-0.5 flex-shrink-0 sm:w-[18px] sm:h-[18px]" />
+                            <div className="text-[10px] sm:text-xs text-slate-600 leading-relaxed">
+                                Manual backups are stored within the Supabase infrastructure. Each backup inventories <span className="font-semibold">all system tables</span>, records row counts as metadata, and generates a unique checksum for verification.
                             </div>
-                        </Card>
+                        </div>
 
                         {filteredBackupLogs.length === 0 ? (
                             <div className="text-center py-8 sm:py-12">
@@ -735,6 +733,14 @@ export default function AdminSettingsPage() {
                 {/* ─── Activity Log Tab ──────────────────────────────────────── */}
                 {activeTab === "activity" && (
                     <div className="space-y-4 sm:space-y-6">
+                        {/* Activity Log Information */}
+                        <div className="flex items-start gap-2 sm:gap-3 px-1">
+                            <Activity size={16} className="text-slate-500 mt-0.5 flex-shrink-0 sm:w-[18px] sm:h-[18px]" />
+                            <div className="text-[10px] sm:text-xs text-slate-600 leading-relaxed">
+                                System activity logs track all user actions and administrative operations. Each entry includes <span className="font-semibold">severity levels</span>, execution time, IP address, and detailed metadata for comprehensive audit trails.
+                            </div>
+                        </div>
+
                         {/* Activity Items */}
                         {filteredActivityLogs.length === 0 ? (
                             <div className="text-center py-8 sm:py-12">
