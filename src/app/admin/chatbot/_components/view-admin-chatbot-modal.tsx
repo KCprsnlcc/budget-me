@@ -22,7 +22,7 @@ import { fetchUserChatMessages } from "../_lib/admin-chatbot-service";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import Skeleton from "react-loading-skeleton";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 
 interface ViewAdminChatbotModalProps {
     open: boolean;
@@ -180,49 +180,51 @@ function ChatBubble({ message, copiedId, onCopy }: { message: AdminChatMessage; 
 
 function MessagesSkeleton() {
     return (
-        <div className="space-y-6 sm:space-y-8">
-            {/* User message skeleton - right aligned */}
-            <div className="flex justify-end">
-                <div className="max-w-[90%] sm:max-w-[85%]">
-                    <Skeleton 
-                        height={56} 
-                        borderRadius={32} 
-                        width={240}
-                    />
+        <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+            <div className="space-y-6 sm:space-y-8">
+                {/* User message skeleton - right aligned */}
+                <div className="flex justify-end">
+                    <div className="max-w-[90%] sm:max-w-[85%]">
+                        <Skeleton 
+                            height={56} 
+                            borderRadius={32} 
+                            width={240}
+                        />
+                    </div>
                 </div>
-            </div>
-            
-            {/* Assistant message skeleton - left aligned, full width */}
-            <div className="flex justify-start">
-                <div className="flex-1 space-y-2">
-                    <Skeleton height={96} borderRadius={32} />
-                    <div className="flex gap-2">
-                        <Skeleton width={16} height={16} circle />
+                
+                {/* Assistant message skeleton - left aligned, full width */}
+                <div className="flex justify-start">
+                    <div className="flex-1 space-y-2">
+                        <Skeleton height={96} borderRadius={32} />
+                        <div className="flex gap-2">
+                            <Skeleton width={16} height={16} circle />
+                        </div>
+                    </div>
+                </div>
+                
+                {/* User message skeleton */}
+                <div className="flex justify-end">
+                    <div className="max-w-[90%] sm:max-w-[85%]">
+                        <Skeleton 
+                            height={48} 
+                            borderRadius={32} 
+                            width={200}
+                        />
+                    </div>
+                </div>
+                
+                {/* Assistant message skeleton */}
+                <div className="flex justify-start">
+                    <div className="flex-1 space-y-2">
+                        <Skeleton height={140} borderRadius={32} />
+                        <div className="flex gap-2">
+                            <Skeleton width={16} height={16} circle />
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            {/* User message skeleton */}
-            <div className="flex justify-end">
-                <div className="max-w-[90%] sm:max-w-[85%]">
-                    <Skeleton 
-                        height={48} 
-                        borderRadius={32} 
-                        width={200}
-                    />
-                </div>
-            </div>
-            
-            {/* Assistant message skeleton */}
-            <div className="flex justify-start">
-                <div className="flex-1 space-y-2">
-                    <Skeleton height={140} borderRadius={32} />
-                    <div className="flex gap-2">
-                        <Skeleton width={16} height={16} circle />
-                    </div>
-                </div>
-            </div>
-        </div>
+        </SkeletonTheme>
     );
 }
 
@@ -399,19 +401,21 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
                         <div className="space-y-6 sm:space-y-8">
                             {/* Loading more indicator at top */}
                             {loadingMore && (
-                                <div className="space-y-4 sm:space-y-6">
-                                    {/* Skeleton for older messages being loaded */}
-                                    <div className="flex justify-end">
-                                        <div className="max-w-[90%] sm:max-w-[85%]">
-                                            <Skeleton height={48} borderRadius={32} width={200} />
+                                <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
+                                    <div className="space-y-4 sm:space-y-6">
+                                        {/* Skeleton for older messages being loaded */}
+                                        <div className="flex justify-end">
+                                            <div className="max-w-[90%] sm:max-w-[85%]">
+                                                <Skeleton height={48} borderRadius={32} width={200} />
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-start">
+                                            <div className="flex-1">
+                                                <Skeleton height={80} borderRadius={32} />
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="flex justify-start">
-                                        <div className="flex-1">
-                                            <Skeleton height={80} borderRadius={32} />
-                                        </div>
-                                    </div>
-                                </div>
+                                </SkeletonTheme>
                             )}
 
                             {Object.entries(groupedMessages).map(([dateKey, msgs]) => (
