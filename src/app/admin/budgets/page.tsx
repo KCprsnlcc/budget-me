@@ -50,8 +50,8 @@ import { FilterTableSkeleton } from "@/components/ui/skeleton-filter-loaders";
 import {
     exportAdminBudgetsToCSV,
     exportAdminBudgetsToPDF,
+    type BudgetAdminExportData as PDFBudgetAdminExportData,
 } from "@/lib/export-utils";
-import { type BudgetAdminExportData as PDFBudgetAdminExportData } from "@/lib/export-utils/pdf-admin-budgets";
 import { getSafeSkeletonCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User } from "@supabase/supabase-js";

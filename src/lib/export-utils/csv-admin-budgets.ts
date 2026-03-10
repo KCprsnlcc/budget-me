@@ -1,6 +1,6 @@
 import { exportToCSV } from "./csv-export";
 import { getTimestampString } from "./formatters";
-import type { BudgetAdminExportData } from "./pdf-admin-budgets";
+import type { BudgetAdminExportData } from "./types";
 
 /**
  * Export admin budgets as CSV

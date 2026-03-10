@@ -229,12 +229,12 @@ export interface AnalyticsAdminExportData extends Record<string, string | number
 export interface BudgetAdminExportData extends Record<string, string | number | boolean | null | undefined> {
   id: string;
   budget_name: string;
-  user_email: string;
+  user: string;
   category: string;
   amount: number;
   spent: number;
   remaining: number;
-  percentage: number;
+  period: string;
   status: string;
 }
 
