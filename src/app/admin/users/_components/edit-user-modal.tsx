@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { User, UserFormState } from "../_lib/types";
 import { updateUser } from "../_lib/user-service";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, ArrowRight, Check, User as UserIcon, Shield, ClipboardCheck, PenSquare, AlertTriangle } from "lucide-react";
+import { Loader2, ArrowLeft, ArrowRight, Check, User as UserIcon, Shield, ClipboardCheck, SquarePen as PenSquare, AlertTriangle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DateSelector } from "@/components/ui/date-selector";
 import { Stepper } from "./stepper";
@@ -80,8 +80,8 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
       toast.success("User updated successfully");
       handleClose();
       onSuccess();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to update user");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to update user");
     } finally {
       setLoading(false);
     }
@@ -101,10 +101,10 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
           </span>
         </div>
       </ModalHeader>
-      
+
       {/* Stepper */}
       <Stepper steps={STEPS} currentStep={currentStep} />
-      
+
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
         {/* Step 1: Role Type */}
         {currentStep === 1 && (
@@ -126,20 +126,18 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
                     key={value}
                     type="button"
                     onClick={() => setFormData({ ...formData, role: value as any })}
-                    className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${
-                      selected
-                        ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
-                        : "border-slate-200 hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
-                    }`}
+                    className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${selected
+                      ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
+                      : "border-slate-200 hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                      }`}
                     style={{ animationDelay: `${idx * 60}ms` }}
                   >
                     <div className="flex items-start gap-4">
                       <div
-                        className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white ${
-                          selected
-                            ? "text-slate-700 border-slate-200"
-                            : "text-slate-400 border-slate-100"
-                        }`}
+                        className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white ${selected
+                          ? "text-slate-700 border-slate-200"
+                          : "text-slate-400 border-slate-100"
+                          }`}
                       >
                         {value === "admin" ? <Shield size={18} /> : <UserIcon size={18} />}
                       </div>
@@ -148,9 +146,8 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
                         <p className="text-[11px] text-slate-500 leading-relaxed">{desc}</p>
                       </div>
                       <div
-                        className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
-                          selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
-                        }`}
+                        className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                          }`}
                       >
                         <Check size={10} />
                       </div>

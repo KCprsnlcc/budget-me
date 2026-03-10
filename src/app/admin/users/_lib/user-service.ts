@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { User, UserFormState, UserFilters, UserStats } from "./types";
 
 /**
@@ -12,7 +12,7 @@ export async function fetchUsers(
   pageSize: number = 10
 ): Promise<{ users: User[]; totalCount: number }> {
   const supabase = await createClient();
-  
+
   try {
     let query = supabase.from("profiles").select("*", { count: "exact" });
 
@@ -68,7 +68,7 @@ export async function fetchUsers(
  */
 export async function fetchUserStats(): Promise<UserStats> {
   const supabase = await createClient();
-  
+
   try {
     // Total users
     const { count: totalUsers } = await supabase
@@ -155,8 +155,8 @@ export async function fetchUserStats(): Promise<UserStats> {
  * Create a new user
  */
 export async function createUser(data: UserFormState): Promise<User> {
-  const supabase = await createClient();
-  
+  const supabase = await createAdminClient();
+
   try {
     // First, create the auth user with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
@@ -171,10 +171,12 @@ export async function createUser(data: UserFormState): Promise<User> {
     if (authError) throw authError;
     if (!authData.user) throw new Error("Failed to create auth user");
 
-    // Then update the profile with additional information
+    // Then upsert the profile with additional information
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .update({
+      .upsert({
+        id: authData.user.id,
+        email: data.email,
         full_name: data.full_name,
         role: data.role,
         phone: data.phone,
@@ -183,17 +185,18 @@ export async function createUser(data: UserFormState): Promise<User> {
         language: data.language,
         currency_preference: data.currency_preference,
         is_active: data.is_active,
+        updated_at: new Date().toISOString(),
       })
-      .eq("id", authData.user.id)
       .select()
       .single();
 
     if (profileError) throw profileError;
 
     return profile as User;
-  } catch (error) {
-    console.error("Error creating user:", error);
-    throw new Error(error instanceof Error ? error.message : "Failed to create user");
+  } catch (error: any) {
+    console.error("Detailed error creating user:", error);
+    const message = error?.message || error?.error_description || "An unexpected error occurred while creating the user";
+    throw new Error(message);
   }
 }
 
@@ -201,8 +204,8 @@ export async function createUser(data: UserFormState): Promise<User> {
  * Update an existing user
  */
 export async function updateUser(id: string, data: Partial<UserFormState>): Promise<User> {
-  const supabase = await createClient();
-  
+  const supabase = await createAdminClient();
+
   try {
     const updateData: any = {
       updated_at: new Date().toISOString(),
@@ -227,9 +230,10 @@ export async function updateUser(id: string, data: Partial<UserFormState>): Prom
     if (error) throw error;
 
     return updatedUser as User;
-  } catch (error) {
-    console.error("Error updating user:", error);
-    throw new Error("Failed to update user");
+  } catch (error: any) {
+    console.error("Detailed error updating user:", error);
+    const message = error?.message || error?.error_description || "An unexpected error occurred while updating the user";
+    throw new Error(message);
   }
 }
 
@@ -238,7 +242,7 @@ export async function updateUser(id: string, data: Partial<UserFormState>): Prom
  */
 export async function deactivateUser(id: string): Promise<void> {
   const supabase = await createClient();
-  
+
   try {
     const { error } = await supabase
       .from("profiles")
@@ -260,7 +264,7 @@ export async function deactivateUser(id: string): Promise<void> {
  */
 export async function activateUser(id: string): Promise<void> {
   const supabase = await createClient();
-  
+
   try {
     const { error } = await supabase
       .from("profiles")
@@ -282,7 +286,7 @@ export async function activateUser(id: string): Promise<void> {
  */
 export async function deleteUser(id: string): Promise<void> {
   const supabase = await createClient();
-  
+
   try {
     const { error } = await supabase.from("profiles").delete().eq("id", id);
 

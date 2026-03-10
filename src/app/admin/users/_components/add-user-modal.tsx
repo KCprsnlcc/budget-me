@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Stepper } from "./stepper";
 import { UserFormState } from "../_lib/types";
 import { createUser } from "../_lib/user-service";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, ArrowRight, Check, User as UserIcon, Shield, Key, Copy, CheckCircle, ClipboardCheck, PenSquare, AlertTriangle, Eye, EyeOff } from "lucide-react";
+import {
+  Loader2, ArrowLeft, ArrowRight, Check, User as UserIcon, Shield, Key, Copy,
+  CircleCheck, CheckCircle, ClipboardCheck, SquarePen as PenSquare, AlertTriangle, Eye, EyeOff,
+  Mail, Lock, Globe, Calendar as CalendarIcon, Clock, Smartphone,
+  CircleCheck as CircleCheck2, AlertCircle, X, ChevronRight
+} from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DateSelector } from "@/components/ui/date-selector";
 
@@ -31,19 +36,19 @@ function generatePassword(length: number = 16): string {
   const numbers = "0123456789";
   const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?";
   const allChars = uppercase + lowercase + numbers + symbols;
-  
+
   let password = "";
   // Ensure at least one of each type
   password += uppercase[Math.floor(Math.random() * uppercase.length)];
   password += lowercase[Math.floor(Math.random() * lowercase.length)];
   password += numbers[Math.floor(Math.random() * numbers.length)];
   password += symbols[Math.floor(Math.random() * symbols.length)];
-  
+
   // Fill the rest randomly
   for (let i = password.length; i < length; i++) {
     password += allChars[Math.floor(Math.random() * allChars.length)];
   }
-  
+
   // Shuffle the password
   return password.split('').sort(() => Math.random() - 0.5).join('');
 }
@@ -63,8 +68,15 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
     language: "en",
     currency_preference: "PHP",
     is_active: true,
-    password: generatePassword(),
+    password: "", // Start empty to avoid hydration mismatch
   });
+
+  // Set initial password on mount
+  useEffect(() => {
+    if (open && !formData.password) {
+      setFormData(prev => ({ ...prev, password: generatePassword() }));
+    }
+  }, [open, formData.password]);
 
   const handleClose = () => {
     setCurrentStep(1);
@@ -128,8 +140,8 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
       toast.success("User created successfully");
       handleClose();
       onSuccess();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create user");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to create user");
     } finally {
       setLoading(false);
     }
@@ -147,10 +159,10 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
           </span>
         </div>
       </ModalHeader>
-      
+
       {/* Stepper */}
       <Stepper steps={STEPS} currentStep={currentStep} />
-      
+
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
 
         {/* Step 1: Role Type */}
@@ -168,20 +180,18 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                     key={value}
                     type="button"
                     onClick={() => setFormData({ ...formData, role: value as any })}
-                    className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${
-                      selected
-                        ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
-                        : "border-slate-200 hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
-                    }`}
+                    className={`relative p-4 rounded-xl border cursor-pointer text-left transition-all duration-200 bg-white ${selected
+                      ? "border-emerald-500 shadow-[0_0_0_1px_#10b981]"
+                      : "border-slate-200 hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                      }`}
                     style={{ animationDelay: `${idx * 60}ms` }}
                   >
                     <div className="flex items-start gap-4">
                       <div
-                        className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white ${
-                          selected
-                            ? "text-slate-700 border-slate-200"
-                            : "text-slate-400 border-slate-100"
-                        }`}
+                        className={`w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 border transition-all duration-200 bg-white ${selected
+                          ? "text-slate-700 border-slate-200"
+                          : "text-slate-400 border-slate-100"
+                          }`}
                       >
                         {value === "admin" ? <Shield size={18} /> : <UserIcon size={18} />}
                       </div>
@@ -190,9 +200,8 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                         <p className="text-[11px] text-slate-500 leading-relaxed">{desc}</p>
                       </div>
                       <div
-                        className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
-                          selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
-                        }`}
+                        className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                          }`}
                       >
                         <Check size={10} />
                       </div>
