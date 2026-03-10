@@ -191,11 +191,11 @@ export function ViewAdminFamilyModal({
                 {/* STEP 2: Analysis */}
                 {step === 2 && (
                     <div className="space-y-6 animate-txn-in">
-                        {/* Family Members */}
+                        {/* Family Member Logs */}
                         <div>
-                            <h3 className="text-[15px] font-bold text-slate-900 mb-3">Family Members</h3>
+                            <h3 className="text-[15px] font-bold text-slate-900 mb-3">Family Member Logs</h3>
                             <p className="text-xs text-slate-500 mb-4">
-                                {members.length} member{members.length !== 1 ? "s" : ""} in this family
+                                {members.length} log{members.length !== 1 ? "s" : ""} &bull; {members.filter(m => m.status === "active").length} active member{members.filter(m => m.status === "active").length !== 1 ? "s" : ""}
                             </p>
 
                             {membersLoading ? (
