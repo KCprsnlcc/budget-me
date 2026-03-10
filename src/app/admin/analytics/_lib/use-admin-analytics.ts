@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { fetchAdminAnalytics, fetchAdminAnalyticsStats, fetchAllUsers } from "./admin-analytics-service";
-import type { AdminAnalyticsReport, AdminAnalyticsStats, AdminAnalyticsFilters } from "./types";
+import { fetchUserAnalyticsSummaries, fetchAdminAnalyticsStats, fetchAllUsers, fetchUserAnalyticsDetails } from "./admin-analytics-service";
+import type { UserAnalyticsSummary, UserAnalyticsDetails, AdminAnalyticsStats, AdminAnalyticsFilters } from "./types";
 
 export function useAdminAnalytics() {
-    const [reports, setReports] = useState<AdminAnalyticsReport[]>([]);
+    const [userSummaries, setUserSummaries] = useState<UserAnalyticsSummary[]>([]);
     const [stats, setStats] = useState<AdminAnalyticsStats | null>(null);
     const [users, setUsers] = useState<{ id: string; email: string; full_name: string | null }[]>([]);
     const [loading, setLoading] = useState(true);
@@ -48,17 +48,17 @@ export function useAdminAnalytics() {
         setError(null);
 
         try {
-            const [reportsResult, statsData, usersData] = await Promise.all([
-                fetchAdminAnalytics(filters, currentPage, pageSize),
+            const [summariesResult, statsData, usersData] = await Promise.all([
+                fetchUserAnalyticsSummaries(filters, currentPage, pageSize),
                 (stats && !forceRefreshStats) ? Promise.resolve(stats) : fetchAdminAnalyticsStats(),
                 users.length > 0 ? Promise.resolve(users) : fetchAllUsers(),
             ]);
 
-            if (reportsResult.error) {
-                setError(reportsResult.error);
+            if (summariesResult.error) {
+                setError(summariesResult.error);
             } else {
-                setReports(reportsResult.data);
-                setTotalCount(reportsResult.count ?? 0);
+                setUserSummaries(summariesResult.data);
+                setTotalCount(summariesResult.count ?? 0);
             }
 
             if (!stats || forceRefreshStats) setStats(statsData);
@@ -86,18 +86,15 @@ export function useAdminAnalytics() {
     }, [filters, currentPage, pageSize]);
 
     // Search filter (client-side)
-    const filteredReports = useMemo(() => {
-        if (!search) return reports;
+    const filteredUserSummaries = useMemo(() => {
+        if (!search) return userSummaries;
         const lowerSearch = search.toLowerCase();
-        return reports.filter(
-            (r) =>
-                r.report_type?.toLowerCase().includes(lowerSearch) ||
-                r.user_email?.toLowerCase().includes(lowerSearch) ||
-                r.user_name?.toLowerCase().includes(lowerSearch) ||
-                r.timeframe?.toLowerCase().includes(lowerSearch) ||
-                r.summary?.toLowerCase().includes(lowerSearch)
+        return userSummaries.filter(
+            (u) =>
+                u.user_email?.toLowerCase().includes(lowerSearch) ||
+                u.user_name?.toLowerCase().includes(lowerSearch)
         );
-    }, [reports, search]);
+    }, [userSummaries, search]);
 
     const resetFilters = useCallback(() => {
         const now = new Date();
@@ -142,7 +139,7 @@ export function useAdminAnalytics() {
     }, []);
 
     return {
-        reports: filteredReports,
+        userSummaries: filteredUserSummaries,
         stats,
         users,
         loading,

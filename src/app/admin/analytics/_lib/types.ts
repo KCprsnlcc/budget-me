@@ -1,5 +1,6 @@
-// Admin System Analytics Management Types
+// Admin User Analytics Management Types
 
+// Individual report record (for detailed view)
 export type AdminAnalyticsReport = {
     id: string;
     user_id: string;
@@ -27,6 +28,77 @@ export type AdminAnalyticsReport = {
     user_email?: string;
     user_name?: string;
     user_avatar?: string;
+};
+
+// Aggregated user analytics (one row per user in table)
+export type UserAnalyticsSummary = {
+    user_id: string;
+    user_email: string;
+    user_name?: string | null;
+    user_avatar?: string | null;
+    total_reports: number;
+    total_transactions: number;
+    active_budgets: number;
+    active_goals: number;
+    last_updated: string;
+    avg_confidence_level: number;
+    avg_accuracy_score: number;
+    total_data_points: number;
+    report_type_breakdown: { type: string; count: number }[];
+    anomaly_count: number;
+    has_ai_insights: boolean;
+};
+
+// Detailed user analytics (for view modal - mimics reports page)
+export type UserAnalyticsDetails = {
+    user_id: string;
+    user_email: string;
+    user_name?: string | null;
+    user_avatar?: string | null;
+    
+    // Summary stats (like reports page)
+    total_transactions: number;
+    active_budgets: number;
+    active_goals: number;
+    last_updated: string;
+    
+    // Report settings
+    report_settings: {
+        report_type: string;
+        timeframe: string;
+        chart_type: string;
+    };
+    
+    // Anomaly detection
+    anomalies: {
+        active: number;
+        resolved: number;
+        recent: Array<{
+            id: string;
+            type: string;
+            severity: string;
+            description: string;
+            detected_at: string;
+        }>;
+    };
+    
+    // AI insights
+    ai_insights: {
+        has_insights: boolean;
+        last_generated: string | null;
+        summary: string | null;
+        recommendations: string[] | null;
+    };
+    
+    // Charts data
+    charts: {
+        spending_by_category: any;
+        income_vs_expense: any;
+        trends: any;
+    };
+    
+    // All reports for this user
+    reports: AdminAnalyticsReport[];
 };
 
 export type AdminAnalyticsStats = {

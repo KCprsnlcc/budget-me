@@ -63,7 +63,7 @@ export const ADMIN_NAV: NavGroup[] = [
   {
     label: "System",
     items: [
-      { label: "System Analytics", href: "/admin/analytics", icon: "Activity", module: "admin-analytics" },
+      { label: "User Analytics", href: "/admin/analytics", icon: "Activity", module: "admin-analytics" },
       { label: "System Settings", href: "/admin/settings", icon: "Settings", module: "admin-settings" },
     ],
   },

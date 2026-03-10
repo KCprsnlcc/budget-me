@@ -1,9 +1,258 @@
 import { createClient } from "@/lib/supabase/client";
-import type { AdminAnalyticsReport, AdminAnalyticsStats, AdminAnalyticsFilters } from "./types";
+import type { AdminAnalyticsReport, AdminAnalyticsStats, AdminAnalyticsFilters, UserAnalyticsSummary, UserAnalyticsDetails } from "./types";
 
 const supabase = createClient();
 
-// Fetch all analytics with filters (admin view)
+// Fetch aggregated user analytics (one row per user)
+export async function fetchUserAnalyticsSummaries(
+    filters: AdminAnalyticsFilters = {},
+    page: number = 1,
+    pageSize: number = 20
+): Promise<{ data: UserAnalyticsSummary[]; error: string | null; count: number | null }> {
+    try {
+        // Build date filter
+        let dateFilter = '';
+        if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
+            const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
+            const endDate = new Date(filters.year, filters.month, 0);
+            const end = `${filters.year}-${String(filters.month).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}`;
+            dateFilter = `AND r.generated_at >= '${start}' AND r.generated_at <= '${end}'`;
+        } else if (filters.year !== "all" && filters.year) {
+            dateFilter = `AND r.generated_at >= '${filters.year}-01-01' AND r.generated_at <= '${filters.year}-12-31'`;
+        }
+
+        // Build additional filters
+        const reportTypeFilter = filters.report_type ? `AND r.report_type = '${filters.report_type}'` : '';
+        const timeframeFilter = filters.timeframe ? `AND r.timeframe = '${filters.timeframe}'` : '';
+        const userIdFilter = filters.userId ? `AND r.user_id = '${filters.userId}'` : '';
+
+        // Get aggregated user data with counts
+        const { data: userData, error: userError, count } = await supabase.rpc('get_user_analytics_summary', {
+            date_filter: dateFilter,
+            report_type_filter: reportTypeFilter,
+            timeframe_filter: timeframeFilter,
+            user_id_filter: userIdFilter,
+            page_num: page,
+            page_size: pageSize
+        });
+
+        if (userError) {
+            console.error("Error fetching user analytics:", userError);
+            // Fallback to manual aggregation if RPC doesn't exist
+            return await fetchUserAnalyticsSummariesFallback(filters, page, pageSize);
+        }
+
+        return { data: userData || [], error: null, count: count || 0 };
+    } catch (error) {
+        console.error("Error in fetchUserAnalyticsSummaries:", error);
+        // Fallback to manual aggregation
+        return await fetchUserAnalyticsSummariesFallback(filters, page, pageSize);
+    }
+}
+
+// Fallback method: Manual aggregation
+async function fetchUserAnalyticsSummariesFallback(
+    filters: AdminAnalyticsFilters = {},
+    page: number = 1,
+    pageSize: number = 20
+): Promise<{ data: UserAnalyticsSummary[]; error: string | null; count: number | null }> {
+    try {
+        // Fetch all reports with filters
+        let query = supabase
+            .from("ai_reports")
+            .select("*, profiles(email, full_name, avatar_url)");
+
+        // Apply date filters
+        if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
+            const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
+            const endDate = new Date(filters.year, filters.month, 0);
+            const end = `${filters.year}-${String(filters.month).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}`;
+            query = query.gte("generated_at", start).lte("generated_at", end);
+        } else if (filters.year !== "all" && filters.year) {
+            query = query.gte("generated_at", `${filters.year}-01-01`).lte("generated_at", `${filters.year}-12-31`);
+        }
+
+        if (filters.report_type) query = query.eq("report_type", filters.report_type);
+        if (filters.timeframe) query = query.eq("timeframe", filters.timeframe);
+        if (filters.userId) query = query.eq("user_id", filters.userId);
+
+        const { data: reports, error } = await query;
+        if (error) return { data: [], error: error.message, count: null };
+
+        // Group by user and aggregate
+        const userMap = new Map<string, UserAnalyticsSummary>();
+        
+        for (const report of reports || []) {
+            const userId = report.user_id;
+            const profile = report.profiles as any;
+            
+            if (!userMap.has(userId)) {
+                userMap.set(userId, {
+                    user_id: userId,
+                    user_email: profile?.email || 'Unknown',
+                    user_name: profile?.full_name,
+                    user_avatar: profile?.avatar_url,
+                    total_reports: 0,
+                    total_transactions: 0,
+                    active_budgets: 0,
+                    active_goals: 0,
+                    last_updated: report.generated_at || '',
+                    avg_confidence_level: 0,
+                    avg_accuracy_score: 0,
+                    total_data_points: 0,
+                    report_type_breakdown: [],
+                    anomaly_count: 0,
+                    has_ai_insights: false,
+                });
+            }
+
+            const userSummary = userMap.get(userId)!;
+            userSummary.total_reports++;
+            userSummary.total_data_points += report.data_points || 0;
+            
+            if (report.generated_at && report.generated_at > userSummary.last_updated) {
+                userSummary.last_updated = report.generated_at;
+            }
+        }
+
+        // Calculate averages and fetch additional data
+        for (const [userId, summary] of userMap.entries()) {
+            const userReports = (reports || []).filter(r => r.user_id === userId);
+            
+            const confidenceLevels = userReports.map(r => r.confidence_level).filter(Boolean);
+            const accuracyScores = userReports.map(r => r.accuracy_score).filter(Boolean);
+            
+            summary.avg_confidence_level = confidenceLevels.length > 0
+                ? confidenceLevels.reduce((a, b) => a + b, 0) / confidenceLevels.length
+                : 0;
+            summary.avg_accuracy_score = accuracyScores.length > 0
+                ? accuracyScores.reduce((a, b) => a + b, 0) / accuracyScores.length
+                : 0;
+
+            // Report type breakdown
+            const typeMap = new Map<string, number>();
+            userReports.forEach(r => {
+                typeMap.set(r.report_type, (typeMap.get(r.report_type) || 0) + 1);
+            });
+            summary.report_type_breakdown = Array.from(typeMap.entries()).map(([type, count]) => ({ type, count }));
+
+            // Check for AI insights
+            summary.has_ai_insights = userReports.some(r => r.insights || r.recommendations);
+
+            // Fetch additional user stats
+            const [transactionsResult, budgetsResult, goalsResult, anomaliesResult] = await Promise.all([
+                supabase.from("transactions").select("id", { count: "exact", head: true }).eq("user_id", userId),
+                supabase.from("budgets").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "active"),
+                supabase.from("goals").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "active"),
+                supabase.from("anomaly_alerts").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "active"),
+            ]);
+
+            summary.total_transactions = transactionsResult.count || 0;
+            summary.active_budgets = budgetsResult.count || 0;
+            summary.active_goals = goalsResult.count || 0;
+            summary.anomaly_count = anomaliesResult.count || 0;
+        }
+
+        const allUsers = Array.from(userMap.values()).sort((a, b) => 
+            new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime()
+        );
+
+        // Pagination
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize;
+        const paginatedUsers = allUsers.slice(from, to);
+
+        return { data: paginatedUsers, error: null, count: allUsers.length };
+    } catch (error) {
+        console.error("Error in fallback aggregation:", error);
+        return { data: [], error: error instanceof Error ? error.message : "Failed to fetch user analytics", count: null };
+    }
+}
+
+// Fetch detailed analytics for a specific user (for view modal)
+export async function fetchUserAnalyticsDetails(userId: string): Promise<{ data: UserAnalyticsDetails | null; error: string | null }> {
+    try {
+        // Fetch user profile
+        const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("email, full_name, avatar_url")
+            .eq("id", userId)
+            .single();
+
+        if (profileError) return { data: null, error: profileError.message };
+
+        // Fetch all reports for this user
+        const { data: reports, error: reportsError } = await supabase
+            .from("ai_reports")
+            .select("*")
+            .eq("user_id", userId)
+            .order("generated_at", { ascending: false });
+
+        if (reportsError) return { data: null, error: reportsError.message };
+
+        // Fetch additional data in parallel
+        const [transactionsResult, budgetsResult, goalsResult, anomaliesResult, resolvedAnomaliesResult] = await Promise.all([
+            supabase.from("transactions").select("*").eq("user_id", userId).order("date", { ascending: false }).limit(100),
+            supabase.from("budgets").select("*").eq("user_id", userId).eq("status", "active"),
+            supabase.from("goals").select("*").eq("user_id", userId).eq("status", "active"),
+            supabase.from("anomaly_alerts").select("*").eq("user_id", userId).eq("status", "active").order("detected_at", { ascending: false }),
+            supabase.from("anomaly_alerts").select("*").eq("user_id", userId).eq("status", "resolved").order("detected_at", { ascending: false }),
+        ]);
+
+        const latestReport = reports?.[0];
+        
+        const details: UserAnalyticsDetails = {
+            user_id: userId,
+            user_email: profile.email,
+            user_name: profile.full_name,
+            user_avatar: profile.avatar_url,
+            total_transactions: transactionsResult.count || 0,
+            active_budgets: budgetsResult.count || 0,
+            active_goals: goalsResult.count || 0,
+            last_updated: latestReport?.generated_at || new Date().toISOString(),
+            report_settings: {
+                report_type: latestReport?.report_type || 'spending',
+                timeframe: latestReport?.timeframe || 'month',
+                chart_type: 'pie',
+            },
+            anomalies: {
+                active: anomaliesResult.count || 0,
+                resolved: resolvedAnomaliesResult.count || 0,
+                recent: (anomaliesResult.data || []).slice(0, 5).map(a => ({
+                    id: a.id,
+                    type: a.anomaly_type,
+                    severity: a.severity,
+                    description: a.description,
+                    detected_at: a.detected_at,
+                })),
+            },
+            ai_insights: {
+                has_insights: reports?.some(r => r.insights || r.recommendations) || false,
+                last_generated: latestReport?.generated_at || null,
+                summary: latestReport?.summary || null,
+                recommendations: latestReport?.recommendations || null,
+            },
+            charts: {
+                spending_by_category: null, // Will be populated from transactions
+                income_vs_expense: null,
+                trends: null,
+            },
+            reports: (reports || []).map(r => ({
+                ...r,
+                user_email: profile.email,
+                user_name: profile.full_name,
+                user_avatar: profile.avatar_url,
+            })),
+        };
+
+        return { data: details, error: null };
+    } catch (error) {
+        console.error("Error fetching user analytics details:", error);
+        return { data: null, error: error instanceof Error ? error.message : "Failed to fetch user details" };
+    }
+}
+
+// Keep original function for backward compatibility
 export async function fetchAdminAnalytics(
     filters: AdminAnalyticsFilters = {},
     page: number = 1,

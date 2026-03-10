@@ -39,7 +39,7 @@ import {
 import { ViewAdminAnalyticsModal } from "./_components/view-admin-analytics-modal";
 import { DeleteAdminAnalyticsModal } from "./_components/delete-admin-analytics-modal";
 import { useAdminAnalytics } from "./_lib/use-admin-analytics";
-import type { AdminAnalyticsReport } from "./_lib/types";
+import type { UserAnalyticsSummary } from "./_lib/types";
 import { getSafeSkeletonCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User } from "@supabase/supabase-js";
@@ -202,66 +202,65 @@ const SummaryCard = memo(({ data }: { data: SummaryType }) => {
 SummaryCard.displayName = "SummaryCard";
 
 const AnalyticsCard = memo(({
-    report,
+    userSummary,
     onView,
     onDelete,
 }: {
-    report: AdminAnalyticsReport;
-    onView: (r: AdminAnalyticsReport) => void;
-    onDelete: (r: AdminAnalyticsReport) => void;
+    userSummary: UserAnalyticsSummary;
+    onView: (u: UserAnalyticsSummary) => void;
+    onDelete: (u: UserAnalyticsSummary) => void;
 }) => {
-    const Icon = getReportTypeIcon(report.report_type);
-
     return (
         <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                    <div className="text-lg">
-                        <Icon size={20} className="text-emerald-500" />
+                    <div className="relative">
+                        {userSummary.user_avatar ? (
+                            <img
+                                src={userSummary.user_avatar}
+                                alt={userSummary.user_name || userSummary.user_email}
+                                className="w-12 h-12 rounded-full object-cover border-2 border-emerald-100"
+                            />
+                        ) : (
+                            <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-lg font-bold text-emerald-600">
+                                {(userSummary.user_name || userSummary.user_email || "?").charAt(0).toUpperCase()}
+                            </div>
+                        )}
                     </div>
                     <div>
-                        <h4 className="text-sm font-semibold capitalize text-slate-900">{report.report_type.replace(/_/g, " ")}</h4>
-                        <div className="flex items-center gap-1.5 mt-1">
-                            {report.user_avatar ? (
-                                <img
-                                    src={report.user_avatar}
-                                    alt={report.user_name || report.user_email || "User"}
-                                    className="w-4 h-4 rounded-full object-cover"
-                                />
-                            ) : (
-                                <div className="w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center text-[8px] font-medium text-slate-600">
-                                    {(report.user_name || report.user_email || "?").charAt(0).toUpperCase()}
-                                </div>
-                            )}
-                            <p className="text-xs text-slate-500 min-w-0 truncate">{report.user_email ?? "Unknown User"}</p>
-                        </div>
+                        <h4 className="text-sm font-semibold text-slate-900">{userSummary.user_name || "Unknown User"}</h4>
+                        <p className="text-xs text-slate-500 truncate max-w-[200px]">{userSummary.user_email}</p>
                     </div>
                 </div>
                 <div className="flex flex-col items-end gap-2 text-right">
-                    <span className="text-xs font-medium text-blue-600 capitalize">
-                        {report.timeframe}
+                    <span className="text-xs font-medium text-blue-600">
+                        {userSummary.total_reports} reports
                     </span>
-                    <span className="text-[10px] text-slate-400">{formatDate(report.generated_at)}</span>
+                    <span className="text-[10px] text-slate-400">{formatDate(userSummary.last_updated)}</span>
                 </div>
             </div>
 
             <div className="flex justify-between items-center mt-2 border-t border-slate-50 pt-3">
                 <div className="flex items-center gap-4 text-xs">
                     <div className="flex items-center gap-1">
-                        <span className="text-slate-400">Score:</span>
-                        <span className="font-semibold text-slate-700">{report.accuracy_score ? `${report.accuracy_score}%` : 'N/A'}</span>
+                        <span className="text-slate-400">Trans:</span>
+                        <span className="font-semibold text-slate-700">{userSummary.total_transactions}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                        <span className="text-slate-400">Conf:</span>
-                        <span className="font-semibold text-slate-700">{report.confidence_level ? `${(report.confidence_level * 100).toFixed(0)}%` : 'N/A'}</span>
+                        <span className="text-slate-400">Budgets:</span>
+                        <span className="font-semibold text-slate-700">{userSummary.active_budgets}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <span className="text-slate-400">Goals:</span>
+                        <span className="font-semibold text-slate-700">{userSummary.active_goals}</span>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500" title="View Details" onClick={() => onView(report)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500" title="View Details" onClick={() => onView(userSummary)}>
                         <Eye size={16} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" title="Delete" onClick={() => onDelete(report)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" title="Delete" onClick={() => onDelete(userSummary)}>
                         <Trash2 size={16} />
                     </Button>
                 </div>
@@ -273,54 +272,54 @@ const AnalyticsCard = memo(({
 AnalyticsCard.displayName = "AnalyticsCard";
 
 const AnalyticsRow = memo(({
-    report,
+    userSummary,
     onView,
     onDelete,
 }: {
-    report: AdminAnalyticsReport;
-    onView: (r: AdminAnalyticsReport) => void;
-    onDelete: (r: AdminAnalyticsReport) => void;
+    userSummary: UserAnalyticsSummary;
+    onView: (u: UserAnalyticsSummary) => void;
+    onDelete: (u: UserAnalyticsSummary) => void;
 }) => {
     return (
         <TableRow className="group hover:bg-slate-50/80 transition-colors">
-            <TableCell className="px-6 py-4 text-slate-400 text-xs">{formatDate(report.generated_at)}</TableCell>
             <TableCell className="px-6 py-4">
-                <span className="font-medium text-slate-900 capitalize text-sm">{report.report_type.replace(/_/g, " ")}</span>
-            </TableCell>
-            <TableCell className="px-6 py-4">
-                <div className="flex items-center gap-2 max-w-[150px]">
-                    {report.user_avatar ? (
+                <div className="flex items-center gap-3">
+                    {userSummary.user_avatar ? (
                         <img
-                            src={report.user_avatar}
-                            alt={report.user_name || report.user_email || "User"}
-                            className="w-6 h-6 rounded-full object-cover shrink-0"
+                            src={userSummary.user_avatar}
+                            alt={userSummary.user_name || userSummary.user_email}
+                            className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200"
                         />
                     ) : (
-                        <div className="w-6 h-6 rounded-full shrink-0 bg-slate-200 flex items-center justify-center text-[10px] font-medium text-slate-600">
-                            {(report.user_name || report.user_email || "?").charAt(0).toUpperCase()}
+                        <div className="w-8 h-8 rounded-full shrink-0 bg-emerald-100 flex items-center justify-center text-xs font-medium text-emerald-600">
+                            {(userSummary.user_name || userSummary.user_email || "?").charAt(0).toUpperCase()}
                         </div>
                     )}
-                    <span className="text-slate-500 text-sm truncate">{report.user_email ?? "Unknown"}</span>
+                    <div className="min-w-0">
+                        <p className="font-medium text-slate-900 text-sm truncate">{userSummary.user_name || "Unknown User"}</p>
+                        <p className="text-slate-500 text-xs truncate">{userSummary.user_email}</p>
+                    </div>
                 </div>
-            </TableCell>
-            <TableCell className="px-6 py-4">
-                <span className="text-xs font-medium text-blue-600 capitalize">
-                    {report.timeframe}
-                </span>
             </TableCell>
             <TableCell className="px-6 py-4 text-center">
-                <div className="flex gap-3 justify-center text-xs">
-                    <span className="font-medium text-slate-700">{report.accuracy_score ? `${report.accuracy_score}%` : '—'}</span>
-                    <span className="text-slate-300">|</span>
-                    <span className="font-medium text-slate-700">{report.confidence_level ? `${(report.confidence_level * 100).toFixed(0)}%` : '—'}</span>
-                </div>
+                <span className="font-medium text-slate-900 text-sm">{userSummary.total_reports}</span>
             </TableCell>
+            <TableCell className="px-6 py-4 text-center">
+                <span className="text-slate-700 text-sm">{userSummary.total_transactions}</span>
+            </TableCell>
+            <TableCell className="px-6 py-4 text-center">
+                <span className="text-slate-700 text-sm">{userSummary.active_budgets}</span>
+            </TableCell>
+            <TableCell className="px-6 py-4 text-center">
+                <span className="text-slate-700 text-sm">{userSummary.active_goals}</span>
+            </TableCell>
+            <TableCell className="px-6 py-4 text-slate-400 text-xs">{formatDate(userSummary.last_updated)}</TableCell>
             <TableCell className="px-6 py-4">
                 <div className="flex items-center justify-end gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500" title="View Details" onClick={() => onView(report)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500" title="View Details" onClick={() => onView(userSummary)}>
                         <Eye size={16} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-500" title="Delete" onClick={() => onDelete(report)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-500" title="Delete" onClick={() => onDelete(userSummary)}>
                         <Trash2 size={16} />
                     </Button>
                 </div>
@@ -334,13 +333,13 @@ AnalyticsRow.displayName = "AnalyticsRow";
 export default function AdminAnalyticsPage() {
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [selectedReport, setSelectedReport] = useState<AdminAnalyticsReport | null>(null);
+    const [selectedUserSummary, setSelectedUserSummary] = useState<UserAnalyticsSummary | null>(null);
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
     const contentRef = useRef<HTMLDivElement>(null);
     const [hoveredBar, setHoveredBar] = useState<{ month: string, count: number } | null>(null);
 
     const {
-        reports,
+        userSummaries,
         stats,
         users,
         loading,
@@ -368,13 +367,13 @@ export default function AdminAnalyticsPage() {
         previousPage,
     } = useAdminAnalytics();
 
-    const handleView = useCallback((r: AdminAnalyticsReport) => {
-        setSelectedReport(r);
+    const handleView = useCallback((u: UserAnalyticsSummary) => {
+        setSelectedUserSummary(u);
         setViewModalOpen(true);
     }, []);
 
-    const handleDelete = useCallback((r: AdminAnalyticsReport) => {
-        setSelectedReport(r);
+    const handleDelete = useCallback((u: UserAnalyticsSummary) => {
+        setSelectedUserSummary(u);
         setDeleteModalOpen(true);
     }, []);
 
@@ -531,8 +530,8 @@ export default function AdminAnalyticsPage() {
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
                     <div>
-                        <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">System Analytics Management</h2>
-                        <p className="text-xs sm:text-sm text-slate-500 mt-1 font-light">View and manage all system analytics data and AI reports.</p>
+                        <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">User Analytics Management</h2>
+                        <p className="text-xs sm:text-sm text-slate-500 mt-1 font-light">View and manage user analytics data and AI-generated reports.</p>
                     </div>
                     <div className="flex gap-2 order-1 w-full sm:w-auto">
                         <div className="flex bg-slate-100 p-1 rounded-lg flex-1 sm:flex-none">
@@ -857,12 +856,12 @@ export default function AdminAnalyticsPage() {
                 )}
 
                 {/* Analytics Display */}
-                {reports.length === 0 && !loading && !tableLoading ? (
+                {userSummaries.length === 0 && !loading && !tableLoading ? (
                     <Card className="p-12 text-center">
                         <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
-                        <h3 className="text-sm font-semibold text-slate-700 mb-1">No analytics reports found</h3>
+                        <h3 className="text-sm font-semibold text-slate-700 mb-1">No user analytics found</h3>
                         <p className="text-xs text-slate-400 mb-4">
-                            {search ? "Try adjusting your search or filters." : "No reports available in the database."}
+                            {search ? "Try adjusting your search or filters." : "No user data available in the database."}
                         </p>
                     </Card>
                 ) : viewMode === 'table' ? (
@@ -871,15 +870,12 @@ export default function AdminAnalyticsPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="px-6 py-3">
-                                            <div className="flex items-center gap-1">
-                                                Date <MoreHorizontal size={12} className="rotate-90" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead className="px-6 py-3">Type</TableHead>
                                         <TableHead className="px-6 py-3">User</TableHead>
-                                        <TableHead className="px-6 py-3">Timeframe</TableHead>
-                                        <TableHead className="px-6 py-3 text-center">Accuracy | Confidence</TableHead>
+                                        <TableHead className="px-6 py-3 text-center">Total Reports</TableHead>
+                                        <TableHead className="px-6 py-3 text-center">Transactions</TableHead>
+                                        <TableHead className="px-6 py-3 text-center">Budgets</TableHead>
+                                        <TableHead className="px-6 py-3 text-center">Goals</TableHead>
+                                        <TableHead className="px-6 py-3">Last Updated</TableHead>
                                         <TableHead className="px-6 py-3 text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -893,25 +889,22 @@ export default function AdminAnalyticsPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
-                                            <div className="flex items-center gap-1">
-                                                Date <MoreHorizontal size={12} className="rotate-90" />
-                                            </div>
-                                        </TableHead>
-                                        <TableHead className="px-6 py-3">Type</TableHead>
                                         <TableHead className="px-6 py-3">User</TableHead>
-                                        <TableHead className="px-6 py-3">Timeframe</TableHead>
-                                        <TableHead className="px-6 py-3 text-center">Accuracy | Confidence</TableHead>
+                                        <TableHead className="px-6 py-3 text-center">Total Reports</TableHead>
+                                        <TableHead className="px-6 py-3 text-center">Transactions</TableHead>
+                                        <TableHead className="px-6 py-3 text-center">Budgets</TableHead>
+                                        <TableHead className="px-6 py-3 text-center">Goals</TableHead>
+                                        <TableHead className="px-6 py-3">Last Updated</TableHead>
                                         <TableHead className="px-6 py-3 text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {reports.length === 0 ? (
+                                    {userSummaries.length === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={6} className="px-6 py-12 text-center">
+                                            <TableCell colSpan={7} className="px-6 py-12 text-center">
                                                 <div className="flex flex-col items-center justify-center">
                                                     <Inbox size={32} className="text-slate-300 mb-2" />
-                                                    <p className="text-sm text-slate-500">No reports match your filters</p>
+                                                    <p className="text-sm text-slate-500">No users match your filters</p>
                                                     <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
                                                         Clear Filters
                                                     </Button>
@@ -919,10 +912,10 @@ export default function AdminAnalyticsPage() {
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        reports.map((report) => (
+                                        userSummaries.map((userSummary) => (
                                             <AnalyticsRow
-                                                key={report.id}
-                                                report={report}
+                                                key={userSummary.user_id}
+                                                userSummary={userSummary}
                                                 onView={handleView}
                                                 onDelete={handleDelete}
                                             />
@@ -942,21 +935,21 @@ export default function AdminAnalyticsPage() {
                     <>
                         {/* Grid View (Desktop) */}
                         <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {reports.length === 0 ? (
+                            {userSummaries.length === 0 ? (
                                 <div className="col-span-full">
                                     <Card className="p-12 text-center">
                                         <Inbox size={32} className="text-slate-300 mb-2" />
-                                        <p className="text-sm text-slate-500">No reports match your filters</p>
+                                        <p className="text-sm text-slate-500">No users match your filters</p>
                                         <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
                                             Clear Filters
                                         </Button>
                                     </Card>
                                 </div>
                             ) : (
-                                reports.map((report) => (
+                                userSummaries.map((userSummary) => (
                                     <AnalyticsCard
-                                        key={report.id}
-                                        report={report}
+                                        key={userSummary.user_id}
+                                        userSummary={userSummary}
                                         onView={handleView}
                                         onDelete={handleDelete}
                                     />
@@ -966,19 +959,19 @@ export default function AdminAnalyticsPage() {
 
                         {/* Grid View (Mobile) */}
                         <div className="md:hidden space-y-4">
-                            {reports.length === 0 ? (
+                            {userSummaries.length === 0 ? (
                                 <Card className="p-12 text-center">
                                     <Inbox size={32} className="text-slate-300 mb-2" />
-                                    <p className="text-sm text-slate-500">No reports match your filters</p>
+                                    <p className="text-sm text-slate-500">No users match your filters</p>
                                     <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
                                         Clear Filters
                                     </Button>
                                 </Card>
                             ) : (
-                                reports.map((report) => (
+                                userSummaries.map((userSummary) => (
                                     <AnalyticsCard
-                                        key={report.id}
-                                        report={report}
+                                        key={userSummary.user_id}
+                                        userSummary={userSummary}
                                         onView={handleView}
                                         onDelete={handleDelete}
                                     />
@@ -989,10 +982,10 @@ export default function AdminAnalyticsPage() {
                 )}
 
                 {/* Pagination */}
-                {!loading && !tableLoading && !error && reports.length > 0 && (
+                {!loading && !tableLoading && !error && userSummaries.length > 0 && (
                     <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0">
                         <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
-                            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} reports
+                            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} users
                         </div>
                         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
                             {totalPages > 1 && (
@@ -1064,24 +1057,24 @@ export default function AdminAnalyticsPage() {
             </div>
 
             {/* Modals */}
-            {selectedReport && (
+            {selectedUserSummary && (
                 <ViewAdminAnalyticsModal
                     isOpen={viewModalOpen}
                     onClose={() => {
                         setViewModalOpen(false);
-                        setSelectedReport(null);
+                        setSelectedUserSummary(null);
                     }}
-                    report={selectedReport}
+                    userSummary={selectedUserSummary}
                 />
             )}
-            {selectedReport && (
+            {selectedUserSummary && (
                 <DeleteAdminAnalyticsModal
                     isOpen={deleteModalOpen}
                     onClose={() => {
                         setDeleteModalOpen(false);
-                        setSelectedReport(null);
+                        setSelectedUserSummary(null);
                     }}
-                    report={selectedReport}
+                    userSummary={selectedUserSummary}
                     onDeleted={refetch}
                 />
             )}
