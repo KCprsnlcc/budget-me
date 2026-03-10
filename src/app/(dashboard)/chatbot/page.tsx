@@ -44,6 +44,7 @@ import {
   fetchChatHistory,
   clearChatHistory,
   fetchAvailableModels,
+  fetchMessageContent,
   AVAILABLE_MODELS,
   getDefaultModel,
   saveWelcomeMessage,
@@ -142,8 +143,8 @@ export default function ChatbotPage() {
           }
         }
 
-        // Fetch chat history from Supabase
-        const { data: history, error: historyError, hasMore: more } = await fetchChatHistory(user.id, 10);
+        // Fetch chat history from Supabase - Load recent messages with full content
+        const { data: history, error: historyError, hasMore: more } = await fetchChatHistory(user.id, 5, undefined, false);
         if (!historyError && history && history.length > 0) {
           // Filter out any messages with empty content
           const validMessages = history.filter(msg => msg.content && msg.content.trim() !== "");
@@ -259,7 +260,7 @@ export default function ChatbotPage() {
 
       const beforeTimestamp = oldestMessage.created_at;
 
-      fetchChatHistory(user.id, 10, beforeTimestamp).then(({ data, error, hasMore: more }) => {
+      fetchChatHistory(user.id, 10, beforeTimestamp, false).then(({ data, error, hasMore: more }) => {
         if (!error && data.length > 0) {
           // Prepend older messages
           setMessages(prev => [...data, ...prev]);

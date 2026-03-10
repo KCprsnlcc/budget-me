@@ -398,16 +398,71 @@ export async function saveWelcomeMessage(userId: string, userProfile?: { fullNam
 }
 
 // Fetch chat history from database with pagination
+/**
+ * Fetches content for specific messages by their IDs.
+ * Used for lazy loading message content when messages come into view.
+ * 
+ * @param messageIds - Array of message IDs to fetch content for
+ * @returns Promise with message content mapped by ID
+ */
+export async function fetchMessageContent(
+  messageIds: string[]
+): Promise<{ data: Record<string, string>; error: string | null }> {
+  try {
+    if (messageIds.length === 0) {
+      return { data: {}, error: null };
+    }
+
+    const { data, error } = await supabase
+      .from("chatbot_messages")
+      .select("id, content")
+      .in("id", messageIds);
+
+    if (error) {
+      return { data: {}, error: error.message };
+    }
+
+    // Map content by message ID
+    const contentMap: Record<string, string> = {};
+    (data || []).forEach((row) => {
+      contentMap[row.id] = row.content || "";
+    });
+
+    return { data: contentMap, error: null };
+  } catch (err) {
+    return { data: {}, error: err instanceof Error ? err.message : "Failed to fetch message content" };
+  }
+}
+
+/**
+ * Fetches chat history with optimized loading strategy.
+ * 
+ * OPTIMIZATION: This function now supports two loading modes:
+ * 1. Metadata-only mode: Loads only essential fields (id, role, timestamp, model) for initial page load
+ * 2. Full content mode: Loads complete message content when needed
+ * 
+ * @param userId - The user ID to fetch chat history for
+ * @param limit - Number of messages to fetch
+ * @param before - Timestamp to fetch messages before (for pagination)
+ * @param metadataOnly - If true, only loads essential fields without content
+ * @returns Promise with message data, error status, and hasMore flag
+ */
 export async function fetchChatHistory(
   userId: string, 
   limit: number = 20, 
-  before?: string
+  before?: string,
+  metadataOnly: boolean = false
 ): Promise<{ data: MessageType[]; error: string | null; hasMore: boolean }> {
   try {
+    // Select fields based on loading mode
+    const selectFields = metadataOnly 
+      ? "id, role, created_at, model, suggestions, attachment"
+      : "*";
+
     // Check if chatbot_messages table exists
     let query = supabase
       .from("chatbot_messages")
-      .select("*")
+      .select(selectFields)
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(limit + 1); // Fetch one extra to check if there are more
@@ -435,7 +490,7 @@ export async function fetchChatHistory(
     const mappedMessages: MessageType[] = messages.map((row) => ({
       id: row.id,
       role: row.role as "assistant" | "user",
-      content: row.content,
+      content: metadataOnly ? "" : row.content, // Empty content in metadata-only mode
       timestamp: new Date(row.created_at).toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
@@ -444,6 +499,7 @@ export async function fetchChatHistory(
       suggestions: row.suggestions || [],
       attachment: row.attachment || undefined,
       created_at: row.created_at, // Keep for pagination
+      isContentLoaded: !metadataOnly, // Track if content is loaded
     }));
 
     // Reverse to show oldest first

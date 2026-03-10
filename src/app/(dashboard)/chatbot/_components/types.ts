@@ -14,6 +14,7 @@ export type MessageType = {
     url?: string;
   };
   created_at?: string; // For pagination
+  isContentLoaded?: boolean; // Track if message content is loaded (for lazy loading)
 };
 
 export type AIModel = {
