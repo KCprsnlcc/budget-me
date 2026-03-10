@@ -1,21 +1,7 @@
 import { createBasePDF, addPDFTable } from "./pdf-base";
 import { COLORS } from "./constants";
 import { formatCurrencyPHP, getTimestampString } from "./formatters";
-
-/**
- * Admin Budget Export interface
- */
-export interface BudgetAdminExportData extends Record<string, string | number | boolean | null | undefined> {
-    id: string;
-    budget_name: string;
-    user: string;
-    amount: number;
-    spent: number;
-    remaining: number;
-    period: string;
-    status: string;
-    category: string;
-}
+import type { BudgetAdminExportData } from "./types";
 
 /**
  * Export admin budgets as PDF
