@@ -597,7 +597,7 @@ try {
      <body>
        <div class="no-print">
          <p style="margin: 0 0 12px 0; color: #475569;">Press the button below or use Ctrl+P (Cmd+P on Mac) to save as PDF</p>
-         <button onclick="window.print()">🖨️ Print to PDF</button>
+         <button onclick="window.print()">Print to PDF</button>
        </div>
        <div class="header">
          <h1>BudgetSense AI Conversation</h1>

@@ -161,7 +161,7 @@ The predictions page (`src/app/(dashboard)/predictions/page.tsx`) provides advan
 - **Monthly Aggregation**: Groups transactions by month for analysis
 - **Exponential Smoothing**: Core forecasting algorithm with alpha parameter (0.3)
 - **Confidence Calculation**: Prophet-style confidence intervals with 95% z-score
-- **Random Variation**: Small random factors (±2-5%) for realistic predictions
+- **Random Variation**: Small random factors (+/-2-5%) for realistic predictions
 
 ### Performance Optimizations
 - **Lazy Loading**: Predictions generated only on user request

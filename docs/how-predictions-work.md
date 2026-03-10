@@ -408,8 +408,8 @@ Recommendations:
 
 ### Q: Should I make financial decisions based on predictions?
 **A:** Use predictions as **guidance, not absolute truth**:
-- ✅ Good for: Monthly budgeting, understanding trends, setting realistic savings goals
-- ❌ Not good for: Major financial decisions, exact planning, assuming guaranteed outcomes
+- Good for: Monthly budgeting, understanding trends, setting realistic savings goals
+- Not good for: Major financial decisions, exact planning, assuming guaranteed outcomes
 
 ---
 

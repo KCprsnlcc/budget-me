@@ -76,7 +76,7 @@ The AI creates a comprehensive financial analysis including:
 
 ### Risk Levels Explained
 
-#### Low Risk (Score: 0-30) 🟢
+#### Low Risk (Score: 0-30)
 **What it means:** Your finances are stable and healthy
 **Characteristics:**
 - Savings rate above 20%
@@ -86,7 +86,7 @@ The AI creates a comprehensive financial analysis including:
 
 **Example:** "Your 25% savings rate and stable spending create a strong financial foundation."
 
-#### Medium Risk (Score: 31-70) 🟡
+#### Medium Risk (Score: 31-70)
 **What it means:** Your finances are okay but need attention
 **Characteristics:**
 - Savings rate between 10-20%
@@ -96,7 +96,7 @@ The AI creates a comprehensive financial analysis including:
 
 **Example:** "Your 12% savings rate is acceptable but could be improved for better financial security."
 
-#### High Risk (Score: 71-100) 🔴
+#### High Risk (Score: 71-100)
 **What it means:** Your finances need immediate attention
 **Characteristics:**
 - Savings rate below 10%
@@ -167,35 +167,35 @@ The AI creates recommendations by:
 
 ### Recommendation Categories
 
-#### Savings Recommendations 💰
+#### Savings Recommendations
 **Focus:** Building and growing your savings
 **Examples:**
 - "Build Emergency Fund: Aim to save 3-6 months of expenses"
 - "Automate Savings: Set up automatic transfers after receiving income"
 - "Increase Savings Rate: Target 20% of income for long-term security"
 
-#### Expense Recommendations 📉
+#### Expense Recommendations
 **Focus:** Reducing and optimizing your spending
 **Examples:**
 - "Review Food & Dining: 15% increase detected, consider meal planning"
 - "Optimize Subscriptions: Cancel unused services saving ₱1,200/month"
 - "Reduce Transportation Costs: Explore carpooling or public transport"
 
-#### Income Recommendations 📈
+#### Income Recommendations
 **Focus:** Increasing your earning potential
 **Examples:**
 - "Develop Side Income: Freelancing could add ₱5,000/month"
 - "Skill Development: Invest in training for career advancement"
 - "Negotiate Salary: Research market rates for your position"
 
-#### Investment Recommendations 📊
+#### Investment Recommendations
 **Focus:** Growing your money long-term
 **Examples:**
 - "Start Investment Portfolio: Begin with low-risk options"
 - "Emergency Fund First: Complete before investing"
 - "Diversify Income: Consider multiple investment vehicles"
 
-#### Debt Recommendations 💳
+#### Debt Recommendations
 **Focus:** Managing and eliminating debt
 **Examples:**
 - "Pay High-Interest Debt: Focus on credit cards first"
@@ -204,19 +204,19 @@ The AI creates recommendations by:
 
 ### Priority Levels
 
-#### High Priority 🔴
+#### High Priority
 **Immediate action needed** - These recommendations address urgent financial issues
 - Building emergency fund when you have none
 - Addressing negative savings rate
 - Paying off high-interest debt
 
-#### Medium Priority 🟡
+#### Medium Priority
 **Important but not urgent** - These improve your financial situation
 - Optimizing spending categories
 - Increasing savings rate from good to excellent
 - Starting investment planning
 
-#### Low Priority 🟢
+#### Low Priority
 **Nice to have improvements** - These provide additional benefits
 - Fine-tuning already good budgets
 - Advanced investment strategies
@@ -231,7 +231,7 @@ The AI creates recommendations by:
 
 ### Common Strategies by Impact Level
 
-#### High Impact Strategies 🎯
+#### High Impact Strategies
 **These provide the biggest improvement to your financial stability:**
 
 1. **Expense Tracking**
@@ -249,7 +249,7 @@ The AI creates recommendations by:
    - Keep in easily accessible account
    - Use only for true emergencies
 
-#### Medium Impact Strategies ⚖️
+#### Medium Impact Strategies
 **These provide solid improvements with moderate effort:**
 
 1. **Income Diversification**
@@ -267,7 +267,7 @@ The AI creates recommendations by:
    - Negotiate better rates for services
    - Find more cost-effective alternatives
 
-#### Low Impact Strategies 🔧
+#### Low Impact Strategies
 **These provide incremental improvements:**
 
 1. **Financial Education**
@@ -289,21 +289,21 @@ The AI creates recommendations by:
 
 ### Opportunity Categories by Timeframe
 
-#### Short-term (3-6 months) 📅
+#### Short-term (3-6 months)
 **Quick wins you can achieve relatively fast:**
 - Complete emergency fund
 - Optimize current spending
 - Eliminate high-interest debt
 - Establish consistent saving habits
 
-#### Medium-term (6-18 months) 📆
+#### Medium-term (6-18 months)
 **Substantial improvements requiring sustained effort:**
 - Build investment portfolio
 - Increase income through skills/career advancement
 - Establish multiple income streams
 - Complete debt elimination plan
 
-#### Long-term (1-5 years) 🗓️
+#### Long-term (1-5 years)
 **Major financial milestones and life goals:**
 - Home ownership down payment
 - Retirement planning and contributions
@@ -321,7 +321,7 @@ The AI estimates potential returns based on:
 
 ## 8. HOW AI INSIGHTS DIFFER FROM REGULAR PREDICTIONS
 
-### Regular Predictions 🔢
+### Regular Predictions
 **What they do:**
 - Forecast future income and expenses
 - Show spending trends by category
@@ -334,7 +334,7 @@ The AI estimates potential returns based on:
 - Suggest improvements
 - Consider financial best practices
 
-### AI Insights 🧠
+### AI Insights
 **What they do:**
 - **Analyze** your complete financial picture
 - **Assess** your financial risk and stability
@@ -427,7 +427,7 @@ savings rate from 12% to 15%."
 
 ## 11. UNDERSTANDING AI LIMITATIONS
 
-### What AI Insights CAN Do ✅
+### What AI Insights CAN Do
 
 #### Analyze Your Data
 - Process all your financial information comprehensively
@@ -447,7 +447,7 @@ savings rate from 12% to 15%."
 - Highlight financial strengths
 - Suggest improvement strategies
 
-### What AI Insights CANNOT Do ❌
+### What AI Insights CANNOT Do
 
 #### Predict External Events
 - Economic recessions or market crashes
@@ -658,8 +658,8 @@ savings rate from 12% to 15%."
 
 ### Q: Are AI insights better than human financial advisors?
 **A:** AI insights are **complementary, not replacement** for human advisors:
-- ✅ **AI is good for:** Data analysis, pattern recognition, basic recommendations
-- ✅ **Humans are good for:** Complex planning, personal circumstances, emotional support
+- **AI is good for:** Data analysis, pattern recognition, basic recommendations
+- **Humans are good for:** Complex planning, personal circumstances, emotional support
 - **Best approach:** Use AI for regular guidance, consult humans for major decisions
 
 ### Q: Why do my insights change each month?
@@ -671,9 +671,9 @@ savings rate from 12% to 15%."
 
 ### Q: Can I trust AI financial advice?
 **A:** Use AI insights as **informed guidance, not absolute truth**:
-- ✅ **Good for:** Understanding your financial patterns, identifying opportunities
-- ✅ **Helpful for:** Getting objective analysis, discovering blind spots
-- ❌ **Not for:** Major life decisions, investment choices, complex planning
+- **Good for:** Understanding your financial patterns, identifying opportunities
+- **Helpful for:** Getting objective analysis, discovering blind spots
+- **Not for:** Major life decisions, investment choices, complex planning
 - **Remember:** You know your situation best - adapt advice to your circumstances
 
 ### Q: What if I disagree with the recommendations?

@@ -90,7 +90,7 @@ The family page (`src/app/(dashboard)/family/page.tsx`) provides comprehensive f
 ### 3. Invite Member Modal
 **File**: `invite-member-modal.tsx`
 **Function**:
-- **2-Step Process**: Details → Review
+- **2-Step Process**: Details > Review
 - **Email Input**: Enter invitee's email address
 - **Role Selection**: Choose member role (Member, Admin, Viewer)
 - **Custom Message**: Optional invitation message

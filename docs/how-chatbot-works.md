@@ -37,31 +37,31 @@ Unlike generic chatbots, BudgetMe's AI assistant:
 ### Your Complete Financial Profile
 The chatbot has read-only access to:
 
-#### Personal Information ✅
+#### Personal Information
 - Your full name, email, phone number
 - Date of birth and profile picture
 - Account preferences and settings
 
-#### All Financial Accounts ✅
+#### All Financial Accounts
 - Bank accounts (BDO, BPI, Metrobank, etc.)
 - Credit cards and their balances
 - Cash wallets and digital wallets (GCash, PayMaya)
 - Investment accounts and their current values
 - Which account is set as your default
 
-#### Transaction History ✅
+#### Transaction History
 - All your income and expense transactions
 - Transaction dates, amounts, and descriptions
 - Categories you've assigned to each transaction
 - Which account each transaction came from
 
-#### Budgets and Goals ✅
+#### Budgets and Goals
 - All your active budgets and their progress
 - Budget categories and spending limits
 - Financial goals and contribution history
 - Goal deadlines and target amounts
 
-#### Family Information ✅
+#### Family Information
 - Family group membership (if you're in one)
 - Family members and their roles
 - Shared family goals and budgets
@@ -86,7 +86,7 @@ account holds the majority of your liquid funds at 84%."
 
 ## 3. WHAT THE CHATBOT CAN DO
 
-### Financial Analysis and Advice ✅
+### Financial Analysis and Advice
 
 #### Account Information
 - Tell you balances across all accounts
@@ -112,7 +112,7 @@ account holds the majority of your liquid funds at 84%."
 - Suggest contribution amounts to meet deadlines
 - Explain goal performance and trends
 
-### Image Analysis (Vision Models Only) 📸
+### Image Analysis (Vision Models Only)
 
 #### Receipt Analysis
 - Extract amounts, dates, and merchant names
@@ -132,7 +132,7 @@ account holds the majority of your liquid funds at 84%."
 - Explain financial reports
 - Extract key financial information
 
-### Conversation and Learning 💬
+### Conversation and Learning
 
 #### Personalized Responses
 - Reference your specific financial data
@@ -150,7 +150,7 @@ account holds the majority of your liquid funds at 84%."
 
 ## 4. WHAT THE CHATBOT CANNOT DO
 
-### Data Modification ❌
+### Data Modification
 
 #### Cannot Create
 - Add new transactions for you
@@ -199,7 +199,7 @@ this process?"
 
 ## 5. AVAILABLE AI MODELS
 
-### Free Model (Default) 🆓
+### Free Model (Default)
 
 #### GPT-OSS 20B
 - **Cost:** Free to use
@@ -207,7 +207,7 @@ this process?"
 - **Best for:** General financial questions and advice
 - **Limitations:** No image analysis, basic reasoning
 
-### Premium Models (Paid) 💰
+### Premium Models (Paid)
 
 #### GPT-4o and GPT-4o Mini
 - **Cost:** Uses your daily AI credits (25 per day)
@@ -283,19 +283,19 @@ Every response includes:
 
 ### What Images You Can Upload
 
-#### Receipts 🧾
+#### Receipts
 - **Grocery receipts:** Extract items, amounts, totals
 - **Restaurant bills:** Identify dining expenses, tips
 - **Shopping receipts:** Categorize purchases, track spending
 - **Service receipts:** Utilities, repairs, professional services
 
-#### Bills and Statements 📄
+#### Bills and Statements
 - **Utility bills:** Electric, water, internet, phone
 - **Credit card statements:** Balances, payments, charges
 - **Bank statements:** Transaction summaries, balances
 - **Insurance bills:** Premiums, coverage details
 
-#### Financial Documents 📊
+#### Financial Documents
 - **Investment statements:** Portfolio values, gains/losses
 - **Loan documents:** Balances, payment schedules
 - **Tax documents:** Income summaries, deductions
@@ -377,11 +377,11 @@ Remaining: 7 credits until midnight
 ### Getting Better Responses
 
 #### Be Specific
-❌ **Vague:** "How are my finances?"
-✅ **Specific:** "How much did I spend on food this month compared to last month?"
+**Vague:** "How are my finances?"
+**Specific:** "How much did I spend on food this month compared to last month?"
 
-❌ **General:** "Help me save money"
-✅ **Detailed:** "Which of my expense categories has increased the most, and how can I reduce it?"
+**General:** "Help me save money"
+**Detailed:** "Which of my expense categories has increased the most, and how can I reduce it?"
 
 #### Ask Follow-up Questions
 ```
@@ -519,7 +519,7 @@ Before starting, think about:
 
 ### Conversation Export Formats
 
-#### PDF Export 📄
+#### PDF Export
 **What you get:**
 - Formatted conversation with message bubbles
 - Timestamps and model information
@@ -532,7 +532,7 @@ Before starting, think about:
 - Printing for offline reference
 - Professional documentation
 
-#### CSV Export 📊
+#### CSV Export
 **What you get:**
 - Spreadsheet format with columns: Role, Timestamp, Content, Model
 - Raw conversation data for analysis
