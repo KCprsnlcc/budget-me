@@ -14,6 +14,7 @@ import {
     Check,
     Share,
     Loader2,
+    ChevronDown,
 } from "lucide-react";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -237,12 +238,18 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
     const chatEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
     const handleCopy = (id: string, content: string) => {
         navigator.clipboard.writeText(content);
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
     };
+
+    const scrollToBottom = useCallback(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        // Don't hide immediately - let the scroll handler detect when we're at bottom
+    }, []);
 
     // Fetch initial messages
     useEffect(() => {
@@ -273,11 +280,19 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
         }
     }, [messages.length, isInitialLoad]);
 
-    // Handle scroll for infinite loading
+    // Handle scroll for infinite loading and scroll-to-bottom button visibility
     const handleScroll = useCallback(() => {
-        if (!chatContainerRef.current || loadingMore || !hasMore || loadingMessages) return;
+        if (!chatContainerRef.current || loadingMessages) return;
 
         const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+        
+        // Show scroll-to-bottom button when user is not near the bottom (more than 100px from bottom)
+        // Use a smaller threshold to prevent flickering
+        const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+        setShowScrollToBottom(!isNearBottom && messages.length > 0);
+
+        // Handle infinite loading
+        if (loadingMore || !hasMore) return;
 
         // Load more when scrolled near the top (within 100px) and not initial load
         if (scrollTop < 100 && !isInitialLoad && messages.length > 0) {
@@ -389,7 +404,7 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
             </div>
 
             {/* Messages Container — exact same bg and spacing as /chatbot page */}
-            <ModalBody className="p-0">
+            <ModalBody className="p-0 relative">
                 <div
                     ref={chatContainerRef}
                     onScroll={handleScroll}
@@ -452,6 +467,16 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
                         </div>
                     )}
                 </div>
+
+                {/* Scroll to Bottom Button */}
+                {showScrollToBottom && (
+                    <button
+                        onClick={scrollToBottom}
+                        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 bg-emerald-500 text-white p-2 rounded-full shadow-lg transition-opacity duration-300 ease-in-out"
+                    >
+                        <ChevronDown size={20} />
+                    </button>
+                )}
             </ModalBody>
 
             {/* Footer */}

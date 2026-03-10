@@ -78,6 +78,7 @@ export default function ChatbotPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   const currentModel = models.find((m) => m.id === selectedModel) || models[0];
 
@@ -86,7 +87,7 @@ export default function ChatbotPage() {
   const [userProfile, setUserProfile] = useState<UserProfile | undefined>(undefined);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
-  
+
   // File upload state
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
@@ -150,8 +151,7 @@ export default function ChatbotPage() {
           const validMessages = history.filter(msg => msg.content && msg.content.trim() !== "");
           setMessages(validMessages);
           setHasMore(more);
-          setIsInitialLoad(false);
-          
+
           // Set suggestions from the first assistant message if it has them
           const firstAssistantMessage = validMessages.find(msg => msg.role === "assistant");
           if (firstAssistantMessage?.suggestions && firstAssistantMessage.suggestions.length > 0) {
@@ -162,7 +162,7 @@ export default function ChatbotPage() {
         } else {
           // No chat history, show and save personalized welcome message with dynamic suggestions
           const { question, suggestions, userProfile: profile } = generateWelcomeMessage(userProfile);
-          
+
           const welcomeMessage: MessageType = {
             id: `welcome-${Date.now()}`,
             role: "assistant",
@@ -174,17 +174,17 @@ export default function ChatbotPage() {
             model: selectedModel,
             suggestions: suggestions,
           };
-          
+
           setMessages([welcomeMessage]);
           setDynamicSuggestions(suggestions);
-          
+
           // Save welcome message to database
           await saveWelcomeMessage(user.id, userProfile);
         }
       } catch (err) {
         // On error, show welcome message
         const { question, suggestions } = generateWelcomeMessage(userProfile);
-        
+
         const welcomeMessage: MessageType = {
           id: `welcome-${Date.now()}`,
           role: "assistant",
@@ -196,7 +196,7 @@ export default function ChatbotPage() {
           model: selectedModel,
           suggestions: suggestions,
         };
-        
+
         setMessages([welcomeMessage]);
         setDynamicSuggestions(suggestions);
       } finally {
@@ -213,7 +213,7 @@ export default function ChatbotPage() {
   useEffect(() => {
     const fetchRateLimitStatus = async () => {
       if (!user?.id) return;
-      
+
       try {
         const { status } = await checkAIUsage(user.id, "chatbot");
         setRateLimitStatus(status);
@@ -223,7 +223,7 @@ export default function ChatbotPage() {
     };
 
     fetchRateLimitStatus();
-    
+
     // Refresh every 30 seconds
     const interval = setInterval(fetchRateLimitStatus, 30000);
     return () => clearInterval(interval);
@@ -231,26 +231,37 @@ export default function ChatbotPage() {
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Don't hide immediately - let the scroll handler detect when we're at bottom
   }, []);
 
-  // Only scroll to bottom on initial load
+  // Auto-scroll to bottom on initial load only
   useEffect(() => {
     if (messages.length > 0 && isInitialLoad) {
-      scrollToBottom();
-      setIsInitialLoad(false);
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        setIsInitialLoad(false);
+      }, 100);
     }
-  }, [messages, scrollToBottom, isInitialLoad]);
+  }, [messages.length, isInitialLoad]);
 
-  // Handle scroll for infinite loading
+  // Handle scroll for infinite loading and scroll-to-bottom button visibility
   const handleScroll = useCallback(() => {
-    if (!messagesContainerRef.current || loadingMore || !hasMore || isSending) return;
+    if (!messagesContainerRef.current || loading) return;
 
-    const { scrollTop } = messagesContainerRef.current;
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
 
-    // Load more when scrolled near the top (within 100px)
-    if (scrollTop < 100 && user?.id && !isInitialLoad) {
+    // Show scroll-to-bottom button when user is not near the bottom (more than 100px from bottom)
+    // Use a smaller threshold to prevent flickering
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    setShowScrollToBottom(!isNearBottom && messages.length > 0);
+
+    // Handle infinite loading
+    if (loadingMore || !hasMore) return;
+
+    // Load more when scrolled near the top (within 100px) and not initial load
+    if (scrollTop < 100 && !isInitialLoad && messages.length > 0) {
       setLoadingMore(true);
-      
+
       // Get the oldest message timestamp
       const oldestMessage = messages[0];
       if (!oldestMessage || !oldestMessage.created_at) {
@@ -260,23 +271,28 @@ export default function ChatbotPage() {
 
       const beforeTimestamp = oldestMessage.created_at;
 
-      fetchChatHistory(user.id, 10, beforeTimestamp, false).then(({ data, error, hasMore: more }) => {
+      fetchChatHistory(user!.id, 10, beforeTimestamp, false).then(({ data, error, hasMore: more }) => {
         if (!error && data.length > 0) {
+          // Store current scroll position relative to bottom
+          const scrollFromBottom = scrollHeight - scrollTop - clientHeight;
+
           // Prepend older messages
           setMessages(prev => [...data, ...prev]);
           setHasMore(more);
-          
-          // Maintain scroll position
+
+          // Maintain scroll position after new messages are added
           setTimeout(() => {
             if (messagesContainerRef.current) {
-              messagesContainerRef.current.scrollTop = 200;
+              const newScrollHeight = messagesContainerRef.current.scrollHeight;
+              const newScrollTop = newScrollHeight - scrollFromBottom - clientHeight;
+              messagesContainerRef.current.scrollTop = Math.max(newScrollTop, 200);
             }
           }, 0);
         }
         setLoadingMore(false);
       });
     }
-  }, [messages, loadingMore, hasMore, user, isSending, isInitialLoad]);
+  }, [messages, loadingMore, hasMore, user, isInitialLoad, loading]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -326,7 +342,7 @@ export default function ChatbotPage() {
     }
 
     const trimmedInput = input.trim();
-    
+
     // Convert file to base64 if it's an image
     let base64Data: string | undefined;
     if (attachedFile && attachedFile.type.startsWith('image/')) {
@@ -348,7 +364,7 @@ export default function ChatbotPage() {
         return;
       }
     }
-    
+
     // Create user message with unique ID
     const userMessageId = `user-${Date.now()}-${Math.random()}`;
     const userMessage: MessageType = {
@@ -405,7 +421,7 @@ export default function ChatbotPage() {
     try {
       // Prepare messages for API (including current context)
       const contextMessages = [...messages, userMessage].slice(-10); // Keep last 10 messages for context
-      
+
       const result: SendMessageResult = await sendMessageToAI(
         contextMessages,
         selectedModel,
@@ -448,10 +464,10 @@ export default function ChatbotPage() {
           setError(clearError);
           return;
         }
-        
+
         // Reset with new randomized welcome message and suggestions
         const { question, suggestions } = generateWelcomeMessage(userProfile);
-        
+
         const welcomeMessage: MessageType = {
           id: `welcome-${Date.now()}`,
           role: "assistant",
@@ -463,10 +479,10 @@ export default function ChatbotPage() {
           model: selectedModel,
           suggestions: suggestions,
         };
-        
+
         setMessages([welcomeMessage]);
         setDynamicSuggestions(suggestions);
-        
+
         // Save welcome message to database
         await saveWelcomeMessage(user.id, userProfile);
         setTypingMessageId(null);
@@ -551,10 +567,10 @@ export default function ChatbotPage() {
   const renderMessageContent = (content: string | undefined, role: MessageRole, messageId: string) => {
     // Handle undefined content
     const safeContent = content || "";
-    
+
     // Only apply typing effect to assistant messages that match the typing ID
     const isTyping = role === "assistant" && typingMessageId === messageId;
-    
+
     // For user messages, always render immediately without typing effect
     if (role === "user") {
       return (
@@ -563,7 +579,7 @@ export default function ChatbotPage() {
         </div>
       );
     }
-    
+
     // Custom components for markdown rendering (assistant messages only)
     const components = {
       // Style tables
@@ -582,10 +598,9 @@ export default function ChatbotPage() {
         </thead>
       ),
       th: ({ children, align }: any) => (
-        <th 
-          className={`px-5 py-3 font-semibold text-slate-500 uppercase tracking-wider ${
-            align === "right" ? "text-right" : "text-left"
-          }`}
+        <th
+          className={`px-5 py-3 font-semibold text-slate-500 uppercase tracking-wider ${align === "right" ? "text-right" : "text-left"
+            }`}
         >
           {children}
         </th>
@@ -601,10 +616,9 @@ export default function ChatbotPage() {
         </tr>
       ),
       td: ({ children, align }: any) => (
-        <td 
-          className={`px-5 py-3 ${
-            align === "right" ? "text-right text-slate-900 font-semibold" : "text-slate-500"
-          }`}
+        <td
+          className={`px-5 py-3 ${align === "right" ? "text-right text-slate-900 font-semibold" : "text-slate-500"
+            }`}
         >
           {children}
         </td>
@@ -681,9 +695,9 @@ export default function ChatbotPage() {
     return (
       <div className={`text-sm leading-relaxed ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
         {isTyping ? (
-          <TypingMarkdown 
-            content={safeContent} 
-            speed={7} 
+          <TypingMarkdown
+            content={safeContent}
+            speed={7}
             delay={200}
             components={components}
             onComplete={() => setTypingMessageId(null)}
@@ -783,7 +797,7 @@ export default function ChatbotPage() {
                   <div className="relative flex items-end gap-1.5 sm:gap-2 bg-slate-50 border border-slate-200/60 rounded-3xl p-1.5 sm:p-2">
                     {/* Attachment Button Skeleton */}
                     <Skeleton width={32} height={32} borderRadius={50} className="sm:w-10 sm:h-10" />
-                    
+
                     {/* Textarea Skeleton */}
                     <div className="flex-1">
                       <Skeleton height={28} borderRadius={4} className="sm:h-8" />
@@ -858,8 +872,8 @@ export default function ChatbotPage() {
 
               {/* Export Chat Dropdown - Clickable for mobile/tablet */}
               <div className="relative" ref={exportDropdownRef}>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   disabled={isPending || messages.length === 0}
                   className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 disabled:opacity-50"
@@ -871,10 +885,10 @@ export default function ChatbotPage() {
                 {/* Dropdown - Show on click for mobile/tablet, hover for desktop */}
                 {exportDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-44 sm:w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full justify-start text-[10px] sm:text-xs text-slate-600 hover:bg-slate-50 gap-2" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-[10px] sm:text-xs text-slate-600 hover:bg-slate-50 gap-2"
                       onClick={() => {
                         handleExportPDF();
                         setExportDropdownOpen(false);
@@ -883,10 +897,10 @@ export default function ChatbotPage() {
                     >
                       <span className="text-rose-500 font-semibold">PDF</span> Export as PDF
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full justify-start text-[10px] sm:text-xs text-slate-600 hover:bg-slate-50 gap-2" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-[10px] sm:text-xs text-slate-600 hover:bg-slate-50 gap-2"
                       onClick={() => {
                         handleExportCSV();
                         setExportDropdownOpen(false);
@@ -908,7 +922,7 @@ export default function ChatbotPage() {
                 <AlertCircle size={14} className="sm:w-4 sm:h-4 shrink-0" />
                 <span className="text-xs sm:text-sm truncate">{error}</span>
               </div>
-              <button 
+              <button
                 onClick={dismissError}
                 className="text-red-500 hover:text-red-700 text-xs sm:text-sm font-medium shrink-0 ml-2"
               >
@@ -918,118 +932,128 @@ export default function ChatbotPage() {
           )}
 
           {/* Messages Container */}
-          <div
-            ref={messagesContainerRef}
-            onScroll={handleScroll}
-            id="chat-messages"
-            className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 relative scroll-smooth bg-white scrollbar-thin"
-          >
-            {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                <Bot size={48} className="mb-4 text-slate-300" />
-                <p className="text-sm">Start a conversation with BudgetSense AI</p>
-              </div>
-            ) : (
-              <>
-                {/* Loading more indicator at top */}
-                {loadingMore && (
-                  <div className="space-y-4">
-                    {/* Skeleton for older messages being loaded */}
-                    <div className="flex justify-end">
-                      <div className="max-w-[90%] sm:max-w-[85%]">
-                        <Skeleton height={48} borderRadius={32} width={200} />
-                      </div>
-                    </div>
-                    <div className="flex justify-start">
-                      <div className="flex-1">
-                        <Skeleton height={80} borderRadius={32} />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {messages.filter(msg => msg.content && msg.content.trim() !== "").map((msg, index) => (
-                <div
-                  key={msg.id}
-                  className={`mx-auto max-w-3xl ${
-                    msg.role === "user" ? "flex justify-end" : "flex justify-start"
-                  }`}
-                >
-                  {/* Message Content */}
-                  <div className={`${msg.role === "user" ? "max-w-[90%] sm:max-w-[85%]" : "space-y-2 sm:space-y-3 flex-1"} relative group`}>
-                    {/* Message Bubble */}
-                    <div
-                      className={`${
-                        msg.role === "assistant"
-                          ? "rounded-[2rem] rounded-tl-sm text-slate-800 transition-all"
-                          : "bg-emerald-500 text-white rounded-[2rem] rounded-tr-sm px-4 sm:px-6 py-2.5 sm:py-3.5 shadow-sm"
-                      }`}
-                    >
-                      {/* File Attachment */}
-                      {msg.attachment && (
-                        <div className={`mb-1.5 sm:mb-2 p-1.5 sm:p-2 rounded-lg ${msg.role === "user" ? "bg-emerald-600" : "bg-slate-100"}`}>
-                          <div className="flex items-center gap-1.5 sm:gap-2">
-                            <Paperclip size={14} className={`sm:w-4 sm:h-4 ${msg.role === "user" ? "text-emerald-200" : "text-slate-500"}`} />
-                            <span className={`text-xs sm:text-sm truncate ${msg.role === "user" ? "text-white" : "text-slate-700"}`}>
-                              {msg.attachment.name}
-                            </span>
-                            <span className={`text-[10px] sm:text-xs ${msg.role === "user" ? "text-emerald-200" : "text-slate-500"}`}>
-                              ({(msg.attachment.size / 1024).toFixed(1)} KB)
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                      {renderMessageContent(msg.content, msg.role, msg.id)}
-                    </div>
-
-                    {/* Copy Button as Footer */}
-                    <div className={`flex gap-1.5 sm:gap-2 ${msg.role === "assistant" ? "opacity-100 justify-start" : "opacity-0 justify-end"} group-hover:opacity-100 transition-all duration-200`}>
-                      {/* Share Button - Only for Assistant Messages */}
-                      {msg.role === "assistant" && msg.content && (
-                        <button
-                          onClick={() => handleShareMessage(msg.content)}
-                          className="p-1 sm:p-1.5 hover:opacity-80 transition-opacity"
-                          title="Share message"
-                        >
-                          <Share size={12} className="sm:w-[14px] sm:h-[14px] text-slate-400" />
-                        </button>
-                      )}
-                      
-                      <button 
-                        onClick={() => handleCopyMessage(msg.content || "", msg.id)}
-                        className="p-1 sm:p-1.5 hover:opacity-80 transition-opacity"
-                        title="Copy message"
-                      >
-                        {copiedMessageId === msg.id ? (
-                          <Check size={12} className="sm:w-[14px] sm:h-[14px] text-emerald-500" />
-                        ) : (
-                          <Copy size={12} className="sm:w-[14px] sm:h-[14px] text-slate-400" />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Suggestion Chips - Only for first assistant message with dynamic suggestions */}
-                    {msg.role === "assistant" && index === 0 && dynamicSuggestions.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-1">
-                        {dynamicSuggestions.map((suggestion, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => handleSuggestionClick(suggestion)}
-                            className="px-3 sm:px-5 py-2 sm:py-2.5 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 rounded-full text-[10px] sm:text-xs text-slate-600 transition-all shadow-sm flex items-center gap-1.5 sm:gap-2 group cursor-pointer"
-                          >
-                            <Lightbulb size={12} className="sm:w-[14px] sm:h-[14px] text-slate-400" />
-                            <span className="truncate max-w-[200px] sm:max-w-none">{suggestion}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+          <div className="flex-1 relative bg-white min-h-0 flex flex-col">
+            <div
+              ref={messagesContainerRef}
+              onScroll={handleScroll}
+              id="chat-messages"
+              className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 scroll-smooth scrollbar-thin"
+            >
+              {messages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                  <Bot size={48} className="mb-4 text-slate-300" />
+                  <p className="text-sm">Start a conversation with BudgetSense AI</p>
                 </div>
-              ))}
-              </>
+              ) : (
+                <>
+                  {/* Loading more indicator at top */}
+                  {loadingMore && (
+                    <div className="space-y-4">
+                      {/* Skeleton for older messages being loaded */}
+                      <div className="flex justify-end">
+                        <div className="max-w-[90%] sm:max-w-[85%]">
+                          <Skeleton height={48} borderRadius={32} width={200} />
+                        </div>
+                      </div>
+                      <div className="flex justify-start">
+                        <div className="flex-1">
+                          <Skeleton height={80} borderRadius={32} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {messages.filter(msg => msg.content && msg.content.trim() !== "").map((msg, index) => (
+                    <div
+                      key={msg.id}
+                      className={`mx-auto max-w-3xl ${msg.role === "user" ? "flex justify-end" : "flex justify-start"
+                        }`}
+                    >
+                      {/* Message Content */}
+                      <div className={`${msg.role === "user" ? "max-w-[90%] sm:max-w-[85%]" : "space-y-2 sm:space-y-3 flex-1"} relative group`}>
+                        {/* Message Bubble */}
+                        <div
+                          className={`${msg.role === "assistant"
+                            ? "rounded-[2rem] rounded-tl-sm text-slate-800 transition-all"
+                            : "bg-emerald-500 text-white rounded-[2rem] rounded-tr-sm px-4 sm:px-6 py-2.5 sm:py-3.5 shadow-sm"
+                            }`}
+                        >
+                          {/* File Attachment */}
+                          {msg.attachment && (
+                            <div className={`mb-1.5 sm:mb-2 p-1.5 sm:p-2 rounded-lg ${msg.role === "user" ? "bg-emerald-600" : "bg-slate-100"}`}>
+                              <div className="flex items-center gap-1.5 sm:gap-2">
+                                <Paperclip size={14} className={`sm:w-4 sm:h-4 ${msg.role === "user" ? "text-emerald-200" : "text-slate-500"}`} />
+                                <span className={`text-xs sm:text-sm truncate ${msg.role === "user" ? "text-white" : "text-slate-700"}`}>
+                                  {msg.attachment.name}
+                                </span>
+                                <span className={`text-[10px] sm:text-xs ${msg.role === "user" ? "text-emerald-200" : "text-slate-500"}`}>
+                                  ({(msg.attachment.size / 1024).toFixed(1)} KB)
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                          {renderMessageContent(msg.content, msg.role, msg.id)}
+                        </div>
+
+                        {/* Copy Button as Footer */}
+                        <div className={`flex gap-1.5 sm:gap-2 ${msg.role === "assistant" ? "opacity-100 justify-start" : "opacity-0 justify-end"} group-hover:opacity-100 transition-all duration-200`}>
+                          {/* Share Button - Only for Assistant Messages */}
+                          {msg.role === "assistant" && msg.content && (
+                            <button
+                              onClick={() => handleShareMessage(msg.content)}
+                              className="p-1 sm:p-1.5 hover:opacity-80 transition-opacity"
+                              title="Share message"
+                            >
+                              <Share size={12} className="sm:w-[14px] sm:h-[14px] text-slate-400" />
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => handleCopyMessage(msg.content || "", msg.id)}
+                            className="p-1 sm:p-1.5 hover:opacity-80 transition-opacity"
+                            title="Copy message"
+                          >
+                            {copiedMessageId === msg.id ? (
+                              <Check size={12} className="sm:w-[14px] sm:h-[14px] text-emerald-500" />
+                            ) : (
+                              <Copy size={12} className="sm:w-[14px] sm:h-[14px] text-slate-400" />
+                            )}
+                          </button>
+                        </div>
+
+                        {/* Suggestion Chips - Only for first assistant message with dynamic suggestions */}
+                        {msg.role === "assistant" && index === 0 && dynamicSuggestions.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-1">
+                            {dynamicSuggestions.map((suggestion, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => handleSuggestionClick(suggestion)}
+                                className="px-3 sm:px-5 py-2 sm:py-2.5 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 rounded-full text-[10px] sm:text-xs text-slate-600 transition-all shadow-sm flex items-center gap-1.5 sm:gap-2 group cursor-pointer"
+                              >
+                                <Lightbulb size={12} className="sm:w-[14px] sm:h-[14px] text-slate-400" />
+                                <span className="truncate max-w-[200px] sm:max-w-none">{suggestion}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+              <div ref={messagesEndRef} />
+              <div className="h-4" />
+            </div>
+
+            {/* Scroll to Bottom Button */}
+            {showScrollToBottom && (
+              <button
+                onClick={scrollToBottom}
+                className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10 bg-emerald-500 text-white p-2 rounded-full shadow-lg transition-opacity duration-300 ease-in-out"
+              >
+                <ChevronDown size={20} />
+              </button>
             )}
-            <div ref={messagesEndRef} />
-            <div className="h-4" />
           </div>
 
           {/* Input Area */}
@@ -1040,9 +1064,9 @@ export default function ChatbotPage() {
                 <div className="mb-2 flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2">
                   <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
                     {attachedFile.type.startsWith('image/') ? (
-                      <img 
-                        src={URL.createObjectURL(attachedFile)} 
-                        alt="Preview" 
+                      <img
+                        src={URL.createObjectURL(attachedFile)}
+                        alt="Preview"
                         className="w-full h-full object-cover rounded-lg"
                       />
                     ) : attachedFile.type.includes('pdf') ? (
@@ -1084,7 +1108,7 @@ export default function ChatbotPage() {
                 />
 
                 {/* Attachment Button */}
-                <button 
+                <button
                   onClick={handleFileSelect}
                   disabled={isSending || uploadingFile}
                   className="p-1.5 sm:p-2 text-slate-400 hover:text-emerald-500 rounded-full transition-colors flex-shrink-0 disabled:opacity-50"
@@ -1097,12 +1121,12 @@ export default function ChatbotPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={!rateLimitStatus?.canUseAI 
-                    ? "Daily AI limit reached (25/day). Resets at midnight." 
-                    : isSending 
-                      ? "AI is thinking..." 
-                      : attachedFile 
-                        ? "Add a message about this file..." 
+                  placeholder={!rateLimitStatus?.canUseAI
+                    ? "Daily AI limit reached (25/day). Resets at midnight."
+                    : isSending
+                      ? "AI is thinking..."
+                      : attachedFile
+                        ? "Add a message about this file..."
                         : "Message BudgetSense..."}
                   rows={1}
                   disabled={isSending || !rateLimitStatus?.canUseAI}
@@ -1131,9 +1155,9 @@ export default function ChatbotPage() {
                 </span>
                 <div>|</div>
                 <span>Powered by</span>
-                <img 
-                  src="/logos/OpenAI-black-monoblossom.svg" 
-                  alt="OpenAI" 
+                <img
+                  src="/logos/OpenAI-black-monoblossom.svg"
+                  alt="OpenAI"
                   className="h-3 w-auto opacity-70"
                 />
                 <span>OpenAI</span>
