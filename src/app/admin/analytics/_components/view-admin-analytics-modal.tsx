@@ -88,8 +88,8 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                         {/* User Header */}
                         <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
                             <div className="flex justify-center mb-3">
-                                <UserAvatar 
-                                    user={createMockUser(userSummary)} 
+                                <UserAvatar
+                                    user={createMockUser(userSummary)}
                                     size="xl"
                                     className="ring-2 ring-white shadow-sm"
                                 />
@@ -100,10 +100,6 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                                 {userSummary.total_reports} Reports Generated
                             </div>
                             <div className="flex items-center justify-center gap-3">
-                                <span className="text-xs font-semibold text-emerald-500">
-                                    Active Analytics
-                                </span>
-                                <span className="text-slate-300">•</span>
                                 <span className="text-xs font-medium text-slate-600">
                                     Last Updated {format(new Date(userSummary.last_updated), "MMM dd")}
                                 </span>
@@ -115,25 +111,25 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                             <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Analytics Summary</h4>
                             <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                                 <div className="p-5 space-y-0 divide-y divide-slate-100">
-                                    <DetailRow 
-                                        label="Total Reports" 
-                                        value={userSummary.total_reports.toString()} 
-                                        icon={FileText} 
+                                    <DetailRow
+                                        label="Total Reports"
+                                        value={userSummary.total_reports.toString()}
+                                        icon={FileText}
                                     />
-                                    <DetailRow 
-                                        label="Transactions" 
-                                        value={userSummary.total_transactions.toString()} 
-                                        icon={Wallet} 
+                                    <DetailRow
+                                        label="Transactions"
+                                        value={userSummary.total_transactions.toString()}
+                                        icon={Wallet}
                                     />
-                                    <DetailRow 
-                                        label="Active Budgets" 
-                                        value={userSummary.active_budgets.toString()} 
-                                        icon={Target} 
+                                    <DetailRow
+                                        label="Active Budgets"
+                                        value={userSummary.active_budgets.toString()}
+                                        icon={Target}
                                     />
-                                    <DetailRow 
-                                        label="Active Goals" 
-                                        value={userSummary.active_goals.toString()} 
-                                        icon={Flag} 
+                                    <DetailRow
+                                        label="Active Goals"
+                                        value={userSummary.active_goals.toString()}
+                                        icon={Flag}
                                     />
                                 </div>
                             </div>
@@ -144,20 +140,20 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                             <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Performance Metrics</h4>
                             <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                                 <div className="p-5 space-y-0 divide-y divide-slate-100">
-                                    <DetailRow 
-                                        label="Avg Confidence" 
-                                        value={`${(userSummary.avg_confidence_level * 100).toFixed(1)}%`} 
-                                        icon={TrendingUp} 
+                                    <DetailRow
+                                        label="Avg Confidence"
+                                        value={`${(userSummary.avg_confidence_level * 100).toFixed(1)}%`}
+                                        icon={TrendingUp}
                                     />
-                                    <DetailRow 
-                                        label="Avg Accuracy" 
-                                        value={`${userSummary.avg_accuracy_score.toFixed(1)}%`} 
-                                        icon={BarChart2} 
+                                    <DetailRow
+                                        label="Avg Accuracy"
+                                        value={`${userSummary.avg_accuracy_score.toFixed(1)}%`}
+                                        icon={BarChart2}
                                     />
-                                    <DetailRow 
-                                        label="Data Points" 
-                                        value={userSummary.total_data_points.toLocaleString()} 
-                                        icon={Activity} 
+                                    <DetailRow
+                                        label="Data Points"
+                                        value={userSummary.total_data_points.toLocaleString()}
+                                        icon={Activity}
                                     />
                                 </div>
                             </div>
@@ -170,11 +166,11 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                                 <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                                     <div className="p-5 space-y-0 divide-y divide-slate-100">
                                         {userSummary.report_type_breakdown.map((item) => (
-                                            <DetailRow 
+                                            <DetailRow
                                                 key={item.type}
-                                                label={item.type.replace(/_/g, ' ')} 
-                                                value={item.count.toString()} 
-                                                icon={FileText} 
+                                                label={item.type.replace(/_/g, ' ')}
+                                                value={item.count.toString()}
+                                                icon={FileText}
                                             />
                                         ))}
                                     </div>

@@ -81,11 +81,11 @@ async function fetchUserAnalyticsSummariesFallback(
 
         // Group by user and aggregate
         const userMap = new Map<string, UserAnalyticsSummary>();
-        
+
         for (const report of reports || []) {
             const userId = report.user_id;
             const profile = report.profiles as any;
-            
+
             if (!userMap.has(userId)) {
                 userMap.set(userId, {
                     user_id: userId,
@@ -109,7 +109,7 @@ async function fetchUserAnalyticsSummariesFallback(
             const userSummary = userMap.get(userId)!;
             userSummary.total_reports++;
             userSummary.total_data_points += report.data_points || 0;
-            
+
             if (report.generated_at && report.generated_at > userSummary.last_updated) {
                 userSummary.last_updated = report.generated_at;
             }
@@ -118,10 +118,10 @@ async function fetchUserAnalyticsSummariesFallback(
         // Calculate averages and fetch additional data
         for (const [userId, summary] of userMap.entries()) {
             const userReports = (reports || []).filter(r => r.user_id === userId);
-            
+
             const confidenceLevels = userReports.map(r => r.confidence_level).filter(Boolean);
             const accuracyScores = userReports.map(r => r.accuracy_score).filter(Boolean);
-            
+
             summary.avg_confidence_level = confidenceLevels.length > 0
                 ? confidenceLevels.reduce((a, b) => a + b, 0) / confidenceLevels.length
                 : 0;
@@ -143,7 +143,7 @@ async function fetchUserAnalyticsSummariesFallback(
             const [transactionsResult, budgetsResult, goalsResult, anomaliesResult] = await Promise.all([
                 supabase.from("transactions").select("id", { count: "exact", head: true }).eq("user_id", userId),
                 supabase.from("budgets").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "active"),
-                supabase.from("goals").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "active"),
+                supabase.from("goals").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "in_progress"),
                 supabase.from("anomaly_alerts").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "active"),
             ]);
 
@@ -153,7 +153,7 @@ async function fetchUserAnalyticsSummariesFallback(
             summary.anomaly_count = anomaliesResult.count || 0;
         }
 
-        const allUsers = Array.from(userMap.values()).sort((a, b) => 
+        const allUsers = Array.from(userMap.values()).sort((a, b) =>
             new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime()
         );
 
@@ -194,13 +194,13 @@ export async function fetchUserAnalyticsDetails(userId: string): Promise<{ data:
         const [transactionsResult, budgetsResult, goalsResult, anomaliesResult, resolvedAnomaliesResult] = await Promise.all([
             supabase.from("transactions").select("*").eq("user_id", userId).order("date", { ascending: false }).limit(100),
             supabase.from("budgets").select("*").eq("user_id", userId).eq("status", "active"),
-            supabase.from("goals").select("*").eq("user_id", userId).eq("status", "active"),
+            supabase.from("goals").select("*").eq("user_id", userId).eq("status", "in_progress"),
             supabase.from("anomaly_alerts").select("*").eq("user_id", userId).eq("status", "active").order("detected_at", { ascending: false }),
             supabase.from("anomaly_alerts").select("*").eq("user_id", userId).eq("status", "resolved").order("detected_at", { ascending: false }),
         ]);
 
         const latestReport = reports?.[0];
-        
+
         const details: UserAnalyticsDetails = {
             user_id: userId,
             user_email: profile.email,
