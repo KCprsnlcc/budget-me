@@ -465,7 +465,7 @@ export function ViewAdminPredictionModal({
                                         {report.prediction_data.fullAIInsights.longTermOpportunities.length > 0 && (
                                             <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                    <Star size={14} className="text-slate-500" />Long-term Opportunities ({report.prediction_data.fullAIInsights.longTermOpportunities.length})
+                                                    <Star size={14} className="text-emerald-500" />Long-term Opportunities ({report.prediction_data.fullAIInsights.longTermOpportunities.length})
                                                 </h3>
                                                 <div className="space-y-3">
                                                     {report.prediction_data.fullAIInsights.longTermOpportunities.map((opp: any, idx: number) => (
@@ -615,7 +615,7 @@ export function ViewAdminPredictionModal({
                                             {Array.isArray(longTermOpportunities) && longTermOpportunities.length > 0 && (
                                                 <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                        <Star size={14} className="text-slate-500" />Long-term Opportunities ({longTermOpportunities.length})
+                                                        <Star size={14} className="text-emerald-500" />Long-term Opportunities ({longTermOpportunities.length})
                                                     </h3>
                                                     <div className="space-y-3">
                                                         {longTermOpportunities.map((opp: any, idx: number) => (

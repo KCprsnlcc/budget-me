@@ -1022,7 +1022,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                                 {generationResult.aiInsights.longTermOpportunities.length > 0 && (
                                                     <div className="border border-slate-200 rounded-xl p-5">
                                                         <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                                            <Star size={14} className="text-slate-500" />
+                                                            <Star size={14} className="text-emerald-500" />
                                                             Long-term Opportunities
                                                         </h3>
                                                         <div className="space-y-3">
