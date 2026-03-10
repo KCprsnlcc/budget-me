@@ -7,7 +7,6 @@ import {
     ArrowLeft,
     ArrowRight,
     Calendar,
-    User,
     Activity,
     FileText,
     PieChart,
@@ -19,7 +18,6 @@ import {
     CheckCircle,
     Wallet,
     Flag,
-    Clock,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Stepper } from "./stepper";
@@ -100,7 +98,7 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
     return (
         <Modal open={actualOpen} onClose={handleClose} className="max-w-[520px]">
             {/* Header */}
-            <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
+            <ModalHeader onClose={handleClose} className="px-5 py-3.5">
                 <div className="flex items-center gap-3">
                     <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                         User Analytics Details
@@ -115,7 +113,7 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
             <Stepper steps={STEPS} currentStep={step} />
 
             {/* Body */}
-            <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
+            <ModalBody className="px-5 py-5">
                 {loading ? (
                     <div className="text-center py-12">
                         <Activity size={32} className="mx-auto text-gray-300 mb-2 animate-pulse" />
@@ -132,7 +130,7 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                         {step === 1 && (
                             <div className="space-y-6 animate-txn-in">
                                 {/* User Header */}
-                                <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-gray-200">
+                                <div className="text-center p-6">
                                     <div className="flex justify-center mb-3">
                                         <UserAvatar 
                                             user={createMockUser(userSummary)} 
@@ -146,7 +144,7 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                                         {userSummary.total_reports} <span className="text-xl text-gray-400">reports</span>
                                     </div>
                                     <div className="flex items-center justify-center gap-3">
-                                        <span className="text-xs font-semibold px-2 py-1 rounded bg-white text-gray-500 uppercase tracking-wider inline-block border border-gray-100">
+                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                             Active User
                                         </span>
                                         <span className="text-gray-300">•</span>
@@ -159,37 +157,33 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                                 {/* Summary Stats */}
                                 <div>
                                     <h4 className="text-[11px] font-semibold text-gray-700 mb-3 uppercase tracking-[0.04em]">Summary Statistics</h4>
-                                    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                                        <div className="p-5 space-y-0 divide-y divide-gray-100">
-                                            <DetailRow label="Total Reports" value={userSummary.total_reports.toString()} icon={FileText} />
-                                            <DetailRow label="Transactions" value={userSummary.total_transactions.toString()} icon={Wallet} />
-                                            <DetailRow label="Active Budgets" value={userSummary.active_budgets.toString()} icon={Target} />
-                                            <DetailRow label="Active Goals" value={userSummary.active_goals.toString()} icon={Flag} />
-                                        </div>
+                                    <div className="p-5 space-y-0 divide-y divide-gray-100">
+                                        <DetailRow label="Total Reports" value={userSummary.total_reports.toString()} icon={FileText} />
+                                        <DetailRow label="Transactions" value={userSummary.total_transactions.toString()} icon={Wallet} />
+                                        <DetailRow label="Active Budgets" value={userSummary.active_budgets.toString()} icon={Target} />
+                                        <DetailRow label="Active Goals" value={userSummary.active_goals.toString()} icon={Flag} />
                                     </div>
                                 </div>
 
                                 {/* Performance Metrics */}
                                 <div>
                                     <h4 className="text-[11px] font-semibold text-gray-700 mb-3 uppercase tracking-[0.04em]">Performance Metrics</h4>
-                                    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                                        <div className="p-5 space-y-0 divide-y divide-gray-100">
-                                            <DetailRow 
-                                                label="Avg Confidence" 
-                                                value={`${(userSummary.avg_confidence_level * 100).toFixed(1)}%`} 
-                                                icon={TrendingUp} 
-                                            />
-                                            <DetailRow 
-                                                label="Avg Accuracy" 
-                                                value={`${userSummary.avg_accuracy_score.toFixed(1)}%`} 
-                                                icon={BarChart2} 
-                                            />
-                                            <DetailRow 
-                                                label="Data Points" 
-                                                value={userSummary.total_data_points.toLocaleString()} 
-                                                icon={Activity} 
-                                            />
-                                        </div>
+                                    <div className="p-5 space-y-0 divide-y divide-gray-100">
+                                        <DetailRow 
+                                            label="Avg Confidence" 
+                                            value={`${(userSummary.avg_confidence_level * 100).toFixed(1)}%`} 
+                                            icon={TrendingUp} 
+                                        />
+                                        <DetailRow 
+                                            label="Avg Accuracy" 
+                                            value={`${userSummary.avg_accuracy_score.toFixed(1)}%`} 
+                                            icon={BarChart2} 
+                                        />
+                                        <DetailRow 
+                                            label="Data Points" 
+                                            value={userSummary.total_data_points.toLocaleString()} 
+                                            icon={Activity} 
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -202,14 +196,14 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                                 <div>
                                     <h3 className="text-[15px] font-bold text-gray-900 mb-3">Anomaly Detection</h3>
                                     <div className="grid grid-cols-2 gap-3 mb-4">
-                                        <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-100">
+                                        <div className="flex items-center gap-3 p-3">
                                             <AlertTriangle size={20} className="text-red-600" />
                                             <div>
                                                 <p className="text-xs text-red-600 font-medium">Active</p>
                                                 <p className="text-2xl font-bold text-red-700">{userDetails.anomalies.active}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                                        <div className="flex items-center gap-3 p-3">
                                             <CheckCircle size={20} className="text-emerald-600" />
                                             <div>
                                                 <p className="text-xs text-emerald-600 font-medium">Resolved</p>
@@ -222,7 +216,7 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                                         <div className="space-y-2">
                                             <p className="text-xs text-gray-500 font-semibold mb-2">Recent Anomalies</p>
                                             {userDetails.anomalies.recent.slice(0, 3).map((anomaly: any) => (
-                                                <div key={anomaly.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                                                <div key={anomaly.id} className="flex items-center justify-between p-3">
                                                     <div className="flex items-center gap-3">
                                                         <div className={`w-2 h-2 rounded-full ${
                                                             anomaly.severity === 'high' ? 'bg-red-500' :
@@ -244,24 +238,24 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                                     <h3 className="text-[15px] font-bold text-gray-900 mb-3">AI Financial Insights</h3>
                                     {userDetails.ai_insights.has_insights ? (
                                         <div className="space-y-3">
-                                            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-100">
+                                            <div className="flex items-center justify-between p-3">
                                                 <div className="flex items-center gap-2">
-                                                    <CheckCircle size={16} className="text-purple-600" />
-                                                    <span className="text-sm font-medium text-purple-900">Insights Available</span>
+                                                    <CheckCircle size={16} className="text-gray-600" />
+                                                    <span className="text-sm font-medium text-gray-900">Insights Available</span>
                                                 </div>
-                                                <span className="text-xs text-purple-600">
+                                                <span className="text-xs text-gray-600">
                                                     {format(new Date(userDetails.ai_insights.last_generated), "MMM dd")}
                                                 </span>
                                             </div>
                                             {userDetails.ai_insights.summary && (
-                                                <div className="p-4 bg-white rounded-lg border border-gray-100">
+                                                <div className="p-4">
                                                     <p className="text-xs text-gray-500 font-semibold mb-2">Summary</p>
                                                     <p className="text-sm text-gray-700 leading-relaxed">{userDetails.ai_insights.summary}</p>
                                                 </div>
                                             )}
                                         </div>
                                     ) : (
-                                        <div className="text-center py-6 bg-white rounded-lg border border-gray-100">
+                                        <div className="text-center py-6">
                                             <BrainCircuit size={32} className="mx-auto text-gray-300 mb-2" />
                                             <p className="text-sm text-gray-500">No AI insights generated yet</p>
                                         </div>
@@ -271,24 +265,22 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                                 {/* Report Settings */}
                                 <div>
                                     <h3 className="text-[15px] font-bold text-gray-900 mb-3">Report Settings</h3>
-                                    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                                        <div className="p-5 space-y-0 divide-y divide-gray-100">
-                                            <DetailRow 
-                                                label="Report Type" 
-                                                value={userDetails.report_settings.report_type.replace(/_/g, ' ')} 
-                                                icon={FileText} 
-                                            />
-                                            <DetailRow 
-                                                label="Timeframe" 
-                                                value={userDetails.report_settings.timeframe} 
-                                                icon={Calendar} 
-                                            />
-                                            <DetailRow 
-                                                label="Chart Type" 
-                                                value={userDetails.report_settings.chart_type} 
-                                                icon={BarChart2} 
-                                            />
-                                        </div>
+                                    <div className="p-5 space-y-0 divide-y divide-gray-100">
+                                        <DetailRow 
+                                            label="Report Type" 
+                                            value={userDetails.report_settings.report_type.replace(/_/g, ' ')} 
+                                            icon={FileText} 
+                                        />
+                                        <DetailRow 
+                                            label="Timeframe" 
+                                            value={userDetails.report_settings.timeframe} 
+                                            icon={Calendar} 
+                                        />
+                                        <DetailRow 
+                                            label="Chart Type" 
+                                            value={userDetails.report_settings.chart_type} 
+                                            icon={BarChart2} 
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -305,9 +297,9 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                                         {userDetails.reports.map((report: any) => {
                                             const Icon = getReportTypeIcon(report.report_type);
                                             return (
-                                                <div key={report.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors">
+                                                <div key={report.id} className="flex items-center justify-between p-3 hover:bg-gray-50 transition-colors">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                                        <div className="w-8 h-8 flex items-center justify-center text-emerald-600">
                                                             <Icon size={16} />
                                                         </div>
                                                         <div>
@@ -334,17 +326,15 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                                 {/* Report Type Breakdown */}
                                 <div>
                                     <h3 className="text-[15px] font-bold text-gray-900 mb-3">Report Type Breakdown</h3>
-                                    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                                        <div className="p-5 space-y-0 divide-y divide-gray-100">
-                                            {userSummary.report_type_breakdown.map((item) => (
-                                                <div key={item.type} className="flex justify-between items-center py-2.5">
-                                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold capitalize">
-                                                        {item.type.replace(/_/g, ' ')}
-                                                    </span>
-                                                    <span className="text-[13px] font-semibold text-gray-700">{item.count}</span>
-                                                </div>
-                                            ))}
-                                        </div>
+                                    <div className="p-5 space-y-0 divide-y divide-gray-100">
+                                        {userSummary.report_type_breakdown.map((item) => (
+                                            <div key={item.type} className="flex justify-between items-center py-2.5">
+                                                <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold capitalize">
+                                                    {item.type.replace(/_/g, ' ')}
+                                                </span>
+                                                <span className="text-[13px] font-semibold text-gray-700">{item.count}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             </div>

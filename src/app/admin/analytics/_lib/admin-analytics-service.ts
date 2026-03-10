@@ -37,8 +37,8 @@ export async function fetchUserAnalyticsSummaries(
         });
 
         if (userError) {
-            console.error("Error fetching user analytics:", userError);
-            // Fallback to manual aggregation if RPC doesn't exist
+            // Silently fallback to manual aggregation if RPC doesn't exist
+            // This is expected if the database function hasn't been created yet
             return await fetchUserAnalyticsSummariesFallback(filters, page, pageSize);
         }
 
