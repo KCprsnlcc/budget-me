@@ -47,6 +47,11 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { format } from "date-fns";
 import { getSafeSkeletonCount } from "@/lib/utils";
+import {
+    exportAdminChatbotToCSV,
+    exportAdminChatbotToPDF,
+    type ChatbotAdminExportData,
+} from "@/lib/export-utils";
 
 type SummaryType = {
     label: string;
@@ -300,6 +305,50 @@ export default function AdminChatbotPage() {
         setSelectedSession(s);
         setDeleteModalOpen(true);
     }, []);
+
+    // Export handlers
+    const handleExportCSV = useCallback(() => {
+        if (sessions.length === 0) {
+            alert("No chat sessions to export");
+            return;
+        }
+
+        const exportData: ChatbotAdminExportData[] = sessions.map((s) => ({
+            user_email: s.user_email,
+            user_name: s.user_name || "Unknown",
+            total_messages: s.total_messages,
+            models_used: s.models_used.join(", "),
+            last_active: format(new Date(s.last_message_at), "MMM dd, yyyy HH:mm"),
+            last_message_preview: s.last_message_preview,
+        }));
+
+        exportAdminChatbotToCSV(exportData);
+    }, [sessions]);
+
+    const handleExportPDF = useCallback(() => {
+        if (sessions.length === 0) {
+            alert("No chat sessions to export");
+            return;
+        }
+
+        const exportData: ChatbotAdminExportData[] = sessions.map((s) => ({
+            user_email: s.user_email,
+            user_name: s.user_name || "Unknown",
+            total_messages: s.total_messages,
+            models_used: s.models_used.join(", "),
+            last_active: format(new Date(s.last_message_at), "MMM dd, yyyy HH:mm"),
+            last_message_preview: s.last_message_preview,
+        }));
+
+        const summaryData = {
+            totalMessages: stats?.totalMessages || 0,
+            activeUsers: stats?.activeUsers || 0,
+            totalUserMessages: stats?.totalUserMessages || 0,
+            totalAssistantMessages: stats?.totalAssistantMessages || 0,
+        };
+
+        exportAdminChatbotToPDF(exportData, summaryData);
+    }, [sessions, stats]);
 
     // Summary cards
     const summaryItems: SummaryType[] = useMemo(() => {
@@ -776,6 +825,46 @@ export default function AdminChatbotPage() {
                                 </select>
                                 <span className="hidden sm:inline">per page</span>
                             </div>
+                        </div>
+
+                        <div className="relative flex-1 sm:flex-none" ref={exportDropdownRef}>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full sm:w-auto"
+                                onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+                            >
+                                <Download size={14} className="sm:mr-1" />
+                                <span className="hidden sm:inline">Export</span>
+                                <MoreHorizontal size={12} className="ml-1" />
+                            </Button>
+
+                            {exportDropdownOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50 animate-in fade-in zoom-in duration-200">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                                        onClick={() => {
+                                            handleExportPDF();
+                                            setExportDropdownOpen(false);
+                                        }}
+                                    >
+                                        <span className="text-rose-500 mr-2 font-bold">PDF</span> Export as PDF
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                                        onClick={() => {
+                                            handleExportCSV();
+                                            setExportDropdownOpen(false);
+                                        }}
+                                    >
+                                        <span className="text-emerald-500 mr-2 font-bold">CSV</span> Export as CSV
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

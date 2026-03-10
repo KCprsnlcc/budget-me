@@ -55,6 +55,11 @@ import { FilterTableSkeleton, TransactionCardSkeleton } from "@/components/ui/sk
 import { getSafeSkeletonCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User } from "@supabase/supabase-js";
+import {
+    exportAdminGoalsToCSV,
+    exportAdminGoalsToPDF,
+    type GoalAdminExportData,
+} from "@/lib/export-utils";
 
 type SummaryType = {
     label: string;
@@ -316,6 +321,22 @@ export default function AdminGoalsPage() {
     const [selectedGoal, setSelectedGoal] = useState<AdminGoal | null>(null);
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
     const [hoveredBar, setHoveredBar] = useState<{ month: string, count: number } | null>(null);
+    const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+    const exportDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Close export dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+                setExportDropdownOpen(false);
+            }
+        };
+
+        if (exportDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [exportDropdownOpen]);
 
     const {
         goals,
@@ -367,6 +388,56 @@ export default function AdminGoalsPage() {
         setSelectedGoal(goal);
         setContributeModalOpen(true);
     }, []);
+
+    // Export handlers
+    const handleExportCSV = useCallback(() => {
+        if (goals.length === 0) {
+            alert("No goals to export");
+            return;
+        }
+
+        const exportData: GoalAdminExportData[] = goals.map((g) => ({
+            id: g.id,
+            goal_name: g.goal_name,
+            user_email: g.user_email || "Unknown",
+            target_amount: g.target_amount,
+            current_amount: g.current_amount,
+            progress_percentage: g.progress_percentage || 0,
+            priority: g.priority,
+            status: g.status,
+            category: g.category,
+        }));
+
+        exportAdminGoalsToCSV(exportData);
+    }, [goals]);
+
+    const handleExportPDF = useCallback(() => {
+        if (goals.length === 0) {
+            alert("No goals to export");
+            return;
+        }
+
+        const exportData: GoalAdminExportData[] = goals.map((g) => ({
+            id: g.id,
+            goal_name: g.goal_name,
+            user_email: g.user_email || "Unknown",
+            target_amount: g.target_amount,
+            current_amount: g.current_amount,
+            progress_percentage: g.progress_percentage || 0,
+            priority: g.priority,
+            status: g.status,
+            category: g.category,
+        }));
+
+        const summaryData = {
+            totalGoals: stats?.totalGoals || 0,
+            activeSaves: stats?.activeGoals || 0,
+            totalSaved: stats?.totalSaved || 0,
+            completedGoals: stats?.completedGoals || 0,
+        };
+
+        exportAdminGoalsToPDF(exportData, summaryData);
+    }, [goals, stats]);
 
     // Build summary cards from real data
     const summaryItems: SummaryType[] = useMemo(() => {
@@ -543,6 +614,45 @@ export default function AdminGoalsPage() {
                                 Grid
                             </Button>
                         </div>
+                        <div className="relative flex-1 sm:flex-none" ref={exportDropdownRef}>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full sm:w-auto"
+                                onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+                            >
+                                <Download size={14} className="sm:mr-1" />
+                                <span className="hidden sm:inline">Export</span>
+                                <MoreHorizontal size={12} className="ml-1" />
+                            </Button>
+
+                            {exportDropdownOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50 animate-in fade-in zoom-in duration-200">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                                        onClick={() => {
+                                            handleExportPDF();
+                                            setExportDropdownOpen(false);
+                                        }}
+                                    >
+                                        <span className="text-rose-500 mr-2 font-bold">PDF</span> Export as PDF
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                                        onClick={() => {
+                                            handleExportCSV();
+                                            setExportDropdownOpen(false);
+                                        }}
+                                    >
+                                        <span className="text-emerald-500 mr-2 font-bold">CSV</span> Export as CSV
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <Button
                         size="sm"
@@ -660,7 +770,7 @@ export default function AdminGoalsPage() {
                                     ))}
                                 </div>
                             </>
-                        
+
                         ) : (
                             <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center px-4">
                                 <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
@@ -801,7 +911,7 @@ export default function AdminGoalsPage() {
                     <Card className="bg-white p-8 text-center shrink-0">
                         <p className="text-sm text-red-500 mb-3">{error}</p>
                         <Button variant="outline" size="sm" onClick={refetch}>
-                            <RotateCcw size={14}/> Retry
+                            <RotateCcw size={14} /> Retry
                         </Button>
                     </Card>
                 )}

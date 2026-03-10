@@ -24,7 +24,17 @@ import {
     Search,
     Filter,
     RotateCcw,
+    MoreHorizontal,
 } from "lucide-react";
+import {
+    exportAdminBackupsToCSV,
+    exportAdminBackupsToPDF,
+    exportAdminActivityToCSV,
+    exportAdminActivityToPDF,
+    type BackupAdminExportData,
+    type ActivityAdminExportData,
+} from "@/lib/export-utils";
+import { useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
@@ -155,7 +165,22 @@ export default function AdminSettingsPage() {
 
     const [backingUp, setBackingUp] = useState(false);
     const [hoveredBar, setHoveredBar] = useState<{ name: string, count: number } | null>(null);
-    
+
+    // Export state
+    const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+    const exportDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+                setExportDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     // Filter states
     const [searchQuery, setSearchQuery] = useState("");
     const [monthFilter, setMonthFilter] = useState<string | "all">("all");
@@ -278,6 +303,83 @@ export default function AdminSettingsPage() {
 
         return filtered;
     }, [activityLogs, searchQuery, monthFilter, yearFilter]);
+
+    // Export handlers
+    const handleExportCSV = useCallback(() => {
+        if (activeTab === "backups") {
+            if (filteredBackupLogs.length === 0) {
+                alert("No backups to export");
+                return;
+            }
+            const exportData: BackupAdminExportData[] = filteredBackupLogs.map(b => ({
+                id: b.id,
+                status: b.status,
+                type: b.backup_type,
+                started_at: formatDate(b.started_at),
+                finished_at: b.completed_at ? formatDate(b.completed_at) : "N/A",
+                size: formatBytes(b.backup_size_bytes || 0),
+                tables_count: b.tables_backed_up?.length || 0,
+                created_by: b.created_by_email || "System",
+            }));
+            exportAdminBackupsToCSV(exportData);
+        } else {
+            if (filteredActivityLogs.length === 0) {
+                alert("No activity logs to export");
+                return;
+            }
+            const exportData: ActivityAdminExportData[] = filteredActivityLogs.map(a => ({
+                id: a.id,
+                type: a.activity_type,
+                description: a.activity_description,
+                user_email: a.user_email || "System",
+                severity: a.severity,
+                created_at: formatDate(a.created_at),
+                metadata: JSON.stringify(a.metadata || {}),
+            }));
+            exportAdminActivityToCSV(exportData);
+        }
+    }, [activeTab, filteredBackupLogs, filteredActivityLogs]);
+
+    const handleExportPDF = useCallback(() => {
+        if (activeTab === "backups") {
+            if (filteredBackupLogs.length === 0) {
+                alert("No backups to export");
+                return;
+            }
+            const exportData: BackupAdminExportData[] = filteredBackupLogs.map(b => ({
+                id: b.id,
+                status: b.status,
+                type: b.backup_type,
+                started_at: formatDate(b.started_at),
+                finished_at: b.completed_at ? formatDate(b.completed_at) : "N/A",
+                size: formatBytes(b.backup_size_bytes || 0),
+                tables_count: b.tables_backed_up?.length || 0,
+                created_by: b.created_by_email || "System",
+            }));
+            exportAdminBackupsToPDF(exportData, {
+                totalBackups: stats?.totalBackups,
+                lastBackupAt: stats?.lastBackupAt ? formatDate(stats.lastBackupAt) : "Never",
+            });
+        } else {
+            if (filteredActivityLogs.length === 0) {
+                alert("No activity logs to export");
+                return;
+            }
+            const exportData: ActivityAdminExportData[] = filteredActivityLogs.map(a => ({
+                id: a.id,
+                type: a.activity_type,
+                description: a.activity_description,
+                user_email: a.user_email || "System",
+                severity: a.severity,
+                created_at: formatDate(a.created_at),
+                metadata: JSON.stringify(a.metadata || {}),
+            }));
+            exportAdminActivityToPDF(exportData, {
+                totalLogs: stats?.totalActivityLogs,
+                recentErrors: stats?.recentErrors,
+            });
+        }
+    }, [activeTab, filteredBackupLogs, filteredActivityLogs, stats]);
 
     // ─── Loading State ─────────────────────────────────────────────────
     if (loading) {
@@ -447,6 +549,47 @@ export default function AdminSettingsPage() {
                             <><Download size={14} /> Download SQL</>
                         )}
                     </Button>
+
+                    <div className="relative" ref={exportDropdownRef}>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="bg-white text-slate-600 border-slate-200"
+                            onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+                        >
+                            <Download size={14} />
+                            <span>Export</span>
+                            <MoreHorizontal size={12} className="ml-1" />
+                        </Button>
+
+                        {exportDropdownOpen && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50 animate-in fade-in zoom-in duration-200">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                                    onClick={() => {
+                                        handleExportPDF();
+                                        setExportDropdownOpen(false);
+                                    }}
+                                >
+                                    <span className="text-rose-500 mr-2 font-bold">PDF</span> Export as PDF
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                                    onClick={() => {
+                                        handleExportCSV();
+                                        setExportDropdownOpen(false);
+                                    }}
+                                >
+                                    <span className="text-emerald-500 mr-2 font-bold">CSV</span> Export as CSV
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+
                     <Button
                         size="sm"
                         className="bg-emerald-500 hover:bg-emerald-600"
@@ -637,7 +780,7 @@ export default function AdminSettingsPage() {
                                 emptyLabel="All Months"
                                 hideSearch={true}
                             />
-                            
+
                             <FilterDropdown
                                 value={yearFilter === "all" ? "" : yearFilter.toString()}
                                 onChange={(value) => setYearFilter(value === "" ? "all" : value)}
@@ -654,23 +797,21 @@ export default function AdminSettingsPage() {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${
-                                    activeTab === 'backups' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                                }`}
+                                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${activeTab === 'backups' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                    }`}
                                 onClick={() => setActiveTab('backups')}
                             >
-                                <Database size={14}/>
+                                <Database size={14} />
                                 Backups
                             </Button>
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${
-                                    activeTab === 'activity' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                                }`}
+                                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${activeTab === 'activity' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                    }`}
                                 onClick={() => setActiveTab('activity')}
                             >
-                                <Activity size={14}/>
+                                <Activity size={14} />
                                 Activity Log
                             </Button>
                         </div>
@@ -707,7 +848,7 @@ export default function AdminSettingsPage() {
                                     {backupLogs.length === 0 ? "No Backups Yet" : "No Matching Backups"}
                                 </h3>
                                 <p className="text-xs sm:text-sm text-slate-500 mb-4 sm:mb-6">
-                                    {backupLogs.length === 0 
+                                    {backupLogs.length === 0
                                         ? "Create your first backup to see it here."
                                         : "No backups match your search criteria."
                                     }
@@ -735,7 +876,7 @@ export default function AdminSettingsPage() {
                                         <div className="flex-shrink-0 mt-0.5">
                                             {backupStatusIcon(backup.status)}
                                         </div>
-                                        
+
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between mb-1 sm:mb-2">
                                                 <div className="flex-1 min-w-0 pr-2">
@@ -766,7 +907,7 @@ export default function AdminSettingsPage() {
                                                     </span>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-[10px] sm:text-xs text-slate-500">
                                                 {backup.backup_size_bytes && (
                                                     <>
@@ -874,7 +1015,7 @@ export default function AdminSettingsPage() {
                                         <div className={`text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider flex-shrink-0 mt-0.5 ${severityColor(log.severity)}`}>
                                             {log.severity}
                                         </div>
-                                        
+
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between mb-1 sm:mb-2">
                                                 <div className="flex-1 min-w-0 pr-2">
@@ -893,7 +1034,7 @@ export default function AdminSettingsPage() {
                                                     </span>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-[10px] sm:text-xs text-slate-500">
                                                 {log.user_email && (
                                                     <>

@@ -26,6 +26,7 @@ import {
     MoreHorizontal,
     Mail,
     Home,
+    Download,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,13 @@ import { FilterTableSkeleton } from "@/components/ui/skeleton-filter-loaders";
 import { getSafeSkeletonCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User } from "@supabase/supabase-js";
+import {
+    exportAdminFamiliesToCSV,
+    exportAdminFamiliesToPDF,
+    type FamilyAdminExportData,
+} from "@/lib/export-utils";
+import { format } from "date-fns";
+import { useEffect } from "react";
 
 type SummaryType = {
     label: string;
@@ -279,6 +287,22 @@ export default function AdminFamilyPage() {
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
     const contentRef = useRef<HTMLDivElement>(null);
     const [hoveredBar, setHoveredBar] = useState<{ month: string, count: number } | null>(null);
+    const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+    const exportDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Close export dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+                setExportDropdownOpen(false);
+            }
+        };
+
+        if (exportDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [exportDropdownOpen]);
 
     const {
         families,
@@ -324,6 +348,50 @@ export default function AdminFamilyPage() {
         setSelectedFamily(f);
         setDeleteModalOpen(true);
     }, []);
+
+    // Export handlers
+    const handleExportCSV = useCallback(() => {
+        if (families.length === 0) {
+            alert("No families to export");
+            return;
+        }
+
+        const exportData: FamilyAdminExportData[] = families.map((f) => ({
+            id: f.id,
+            family_name: f.family_name,
+            owner_email: f.creator_email || "Unknown",
+            member_count: f.member_count || 0,
+            created_at: format(new Date(f.created_at), "MMM dd, yyyy"),
+            subscription_status: f.status,
+        }));
+
+        exportAdminFamiliesToCSV(exportData);
+    }, [families]);
+
+    const handleExportPDF = useCallback(() => {
+        if (families.length === 0) {
+            alert("No families to export");
+            return;
+        }
+
+        const exportData: FamilyAdminExportData[] = families.map((f) => ({
+            id: f.id,
+            family_name: f.family_name,
+            owner_email: f.creator_email || "Unknown",
+            member_count: f.member_count || 0,
+            created_at: format(new Date(f.created_at), "MMM dd, yyyy"),
+            subscription_status: f.status,
+        }));
+
+        const summaryData = {
+            totalFamilies: stats?.totalFamilies || 0,
+            totalMembers: stats?.totalMembers || 0,
+            avgMembers: stats?.avgMembersPerFamily || 0,
+            publicFamilies: stats?.publicFamilies || 0,
+        };
+
+        exportAdminFamiliesToPDF(exportData, summaryData);
+    }, [families, stats]);
 
     // Build summary cards from real data
     const summaryItems: SummaryType[] = useMemo(() => {
@@ -531,9 +599,49 @@ export default function AdminFamilyPage() {
                                     }`}
                                 onClick={() => setViewMode('grid')}
                             >
-                                <Grid3X3 size={14}/>
+                                <Grid3X3 size={14} />
                                 Grid
                             </Button>
+                        </div>
+
+                        <div className="relative flex-1 sm:flex-none" ref={exportDropdownRef}>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full sm:w-auto"
+                                onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+                            >
+                                <Download size={14} className="sm:mr-1" />
+                                <span className="hidden sm:inline">Export</span>
+                                <MoreHorizontal size={12} className="ml-1" />
+                            </Button>
+
+                            {exportDropdownOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50 animate-in fade-in zoom-in duration-200">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                                        onClick={() => {
+                                            handleExportPDF();
+                                            setExportDropdownOpen(false);
+                                        }}
+                                    >
+                                        <span className="text-rose-500 mr-2 font-bold">PDF</span> Export as PDF
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                                        onClick={() => {
+                                            handleExportCSV();
+                                            setExportDropdownOpen(false);
+                                        }}
+                                    >
+                                        <span className="text-emerald-500 mr-2 font-bold">CSV</span> Export as CSV
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -693,8 +801,8 @@ export default function AdminFamilyPage() {
                                     <div key={fam.family_id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
                                         <div className="flex items-center gap-3">
                                             <div className="relative flex-shrink-0">
-                                                <UserAvatar 
-                                                    user={mockUser} 
+                                                <UserAvatar
+                                                    user={mockUser}
                                                     size="md"
                                                     className="ring-2 ring-white shadow-sm w-8 h-8"
                                                 />

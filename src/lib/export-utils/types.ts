@@ -13,6 +13,18 @@ export interface TransactionExportData extends Record<string, string | number | 
 }
 
 /**
+ * User export interfaces
+ */
+export interface UserExportData extends Record<string, string | number | boolean | null | undefined> {
+  id: string;
+  full_name: string | null;
+  email: string;
+  role: string;
+  status: string;
+  created_at: string;
+}
+
+/**
  * Goal export interfaces
  */
 export interface GoalExportData extends Record<string, string | number | boolean | null | undefined> {
@@ -158,4 +170,112 @@ export interface ReportExportData {
     }>;
     actionableSteps?: string[];
   } | null;
+}
+
+/**
+ * Admin Export interfaces
+ */
+export interface AIUsageAdminExportData extends Record<string, string | number | boolean | null | undefined> {
+  id: string;
+  usage_date: string;
+  user_email: string;
+  predictions_used: number;
+  insights_used: number;
+  chatbot_used: number;
+  total_used: number;
+}
+
+export interface FamilyAdminExportData extends Record<string, string | number | boolean | null | undefined> {
+  id: string;
+  family_name: string;
+  owner_email: string;
+  member_count: number;
+  created_at: string;
+  subscription_status: string;
+}
+
+export interface BackupAdminExportData extends Record<string, string | number | boolean | null | undefined> {
+  id: string;
+  status: string;
+  type: string;
+  started_at: string;
+  finished_at: string;
+  size: string;
+  tables_count: number;
+  created_by: string;
+}
+
+export interface ActivityAdminExportData extends Record<string, string | number | boolean | null | undefined> {
+  id: string;
+  type: string;
+  description: string;
+  user_email: string;
+  severity: string;
+  created_at: string;
+  metadata: string;
+}
+
+export interface AnalyticsAdminExportData extends Record<string, string | number | boolean | null | undefined> {
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  total_reports: number;
+  total_transactions: number;
+  active_budgets: number;
+  active_goals: number;
+  last_updated: string;
+}
+
+export interface BudgetAdminExportData extends Record<string, string | number | boolean | null | undefined> {
+  id: string;
+  budget_name: string;
+  user_email: string;
+  category: string;
+  amount: number;
+  spent: number;
+  remaining: number;
+  percentage: number;
+  status: string;
+}
+
+export interface GoalAdminExportData extends Record<string, string | number | boolean | null | undefined> {
+  id: string;
+  goal_name: string;
+  user_email: string;
+  target_amount: number;
+  current_amount: number;
+  progress_percentage: number;
+  priority: string;
+  status: string;
+  category: string;
+}
+
+export interface PredictionAdminExportData extends Record<string, string | number | boolean | null | undefined> {
+  id: string;
+  date: string;
+  user_email: string;
+  type: string;
+  accuracy: string;
+  confidence: string;
+  data_points: number;
+}
+
+export interface ChatbotAdminExportData extends Record<string, string | number | boolean | null | undefined> {
+  user_email: string;
+  user_name: string;
+  total_messages: number;
+  models_used: string;
+  last_active: string;
+  last_message_preview: string;
+}
+export interface TransactionAdminExportData extends Record<string, string | number | boolean | null | undefined> {
+  id: string;
+  date: string;
+  user_email: string;
+  description: string | null;
+  type: string;
+  category: string;
+  account: string;
+  amount: number;
+  notes: string | null;
 }

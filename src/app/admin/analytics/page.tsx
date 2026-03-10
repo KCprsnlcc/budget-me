@@ -43,6 +43,13 @@ import type { UserAnalyticsSummary } from "./_lib/types";
 import { getSafeSkeletonCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User } from "@supabase/supabase-js";
+import {
+    exportAdminAnalyticsToCSV,
+    exportAdminAnalyticsToPDF,
+    type AnalyticsAdminExportData,
+} from "@/lib/export-utils";
+import { useEffect } from "react";
+import { Download } from "lucide-react";
 
 type SummaryType = {
     label: string;
@@ -226,8 +233,8 @@ const AnalyticsCard = memo(({
         <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                    <UserAvatar 
-                        user={mockUser} 
+                    <UserAvatar
+                        user={mockUser}
                         size="lg"
                         className="ring-2 ring-white shadow-sm"
                     />
@@ -300,8 +307,8 @@ const AnalyticsRow = memo(({
         <TableRow className="group hover:bg-slate-50/80 transition-colors">
             <TableCell className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                    <UserAvatar 
-                        user={mockUser} 
+                    <UserAvatar
+                        user={mockUser}
                         size="md"
                         className="ring-2 ring-white shadow-sm"
                     />
@@ -347,6 +354,19 @@ export default function AdminAnalyticsPage() {
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
     const contentRef = useRef<HTMLDivElement>(null);
     const [hoveredBar, setHoveredBar] = useState<{ month: string, count: number } | null>(null);
+    const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+    const exportDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+                setExportDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const {
         userSummaries,
@@ -386,6 +406,54 @@ export default function AdminAnalyticsPage() {
         setSelectedUserSummary(u);
         setDeleteModalOpen(true);
     }, []);
+
+    // Export handlers
+    const handleExportCSV = useCallback(() => {
+        if (userSummaries.length === 0) {
+            alert("No analytics data to export");
+            return;
+        }
+
+        const exportData: AnalyticsAdminExportData[] = userSummaries.map((u) => ({
+            user_id: u.user_id,
+            user_name: u.user_name || "Unknown User",
+            user_email: u.user_email,
+            total_reports: u.total_reports,
+            total_transactions: u.total_transactions,
+            active_budgets: u.active_budgets,
+            active_goals: u.active_goals,
+            last_updated: formatDate(u.last_updated),
+        }));
+
+        exportAdminAnalyticsToCSV(exportData);
+    }, [userSummaries]);
+
+    const handleExportPDF = useCallback(() => {
+        if (userSummaries.length === 0) {
+            alert("No analytics data to export");
+            return;
+        }
+
+        const exportData: AnalyticsAdminExportData[] = userSummaries.map((u) => ({
+            user_id: u.user_id,
+            user_name: u.user_name || "Unknown User",
+            user_email: u.user_email,
+            total_reports: u.total_reports,
+            total_transactions: u.total_transactions,
+            active_budgets: u.active_budgets,
+            active_goals: u.active_goals,
+            last_updated: formatDate(u.last_updated),
+        }));
+
+        const summaryData = {
+            totalReports: stats?.totalReports || 0,
+            activeUsers: stats?.activeUsers || 0,
+            avgConfidence: `${((stats?.avgConfidenceLevel || 0) * 100).toFixed(1)}%`,
+            totalDataPoints: stats?.totalDataPointsAnalyzed || 0,
+        };
+
+        exportAdminAnalyticsToPDF(exportData, summaryData);
+    }, [userSummaries, stats]);
 
     // Build summary cards from real data
     const summaryCards: SummaryType[] = useMemo(() => {
@@ -479,7 +547,7 @@ export default function AdminAnalyticsPage() {
                                 </div>
                                 <Skeleton height={192} className="sm:h-60" />
                             </Card>
-                            
+
                             {/* Distribution Skeleton */}
                             <Card className="p-4 sm:p-6">
                                 <Skeleton width={140} height={14} className="mb-2" />
@@ -565,6 +633,46 @@ export default function AdminAnalyticsPage() {
                                 <Grid3X3 size={14} />
                                 Grid
                             </Button>
+                        </div>
+
+                        <div className="relative flex-1 sm:flex-none" ref={exportDropdownRef}>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full sm:w-auto"
+                                onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+                            >
+                                <Download size={14} className="sm:mr-1" />
+                                <span className="hidden sm:inline">Export</span>
+                                <MoreHorizontal size={12} className="ml-1" />
+                            </Button>
+
+                            {exportDropdownOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50 animate-in fade-in zoom-in duration-200">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                                        onClick={() => {
+                                            handleExportPDF();
+                                            setExportDropdownOpen(false);
+                                        }}
+                                    >
+                                        <span className="text-rose-500 mr-2 font-bold">PDF</span> Export as PDF
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                                        onClick={() => {
+                                            handleExportCSV();
+                                            setExportDropdownOpen(false);
+                                        }}
+                                    >
+                                        <span className="text-emerald-500 mr-2 font-bold">CSV</span> Export as CSV
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -773,180 +881,203 @@ export default function AdminAnalyticsPage() {
                         </Card>
                     )}
 
-                {/* Filters */}
-                <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
-                    <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
-                        <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
-                            <Filter size={14} className="sm:w-4 sm:h-4" />
-                            <span className="font-medium">Filters</span>
-                        </div>
-                        <div className="hidden xl:block h-4 w-px bg-slate-200"></div>
+                    {/* Filters */}
+                    <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
+                        <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
+                            <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
+                                <Filter size={14} className="sm:w-4 sm:h-4" />
+                                <span className="font-medium">Filters</span>
+                            </div>
+                            <div className="hidden xl:block h-4 w-px bg-slate-200"></div>
 
-                        <div className="relative w-full xl:w-64">
-                            <Search size={12} className="sm:w-[14px] sm:h-[14px] absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="Search analytics..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="w-full pl-7 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
-                            />
-                        </div>
+                            <div className="relative w-full xl:w-64">
+                                <Search size={12} className="sm:w-[14px] sm:h-[14px] absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search analytics..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className="w-full pl-7 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
+                                />
+                            </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
-                            <FilterDropdown
-                                value={month === "all" ? "" : month.toString()}
-                                onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
-                                options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
-                                placeholder="All Months"
-                                className="w-full text-slate-900 text-xs sm:text-sm"
-                                allowEmpty={true}
-                                emptyLabel="All Months"
-                                hideSearch={true}
-                            />
-                            <FilterDropdown
-                                value={year === "all" ? "" : year.toString()}
-                                onChange={(value) => setYear(value === "" ? "all" : Number(value))}
-                                options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
-                                placeholder="All Years"
-                                className="w-full text-slate-900 text-xs sm:text-sm"
-                                allowEmpty={true}
-                                emptyLabel="All Years"
-                                hideSearch={true}
-                            />
-                            <FilterDropdown
-                                value={reportTypeFilter}
-                                onChange={(value) => setReportTypeFilter(value)}
-                                options={[
-                                    { value: "spending", label: "Spending" },
-                                    { value: "income-expense", label: "Income/Expense" },
-                                    { value: "savings", label: "Savings" },
-                                    { value: "trends", label: "Trends" },
-                                    { value: "goals", label: "Goals" },
-                                    { value: "predictions", label: "Predictions" },
-                                ]}
-                                placeholder="All Types"
-                                className="w-full text-xs sm:text-sm"
-                                allowEmpty={true}
-                                emptyLabel="All Types"
-                                hideSearch={true}
-                            />
-                            <FilterDropdown
-                                value={userFilter}
-                                onChange={(value) => setUserFilter(value)}
-                                options={users.map((u) => ({ value: u.id, label: u.email }))}
-                                placeholder="All Users"
-                                className="w-full text-xs sm:text-sm"
-                                allowEmpty={true}
-                                emptyLabel="All Users"
-                                hideSearch={false}
-                            />
-                        </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 xl:flex items-center gap-2 w-full xl:w-auto">
+                                <FilterDropdown
+                                    value={month === "all" ? "" : month.toString()}
+                                    onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
+                                    options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
+                                    placeholder="All Months"
+                                    className="w-full text-slate-900 text-xs sm:text-sm"
+                                    allowEmpty={true}
+                                    emptyLabel="All Months"
+                                    hideSearch={true}
+                                />
+                                <FilterDropdown
+                                    value={year === "all" ? "" : year.toString()}
+                                    onChange={(value) => setYear(value === "" ? "all" : Number(value))}
+                                    options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
+                                    placeholder="All Years"
+                                    className="w-full text-slate-900 text-xs sm:text-sm"
+                                    allowEmpty={true}
+                                    emptyLabel="All Years"
+                                    hideSearch={true}
+                                />
+                                <FilterDropdown
+                                    value={reportTypeFilter}
+                                    onChange={(value) => setReportTypeFilter(value)}
+                                    options={[
+                                        { value: "spending", label: "Spending" },
+                                        { value: "income-expense", label: "Income/Expense" },
+                                        { value: "savings", label: "Savings" },
+                                        { value: "trends", label: "Trends" },
+                                        { value: "goals", label: "Goals" },
+                                        { value: "predictions", label: "Predictions" },
+                                    ]}
+                                    placeholder="All Types"
+                                    className="w-full text-xs sm:text-sm"
+                                    allowEmpty={true}
+                                    emptyLabel="All Types"
+                                    hideSearch={true}
+                                />
+                                <FilterDropdown
+                                    value={userFilter}
+                                    onChange={(value) => setUserFilter(value)}
+                                    options={users.map((u) => ({ value: u.id, label: u.email }))}
+                                    placeholder="All Users"
+                                    className="w-full text-xs sm:text-sm"
+                                    allowEmpty={true}
+                                    emptyLabel="All Users"
+                                    hideSearch={false}
+                                />
+                            </div>
 
-                        <div className="flex-1"></div>
-                        <div className="flex items-center gap-2 w-full xl:w-auto">
-                            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to Current Month" onClick={resetFilters}>
-                                <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> Current
-                            </Button>
-                            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={resetFiltersToAll}>
-                                <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> All Time
-                            </Button>
+                            <div className="flex-1"></div>
+                            <div className="flex items-center gap-2 w-full xl:w-auto">
+                                <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to Current Month" onClick={resetFilters}>
+                                    <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> Current
+                                </Button>
+                                <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={resetFiltersToAll}>
+                                    <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> All Time
+                                </Button>
+                            </div>
                         </div>
-                    </div>
-                </Card>
-
-                {/* Error State */}
-                {error && !loading && (
-                    <Card className="p-8 text-center">
-                        <p className="text-sm text-red-500 mb-3">{error}</p>
-                        <Button variant="outline" size="sm" onClick={refetch}>
-                            <RotateCcw size={14} /> Retry
-                        </Button>
                     </Card>
-                )}
 
-                {/* Analytics Display */}
-                {userSummaries.length === 0 && !loading && !tableLoading ? (
-                    <Card className="p-12 text-center">
-                        <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
-                        <h3 className="text-sm font-semibold text-slate-700 mb-1">No user analytics found</h3>
-                        <p className="text-xs text-slate-400 mb-4">
-                            {search ? "Try adjusting your search or filters." : "No user data available in the database."}
-                        </p>
-                    </Card>
-                ) : viewMode === 'table' ? (
-                    <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-                        {tableLoading ? (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="px-6 py-3">User</TableHead>
-                                        <TableHead className="px-6 py-3 text-center">Total Reports</TableHead>
-                                        <TableHead className="px-6 py-3 text-center">Transactions</TableHead>
-                                        <TableHead className="px-6 py-3 text-center">Budgets</TableHead>
-                                        <TableHead className="px-6 py-3 text-center">Goals</TableHead>
-                                        <TableHead className="px-6 py-3">Last Updated</TableHead>
-                                        <TableHead className="px-6 py-3 text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {Array.from({ length: getSafeSkeletonCount(pageSize, 10, 20) }).map((_, i) => (
-                                        <TableRowSkeleton key={i} />
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        ) : (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="px-6 py-3">User</TableHead>
-                                        <TableHead className="px-6 py-3 text-center">Total Reports</TableHead>
-                                        <TableHead className="px-6 py-3 text-center">Transactions</TableHead>
-                                        <TableHead className="px-6 py-3 text-center">Budgets</TableHead>
-                                        <TableHead className="px-6 py-3 text-center">Goals</TableHead>
-                                        <TableHead className="px-6 py-3">Last Updated</TableHead>
-                                        <TableHead className="px-6 py-3 text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {userSummaries.length === 0 ? (
+                    {/* Error State */}
+                    {error && !loading && (
+                        <Card className="p-8 text-center">
+                            <p className="text-sm text-red-500 mb-3">{error}</p>
+                            <Button variant="outline" size="sm" onClick={refetch}>
+                                <RotateCcw size={14} /> Retry
+                            </Button>
+                        </Card>
+                    )}
+
+                    {/* Analytics Display */}
+                    {userSummaries.length === 0 && !loading && !tableLoading ? (
+                        <Card className="p-12 text-center">
+                            <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
+                            <h3 className="text-sm font-semibold text-slate-700 mb-1">No user analytics found</h3>
+                            <p className="text-xs text-slate-400 mb-4">
+                                {search ? "Try adjusting your search or filters." : "No user data available in the database."}
+                            </p>
+                        </Card>
+                    ) : viewMode === 'table' ? (
+                        <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+                            {tableLoading ? (
+                                <Table>
+                                    <TableHeader>
                                         <TableRow>
-                                            <TableCell colSpan={7} className="px-6 py-12 text-center">
-                                                <div className="flex flex-col items-center justify-center">
-                                                    <Inbox size={32} className="text-slate-300 mb-2" />
-                                                    <p className="text-sm text-slate-500">No users match your filters</p>
-                                                    <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
-                                                        Clear Filters
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
+                                            <TableHead className="px-6 py-3">User</TableHead>
+                                            <TableHead className="px-6 py-3 text-center">Total Reports</TableHead>
+                                            <TableHead className="px-6 py-3 text-center">Transactions</TableHead>
+                                            <TableHead className="px-6 py-3 text-center">Budgets</TableHead>
+                                            <TableHead className="px-6 py-3 text-center">Goals</TableHead>
+                                            <TableHead className="px-6 py-3">Last Updated</TableHead>
+                                            <TableHead className="px-6 py-3 text-right">Actions</TableHead>
                                         </TableRow>
-                                    ) : (
-                                        userSummaries.map((userSummary) => (
-                                            <AnalyticsRow
-                                                key={userSummary.user_id}
-                                                userSummary={userSummary}
-                                                onView={handleView}
-                                                onDelete={handleDelete}
-                                            />
-                                        ))
-                                    )}
-                                </TableBody>
-                            </Table>
-                        )}
-                    </Card>
-                ) : tableLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {Array.from({ length: getSafeSkeletonCount(pageSize, 10, 20) }).map((_, i) => (
-                            <AnalyticsCardSkeleton key={i} />
-                        ))}
-                    </div>
-                ) : (
-                    <>
-                        {/* Grid View (Desktop) */}
-                        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {userSummaries.length === 0 ? (
-                                <div className="col-span-full">
+                                    </TableHeader>
+                                    <TableBody>
+                                        {Array.from({ length: getSafeSkeletonCount(pageSize, 10, 20) }).map((_, i) => (
+                                            <TableRowSkeleton key={i} />
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            ) : (
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="px-6 py-3">User</TableHead>
+                                            <TableHead className="px-6 py-3 text-center">Total Reports</TableHead>
+                                            <TableHead className="px-6 py-3 text-center">Transactions</TableHead>
+                                            <TableHead className="px-6 py-3 text-center">Budgets</TableHead>
+                                            <TableHead className="px-6 py-3 text-center">Goals</TableHead>
+                                            <TableHead className="px-6 py-3">Last Updated</TableHead>
+                                            <TableHead className="px-6 py-3 text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {userSummaries.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={7} className="px-6 py-12 text-center">
+                                                    <div className="flex flex-col items-center justify-center">
+                                                        <Inbox size={32} className="text-slate-300 mb-2" />
+                                                        <p className="text-sm text-slate-500">No users match your filters</p>
+                                                        <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
+                                                            Clear Filters
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            userSummaries.map((userSummary) => (
+                                                <AnalyticsRow
+                                                    key={userSummary.user_id}
+                                                    userSummary={userSummary}
+                                                    onView={handleView}
+                                                    onDelete={handleDelete}
+                                                />
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            )}
+                        </Card>
+                    ) : tableLoading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {Array.from({ length: getSafeSkeletonCount(pageSize, 10, 20) }).map((_, i) => (
+                                <AnalyticsCardSkeleton key={i} />
+                            ))}
+                        </div>
+                    ) : (
+                        <>
+                            {/* Grid View (Desktop) */}
+                            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {userSummaries.length === 0 ? (
+                                    <div className="col-span-full">
+                                        <Card className="p-12 text-center">
+                                            <Inbox size={32} className="text-slate-300 mb-2" />
+                                            <p className="text-sm text-slate-500">No users match your filters</p>
+                                            <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
+                                                Clear Filters
+                                            </Button>
+                                        </Card>
+                                    </div>
+                                ) : (
+                                    userSummaries.map((userSummary) => (
+                                        <AnalyticsCard
+                                            key={userSummary.user_id}
+                                            userSummary={userSummary}
+                                            onView={handleView}
+                                            onDelete={handleDelete}
+                                        />
+                                    ))
+                                )}
+                            </div>
+
+                            {/* Grid View (Mobile) */}
+                            <div className="md:hidden space-y-4">
+                                {userSummaries.length === 0 ? (
                                     <Card className="p-12 text-center">
                                         <Inbox size={32} className="text-slate-300 mb-2" />
                                         <p className="text-sm text-slate-500">No users match your filters</p>
@@ -954,141 +1085,118 @@ export default function AdminAnalyticsPage() {
                                             Clear Filters
                                         </Button>
                                     </Card>
-                                </div>
-                            ) : (
-                                userSummaries.map((userSummary) => (
-                                    <AnalyticsCard
-                                        key={userSummary.user_id}
-                                        userSummary={userSummary}
-                                        onView={handleView}
-                                        onDelete={handleDelete}
-                                    />
-                                ))
-                            )}
-                        </div>
+                                ) : (
+                                    userSummaries.map((userSummary) => (
+                                        <AnalyticsCard
+                                            key={userSummary.user_id}
+                                            userSummary={userSummary}
+                                            onView={handleView}
+                                            onDelete={handleDelete}
+                                        />
+                                    ))
+                                )}
+                            </div>
+                        </>
+                    )}
 
-                        {/* Grid View (Mobile) */}
-                        <div className="md:hidden space-y-4">
-                            {userSummaries.length === 0 ? (
-                                <Card className="p-12 text-center">
-                                    <Inbox size={32} className="text-slate-300 mb-2" />
-                                    <p className="text-sm text-slate-500">No users match your filters</p>
-                                    <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
-                                        Clear Filters
-                                    </Button>
-                                </Card>
-                            ) : (
-                                userSummaries.map((userSummary) => (
-                                    <AnalyticsCard
-                                        key={userSummary.user_id}
-                                        userSummary={userSummary}
-                                        onView={handleView}
-                                        onDelete={handleDelete}
-                                    />
-                                ))
-                            )}
-                        </div>
-                    </>
-                )}
+                    {/* Pagination */}
+                    {!loading && !tableLoading && !error && userSummaries.length > 0 && (
+                        <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0">
+                            <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
+                                Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} users
+                            </div>
+                            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                                {totalPages > 1 && (
+                                    <div className="flex items-center gap-1 sm:gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={previousPage}
+                                            disabled={!hasPreviousPage}
+                                            className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                                        >
+                                            <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
+                                        </Button>
+                                        <div className="flex items-center gap-0.5 sm:gap-1">
+                                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                                let pageNum;
+                                                if (totalPages <= 5) {
+                                                    pageNum = i + 1;
+                                                } else if (currentPage <= 3) {
+                                                    pageNum = i + 1;
+                                                } else if (currentPage >= totalPages - 2) {
+                                                    pageNum = totalPages - 4 + i;
+                                                } else {
+                                                    pageNum = currentPage - 2 + i;
+                                                }
 
-                {/* Pagination */}
-                {!loading && !tableLoading && !error && userSummaries.length > 0 && (
-                    <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0">
-                        <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
-                            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} users
-                        </div>
-                        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                            {totalPages > 1 && (
-                                <div className="flex items-center gap-1 sm:gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={previousPage}
-                                        disabled={!hasPreviousPage}
-                                        className="h-7 w-7 sm:h-8 sm:w-8 p-0"
-                                    >
-                                        <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
-                                    </Button>
-                                    <div className="flex items-center gap-0.5 sm:gap-1">
-                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                            let pageNum;
-                                            if (totalPages <= 5) {
-                                                pageNum = i + 1;
-                                            } else if (currentPage <= 3) {
-                                                pageNum = i + 1;
-                                            } else if (currentPage >= totalPages - 2) {
-                                                pageNum = totalPages - 4 + i;
-                                            } else {
-                                                pageNum = currentPage - 2 + i;
-                                            }
-
-                                            return (
-                                                <Button
-                                                    key={pageNum}
-                                                    variant={currentPage === pageNum ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => goToPage(pageNum)}
-                                                    className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-[10px] sm:text-xs"
-                                                >
-                                                    {pageNum}
-                                                </Button>
-                                            );
-                                        })}
+                                                return (
+                                                    <Button
+                                                        key={pageNum}
+                                                        variant={currentPage === pageNum ? "default" : "outline"}
+                                                        size="sm"
+                                                        onClick={() => goToPage(pageNum)}
+                                                        className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-[10px] sm:text-xs"
+                                                    >
+                                                        {pageNum}
+                                                    </Button>
+                                                );
+                                            })}
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={nextPage}
+                                            disabled={!hasNextPage}
+                                            className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                                        >
+                                            <ChevronRight size={14} className="sm:w-4 sm:h-4" />
+                                        </Button>
                                     </div>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={nextPage}
-                                        disabled={!hasNextPage}
-                                        className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                                )}
+                                <div className="text-xs sm:text-sm text-slate-600 flex items-center gap-2">
+                                    <span>Show</span>
+                                    <select
+                                        value={pageSize === Number.MAX_SAFE_INTEGER ? "all" : pageSize}
+                                        onChange={(e) => handlePageSizeChange(e.target.value === "all" ? Number.MAX_SAFE_INTEGER : parseInt(e.target.value))}
+                                        className="text-xs sm:text-sm border border-slate-200 rounded px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
                                     >
-                                        <ChevronRight size={14} className="sm:w-4 sm:h-4" />
-                                    </Button>
+                                        <option value={10}>10</option>
+                                        <option value={25}>25</option>
+                                        <option value={50}>50</option>
+                                        <option value={100}>100</option>
+                                        <option value="all">All</option>
+                                    </select>
+                                    <span className="hidden sm:inline">per page</span>
                                 </div>
-                            )}
-                            <div className="text-xs sm:text-sm text-slate-600 flex items-center gap-2">
-                                <span>Show</span>
-                                <select
-                                    value={pageSize === Number.MAX_SAFE_INTEGER ? "all" : pageSize}
-                                    onChange={(e) => handlePageSizeChange(e.target.value === "all" ? Number.MAX_SAFE_INTEGER : parseInt(e.target.value))}
-                                    className="text-xs sm:text-sm border border-slate-200 rounded px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
-                                >
-                                    <option value={10}>10</option>
-                                    <option value={25}>25</option>
-                                    <option value={50}>50</option>
-                                    <option value={100}>100</option>
-                                    <option value="all">All</option>
-                                </select>
-                                <span className="hidden sm:inline">per page</span>
                             </div>
                         </div>
-                    </div>
+                    )}
+                </div>
+
+                {/* Modals */}
+                {selectedUserSummary && (
+                    <ViewAdminAnalyticsModal
+                        isOpen={viewModalOpen}
+                        onClose={() => {
+                            setViewModalOpen(false);
+                            setSelectedUserSummary(null);
+                        }}
+                        userSummary={selectedUserSummary}
+                    />
+                )}
+                {selectedUserSummary && (
+                    <DeleteAdminAnalyticsModal
+                        isOpen={deleteModalOpen}
+                        onClose={() => {
+                            setDeleteModalOpen(false);
+                            setSelectedUserSummary(null);
+                        }}
+                        userSummary={selectedUserSummary}
+                        onDeleted={refetch}
+                    />
                 )}
             </div>
-
-            {/* Modals */}
-            {selectedUserSummary && (
-                <ViewAdminAnalyticsModal
-                    isOpen={viewModalOpen}
-                    onClose={() => {
-                        setViewModalOpen(false);
-                        setSelectedUserSummary(null);
-                    }}
-                    userSummary={selectedUserSummary}
-                />
-            )}
-            {selectedUserSummary && (
-                <DeleteAdminAnalyticsModal
-                    isOpen={deleteModalOpen}
-                    onClose={() => {
-                        setDeleteModalOpen(false);
-                        setSelectedUserSummary(null);
-                    }}
-                    userSummary={selectedUserSummary}
-                    onDeleted={refetch}
-                />
-            )}
-        </div>
         </SkeletonTheme>
     );
 }

@@ -50,6 +50,12 @@ import { format } from "date-fns";
 import { cn, getSafeSkeletonCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import {
+  exportAdminUsersToCSV,
+  exportAdminUsersToPDF,
+  type UserExportData,
+} from "@/lib/export-utils";
+import { useEffect } from "react";
 
 type SummaryType = {
   label: string;
@@ -110,8 +116,8 @@ const UserCard = memo(({
     <Card className="p-4 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-all group cursor-pointer">
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
-          <UserAvatar 
-            user={supabaseUser} 
+          <UserAvatar
+            user={supabaseUser}
             size="lg"
             className="ring-2 ring-white shadow-sm"
           />
@@ -181,8 +187,8 @@ const UserRow = memo(({
     <TableRow className="group hover:bg-slate-50/80 transition-colors">
       <TableCell className="px-6 py-4">
         <div className="flex items-center gap-3">
-          <UserAvatar 
-            user={supabaseUser} 
+          <UserAvatar
+            user={supabaseUser}
             size="md"
             className="ring-2 ring-white shadow-sm"
           />
@@ -229,8 +235,24 @@ export default function UsersPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const exportDropdownRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [hoveredBar, setHoveredBar] = useState<{ month: string; count: number } | null>(null);
+
+  // Close export dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+        setExportDropdownOpen(false);
+      }
+    };
+
+    if (exportDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [exportDropdownOpen]);
 
   const {
     users,
@@ -282,6 +304,49 @@ export default function UsersPage() {
       setEditModalOpen(true);
     }, 150);
   }, []);
+
+  // Export handlers
+  const handleExportCSV = useCallback(() => {
+    if (users.length === 0) {
+      alert("No users to export");
+      return;
+    }
+
+    const exportData: UserExportData[] = users.map((u) => ({
+      id: u.id,
+      full_name: u.full_name,
+      email: u.email,
+      role: u.role,
+      status: u.is_active ? "Active" : "Inactive",
+      created_at: format(new Date(u.created_at), "MMM dd, yyyy"),
+    }));
+
+    exportAdminUsersToCSV(exportData);
+  }, [users]);
+
+  const handleExportPDF = useCallback(() => {
+    if (users.length === 0) {
+      alert("No users to export");
+      return;
+    }
+
+    const exportData: UserExportData[] = users.map((u) => ({
+      id: u.id,
+      full_name: u.full_name,
+      email: u.email,
+      role: u.role,
+      status: u.is_active ? "Active" : "Inactive",
+      created_at: format(new Date(u.created_at), "MMM dd, yyyy"),
+    }));
+
+    const summary = {
+      totalUsers: stats?.totalUsers || 0,
+      activeUsers: stats?.activeUsers || 0,
+      adminCount: stats?.adminCount || 0,
+    };
+
+    exportAdminUsersToPDF(exportData, summary);
+  }, [users, stats]);
 
   // Build summary cards from real data
   const summaryItems: SummaryType[] = useMemo(() => {
@@ -431,9 +496,8 @@ export default function UsersPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${
-                  viewMode === "table" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                }`}
+                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${viewMode === "table" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                  }`}
                 onClick={() => setViewMode("table")}
               >
                 <TableIcon size={14} />
@@ -442,14 +506,52 @@ export default function UsersPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${
-                  viewMode === "grid" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                }`}
+                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${viewMode === "grid" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                  }`}
                 onClick={() => setViewMode("grid")}
               >
                 <Grid3X3 size={14} />
                 Grid
               </Button>
+            </div>
+            <div className="relative flex-1 sm:flex-none" ref={exportDropdownRef}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+                onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+              >
+                <Download size={14} className="sm:mr-1" />
+                <span className="hidden sm:inline">Export</span>
+                <MoreHorizontal size={12} className="ml-1" />
+              </Button>
+              {/* Dropdown */}
+              {exportDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                    onClick={() => {
+                      handleExportPDF();
+                      setExportDropdownOpen(false);
+                    }}
+                  >
+                    <span className="text-rose-500 mr-2">PDF</span> Export as PDF
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                    onClick={() => {
+                      handleExportCSV();
+                      setExportDropdownOpen(false);
+                    }}
+                  >
+                    <span className="text-emerald-500 mr-2">CSV</span> Export as CSV
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
           <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 order-2 w-full sm:w-auto" onClick={() => setAddModalOpen(true)}>

@@ -45,11 +45,11 @@ import { useAdminTransactions } from "./_lib/use-admin-transactions";
 import type { AdminTransaction } from "./_lib/types";
 import { FilterTableSkeleton, TransactionCardSkeleton } from "@/components/ui/skeleton-filter-loaders";
 import {
-  exportToCSV,
-  exportTransactionsToPDF,
+  exportAdminTransactionsToCSV,
+  exportAdminTransactionsToPDF,
   formatExportDate,
   getTimestampString,
-  type TransactionExportData,
+  type TransactionAdminExportData,
 } from "@/lib/export-utils";
 import { getSafeSkeletonCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/shared/user-avatar";
@@ -96,9 +96,8 @@ const SummaryCard = memo(({ item }: { item: SummaryType }) => {
           {Icon && <Icon size={22} strokeWidth={1.5} />}
         </div>
         {item.change && (
-          <div className={`flex items-center gap-1 text-[10px] font-medium ${
-            item.trend === "up" ? "text-emerald-700" : "text-red-700"
-          }`}>
+          <div className={`flex items-center gap-1 text-[10px] font-medium ${item.trend === "up" ? "text-emerald-700" : "text-red-700"
+            }`}>
             {item.trend === "up" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
             {item.change}
           </div>
@@ -125,7 +124,7 @@ const TransactionCard = memo(({
 }) => {
   const isIncome = isIncomeType(tx);
   const catName = tx.category_name ?? tx.type;
-  
+
   return (
     <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
       <div className="flex justify-between items-start mb-4">
@@ -137,9 +136,9 @@ const TransactionCard = memo(({
             <h4 className="text-sm font-semibold text-slate-900">{tx.description ?? "Untitled"}</h4>
             <div className="flex items-center gap-1.5 mt-1">
               {tx.user_avatar ? (
-                <img 
-                  src={tx.user_avatar} 
-                  alt={tx.user_name || tx.user_email || "User"} 
+                <img
+                  src={tx.user_avatar}
+                  alt={tx.user_name || tx.user_email || "User"}
                   className="w-4 h-4 rounded-full object-cover"
                 />
               ) : (
@@ -158,16 +157,15 @@ const TransactionCard = memo(({
           <span className="text-xs text-slate-400">{formatDate(tx.date)}</span>
         </div>
       </div>
-      
+
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <span className={`text-lg font-semibold ${
-            isIncome ? "text-emerald-600" : "text-slate-900"
-          }`}>
+          <span className={`text-lg font-semibold ${isIncome ? "text-emerald-600" : "text-slate-900"
+            }`}>
             {isIncome ? "+" : "-"}₱{tx.amount.toFixed(2)}
           </span>
         </div>
-        
+
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(tx)}>
             <Eye size={16} />
@@ -205,9 +203,9 @@ const TransactionRow = memo(({
       <TableCell className="px-6 py-4">
         <div className="flex items-center gap-2">
           {tx.user_avatar ? (
-            <img 
-              src={tx.user_avatar} 
-              alt={tx.user_name || tx.user_email || "User"} 
+            <img
+              src={tx.user_avatar}
+              alt={tx.user_name || tx.user_email || "User"}
               className="w-6 h-6 rounded-full object-cover"
             />
           ) : (
@@ -255,7 +253,7 @@ export default function AdminTransactionsPage() {
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [hoveredBar, setHoveredBar] = useState<{month: string, count: number} | null>(null);
+  const [hoveredBar, setHoveredBar] = useState<{ month: string, count: number } | null>(null);
 
   // Close export dropdown when clicking outside
   useEffect(() => {
@@ -318,38 +316,38 @@ export default function AdminTransactionsPage() {
   // Build summary cards from real data
   const summaryItems: SummaryType[] = useMemo(() => {
     if (!stats) return [];
-    
+
     const growthTrend: "up" | "down" = stats.monthOverMonthGrowth >= 0 ? "up" : "down";
     const growthText = `${Math.abs(stats.monthOverMonthGrowth).toFixed(1)}% MoM`;
-    
+
     return [
-      { 
-        label: "Total Transactions", 
-        value: stats.totalTransactions.toLocaleString(), 
-        change: growthText, 
-        trend: growthTrend, 
-        icon: Wallet 
+      {
+        label: "Total Transactions",
+        value: stats.totalTransactions.toLocaleString(),
+        change: growthText,
+        trend: growthTrend,
+        icon: Wallet
       },
-      { 
-        label: "Active Users", 
-        value: stats.activeUsers.toLocaleString(), 
-        change: `${stats.pendingTransactions} pending`, 
-        trend: "up", 
-        icon: TrendingUp 
+      {
+        label: "Active Users",
+        value: stats.activeUsers.toLocaleString(),
+        change: `${stats.pendingTransactions} pending`,
+        trend: "up",
+        icon: TrendingUp
       },
-      { 
-        label: "Total Volume", 
-        value: formatCurrency(stats.totalIncome + stats.totalExpenses), 
-        change: `Avg ${formatCompact(stats.avgTransactionValue)}`, 
-        trend: "up", 
-        icon: ShoppingBag 
+      {
+        label: "Total Volume",
+        value: formatCurrency(stats.totalIncome + stats.totalExpenses),
+        change: `Avg ${formatCompact(stats.avgTransactionValue)}`,
+        trend: "up",
+        icon: ShoppingBag
       },
-      { 
-        label: "Net Balance", 
-        value: formatCurrency(stats.netBalance), 
-        change: stats.topSpendingCategory ? stats.topSpendingCategory.name : "—", 
-        trend: stats.netBalance >= 0 ? "up" : "down", 
-        icon: PiggyBank 
+      {
+        label: "Net Balance",
+        value: formatCurrency(stats.netBalance),
+        change: stats.topSpendingCategory ? stats.topSpendingCategory.name : "—",
+        trend: stats.netBalance >= 0 ? "up" : "down",
+        icon: PiggyBank
       },
     ];
   }, [stats]);
@@ -361,9 +359,10 @@ export default function AdminTransactionsPage() {
       return;
     }
 
-    const exportData: TransactionExportData[] = transactions.map((tx) => ({
+    const exportData: TransactionAdminExportData[] = transactions.map((tx) => ({
       id: tx.id,
       date: formatExportDate(tx.date),
+      user_email: tx.user_email || "Unknown",
       description: tx.description || "Untitled",
       type: tx.type,
       category: tx.category_name || tx.type,
@@ -372,8 +371,7 @@ export default function AdminTransactionsPage() {
       notes: tx.notes,
     }));
 
-    const filename = `admin_transactions_${getTimestampString()}.csv`;
-    exportToCSV(exportData, filename);
+    exportAdminTransactionsToCSV(exportData);
   }, [transactions]);
 
   const handleExportPDF = useCallback(() => {
@@ -382,9 +380,10 @@ export default function AdminTransactionsPage() {
       return;
     }
 
-    const exportData: TransactionExportData[] = transactions.map((tx) => ({
+    const exportData: TransactionAdminExportData[] = transactions.map((tx) => ({
       id: tx.id,
       date: formatExportDate(tx.date),
+      user_email: tx.user_email || "Unknown",
       description: tx.description || "Untitled",
       type: tx.type,
       category: tx.category_name || tx.type,
@@ -393,13 +392,13 @@ export default function AdminTransactionsPage() {
       notes: tx.notes,
     }));
 
-    const summary = {
+    const summaryData = {
       totalIncome: stats?.totalIncome ?? 0,
       totalExpenses: stats?.totalExpenses ?? 0,
       netBalance: stats?.netBalance ?? 0,
     };
 
-    exportTransactionsToPDF(exportData, summary);
+    exportAdminTransactionsToPDF(exportData, summaryData);
   }, [transactions, stats]);
 
   // Normalize chart data to percentages for bar heights
@@ -560,9 +559,8 @@ export default function AdminTransactionsPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${
-                  viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                }`}
+                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  }`}
                 onClick={() => setViewMode('table')}
               >
                 <TableIcon size={14} />
@@ -571,9 +569,8 @@ export default function AdminTransactionsPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${
-                  viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                }`}
+                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  }`}
                 onClick={() => setViewMode('grid')}
               >
                 <Grid3X3 size={14} />
@@ -589,7 +586,7 @@ export default function AdminTransactionsPage() {
               >
                 <Download size={14} className="sm" />
                 <span className="hidden sm:inline">Export</span>
-                <MoreHorizontal size={12}/>
+                <MoreHorizontal size={12} />
               </Button>
               {/* Dropdown */}
               {exportDropdownOpen && (
@@ -638,25 +635,25 @@ export default function AdminTransactionsPage() {
         className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth"
       >
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {summaryItems.map((item) => (
-          <SummaryCard key={item.label} item={item} />
-        ))}
-      </div>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {summaryItems.map((item) => (
+            <SummaryCard key={item.label} item={item} />
+          ))}
+        </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Transaction Growth Chart */}
-        <Card className="lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
-          <div className="flex items-center justify-between mb-6 sm:mb-8">
-            <div>
-              <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Transaction Growth</h3>
-              <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">6-month transaction volume.</p>
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Transaction Growth Chart */}
+          <Card className="lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
+              <div>
+                <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Transaction Growth</h3>
+                <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">6-month transaction volume.</p>
+              </div>
             </div>
-          </div>
 
-          {chartData.length > 0 ? (
+            {chartData.length > 0 ? (
               <>
                 <div className="relative h-48 sm:h-60 flex items-end justify-between gap-1 sm:gap-6 px-2 border-b border-slate-50">
                   <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
@@ -706,16 +703,16 @@ export default function AdminTransactionsPage() {
                 </p>
               </div>
             )}
-        </Card>
+          </Card>
 
-        {/* Type Distribution */}
-        <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
-          <div className="mb-4 sm:mb-6">
-            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Type Distribution</h3>
-            <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Transaction types breakdown.</p>
-          </div>
+          {/* Type Distribution */}
+          <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Type Distribution</h3>
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Transaction types breakdown.</p>
+            </div>
 
-          {stats?.typeDistribution.length ? (
+            {stats?.typeDistribution.length ? (
               <>
                 <div className="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
                   <div
@@ -738,9 +735,9 @@ export default function AdminTransactionsPage() {
                           style={{
                             backgroundColor:
                               type.type === "income" ? "#10b981" :
-                              type.type === "expense" ? "#ef4444" :
-                              type.type === "contribution" ? "#3b82f6" :
-                              type.type === "transfer" ? "#a855f7" : "#14b8a6",
+                                type.type === "expense" ? "#ef4444" :
+                                  type.type === "contribution" ? "#3b82f6" :
+                                    type.type === "transfer" ? "#a855f7" : "#14b8a6",
                           }}
                         />
                         <span className="text-slate-600 capitalize">{type.type}</span>
@@ -761,244 +758,268 @@ export default function AdminTransactionsPage() {
                 </p>
               </div>
             )}
-        </Card>
-      </div>
+          </Card>
+        </div>
 
-      {/* Top Users Section */}
-      {stats?.topUsers && stats.topUsers.length > 0 && (
-        <Card className="p-4 sm:p-6 hover:shadow-md transition-all">
-          <div className="mb-4 sm:mb-6">
-            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Top Users by Transaction Volume</h3>
-            <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Users with highest transaction amounts.</p>
-          </div>
-          
-          <div className="space-y-3">
-            {stats.topUsers.map((user, index) => {
-              // Create mock user for UserAvatar component
-              const mockUser: User = {
-                id: user.user_id,
-                email: user.email,
-                user_metadata: {
-                  full_name: user.full_name,
-                  avatar_url: user.avatar_url
-                },
-                app_metadata: {},
-                created_at: "",
-                aud: "authenticated"
-              } as User;
+        {/* Top Users Section */}
+        {stats?.topUsers && stats.topUsers.length > 0 && (
+          <Card className="p-4 sm:p-6 hover:shadow-md transition-all">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Top Users by Transaction Volume</h3>
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Users with highest transaction amounts.</p>
+            </div>
 
-              return (
-                <div key={user.user_id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="relative flex-shrink-0">
-                      <UserAvatar 
-                        user={mockUser} 
-                        size="lg"
-                        className="ring-2 ring-white shadow-sm"
-                      />
-                      <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm">
-                        {index + 1}
+            <div className="space-y-3">
+              {stats.topUsers.map((user, index) => {
+                // Create mock user for UserAvatar component
+                const mockUser: User = {
+                  id: user.user_id,
+                  email: user.email,
+                  user_metadata: {
+                    full_name: user.full_name,
+                    avatar_url: user.avatar_url
+                  },
+                  app_metadata: {},
+                  created_at: "",
+                  aud: "authenticated"
+                } as User;
+
+                return (
+                  <div key={user.user_id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="relative flex-shrink-0">
+                        <UserAvatar
+                          user={mockUser}
+                          size="lg"
+                          className="ring-2 ring-white shadow-sm"
+                        />
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm">
+                          {index + 1}
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-slate-900 truncate">
+                          {user.full_name || user.email}
+                        </p>
+                        <p className="text-xs text-slate-500">{user.transaction_count} transactions</p>
                       </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-slate-900 truncate">
-                        {user.full_name || user.email}
-                      </p>
-                      <p className="text-xs text-slate-500">{user.transaction_count} transactions</p>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-sm font-semibold text-slate-900">{formatCurrency(user.total_amount)}</p>
+                      <p className="text-xs text-slate-500">Total Volume</p>
                     </div>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-semibold text-slate-900">{formatCurrency(user.total_amount)}</p>
-                    <p className="text-xs text-slate-500">Total Volume</p>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+          </Card>
+        )}
+
+        {/* Filters */}
+        <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
+          <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
+              <Filter size={14} className="sm:w-4 sm:h-4" />
+              <span className="font-medium">Filters</span>
+            </div>
+            <div className="hidden xl:block h-4 w-px bg-slate-200"></div>
+
+            <div className="relative w-full xl:w-64">
+              <Search size={12} className="sm:w-[14px] sm:h-[14px] absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search transactions..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-7 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-5 xl:flex items-center gap-2 w-full xl:w-auto">
+              <FilterDropdown
+                value={month === "all" ? "" : month.toString()}
+                onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
+                options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
+                placeholder="All Months"
+                className="w-full text-slate-900 text-xs sm:text-sm"
+                allowEmpty={true}
+                emptyLabel="All Months"
+                hideSearch={true}
+              />
+              <FilterDropdown
+                value={year === "all" ? "" : year.toString()}
+                onChange={(value) => setYear(value === "" ? "all" : Number(value))}
+                options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
+                placeholder="All Years"
+                className="w-full text-slate-900 text-xs sm:text-sm"
+                allowEmpty={true}
+                emptyLabel="All Years"
+                hideSearch={true}
+              />
+              <FilterDropdown
+                value={typeFilter}
+                onChange={(value) => setTypeFilter(value)}
+                options={[
+                  { value: "income", label: "Income" },
+                  { value: "expense", label: "Expense" },
+                  { value: "contribution", label: "Contribution" },
+                  { value: "transfer", label: "Transfer" },
+                  { value: "cash_in", label: "Cash In" },
+                ]}
+                placeholder="All Types"
+                className="w-full text-xs sm:text-sm"
+                allowEmpty={true}
+                emptyLabel="All Types"
+                hideSearch={true}
+              />
+              <FilterDropdown
+                value={userFilter}
+                onChange={(value) => setUserFilter(value)}
+                options={users.map((u) => ({ value: u.id, label: u.email }))}
+                placeholder="All Users"
+                className="w-full text-xs sm:text-sm"
+                allowEmpty={true}
+                emptyLabel="All Users"
+                hideSearch={false}
+              />
+              <FilterDropdown
+                value={statusFilter}
+                onChange={(value) => setStatusFilter(value)}
+                options={[
+                  { value: "completed", label: "Completed" },
+                  { value: "pending", label: "Pending" },
+                ]}
+                placeholder="All Status"
+                className="w-full text-xs sm:text-sm"
+                allowEmpty={true}
+                emptyLabel="All Status"
+                hideSearch={true}
+              />
+            </div>
+
+            <div className="flex-1"></div>
+            <div className="flex items-center gap-2 w-full xl:w-auto">
+              <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to Current Month" onClick={resetFilters}>
+                <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> Current
+              </Button>
+              <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={resetFiltersToAll}>
+                <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> All Time
+              </Button>
+            </div>
           </div>
         </Card>
-      )}
 
-      {/* Filters */}
-      <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
-        <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
-            <Filter size={14} className="sm:w-4 sm:h-4" />
-            <span className="font-medium">Filters</span>
-          </div>
-          <div className="hidden xl:block h-4 w-px bg-slate-200"></div>
-
-          <div className="relative w-full xl:w-64">
-            <Search size={12} className="sm:w-[14px] sm:h-[14px] absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search transactions..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-7 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-5 xl:flex items-center gap-2 w-full xl:w-auto">
-            <FilterDropdown
-              value={month === "all" ? "" : month.toString()}
-              onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
-              options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
-              placeholder="All Months"
-              className="w-full text-slate-900 text-xs sm:text-sm"
-              allowEmpty={true}
-              emptyLabel="All Months"
-              hideSearch={true}
-            />
-            <FilterDropdown
-              value={year === "all" ? "" : year.toString()}
-              onChange={(value) => setYear(value === "" ? "all" : Number(value))}
-              options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
-              placeholder="All Years"
-              className="w-full text-slate-900 text-xs sm:text-sm"
-              allowEmpty={true}
-              emptyLabel="All Years"
-              hideSearch={true}
-            />
-            <FilterDropdown
-              value={typeFilter}
-              onChange={(value) => setTypeFilter(value)}
-              options={[
-                { value: "income", label: "Income" },
-                { value: "expense", label: "Expense" },
-                { value: "contribution", label: "Contribution" },
-                { value: "transfer", label: "Transfer" },
-                { value: "cash_in", label: "Cash In" },
-              ]}
-              placeholder="All Types"
-              className="w-full text-xs sm:text-sm"
-              allowEmpty={true}
-              emptyLabel="All Types"
-              hideSearch={true}
-            />
-            <FilterDropdown
-              value={userFilter}
-              onChange={(value) => setUserFilter(value)}
-              options={users.map((u) => ({ value: u.id, label: u.email }))}
-              placeholder="All Users"
-              className="w-full text-xs sm:text-sm"
-              allowEmpty={true}
-              emptyLabel="All Users"
-              hideSearch={false}
-            />
-            <FilterDropdown
-              value={statusFilter}
-              onChange={(value) => setStatusFilter(value)}
-              options={[
-                { value: "completed", label: "Completed" },
-                { value: "pending", label: "Pending" },
-              ]}
-              placeholder="All Status"
-              className="w-full text-xs sm:text-sm"
-              allowEmpty={true}
-              emptyLabel="All Status"
-              hideSearch={true}
-            />
-          </div>
-
-          <div className="flex-1"></div>
-          <div className="flex items-center gap-2 w-full xl:w-auto">
-            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to Current Month" onClick={resetFilters}>
-              <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> Current
+        {/* Error State */}
+        {error && !loading && (
+          <Card className="p-8 text-center">
+            <p className="text-sm text-red-500 mb-3">{error}</p>
+            <Button variant="outline" size="sm" onClick={refetch}>
+              <RotateCcw size={14} /> Retry
             </Button>
-            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={resetFiltersToAll}>
-              <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> All Time
-            </Button>
-          </div>
-        </div>
-      </Card>
+          </Card>
+        )}
 
-      {/* Error State */}
-      {error && !loading && (
-        <Card className="p-8 text-center">
-          <p className="text-sm text-red-500 mb-3">{error}</p>
-          <Button variant="outline" size="sm" onClick={refetch}>
-            <RotateCcw size={14} /> Retry
-          </Button>
-        </Card>
-      )}
-
-      {/* Transactions Display */}
-      {transactions.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
-          <h3 className="text-sm font-semibold text-slate-700 mb-1">No transactions found</h3>
-          <p className="text-xs text-slate-400 mb-4">
-            {search ? "Try adjusting your search or filters." : "No transactions available."}
-          </p>
-        </Card>
-      ) : viewMode === 'table' ? (
-        <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-          {tableLoading ? (
-            <FilterTableSkeleton rows={getSafeSkeletonCount(pageSize)} columns={6} />
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
-                    <div className="flex items-center gap-1">
-                      Date <MoreHorizontal size={12} className="rotate-90" />
-                    </div>
-                  </TableHead>
-                  <TableHead className="px-6 py-3">Description</TableHead>
-                  <TableHead className="px-6 py-3">User</TableHead>
-                  <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
-                    <div className="flex items-center gap-1">
-                      Category <MoreHorizontal size={12} className="rotate-90" />
-                    </div>
-                  </TableHead>
-                  <TableHead className="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
-                    <div className="flex items-center gap-1 justify-end">
-                      Amount <MoreHorizontal size={12} className="rotate-90" />
-                    </div>
-                  </TableHead>
-                  <TableHead className="px-6 py-3 text-center">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.length === 0 ? (
+        {/* Transactions Display */}
+        {transactions.length === 0 ? (
+          <Card className="p-12 text-center">
+            <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
+            <h3 className="text-sm font-semibold text-slate-700 mb-1">No transactions found</h3>
+            <p className="text-xs text-slate-400 mb-4">
+              {search ? "Try adjusting your search or filters." : "No transactions available."}
+            </p>
+          </Card>
+        ) : viewMode === 'table' ? (
+          <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+            {tableLoading ? (
+              <FilterTableSkeleton rows={getSafeSkeletonCount(pageSize)} columns={6} />
+            ) : (
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="px-6 py-12 text-center">
-                      <div className="flex flex-col items-center justify-center">
-                        <Inbox size={32} className="text-slate-300 mb-2" />
-                        <p className="text-sm text-slate-500">No transactions match your filters</p>
-                        <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
-                          Clear Filters
-                        </Button>
+                    <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
+                      <div className="flex items-center gap-1">
+                        Date <MoreHorizontal size={12} className="rotate-90" />
                       </div>
-                    </TableCell>
+                    </TableHead>
+                    <TableHead className="px-6 py-3">Description</TableHead>
+                    <TableHead className="px-6 py-3">User</TableHead>
+                    <TableHead className="px-6 py-3 cursor-pointer hover:text-slate-700 transition-colors">
+                      <div className="flex items-center gap-1">
+                        Category <MoreHorizontal size={12} className="rotate-90" />
+                      </div>
+                    </TableHead>
+                    <TableHead className="px-6 py-3 text-right cursor-pointer hover:text-slate-700 transition-colors">
+                      <div className="flex items-center gap-1 justify-end">
+                        Amount <MoreHorizontal size={12} className="rotate-90" />
+                      </div>
+                    </TableHead>
+                    <TableHead className="px-6 py-3 text-center">Actions</TableHead>
                   </TableRow>
-                ) : (
-                  transactions.map((tx) => (
-                    <TransactionRow
-                      key={tx.id}
-                      tx={tx}
-                      onView={handleView}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                    />
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </Card>
-      ) : tableLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: getSafeSkeletonCount(pageSize) }).map((_, i) => (
-            <TransactionCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : (
-        <>
-          {/* Transaction Cards Grid (Desktop) */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {transactions.length === 0 ? (
-              <div className="col-span-full">
+                </TableHeader>
+                <TableBody>
+                  {transactions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center justify-center">
+                          <Inbox size={32} className="text-slate-300 mb-2" />
+                          <p className="text-sm text-slate-500">No transactions match your filters</p>
+                          <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
+                            Clear Filters
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    transactions.map((tx) => (
+                      <TransactionRow
+                        key={tx.id}
+                        tx={tx}
+                        onView={handleView}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                      />
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Card>
+        ) : tableLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: getSafeSkeletonCount(pageSize) }).map((_, i) => (
+              <TransactionCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* Transaction Cards Grid (Desktop) */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {transactions.length === 0 ? (
+                <div className="col-span-full">
+                  <Card className="p-12 text-center">
+                    <Inbox size={32} className="text-slate-300 mb-2" />
+                    <p className="text-sm text-slate-500">No transactions match your filters</p>
+                    <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
+                      Clear Filters
+                    </Button>
+                  </Card>
+                </div>
+              ) : (
+                transactions.map((tx) => (
+                  <TransactionCard
+                    key={tx.id}
+                    tx={tx}
+                    onView={handleView}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* Transaction Cards Grid (Mobile) */}
+            <div className="md:hidden space-y-4">
+              {transactions.length === 0 ? (
                 <Card className="p-12 text-center">
                   <Inbox size={32} className="text-slate-300 mb-2" />
                   <p className="text-sm text-slate-500">No transactions match your filters</p>
@@ -1006,118 +1027,94 @@ export default function AdminTransactionsPage() {
                     Clear Filters
                   </Button>
                 </Card>
-              </div>
-            ) : (
-              transactions.map((tx) => (
-                <TransactionCard
-                  key={tx.id}
-                  tx={tx}
-                  onView={handleView}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ))
-            )}
-          </div>
+              ) : (
+                transactions.map((tx) => (
+                  <TransactionCard
+                    key={tx.id}
+                    tx={tx}
+                    onView={handleView}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                ))
+              )}
+            </div>
+          </>
+        )}
 
-          {/* Transaction Cards Grid (Mobile) */}
-          <div className="md:hidden space-y-4">
-            {transactions.length === 0 ? (
-              <Card className="p-12 text-center">
-                <Inbox size={32} className="text-slate-300 mb-2" />
-                <p className="text-sm text-slate-500">No transactions match your filters</p>
-                <Button size="sm" variant="outline" onClick={resetFiltersToAll} className="mt-2">
-                  Clear Filters
-                </Button>
-              </Card>
-            ) : (
-              transactions.map((tx) => (
-                <TransactionCard
-                  key={tx.id}
-                  tx={tx}
-                  onView={handleView}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ))
-            )}
-          </div>
-        </>
-      )}
+        {/* Pagination */}
+        {!loading && !tableLoading && !error && transactions.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0">
+            <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
+              Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} transactions
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={previousPage}
+                    disabled={!hasPreviousPage}
+                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                  >
+                    <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
+                  </Button>
+                  <div className="flex items-center gap-0.5 sm:gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
 
-      {/* Pagination */}
-      {!loading && !tableLoading && !error && transactions.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0">
-          <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
-            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} transactions
-          </div>
-          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
-            {totalPages > 1 && (
-              <div className="flex items-center gap-1 sm:gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={previousPage}
-                  disabled={!hasPreviousPage}
-                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
-                >
-                  <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
-                </Button>
-                <div className="flex items-center gap-0.5 sm:gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => goToPage(pageNum)}
-                        className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-[10px] sm:text-xs"
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => goToPage(pageNum)}
+                          className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-[10px] sm:text-xs"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={nextPage}
+                    disabled={!hasNextPage}
+                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                  >
+                    <ChevronRight size={14} className="sm:w-4 sm:h-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={nextPage}
-                  disabled={!hasNextPage}
-                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+              )}
+              <div className="text-xs sm:text-sm text-slate-600 flex items-center gap-2">
+                <span>Show</span>
+                <select
+                  value={pageSize === Number.MAX_SAFE_INTEGER ? "all" : pageSize}
+                  onChange={(e) => handlePageSizeChange(e.target.value === "all" ? Number.MAX_SAFE_INTEGER : parseInt(e.target.value))}
+                  className="text-xs sm:text-sm border border-slate-200 rounded px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
                 >
-                  <ChevronRight size={14} className="sm:w-4 sm:h-4" />
-                </Button>
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value="all">All</option>
+                </select>
+                <span className="hidden sm:inline">per page</span>
               </div>
-            )}
-            <div className="text-xs sm:text-sm text-slate-600 flex items-center gap-2">
-              <span>Show</span>
-              <select
-                value={pageSize === Number.MAX_SAFE_INTEGER ? "all" : pageSize}
-                onChange={(e) => handlePageSizeChange(e.target.value === "all" ? Number.MAX_SAFE_INTEGER : parseInt(e.target.value))}
-                className="text-xs sm:text-sm border border-slate-200 rounded px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-                <option value="all">All</option>
-              </select>
-              <span className="hidden sm:inline">per page</span>
             </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
 
       {/* Modals */}

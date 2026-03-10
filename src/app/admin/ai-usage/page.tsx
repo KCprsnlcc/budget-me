@@ -24,6 +24,8 @@ import {
   Activity,
   Zap,
   AlertCircle,
+  Download,
+  MoreHorizontal,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,6 +47,12 @@ import { FilterTableSkeleton } from "@/components/ui/skeleton-filter-loaders";
 import { getSafeSkeletonCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User } from "@supabase/supabase-js";
+import {
+  exportAdminAIUsageToCSV,
+  exportAdminAIUsageToPDF,
+  type AIUsageAdminExportData,
+} from "@/lib/export-utils";
+import { format } from "date-fns";
 
 type SummaryType = {
   label: string;
@@ -80,9 +88,8 @@ const SummaryCard = memo(({ item }: { item: SummaryType }) => {
           {Icon && <Icon size={22} strokeWidth={1.5} />}
         </div>
         {item.change && (
-          <div className={`flex items-center gap-1 text-[10px] font-medium ${
-            item.trend === "up" ? "text-emerald-700" : "text-red-700"
-          }`}>
+          <div className={`flex items-center gap-1 text-[10px] font-medium ${item.trend === "up" ? "text-emerald-700" : "text-red-700"
+            }`}>
             {item.trend === "up" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
             {item.change}
           </div>
@@ -108,11 +115,10 @@ const AIUsageCard = memo(({
 }) => {
   const isAtLimit = usage.total_used >= 25;
   const isHigh = usage.total_used >= 16 && usage.total_used < 25;
-  
+
   return (
-    <Card className={`p-4 hover:shadow-md transition-all group cursor-pointer ${
-      isAtLimit ? 'border-red-200 bg-red-50/30' : isHigh ? 'border-amber-200 bg-amber-50/30' : ''
-    }`}>
+    <Card className={`p-4 hover:shadow-md transition-all group cursor-pointer ${isAtLimit ? 'border-red-200 bg-red-50/30' : isHigh ? 'border-amber-200 bg-amber-50/30' : ''
+      }`}>
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
           <div className="text-lg">
@@ -122,9 +128,9 @@ const AIUsageCard = memo(({
             <h4 className="text-sm font-semibold text-slate-900">{formatDate(usage.usage_date)}</h4>
             <div className="flex items-center gap-1.5 mt-1">
               {usage.user_avatar ? (
-                <img 
-                  src={usage.user_avatar} 
-                  alt={usage.user_name || usage.user_email || "User"} 
+                <img
+                  src={usage.user_avatar}
+                  alt={usage.user_name || usage.user_email || "User"}
                   className="w-4 h-4 rounded-full object-cover"
                 />
               ) : (
@@ -137,15 +143,14 @@ const AIUsageCard = memo(({
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <span className={`text-xs font-medium ${
-            isAtLimit ? 'text-red-600' : isHigh ? 'text-amber-600' : 'text-emerald-600'
-          }`}>
+          <span className={`text-xs font-medium ${isAtLimit ? 'text-red-600' : isHigh ? 'text-amber-600' : 'text-emerald-600'
+            }`}>
             {usage.total_used} / 25
           </span>
           {isAtLimit && <span className="text-[10px] text-red-500 font-medium">At Limit</span>}
         </div>
       </div>
-      
+
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3 text-xs text-slate-500">
           <div className="flex items-center gap-1">
@@ -161,7 +166,7 @@ const AIUsageCard = memo(({
             <span>{usage.chatbot_used}</span>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" className="h-8 w-8" title="View Details" onClick={() => onView(usage)}>
             <Eye size={16} />
@@ -189,16 +194,16 @@ const AIUsageRow = memo(({
 }) => {
   const isAtLimit = usage.total_used >= 25;
   const isHigh = usage.total_used >= 16 && usage.total_used < 25;
-  
+
   return (
     <TableRow className="group hover:bg-slate-50/80 transition-colors">
       <TableCell className="px-6 py-4 text-slate-400">{formatDate(usage.usage_date)}</TableCell>
       <TableCell className="px-6 py-4">
         <div className="flex items-center gap-2">
           {usage.user_avatar ? (
-            <img 
-              src={usage.user_avatar} 
-              alt={usage.user_name || usage.user_email || "User"} 
+            <img
+              src={usage.user_avatar}
+              alt={usage.user_name || usage.user_email || "User"}
               className="w-6 h-6 rounded-full object-cover"
             />
           ) : (
@@ -219,9 +224,8 @@ const AIUsageRow = memo(({
         <span className="text-slate-900 font-medium">{usage.chatbot_used}</span>
       </TableCell>
       <TableCell className="px-6 py-4 text-right">
-        <span className={`font-medium ${
-          isAtLimit ? 'text-red-600' : isHigh ? 'text-amber-600' : 'text-emerald-600'
-        }`}>
+        <span className={`font-medium ${isAtLimit ? 'text-red-600' : isHigh ? 'text-amber-600' : 'text-emerald-600'
+          }`}>
           {usage.total_used} / 25
         </span>
       </TableCell>
@@ -249,9 +253,25 @@ export default function AdminAIUsagePage() {
   const [selectedUsage, setSelectedUsage] = useState<AdminAIUsage | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const contentRef = useRef<HTMLDivElement>(null);
-  const [hoveredBar, setHoveredBar] = useState<{date: string, count: number} | null>(null);
+  const [hoveredBar, setHoveredBar] = useState<{ date: string, count: number } | null>(null);
   const [month, setMonth] = useState<number | "all">("all");
   const [year, setYear] = useState<number | "all">("all");
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const exportDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close export dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+        setExportDropdownOpen(false);
+      }
+    };
+
+    if (exportDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [exportDropdownOpen]);
 
   const currentYear = new Date().getFullYear();
 
@@ -343,42 +363,88 @@ export default function AdminAIUsagePage() {
     resetFiltersToAll();
   }, [resetFiltersToAll]);
 
+  // Export handlers
+  const handleExportCSV = useCallback(() => {
+    if (usageRecords.length === 0) {
+      alert("No usage records to export");
+      return;
+    }
+
+    const exportData: AIUsageAdminExportData[] = usageRecords.map((r) => ({
+      id: r.id,
+      usage_date: format(new Date(r.usage_date + "T00:00:00"), "MMM dd, yyyy"),
+      user_email: r.user_email || "Unknown",
+      predictions_used: r.predictions_used,
+      insights_used: r.insights_used,
+      chatbot_used: r.chatbot_used,
+      total_used: r.total_used,
+    }));
+
+    exportAdminAIUsageToCSV(exportData);
+  }, [usageRecords]);
+
+  const handleExportPDF = useCallback(() => {
+    if (usageRecords.length === 0) {
+      alert("No usage records to export");
+      return;
+    }
+
+    const exportData: AIUsageAdminExportData[] = usageRecords.map((r) => ({
+      id: r.id,
+      usage_date: format(new Date(r.usage_date + "T00:00:00"), "MMM dd, yyyy"),
+      user_email: r.user_email || "Unknown",
+      predictions_used: r.predictions_used,
+      insights_used: r.insights_used,
+      chatbot_used: r.chatbot_used,
+      total_used: r.total_used,
+    }));
+
+    const summary = {
+      totalUsage: stats?.totalUsage || 0,
+      activeUsers: stats?.activeUsersToday || 0,
+      avgUsage: stats?.avgUsagePerUser || 0,
+      topFeature: stats?.topFeature?.name ? (stats.topFeature.name.charAt(0).toUpperCase() + stats.topFeature.name.slice(1)) : "N/A",
+    };
+
+    exportAdminAIUsageToPDF(exportData, summary);
+  }, [usageRecords, stats]);
+
 
   // Build summary cards from real data
   const summaryItems: SummaryType[] = useMemo(() => {
     if (!stats) return [];
-    
+
     const growthTrend: "up" | "down" = stats.dailyGrowth >= 0 ? "up" : "down";
     const growthText = `${Math.abs(stats.dailyGrowth).toFixed(1)}% Daily`;
-    
+
     return [
-      { 
-        label: "Total AI Usage", 
-        value: stats.totalUsage.toLocaleString(), 
-        change: growthText, 
-        trend: growthTrend, 
-        icon: BarChart3 
+      {
+        label: "Total AI Usage",
+        value: stats.totalUsage.toLocaleString(),
+        change: growthText,
+        trend: growthTrend,
+        icon: BarChart3
       },
-      { 
-        label: "Active Users", 
-        value: stats.activeUsersToday.toLocaleString(), 
-        change: `${stats.usersAtLimit} at limit`, 
-        trend: stats.usersAtLimit > 0 ? "down" : "up", 
-        icon: Users 
+      {
+        label: "Active Users",
+        value: stats.activeUsersToday.toLocaleString(),
+        change: `${stats.usersAtLimit} at limit`,
+        trend: stats.usersAtLimit > 0 ? "down" : "up",
+        icon: Users
       },
-      { 
-        label: "Avg Usage/User", 
-        value: stats.avgUsagePerUser.toFixed(1), 
-        change: `${stats.totalUsers} total users`, 
-        trend: "up", 
-        icon: Activity 
+      {
+        label: "Avg Usage/User",
+        value: stats.avgUsagePerUser.toFixed(1),
+        change: `${stats.totalUsers} total users`,
+        trend: "up",
+        icon: Activity
       },
-      { 
-        label: "Top Feature", 
-        value: stats.topFeature.name.charAt(0).toUpperCase() + stats.topFeature.name.slice(1), 
-        change: `${stats.topFeature.count} uses`, 
-        trend: "up", 
-        icon: Zap 
+      {
+        label: "Top Feature",
+        value: stats.topFeature.name.charAt(0).toUpperCase() + stats.topFeature.name.slice(1),
+        change: `${stats.topFeature.count} uses`,
+        trend: "up",
+        icon: Zap
       },
     ];
   }, [stats]);
@@ -399,7 +465,7 @@ export default function AdminAIUsagePage() {
     () => stats?.featureDistribution.reduce((sum, f) => sum + f.count, 0) || 0,
     [stats]
   );
-  
+
   const featureGradient = useMemo(() => {
     if (!stats?.featureDistribution.length) return "conic-gradient(#e2e8f0 0% 100%)";
     const colors: Record<string, string> = {
@@ -535,29 +601,69 @@ export default function AdminAIUsagePage() {
           <p className="text-xs sm:text-sm text-slate-500 mt-1 font-light">Monitor and manage AI feature usage across the platform.</p>
         </div>
         <div className="flex gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
-          <div className="flex bg-slate-100 p-1 rounded-lg flex-1 sm:flex-none">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${
-                viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-              }`}
-              onClick={() => setViewMode('table')}
-            >
-              <TableIcon size={14} />
-              Table
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${
-                viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-              }`}
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid3X3 size={14} />
-              Grid
-            </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex bg-slate-100 p-1 rounded-lg flex-1 sm:flex-none">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${viewMode === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                onClick={() => setViewMode('table')}
+              >
+                <TableIcon size={14} />
+                Table
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors flex-1 sm:flex-none ${viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                onClick={() => setViewMode('grid')}
+              >
+                <Grid3X3 size={14} />
+                Grid
+              </Button>
+            </div>
+
+            <div className="relative flex-1 sm:flex-none" ref={exportDropdownRef}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+                onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+              >
+                <Download size={14} className="sm:mr-1" />
+                <span className="hidden sm:inline">Export</span>
+                <MoreHorizontal size={12} className="ml-1" />
+              </Button>
+
+              {exportDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50 animate-in fade-in zoom-in duration-200">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                    onClick={() => {
+                      handleExportPDF();
+                      setExportDropdownOpen(false);
+                    }}
+                  >
+                    <span className="text-rose-500 mr-2 font-bold">PDF</span> Export as PDF
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                    onClick={() => {
+                      handleExportCSV();
+                      setExportDropdownOpen(false);
+                    }}
+                  >
+                    <span className="text-emerald-500 mr-2 font-bold">CSV</span> Export as CSV
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -568,26 +674,26 @@ export default function AdminAIUsagePage() {
         className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth"
       >
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {summaryItems.map((item) => (
-          <SummaryCard key={item.label} item={item} />
-        ))}
-      </div>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {summaryItems.map((item) => (
+            <SummaryCard key={item.label} item={item} />
+          ))}
+        </div>
 
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Usage Growth Chart */}
-        <Card className="lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
-          <div className="flex items-center justify-between mb-6 sm:mb-8">
-            <div>
-              <h3 className="text-xs sm:text-sm font-semibold text-slate-900">AI Usage Growth</h3>
-              <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">7-day usage trend.</p>
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Usage Growth Chart */}
+          <Card className="lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
+              <div>
+                <h3 className="text-xs sm:text-sm font-semibold text-slate-900">AI Usage Growth</h3>
+                <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">7-day usage trend.</p>
+              </div>
             </div>
-          </div>
 
-          {chartData.length > 0 ? (
+            {chartData.length > 0 ? (
               <>
                 <div className="relative h-48 sm:h-60 flex items-end justify-between gap-1 sm:gap-6 px-2 border-b border-slate-50">
                   <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
@@ -636,17 +742,17 @@ export default function AdminAIUsagePage() {
                 </p>
               </div>
             )}
-        </Card>
+          </Card>
 
 
-        {/* Feature Distribution */}
-        <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
-          <div className="mb-4 sm:mb-6">
-            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Feature Distribution</h3>
-            <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">AI features breakdown.</p>
-          </div>
+          {/* Feature Distribution */}
+          <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Feature Distribution</h3>
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">AI features breakdown.</p>
+            </div>
 
-          {stats?.featureDistribution.length ? (
+            {stats?.featureDistribution.length ? (
               <>
                 <div className="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
                   <div
@@ -669,7 +775,7 @@ export default function AdminAIUsagePage() {
                           style={{
                             backgroundColor:
                               feature.feature === "predictions" ? "#3b82f6" :
-                              feature.feature === "insights" ? "#10b981" : "#a855f7",
+                                feature.feature === "insights" ? "#10b981" : "#a855f7",
                           }}
                         />
                         <span className="text-slate-600 capitalize">{feature.feature}</span>
@@ -690,216 +796,239 @@ export default function AdminAIUsagePage() {
                 </p>
               </div>
             )}
-        </Card>
-      </div>
-
-
-      {/* Top Users Section */}
-      {stats?.topUsers && stats.topUsers.length > 0 && (
-        <Card className="p-4 sm:p-6 hover:shadow-md transition-all">
-          <div className="mb-4 sm:mb-6">
-            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Top Users by AI Usage</h3>
-            <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Users with highest AI feature usage.</p>
-          </div>
-          
-          <div className="space-y-3">
-            {stats.topUsers.map((user, index) => {
-              // Create mock user for UserAvatar component
-              const mockUser: User = {
-                id: user.user_id,
-                email: user.email,
-                user_metadata: {
-                  full_name: user.full_name,
-                  avatar_url: user.avatar_url
-                },
-                app_metadata: {},
-                created_at: "",
-                aud: "authenticated"
-              } as User;
-
-              return (
-                <div key={user.user_id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="relative flex-shrink-0">
-                      <UserAvatar 
-                        user={mockUser} 
-                        size="lg"
-                        className="ring-2 ring-white shadow-sm"
-                      />
-                      <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm">
-                        {index + 1}
-                      </div>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-slate-900 truncate">
-                        {user.full_name || user.email}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-slate-500">
-                        <span className="flex items-center gap-1"><Brain size={10} />{user.predictions_used}</span>
-                        <span className="flex items-center gap-1"><TrendingUp size={10} />{user.insights_used}</span>
-                        <span className="flex items-center gap-1"><MessageSquare size={10} />{user.chatbot_used}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-semibold text-slate-900">{user.total_usage}</p>
-                    <p className="text-xs text-slate-500">Total Uses</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      )}
-
-
-      {/* Filters */}
-      <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
-        <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
-            <Filter size={14} className="sm:w-4 sm:h-4" />
-            <span className="font-medium">Filters</span>
-          </div>
-          <div className="hidden xl:block h-4 w-px bg-slate-200"></div>
-
-          <div className="relative w-full xl:w-64">
-            <Search size={12} className="sm:w-[14px] sm:h-[14px] absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search usage records..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-7 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:flex items-center gap-2 w-full xl:w-auto">
-            <FilterDropdown
-              value={month === "all" ? "" : month.toString()}
-              onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
-              options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
-              placeholder="All Months"
-              className="w-full text-slate-900 text-xs sm:text-sm"
-              allowEmpty={true}
-              emptyLabel="All Months"
-              hideSearch={true}
-            />
-            <FilterDropdown
-              value={year === "all" ? "" : year.toString()}
-              onChange={(value) => setYear(value === "" ? "all" : Number(value))}
-              options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
-              placeholder="All Years"
-              className="w-full text-slate-900 text-xs sm:text-sm"
-              allowEmpty={true}
-              emptyLabel="All Years"
-              hideSearch={true}
-            />
-            <FilterDropdown
-              value={usageRangeFilter}
-              onChange={(value) => setUsageRangeFilter(value as any)}
-              options={[
-                { value: "all", label: "All Usage" },
-                { value: "low", label: "Low (0-5)" },
-                { value: "medium", label: "Medium (6-15)" },
-                { value: "high", label: "High (16-24)" },
-                { value: "limit", label: "At Limit (25)" },
-              ]}
-              placeholder="All Usage"
-              className="w-full text-slate-900 text-xs sm:text-sm"
-              allowEmpty={false}
-              hideSearch={true}
-            />
-          </div>
-
-          <div className="flex-1"></div>
-          <div className="flex items-center gap-2 w-full xl:w-auto">
-            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to Current Month" onClick={handleResetFilters}>
-              <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> Current
-            </Button>
-            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={handleResetFiltersToAll}>
-              <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> All Time
-            </Button>
-          </div>
+          </Card>
         </div>
-      </Card>
 
 
-      {/* Error State */}
-      {error && !loading && (
-        <Card className="p-8 text-center">
-          <AlertCircle size={40} className="mx-auto text-red-300 mb-4" />
-          <p className="text-sm text-red-500 mb-3">{error}</p>
-          <Button variant="outline" size="sm" onClick={refetch}>
-            <RotateCcw size={14} /> Retry
-          </Button>
+        {/* Top Users Section */}
+        {stats?.topUsers && stats.topUsers.length > 0 && (
+          <Card className="p-4 sm:p-6 hover:shadow-md transition-all">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Top Users by AI Usage</h3>
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Users with highest AI feature usage.</p>
+            </div>
+
+            <div className="space-y-3">
+              {stats.topUsers.map((user, index) => {
+                // Create mock user for UserAvatar component
+                const mockUser: User = {
+                  id: user.user_id,
+                  email: user.email,
+                  user_metadata: {
+                    full_name: user.full_name,
+                    avatar_url: user.avatar_url
+                  },
+                  app_metadata: {},
+                  created_at: "",
+                  aud: "authenticated"
+                } as User;
+
+                return (
+                  <div key={user.user_id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="relative flex-shrink-0">
+                        <UserAvatar
+                          user={mockUser}
+                          size="lg"
+                          className="ring-2 ring-white shadow-sm"
+                        />
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-sm">
+                          {index + 1}
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-slate-900 truncate">
+                          {user.full_name || user.email}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                          <span className="flex items-center gap-1"><Brain size={10} />{user.predictions_used}</span>
+                          <span className="flex items-center gap-1"><TrendingUp size={10} />{user.insights_used}</span>
+                          <span className="flex items-center gap-1"><MessageSquare size={10} />{user.chatbot_used}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-sm font-semibold text-slate-900">{user.total_usage}</p>
+                      <p className="text-xs text-slate-500">Total Uses</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        )}
+
+
+        {/* Filters */}
+        <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
+          <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
+              <Filter size={14} className="sm:w-4 sm:h-4" />
+              <span className="font-medium">Filters</span>
+            </div>
+            <div className="hidden xl:block h-4 w-px bg-slate-200"></div>
+
+            <div className="relative w-full xl:w-64">
+              <Search size={12} className="sm:w-[14px] sm:h-[14px] absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search usage records..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-7 sm:pl-9 pr-3 sm:pr-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 bg-slate-50"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:flex items-center gap-2 w-full xl:w-auto">
+              <FilterDropdown
+                value={month === "all" ? "" : month.toString()}
+                onChange={(value) => setMonth(value === "" ? "all" : Number(value))}
+                options={MONTH_NAMES.map((name, i) => ({ value: (i + 1).toString(), label: name }))}
+                placeholder="All Months"
+                className="w-full text-slate-900 text-xs sm:text-sm"
+                allowEmpty={true}
+                emptyLabel="All Months"
+                hideSearch={true}
+              />
+              <FilterDropdown
+                value={year === "all" ? "" : year.toString()}
+                onChange={(value) => setYear(value === "" ? "all" : Number(value))}
+                options={Array.from({ length: 5 }, (_, i) => currentYear - i).map((y) => ({ value: y.toString(), label: y.toString() }))}
+                placeholder="All Years"
+                className="w-full text-slate-900 text-xs sm:text-sm"
+                allowEmpty={true}
+                emptyLabel="All Years"
+                hideSearch={true}
+              />
+              <FilterDropdown
+                value={usageRangeFilter}
+                onChange={(value) => setUsageRangeFilter(value as any)}
+                options={[
+                  { value: "all", label: "All Usage" },
+                  { value: "low", label: "Low (0-5)" },
+                  { value: "medium", label: "Medium (6-15)" },
+                  { value: "high", label: "High (16-24)" },
+                  { value: "limit", label: "At Limit (25)" },
+                ]}
+                placeholder="All Usage"
+                className="w-full text-slate-900 text-xs sm:text-sm"
+                allowEmpty={false}
+                hideSearch={true}
+              />
+            </div>
+
+            <div className="flex-1"></div>
+            <div className="flex items-center gap-2 w-full xl:w-auto">
+              <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to Current Month" onClick={handleResetFilters}>
+                <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> Current
+              </Button>
+              <Button variant="outline" size="sm" className="text-[10px] sm:text-xs w-full xl:w-auto justify-center" title="Reset to All Time" onClick={handleResetFiltersToAll}>
+                <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" /> All Time
+              </Button>
+            </div>
+          </div>
         </Card>
-      )}
 
-      {/* Usage Records Display */}
-      {usageRecords.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
-          <h3 className="text-sm font-semibold text-slate-700 mb-1">No usage records found</h3>
-          <p className="text-xs text-slate-400 mb-4">
-            {search ? "Try adjusting your search or filters." : "No usage records available."}
-          </p>
-        </Card>
-      ) : viewMode === 'table' ? (
-        <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
-          {tableLoading ? (
-            <FilterTableSkeleton rows={getSafeSkeletonCount(pageSize)} columns={7} />
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="px-6 py-3">Date</TableHead>
-                  <TableHead className="px-6 py-3">User</TableHead>
-                  <TableHead className="px-6 py-3 text-center">Predictions</TableHead>
-                  <TableHead className="px-6 py-3 text-center">Insights</TableHead>
-                  <TableHead className="px-6 py-3 text-center">Chatbot</TableHead>
-                  <TableHead className="px-6 py-3 text-right">Total Usage</TableHead>
-                  <TableHead className="px-6 py-3 text-center">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {usageRecords.length === 0 ? (
+
+        {/* Error State */}
+        {error && !loading && (
+          <Card className="p-8 text-center">
+            <AlertCircle size={40} className="mx-auto text-red-300 mb-4" />
+            <p className="text-sm text-red-500 mb-3">{error}</p>
+            <Button variant="outline" size="sm" onClick={refetch}>
+              <RotateCcw size={14} /> Retry
+            </Button>
+          </Card>
+        )}
+
+        {/* Usage Records Display */}
+        {usageRecords.length === 0 ? (
+          <Card className="p-12 text-center">
+            <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
+            <h3 className="text-sm font-semibold text-slate-700 mb-1">No usage records found</h3>
+            <p className="text-xs text-slate-400 mb-4">
+              {search ? "Try adjusting your search or filters." : "No usage records available."}
+            </p>
+          </Card>
+        ) : viewMode === 'table' ? (
+          <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
+            {tableLoading ? (
+              <FilterTableSkeleton rows={getSafeSkeletonCount(pageSize)} columns={7} />
+            ) : (
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="px-6 py-12 text-center">
-                      <div className="flex flex-col items-center justify-center">
-                        <Inbox size={32} className="text-slate-300 mb-2" />
-                        <p className="text-sm text-slate-500">No usage records match your filters</p>
-                        <Button size="sm" variant="outline" onClick={handleResetFiltersToAll} className="mt-2">
-                          Clear Filters
-                        </Button>
-                      </div>
-                    </TableCell>
+                    <TableHead className="px-6 py-3">Date</TableHead>
+                    <TableHead className="px-6 py-3">User</TableHead>
+                    <TableHead className="px-6 py-3 text-center">Predictions</TableHead>
+                    <TableHead className="px-6 py-3 text-center">Insights</TableHead>
+                    <TableHead className="px-6 py-3 text-center">Chatbot</TableHead>
+                    <TableHead className="px-6 py-3 text-right">Total Usage</TableHead>
+                    <TableHead className="px-6 py-3 text-center">Actions</TableHead>
                   </TableRow>
-                ) : (
-                  usageRecords.map((usage) => (
-                    <AIUsageRow
-                      key={usage.id}
-                      usage={usage}
-                      onView={handleView}
-                      onDelete={handleDelete}
-                    />
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </Card>
-      ) : tableLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: getSafeSkeletonCount(pageSize) }).map((_, i) => (
-            <SimpleCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : (
-        <>
-          {/* Usage Cards Grid (Desktop) */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {usageRecords.length === 0 ? (
-              <div className="col-span-full">
+                </TableHeader>
+                <TableBody>
+                  {usageRecords.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center justify-center">
+                          <Inbox size={32} className="text-slate-300 mb-2" />
+                          <p className="text-sm text-slate-500">No usage records match your filters</p>
+                          <Button size="sm" variant="outline" onClick={handleResetFiltersToAll} className="mt-2">
+                            Clear Filters
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    usageRecords.map((usage) => (
+                      <AIUsageRow
+                        key={usage.id}
+                        usage={usage}
+                        onView={handleView}
+                        onDelete={handleDelete}
+                      />
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Card>
+        ) : tableLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: getSafeSkeletonCount(pageSize) }).map((_, i) => (
+              <SimpleCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* Usage Cards Grid (Desktop) */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {usageRecords.length === 0 ? (
+                <div className="col-span-full">
+                  <Card className="p-12 text-center">
+                    <Inbox size={32} className="text-slate-300 mb-2" />
+                    <p className="text-sm text-slate-500">No usage records match your filters</p>
+                    <Button size="sm" variant="outline" onClick={handleResetFiltersToAll} className="mt-2">
+                      Clear Filters
+                    </Button>
+                  </Card>
+                </div>
+              ) : (
+                usageRecords.map((usage) => (
+                  <AIUsageCard
+                    key={usage.id}
+                    usage={usage}
+                    onView={handleView}
+                    onDelete={handleDelete}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* Usage Cards Grid (Mobile) */}
+            <div className="md:hidden space-y-4">
+              {usageRecords.length === 0 ? (
                 <Card className="p-12 text-center">
                   <Inbox size={32} className="text-slate-300 mb-2" />
                   <p className="text-sm text-slate-500">No usage records match your filters</p>
@@ -907,117 +1036,94 @@ export default function AdminAIUsagePage() {
                     Clear Filters
                   </Button>
                 </Card>
-              </div>
-            ) : (
-              usageRecords.map((usage) => (
-                <AIUsageCard
-                  key={usage.id}
-                  usage={usage}
-                  onView={handleView}
-                  onDelete={handleDelete}
-                />
-              ))
-            )}
-          </div>
-
-          {/* Usage Cards Grid (Mobile) */}
-          <div className="md:hidden space-y-4">
-            {usageRecords.length === 0 ? (
-              <Card className="p-12 text-center">
-                <Inbox size={32} className="text-slate-300 mb-2" />
-                <p className="text-sm text-slate-500">No usage records match your filters</p>
-                <Button size="sm" variant="outline" onClick={handleResetFiltersToAll} className="mt-2">
-                  Clear Filters
-                </Button>
-              </Card>
-            ) : (
-              usageRecords.map((usage) => (
-                <AIUsageCard
-                  key={usage.id}
-                  usage={usage}
-                  onView={handleView}
-                  onDelete={handleDelete}
-                />
-              ))
-            )}
-          </div>
-        </>
-      )}
+              ) : (
+                usageRecords.map((usage) => (
+                  <AIUsageCard
+                    key={usage.id}
+                    usage={usage}
+                    onView={handleView}
+                    onDelete={handleDelete}
+                  />
+                ))
+              )}
+            </div>
+          </>
+        )}
 
 
-      {/* Pagination */}
-      {!loading && !tableLoading && !error && usageRecords.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0">
-          <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
-            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} records
-          </div>
-          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
-            {totalPages > 1 && (
-              <div className="flex items-center gap-1 sm:gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={previousPage}
-                  disabled={!hasPreviousPage}
-                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
-                >
-                  <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
-                </Button>
-                <div className="flex items-center gap-0.5 sm:gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => goToPage(pageNum)}
-                        className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-[10px] sm:text-xs"
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
+        {/* Pagination */}
+        {!loading && !tableLoading && !error && usageRecords.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0">
+            <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
+              Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} records
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={previousPage}
+                    disabled={!hasPreviousPage}
+                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                  >
+                    <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
+                  </Button>
+                  <div className="flex items-center gap-0.5 sm:gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => goToPage(pageNum)}
+                          className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-[10px] sm:text-xs"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={nextPage}
+                    disabled={!hasNextPage}
+                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                  >
+                    <ChevronRight size={14} className="sm:w-4 sm:h-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={nextPage}
-                  disabled={!hasNextPage}
-                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+              )}
+              <div className="text-xs sm:text-sm text-slate-600 flex items-center gap-2">
+                <span>Show</span>
+                <select
+                  value={pageSize === Number.MAX_SAFE_INTEGER ? "all" : pageSize}
+                  onChange={(e) => handlePageSizeChange(e.target.value === "all" ? Number.MAX_SAFE_INTEGER : parseInt(e.target.value))}
+                  className="text-xs sm:text-sm border border-slate-200 rounded px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
                 >
-                  <ChevronRight size={14} className="sm:w-4 sm:h-4" />
-                </Button>
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value="all">All</option>
+                </select>
+                <span className="hidden sm:inline">per page</span>
               </div>
-            )}
-            <div className="text-xs sm:text-sm text-slate-600 flex items-center gap-2">
-              <span>Show</span>
-              <select
-                value={pageSize === Number.MAX_SAFE_INTEGER ? "all" : pageSize}
-                onChange={(e) => handlePageSizeChange(e.target.value === "all" ? Number.MAX_SAFE_INTEGER : parseInt(e.target.value))}
-                className="text-xs sm:text-sm border border-slate-200 rounded px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white text-slate-700 focus:outline-none focus:border-emerald-500 font-medium"
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-                <option value="all">All</option>
-              </select>
-              <span className="hidden sm:inline">per page</span>
             </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
 
       {/* Modals */}

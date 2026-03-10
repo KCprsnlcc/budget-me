@@ -48,9 +48,10 @@ import type { AdminBudget } from "./_lib/types";
 import { deriveBudgetHealth } from "./_lib/types";
 import { FilterTableSkeleton } from "@/components/ui/skeleton-filter-loaders";
 import {
-    exportToCSV,
-    getTimestampString,
+    exportAdminBudgetsToCSV,
+    exportAdminBudgetsToPDF,
 } from "@/lib/export-utils";
+import { type BudgetAdminExportData as PDFBudgetAdminExportData } from "@/lib/export-utils/pdf-admin-budgets";
 import { getSafeSkeletonCount } from "@/lib/utils";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { User } from "@supabase/supabase-js";
@@ -414,14 +415,14 @@ export default function AdminBudgetsPage() {
         ];
     }, [stats]);
 
-    // Export handler
+    // Export handlers
     const handleExportCSV = useCallback(() => {
         if (budgets.length === 0) {
             alert("No budgets to export");
             return;
         }
 
-        const exportData = budgets.map((b) => ({
+        const exportData: PDFBudgetAdminExportData[] = budgets.map((b) => ({
             id: b.id,
             budget_name: b.budget_name,
             user: b.user_email || "Unknown",
@@ -430,14 +431,39 @@ export default function AdminBudgetsPage() {
             remaining: b.amount - b.spent,
             period: b.period,
             status: b.status,
-            start_date: b.start_date,
-            end_date: b.end_date,
             category: b.expense_category_name || b.category_name || "—",
         }));
 
-        const filename = `admin_budgets_${getTimestampString()}.csv`;
-        exportToCSV(exportData as any, filename);
+        exportAdminBudgetsToCSV(exportData);
     }, [budgets]);
+
+    const handleExportPDF = useCallback(() => {
+        if (budgets.length === 0) {
+            alert("No budgets to export");
+            return;
+        }
+
+        const exportData: PDFBudgetAdminExportData[] = budgets.map((b) => ({
+            id: b.id,
+            budget_name: b.budget_name,
+            user: b.user_email || "Unknown",
+            amount: b.amount,
+            spent: b.spent,
+            remaining: b.amount - b.spent,
+            period: b.period,
+            status: b.status,
+            category: b.expense_category_name || b.category_name || "—",
+        }));
+
+        const summaryData = {
+            totalBudgets: stats?.totalBudgets || 0,
+            totalAmount: stats?.totalBudgetAmount || 0,
+            totalSpent: (stats?.totalBudgetAmount || 0) - (stats?.remaining || 0),
+            remaining: stats?.remaining || 0,
+        };
+
+        exportAdminBudgetsToPDF(exportData, summaryData);
+    }, [budgets, stats]);
 
     // Normalize chart data to percentages for bar heights
     const chartData = useMemo(() => {
@@ -455,7 +481,7 @@ export default function AdminBudgetsPage() {
         if (!stats?.budgetAllocation?.length) return "conic-gradient(#e2e8f0 0% 100%)";
         const colors: Record<string, string> = {
             "Food & Dining": "#10b981",
-            "Transportation": "#f59e0b", 
+            "Transportation": "#f59e0b",
             "Shopping": "#3b82f6",
             "Entertainment": "#8b5cf6",
             "Bills & Utilities": "#ef4444",
@@ -601,7 +627,7 @@ export default function AdminBudgetsPage() {
                                     }`}
                                 onClick={() => setViewMode('table')}
                             >
-                                <TableIcon size={14}/>
+                                <TableIcon size={14} />
                                 Table
                             </Button>
                             <Button
@@ -611,7 +637,7 @@ export default function AdminBudgetsPage() {
                                     }`}
                                 onClick={() => setViewMode('grid')}
                             >
-                                <Grid3X3 size={14}/>
+                                <Grid3X3 size={14} />
                                 Grid
                             </Button>
                         </div>
@@ -622,13 +648,24 @@ export default function AdminBudgetsPage() {
                                 className="w-full sm:w-auto"
                                 onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
                             >
-                                <Download size={14}/>
+                                <Download size={14} />
                                 <span className="hidden sm:inline">Export</span>
                                 <MoreHorizontal size={12} className="ml-1" />
                             </Button>
                             {/* Dropdown */}
                             {exportDropdownOpen && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50">
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50 animate-in fade-in zoom-in duration-200">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
+                                        onClick={() => {
+                                            handleExportPDF();
+                                            setExportDropdownOpen(false);
+                                        }}
+                                    >
+                                        <span className="text-rose-500 mr-2 font-bold">PDF</span> Export as PDF
+                                    </Button>
                                     <Button
                                         variant="ghost"
                                         size="sm"
@@ -638,7 +675,7 @@ export default function AdminBudgetsPage() {
                                             setExportDropdownOpen(false);
                                         }}
                                     >
-                                        <span className="text-emerald-500 mr-2">CSV</span> Export as CSV
+                                        <span className="text-emerald-500 mr-2 font-bold">CSV</span> Export as CSV
                                     </Button>
                                 </div>
                             )}
@@ -766,13 +803,13 @@ export default function AdminBudgetsPage() {
                                                         style={{
                                                             backgroundColor: item.color || (
                                                                 item.category === "Food & Dining" ? "#10b981" :
-                                                                item.category === "Transportation" ? "#f59e0b" :
-                                                                item.category === "Shopping" ? "#3b82f6" :
-                                                                item.category === "Entertainment" ? "#8b5cf6" :
-                                                                item.category === "Bills & Utilities" ? "#ef4444" :
-                                                                item.category === "Healthcare" ? "#06b6d4" :
-                                                                item.category === "Education" ? "#f97316" :
-                                                                "#94a3b8"
+                                                                    item.category === "Transportation" ? "#f59e0b" :
+                                                                        item.category === "Shopping" ? "#3b82f6" :
+                                                                            item.category === "Entertainment" ? "#8b5cf6" :
+                                                                                item.category === "Bills & Utilities" ? "#ef4444" :
+                                                                                    item.category === "Healthcare" ? "#06b6d4" :
+                                                                                        item.category === "Education" ? "#f97316" :
+                                                                                            "#94a3b8"
                                                             ),
                                                         }}
                                                     />
