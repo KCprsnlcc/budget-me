@@ -16,7 +16,6 @@ import {
     Globe,
     Lock,
     Clock,
-    Target,
     Wallet,
     Loader2,
 } from "lucide-react";
@@ -270,12 +269,6 @@ export function ViewAdminFamilyModal({
                                     label="Max Members"
                                     value={`${family.max_members}`}
                                     description="Maximum number of members allowed"
-                                />
-                                <SettingRow
-                                    icon={Target}
-                                    label="Goal Sharing"
-                                    value={family.allow_goal_sharing ? "Enabled" : "Disabled"}
-                                    description="Members can share and collaborate on goals"
                                 />
                             </div>
                         </div>

@@ -147,6 +147,11 @@ const BudgetCard = memo(({
                             )}
                             <p className="text-xs text-slate-500">{budget.user_email ?? "Unknown User"}</p>
                         </div>
+                        <div className="mt-1">
+                            <p className="text-[10px] text-slate-400">
+                                {budget.expense_category_name || budget.category_name || "No category"}
+                            </p>
+                        </div>
                     </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
@@ -227,6 +232,11 @@ const BudgetRow = memo(({
                     )}
                     <span className="text-slate-500">{budget.user_email ?? "Unknown"}</span>
                 </div>
+            </TableCell>
+            <TableCell className="px-6 py-4">
+                <span className="text-xs text-slate-600">
+                    {budget.expense_category_name || budget.category_name || "—"}
+                </span>
             </TableCell>
             <TableCell className="px-6 py-4 text-right font-medium text-slate-900">
                 ₱{budget.amount.toFixed(2)}
@@ -440,28 +450,29 @@ export default function AdminBudgetsPage() {
         }));
     }, [stats]);
 
-    // Build conic-gradient for status distribution donut
-    const statusTotal = useMemo(
-        () => stats?.statusDistribution.reduce((sum, t) => sum + t.count, 0) || 0,
-        [stats]
-    );
-    const statusGradient = useMemo(() => {
-        if (!stats?.statusDistribution.length) return "conic-gradient(#e2e8f0 0% 100%)";
+    // Build conic-gradient for budget allocation donut
+    const allocationGradient = useMemo(() => {
+        if (!stats?.budgetAllocation?.length) return "conic-gradient(#e2e8f0 0% 100%)";
         const colors: Record<string, string> = {
-            active: "#10b981",
-            paused: "#f59e0b",
-            completed: "#3b82f6",
-            archived: "#94a3b8",
+            "Food & Dining": "#10b981",
+            "Transportation": "#f59e0b", 
+            "Shopping": "#3b82f6",
+            "Entertainment": "#8b5cf6",
+            "Bills & Utilities": "#ef4444",
+            "Healthcare": "#06b6d4",
+            "Education": "#f97316",
         };
+        const total = stats.budgetAllocation.reduce((sum, t) => sum + t.amount, 0);
+        if (total === 0) return "conic-gradient(#e2e8f0 0% 100%)";
         let acc = 0;
-        const stops = stats.statusDistribution.map((t) => {
+        const stops = stats.budgetAllocation.map((t) => {
             const start = acc;
-            acc += (t.count / statusTotal) * 100;
-            const color = colors[t.status] || "#94a3b8";
+            acc += (t.amount / total) * 100;
+            const color = t.color || colors[t.category] || "#94a3b8";
             return `${color} ${start}% ${acc}%`;
         });
         return `conic-gradient(${stops.join(", ")})`;
-    }, [stats, statusTotal]);
+    }, [stats]);
 
     const currentYear = new Date().getFullYear();
 
@@ -721,45 +732,56 @@ export default function AdminBudgetsPage() {
                         )}
                     </Card>
 
-                    {/* Status Distribution */}
+                    {/* Budget Allocation */}
                     <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
                         <div className="mb-4 sm:mb-6">
-                            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Status Distribution</h3>
-                            <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Budget statuses breakdown.</p>
+                            <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Budget Allocation</h3>
+                            <p className="text-[10px] sm:text-xs text-slate-500 mt-1 font-light">Budget distribution across categories.</p>
                         </div>
 
-                        {stats?.statusDistribution.length ? (
+                        {stats?.budgetAllocation?.length ? (
                             <>
                                 <div className="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
                                     <div
                                         className="w-24 h-24 sm:w-32 sm:h-32 mx-auto rounded-full flex-shrink-0 relative"
-                                        style={{ background: statusGradient }}
+                                        style={{ background: allocationGradient }}
                                     >
                                         <div className="absolute inset-0 m-auto w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
                                             <span className="text-[10px] sm:text-xs text-slate-400 font-medium">Total</span>
-                                            <span className="text-sm sm:text-xl font-bold text-slate-900">{statusTotal}</span>
+                                            <span className="text-sm sm:text-xl font-bold text-slate-900">
+                                                ₱{stats.totalBudgetAmount >= 1000 ? `${(stats.totalBudgetAmount / 1000).toFixed(1)}k` : stats.totalBudgetAmount.toLocaleString()}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2 sm:space-y-3 flex-1">
-                                    {stats.statusDistribution.map((item) => (
-                                        <div key={item.status} className="flex items-center justify-between text-[10px] sm:text-xs">
-                                            <div className="flex items-center gap-1.5 sm:gap-2">
-                                                <div
-                                                    className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
-                                                    style={{
-                                                        backgroundColor:
-                                                            item.status === "active" ? "#10b981" :
-                                                                item.status === "paused" ? "#f59e0b" :
-                                                                    item.status === "completed" ? "#3b82f6" : "#94a3b8",
-                                                    }}
-                                                />
-                                                <span className="text-slate-600 capitalize">{item.status}</span>
+                                <div className="space-y-2 sm:space-y-3 flex-1 max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300 pr-1 scroll-smooth">
+                                    {stats.budgetAllocation.map((item) => {
+                                        const pct = stats.totalBudgetAmount > 0 ? Math.round((item.amount / stats.totalBudgetAmount) * 100) : 0;
+                                        return (
+                                            <div key={item.category} className="flex items-center justify-between text-[10px] sm:text-xs">
+                                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                                    <div
+                                                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
+                                                        style={{
+                                                            backgroundColor: item.color || (
+                                                                item.category === "Food & Dining" ? "#10b981" :
+                                                                item.category === "Transportation" ? "#f59e0b" :
+                                                                item.category === "Shopping" ? "#3b82f6" :
+                                                                item.category === "Entertainment" ? "#8b5cf6" :
+                                                                item.category === "Bills & Utilities" ? "#ef4444" :
+                                                                item.category === "Healthcare" ? "#06b6d4" :
+                                                                item.category === "Education" ? "#f97316" :
+                                                                "#94a3b8"
+                                                            ),
+                                                        }}
+                                                    />
+                                                    <span className="text-slate-600">{item.category || "Uncategorized"}</span>
+                                                </div>
+                                                <span className="font-medium text-slate-900">{pct}%</span>
                                             </div>
-                                            <span className="font-medium text-slate-900">{item.count} ({item.percentage}%)</span>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </>
                         ) : (
@@ -767,9 +789,9 @@ export default function AdminBudgetsPage() {
                                 <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
                                     <PieChart size={20} className="sm:w-6 sm:h-6" />
                                 </div>
-                                <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Status Data</h4>
+                                <h4 className="text-xs sm:text-sm font-medium text-slate-800 mb-1">No Budget Allocation</h4>
                                 <p className="text-[10px] sm:text-xs text-slate-400 max-w-sm">
-                                    Status distribution will appear here.
+                                    Budget allocation will appear here.
                                 </p>
                             </div>
                         )}
@@ -948,7 +970,7 @@ export default function AdminBudgetsPage() {
                 ) : viewMode === 'table' ? (
                     <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
                         {tableLoading ? (
-                            <FilterTableSkeleton rows={getSafeSkeletonCount(pageSize)} columns={7} />
+                            <FilterTableSkeleton rows={getSafeSkeletonCount(pageSize)} columns={8} />
                         ) : (
                             <Table>
                                 <TableHeader>
@@ -959,6 +981,7 @@ export default function AdminBudgetsPage() {
                                             </div>
                                         </TableHead>
                                         <TableHead className="px-6 py-3">User</TableHead>
+                                        <TableHead className="px-6 py-3">Category</TableHead>
                                         <TableHead className="px-6 py-3 text-right">
                                             <div className="flex items-center gap-1 justify-end">
                                                 Amount <MoreHorizontal size={12} className="rotate-90" />
@@ -977,7 +1000,7 @@ export default function AdminBudgetsPage() {
                                 <TableBody>
                                     {budgets.length === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={7} className="px-6 py-12 text-center">
+                                            <TableCell colSpan={8} className="px-6 py-12 text-center">
                                                 <div className="flex flex-col items-center justify-center">
                                                     <Inbox size={32} className="text-slate-300 mb-2" />
                                                     <p className="text-sm text-slate-500">No budgets match your filters</p>

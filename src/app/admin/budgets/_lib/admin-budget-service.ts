@@ -108,7 +108,15 @@ export async function fetchAdminBudgetStats(): Promise<AdminBudgetStats | null> 
     // All budgets for aggregation
     const { data: allBudgets } = await supabase
         .from("budgets")
-        .select("user_id, amount, spent, status, period");
+        .select(`
+            user_id, 
+            amount, 
+            spent, 
+            status, 
+            period,
+            category_name,
+            expense_categories!budgets_category_id_fkey ( category_name, color )
+        `);
 
     let totalBudgetAmount = 0;
     let totalSpent = 0;
@@ -180,6 +188,27 @@ export async function fetchAdminBudgetStats(): Promise<AdminBudgetStats | null> 
         percentage: Math.round((count / total) * 100),
     }));
 
+    // Budget allocation by category (amount, not count)
+    const categoryMap = new Map<string, { amount: number; color?: string }>();
+    for (const b of allBudgets ?? []) {
+        const expCat = b.expense_categories as Record<string, any> | null;
+        const category = expCat?.category_name || b.category_name || "Uncategorized";
+        const color = expCat?.color;
+        const existing = categoryMap.get(category);
+        if (existing) {
+            existing.amount += Number(b.amount);
+        } else {
+            categoryMap.set(category, { amount: Number(b.amount), color });
+        }
+    }
+    const budgetAllocation = Array.from(categoryMap.entries())
+        .map(([category, data]) => ({
+            category,
+            amount: data.amount,
+            color: data.color,
+        }))
+        .sort((a, b) => b.amount - a.amount);
+
     // Period distribution
     const periodMap = new Map<string, number>();
     for (const b of allBudgets ?? []) {
@@ -241,6 +270,7 @@ export async function fetchAdminBudgetStats(): Promise<AdminBudgetStats | null> 
         monthOverMonthGrowth,
         budgetGrowth,
         statusDistribution,
+        budgetAllocation,
         periodDistribution,
         topUsers,
     };

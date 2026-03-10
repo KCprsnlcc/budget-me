@@ -50,6 +50,7 @@ export type AdminBudgetStats = {
     monthOverMonthGrowth: number;
     budgetGrowth: { month: string; count: number }[];
     statusDistribution: { status: string; count: number; percentage: number }[];
+    budgetAllocation: { category: string; amount: number; color?: string }[];
     periodDistribution: { period: string; count: number; percentage: number }[];
     topUsers: {
         user_id: string;

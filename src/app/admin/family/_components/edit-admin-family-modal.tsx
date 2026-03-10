@@ -8,7 +8,7 @@ import {
     ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { Loader2, Home, FileText, Globe, Flag, Info, ArrowRight, ArrowLeft, Check } from "lucide-react";
+import { Loader2, Home, FileText, Globe, Info, ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Stepper } from "../../transactions/_components/stepper";
 import type { AdminFamily } from "../_lib/types";
@@ -35,7 +35,7 @@ export function EditAdminFamilyModal({
     const [description, setDescription] = useState("");
     const [isPublic, setIsPublic] = useState(false);
     const [maxMembers, setMaxMembers] = useState(10);
-    const [allowGoalSharing, setAllowGoalSharing] = useState(true);
+
     const [status, setStatus] = useState<"active" | "inactive">("active");
 
     // Populate form when family changes
@@ -45,7 +45,6 @@ export function EditAdminFamilyModal({
             setDescription(family.description ?? "");
             setIsPublic(family.is_public);
             setMaxMembers(family.max_members);
-            setAllowGoalSharing(family.allow_goal_sharing);
             setStatus(family.status);
         }
     }, [family]);
@@ -85,7 +84,6 @@ export function EditAdminFamilyModal({
                 description: description.trim() || null,
                 is_public: isPublic,
                 max_members: maxMembers,
-                allow_goal_sharing: allowGoalSharing,
                 status,
             });
 
@@ -102,7 +100,7 @@ export function EditAdminFamilyModal({
         } finally {
             setLoading(false);
         }
-    }, [family, familyName, description, isPublic, maxMembers, allowGoalSharing, status, handleClose, onSuccess]);
+    }, [family, familyName, description, isPublic, maxMembers, status, handleClose, onSuccess]);
 
     if (!family) return null;
 
@@ -270,19 +268,6 @@ export function EditAdminFamilyModal({
                                 />
                             </div>
 
-                            {/* Toggle Settings */}
-                            <div className="space-y-3">
-                                <h4 className="text-[11px] font-semibold text-gray-700 uppercase tracking-[0.04em]">Settings</h4>
-
-                                <ToggleRow
-                                    icon={Flag}
-                                    label="Goal Sharing"
-                                    description="Members can share and collaborate on goals"
-                                    checked={allowGoalSharing}
-                                    onChange={setAllowGoalSharing}
-                                />
-                            </div>
-
                             <div className="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-lg">
                                 <Info className="text-gray-600 mt-0.5" size={16} />
                                 <div className="text-xs text-gray-700">
@@ -337,12 +322,6 @@ export function EditAdminFamilyModal({
                                 <div className="flex justify-between items-center py-2.5">
                                     <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Max Members</span>
                                     <span className="text-[13px] font-semibold text-gray-700">{maxMembers}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-2.5">
-                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Goal Sharing</span>
-                                    <span className="text-[13px] font-semibold text-gray-700">
-                                        {allowGoalSharing ? "Enabled" : "Disabled"}
-                                    </span>
                                 </div>
                             </div>
                         </div>

@@ -16,10 +16,7 @@ import {
     Tag,
     FileText,
     Clock,
-    TrendingUp,
-    Target,
-    BarChart3,
-    AlertTriangle,
+    RefreshCw,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Stepper } from "./stepper";
@@ -210,61 +207,24 @@ export function ViewAdminBudgetModal({
                             </div>
                         </div>
 
-                        {/* Budget Settings */}
+                        {/* Budget Metadata */}
                         <div>
                             <h3 className="text-[15px] font-bold text-slate-900 mb-3">
-                                Budget Settings
+                                Budget Metadata
                             </h3>
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
-                                            <TrendingUp size={16} className="text-slate-600" />
+                                            <Tag size={16} className="text-slate-600" />
                                         </div>
                                         <div>
-                                            <div className="text-sm font-semibold text-slate-900">Recurring</div>
+                                            <div className="text-sm font-semibold text-slate-900">Category</div>
                                             <div className="text-[10px] text-slate-400">
-                                                {budget.is_recurring ? "This budget recurs automatically" : "One-time budget"}
+                                                {budget.expense_category_name || budget.category_name || "Uncategorized"}
                                             </div>
                                         </div>
                                     </div>
-                                    <span className="text-xs font-medium text-slate-600">
-                                        {budget.is_recurring ? "Yes" : "No"}
-                                    </span>
-                                </div>
-
-                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
-                                            <AlertTriangle size={16} className="text-slate-600" />
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-semibold text-slate-900">Alert Threshold</div>
-                                            <div className="text-[10px] text-slate-400">
-                                                {budget.alert_enabled ? `Alert at ${(budget.alert_threshold * 100).toFixed(0)}%` : "Alerts disabled"}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span className="text-xs font-medium text-slate-600">
-                                        {budget.alert_enabled ? "Enabled" : "Disabled"}
-                                    </span>
-                                </div>
-
-                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
-                                            <BarChart3 size={16} className="text-slate-600" />
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-semibold text-slate-900">Rollover</div>
-                                            <div className="text-[10px] text-slate-400">
-                                                {budget.rollover_enabled ? `Rollover amount: ₱${budget.rollover_amount.toFixed(2)}` : "No rollover"}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span className="text-xs font-medium text-slate-600">
-                                        {budget.rollover_enabled ? "Enabled" : "Disabled"}
-                                    </span>
                                 </div>
 
                                 <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
@@ -276,6 +236,20 @@ export function ViewAdminBudgetModal({
                                             <div className="text-sm font-semibold text-slate-900">Created</div>
                                             <div className="text-[10px] text-slate-400">
                                                 {format(new Date(budget.created_at), "MMM dd, yyyy 'at' h:mm a")}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
+                                            <RefreshCw size={16} className="text-slate-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-slate-900">Last Updated</div>
+                                            <div className="text-[10px] text-slate-400">
+                                                {format(new Date(budget.updated_at), "MMM dd, yyyy 'at' h:mm a")}
                                             </div>
                                         </div>
                                     </div>

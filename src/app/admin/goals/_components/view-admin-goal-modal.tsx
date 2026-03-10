@@ -8,17 +8,21 @@ import {
     ModalFooter,
 } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import { ProgressBar } from "@/components/ui/progress-bar";
-import { cn } from "@/lib/utils";
 import {
     ArrowLeft,
     ArrowRight,
-    Info,
+    Calendar,
+    User,
+    Tag,
+    FileText,
+    Clock,
+    RefreshCw,
+    Target,
+    TrendingUp,
     Users,
     Globe,
-    TrendingUp,
-    TrendingDown,
 } from "lucide-react";
+import { format } from "date-fns";
 import { Stepper } from "./stepper";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { AdminGoal } from "../_lib/types";
@@ -67,19 +71,6 @@ export function ViewAdminGoalModal({
         onClose();
     }, [reset, onClose]);
 
-    const handleNext = useCallback(() => {
-        if (step >= 2) {
-            handleClose();
-            return;
-        }
-        setStep((s) => s + 1);
-    }, [step, handleClose]);
-
-    const handleBack = useCallback(() => {
-        if (step <= 1) return;
-        setStep((s) => s - 1);
-    }, [step]);
-
     const createMockUser = (goal: AdminGoal): SupabaseUser => {
         return {
             id: goal.user_id,
@@ -103,122 +94,138 @@ export function ViewAdminGoalModal({
     return (
         <Modal open={open} onClose={handleClose} className="max-w-[520px]">
             {/* Header */}
-            <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-900">{goal.goal_name}</h3>
+            <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-slate-100">
                 <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-gray-400 font-medium tracking-wide">
+                    <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                        Goal Details
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium tracking-wide">
                         Step {step} of 2
                     </span>
                 </div>
             </ModalHeader>
 
+            {/* Stepper */}
+            <Stepper steps={STEPS} currentStep={step} />
+
             {/* Body */}
             <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-                {/* Stepper */}
-                <Stepper steps={STEPS} currentStep={step} />
-
                 {/* STEP 1: Overview */}
                 {step === 1 && (
-                    <div className="space-y-4 animate-txn-in">
-                        <div className="text-center py-6 bg-[#F9FAFB]/50 rounded-xl border border-gray-200">
-                            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Progress</div>
-                            <div className="text-3xl font-bold text-gray-900">{progress}%</div>
-                            <div className="text-xs text-gray-600 mt-1 font-medium">
-                                {formatCurrency(goal.current_amount)} of {formatCurrency(goal.target_amount)}
+                    <div className="space-y-6 animate-txn-in">
+                        {/* Goal Header */}
+                        <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
+                            <div className="flex justify-center mb-3">
+                                <UserAvatar
+                                    user={createMockUser(goal)}
+                                    size="xl"
+                                    className="ring-2 ring-white shadow-sm"
+                                />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900">{goal.user_name || "No Name"}</h3>
+                            <p className="text-sm text-slate-500 mb-3">{goal.user_email || "Unknown User"}</p>
+                            <div className="text-[24px] font-bold my-2 text-slate-900">
+                                {goal.goal_name}
+                            </div>
+                            <div className="flex items-center justify-center gap-3">
+                                <span className={`text-xs font-semibold ${
+                                    goal.status === "completed" ? "text-emerald-500" :
+                                    goal.status === "in_progress" ? "text-blue-500" :
+                                    goal.status === "cancelled" ? "text-red-500" :
+                                    goal.status === "paused" ? "text-amber-500" : "text-slate-500"
+                                }`}>
+                                    {goal.status === "completed" ? "Completed" : 
+                                     goal.status === "in_progress" ? "In Progress" : 
+                                     goal.status === "cancelled" ? "Cancelled" : 
+                                     goal.status === "paused" ? "Paused" : "Not Started"}
+                                </span>
+                                <span className="text-slate-300">•</span>
+                                <span className="text-xs font-medium text-slate-600 capitalize">
+                                    {goal.priority} Priority
+                                </span>
                             </div>
                         </div>
 
-                        <div className="space-y-4">
+                        {/* Goal Progress */}
+                        <div>
+                            <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Goal Progress</h4>
+                            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm p-5">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs font-semibold text-slate-600">{formatCurrency(goal.current_amount)} / {formatCurrency(goal.target_amount)}</span>
+                                    <span className={`text-xs font-bold ${progress >= 95 ? "text-emerald-500" : progress >= 80 ? "text-blue-500" : "text-slate-500"}`}>{progress.toFixed(1)}%</span>
+                                </div>
+                                <div className="w-full bg-slate-100 rounded-full h-2.5">
+                                    <div
+                                        className={`h-2.5 rounded-full transition-all ${progress >= 95 ? "bg-emerald-500" : progress >= 80 ? "bg-blue-500" : "bg-slate-400"}`}
+                                        style={{ width: `${Math.min(progress, 100)}%` }}
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between mt-2">
+                                    <span className="text-[10px] text-slate-400">Remaining: {formatCurrency(remaining)}</span>
+                                    <span className="text-[10px] text-slate-400">{daysRemaining} days left</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Goal Information */}
+                        <div>
+                            <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Goal Information</h4>
+                            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                                <div className="p-5 space-y-0 divide-y divide-slate-100">
+                                    <DetailRow
+                                        label="Category"
+                                        value={goal.category || "—"}
+                                        icon={Tag}
+                                    />
+                                    <DetailRow
+                                        label="Target Amount"
+                                        value={formatCurrency(goal.target_amount)}
+                                        icon={Target}
+                                    />
+                                    <DetailRow
+                                        label="Target Date"
+                                        value={formatDate(goal.target_date)}
+                                        icon={Calendar}
+                                    />
+                                    <DetailRow
+                                        label="Priority"
+                                        value={goal.priority?.charAt(0).toUpperCase() + goal.priority?.slice(1) || "—"}
+                                        icon={TrendingUp}
+                                    />
+                                    {goal.description && (
+                                        <DetailRow
+                                            label="Description"
+                                            value={goal.description}
+                                            icon={FileText}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Goal Type */}
+                        {(goal.is_family_goal || goal.is_public) && (
                             <div>
-                                <div className="flex justify-between text-xs mb-2">
-                                    <span className="text-slate-500">Goal Progress</span>
-                                    <span className="font-medium text-slate-900">{progress}%</span>
-                                </div>
-                                <ProgressBar value={goal.current_amount} max={goal.target_amount} color="success" className="h-2" />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="p-4 rounded-lg bg-white border border-gray-200">
-                                    <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">Status</div>
-                                    <div className="text-sm font-semibold text-gray-900 capitalize">
-                                        {goal.status === "completed" ? "Completed" : goal.status === "in_progress" ? "In Progress" : goal.status === "cancelled" ? "Cancelled" : goal.status === "paused" ? "Paused" : "Not Started"}
-                                    </div>
-                                </div>
-
-                                <div className="p-4 rounded-lg bg-white border border-gray-200">
-                                    <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">Priority</div>
-                                    <div className="text-sm font-semibold text-gray-900 capitalize">{goal.priority}</div>
-                                </div>
-
-                                <div className="p-4 rounded-lg bg-white border border-gray-200">
-                                    <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">Remaining</div>
-                                    <div className="text-sm font-semibold text-gray-900">{formatCurrency(remaining)}</div>
-                                </div>
-
-                                <div className="p-4 rounded-lg bg-white border border-gray-200">
-                                    <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">Days Left</div>
-                                    <div className="text-sm font-semibold text-gray-900">{daysRemaining} days</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="p-3 rounded-lg bg-white border border-gray-200 flex items-start gap-3">
-                            <Info size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
-                            <div>
-                                <div className="font-medium text-sm text-gray-900">Goal Performance</div>
-                                <div className="text-xs text-gray-600">
-                                    {progress}% toward goal with {daysRemaining} days remaining.
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Goal Owner Section */}
-                        <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
-                            <UserAvatar 
-                                user={createMockUser(goal)} 
-                                size="md"
-                                className="ring-2 ring-white shadow-sm flex-shrink-0"
-                            />
-                            <div className="flex-1">
-                                <div className="font-medium text-sm text-gray-900 mb-1">Goal Owner</div>
-                                <div className="space-y-1">
-                                    <div className="text-xs text-gray-600">
-                                        Name: <span className="font-semibold">{goal.user_name || "Unknown"}</span>
-                                    </div>
-                                    <div className="text-xs text-gray-600">
-                                        Email: <span className="font-semibold">{goal.user_email || "N/A"}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Family Context Section */}
-                        {goal.is_family_goal && (
-                            <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
-                                <Users size={16} className="text-gray-600 flex-shrink-0 mt-0.5" />
-                                <div className="flex-1">
-                                    <div className="font-medium text-sm text-gray-900 mb-1.5">Family Goal</div>
-                                    {goal.family_name && (
-                                        <div className="text-xs text-gray-600 mb-2">
-                                            Family: <span className="font-semibold">{goal.family_name}</span>
+                                <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Goal Type</h4>
+                                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm p-5">
+                                    {goal.is_family_goal && (
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <Users size={16} className="text-slate-600" />
+                                            <div>
+                                                <div className="text-sm font-semibold text-slate-900">Family Goal</div>
+                                                <div className="text-xs text-slate-500">Shared with family members</div>
+                                            </div>
                                         </div>
                                     )}
-                                    <div className="text-xs text-gray-500">
-                                        Shared with family members for collaborative tracking and contributions
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Public Goal Context */}
-                        {goal.is_public && !goal.is_family_goal && (
-                            <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
-                                <Globe size={16} className="text-gray-600 flex-shrink-0 mt-0.5" />
-                                <div className="flex-1">
-                                    <div className="font-medium text-sm text-gray-900 mb-1">Public Goal</div>
-                                    <div className="text-xs text-gray-500">
-                                        Visible to the public community for inspiration
-                                    </div>
+                                    {goal.is_public && !goal.is_family_goal && (
+                                        <div className="flex items-center gap-3">
+                                            <Globe size={16} className="text-slate-600" />
+                                            <div>
+                                                <div className="text-sm font-semibold text-slate-900">Public Goal</div>
+                                                <div className="text-xs text-slate-500">Visible to the community</div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -227,196 +234,137 @@ export function ViewAdminGoalModal({
 
                 {/* STEP 2: Analysis */}
                 {step === 2 && (
-                    <div className="space-y-4 animate-txn-in">
+                    <div className="space-y-6 animate-txn-in">
+                        {/* User Information */}
                         <div>
-                            <h4 className="text-sm font-semibold text-slate-900 mb-2">Goal Analysis & Insights</h4>
-                            <p className="text-xs text-slate-500">Comprehensive goal performance and projections</p>
-                        </div>
-
-                        {/* Goal Performance Overview */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-white rounded-lg p-3 border border-gray-200">
-                                <div className="text-[10px] text-gray-500 mb-2">Goal Utilization</div>
-                                <div className="flex items-center justify-center h-16">
-                                    <div className="relative">
-                                        <div className="w-14 h-14 rounded-full border-3 border-gray-200"></div>
-                                        <div
-                                            className="absolute inset-0 w-14 h-14 rounded-full border-3 border-emerald-500 border-t-transparent rotate-45"
-                                        ></div>
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <span className="text-xs font-bold text-gray-700">{progress}%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="text-center mt-2">
-                                    <div className="text-xs font-semibold text-gray-700">{formatCurrency(remaining)}</div>
-                                    <div className="text-[9px] text-gray-500">remaining</div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white rounded-lg p-3 border border-gray-200">
-                                <div className="text-[10px] text-gray-500 mb-2">Contribution Trend</div>
-                                <div className="h-16 flex items-end justify-center gap-1">
-                                    <div className="w-2 bg-gray-300 h-1/2 rounded-t-sm"></div>
-                                    <div className="w-2 bg-gray-300 h-2/3 rounded-t-sm"></div>
-                                    <div className="w-2 bg-emerald-500 h-3/4 rounded-t-sm"></div>
-                                    <div className="w-2 bg-amber-500 h-full rounded-t-sm"></div>
-                                    <div className="w-2 bg-gray-300 h-2/3 rounded-t-sm"></div>
-                                </div>
-                                <div className="text-center mt-2">
-                                    <div className="text-xs font-semibold text-gray-700 flex items-center justify-center gap-1">
-                                        {progress > 80 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                                        {Math.abs(progress - 100)}%
-                                    </div>
-                                    <div className="text-[9px] text-gray-500">vs target</div>
+                            <h3 className="text-[15px] font-bold text-slate-900 mb-3">
+                                User Information
+                            </h3>
+                            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                                <div className="p-5 space-y-0 divide-y divide-slate-100">
+                                    <DetailRow
+                                        label="Email"
+                                        value={goal.user_email || "Unknown"}
+                                        icon={User}
+                                    />
+                                    <DetailRow
+                                        label="Name"
+                                        value={goal.user_name || "—"}
+                                        icon={User}
+                                    />
+                                    <DetailRow
+                                        label="User ID"
+                                        value={goal.user_id}
+                                        icon={User}
+                                    />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Goal Details */}
-                        <div className="space-y-3">
-                            <div className="p-4 rounded-lg border border-slate-200">
-                                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Goal Name</div>
-                                <div className="text-sm font-semibold text-slate-900">{goal.goal_name}</div>
-                            </div>
-
-                            <div className="p-4 rounded-lg border border-slate-200">
-                                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Category</div>
-                                <div className="text-sm font-semibold text-slate-900 capitalize">{goal.category}</div>
-                            </div>
-
-                            <div className="p-4 rounded-lg border border-slate-200">
-                                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Target Amount</div>
-                                <div className="text-sm font-semibold text-slate-900">{formatCurrency(goal.target_amount)}</div>
-                            </div>
-
-                            <div className="p-4 rounded-lg border border-slate-200">
-                                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Current Progress</div>
-                                <div className="text-sm font-semibold text-slate-900">{formatCurrency(goal.current_amount)}</div>
-                            </div>
-
-                            {goal.auto_contribute && (
-                                <div className="p-4 rounded-lg border border-slate-200">
-                                    <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Auto Contribution</div>
-                                    <div className="text-sm font-semibold text-slate-900">
-                                        {formatCurrency(goal.auto_contribute_amount)} / {goal.auto_contribute_frequency || "monthly"}
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="p-4 rounded-lg border border-slate-200">
-                                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Deadline</div>
-                                <div className="text-sm font-semibold text-slate-900">{formatDate(goal.target_date)}</div>
-                            </div>
-
-                            <div className="p-4 rounded-lg border border-slate-200">
-                                <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Priority</div>
-                                <div className="text-sm font-semibold text-slate-900 capitalize">{goal.priority}</div>
-                            </div>
-
-                            {(goal.is_family_goal || goal.is_public) && (
-                                <div className="p-4 rounded-lg border border-gray-200 bg-white">
-                                    <div className="text-[11px] font-semibold uppercase tracking-[0.05em] mb-2 text-gray-600">Goal Type</div>
-                                    <div className="text-sm font-semibold flex items-center gap-2 mb-3">
-                                        {goal.is_family_goal ? (
-                                            <>
-                                                <Users size={14} className="text-gray-600" />
-                                                <span className="text-gray-900">Family Goal</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Globe size={14} className="text-gray-600" />
-                                                <span className="text-gray-900">Public Goal</span>
-                                            </>
-                                        )}
-                                    </div>
-
-                                    <div className="text-xs mt-3 pt-2 border-t border-gray-100 text-gray-600">
-                                        {goal.is_family_goal ? (
-                                            <>Shared with family members for collaborative tracking and contributions</>
-                                        ) : (
-                                            <>Visible to the public community for inspiration</>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Projected Completion */}
+                        {/* Goal Metadata */}
                         <div>
-                            <h4 className="text-xs font-semibold text-slate-900 mb-3">Projected Completion</h4>
-                            <div className="p-3 rounded-lg border border-slate-100">
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                            <span className="text-xs text-slate-600">Current Rate</span>
+                            <h3 className="text-[15px] font-bold text-slate-900 mb-3">
+                                Goal Metadata
+                            </h3>
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
+                                            <Tag size={16} className="text-slate-600" />
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-16 bg-slate-200 rounded-full h-1.5">
-                                                <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${progress}%` }}></div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-slate-900">Category</div>
+                                            <div className="text-[10px] text-slate-400">
+                                                {goal.category || "Uncategorized"}
                                             </div>
-                                            <span className="text-xs font-semibold text-slate-700">{formatCurrency(goal.current_amount)}</span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                                            <span className="text-xs text-slate-600">Target</span>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
+                                            <Clock size={16} className="text-slate-600" />
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-16 bg-slate-200 rounded-full h-1.5">
-                                                <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: "100%" }}></div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-slate-900">Created</div>
+                                            <div className="text-[10px] text-slate-400">
+                                                {format(new Date(goal.created_at), "MMM dd, yyyy 'at' h:mm a")}
                                             </div>
-                                            <span className="text-xs font-semibold text-slate-700">{formatCurrency(goal.target_amount)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 bg-[#F9FAFB]/50 rounded-lg border border-slate-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-100 bg-white">
+                                            <RefreshCw size={16} className="text-slate-600" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-slate-900">Last Updated</div>
+                                            <div className="text-[10px] text-slate-400">
+                                                {format(new Date(goal.updated_at), "MMM dd, yyyy 'at' h:mm a")}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Notes & Description */}
-                        {(goal.description || goal.notes) && (
-                            <div className="space-y-3">
-                                {goal.description && (
-                                    <div className="p-4 rounded-lg border border-slate-200">
-                                        <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Description</div>
-                                        <div className="text-sm text-slate-900">{goal.description}</div>
-                                    </div>
-                                )}
-                                {goal.notes && (
-                                    <div className="p-4 rounded-lg border border-slate-200">
-                                        <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Notes</div>
-                                        <div className="text-sm text-slate-900">{goal.notes}</div>
-                                    </div>
-                                )}
+                        {/* Goal ID */}
+                        <div>
+                            <h3 className="text-[15px] font-bold text-slate-900 mb-3">
+                                Goal ID
+                            </h3>
+                            <div className="bg-[#F9FAFB]/50 rounded-lg p-4 border border-slate-100">
+                                <p className="text-[11px] text-slate-500 leading-relaxed font-mono break-all">
+                                    {goal.id}
+                                </p>
                             </div>
-                        )}
+                        </div>
                     </div>
                 )}
             </ModalBody>
 
             {/* Footer */}
             <ModalFooter className="flex justify-between">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleBack}
-                    className={cn("transition-all", step === 1 ? "invisible" : "")}
-                >
-                    <ArrowLeft size={14} className="mr-1" />
-                    Back
-                </Button>
-                <div className="flex-1" />
+                {step > 1 ? (
+                    <Button variant="secondary" size="sm" onClick={() => setStep(1)}>
+                        <ArrowLeft size={14} /> Back
+                    </Button>
+                ) : (
+                    <div />
+                )}
                 <Button
                     size="sm"
-                    onClick={handleNext}
+                    onClick={() => {
+                        if (step === 2) {
+                            setStep(1);
+                        } else {
+                            setStep(2);
+                        }
+                    }}
                     className="bg-emerald-500 hover:bg-emerald-600"
                 >
-                    {step === 2 ? "Close" : "View Analysis"}
-                    <ArrowRight size={14} className="ml-1" />
+                    {step === 2 ? (
+                        <>Back to Overview <ArrowLeft size={14} /></>
+                    ) : (
+                        <>View Analysis <ArrowRight size={14} /></>
+                    )}
                 </Button>
             </ModalFooter>
         </Modal>
+    );
+}
+
+function DetailRow({ label, value, icon: Icon }: { label: string; value: string; icon: React.ElementType }) {
+    return (
+        <div className="flex justify-between items-center py-2.5">
+            <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold flex items-center gap-1.5">
+                <Icon size={12} className="text-slate-400" />
+                {label}
+            </span>
+            <span className="text-[13px] font-semibold text-slate-700">{value}</span>
+        </div>
     );
 }
