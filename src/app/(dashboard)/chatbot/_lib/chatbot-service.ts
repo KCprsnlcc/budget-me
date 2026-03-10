@@ -167,7 +167,7 @@ export async function sendMessageToAI(
 
     // Check if any message has image attachments
     const hasImageAttachment = messages.some(msg => msg.attachment && msg.attachment.type.startsWith('image/'));
-    
+
     // Check if the selected model supports vision
     const selectedModel = AVAILABLE_MODELS.find(model => model.id === modelId);
     if (hasImageAttachment && selectedModel && !selectedModel.hasVision) {
@@ -213,7 +213,7 @@ export async function sendMessageToAI(
             ],
           };
         }
-        
+
         // Regular text message
         return {
           role: msg.role,
@@ -249,11 +249,11 @@ export async function sendMessageToAI(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('OpenRouter API Error:', errorData);
-      
+
       // Check for image analysis errors
       const hasImageAttachment = apiMessages.some(msg => Array.isArray(msg.content));
       const errorMessage = errorData.error?.message || errorData.message || `API error: ${response.status}`;
-      
+
       // Handle specific error cases
       if (response.status === 401) {
         return {
@@ -286,7 +286,7 @@ export async function sendMessageToAI(
           error: "Insufficient credits. This model requires payment. Please switch to a free model or add credits to your OpenRouter account.",
         };
       }
-      
+
       return {
         success: false,
         error: errorMessage,
@@ -368,7 +368,7 @@ export async function saveWelcomeMessage(userId: string, userProfile?: { fullNam
     // Import the welcome message generator
     const { generateWelcomeMessage } = await import('./welcome-messages');
     const { question, suggestions } = generateWelcomeMessage(userProfile as any);
-    
+
     const welcomeMessage = {
       id: `welcome-${Date.now()}`,
       role: "assistant" as const,
@@ -389,7 +389,7 @@ export async function saveWelcomeMessage(userId: string, userProfile?: { fullNam
       suggestions: suggestions,
       created_at: new Date().toISOString(),
     });
-    
+
     return { success: true };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Failed to save welcome message";
@@ -448,14 +448,14 @@ export async function fetchMessageContent(
  * @returns Promise with message data, error status, and hasMore flag
  */
 export async function fetchChatHistory(
-  userId: string, 
-  limit: number = 20, 
+  userId: string,
+  limit: number = 20,
   before?: string,
   metadataOnly: boolean = false
 ): Promise<{ data: MessageType[]; error: string | null; hasMore: boolean }> {
   try {
     // Select fields based on loading mode
-    const selectFields = metadataOnly 
+    const selectFields = metadataOnly
       ? "id, role, created_at, model, suggestions, attachment"
       : "*";
 
@@ -487,7 +487,7 @@ export async function fetchChatHistory(
     const hasMore = (data || []).length > limit;
     const messages = (data || []).slice(0, limit);
 
-    const mappedMessages: MessageType[] = messages.map((row) => ({
+    const mappedMessages: MessageType[] = messages.map((row: any) => ({
       id: row.id,
       role: row.role as "assistant" | "user",
       content: metadataOnly ? "" : row.content, // Empty content in metadata-only mode
