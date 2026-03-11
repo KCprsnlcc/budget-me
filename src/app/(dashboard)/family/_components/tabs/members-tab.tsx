@@ -69,7 +69,9 @@ export function MembersTab({
   const [roleChanges, setRoleChanges] = useState<Record<string, string>>({});
   const [savingRoles, setSavingRoles] = useState(false);
   const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
+  const [processingRequestAction, setProcessingRequestAction] = useState<'approve' | 'decline' | null>(null);
   const [processingInvitationId, setProcessingInvitationId] = useState<string | null>(null);
+  const [processingInvitationAction, setProcessingInvitationAction] = useState<'accept' | 'decline' | null>(null);
 
   // Modal states
   const [transferOwnershipModalOpen, setTransferOwnershipModalOpen] = useState(false);
@@ -167,26 +169,34 @@ export function MembersTab({
 
   const handleApprove = async (requestId: string) => {
     setProcessingRequestId(requestId);
+    setProcessingRequestAction('approve');
     await onApproveRequest(requestId);
     setProcessingRequestId(null);
+    setProcessingRequestAction(null);
   };
 
   const handleDecline = async (requestId: string) => {
     setProcessingRequestId(requestId);
+    setProcessingRequestAction('decline');
     await onDeclineRequest(requestId);
     setProcessingRequestId(null);
+    setProcessingRequestAction(null);
   };
 
   const handleAcceptInvitation = async (invitationId: string) => {
     setProcessingInvitationId(invitationId);
+    setProcessingInvitationAction('accept');
     await onRespondToInvitation?.(invitationId, true);
     setProcessingInvitationId(null);
+    setProcessingInvitationAction(null);
   };
 
   const handleDeclineInvitation = async (invitationId: string) => {
     setProcessingInvitationId(invitationId);
+    setProcessingInvitationAction('decline');
     await onRespondToInvitation?.(invitationId, false);
     setProcessingInvitationId(null);
+    setProcessingInvitationAction(null);
   };
 
   // Modal handlers
@@ -420,7 +430,7 @@ export function MembersTab({
                       disabled={!canApproveRequests || processingRequestId === request.id}
                       title={!canApproveRequests ? "Only admins and owners can approve requests" : ""}
                     >
-                      {processingRequestId === request.id ? (
+                      {processingRequestId === request.id && processingRequestAction === 'approve' ? (
                         <>
                           <Loader2 size={12} className="animate-spin mr-1 sm:w-3.5 sm:h-3.5" />
                           <span className="hidden sm:inline">Approving...</span>
@@ -441,7 +451,7 @@ export function MembersTab({
                       disabled={!canApproveRequests || processingRequestId === request.id}
                       title={!canApproveRequests ? "Only admins and owners can decline requests" : ""}
                     >
-                      {processingRequestId === request.id ? (
+                      {processingRequestId === request.id && processingRequestAction === 'decline' ? (
                         <>
                           <Loader2 size={12} className="animate-spin mr-1 sm:w-3.5 sm:h-3.5" />
                           <span className="hidden sm:inline">Declining...</span>
@@ -525,7 +535,7 @@ export function MembersTab({
                         onClick={() => handleAcceptInvitation(invitation.id)}
                         disabled={processingInvitationId === invitation.id}
                       >
-                        {processingInvitationId === invitation.id ? (
+                        {processingInvitationId === invitation.id && processingInvitationAction === 'accept' ? (
                           <>
                             <Loader2 size={12} className="animate-spin mr-1 sm:w-3.5 sm:h-3.5" />
                             <span className="hidden sm:inline">Accepting...</span>
@@ -542,7 +552,7 @@ export function MembersTab({
                         onClick={() => handleDeclineInvitation(invitation.id)}
                         disabled={processingInvitationId === invitation.id}
                       >
-                        {processingInvitationId === invitation.id ? (
+                        {processingInvitationId === invitation.id && processingInvitationAction === 'decline' ? (
                           <>
                             <Loader2 size={12} className="animate-spin mr-1 sm:w-3.5 sm:h-3.5" />
                             <span className="hidden sm:inline">Declining...</span>
