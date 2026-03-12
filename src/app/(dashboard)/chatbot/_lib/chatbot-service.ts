@@ -217,6 +217,7 @@ export async function sendMessageToAI(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "same-origin", // Ensure cookies are sent
       body: JSON.stringify({
         messages: apiMessages,
         modelId,
@@ -241,9 +242,11 @@ export async function sendMessageToAI(
         };
       }
       if (response.status === 403) {
+        // Log the actual error for debugging
+        console.error("[CHATBOT] 403 error:", errorData);
         return {
           success: false,
-          error: "Access denied. Please ensure you are logged in.",
+          error: errorData.error || "Access denied. Please refresh the page and try again.",
         };
       }
 

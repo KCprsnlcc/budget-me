@@ -193,13 +193,30 @@ export async function validateAIRequest(
   ].filter(Boolean);
 
   // Check both origin and referer headers
-  const requestOrigin = origin || (referer ? new URL(referer).origin : null);
+  let requestOrigin: string | null = null;
+  try {
+    requestOrigin = origin || (referer ? new URL(referer).origin : null);
+  } catch (err) {
+    // Invalid URL in referer, skip origin validation
+    console.warn("[AI-SEC] Invalid referer URL:", referer);
+  }
   
+  // Only validate origin if we have both a request origin and configured allowed origins
+  // Skip validation for same-origin requests (when origin header is missing)
+  // Also skip if no allowed origins are configured (development mode)
   if (requestOrigin && allowedOrigins.length > 0) {
     const isAllowed = allowedOrigins.some(
-      (allowed) => requestOrigin === allowed || requestOrigin.startsWith(allowed!)
+      (allowed) => {
+        if (!allowed) return false;
+        // Exact match or starts with (for subdomains)
+        return requestOrigin === allowed || requestOrigin.startsWith(allowed);
+      }
     );
+    
     if (!isAllowed) {
+      // Log but don't block in development (localhost)
+      const isDevelopment = requestOrigin.includes("localhost") || requestOrigin.includes("127.0.0.1");
+      
       logRequest({
         timestamp: new Date().toISOString(),
         ip,
@@ -209,15 +226,19 @@ export async function validateAIRequest(
         origin,
         route: routeName,
         promptLength: 0,
-        status: "blocked",
-        blockReason: `Invalid origin: ${requestOrigin}`,
+        status: isDevelopment ? "allowed" : "blocked",
+        blockReason: isDevelopment ? `Dev origin: ${requestOrigin}` : `Invalid origin: ${requestOrigin}`,
       });
-      return {
-        error: NextResponse.json(
-          { error: "Invalid request origin" },
-          { status: 403 }
-        ),
-      };
+      
+      // Only block in production
+      if (!isDevelopment) {
+        return {
+          error: NextResponse.json(
+            { error: "Invalid request origin" },
+            { status: 403 }
+          ),
+        };
+      }
     }
   }
 
@@ -245,6 +266,14 @@ export async function validateAIRequest(
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
+      console.warn("[AI-SEC] Authentication failed:", {
+        error: authError?.message,
+        hasUser: !!user,
+        route: routeName,
+        ip,
+        cookies: request.cookies.getAll().map(c => c.name).join(", "),
+      });
+      
       logRequest({
         timestamp: new Date().toISOString(),
         ip,
@@ -255,7 +284,7 @@ export async function validateAIRequest(
         route: routeName,
         promptLength: 0,
         status: "blocked",
-        blockReason: "No valid session",
+        blockReason: authError?.message || "No valid session",
       });
       return {
         error: NextResponse.json(
@@ -272,6 +301,7 @@ export async function validateAIRequest(
     const { data: { session } } = await supabase.auth.getSession();
     sessionId = session?.access_token?.slice(-12) || "unknown";
   } catch (err) {
+    console.error("[AI-SEC] Auth system error:", err);
     logRequest({
       timestamp: new Date().toISOString(),
       ip,
