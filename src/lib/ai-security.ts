@@ -185,8 +185,13 @@ export async function validateAIRequest(
   }
 
   // ─── 2. Validate request origin (CSRF protection) ─────────────────────
+  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   const allowedOrigins = [
-    process.env.NEXT_PUBLIC_SITE_URL,
+    configuredSiteUrl,
+    // Also allow the same domain with/without trailing slash and http/https variants
+    configuredSiteUrl?.replace(/\/$/, ''), // Remove trailing slash
+    configuredSiteUrl?.replace(/^http:/, 'https:'), // HTTPS variant
+    configuredSiteUrl?.replace(/^http:/, 'https:').replace(/\/$/, ''), // HTTPS without trailing slash
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",
@@ -203,7 +208,6 @@ export async function validateAIRequest(
   
   // Only validate origin if we have both a request origin and configured allowed origins
   // Skip validation for same-origin requests (when origin header is missing)
-  // Also skip if no allowed origins are configured (development mode)
   if (requestOrigin && allowedOrigins.length > 0) {
     const isAllowed = allowedOrigins.some(
       (allowed) => {
@@ -217,6 +221,13 @@ export async function validateAIRequest(
       // Log but don't block in development (localhost)
       const isDevelopment = requestOrigin.includes("localhost") || requestOrigin.includes("127.0.0.1");
       
+      console.warn("[AI-SEC] Origin validation:", {
+        requestOrigin,
+        allowedOrigins,
+        configuredSiteUrl,
+        isDevelopment,
+      });
+      
       logRequest({
         timestamp: new Date().toISOString(),
         ip,
@@ -227,7 +238,7 @@ export async function validateAIRequest(
         route: routeName,
         promptLength: 0,
         status: isDevelopment ? "allowed" : "blocked",
-        blockReason: isDevelopment ? `Dev origin: ${requestOrigin}` : `Invalid origin: ${requestOrigin}`,
+        blockReason: isDevelopment ? `Dev origin: ${requestOrigin}` : `Invalid origin: ${requestOrigin} (allowed: ${allowedOrigins.join(", ")})`,
       });
       
       // Only block in production
