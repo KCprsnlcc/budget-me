@@ -67,44 +67,34 @@ export function Hero() {
         </svg>
       </div>
 
-      {/* Left Hero Image */}
-      <div className="hidden xl:block absolute left-5 top-1/2 -translate-y-1/2 h-[70%] z-20 pointer-events-none [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/left-side-hero.webp" alt="" className="h-full w-auto object-contain object-left-bottom" />
-      </div>
+      <div className="relative z-10">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Headline */}
+          <h1 className="text-4xl md:text-5xl lg:text-5xl font-semibold text-slate-900 tracking-tight mb-5 leading-[1.2]">
+            Smart Financial Planning <br />
+            <span className="text-emerald-500">Made Simple for Everyone</span>
+          </h1>
 
-      {/* Right Hero Image */}
-      <div className="hidden xl:block absolute right-5 top-1/2 -translate-y-1/2 h-[70%] z-20 pointer-events-none [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/right-side-hero.webp" alt="" className="h-full w-auto object-contain object-right-bottom" />
-      </div>
+          {/* Subheadline */}
+          <p className="text-[13px] md:text-sm text-slate-700 max-w-xl mx-auto mb-8 leading-relaxed">
+            Take control of your finances with intuitive budgeting tools. Track expenses,{" "}
+            <br className="hidden md:block" />
+            set ambitious goals, and build wealth with AI-powered insights.
+          </p>
 
-      <div className="max-w-4xl mx-auto text-center relative z-10">
-        {/* Headline */}
-        <h1 className="text-4xl md:text-5xl lg:text-5xl font-semibold text-slate-900 tracking-tight mb-5 leading-[1.2]">
-          Smart Financial Planning <br />
-          <span className="text-emerald-500">Made Simple for Everyone</span>
-        </h1>
-
-        {/* Subheadline */}
-        <p className="text-[13px] md:text-sm text-slate-700 max-w-xl mx-auto mb-8 leading-relaxed">
-          Take control of your finances with intuitive budgeting tools. Track expenses,{" "}
-          <br className="hidden md:block" />
-          set ambitious goals, and build wealth with AI-powered insights.
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16">
-          <Link href="/register">
-            <Button size="lg">Start your budget</Button>
-          </Link>
-          <Button variant="secondary" size="lg">
-            Request a demo
-          </Button>
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16">
+            <Link href="/register">
+              <Button size="lg">Start your budget</Button>
+            </Link>
+            <Button variant="secondary" size="lg">
+              Request a demo
+            </Button>
+          </div>
         </div>
 
         {/* Tech Specs Marquee */}
-        <div className="relative max-w-5xl mx-auto">
+        <div className="relative w-full">
           {/* Edge Fades - COMMENTED OUT FOR RESTORATION */}
           {/* <div className="absolute left-[-20px] top-0 bottom-0 w-40 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
           <div className="absolute right-[-20px] top-0 bottom-0 w-40 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
@@ -122,9 +112,9 @@ export function Hero() {
                   <div
                     key={spec.title}
                     // HOVER ANIMATION COMMENTED OUT - Restore by adding to className: group hover:translate-y-[-2px] transition-transform duration-300
-                    className="w-72 shrink-0"
+                    className="w-72 shrink-0 text-center"
                   >
-                    <div className="text-slate-900 text-[11px] font-bold mb-2 flex items-center gap-2 uppercase tracking-tight">
+                    <div className="text-slate-900 text-[11px] font-bold mb-2 flex items-center justify-center gap-2 uppercase tracking-tight">
                       {Icon && (
                         <Icon
                           size={16}
