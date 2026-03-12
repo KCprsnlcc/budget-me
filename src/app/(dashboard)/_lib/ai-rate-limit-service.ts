@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
 
-export type AIUsageType = "predictions" | "insights" | "chatbot";
+export type AIUsageType = "predictions" | "insights" | "chatbot" | "report-insights";
 
 export interface AIUsageStatus {
   totalUsed: number;
@@ -24,6 +24,14 @@ export async function checkAIUsage(
   usageType: AIUsageType
 ): Promise<{ allowed: boolean; status: AIUsageStatus; error?: string }> {
   try {
+    if (usageType === "report-insights") {
+      const status = getDefaultStatus();
+      return {
+        allowed: true,
+        status,
+      };
+    }
+
     const today = new Date().toISOString().split("T")[0];
 
     let { data: usage, error } = await supabase
@@ -92,6 +100,11 @@ export async function incrementAIUsage(
   usageType: AIUsageType
 ): Promise<{ success: boolean; status?: AIUsageStatus; error?: string }> {
   try {
+    if (usageType === "report-insights") {
+      const status = getDefaultStatus();
+      return { success: true, status };
+    }
+
     const today = new Date().toISOString().split("T")[0];
 
     const { allowed, status: currentStatus } = await checkAIUsage(

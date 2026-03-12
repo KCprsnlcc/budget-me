@@ -143,7 +143,7 @@ export default function ReportsPage() {
       if (!user?.id) return;
       
       try {
-        const { status } = await checkAIUsage(user.id, "insights");
+        const { status } = await checkAIUsage(user.id, "predictions");
         setRateLimitStatus(status);
       } catch (error) {
         console.error("Error fetching rate limit status:", error);
@@ -227,10 +227,10 @@ export default function ReportsPage() {
   const handleGenerateAIInsights = useCallback(async () => {
     if (!user?.id || !summaryData || !chartData) return;
 
-    const { allowed, error: limitError } = await checkAIUsage(user.id, "insights");
+    const { allowed } = await checkAIUsage(user.id, "report-insights");
     if (!allowed) {
-      toast.error("Daily limit reached", {
-        description: limitError || "You've reached your daily limit for AI Insights. Try again tomorrow.",
+      toast.error("Unable to generate insights", {
+        description: "Please try again later.",
       });
       return;
     }
@@ -243,7 +243,8 @@ export default function ReportsPage() {
 
     try {
 
-      const { success: incrementSuccess } = await incrementAIUsage(user.id, "insights");
+      // Report insights don't count towards usage limit
+      const { success: incrementSuccess } = await incrementAIUsage(user.id, "report-insights");
       if (!incrementSuccess) {
         toast.error("Failed to track usage", {
           description: "Please try again",
@@ -252,7 +253,7 @@ export default function ReportsPage() {
         return;
       }
 
-      const { status } = await checkAIUsage(user.id, "insights");
+      const { status } = await checkAIUsage(user.id, "report-insights");
       setRateLimitStatus(status);
 
       const insights = await generateReportAIInsights({
