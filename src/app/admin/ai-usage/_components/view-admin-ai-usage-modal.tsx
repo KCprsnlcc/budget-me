@@ -51,7 +51,6 @@ export function ViewAdminAIUsageModal({
     onClose();
   }, [reset, onClose]);
 
-  // Helper function to convert usage user data to Supabase User format for UserAvatar
   const createMockUser = (usage: AdminAIUsage): SupabaseUser => {
     return {
       id: usage.user_id,
@@ -73,7 +72,7 @@ export function ViewAdminAIUsageModal({
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-      {/* Header */}
+      {}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-slate-100">
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
@@ -85,15 +84,15 @@ export function ViewAdminAIUsageModal({
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
+      {}
       <Stepper steps={STEPS} currentStep={step} />
 
-      {/* Body */}
+      {}
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* STEP 1: Overview */}
+        {}
         {step === 1 && (
           <div className="space-y-6 animate-txn-in">
-            {/* Usage Header */}
+            {}
             <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
               <div className="flex justify-center mb-3">
                 <UserAvatar 
@@ -120,7 +119,7 @@ export function ViewAdminAIUsageModal({
               </div>
             </div>
 
-            {/* AI Features Breakdown */}
+            {}
             <div>
               <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">AI Features Usage</h4>
               <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -149,7 +148,7 @@ export function ViewAdminAIUsageModal({
               </div>
             </div>
 
-            {/* Usage Information */}
+            {}
             <div>
               <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Usage Information</h4>
               <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -170,10 +169,10 @@ export function ViewAdminAIUsageModal({
           </div>
         )}
 
-        {/* STEP 2: Analysis */}
+        {}
         {step === 2 && (
           <div className="space-y-6 animate-txn-in">
-            {/* User Information */}
+            {}
             <div>
               <h3 className="text-[15px] font-bold text-slate-900 mb-3">
                 User Information
@@ -199,7 +198,7 @@ export function ViewAdminAIUsageModal({
               </div>
             </div>
 
-            {/* Usage Metadata */}
+            {}
             <div>
               <h3 className="text-[15px] font-bold text-slate-900 mb-3">
                 Usage Metadata
@@ -249,7 +248,7 @@ export function ViewAdminAIUsageModal({
               </div>
             </div>
 
-            {/* Record ID */}
+            {}
             <div>
               <h3 className="text-[15px] font-bold text-slate-900 mb-3">
                 Record ID
@@ -264,7 +263,7 @@ export function ViewAdminAIUsageModal({
         )}
       </ModalBody>
 
-      {/* Footer */}
+      {}
       <ModalFooter className="flex justify-between">
         {step > 1 ? (
           <Button variant="secondary" size="sm" onClick={() => setStep(1)}>

@@ -101,7 +101,6 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
     general: Flag,
 };
 
-// Memoized components for better performance
 const SummaryCard = memo(({ item }: { item: SummaryType }) => {
     const Icon = item.icon;
     return (
@@ -324,7 +323,6 @@ export default function AdminGoalsPage() {
     const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
     const exportDropdownRef = useRef<HTMLDivElement>(null);
 
-    // Close export dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
@@ -389,7 +387,6 @@ export default function AdminGoalsPage() {
         setContributeModalOpen(true);
     }, []);
 
-    // Export handlers
     const handleExportCSV = useCallback(() => {
         if (goals.length === 0) {
             alert("No goals to export");
@@ -439,7 +436,6 @@ export default function AdminGoalsPage() {
         exportAdminGoalsToPDF(exportData, summaryData);
     }, [goals, stats]);
 
-    // Build summary cards from real data
     const summaryItems: SummaryType[] = useMemo(() => {
         if (!stats) return [];
 
@@ -478,7 +474,6 @@ export default function AdminGoalsPage() {
         ];
     }, [stats]);
 
-    // Normalize chart data to percentages for bar heights
     const chartData = useMemo(() => {
         if (!stats?.goalGrowth.length) return [];
         const max = Math.max(...stats.goalGrowth.map((d) => d.count), 1);
@@ -489,7 +484,6 @@ export default function AdminGoalsPage() {
         }));
     }, [stats]);
 
-    // Build conic-gradient for category distribution donut
     const categoryTotal = useMemo(
         () => stats?.categoryDistribution.reduce((sum, t) => sum + t.count, 0) || 0,
         [stats]
@@ -518,7 +512,6 @@ export default function AdminGoalsPage() {
 
     const currentYear = new Date().getFullYear();
 
-    // Loading state
     if (loading && !tableLoading) {
         return (
             <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
@@ -584,7 +577,7 @@ export default function AdminGoalsPage() {
 
     return (
         <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-            {/* Header */}
+            {}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
                 <div>
                     <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">Goals Management</h2>
@@ -668,16 +661,16 @@ export default function AdminGoalsPage() {
 
             <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth">
 
-                {/* Summary Cards */}
+                {}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {summaryItems.map((item) => (
                         <SummaryCard key={item.label} item={item} />
                     ))}
                 </div>
 
-                {/* Charts Section */}
+                {}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                    {/* Goal Growth Chart */}
+                    {}
                     <Card className="bg-white lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
                         <div className="flex items-center justify-between mb-6 sm:mb-8">
                             <div>
@@ -738,7 +731,7 @@ export default function AdminGoalsPage() {
                         )}
                     </Card>
 
-                    {/* Category Distribution */}
+                    {}
                     <Card className="bg-white p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
                         <div className="mb-4 sm:mb-6">
                             <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Category Distribution</h3>
@@ -785,7 +778,7 @@ export default function AdminGoalsPage() {
                     </Card>
                 </div>
 
-                {/* Top Savers Section */}
+                {}
                 {stats?.topSavers && stats.topSavers.length > 0 && (
                     <Card className="bg-white p-4 sm:p-6 hover:shadow-md transition-all">
                         <div className="mb-4 sm:mb-6">
@@ -838,7 +831,7 @@ export default function AdminGoalsPage() {
                     </Card>
                 )}
 
-                {/* Filters */}
+                {}
                 <Card className="bg-white p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer flex-shrink-0">
                     <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
                         <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
@@ -906,7 +899,7 @@ export default function AdminGoalsPage() {
                     </div>
                 </Card>
 
-                {/* Error State */}
+                {}
                 {error && !loading && (
                     <Card className="bg-white p-8 text-center shrink-0">
                         <p className="text-sm text-red-500 mb-3">{error}</p>
@@ -916,7 +909,7 @@ export default function AdminGoalsPage() {
                     </Card>
                 )}
 
-                {/* Goals Display */}
+                {}
                 {goals.length === 0 ? (
                     <Card className="bg-white p-12 text-center shrink-0">
                         <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
@@ -979,7 +972,7 @@ export default function AdminGoalsPage() {
                     </div>
                 )}
 
-                {/* Pagination */}
+                {}
                 {!loading && !tableLoading && !error && goals.length > 0 && (
                     <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0 shrink-0">
                         <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
@@ -1031,7 +1024,7 @@ export default function AdminGoalsPage() {
                 )}
             </div>
 
-            {/* Modals */}
+            {}
             <ViewAdminGoalModal
                 open={viewModalOpen}
                 onClose={() => setViewModalOpen(false)}

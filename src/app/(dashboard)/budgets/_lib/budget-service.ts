@@ -8,16 +8,11 @@ import type {
 
 const supabase = createClient();
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 const BUDGET_SELECT = `
   *,
   expense_categories ( category_name, icon, color )
 `;
 
-/** Map a raw DB row (with joins) to the UI BudgetType. */
 function mapRow(row: Record<string, any>): BudgetType {
   const expCat = row.expense_categories as Record<string, any> | null;
 
@@ -42,16 +37,11 @@ function mapRow(row: Record<string, any>): BudgetType {
     rollover_amount: Number(row.rollover_amount),
     created_at: row.created_at,
     updated_at: row.updated_at,
-    // Joined
     expense_category_name: expCat?.category_name ?? undefined,
     expense_category_icon: expCat?.icon ?? undefined,
     expense_category_color: expCat?.color ?? undefined,
   };
 }
-
-// ---------------------------------------------------------------------------
-// READ — Budgets list
-// ---------------------------------------------------------------------------
 
 export type BudgetFilters = {
   month?: number | "all";
@@ -71,7 +61,6 @@ export async function fetchBudgetsList(
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  // First get total count
   let countQuery = supabase
     .from("budgets")
     .select("id", { count: "exact", head: true })
@@ -96,14 +85,12 @@ export async function fetchBudgetsList(
   const { count: totalCount, error: countError } = await countQuery;
   if (countError) return { data: [], error: countError.message, totalCount: 0 };
 
-  // Then get the data
   let query = supabase
     .from("budgets")
     .select(BUDGET_SELECT)
     .eq("user_id", userId)
     .range(from, to);
 
-  // Apply filters
   if (filters.month && filters.month !== "all") {
     query = query.eq("date_part('month', start_date)", filters.month);
   }
@@ -125,10 +112,6 @@ export async function fetchBudgetsList(
   if (error) return { data: [], error: error.message, totalCount: totalCount ?? 0 };
   return { data: data?.map(mapRow) ?? [], error: null, totalCount: totalCount ?? 0 };
 }
-
-// ---------------------------------------------------------------------------
-// CREATE
-// ---------------------------------------------------------------------------
 
 export async function createBudget(
   userId: string,
@@ -169,10 +152,6 @@ export async function createBudget(
   return { data: mapRow(data), error: null };
 }
 
-// ---------------------------------------------------------------------------
-// UPDATE
-// ---------------------------------------------------------------------------
-
 export async function updateBudget(
   budgetId: string,
   form: BudgetFormState
@@ -207,10 +186,6 @@ export async function updateBudget(
   return { data: mapRow(data), error: null };
 }
 
-// ---------------------------------------------------------------------------
-// DELETE
-// ---------------------------------------------------------------------------
-
 export async function deleteBudget(
   budgetId: string
 ): Promise<{ error: string | null }> {
@@ -221,10 +196,6 @@ export async function deleteBudget(
   if (error) return { error: error.message };
   return { error: null };
 }
-
-// ---------------------------------------------------------------------------
-// LOOKUP DATA — Expense Categories for dropdowns
-// ---------------------------------------------------------------------------
 
 export async function fetchExpenseCategories(
   userId: string
@@ -237,10 +208,6 @@ export async function fetchExpenseCategories(
     .order("category_name");
   return (data ?? []) as CategoryOption[];
 }
-
-// ---------------------------------------------------------------------------
-// AGGREGATES — Summary for dashboard cards & charts
-// ---------------------------------------------------------------------------
 
 export type BudgetSummary = {
   totalBudget: number;
@@ -278,10 +245,6 @@ export function computeBudgetSummary(budgets: BudgetType[]): BudgetSummary {
     atRiskCount,
   };
 }
-
-// ---------------------------------------------------------------------------
-// MONTHLY TREND (for bar chart)
-// ---------------------------------------------------------------------------
 
 export type BudgetMonthlyTrendPoint = {
   month: string;

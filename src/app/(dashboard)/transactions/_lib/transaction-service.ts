@@ -32,14 +32,8 @@ import type {
 
 const supabase = createClient();
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-// Emoji to Lucide icon mapping
 function getLucideIcon(emoji: string): React.ComponentType<any> {
   const iconMap: Record<string, React.ComponentType<any>> = {
-    // Expense Categories
     "🏠": Home,
     "🚗": Car,
     "🍽️": Utensils,
@@ -51,7 +45,6 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
     "📚": BookOpen,
     "🛡️": Shield,
     
-    // Income Categories
     "💰": DollarSign,
     "💻": Laptop,
     "📈": TrendingUp,
@@ -61,14 +54,12 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
     "🎁": Gift,
     "💵": Banknote,
     
-    // Default/fallback
     "📋": FileText,
   };
   
   return iconMap[emoji] || FileText;
 }
 
-/** Map a raw DB row (with joins) to the UI TransactionType. */
 function mapRow(row: Record<string, any>): TransactionType {
   const acct = row.accounts as Record<string, any> | null;
   const expCat = row.expense_categories as Record<string, any> | null;
@@ -95,7 +86,6 @@ function mapRow(row: Record<string, any>): TransactionType {
     is_recurring: row.is_recurring ?? false,
     created_at: row.created_at,
     updated_at: row.updated_at,
-    // Joined
     account_name: acct?.account_name ?? undefined,
     account_number_masked: acct?.account_number_masked ?? undefined,
     category_name: categorySource?.category_name ?? undefined,
@@ -104,10 +94,6 @@ function mapRow(row: Record<string, any>): TransactionType {
     goal_name: goal?.goal_name ?? undefined,
   };
 }
-
-// ---------------------------------------------------------------------------
-// READ — Transactions list
-// ---------------------------------------------------------------------------
 
 export type TransactionFilters = {
   month?: number | "all"; // 1-12 or "all"
@@ -139,7 +125,6 @@ export async function fetchTransactions(
     .order("date", { ascending: false })
     .order("created_at", { ascending: false });
 
-  // Date range filter
   if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
     const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
     const endDate = new Date(filters.year, filters.month, 0); // last day
@@ -164,13 +149,11 @@ export async function fetchTransactions(
     );
   }
 
-  // Get total count for pagination (apply same filters as main query)
   let countQuery = supabase
     .from("transactions")
     .select("count", { count: "exact", head: true })
     .eq("user_id", userId);
 
-  // Apply the same filters to count query
   if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
     const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
     const endDate = new Date(filters.year, filters.month, 0); // last day
@@ -197,7 +180,6 @@ export async function fetchTransactions(
 
   const { count } = await countQuery;
 
-  // Add pagination to main query
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   query = query.range(from, to);
@@ -206,10 +188,6 @@ export async function fetchTransactions(
   if (error) return { data: [], error: error.message, count: null };
   return { data: (data ?? []).map(mapRow), error: null, count: count ?? 0 };
 }
-
-// ---------------------------------------------------------------------------
-// CREATE
-// ---------------------------------------------------------------------------
 
 export async function createTransaction(
   userId: string,
@@ -236,12 +214,10 @@ export async function createTransaction(
     if (form.income_category_id) {
       insert.income_category_id = form.income_category_id;
     }
-    // else: constraint will fail - category is required for income
   } else if (form.type === "expense") {
     if (form.expense_category_id) {
       insert.expense_category_id = form.expense_category_id;
     }
-    // else: constraint will fail - category is required for expense
   }
 
   const { data, error } = await supabase
@@ -260,22 +236,16 @@ export async function createTransaction(
 
   if (error) return { data: null, error: error.message };
 
-  // Update budget spent amount if this is an expense with a budget
   if (form.type === "expense" && form.budget && data) {
     await updateBudgetSpent(form.budget, amount);
   }
 
-  // Update goal progress and create contribution if this transaction is linked to a goal
   if (form.goal && data) {
     await updateGoalProgressFromTransaction(form.goal, amount, userId, data.id);
   }
 
   return { data: mapRow(data), error: null };
 }
-
-// ---------------------------------------------------------------------------
-// UPDATE
-// ---------------------------------------------------------------------------
 
 export async function updateTransaction(
   txId: string,
@@ -304,12 +274,10 @@ export async function updateTransaction(
     if (form.income_category_id) {
       update.income_category_id = form.income_category_id;
     }
-    // expense_category_id remains null from initialization
   } else if (form.type === "expense") {
     if (form.expense_category_id) {
       update.expense_category_id = form.expense_category_id;
     }
-    // income_category_id remains null from initialization
   }
 
   const { data, error } = await supabase
@@ -329,40 +297,31 @@ export async function updateTransaction(
 
   if (error) return { data: null, error: error.message };
 
-  // Handle budget recalculations
   const oldBudgetId = originalTx?.budget_id;
   const newBudgetId = form.budget || null;
   const wasExpense = originalTx?.type === "expense";
   const isNowExpense = form.type === "expense";
 
-  // Handle goal progress recalculations
   const oldGoalId = originalTx?.goal_id;
   const newGoalId = form.goal || null;
 
-  // If budget changed or transaction type changed affecting expense status
   if (oldBudgetId !== newBudgetId || wasExpense !== isNowExpense) {
-    // Recalculate old budget if it existed and was an expense
     if (oldBudgetId && wasExpense) {
       await recalculateBudgetSpent(oldBudgetId);
     }
-    // Recalculate new budget if it exists and is now an expense
     if (newBudgetId && isNowExpense && newBudgetId !== oldBudgetId) {
       await recalculateBudgetSpent(newBudgetId);
     }
   }
 
-  // Handle goal progress updates - follow same pattern as createTransaction
   if (oldGoalId !== newGoalId) {
-    // Delete old contribution record if old goal existed
     if (oldGoalId) {
       await deleteContributionRecord(oldGoalId, txId);
     }
-    // Create new contribution record if new goal exists
     if (newGoalId && newGoalId !== oldGoalId && userId) {
       await updateGoalProgressFromTransaction(newGoalId, amount, userId, txId);
     }
   } else if (newGoalId && (originalTx?.amount !== amount)) {
-    // Same goal but amount changed - delete old and create new contribution
     await deleteContributionRecord(newGoalId, txId);
     if (userId) {
       await updateGoalProgressFromTransaction(newGoalId, amount, userId, txId);
@@ -372,39 +331,27 @@ export async function updateTransaction(
   return { data: mapRow(data), error: null };
 }
 
-// ---------------------------------------------------------------------------
-// DELETE
-// ---------------------------------------------------------------------------
-
 export async function deleteTransaction(
   txId: string,
   budgetId?: string,
   goalId?: string
 ): Promise<{ error: string | null }> {
-  // Delete contribution record first if this transaction had a goal
-  // The trigger will automatically update the goal progress when the contribution is deleted
   if (goalId) {
     await deleteContributionRecord(goalId, txId);
   }
 
-  // Then delete the transaction
   const { error } = await supabase
     .from("transactions")
     .delete()
     .eq("id", txId);
   if (error) return { error: error.message };
   
-  // Recalculate budget spent if this transaction had a budget
   if (budgetId) {
     await recalculateBudgetSpent(budgetId);
   }
   
   return { error: null };
 }
-
-// ---------------------------------------------------------------------------
-// LOOKUP DATA — Dropdowns
-// ---------------------------------------------------------------------------
 
 export async function fetchAccounts(
   userId: string
@@ -477,10 +424,6 @@ export async function fetchGoals(
   return (data ?? []) as GoalOption[];
 }
 
-// ---------------------------------------------------------------------------
-// AGGREGATES — Summary, Charts, Insights
-// ---------------------------------------------------------------------------
-
 export type TransactionSummary = {
   monthlyIncome: number;
   monthlyExpenses: number;
@@ -501,7 +444,6 @@ export async function fetchTransactionSummary(
     .eq("user_id", userId)
     .eq("status", "completed");
 
-  // Apply date filters only if not "all"
   if (month !== "all" && year !== "all") {
     const start = `${year}-${String(month).padStart(2, "0")}-01`;
     const endDate = new Date(year, month, 0);
@@ -521,7 +463,6 @@ export async function fetchTransactionSummary(
     else if (row.type === "expense") expenses += amt;
   }
 
-  // Previous month totals for change % (only if not "all")
   let prevIncome = 0;
   let prevExpenses = 0;
   
@@ -581,7 +522,6 @@ export async function fetchCategoryBreakdown(
     .eq("type", "expense")
     .eq("status", "completed");
 
-  // Apply date filters only if not "all"
   if (month !== "all" && year !== "all") {
     const start = `${year}-${String(month).padStart(2, "0")}-01`;
     const endDate = new Date(year, month, 0);
@@ -655,10 +595,6 @@ export async function fetchMonthlyTrend(
   return points;
 }
 
-// ---------------------------------------------------------------------------
-// VIEW MODAL — Insights
-// ---------------------------------------------------------------------------
-
 export async function fetchSimilarTransactions(
   userId: string,
   categoryId: string | null,
@@ -710,7 +646,6 @@ export async function fetchCategoryStats(
   const endDate = new Date(year, month, 0);
   const end = `${year}-${String(month).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}`;
 
-  // Monthly totals for this category
   const { data: monthly } = await supabase
     .from("transactions")
     .select("amount")
@@ -724,7 +659,6 @@ export async function fetchCategoryStats(
   for (const row of monthly ?? []) monthlyTotal += Number(row.amount);
   const count = monthly?.length ?? 0;
 
-  // All-time average for this category
   const { data: all } = await supabase
     .from("transactions")
     .select("amount")
@@ -739,10 +673,6 @@ export async function fetchCategoryStats(
   return { average, monthlyTotal, count };
 }
 
-// ---------------------------------------------------------------------------
-// GOAL PROGRESS UPDATE HELPERS
-// ---------------------------------------------------------------------------
-
 async function updateGoalProgressFromTransaction(
   goalId: string, 
   amount: number, 
@@ -751,13 +681,12 @@ async function updateGoalProgressFromTransaction(
 ): Promise<void> {
   if (!goalId || amount <= 0) return;
   
-  // Create contribution record - the trigger will automatically update the goal progress
   const contribution = {
     goal_id: goalId,
     user_id: userId,
     amount: amount,
     contribution_date: formatDateForInput(getPhilippinesNow()),
-    contribution_type: "manual", // Changed from "transaction" to "manual" to match constraint
+    contribution_type: "manual",
     transaction_id: transactionId,
   };
   
@@ -787,7 +716,6 @@ async function deleteContributionRecord(goalId: string, transactionId: string): 
 export async function recalculateGoalProgress(goalId: string): Promise<void> {
   if (!goalId) return;
   
-  // Fetch current goal state
   const { data: goal } = await supabase
     .from("goals")
     .select("current_amount, target_amount, status")
@@ -796,7 +724,6 @@ export async function recalculateGoalProgress(goalId: string): Promise<void> {
   
   if (!goal) return;
   
-  // Sum all contribution amounts for this goal
   const { data: contributions } = await supabase
     .from("goal_contributions")
     .select("amount")
@@ -806,7 +733,6 @@ export async function recalculateGoalProgress(goalId: string): Promise<void> {
   
   const isCompleted = totalContributed >= Number(goal.target_amount);
   
-  // Update goal with recalculated progress
   const update: Record<string, any> = {
     current_amount: totalContributed,
   };
@@ -825,14 +751,9 @@ export async function recalculateGoalProgress(goalId: string): Promise<void> {
     .eq("id", goalId);
 }
 
-// ---------------------------------------------------------------------------
-// BUDGET UPDATE HELPERS
-// ---------------------------------------------------------------------------
-
 async function updateBudgetSpent(budgetId: string, amount: number): Promise<void> {
   if (!budgetId || amount <= 0) return;
   
-  // Fetch current spent amount
   const { data: budget } = await supabase
     .from("budgets")
     .select("spent")
@@ -844,7 +765,6 @@ async function updateBudgetSpent(budgetId: string, amount: number): Promise<void
   const currentSpent = Number(budget.spent) || 0;
   const newSpent = currentSpent + amount;
   
-  // Update the budget with new spent amount
   await supabase
     .from("budgets")
     .update({ spent: newSpent })
@@ -854,7 +774,6 @@ async function updateBudgetSpent(budgetId: string, amount: number): Promise<void
 export async function recalculateBudgetSpent(budgetId: string): Promise<void> {
   if (!budgetId) return;
   
-  // Sum all expense transactions for this budget
   const { data: transactions } = await supabase
     .from("transactions")
     .select("amount")
@@ -864,7 +783,6 @@ export async function recalculateBudgetSpent(budgetId: string): Promise<void> {
   
   const totalSpent = (transactions ?? []).reduce((sum, tx) => sum + Number(tx.amount), 0);
   
-  // Update budget with recalculated spent amount
   await supabase
     .from("budgets")
     .update({ spent: totalSpent })

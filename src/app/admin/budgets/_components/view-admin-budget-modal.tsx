@@ -76,7 +76,7 @@ export function ViewAdminBudgetModal({
 
     return (
         <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-            {/* Header */}
+            {}
             <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-slate-100">
                 <div className="flex items-center gap-3">
                     <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
@@ -88,15 +88,15 @@ export function ViewAdminBudgetModal({
                 </div>
             </ModalHeader>
 
-            {/* Stepper */}
+            {}
             <Stepper steps={STEPS} currentStep={step} />
 
-            {/* Body */}
+            {}
             <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-                {/* STEP 1: Overview */}
+                {}
                 {step === 1 && (
                     <div className="space-y-6 animate-txn-in">
-                        {/* Budget Header */}
+                        {}
                         <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
                             <div className="flex justify-center mb-3">
                                 <UserAvatar
@@ -121,7 +121,7 @@ export function ViewAdminBudgetModal({
                             </div>
                         </div>
 
-                        {/* Budget Progress */}
+                        {}
                         <div>
                             <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Budget Progress</h4>
                             <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm p-5">
@@ -142,7 +142,7 @@ export function ViewAdminBudgetModal({
                             </div>
                         </div>
 
-                        {/* Budget Information */}
+                        {}
                         <div>
                             <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Budget Information</h4>
                             <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -178,10 +178,10 @@ export function ViewAdminBudgetModal({
                     </div>
                 )}
 
-                {/* STEP 2: Analysis */}
+                {}
                 {step === 2 && (
                     <div className="space-y-6 animate-txn-in">
-                        {/* User Information */}
+                        {}
                         <div>
                             <h3 className="text-[15px] font-bold text-slate-900 mb-3">
                                 User Information
@@ -207,7 +207,7 @@ export function ViewAdminBudgetModal({
                             </div>
                         </div>
 
-                        {/* Budget Metadata */}
+                        {}
                         <div>
                             <h3 className="text-[15px] font-bold text-slate-900 mb-3">
                                 Budget Metadata
@@ -257,7 +257,7 @@ export function ViewAdminBudgetModal({
                             </div>
                         </div>
 
-                        {/* Budget ID */}
+                        {}
                         <div>
                             <h3 className="text-[15px] font-bold text-slate-900 mb-3">
                                 Budget ID
@@ -272,7 +272,7 @@ export function ViewAdminBudgetModal({
                 )}
             </ModalBody>
 
-            {/* Footer */}
+            {}
             <ModalFooter className="flex justify-between">
                 {step > 1 ? (
                     <Button variant="secondary" size="sm" onClick={() => setStep(1)}>

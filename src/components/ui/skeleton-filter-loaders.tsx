@@ -4,10 +4,8 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { Card } from './card';
 
-// Table skeleton loader for filter changes
 export function FilterTableSkeleton({ rows = 10, columns = 6 }: { rows?: number; columns?: number }) {
-  // Clamp rows and columns to safe values to prevent RangeError
-  // Handle Number.MAX_SAFE_INTEGER (when "all" is selected) by using a reasonable default
+
   const safeRows = rows === Number.MAX_SAFE_INTEGER ? 10 : Math.min(Math.max(1, rows || 10), 50);
   const safeColumns = Math.min(Math.max(1, columns || 6), 20);
   
@@ -43,10 +41,8 @@ export function FilterTableSkeleton({ rows = 10, columns = 6 }: { rows?: number;
   );
 }
 
-// Grid skeleton loader for filter changes
 export function FilterGridSkeleton({ items = 6 }: { items?: number }) {
-  // Clamp items to safe value to prevent RangeError
-  // Handle Number.MAX_SAFE_INTEGER (when "all" is selected) by using a reasonable default
+
   const safeItems = items === Number.MAX_SAFE_INTEGER ? 6 : Math.min(Math.max(1, items || 6), 50);
   
   return (
@@ -87,12 +83,10 @@ export function FilterGridSkeleton({ items = 6 }: { items?: number }) {
   );
 }
 
-// Transaction-specific grid skeleton (same as FilterGridSkeleton but named for clarity)
 export function TransactionFilterGridSkeleton({ items = 6 }: { items?: number }) {
   return <FilterGridSkeleton items={items} />;
 }
 
-// Individual transaction card skeleton for filter changes
 export function TransactionCardSkeleton() {
   return (
     <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
@@ -128,10 +122,8 @@ export function TransactionCardSkeleton() {
   );
 }
 
-// Budget-specific grid skeleton (matches initial page load design)
 export function BudgetFilterGridSkeleton({ items = 6 }: { items?: number }) {
-  // Clamp items to safe value to prevent RangeError
-  // Handle Number.MAX_SAFE_INTEGER (when "all" is selected) by using a reasonable default
+
   const safeItems = items === Number.MAX_SAFE_INTEGER ? 6 : Math.min(Math.max(1, items || 6), 50);
   
   return (
@@ -170,10 +162,8 @@ export function BudgetFilterGridSkeleton({ items = 6 }: { items?: number }) {
   );
 }
 
-// Goal-specific grid skeleton (matches initial page load design exactly)
 export function GoalFilterGridSkeleton({ items = 6 }: { items?: number }) {
-  // Clamp items to safe value to prevent RangeError
-  // Handle Number.MAX_SAFE_INTEGER (when "all" is selected) by using a reasonable default
+
   const safeItems = items === Number.MAX_SAFE_INTEGER ? 6 : Math.min(Math.max(1, items || 6), 50);
   
   return (
@@ -222,7 +212,6 @@ export function GoalFilterGridSkeleton({ items = 6 }: { items?: number }) {
   );
 }
 
-// Individual goal card skeleton for filter changes
 export function GoalCardSkeleton() {
   return (
     <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
@@ -268,10 +257,8 @@ export function GoalCardSkeleton() {
   );
 }
 
-// User-specific grid skeleton for filter changes
 export function UserFilterGridSkeleton({ items = 6 }: { items?: number }) {
-  // Clamp items to safe value to prevent RangeError
-  // Handle Number.MAX_SAFE_INTEGER (when "all" is selected) by using a reasonable default
+
   const safeItems = items === Number.MAX_SAFE_INTEGER ? 6 : Math.min(Math.max(1, items || 6), 50);
   
   return (
@@ -307,7 +294,6 @@ export function UserFilterGridSkeleton({ items = 6 }: { items?: number }) {
   );
 }
 
-// Individual user card skeleton for filter changes
 export function UserCardSkeleton() {
   return (
     <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">

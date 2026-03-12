@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Use service role key to bypass RLS
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -18,7 +17,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, handle, text, avatar_url, ring_color, user_id } = body;
 
-    // Validate required fields
     if (!name || !handle || !text) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -26,7 +24,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Insert testimonial using admin client (bypasses RLS)
     const { data, error } = await supabaseAdmin
       .from("testimonials")
       .insert({

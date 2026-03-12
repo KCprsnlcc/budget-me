@@ -17,7 +17,6 @@ export function TypingEffect({ text, speed = 30, delay = 0, onComplete }: Typing
     let timeout: NodeJS.Timeout;
     let typingInterval: NodeJS.Timeout;
 
-    // Start typing after delay
     timeout = setTimeout(() => {
       setIsTyping(true);
       let currentIndex = 0;

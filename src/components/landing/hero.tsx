@@ -12,9 +12,9 @@ const ICON_MAP: Record<string, React.ElementType> = {
 export function Hero() {
   return (
     <section className="relative z-10 pt-40 pb-12 md:pt-40 md:pb-20 px-6 overflow-hidden">
-      {/* Beam Background */}
+      {}
       <div className="pointer-events-none absolute inset-0 h-full w-full -z-10 bg-white">
-        {/* Grid Pattern */}
+        {}
         <div
           className="absolute inset-0 opacity-40"
           style={{
@@ -26,7 +26,7 @@ export function Hero() {
           }}
         />
 
-        {/* SVG Beams */}
+        {}
         <svg
           className="absolute h-full w-full"
           fill="none"
@@ -55,34 +55,30 @@ export function Hero() {
             <path d="M-358 -213C-358 -213 -290 192 174 319C638 446 706 851 706 851" stroke="currentColor" className="text-slate-300" strokeWidth={0.5} />
             <path d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827" stroke="currentColor" className="text-slate-300" strokeWidth={0.5} />
           </g>
-          {/* Static paths - uncomment below and comment out above for animated version */}
+          {}
           <path d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875" stroke="url(#beam-gradient-0)" strokeWidth={1.5} strokeLinecap="round" opacity={0.3} />
           <path d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827" stroke="url(#beam-gradient-1)" strokeWidth={1} strokeLinecap="round" opacity={0.2} />
           <path d="M-204 -381C-204 -381 -136 24 328 151C792 278 860 683 860 683" stroke="url(#beam-gradient-0)" strokeWidth={1.5} strokeLinecap="round" opacity={0.25} />
-          {/* Animated paths - uncomment to restore animations
-          <path d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875" stroke="url(#beam-gradient-0)" strokeWidth={1.5} strokeLinecap="round" className="animate-beam-slow" />
-          <path d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827" stroke="url(#beam-gradient-1)" strokeWidth={1} strokeLinecap="round" className="animate-beam-medium opacity-60" />
-          <path d="M-204 -381C-204 -381 -136 24 328 151C792 278 860 683 860 683" stroke="url(#beam-gradient-0)" strokeWidth={1.5} strokeLinecap="round" className="animate-beam-fast" />
-          */}
+          {}
         </svg>
       </div>
 
       <div className="relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Headline */}
+          {}
           <h1 className="text-4xl md:text-5xl lg:text-5xl font-semibold text-slate-900 tracking-tight mb-5 leading-[1.2]">
             Smart Financial Planning <br />
             <span className="text-emerald-500">Made Simple for Everyone</span>
           </h1>
 
-          {/* Subheadline */}
+          {}
           <p className="text-[13px] md:text-sm text-slate-700 max-w-xl mx-auto mb-8 leading-relaxed">
             Take control of your finances with intuitive budgeting tools. Track expenses,{" "}
             <br className="hidden md:block" />
             set ambitious goals, and build wealth with AI-powered insights.
           </p>
 
-          {/* CTA Buttons */}
+          {}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16">
             <Link href="/register">
               <Button size="lg">Start your budget</Button>
@@ -93,32 +89,30 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Tech Specs Marquee */}
+        {}
         <div className="relative w-full">
-          {/* Edge Fades - COMMENTED OUT FOR RESTORATION */}
-          {/* <div className="absolute left-[-20px] top-0 bottom-0 w-40 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-[-20px] top-0 bottom-0 w-40 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
-          <div className="absolute bottom-[-40px] left-0 right-0 h-32 bg-gradient-to-t from-white via-white/40 to-transparent z-10 pointer-events-none" /> */}
+          {}
+          {}
 
           <div className="relative overflow-hidden py-12">
-            {/* MARQUEE ANIMATION COMMENTED OUT - Static display with single row */}
-            {/* <div className="flex animate-marquee gap-24 items-start w-max px-4"> */}
+            {}
+            {}
             <div className="flex gap-24 items-start justify-center px-4">
-              {/* Triple repeat for seamless loop - COMMENTED OUT */}
-              {/* {[...Array(3)].map((_, repeatIdx) => */}
+              {}
+              {}
               {TECH_SPECS.map((spec) => {
                 const Icon = ICON_MAP[spec.icon];
                 return (
                   <div
                     key={spec.title}
-                    // HOVER ANIMATION COMMENTED OUT - Restore by adding to className: group hover:translate-y-[-2px] transition-transform duration-300
+
                     className="w-72 shrink-0 text-center"
                   >
                     <div className="text-slate-900 text-[11px] font-bold mb-2 flex items-center justify-center gap-2 uppercase tracking-tight">
                       {Icon && (
                         <Icon
                           size={16}
-                          // HOVER ANIMATION COMMENTED OUT - Restore by adding to className: group-hover:scale-110 transition-transform
+
                           className="text-emerald-500"
                         />
                       )}
@@ -130,7 +124,7 @@ export function Hero() {
                   </div>
                 );
               })}
-              {/* )} */}
+              {}
             </div>
           </div>
 

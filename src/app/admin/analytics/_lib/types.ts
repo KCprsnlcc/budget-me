@@ -1,6 +1,5 @@
-// Admin User Analytics Management Types
 
-// Individual report record (for detailed view)
+
 export type AdminAnalyticsReport = {
     id: string;
     user_id: string;
@@ -24,13 +23,12 @@ export type AdminAnalyticsReport = {
     data_points?: number;
     accuracy_score?: number;
     model_version?: string;
-    // Joined
+
     user_email?: string;
     user_name?: string;
     user_avatar?: string;
 };
 
-// Aggregated user analytics (one row per user in table)
 export type UserAnalyticsSummary = {
     user_id: string;
     user_email: string;
@@ -49,27 +47,23 @@ export type UserAnalyticsSummary = {
     has_ai_insights: boolean;
 };
 
-// Detailed user analytics (for view modal - mimics reports page)
 export type UserAnalyticsDetails = {
     user_id: string;
     user_email: string;
     user_name?: string | null;
     user_avatar?: string | null;
-    
-    // Summary stats (like reports page)
+
     total_transactions: number;
     active_budgets: number;
     active_goals: number;
     last_updated: string;
-    
-    // Report settings
+
     report_settings: {
         report_type: string;
         timeframe: string;
         chart_type: string;
     };
-    
-    // Anomaly detection
+
     anomalies: {
         active: number;
         resolved: number;
@@ -81,23 +75,20 @@ export type UserAnalyticsDetails = {
             detected_at: string;
         }>;
     };
-    
-    // AI insights
+
     ai_insights: {
         has_insights: boolean;
         last_generated: string | null;
         summary: string | null;
         recommendations: string[] | null;
     };
-    
-    // Charts data
+
     charts: {
         spending_by_category: any;
         income_vs_expense: any;
         trends: any;
     };
-    
-    // All reports for this user
+
     reports: AdminAnalyticsReport[];
 };
 

@@ -48,13 +48,11 @@ export function WriteReviewModal({ open, onClose, onSubmit }: WriteReviewModalPr
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       setError("Please upload an image file");
       return;
     }
 
-    // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       setError("File size must be less than 2MB");
       return;
@@ -63,7 +61,6 @@ export function WriteReviewModal({ open, onClose, onSubmit }: WriteReviewModalPr
     setAvatarFile(file);
     setError(null);
 
-    // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setAvatarPreview(reader.result as string);
@@ -84,7 +81,6 @@ export function WriteReviewModal({ open, onClose, onSubmit }: WriteReviewModalPr
       e.preventDefault();
       setError(null);
 
-      // Validation
       if (!name.trim()) {
         setError("Please enter your name");
         return;
@@ -120,7 +116,7 @@ export function WriteReviewModal({ open, onClose, onSubmit }: WriteReviewModalPr
         setError(result.error);
       } else if (result.success) {
         setSuccess(true);
-        // Reset form after 2 seconds and close
+
         setTimeout(() => {
           setName("");
           setHandle("");
@@ -174,7 +170,7 @@ export function WriteReviewModal({ open, onClose, onSubmit }: WriteReviewModalPr
 
         <ModalBody className="px-5 py-5">
           <div className="space-y-5">
-            {/* Avatar Upload */}
+            {}
             <div className="flex flex-col items-center gap-3 pb-2">
               <div
                 className={cn(
@@ -224,12 +220,11 @@ export function WriteReviewModal({ open, onClose, onSubmit }: WriteReviewModalPr
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                onChange={handleFileChange}
                 className="hidden"
+                onChange={handleFileChange}
               />
             </div>
 
-            {/* Ring Color Selection */}
             <div>
               <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                 Avatar Border Color
@@ -254,7 +249,7 @@ export function WriteReviewModal({ open, onClose, onSubmit }: WriteReviewModalPr
               </div>
             </div>
 
-            {/* Name Input */}
+            {}
             <div>
               <label htmlFor="name" className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                 Your Name <span className="text-slate-400">*</span>
@@ -269,7 +264,7 @@ export function WriteReviewModal({ open, onClose, onSubmit }: WriteReviewModalPr
               />
             </div>
 
-            {/* Handle Input */}
+            {}
             <div>
               <label htmlFor="handle" className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                 Username / Handle <span className="text-slate-400">*</span>
@@ -284,7 +279,7 @@ export function WriteReviewModal({ open, onClose, onSubmit }: WriteReviewModalPr
               />
             </div>
 
-            {/* Review Text */}
+            {}
             <div>
               <label htmlFor="review" className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                 Your Review <span className="text-slate-400">*</span>
@@ -303,7 +298,7 @@ export function WriteReviewModal({ open, onClose, onSubmit }: WriteReviewModalPr
               </p>
             </div>
 
-            {/* Error Message */}
+            {}
             {error && (
               <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-red-50 border border-red-100 text-red-900 items-start">
                 <X size={16} className="flex-shrink-0 mt-px" />

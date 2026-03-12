@@ -35,7 +35,7 @@ export function LoginForm() {
 
   return (
     <div>
-      {/* Header */}
+      {}
       <div className="mb-8">
         <h1 className="mb-1 text-xl font-medium tracking-tight text-slate-900">
           Welcome back
@@ -45,10 +45,10 @@ export function LoginForm() {
         </p>
       </div>
 
-      {/* Social Auth */}
+      {}
       <SocialAuthButtons />
 
-      {/* Divider */}
+      {}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-slate-100" />
@@ -58,7 +58,7 @@ export function LoginForm() {
         </div>
       </div>
 
-      {/* Success Message */}
+      {}
       {success && (
         <div
           role="alert"
@@ -68,7 +68,7 @@ export function LoginForm() {
         </div>
       )}
 
-      {/* Error Message */}
+      {}
       {error && (
         <div
           role="alert"
@@ -78,7 +78,7 @@ export function LoginForm() {
         </div>
       )}
 
-      {/* Form */}
+      {}
       <form
         className="space-y-4"
         onSubmit={(e) => {
@@ -95,13 +95,12 @@ export function LoginForm() {
               return;
             }
 
-            // Check if user is admin and redirect accordingly
             let finalRedirect = redirectTo;
             if (redirectTo === "/dashboard") {
               const { data: { user } } = await supabase.auth.getUser();
               
               if (user) {
-                // Check if user is admin
+
                 const { data: roleData } = await supabase
                   .from("user_roles")
                   .select("role_name")
@@ -111,8 +110,7 @@ export function LoginForm() {
                   .maybeSingle();
                 
                 let isAdmin = !!roleData;
-                
-                // Fallback to profiles table if no role found in user_roles
+
                 if (!isAdmin) {
                   const { data: profileData } = await supabase
                     .from("profiles")
@@ -122,8 +120,7 @@ export function LoginForm() {
                   
                   isAdmin = profileData?.role === "admin";
                 }
-                
-                // Redirect admin users to admin dashboard
+
                 if (isAdmin) {
                   finalRedirect = "/admin/dashboard";
                 }
@@ -216,7 +213,7 @@ export function LoginForm() {
         </Button>
       </form>
 
-      {/* Footer */}
+      {}
       <div className="mt-6 text-center text-xs text-slate-500">
         Don&apos;t have an account?{" "}
         <Link

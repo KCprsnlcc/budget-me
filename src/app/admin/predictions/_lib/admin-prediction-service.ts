@@ -3,7 +3,6 @@ import type { AdminPredictionReport, AdminAIInsight, AdminPredictionStats, Admin
 
 const supabase = createClient();
 
-// Map raw DB row to AdminPredictionReport
 function mapReportRow(row: Record<string, any>, profile?: Record<string, any> | null): AdminPredictionReport {
     return {
         id: row.id,
@@ -30,7 +29,6 @@ function mapReportRow(row: Record<string, any>, profile?: Record<string, any> | 
     };
 }
 
-// Map raw DB row to AdminAIInsight
 function mapInsightRow(row: Record<string, any>, profile?: Record<string, any> | null): AdminAIInsight {
     return {
         id: row.id,
@@ -68,7 +66,6 @@ function mapInsightRow(row: Record<string, any>, profile?: Record<string, any> |
     };
 }
 
-// Fetch all AI reports with filters (admin view)
 export async function fetchAdminReports(
     filters: AdminPredictionFilters = {},
     page: number = 1,
@@ -79,10 +76,8 @@ export async function fetchAdminReports(
         .select("*", { count: "exact" })
         .order("created_at", { ascending: false });
 
-    // Exclude financial_intelligence type - those belong in AI Insights table
     query = query.neq("report_type", "financial_intelligence");
 
-    // Apply filters
     if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
         const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01T00:00:00`;
         const endDate = new Date(filters.year, filters.month, 0);
@@ -96,7 +91,6 @@ export async function fetchAdminReports(
     if (filters.userId) query = query.eq("user_id", filters.userId);
     if (filters.modelVersion) query = query.eq("model_version", filters.modelVersion);
 
-    // Pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     query = query.range(from, to);
@@ -104,7 +98,6 @@ export async function fetchAdminReports(
     const { data, error, count } = await query;
     if (error) return { data: [], error: error.message, count: null };
 
-    // Fetch user profiles separately
     const userIds = [...new Set((data ?? []).map((r: any) => r.user_id))];
     const { data: profiles } = await supabase
         .from("profiles")
@@ -123,7 +116,6 @@ export async function fetchAdminReports(
     return { data: mappedData, error: null, count: count ?? 0 };
 }
 
-// Fetch all AI insights with filters (admin view)
 export async function fetchAdminInsights(
     filters: AdminPredictionFilters = {},
     page: number = 1,
@@ -134,7 +126,6 @@ export async function fetchAdminInsights(
         .select("*", { count: "exact" })
         .order("generated_at", { ascending: false });
 
-    // Apply filters
     if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
         const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01T00:00:00`;
         const endDate = new Date(filters.year, filters.month, 0);
@@ -147,7 +138,6 @@ export async function fetchAdminInsights(
     if (filters.userId) query = query.eq("user_id", filters.userId);
     if (filters.processingStatus) query = query.eq("processing_status", filters.processingStatus);
 
-    // Pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     query = query.range(from, to);
@@ -155,7 +145,6 @@ export async function fetchAdminInsights(
     const { data, error, count } = await query;
     if (error) return { data: [], error: error.message, count: null };
 
-    // Fetch user profiles separately
     const userIds = [...new Set((data ?? []).map((r: any) => r.user_id))];
     const { data: profiles } = await supabase
         .from("profiles")
@@ -174,23 +163,19 @@ export async function fetchAdminInsights(
     return { data: mappedData, error: null, count: count ?? 0 };
 }
 
-// Fetch admin prediction statistics
 export async function fetchAdminPredictionStats(): Promise<AdminPredictionStats | null> {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
 
-    // Total reports
     const { count: totalReports } = await supabase
         .from("ai_reports")
         .select("*", { count: "exact", head: true });
 
-    // Total insights
     const { count: totalInsights } = await supabase
         .from("ai_insights")
         .select("*", { count: "exact", head: true });
 
-    // Average accuracy score
     const { data: accuracyData } = await supabase
         .from("ai_reports")
         .select("accuracy_score")
@@ -203,7 +188,6 @@ export async function fetchAdminPredictionStats(): Promise<AdminPredictionStats 
         ? validAccuracyScores.reduce((a: number, b: number) => a + b, 0) / validAccuracyScores.length
         : 0;
 
-    // Average confidence level from insights
     const { data: confData } = await supabase
         .from("ai_insights")
         .select("confidence_level")
@@ -214,7 +198,6 @@ export async function fetchAdminPredictionStats(): Promise<AdminPredictionStats 
         ? confScores.reduce((a: number, b: number) => a + b, 0) / confScores.length
         : 0;
 
-    // Active users (users with at least one report or insight)
     const { data: reportUsers } = await supabase
         .from("ai_reports")
         .select("user_id");
@@ -228,25 +211,21 @@ export async function fetchAdminPredictionStats(): Promise<AdminPredictionStats 
     ]);
     const activeUsers = allUserIds.size;
 
-    // Total data points
     const { data: dpData } = await supabase
         .from("ai_reports")
         .select("data_points");
     const totalDataPoints = (dpData ?? []).reduce((sum: number, r: any) => sum + (r.data_points ?? 0), 0);
 
-    // Anomalies detected
     const { count: anomaliesDetected } = await supabase
         .from("ai_insights")
         .select("*", { count: "exact", head: true })
         .eq("anomaly_detected", true);
 
-    // Admin validated
     const { count: adminValidated } = await supabase
         .from("ai_insights")
         .select("*", { count: "exact", head: true })
         .eq("admin_validated", true);
 
-    // Report growth (last 6 months)
     const reportGrowth: { month: string; count: number }[] = [];
     for (let i = 5; i >= 0; i--) {
         const d = new Date(currentYear, currentMonth - 1 - i, 1);
@@ -266,14 +245,12 @@ export async function fetchAdminPredictionStats(): Promise<AdminPredictionStats 
         reportGrowth.push({ month: label, count: count ?? 0 });
     }
 
-    // Month-over-month growth
     const currentMonthCount = reportGrowth[reportGrowth.length - 1]?.count ?? 0;
     const previousMonthCount = reportGrowth[reportGrowth.length - 2]?.count ?? 0;
     const monthOverMonthGrowth = previousMonthCount > 0
         ? ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100
         : 0;
 
-    // Model distribution
     const { data: modelData } = await supabase
         .from("ai_reports")
         .select("model_version");
@@ -291,7 +268,6 @@ export async function fetchAdminPredictionStats(): Promise<AdminPredictionStats 
         percentage: Math.round((count / modelTotal) * 100),
     }));
 
-    // Processing status distribution (from insights)
     const { data: statusData } = await supabase
         .from("ai_insights")
         .select("processing_status");
@@ -309,7 +285,6 @@ export async function fetchAdminPredictionStats(): Promise<AdminPredictionStats 
         percentage: Math.round((count / statusTotal) * 100),
     }));
 
-    // Top users by report + insight volume
     const userReportCounts = new Map<string, { report_count: number; insight_count: number }>();
     for (const r of reportUsers ?? []) {
         const userId = r.user_id;
@@ -363,21 +338,18 @@ export async function fetchAdminPredictionStats(): Promise<AdminPredictionStats 
     };
 }
 
-// Delete AI report (admin)
 export async function deleteAdminReport(reportId: string): Promise<{ error: string | null }> {
     const { error } = await supabase.from("ai_reports").delete().eq("id", reportId);
     if (error) return { error: error.message };
     return { error: null };
 }
 
-// Delete AI insight (admin)
 export async function deleteAdminInsight(insightId: string): Promise<{ error: string | null }> {
     const { error } = await supabase.from("ai_insights").delete().eq("id", insightId);
     if (error) return { error: error.message };
     return { error: null };
 }
 
-// Update AI insight admin validation
 export async function updateAdminInsightValidation(
     insightId: string,
     validated: boolean,
@@ -394,7 +366,6 @@ export async function updateAdminInsightValidation(
     return { error: null };
 }
 
-// Update AI report data
 export async function updateAdminReport(
     reportId: string,
     updates: {
@@ -412,7 +383,6 @@ export async function updateAdminReport(
     return { error: null };
 }
 
-// Fetch all users for filter dropdown
 export async function fetchAllUsers(): Promise<{ id: string; email: string; full_name: string | null }[]> {
     const { data } = await supabase
         .from("profiles")

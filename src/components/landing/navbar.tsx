@@ -19,7 +19,6 @@ export function Navbar() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
 
-  // Simulate loading state on component mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -28,7 +27,6 @@ export function Navbar() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
@@ -53,7 +51,6 @@ export function Navbar() {
     };
   }, [isUserMenuOpen]);
 
-  // Show loading skeleton while checking auth
   if (loading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
@@ -81,13 +78,13 @@ export function Navbar() {
   return (
     <nav className="fixed w-full z-50 top-0 border-b border-slate-100 bg-white">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
+        {}
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2.5 group">
             <Logo variant="landing" size="md" />
           </Link>
 
-          {/* Desktop Nav */}
+          {}
           <div className="hidden lg:flex items-center gap-6 ml-4">
             {LANDING_NAV_LINKS.map((link) => (
               <a
@@ -101,7 +98,7 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Auth Buttons / User Menu */}
+        {}
         <div className="hidden md:flex items-center gap-4">
           {user ? (
             <>
@@ -121,15 +118,15 @@ export function Navbar() {
                   <ChevronDown size={14} className="text-slate-400" />
                 </button>
 
-                {/* Dropdown */}
+                {}
                 {isUserMenuOpen && (
                   <>
-                    {/* Backdrop */}
+                    {}
                     <div
                       className="fixed inset-0 z-30"
                       onClick={() => setIsUserMenuOpen(false)}
                     />
-                    {/* Menu */}
+                    {}
                     <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg border border-slate-200 shadow-lg z-40 py-1">
                       <div className="px-3 py-2 border-b border-slate-100">
                         <div className="flex items-center gap-2">
@@ -187,7 +184,7 @@ export function Navbar() {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
+        {}
         <button
           className="lg:hidden text-slate-900 cursor-pointer p-2"
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -197,7 +194,7 @@ export function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {}
       {mobileOpen && (
         <div className="lg:hidden border-t border-slate-100 bg-white px-6 py-4 space-y-3">
           {LANDING_NAV_LINKS.map((link) => (
@@ -235,7 +232,7 @@ export function Navbar() {
                     <ChevronDown size={14} className="text-slate-400" />
                   </button>
 
-                  {/* Mobile Dropdown */}
+                  {}
                   {isUserMenuOpen && (
                     <div className="absolute top-full left-0 right-0 mt-1 w-full bg-white rounded-lg border border-slate-200 shadow-lg z-40 py-1">
                       <div className="px-3 py-2 border-b border-slate-100">

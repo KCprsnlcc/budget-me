@@ -11,7 +11,6 @@ export function useAdminChatbot() {
     const [tableLoading, setTableLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Filters
     const [search, setSearch] = useState("");
     const [month, setMonth] = useState<number | "all">("all");
     const [year, setYear] = useState<number | "all">("all");
@@ -19,7 +18,6 @@ export function useAdminChatbot() {
     const [userFilter, setUserFilter] = useState("");
     const [modelFilter, setModelFilter] = useState("");
 
-    // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [totalCount, setTotalCount] = useState(0);
@@ -39,7 +37,6 @@ export function useAdminChatbot() {
         [month, year, roleFilter, userFilter, modelFilter]
     );
 
-    // Fetch data
     const fetchData = useCallback(async (showTableLoading = false, forceRefreshStats = false) => {
         if (showTableLoading) {
             setTableLoading(true);
@@ -74,12 +71,10 @@ export function useAdminChatbot() {
         }
     }, [filters, currentPage, pageSize, search, stats, users, availableModels]);
 
-    // Initial load
     useEffect(() => {
         fetchData();
     }, []);
 
-    // Refetch on filter/pagination changes
     useEffect(() => {
         if (!loading) {
             fetchData(true);

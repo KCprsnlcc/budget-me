@@ -3,15 +3,10 @@
 import { createClient } from "@/lib/supabase/server";
 import type { AnomalyAlert } from "../_components/types";
 
-/**
- * Save a computed anomaly to the database
- * This allows computed anomalies to be tracked and resolved like database anomalies
- */
 export async function saveComputedAnomaly(anomaly: AnomalyAlert, userId: string) {
   try {
     const supabase = await createClient();
 
-    // Map UI anomaly type to database anomaly type
     const anomalyTypeMap: Record<string, string> = {
       'unusual-spending': 'spending_spike',
       'duplicate-transaction': 'data_inconsistency',
@@ -21,7 +16,6 @@ export async function saveComputedAnomaly(anomaly: AnomalyAlert, userId: string)
 
     const dbAnomalyType = anomalyTypeMap[anomaly.type] || 'unusual_pattern';
 
-    // Check if this anomaly already exists (by checking similar anomalies)
     const { data: existing, error: checkError } = await supabase
       .from("admin_anomalies")
       .select("id")
@@ -35,12 +29,10 @@ export async function saveComputedAnomaly(anomaly: AnomalyAlert, userId: string)
       console.error("Error checking existing anomaly:", checkError);
     }
 
-    // If similar anomaly exists, return its ID
     if (existing && existing.length > 0) {
       return { success: true, id: existing[0].id, isNew: false };
     }
 
-    // Insert new anomaly
     const { data, error } = await supabase
       .from("admin_anomalies")
       .insert({
@@ -72,9 +64,6 @@ export async function saveComputedAnomaly(anomaly: AnomalyAlert, userId: string)
   }
 }
 
-/**
- * Batch save multiple computed anomalies
- */
 export async function saveComputedAnomalies(anomalies: AnomalyAlert[], userId: string) {
   try {
     const results = await Promise.all(

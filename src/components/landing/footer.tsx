@@ -7,7 +7,7 @@ export function Footer() {
     <footer className="border-t border-slate-100 bg-white pt-24 pb-12 px-6 relative z-10 transition-all duration-300">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-y-12 gap-x-8 mb-24">
-          {/* Branding */}
+          {}
           <div className="col-span-full lg:col-span-4 lg:pr-12">
             <a href="#" className="inline-block mb-2 ml-2 opacity-90 hover:opacity-100 transition-opacity">
               <Logo variant="landing" size="lg" />
@@ -17,7 +17,7 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Platform Links */}
+          {}
           <div className="lg:col-span-2">
             <h4 className="text-[10px] font-bold text-slate-900 uppercase tracking-[0.2em] mb-8">
               Platform
@@ -36,7 +36,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Resources Links */}
+          {}
           <div className="lg:col-span-2">
             <h4 className="text-[10px] font-bold text-slate-900 uppercase tracking-[0.2em] mb-8">
               Resources
@@ -55,7 +55,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Newsletter */}
+          {}
           <div className="col-span-full lg:col-span-4 lg:pl-12">
             <h4 className="text-[10px] font-bold text-slate-900 uppercase tracking-[0.2em] mb-8">
               Stay Updated
@@ -76,7 +76,7 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {}
         <div className="pt-10 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-6 order-2 md:order-1">
             <p className="text-slate-400 text-[11px] tracking-tight">

@@ -3,14 +3,13 @@ import type { AdminAnalyticsReport, AdminAnalyticsStats, AdminAnalyticsFilters, 
 
 const supabase = createClient();
 
-// Fetch aggregated user analytics (one row per user)
 export async function fetchUserAnalyticsSummaries(
     filters: AdminAnalyticsFilters = {},
     page: number = 1,
     pageSize: number = 20
 ): Promise<{ data: UserAnalyticsSummary[]; error: string | null; count: number | null }> {
     try {
-        // Build date filter
+
         let dateFilter = '';
         if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
             const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
@@ -21,12 +20,10 @@ export async function fetchUserAnalyticsSummaries(
             dateFilter = `AND r.generated_at >= '${filters.year}-01-01' AND r.generated_at <= '${filters.year}-12-31'`;
         }
 
-        // Build additional filters
         const reportTypeFilter = filters.report_type ? `AND r.report_type = '${filters.report_type}'` : '';
         const timeframeFilter = filters.timeframe ? `AND r.timeframe = '${filters.timeframe}'` : '';
         const userIdFilter = filters.userId ? `AND r.user_id = '${filters.userId}'` : '';
 
-        // Get aggregated user data with counts
         const { data: userData, error: userError, count } = await supabase.rpc('get_user_analytics_summary', {
             date_filter: dateFilter,
             report_type_filter: reportTypeFilter,
@@ -37,32 +34,29 @@ export async function fetchUserAnalyticsSummaries(
         });
 
         if (userError) {
-            // Silently fallback to manual aggregation if RPC doesn't exist
-            // This is expected if the database function hasn't been created yet
+
             return await fetchUserAnalyticsSummariesFallback(filters, page, pageSize);
         }
 
         return { data: userData || [], error: null, count: count || 0 };
     } catch (error) {
         console.error("Error in fetchUserAnalyticsSummaries:", error);
-        // Fallback to manual aggregation
+
         return await fetchUserAnalyticsSummariesFallback(filters, page, pageSize);
     }
 }
 
-// Fallback method: Manual aggregation
 async function fetchUserAnalyticsSummariesFallback(
     filters: AdminAnalyticsFilters = {},
     page: number = 1,
     pageSize: number = 20
 ): Promise<{ data: UserAnalyticsSummary[]; error: string | null; count: number | null }> {
     try {
-        // Fetch all reports with filters
+
         let query = supabase
             .from("ai_reports")
             .select("*, profiles(email, full_name, avatar_url)");
 
-        // Apply date filters
         if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
             const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
             const endDate = new Date(filters.year, filters.month, 0);
@@ -79,7 +73,6 @@ async function fetchUserAnalyticsSummariesFallback(
         const { data: reports, error } = await query;
         if (error) return { data: [], error: error.message, count: null };
 
-        // Group by user and aggregate
         const userMap = new Map<string, UserAnalyticsSummary>();
 
         for (const report of reports || []) {
@@ -115,7 +108,6 @@ async function fetchUserAnalyticsSummariesFallback(
             }
         }
 
-        // Calculate averages and fetch additional data
         for (const [userId, summary] of userMap.entries()) {
             const userReports = (reports || []).filter(r => r.user_id === userId);
 
@@ -129,17 +121,14 @@ async function fetchUserAnalyticsSummariesFallback(
                 ? accuracyScores.reduce((a, b) => a + b, 0) / accuracyScores.length
                 : 0;
 
-            // Report type breakdown
             const typeMap = new Map<string, number>();
             userReports.forEach(r => {
                 typeMap.set(r.report_type, (typeMap.get(r.report_type) || 0) + 1);
             });
             summary.report_type_breakdown = Array.from(typeMap.entries()).map(([type, count]) => ({ type, count }));
 
-            // Check for AI insights
             summary.has_ai_insights = userReports.some(r => r.insights || r.recommendations);
 
-            // Fetch additional user stats
             const [transactionsResult, budgetsResult, goalsResult, anomaliesResult] = await Promise.all([
                 supabase.from("transactions").select("id", { count: "exact", head: true }).eq("user_id", userId),
                 supabase.from("budgets").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "active"),
@@ -157,7 +146,6 @@ async function fetchUserAnalyticsSummariesFallback(
             new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime()
         );
 
-        // Pagination
         const from = (page - 1) * pageSize;
         const to = from + pageSize;
         const paginatedUsers = allUsers.slice(from, to);
@@ -169,10 +157,9 @@ async function fetchUserAnalyticsSummariesFallback(
     }
 }
 
-// Fetch detailed analytics for a specific user (for view modal)
 export async function fetchUserAnalyticsDetails(userId: string): Promise<{ data: UserAnalyticsDetails | null; error: string | null }> {
     try {
-        // Fetch user profile
+
         const { data: profile, error: profileError } = await supabase
             .from("profiles")
             .select("email, full_name, avatar_url")
@@ -181,7 +168,6 @@ export async function fetchUserAnalyticsDetails(userId: string): Promise<{ data:
 
         if (profileError) return { data: null, error: profileError.message };
 
-        // Fetch all reports for this user
         const { data: reports, error: reportsError } = await supabase
             .from("ai_reports")
             .select("*")
@@ -190,7 +176,6 @@ export async function fetchUserAnalyticsDetails(userId: string): Promise<{ data:
 
         if (reportsError) return { data: null, error: reportsError.message };
 
-        // Fetch additional data in parallel
         const [transactionsResult, budgetsResult, goalsResult, anomaliesResult, resolvedAnomaliesResult] = await Promise.all([
             supabase.from("transactions").select("*").eq("user_id", userId).order("date", { ascending: false }).limit(100),
             supabase.from("budgets").select("*").eq("user_id", userId).eq("status", "active"),
@@ -252,7 +237,6 @@ export async function fetchUserAnalyticsDetails(userId: string): Promise<{ data:
     }
 }
 
-// Keep original function for backward compatibility
 export async function fetchAdminAnalytics(
     filters: AdminAnalyticsFilters = {},
     page: number = 1,
@@ -269,7 +253,6 @@ export async function fetchAdminAnalytics(
         )
         .order("generated_at", { ascending: false });
 
-    // Apply filters
     if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
         const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
         const endDate = new Date(filters.year, filters.month, 0);
@@ -284,7 +267,6 @@ export async function fetchAdminAnalytics(
     if (filters.userId) query = query.eq("user_id", filters.userId);
     if (filters.ai_service) query = query.eq("ai_service", filters.ai_service);
 
-    // Pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     query = query.range(from, to);
@@ -292,7 +274,6 @@ export async function fetchAdminAnalytics(
     const { data, error, count } = await query;
     if (error) return { data: [], error: error.message, count: null };
 
-    // Map analytics with user data
     const mappedData = (data ?? []).map((row: any) => {
         const profile = row.profiles as Record<string, any> | null;
         return {
@@ -306,7 +287,6 @@ export async function fetchAdminAnalytics(
     return { data: mappedData, error: null, count: count ?? 0 };
 }
 
-// Fetch admin analytics statistics
 export async function fetchAdminAnalyticsStats(): Promise<AdminAnalyticsStats | null> {
     const { data: reports, count: totalReports } = await supabase
         .from("ai_reports")
@@ -333,13 +313,10 @@ export async function fetchAdminAnalyticsStats(): Promise<AdminAnalyticsStats | 
         if (r.data_points != null) { totalDataPointsAnalyzed += Number(r.data_points); }
         if (r.generation_time_ms != null) { totalGenTime += Number(r.generation_time_ms); validGenTimeCount++; }
 
-        // Aggregate types
         typeMap.set(r.report_type, (typeMap.get(r.report_type) ?? 0) + 1);
 
-        // Aggregate timeframes
         timeframeMap.set(r.timeframe, (timeframeMap.get(r.timeframe) ?? 0) + 1);
 
-        // Aggregate users
         if (r.user_id) {
             userTotals.set(r.user_id, (userTotals.get(r.user_id) ?? 0) + 1);
         }
@@ -394,28 +371,24 @@ export async function fetchAdminAnalyticsStats(): Promise<AdminAnalyticsStats | 
     };
 }
 
-// Delete analytics (admin)
 export async function deleteAdminAnalytics(reportId: string): Promise<{ error: string | null }> {
     const { error } = await supabase.from("ai_reports").delete().eq("id", reportId);
     if (error) return { error: error.message };
     return { error: null };
 }
 
-// Update analytics (admin)
 export async function updateAdminAnalytics(reportId: string, updates: Partial<AdminAnalyticsReport>): Promise<{ error: string | null }> {
     const { error } = await supabase.from("ai_reports").update(updates).eq("id", reportId);
     if (error) return { error: error.message };
     return { error: null };
 }
 
-// Create analytics (admin)
 export async function createAdminAnalytics(data: Omit<AdminAnalyticsReport, "id" | "created_at" | "updated_at">): Promise<{ error: string | null }> {
     const { error } = await supabase.from("ai_reports").insert(data);
     if (error) return { error: error.message };
     return { error: null };
 }
 
-// Fetch all users for filter dropdown
 export async function fetchAllUsers(): Promise<{ id: string; email: string; full_name: string | null }[]> {
     const { data } = await supabase
         .from("profiles")

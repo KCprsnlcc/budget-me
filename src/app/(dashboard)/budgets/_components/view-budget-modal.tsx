@@ -27,7 +27,6 @@ import { BUDGET_PERIODS } from "./constants";
 
 const STEPS = ["Overview", "Analysis"];
 
-
 interface ViewBudgetModalProps {
   open: boolean;
   onClose: () => void;
@@ -84,7 +83,6 @@ export function ViewBudgetModal({
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-      {/* Header */}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
           <div className="w-[30px] h-[30px] rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 bg-white">
@@ -99,12 +97,9 @@ export function ViewBudgetModal({
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
       <Stepper steps={STEPS} currentStep={step} />
 
-      {/* Body */}
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* STEP 1: Overview */}
         {step === 1 && (
           <div className="space-y-6 animate-txn-in">
             {/* Amount Display */}
@@ -164,7 +159,6 @@ export function ViewBudgetModal({
           </div>
         )}
 
-        {/* STEP 2: Analysis */}
         {step === 2 && (
           <div className="space-y-4 animate-txn-in">
             <div className="mb-5">
@@ -172,7 +166,6 @@ export function ViewBudgetModal({
               <p className="text-[11px] text-gray-500">Comprehensive budget performance and trends</p>
             </div>
 
-            {/* Budget Performance Overview */}
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-[#F9FAFB]/50 rounded-lg p-3 border border-gray-100">
                 <div className="text-[10px] text-gray-500 mb-2">Budget Utilization</div>
@@ -212,7 +205,6 @@ export function ViewBudgetModal({
               </div>
             </div>
 
-            {/* Budget Details */}
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
               <div className="p-5 space-y-0 divide-y divide-gray-100">
                 <DetailRow label="Budget Name" value={budget.budget_name} />
@@ -229,7 +221,6 @@ export function ViewBudgetModal({
               </div>
             </div>
 
-            {/* Category Comparison */}
             <div>
               <h4 className="text-xs font-semibold text-gray-900 mb-3">Category Comparison</h4>
               <div className="bg-[#F9FAFB]/50 rounded-lg p-3 border border-gray-100">
@@ -253,7 +244,6 @@ export function ViewBudgetModal({
         )}
       </ModalBody>
 
-      {/* Footer */}
       <ModalFooter className="flex justify-between">
         <Button
           variant="outline"

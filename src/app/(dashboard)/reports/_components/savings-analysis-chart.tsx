@@ -32,7 +32,7 @@ export function SavingsAnalysisChart({ chartData, chartType }: SavingsAnalysisCh
         <p className="text-xs text-slate-500 mt-1">Total Savings ({chartData.rate?.toFixed(1)}% rate)</p>
       </div>
 
-      {/* Bar/Column Chart */}
+      {}
       {(chartType === 'bar' || chartType === 'column') && (
         <div className="space-y-3">
           {chartData.funds.map((fund, idx) => {
@@ -60,7 +60,7 @@ export function SavingsAnalysisChart({ chartData, chartType }: SavingsAnalysisCh
         </div>
       )}
 
-      {/* Pie/Donut Chart */}
+      {}
       {(chartType === 'pie' || chartType === 'donut') && (
         <div className="flex flex-col items-center gap-6">
           <div className="flex items-center gap-6 mb-6">
@@ -100,7 +100,7 @@ export function SavingsAnalysisChart({ chartData, chartType }: SavingsAnalysisCh
         </div>
       )}
 
-      {/* Line/Area Chart */}
+      {}
       {(chartType === 'line' || chartType === 'area') && (
         <div className="space-y-4">
           <div className="relative h-64">

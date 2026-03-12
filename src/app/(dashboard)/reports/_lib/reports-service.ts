@@ -5,41 +5,34 @@ import type { AnomalyAlert } from "../_components/types";
 
 const supabase = createClient();
 
-/**
- * Reports Service
- * Fetches real data for Reports page: summary cards, anomalies, and chart data
- */
-
-// Helper to format currency
 function formatCurrency(amount: number): string {
   return `₱${amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-// Helper to calculate date ranges
 function getDateRange(timeframe: 'month' | 'quarter' | 'year') {
   const now = new Date();
-  const endDateFull = now.toISOString(); // Full ISO for timestamp fields
-  const endDate = now.toISOString().split('T')[0]; // Date only for date fields
+  const endDateFull = now.toISOString();
+  const endDate = now.toISOString().split('T')[0]; 
   let startDateFull: string;
   let startDate: string;
 
   switch (timeframe) {
     case 'month':
-      // Last 30 days
+
       const monthAgo = new Date(now);
       monthAgo.setDate(monthAgo.getDate() - 30);
       startDateFull = monthAgo.toISOString();
       startDate = monthAgo.toISOString().split('T')[0];
       break;
     case 'quarter':
-      // Last 3 months (90 days)
+
       const quarterAgo = new Date(now);
       quarterAgo.setDate(quarterAgo.getDate() - 90);
       startDateFull = quarterAgo.toISOString();
       startDate = quarterAgo.toISOString().split('T')[0];
       break;
     case 'year':
-      // Last 12 months (365 days)
+
       const yearAgo = new Date(now);
       yearAgo.setDate(yearAgo.getDate() - 365);
       startDateFull = yearAgo.toISOString();
@@ -55,14 +48,10 @@ function getDateRange(timeframe: 'month' | 'quarter' | 'year') {
   return { startDate, endDate, startDateFull, endDateFull };
 }
 
-/**
- * Fetch report summary data (Total Transactions, Active Budgets, Active Goals, Last Updated)
- */
 export async function fetchReportSummary(userId: string, timeframe: 'month' | 'quarter' | 'year' = 'month') {
   try {
     const { startDate, endDate } = getDateRange(timeframe);
 
-    // Fetch total transactions count
     const { count: transactionCount, error: transError } = await supabase
       .from('transactions')
       .select('*', { count: 'exact', head: true })
@@ -72,7 +61,6 @@ export async function fetchReportSummary(userId: string, timeframe: 'month' | 'q
 
     if (transError) throw transError;
 
-    // Fetch active budgets
     const { data: budgets, error: budgetError } = await supabase
       .from('budgets')
       .select('*')
@@ -81,11 +69,9 @@ export async function fetchReportSummary(userId: string, timeframe: 'month' | 'q
 
     if (budgetError) throw budgetError;
 
-    // Calculate budget status
     const onTrack = budgets?.filter(b => (b.spent / b.amount) <= 0.8).length || 0;
     const warning = budgets?.filter(b => (b.spent / b.amount) > 0.8 && (b.spent / b.amount) < 1).length || 0;
 
-    // Fetch active goals
     const { data: goals, error: goalsError } = await supabase
       .from('goals')
       .select('*')
@@ -94,10 +80,8 @@ export async function fetchReportSummary(userId: string, timeframe: 'month' | 'q
 
     if (goalsError) throw goalsError;
 
-    // Calculate nearing completion goals (>= 80% progress)
     const nearingCompletion = goals?.filter(g => (g.current_amount / g.target_amount) >= 0.8).length || 0;
 
-    // Get last transaction date
     const { data: lastTransaction, error: lastTransError } = await supabase
       .from('transactions')
       .select('created_at')
@@ -133,14 +117,10 @@ export async function fetchReportSummary(userId: string, timeframe: 'month' | 'q
   }
 }
 
-/**
- * Detect anomalies in transaction data
- */
 export async function fetchAnomalyAlerts(userId: string, timeframe: 'month' | 'quarter' | 'year' = 'month'): Promise<AnomalyAlert[]> {
   try {
     const { startDateFull, endDateFull } = getDateRange(timeframe);
 
-    // Fetch anomalies from database
     const { data: dbAnomalies, error: anomalyError } = await supabase
       .from('admin_anomalies')
       .select('*')
@@ -154,7 +134,6 @@ export async function fetchAnomalyAlerts(userId: string, timeframe: 'month' | 'q
       console.error('Error fetching anomalies from database:', anomalyError);
     }
 
-    // Transform database anomalies to AnomalyAlert format
     const transformedAnomalies: AnomalyAlert[] = (dbAnomalies || []).map(anomaly => ({
       id: anomaly.id,
       type: mapAnomalyType(anomaly.anomaly_type),
@@ -168,7 +147,6 @@ export async function fetchAnomalyAlerts(userId: string, timeframe: 'month' | 'q
       status: 'active',
     }));
 
-    // Return database anomalies (they are already saved)
     return transformedAnomalies.slice(0, 10);
   } catch (error) {
     console.error('Error fetching anomaly alerts:', error);
@@ -176,7 +154,6 @@ export async function fetchAnomalyAlerts(userId: string, timeframe: 'month' | 'q
   }
 }
 
-// Helper function to map database anomaly types to UI types
 function mapAnomalyType(dbType: string): 'unusual-spending' | 'duplicate-transaction' | 'budget-overspend' | 'income-anomaly' {
   const typeMap: Record<string, 'unusual-spending' | 'duplicate-transaction' | 'budget-overspend' | 'income-anomaly'> = {
     'spending_spike': 'unusual-spending',
@@ -192,9 +169,6 @@ function mapAnomalyType(dbType: string): 'unusual-spending' | 'duplicate-transac
   return typeMap[dbType] || 'unusual-spending';
 }
 
-/**
- * Fetch chart data based on report type and timeframe
- */
 export async function fetchReportChartData(
   userId: string,
   reportType: 'spending' | 'income-expense' | 'savings' | 'trends' | 'goals' | 'predictions',
@@ -225,7 +199,6 @@ export async function fetchReportChartData(
   }
 }
 
-// Fetch spending by category
 async function fetchSpendingByCategory(userId: string, startDate: string, endDate: string) {
   const { data: transactions, error } = await supabase
     .from('transactions')
@@ -262,7 +235,6 @@ async function fetchSpendingByCategory(userId: string, startDate: string, endDat
   };
 }
 
-// Fetch income vs expense data
 async function fetchIncomeExpenseData(userId: string, startDate: string, endDate: string) {
   const { data: transactions, error } = await supabase
     .from('transactions')
@@ -275,7 +247,6 @@ async function fetchIncomeExpenseData(userId: string, startDate: string, endDate
 
   if (error) throw error;
 
-  // Group by month
   const monthlyData: Record<string, { income: number; expenses: number }> = {};
 
   transactions?.forEach(t => {
@@ -310,7 +281,6 @@ async function fetchIncomeExpenseData(userId: string, startDate: string, endDate
   };
 }
 
-// Fetch savings data
 async function fetchSavingsData(userId: string, startDate: string, endDate: string) {
   const { data: goals, error } = await supabase
     .from('goals')
@@ -339,7 +309,6 @@ async function fetchSavingsData(userId: string, startDate: string, endDate: stri
   };
 }
 
-// Fetch trends data
 async function fetchTrendsData(userId: string, startDate: string, endDate: string) {
   const { data: transactions, error } = await supabase
     .from('transactions')
@@ -352,7 +321,6 @@ async function fetchTrendsData(userId: string, startDate: string, endDate: strin
 
   if (error) throw error;
 
-  // Calculate category trends
   const categoryTrends: Record<string, number[]> = {};
   
   transactions?.forEach(t => {
@@ -380,7 +348,6 @@ async function fetchTrendsData(userId: string, startDate: string, endDate: strin
   return { categories };
 }
 
-// Fetch goals data
 async function fetchGoalsData(userId: string) {
   const { data: goals, error } = await supabase
     .from('goals')
@@ -409,10 +376,8 @@ async function fetchGoalsData(userId: string) {
   };
 }
 
-// Fetch predictions data (placeholder - would integrate with Prophet service)
 async function fetchPredictionsData(userId: string) {
-  // This would integrate with the Prophet prediction service
-  // For now, return placeholder structure
+
   return {
     nextMonth: {
       expenses: 0,
@@ -423,7 +388,6 @@ async function fetchPredictionsData(userId: string) {
   };
 }
 
-// Helper to get color for category
 function getColorForCategory(category: string): string {
   const colors: Record<string, string> = {
     'Housing': '#94a3b8',
@@ -447,16 +411,12 @@ function getColorForCategory(category: string): string {
   return colors[category] || '#e2e8f0';
 }
 
-/**
- * Compute anomaly details for modal
- */
 export async function computeAnomalyDetails(anomalyId: string, userId: string) {
   try {
-    // Parse anomaly ID to determine type and category
+
     const [type, ...rest] = anomalyId.split('-');
     const category = rest.join('-');
 
-    // Fetch related transactions
     const { data: transactions, error } = await supabase
       .from('transactions')
       .select('*, expense_categories(category_name)')
@@ -475,7 +435,6 @@ export async function computeAnomalyDetails(anomalyId: string, userId: string) {
       category: (t.expense_categories as any)?.category_name || 'Uncategorized',
     })) || [];
 
-    // Generate historical data (weekly aggregates)
     const historicalData = [
       { period: 'Week 1', amount: 0, isAnomalous: false },
       { period: 'Week 2', amount: 0, isAnomalous: false },

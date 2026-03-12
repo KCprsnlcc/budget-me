@@ -68,38 +68,31 @@ export default function ReportsPage() {
     categories: ["housing", "food", "transport", "utilities", "other"],
     accounts: ["checking", "chase"],
   });
-  
-  // Export dropdown state
+
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  
-  // Loading states
+
   const [loading, setLoading] = useState(true);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
-  
-  // Scroll indicator state
+
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
-  
-  // Real data states
+
   const [summaryData, setSummaryData] = useState<any>(null);
   const [anomalies, setAnomalies] = useState<AnomalyAlert[]>([]);
   const [resolvedAnomalies, setResolvedAnomalies] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any>(null);
   const [aiInsights, setAiInsights] = useState<ReportAIInsightResponse | null>(null);
   const [hasGeneratedInsights, setHasGeneratedInsights] = useState(false);
-  
-  // Prediction data states
+
   const [predictionData, setPredictionData] = useState<{
     forecast: { historical: MonthlyForecast[]; predicted: MonthlyForecast[]; summary: any } | null;
     categories: CategoryPrediction[];
   }>({ forecast: null, categories: [] });
   const [loadingPredictions, setLoadingPredictions] = useState(false);
-  
-  // AI Rate Limit State
+
   const [rateLimitStatus, setRateLimitStatus] = useState<AIUsageStatus | null>(null);
 
-  // Close export dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
@@ -113,7 +106,6 @@ export default function ReportsPage() {
     }
   }, [exportDropdownOpen]);
 
-  // Check if content is scrollable and show indicator
   useEffect(() => {
     const checkScrollable = () => {
       if (contentRef.current && typeof window !== 'undefined') {
@@ -128,7 +120,6 @@ export default function ReportsPage() {
     return () => window.removeEventListener('resize', checkScrollable);
   }, [loading]);
 
-  // Handle scroll to hide indicator
   useEffect(() => {
     const handleScroll = () => {
       if (contentRef.current) {
@@ -147,7 +138,6 @@ export default function ReportsPage() {
     }
   }, []);
 
-  // Fetch AI rate limit status
   useEffect(() => {
     const fetchRateLimitStatus = async () => {
       if (!user?.id) return;
@@ -161,22 +151,19 @@ export default function ReportsPage() {
     };
 
     fetchRateLimitStatus();
-    
-    // Refresh every 30 seconds
+
     const interval = setInterval(fetchRateLimitStatus, 30000);
     return () => clearInterval(interval);
   }, [user?.id]);
 
-  // Fetch all report data
   const fetchReportData = useCallback(async () => {
     if (!user?.id) return;
 
     setLoading(true);
     try {
-      // First, detect and save any new anomalies
+
       await detectAndSaveAnomalies(user.id, reportSettings.timeframe);
 
-      // Then fetch summary, anomalies, chart data, cached insights, and resolved anomalies in parallel
       const [summary, anomalyData, chart, cachedInsights, resolvedData] = await Promise.all([
         fetchReportSummary(user.id, reportSettings.timeframe),
         fetchAnomalyAlerts(user.id, reportSettings.timeframe),
@@ -190,17 +177,15 @@ export default function ReportsPage() {
       setResolvedAnomalies(resolvedData.data || []);
       setChartData(chart);
 
-      // Auto-load cached insights if available
       if (cachedInsights) {
         setAiInsights(cachedInsights);
         setHasGeneratedInsights(true);
       } else {
-        // Reset insights state if no cached data
+
         setAiInsights(null);
         setHasGeneratedInsights(false);
       }
-      
-      // Fetch prediction data if predictions report type is selected
+
       if (reportSettings.reportType === 'predictions') {
         await fetchPredictionData();
       }
@@ -214,7 +199,6 @@ export default function ReportsPage() {
     }
   }, [user?.id, reportSettings.timeframe, reportSettings.reportType]);
 
-  // Fetch prediction data from predictions service
   const fetchPredictionData = useCallback(async () => {
     if (!user?.id) return;
 
@@ -236,16 +220,13 @@ export default function ReportsPage() {
     }
   }, [user?.id]);
 
-  // Initial data fetch
   useEffect(() => {
     fetchReportData();
   }, [fetchReportData]);
 
-  // Handle Generate AI Insights
   const handleGenerateAIInsights = useCallback(async () => {
     if (!user?.id || !summaryData || !chartData) return;
 
-    // Check rate limit before generating
     const { allowed, error: limitError } = await checkAIUsage(user.id, "insights");
     if (!allowed) {
       toast.error("Daily limit reached", {
@@ -261,7 +242,7 @@ export default function ReportsPage() {
     });
 
     try {
-      // Increment usage
+
       const { success: incrementSuccess } = await incrementAIUsage(user.id, "insights");
       if (!incrementSuccess) {
         toast.error("Failed to track usage", {
@@ -271,11 +252,9 @@ export default function ReportsPage() {
         return;
       }
 
-      // Refresh rate limit status
       const { status } = await checkAIUsage(user.id, "insights");
       setRateLimitStatus(status);
 
-      // Generate insights
       const insights = await generateReportAIInsights({
         userId: user.id,
         reportType: reportSettings.reportType,
@@ -305,7 +284,6 @@ export default function ReportsPage() {
     }
   }, [user?.id, summaryData, chartData, anomalies, reportSettings]);
 
-  // Handle anomaly details
   const handleAnomalyDetails = useCallback(async (anomalyId: string) => {
     if (!user?.id) return;
 
@@ -329,25 +307,24 @@ export default function ReportsPage() {
   const handleDismissAnomaly = useCallback(async (anomalyId: string) => {
     if (!user?.id) return;
 
-    // Remove from active anomalies list immediately for better UX
     setAnomalies(prev => prev.filter(a => a.id !== anomalyId));
     
     try {
-      // Call server action to delete from database
+
       const result = await dismissAnomaly(anomalyId, user.id);
       
       if (result.success) {
-        // Refresh active anomalies to ensure sync with database
+
         const activeData = await fetchAnomalyAlerts(user.id, reportSettings.timeframe);
         setAnomalies(activeData);
       } else {
-        // If failed, restore the anomaly in the list
+
         const activeData = await fetchAnomalyAlerts(user.id, reportSettings.timeframe);
         setAnomalies(activeData);
       }
     } catch (error) {
       console.error("Error dismissing anomaly:", error);
-      // Restore on error
+
       const activeData = await fetchAnomalyAlerts(user.id, reportSettings.timeframe);
       setAnomalies(activeData);
     }
@@ -358,15 +335,14 @@ export default function ReportsPage() {
   const handleResolveAnomaly = useCallback(async (anomalyId: string) => {
     if (!user?.id) return;
 
-    // Remove from active anomalies list immediately for better UX
     setAnomalies(prev => prev.filter(a => a.id !== anomalyId));
     
     try {
-      // Call server action to update in database
+
       const result = await resolveAnomaly(anomalyId, user.id);
       
       if (result.success) {
-        // Refresh both active and resolved anomalies
+
         const [activeData, resolvedResult] = await Promise.all([
           fetchAnomalyAlerts(user.id, reportSettings.timeframe),
           fetchResolvedAnomalies(user.id, reportSettings.timeframe)
@@ -377,13 +353,13 @@ export default function ReportsPage() {
           setResolvedAnomalies(resolvedResult.data || []);
         }
       } else {
-        // If failed, restore the anomaly in the list
+
         const activeData = await fetchAnomalyAlerts(user.id, reportSettings.timeframe);
         setAnomalies(activeData);
       }
     } catch (error) {
       console.error("Error resolving anomaly:", error);
-      // Restore on error
+
       const activeData = await fetchAnomalyAlerts(user.id, reportSettings.timeframe);
       setAnomalies(activeData);
     }
@@ -391,21 +367,19 @@ export default function ReportsPage() {
     setShowAnomalyModal(false);
   }, [user?.id, reportSettings.timeframe]);
 
-  // Handle export PDF
   const handleExportPDF = useCallback(() => {
     if (!summaryData || !chartData) {
       return;
     }
 
     try {
-      // Get date range string
+
       const dateRangeMap = {
         month: "Last 30 Days",
         quarter: "Last 3 Months",
         year: "Last 12 Months",
       };
 
-      // Prepare export data
       const exportData: ReportExportData = {
         summary: summaryData,
         settings: {
@@ -443,21 +417,19 @@ export default function ReportsPage() {
     }
   }, [summaryData, chartData, anomalies, aiInsights, reportSettings]);
 
-  // Handle export CSV
   const handleExportCSV = useCallback(() => {
     if (!summaryData || !chartData) {
       return;
     }
 
     try {
-      // Get date range string
+
       const dateRangeMap = {
         month: "Last 30 Days",
         quarter: "Last 3 Months",
         year: "Last 12 Months",
       };
 
-      // Prepare export data
       const exportData: ReportExportData = {
         summary: summaryData,
         settings: {
@@ -495,12 +467,11 @@ export default function ReportsPage() {
     }
   }, [summaryData, chartData, anomalies, aiInsights, reportSettings]);
 
-  // Loading state
   if (loading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-          {/* Page Header Skeleton */}
+          {}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
             <div>
               <Skeleton width={150} height={24} className="mb-2 sm:w-48 sm:h-8" />
@@ -512,9 +483,9 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* Scrollable Content Area - Skeleton */}
+          {}
           <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0">
-            {/* Summary Cards Skeleton */}
+            {}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Card key={i} className="p-4 sm:p-5">
@@ -529,7 +500,7 @@ export default function ReportsPage() {
               ))}
             </div>
 
-            {/* Report Settings Skeleton */}
+            {}
             <Card className="p-4 sm:p-5">
               <div className="mb-3 sm:mb-4">
                 <Skeleton width={120} height={12} className="mb-2 sm:w-40" />
@@ -545,7 +516,7 @@ export default function ReportsPage() {
               </div>
             </Card>
 
-            {/* Anomaly Detection Skeleton */}
+            {}
             <Card className="p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div>
@@ -578,7 +549,7 @@ export default function ReportsPage() {
               </div>
             </Card>
 
-            {/* AI Insights Skeleton */}
+            {}
             <Card className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div>
@@ -600,7 +571,7 @@ export default function ReportsPage() {
               </div>
             </Card>
 
-            {/* Chart Skeleton */}
+            {}
             <Card className="p-4 sm:p-6">
               <Skeleton width={130} height={14} className="mb-4 sm:mb-6 sm:w-48" />
               <Skeleton height={240} borderRadius={8} className="sm:h-96" />
@@ -611,7 +582,6 @@ export default function ReportsPage() {
     );
   }
 
-  // Memoized summary card component
   const SummaryCard = memo(({ label, value, description, icon: Icon, change, badge }: any) => {
     return (
       <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
@@ -640,7 +610,7 @@ export default function ReportsPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-      {/* Page Header */}
+      {}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">Reports</h2>
@@ -682,7 +652,7 @@ export default function ReportsPage() {
               <span className="hidden sm:inline">Export</span>
               <MoreHorizontal size={12} className="ml-1" />
             </Button>
-            {/* Dropdown */}
+            {}
             {exportDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50">
                 <Button
@@ -713,11 +683,11 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      {/* Scrollable Content Area for Mobile/Tablet */}
+      {}
       <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth"
         ref={contentRef}
       >
-        {/* Scroll Indicator for Mobile/Tablet */}
+        {}
         {showScrollIndicator && (
           <div className="lg:hidden fixed bottom-20 sm:bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-bounce">
             <div className="bg-emerald-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 text-xs font-medium">
@@ -729,7 +699,7 @@ export default function ReportsPage() {
           </div>
         )}
 
-      {/* Summary Cards */}
+      {}
       {summaryData && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <SummaryCard
@@ -760,7 +730,7 @@ export default function ReportsPage() {
         </div>
       )}
 
-      {/* Report Settings Panel */}
+      {}
       <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
         <div className="mb-3 sm:mb-4">
           <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Report Settings</h3>
@@ -841,7 +811,7 @@ export default function ReportsPage() {
         </div>
       </Card>
 
-      {/* Anomaly Alerts Section */}
+      {}
       <Card className="p-4 sm:p-6 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
@@ -850,7 +820,7 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        {/* Tabs */}
+        {}
         <div className="flex gap-2 mb-4 sm:mb-6 border-b border-slate-200 overflow-x-auto">
           <button
             onClick={() => setAnomalyTab("active")}
@@ -874,7 +844,7 @@ export default function ReportsPage() {
           </button>
         </div>
 
-        {/* Active Anomalies Tab */}
+        {}
         {anomalyTab === "active" && (
           <>
             {anomalies.length === 0 ? (
@@ -961,7 +931,7 @@ export default function ReportsPage() {
           </>
         )}
 
-        {/* Resolved Anomalies Tab */}
+        {}
         {anomalyTab === "resolved" && (
           <>
             {resolvedAnomalies.length === 0 ? (
@@ -1021,7 +991,7 @@ export default function ReportsPage() {
         )}
       </Card>
 
-      {/* AI Financial Insights Section */}
+      {}
       <Card className="p-4 sm:p-6 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div>
@@ -1055,7 +1025,7 @@ export default function ReportsPage() {
 
         {!hasGeneratedInsights || !aiInsights ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {/* Savings Opportunity Card - No Data */}
+            {}
             <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
               <div className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
@@ -1072,7 +1042,7 @@ export default function ReportsPage() {
               </div>
             </div>
 
-            {/* Budget Recommendation Card - No Data */}
+            {}
             <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
               <div className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
@@ -1089,7 +1059,7 @@ export default function ReportsPage() {
               </div>
             </div>
 
-            {/* Trend Analysis Card - No Data */}
+            {}
             <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
               <div className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
@@ -1108,7 +1078,7 @@ export default function ReportsPage() {
           </div>
         ) : aiInsights ? (
           <div className="space-y-4 sm:space-y-6">
-            {/* Risk Assessment Summary */}
+            {}
             {aiInsights.riskLevel && (
               <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
                 <div className="p-4 sm:p-5 md:p-6">
@@ -1145,7 +1115,7 @@ export default function ReportsPage() {
               </div>
             )}
 
-            {/* Recommendations Grid */}
+            {}
             {aiInsights.recommendations && aiInsights.recommendations.length > 0 && (
               <div>
                 <h4 className="text-xs sm:text-sm font-semibold text-slate-900 mb-3 sm:mb-4">Recommended Actions</h4>
@@ -1197,7 +1167,7 @@ export default function ReportsPage() {
               </div>
             )}
 
-            {/* Actionable Steps */}
+            {}
             {aiInsights.actionableSteps && aiInsights.actionableSteps.length > 0 && (
               <div>
                 <h4 className="text-xs sm:text-sm font-semibold text-slate-900 mb-3 sm:mb-4">Next Steps</h4>
@@ -1219,7 +1189,7 @@ export default function ReportsPage() {
         ) : null}
       </Card>
 
-      {/* Charts Section */}
+      {}
       {viewMode === "grid" && (
         <ReportCharts
           reportSettings={reportSettings}
@@ -1229,7 +1199,7 @@ export default function ReportsPage() {
         />
       )}
 
-      {/* Table View Section */}
+      {}
       {viewMode === "table" && (
         <Card className="overflow-hidden hover:shadow-md transition-all">
           <div className="p-4 sm:p-6 border-b border-slate-100">
@@ -1260,7 +1230,7 @@ export default function ReportsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              {/* Spending by Category Table */}
+              {}
               {reportSettings.reportType === 'spending' && chartData.categories && chartData.categories.length > 0 && (
                 <table className="w-full min-w-[500px]">
                   <thead className="bg-slate-50 border-b border-slate-200">
@@ -1287,7 +1257,7 @@ export default function ReportsPage() {
                 </table>
               )}
 
-              {/* Income vs Expense Table */}
+              {}
               {reportSettings.reportType === 'income-expense' && chartData.monthly && chartData.monthly.length > 0 && (
                 <table className="w-full min-w-[600px]">
                   <thead className="bg-slate-50 border-b border-slate-200">
@@ -1317,7 +1287,7 @@ export default function ReportsPage() {
                 </table>
               )}
 
-              {/* Savings Analysis Table */}
+              {}
               {reportSettings.reportType === 'savings' && chartData.funds && chartData.funds.length > 0 && (
                 <table className="w-full min-w-[600px]">
                   <thead className="bg-slate-50 border-b border-slate-200">
@@ -1346,7 +1316,7 @@ export default function ReportsPage() {
                 </table>
               )}
 
-              {/* Goals Progress Table */}
+              {}
               {reportSettings.reportType === 'goals' && chartData.goals && chartData.goals.length > 0 && (
                 <table className="w-full min-w-[600px]">
                   <thead className="bg-slate-50 border-b border-slate-200">
@@ -1370,7 +1340,7 @@ export default function ReportsPage() {
                 </table>
               )}
 
-              {/* Trends Table */}
+              {}
               {reportSettings.reportType === 'trends' && chartData.categories && chartData.categories.length > 0 && (
                 <table className="w-full min-w-[500px]">
                   <thead className="bg-slate-50 border-b border-slate-200">
@@ -1404,7 +1374,7 @@ export default function ReportsPage() {
                 </table>
               )}
 
-              {/* Future Predictions Table */}
+              {}
               {reportSettings.reportType === 'predictions' && predictionData.forecast && (
                 <table className="w-full min-w-[700px]">
                   <thead className="bg-slate-50 border-b border-slate-200">
@@ -1439,7 +1409,7 @@ export default function ReportsPage() {
       )}
       </div>
 
-      {/* Anomaly Details Modal */}
+      {}
       {showAnomalyModal && selectedAnomaly && (
         <AnomalyDetailsModal
           isOpen={showAnomalyModal}

@@ -8,7 +8,6 @@ const BUDGET_SELECT = `
   expense_categories!budgets_category_id_fkey ( category_name, icon, color )
 `;
 
-// Map raw DB row to AdminBudget
 function mapRow(row: Record<string, any>, profile?: Record<string, any> | null): AdminBudget {
     const expCat = row.expense_categories as Record<string, any> | null;
 
@@ -42,7 +41,6 @@ function mapRow(row: Record<string, any>, profile?: Record<string, any> | null):
     };
 }
 
-// Fetch all budgets with filters (admin view)
 export async function fetchAdminBudgets(
     filters: AdminBudgetFilters = {},
     page: number = 1,
@@ -53,7 +51,6 @@ export async function fetchAdminBudgets(
         .select(BUDGET_SELECT, { count: "exact" })
         .order("created_at", { ascending: false });
 
-    // Apply filters
     if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
         const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
         const endDate = new Date(filters.year as number, filters.month as number, 0);
@@ -67,7 +64,6 @@ export async function fetchAdminBudgets(
     if (filters.period) query = query.eq("period", filters.period);
     if (filters.userId) query = query.eq("user_id", filters.userId);
 
-    // Pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     query = query.range(from, to);
@@ -75,7 +71,6 @@ export async function fetchAdminBudgets(
     const { data, error, count } = await query;
     if (error) return { data: [], error: error.message, count: null };
 
-    // Fetch user profiles separately
     const userIds = [...new Set((data ?? []).map((b: any) => b.user_id))];
     const { data: profiles } = await supabase
         .from("profiles")
@@ -94,18 +89,15 @@ export async function fetchAdminBudgets(
     return { data: mappedData, error: null, count: count ?? 0 };
 }
 
-// Fetch admin budget statistics
 export async function fetchAdminBudgetStats(): Promise<AdminBudgetStats | null> {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
 
-    // Total budgets
     const { count: totalBudgets } = await supabase
         .from("budgets")
         .select("*", { count: "exact", head: true });
 
-    // All budgets for aggregation
     const { data: allBudgets } = await supabase
         .from("budgets")
         .select(`
@@ -143,13 +135,10 @@ export async function fetchAdminBudgetStats(): Promise<AdminBudgetStats | null> 
         else onTrackCount++;
     }
 
-    // Active users (users with at least one budget)
     const activeUsers = new Set((allBudgets ?? []).map((b: any) => b.user_id)).size;
 
-    // Average budget amount
     const avgBudgetAmount = totalBudgets ? totalBudgetAmount / totalBudgets : 0;
 
-    // Budget growth (last 6 months)
     const budgetGrowth: { month: string; count: number }[] = [];
     for (let i = 5; i >= 0; i--) {
         const d = new Date(currentYear, currentMonth - 1 - i, 1);
@@ -169,14 +158,12 @@ export async function fetchAdminBudgetStats(): Promise<AdminBudgetStats | null> 
         budgetGrowth.push({ month: label, count: count ?? 0 });
     }
 
-    // Month-over-month growth
     const currentMonthCount = budgetGrowth[budgetGrowth.length - 1]?.count ?? 0;
     const previousMonthCount = budgetGrowth[budgetGrowth.length - 2]?.count ?? 0;
     const monthOverMonthGrowth = previousMonthCount > 0
         ? ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100
         : 0;
 
-    // Status distribution
     const statusMap = new Map<string, number>();
     for (const b of allBudgets ?? []) {
         statusMap.set(b.status, (statusMap.get(b.status) ?? 0) + 1);
@@ -188,7 +175,6 @@ export async function fetchAdminBudgetStats(): Promise<AdminBudgetStats | null> 
         percentage: Math.round((count / total) * 100),
     }));
 
-    // Budget allocation by category (amount, not count)
     const categoryMap = new Map<string, { amount: number; color?: string }>();
     for (const b of allBudgets ?? []) {
         const expCat = b.expense_categories as Record<string, any> | null;
@@ -209,7 +195,6 @@ export async function fetchAdminBudgetStats(): Promise<AdminBudgetStats | null> 
         }))
         .sort((a, b) => b.amount - a.amount);
 
-    // Period distribution
     const periodMap = new Map<string, number>();
     for (const b of allBudgets ?? []) {
         periodMap.set(b.period, (periodMap.get(b.period) ?? 0) + 1);
@@ -220,7 +205,6 @@ export async function fetchAdminBudgetStats(): Promise<AdminBudgetStats | null> 
         percentage: Math.round((count / total) * 100),
     }));
 
-    // Top users by budget volume
     const userTotals = new Map<string, { total_budget_amount: number; budget_count: number }>();
     for (const b of allBudgets ?? []) {
         const current = userTotals.get(b.user_id) ?? { total_budget_amount: 0, budget_count: 0 };
@@ -276,7 +260,6 @@ export async function fetchAdminBudgetStats(): Promise<AdminBudgetStats | null> 
     };
 }
 
-// Create budget (admin)
 export async function createAdminBudget(
     userId: string,
     form: {
@@ -312,7 +295,6 @@ export async function createAdminBudget(
     return { error: null };
 }
 
-// Update budget (admin)
 export async function updateAdminBudget(
     budgetId: string,
     form: {
@@ -346,14 +328,12 @@ export async function updateAdminBudget(
     return { error: null };
 }
 
-// Delete budget (admin)
 export async function deleteAdminBudget(budgetId: string): Promise<{ error: string | null }> {
     const { error } = await supabase.from("budgets").delete().eq("id", budgetId);
     if (error) return { error: error.message };
     return { error: null };
 }
 
-// Fetch all users for filter dropdown
 export async function fetchAllUsers(): Promise<{ id: string; email: string; full_name: string | null }[]> {
     const { data } = await supabase
         .from("profiles")

@@ -36,7 +36,6 @@ export interface ReportSettings {
   };
 }
 
-
 export interface ReportTemplate {
   id: string;
   name: string;

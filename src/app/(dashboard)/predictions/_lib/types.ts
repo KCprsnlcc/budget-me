@@ -1,36 +1,26 @@
-/**
- * AI Predictions Types
- * TypeScript interfaces and types for the AI-powered financial predictions feature
- */
+
 
 import type { LucideIcon } from "lucide-react";
 
-/**
- * Monthly forecast data point for income vs expenses chart
- * Enhanced with Prophet-style confidence intervals
- */
 export interface MonthlyForecast {
   month: string;
   income: number;
   expense: number;
   type: "historical" | "current" | "predicted";
   confidence?: number;
-  // Prophet-style confidence intervals
+
   incomeUpper?: number;
   incomeLower?: number;
   expenseUpper?: number;
   expenseLower?: number;
-  // Prophet components
+
   trend?: number;
   seasonality?: number;
   changepoint?: boolean;
-  // Year to ensure uniqueness when same month appears in different years
+
   year?: number;
 }
 
-/**
- * Category prediction with forecasting data
- */
 export interface CategoryPrediction {
   category: string;
   icon?: string;
@@ -44,9 +34,6 @@ export interface CategoryPrediction {
   insight: string;
 }
 
-/**
- * Expense type forecast (recurring vs variable)
- */
 export interface ExpenseTypeForecast {
   amount: number;
   percentage: number;
@@ -54,9 +41,6 @@ export interface ExpenseTypeForecast {
   trendValue: number;
 }
 
-/**
- * Transaction behavior insight
- */
 export interface TransactionBehaviorInsight {
   type: string;
   name: string;
@@ -66,9 +50,6 @@ export interface TransactionBehaviorInsight {
   confidence: number;
 }
 
-/**
- * Prediction history item
- */
 export interface PredictionHistory {
   id: string;
   date: string;
@@ -78,7 +59,7 @@ export interface PredictionHistory {
   insights: number;
   dataPoints: number;
   model: string;
-  // Actual prediction data
+
   projectedIncome?: number;
   projectedExpenses?: number;
   projectedSavings?: number;
@@ -94,7 +75,7 @@ export interface PredictionHistory {
   savingsOpportunities?: number;
   confidenceLevel?: "low" | "medium" | "high" | "very high";
   errorMessage?: string;
-  // Full data for reconstruction on page refresh
+
   fullForecastData?: {
     historical: MonthlyForecast[];
     predicted: MonthlyForecast[];
@@ -108,9 +89,6 @@ export interface PredictionHistory {
   fullBehaviorInsights?: TransactionBehaviorInsight[];
 }
 
-/**
- * Prediction summary for dashboard cards
- */
 export interface PredictionSummary {
   monthlyIncome: number;
   monthlyExpenses: number;
@@ -120,9 +98,6 @@ export interface PredictionSummary {
   expenseChange: number | null;
 }
 
-/**
- * Category spending data for charts
- */
 export interface CategorySpendingData {
   name: string;
   color: string;
@@ -130,9 +105,6 @@ export interface CategorySpendingData {
   percentage: number;
 }
 
-/**
- * Anomaly detection result
- */
 export interface AnomalyResult {
   type: "warning" | "info" | "error";
   title: string;
@@ -141,18 +113,12 @@ export interface AnomalyResult {
   action: string;
 }
 
-/**
- * Savings opportunity
- */
 export interface SavingsOpportunity {
   title: string;
   potential: string;
   confidence: number;
 }
 
-/**
- * AI insights result
- */
 export interface AIInsights {
   summary: string;
   riskLevel: "low" | "medium" | "high";
@@ -161,9 +127,6 @@ export interface AIInsights {
   recommendations: string[];
 }
 
-/**
- * Prophet ML model details for a forecast
- */
 export interface ProphetModelDetails {
   seasonalityMode: "additive" | "multiplicative";
   yearlySeasonality: boolean;
@@ -173,35 +136,26 @@ export interface ProphetModelDetails {
   uncertaintySamples: number;
 }
 
-/**
- * Forecast accuracy metrics
- */
 export interface ForecastAccuracy {
-  mape: number; // Mean Absolute Percentage Error
-  rmse: number; // Root Mean Square Error
-  mae: number;  // Mean Absolute Error
-  coverage: number; // Confidence interval coverage
+  mape: number; 
+  rmse: number; 
+  mae: number;  
+  coverage: number; 
 }
 
-/**
- * Enhanced forecast summary with Prophet metrics
- */
 export interface ForecastSummary {
   avgGrowth: number;
   maxSavings: number;
   confidence: number;
-  // Prophet-specific metrics
+
   modelDetails?: ProphetModelDetails;
   accuracy?: ForecastAccuracy;
-  changepoints?: string[]; // Months with detected changepoints
+  changepoints?: string[];
   seasonalityStrength?: number;
   trendDirection?: "up" | "down" | "stable";
   trendStrength?: number;
 }
 
-/**
- * Prediction generation options
- */
 export interface PredictionOptions {
   forecastMonths?: number;
   confidenceThreshold?: number;
@@ -209,9 +163,6 @@ export interface PredictionOptions {
   includeSavingsOpportunities?: boolean;
 }
 
-/**
- * Prophet-style forecast configuration
- */
 export interface ProphetConfig {
   seasonalityMode: "additive" | "multiplicative";
   yearlySeasonality: boolean;
@@ -222,29 +173,23 @@ export interface ProphetConfig {
   uncertaintySamples: number;
 }
 
-/**
- * Forecast step data for detailed breakdown
- */
 export interface ForecastStep {
   month: string;
   income: number;
   expenses: number;
   savings: number;
   confidence: number;
-  // Prophet-style confidence intervals
+
   incomeUpper: number;
   incomeLower: number;
   expenseUpper: number;
   expenseLower: number;
-  // Trend indicators
+
   incomeTrend: "up" | "down" | "stable";
   expenseTrend: "up" | "down" | "stable";
   changepoint?: boolean;
 }
 
-/**
- * Category analysis item for detailed breakdown
- */
 export interface CategoryAnalysis {
   category: string;
   current: number;
@@ -254,9 +199,6 @@ export interface CategoryAnalysis {
   percentage: number;
 }
 
-/**
- * Key insight for overview section
- */
 export interface KeyInsight {
   type: "positive" | "warning" | "info";
   title: string;

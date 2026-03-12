@@ -10,7 +10,6 @@ import type {
 
 const supabase = createClient();
 
-// ─── Map raw DB row to AdminFamily ──────────────────────────────────
 function mapFamilyRow(row: Record<string, any>): AdminFamily {
     const creator = row.profiles as Record<string, any> | null;
     const memberRows = row.family_members as Record<string, any>[] | null;
@@ -34,7 +33,6 @@ function mapFamilyRow(row: Record<string, any>): AdminFamily {
     };
 }
 
-// ─── Map raw DB row to AdminFamilyMember ─────────────────────────────
 function mapMemberRow(row: Record<string, any>): AdminFamilyMember {
     const profile = row.profiles as Record<string, any> | null;
 
@@ -56,7 +54,6 @@ function mapMemberRow(row: Record<string, any>): AdminFamilyMember {
     };
 }
 
-// ─── Fetch all families with filters (admin view) ────────────────────
 export async function fetchAdminFamilies(
     filters: AdminFamilyFilters = {},
     page: number = 1,
@@ -74,7 +71,6 @@ export async function fetchAdminFamilies(
         )
         .order("created_at", { ascending: false });
 
-    // Apply filters
     if (filters.status) {
         query = query.eq("status", filters.status);
     }
@@ -94,7 +90,6 @@ export async function fetchAdminFamilies(
         query = query.filter("created_at", "lt", new Date(Number(filters.year) + 1, 0, 1).toISOString());
     }
 
-    // Pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     query = query.range(from, to);
@@ -105,13 +100,11 @@ export async function fetchAdminFamilies(
         return { data: [], error: error.message, count: null };
     }
 
-    // Need to separately fetch profiles for the creator data since the join might not include it
     const mapped = (data ?? []).map((row: Record<string, any>) => mapFamilyRow(row));
 
     return { data: mapped, error: null, count };
 }
 
-// ─── Fetch family members for a specific family ─────────────────────
 export async function fetchFamilyMembers(
     familyId: string
 ): Promise<{ data: AdminFamilyMember[]; error: string | null }> {
@@ -133,7 +126,6 @@ export async function fetchFamilyMembers(
     return { data: (data ?? []).map((row: Record<string, any>) => mapMemberRow(row)), error: null };
 }
 
-// ─── Fetch family invitations ────────────────────────────────────────
 export async function fetchFamilyInvitations(
     familyId: string
 ): Promise<{ data: AdminFamilyInvitation[]; error: string | null }> {
@@ -165,7 +157,6 @@ export async function fetchFamilyInvitations(
     };
 }
 
-// ─── Fetch family join requests ──────────────────────────────────────
 export async function fetchFamilyJoinRequests(
     familyId: string
 ): Promise<{ data: AdminFamilyJoinRequest[]; error: string | null }> {
@@ -206,9 +197,8 @@ export async function fetchFamilyJoinRequests(
     };
 }
 
-// ─── Fetch family stats ──────────────────────────────────────────────
 export async function fetchAdminFamilyStats(): Promise<AdminFamilyStats> {
-    // Fetch all families with members count
+
     const { data: families, error: familiesError } = await supabase
         .from("families")
         .select(`
@@ -221,12 +211,10 @@ export async function fetchAdminFamilyStats(): Promise<AdminFamilyStats> {
         return getDefaultStats();
     }
 
-    // Fetch invitations summary
     const { data: invitations } = await supabase
         .from("family_invitations")
         .select("id, status");
 
-    // Fetch join requests summary
     const { data: joinRequests } = await supabase
         .from("family_join_requests")
         .select("id, status");
@@ -237,7 +225,6 @@ export async function fetchAdminFamilyStats(): Promise<AdminFamilyStats> {
     const publicFamilies = families.filter((f: any) => f.is_public).length;
     const privateFamilies = totalFamilies - publicFamilies;
 
-    // Count total active members
     let totalMembers = 0;
     families.forEach((f: any) => {
         if (Array.isArray(f.family_members)) {
@@ -251,7 +238,6 @@ export async function fetchAdminFamilyStats(): Promise<AdminFamilyStats> {
     const pendingInvitations = invitations?.filter((i: any) => i.status === "pending").length ?? 0;
     const pendingJoinRequests = joinRequests?.filter((j: any) => j.status === "pending").length ?? 0;
 
-    // Family growth (last 6 months)
     const now = new Date();
     const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
     const growthMap = new Map<string, number>();
@@ -274,7 +260,6 @@ export async function fetchAdminFamilyStats(): Promise<AdminFamilyStats> {
 
     const familyGrowth = Array.from(growthMap.entries()).map(([month, count]) => ({ month, count }));
 
-    // Status distribution
     const statusCounts: Record<string, number> = { active: activeFamilies, inactive: inactiveFamilies };
     const statusDistribution = Object.entries(statusCounts).map(([status, count]) => ({
         status,
@@ -282,7 +267,6 @@ export async function fetchAdminFamilyStats(): Promise<AdminFamilyStats> {
         percentage: totalFamilies > 0 ? Math.round((count / totalFamilies) * 100) : 0,
     }));
 
-    // Top families by member count
     const familyWithCounts = families.map((f: any) => {
         const creator = f.profiles as Record<string, any> | null;
         const memberCount = Array.isArray(f.family_members)
@@ -337,7 +321,6 @@ function getDefaultStats(): AdminFamilyStats {
     };
 }
 
-// ─── Fetch all users (for filters/dropdowns) ─────────────────────────
 export async function fetchAllUsers(): Promise<{ id: string; email: string; full_name: string | null }[]> {
     const { data, error } = await supabase
         .from("profiles")
@@ -353,11 +336,10 @@ export async function fetchAllUsers(): Promise<{ id: string; email: string; full
     }));
 }
 
-// ─── Delete a family (admin action) ──────────────────────────────────
 export async function deleteAdminFamily(
     familyId: string
 ): Promise<{ error: string | null }> {
-    // First, delete all family members
+
     const { error: membersError } = await supabase
         .from("family_members")
         .delete()
@@ -367,7 +349,6 @@ export async function deleteAdminFamily(
         return { error: `Failed to delete family members: ${membersError.message}` };
     }
 
-    // Delete all invitations
     const { error: invitationsError } = await supabase
         .from("family_invitations")
         .delete()
@@ -377,7 +358,6 @@ export async function deleteAdminFamily(
         return { error: `Failed to delete invitations: ${invitationsError.message}` };
     }
 
-    // Delete all join requests
     const { error: joinRequestsError } = await supabase
         .from("family_join_requests")
         .delete()
@@ -387,7 +367,6 @@ export async function deleteAdminFamily(
         return { error: `Failed to delete join requests: ${joinRequestsError.message}` };
     }
 
-    // Delete activity log entries
     const { error: activityError } = await supabase
         .from("family_activity_log")
         .delete()
@@ -397,7 +376,6 @@ export async function deleteAdminFamily(
         return { error: `Failed to delete activity log: ${activityError.message}` };
     }
 
-    // Unlink family goals (set family_id to null instead of deleting)
     const { error: goalsError } = await supabase
         .from("goals")
         .update({ family_id: null, is_family_goal: false })
@@ -407,7 +385,6 @@ export async function deleteAdminFamily(
         return { error: `Failed to unlink goals: ${goalsError.message}` };
     }
 
-    // Finally, delete the family itself
     const { error: familyError } = await supabase
         .from("families")
         .delete()
@@ -420,7 +397,6 @@ export async function deleteAdminFamily(
     return { error: null };
 }
 
-// ─── Update a family (admin action) ──────────────────────────────────
 export async function updateAdminFamily(
     familyId: string,
     updates: {
@@ -444,7 +420,6 @@ export async function updateAdminFamily(
     return { error: null };
 }
 
-// ─── Update a family member role/permissions (admin action) ──────────
 export async function updateFamilyMember(
     memberId: string,
     updates: {
@@ -466,7 +441,6 @@ export async function updateFamilyMember(
     return { error: null };
 }
 
-// ─── Remove a family member (admin action) ───────────────────────────
 export async function removeFamilyMember(
     memberId: string
 ): Promise<{ error: string | null }> {

@@ -15,7 +15,6 @@ export function OnboardingCheck({ children }: OnboardingCheckProps) {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checking, setChecking] = useState(true);
 
-  // Check for URL parameter to force onboarding (for testing)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
@@ -37,12 +36,7 @@ export function OnboardingCheck({ children }: OnboardingCheckProps) {
         const status = await checkUserDataStatus(user.id);
         setDataStatus(status);
         
-        // Show onboarding if user is a first-time user
-        // This now includes the logic from the old system:
-        // - Show if no accounts OR all accounts have zero balance
-        // - BUT NOT if they've completed setup OR skipped for later
         if (status.isFirstTimeUser) {
-          // Add a 1 second delay like the old system
           const timer = setTimeout(() => {
             setShowOnboarding(true);
           }, 1000);
@@ -50,7 +44,6 @@ export function OnboardingCheck({ children }: OnboardingCheckProps) {
           return () => clearTimeout(timer);
         }
       } catch (error) {
-        // Silently fail - not critical
       } finally {
         setChecking(false);
       }
@@ -65,7 +58,6 @@ export function OnboardingCheck({ children }: OnboardingCheckProps) {
     setShowOnboarding(false);
   };
 
-  // Don't render anything until we have user data
   if (!user) {
     return null;
   }
@@ -74,7 +66,6 @@ export function OnboardingCheck({ children }: OnboardingCheckProps) {
     <>
       {children}
       
-      {/* Onboarding Modal - shown for first-time users */}
       <OnboardingModal
         open={showOnboarding}
         onClose={handleCloseOnboarding}

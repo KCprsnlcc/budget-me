@@ -4,10 +4,6 @@ import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
 
-// ---------------------------------------------------------------------------
-// User Financial Data Types
-// ---------------------------------------------------------------------------
-
 export interface UserFinancialContext {
   profile: {
     fullName: string | null;
@@ -70,10 +66,6 @@ export interface UserFinancialContext {
   }>;
 }
 
-// ---------------------------------------------------------------------------
-// User Profile Data Types
-// ---------------------------------------------------------------------------
-
 export interface UserProfile {
   id: string;
   fullName: string | null;
@@ -85,10 +77,6 @@ export interface UserProfile {
   language: string;
   createdAt: string;
 }
-
-// ---------------------------------------------------------------------------
-// Fetch User Profile for Chatbot
-// ---------------------------------------------------------------------------
 
 export async function fetchUserProfile(
   userId: string
@@ -127,15 +115,10 @@ export async function fetchUserProfile(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Fetch User's Financial Context for Chatbot
-// ---------------------------------------------------------------------------
-
 export async function fetchUserFinancialContext(
   userId: string
 ): Promise<{ data: UserFinancialContext | null; error: string | null }> {
   try {
-    // Fetch user profile
     const { data: profileData } = await supabase
       .from("profiles")
       .select("full_name, email, phone, date_of_birth, avatar_url")
@@ -150,7 +133,6 @@ export async function fetchUserFinancialContext(
       avatarUrl: profileData?.avatar_url ?? null,
     };
 
-    // Fetch accounts with full details
     const { data: accountsData } = await supabase
       .from("accounts")
       .select("id, account_name, account_type, balance, is_default, institution_name")
@@ -170,7 +152,6 @@ export async function fetchUserFinancialContext(
 
     const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
 
-    // Fetch dashboard summary
     const { data: summaryData } = await supabase
       .from("transactions")
       .select("type, amount, date")
@@ -178,7 +159,6 @@ export async function fetchUserFinancialContext(
       .eq("status", "completed")
       .order("date", { ascending: false });
 
-    // Calculate income/expenses from all-time data
     let totalIncome = 0;
     let totalExpenses = 0;
     const categoryTotals: Record<string, number> = {};
@@ -194,7 +174,6 @@ export async function fetchUserFinancialContext(
 
     const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
 
-    // Fetch recent transactions (last 10)
     const { data: recentTxns } = await supabase
       .from("transactions")
       .select(
@@ -223,7 +202,6 @@ export async function fetchUserFinancialContext(
       };
     });
 
-    // Fetch budgets
     const { data: budgetsData } = await supabase
       .from("budgets")
       .select(
@@ -249,7 +227,6 @@ export async function fetchUserFinancialContext(
       };
     });
 
-    // Fetch goals
     const { data: goalsData } = await supabase
       .from("goals")
       .select("*")
@@ -272,10 +249,8 @@ export async function fetchUserFinancialContext(
       };
     });
 
-    // Fetch family members
     let familyMembers: any[] = [];
     try {
-      // First, get the user's family membership
       const { data: userFamilyData, error: userFamilyError } = await supabase
         .from("family_members")
         .select("family_id, role")
@@ -284,10 +259,8 @@ export async function fetchUserFinancialContext(
         .single();
 
       if (userFamilyError || !userFamilyData) {
-        // User is not in a family, continue without family data
         familyMembers = [];
       } else {
-        // Fetch all family members for this family
         const { data: membersData, error: membersError } = await supabase
           .from("family_members")
           .select("id, user_id, role")
@@ -298,7 +271,6 @@ export async function fetchUserFinancialContext(
           console.error('Family members query error:', membersError);
           familyMembers = [];
         } else {
-          // Fetch profiles for all members
           const memberUserIds = (membersData ?? []).map((m: any) => m.user_id);
           
           if (memberUserIds.length > 0) {
@@ -323,11 +295,9 @@ export async function fetchUserFinancialContext(
       }
     } catch (error) {
       console.error('Family members fetch error:', error);
-      // Continue without family data if fetch fails
       familyMembers = [];
     }
 
-    // Calculate top spending categories from recent transactions
     const expenseTransactions = recentTransactions.filter((t) => t.type === "expense");
     const categoryMap: Record<string, number> = {};
     let totalSpent = 0;
@@ -370,9 +340,6 @@ export async function fetchUserFinancialContext(
   }
 }
 
-// ---------------------------------------------------------------------------
-// Format User Context for AI System Prompt
-// ---------------------------------------------------------------------------
 
 export function formatUserContextForAI(context: UserFinancialContext): string {
   const { profile, accounts, summary, recentTransactions, budgets, goals, familyMembers, topCategories } = context;

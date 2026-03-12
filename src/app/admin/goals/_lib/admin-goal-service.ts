@@ -3,7 +3,6 @@ import type { AdminGoal, AdminGoalStats, AdminGoalFilters, AdminGoalFormState } 
 
 const supabase = createClient();
 
-// Map raw DB row to AdminGoal
 function mapRow(row: Record<string, any>, profile?: Record<string, any> | null, family?: Record<string, any> | null): AdminGoal {
     const target = Number(row.target_amount);
     const current = Number(row.current_amount);
@@ -39,7 +38,6 @@ function mapRow(row: Record<string, any>, profile?: Record<string, any> | null, 
     };
 }
 
-// Fetch all goals with filters (admin view)
 export async function fetchAdminGoals(
     filters: AdminGoalFilters = {},
     page: number = 1,
@@ -50,7 +48,6 @@ export async function fetchAdminGoals(
         .select("*", { count: "exact" })
         .order("created_at", { ascending: false });
 
-    // Apply filters
     if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
         const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
         const endDate = new Date(filters.year as number, filters.month as number, 0);
@@ -67,7 +64,6 @@ export async function fetchAdminGoals(
     if (filters.isFamily === "true") query = query.eq("is_family_goal", true);
     if (filters.isFamily === "false") query = query.eq("is_family_goal", false);
 
-    // Pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     query = query.range(from, to);
@@ -75,7 +71,6 @@ export async function fetchAdminGoals(
     const { data, error, count } = await query;
     if (error) return { data: [], error: error.message, count: null };
 
-    // Fetch user profiles separately
     const userIds = [...new Set((data ?? []).map((g: any) => g.user_id))];
     const { data: profiles } = await supabase
         .from("profiles")
@@ -86,7 +81,6 @@ export async function fetchAdminGoals(
         (profiles ?? []).map((p: any) => [p.id, { email: p.email, full_name: p.full_name, avatar_url: p.avatar_url }])
     );
 
-    // Fetch family data if any goals have family_id
     const familyIds = [...new Set((data ?? []).filter((g: any) => g.family_id).map((g: any) => g.family_id))];
     let familyMap = new Map<string, any>();
     if (familyIds.length > 0) {
@@ -106,30 +100,25 @@ export async function fetchAdminGoals(
     return { data: mappedData, error: null, count: count ?? 0 };
 }
 
-// Fetch admin goal statistics
 export async function fetchAdminGoalStats(): Promise<AdminGoalStats | null> {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
 
-    // Total goals
     const { count: totalGoals } = await supabase
         .from("goals")
         .select("*", { count: "exact", head: true });
 
-    // Active goals
     const { count: activeGoals } = await supabase
         .from("goals")
         .select("*", { count: "exact", head: true })
         .eq("status", "in_progress");
 
-    // Completed goals
     const { count: completedGoals } = await supabase
         .from("goals")
         .select("*", { count: "exact", head: true })
         .eq("status", "completed");
 
-    // Money data
     const { data: allGoals } = await supabase
         .from("goals")
         .select("current_amount, target_amount, user_id");
@@ -143,10 +132,8 @@ export async function fetchAdminGoalStats(): Promise<AdminGoalStats | null> {
 
     const averageProgress = totalTargeted > 0 ? Math.round((totalSaved / totalTargeted) * 100) : 0;
 
-    // Active users (users with at least one goal)
     const activeUsers = new Set((allGoals ?? []).map((g: any) => g.user_id)).size;
 
-    // Goal growth (last 6 months)
     const goalGrowth: { month: string; count: number }[] = [];
     for (let i = 5; i >= 0; i--) {
         const d = new Date(currentYear, currentMonth - 1 - i, 1);
@@ -166,14 +153,12 @@ export async function fetchAdminGoalStats(): Promise<AdminGoalStats | null> {
         goalGrowth.push({ month: label, count: count ?? 0 });
     }
 
-    // Month-over-month growth
     const currentMonthCount = goalGrowth[goalGrowth.length - 1]?.count ?? 0;
     const previousMonthCount = goalGrowth[goalGrowth.length - 2]?.count ?? 0;
     const monthOverMonthGrowth = previousMonthCount > 0
         ? ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100
         : 0;
 
-    // Category distribution
     const { data: catData } = await supabase
         .from("goals")
         .select("category");
@@ -191,7 +176,6 @@ export async function fetchAdminGoalStats(): Promise<AdminGoalStats | null> {
         percentage: Math.round((count / total) * 100),
     }));
 
-    // Top savers
     const { data: userGoalData } = await supabase
         .from("goals")
         .select("user_id, current_amount");
@@ -246,7 +230,6 @@ export async function fetchAdminGoalStats(): Promise<AdminGoalStats | null> {
     };
 }
 
-// Create goal (admin)
 export async function createAdminGoal(form: AdminGoalFormState): Promise<{ error: string | null }> {
     const target = parseFloat(form.target_amount);
     if (isNaN(target) || target <= 0) return { error: "Target amount must be greater than zero." };
@@ -275,7 +258,6 @@ export async function createAdminGoal(form: AdminGoalFormState): Promise<{ error
     return { error: null };
 }
 
-// Update goal (admin)
 export async function updateAdminGoal(goalId: string, form: AdminGoalFormState): Promise<{ error: string | null }> {
     const target = parseFloat(form.target_amount);
     if (isNaN(target) || target <= 0) return { error: "Target amount must be greater than zero." };
@@ -303,14 +285,12 @@ export async function updateAdminGoal(goalId: string, form: AdminGoalFormState):
     return { error: null };
 }
 
-// Delete goal (admin)
 export async function deleteAdminGoal(goalId: string): Promise<{ error: string | null }> {
     const { error } = await supabase.from("goals").delete().eq("id", goalId);
     if (error) return { error: error.message };
     return { error: null };
 }
 
-// Fetch all users for filter dropdown
 export async function fetchAllUsers(): Promise<{ id: string; email: string; full_name: string | null }[]> {
     const { data } = await supabase
         .from("profiles")
@@ -319,7 +299,6 @@ export async function fetchAllUsers(): Promise<{ id: string; email: string; full
     return data ?? [];
 }
 
-// Admin goal contribution
 export async function contributeToAdminGoal(
     goalId: string,
     amount: number,
@@ -329,9 +308,6 @@ export async function contributeToAdminGoal(
         return { error: "Contribution amount must be greater than zero." };
     }
 
-    // To properly implement a manual contribution in timezone aware boundaries, we do manual local date retrieval
-    // But wait, the standard date string 'YYYY-MM-DD' usually suffices without full TZ imports if we do it cleanly.
-    // For safety, we will just pass new Date().toISOString() since Supabase uses TIMESTAMPTZ.
     const now = new Date();
     const dateStr = now.toISOString().split('T')[0];
 
@@ -343,7 +319,6 @@ export async function contributeToAdminGoal(
         contribution_type: "manual",
     };
 
-    // Insert contribution record - trigger will handle goal progress update
     const { error: contributionError } = await supabase
         .from("goal_contributions")
         .insert(contribution);

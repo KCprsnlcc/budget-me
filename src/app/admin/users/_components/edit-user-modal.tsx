@@ -102,11 +102,11 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
+      {}
       <Stepper steps={STEPS} currentStep={currentStep} />
 
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* Step 1: Role Type */}
+        {}
         {currentStep === 1 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -159,7 +159,7 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
           </div>
         )}
 
-        {/* Step 2: User Details */}
+        {}
         {currentStep === 2 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -171,7 +171,7 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
               </h2>
             </div>
             <div className="space-y-5">
-              {/* Email (disabled) */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                   Email Address
@@ -185,7 +185,7 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
                 <p className="text-[10px] text-slate-400 mt-1">Email cannot be changed</p>
               </div>
 
-              {/* Full Name */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                   Full Name <span className="text-slate-400">*</span>
@@ -199,7 +199,7 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
                 />
               </div>
 
-              {/* Phone + Date of Birth */}
+              {}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
@@ -227,7 +227,7 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
                 </div>
               </div>
 
-              {/* Active Status */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                   Status
@@ -243,7 +243,7 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
           </div>
         )}
 
-        {/* Step 3: Review */}
+        {}
         {currentStep === 3 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -255,7 +255,7 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
               </h2>
             </div>
             <div className="space-y-4">
-              {/* User Role Display */}
+              {}
               <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Updated Role</div>
                 <div className="flex items-center justify-center gap-2 my-2">
@@ -273,7 +273,7 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
                 </span>
               </div>
 
-              {/* Review Details */}
+              {}
               <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="p-5 space-y-0 divide-y divide-slate-100">
                   <ReviewRow label="Full Name" value={formData.full_name || "—"} />
@@ -283,7 +283,7 @@ export function EditUserModal({ open, onClose, user, onSuccess }: EditUserModalP
                 </div>
               </div>
 
-              {/* Success Notice */}
+              {}
               <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 items-start">
                 <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
                 <div>

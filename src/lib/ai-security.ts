@@ -1,21 +1,7 @@
-/**
- * AI Security Middleware & Utilities
- * Centralized security layer for all AI API routes.
- * 
- * - Session authentication via Supabase
- * - IP + User-based rate limiting (10 req/min)
- * - CSRF origin validation
- * - Suspicious user-agent blocking (e.g., JSHunter Security Analyzer)
- * - Input validation (max prompt length, required fields)
- * - Request metadata logging for anomaly detection
- */
+
 
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
-
-// =============================================================================
-// Types
-// =============================================================================
 
 export interface AISecurityContext {
   userId: string;
@@ -37,15 +23,10 @@ export interface AIRequestLog {
   blockReason?: string;
 }
 
-// =============================================================================
-// Constants
-// =============================================================================
+const RATE_LIMIT_WINDOW_MS = 60_000; 
+const RATE_LIMIT_MAX_REQUESTS = 10;  
+const MAX_PROMPT_LENGTH = 50_000;     
 
-const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 10;  // max 10 per minute per user/IP
-const MAX_PROMPT_LENGTH = 50_000;     // max characters per prompt
-
-// Suspicious user-agent patterns to block
 const BLOCKED_USER_AGENTS = [
   "jshunter",
   "security analyzer",
@@ -67,10 +48,6 @@ const BLOCKED_USER_AGENTS = [
   "scanbot",
 ];
 
-// =============================================================================
-// In-Memory Rate Limiter (per-process; use Redis in production)
-// =============================================================================
-
 interface RateLimitEntry {
   count: number;
   windowStart: number;
@@ -78,7 +55,6 @@ interface RateLimitEntry {
 
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
-// Clean up expired entries every 5 minutes
 if (typeof setInterval !== "undefined") {
   setInterval(() => {
     const now = Date.now();
@@ -95,7 +71,7 @@ function checkRateLimit(key: string): { allowed: boolean; remaining: number; res
   const entry = rateLimitStore.get(key);
 
   if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
-    // New window
+    
     rateLimitStore.set(key, { count: 1, windowStart: now });
     return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - 1, resetMs: RATE_LIMIT_WINDOW_MS };
   }
@@ -110,10 +86,6 @@ function checkRateLimit(key: string): { allowed: boolean; remaining: number; res
   return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - entry.count, resetMs };
 }
 
-// =============================================================================
-// Request Logging
-// =============================================================================
-
 const requestLogs: AIRequestLog[] = [];
 const MAX_LOG_SIZE = 1000;
 
@@ -122,7 +94,7 @@ function logRequest(log: AIRequestLog): void {
   if (requestLogs.length > MAX_LOG_SIZE) {
     requestLogs.splice(0, requestLogs.length - MAX_LOG_SIZE);
   }
-  // Also log to server console for monitoring
+  
   const emoji = log.status === "allowed" ? "✅" : "🚫";
   console.log(
     `${emoji} [AI-SEC] ${log.timestamp} | ${log.route} | user=${log.userId} | ip=${log.ip} | prompt=${log.promptLength}ch | ${log.status}${log.blockReason ? ` (${log.blockReason})` : ""}`
@@ -133,10 +105,6 @@ export function getRequestLogs(): AIRequestLog[] {
   return [...requestLogs];
 }
 
-// =============================================================================
-// Client IP extraction
-// =============================================================================
-
 function getClientIP(request: NextRequest): string {
   return (
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
@@ -145,10 +113,6 @@ function getClientIP(request: NextRequest): string {
     "unknown"
   );
 }
-
-// =============================================================================
-// Main Security Middleware
-// =============================================================================
 
 export async function validateAIRequest(
   request: NextRequest,
@@ -159,7 +123,6 @@ export async function validateAIRequest(
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");
 
-  // ─── 1. Block suspicious user agents ───────────────────────────────────
   const lowerUA = userAgent.toLowerCase();
   for (const blocked of BLOCKED_USER_AGENTS) {
     if (lowerUA.includes(blocked)) {
@@ -184,41 +147,38 @@ export async function validateAIRequest(
     }
   }
 
-  // ─── 2. Validate request origin (CSRF protection) ─────────────────────
   const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   const allowedOrigins = [
     configuredSiteUrl,
-    // Also allow the same domain with/without trailing slash and http/https variants
-    configuredSiteUrl?.replace(/\/$/, ''), // Remove trailing slash
-    configuredSiteUrl?.replace(/^http:/, 'https:'), // HTTPS variant
-    configuredSiteUrl?.replace(/^http:/, 'https:').replace(/\/$/, ''), // HTTPS without trailing slash
+    
+    configuredSiteUrl?.replace(/\/$/, ''), 
+    configuredSiteUrl?.replace(/^http:/, 'https:'), 
+    configuredSiteUrl?.replace(/^http:/, 'https:').replace(/\/$/, ''), 
     "http://localhost:3000",
-    "http://localhost:3001",
+     "http://localhost:3001",
     "http://127.0.0.1:3000",
+    "http://192.168.1.1:3000",
   ].filter(Boolean);
 
-  // Check both origin and referer headers
   let requestOrigin: string | null = null;
   try {
     requestOrigin = origin || (referer ? new URL(referer).origin : null);
   } catch (err) {
-    // Invalid URL in referer, skip origin validation
+    
     console.warn("[AI-SEC] Invalid referer URL:", referer);
   }
-  
-  // Only validate origin if we have both a request origin and configured allowed origins
-  // Skip validation for same-origin requests (when origin header is missing)
+
   if (requestOrigin && allowedOrigins.length > 0) {
     const isAllowed = allowedOrigins.some(
       (allowed) => {
         if (!allowed) return false;
-        // Exact match or starts with (for subdomains)
+        
         return requestOrigin === allowed || requestOrigin.startsWith(allowed);
       }
     );
     
     if (!isAllowed) {
-      // Log but don't block in development (localhost)
+      
       const isDevelopment = requestOrigin.includes("localhost") || requestOrigin.includes("127.0.0.1");
       
       console.warn("[AI-SEC] Origin validation:", {
@@ -240,8 +200,7 @@ export async function validateAIRequest(
         status: isDevelopment ? "allowed" : "blocked",
         blockReason: isDevelopment ? `Dev origin: ${requestOrigin}` : `Invalid origin: ${requestOrigin} (allowed: ${allowedOrigins.join(", ")})`,
       });
-      
-      // Only block in production
+
       if (!isDevelopment) {
         return {
           error: NextResponse.json(
@@ -253,7 +212,6 @@ export async function validateAIRequest(
     }
   }
 
-  // ─── 3. Authenticate user via Supabase session ────────────────────────
   let userId = "unknown";
   let userEmail = "unknown";
   let sessionId = "unknown";
@@ -268,7 +226,7 @@ export async function validateAIRequest(
             return request.cookies.getAll();
           },
           setAll() {
-            // No-op for API routes — cookies are read-only here
+            
           },
         },
       }
@@ -308,7 +266,6 @@ export async function validateAIRequest(
     userId = user.id;
     userEmail = user.email || "unknown";
 
-    // Get session for session ID tracking
     const { data: { session } } = await supabase.auth.getSession();
     sessionId = session?.access_token?.slice(-12) || "unknown";
   } catch (err) {
@@ -333,7 +290,6 @@ export async function validateAIRequest(
     };
   }
 
-  // ─── 4. Rate limiting (both IP-based and user-based) ──────────────────
   const ipLimit = checkRateLimit(`ip:${ip}`);
   const userLimit = checkRateLimit(`user:${userId}`);
 
@@ -377,10 +333,6 @@ export async function validateAIRequest(
   };
 }
 
-// =============================================================================
-// Input validation helpers
-// =============================================================================
-
 export function validatePromptLength(content: string): string | null {
   if (!content || content.trim().length === 0) {
     return "Message content is required";
@@ -391,10 +343,6 @@ export function validatePromptLength(content: string): string | null {
   return null;
 }
 
-// =============================================================================
-// OpenRouter API key (server-only)
-// =============================================================================
-
 export function getOpenRouterApiKey(): string {
   const key = process.env.OPENROUTER_API_KEY || "";
   if (!key) {
@@ -403,4 +351,4 @@ export function getOpenRouterApiKey(): string {
   return key;
 }
 
-export const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+export const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"

@@ -130,9 +130,9 @@ export function AIFinancialIntelligence({
           </Button>
         </div>
 
-        {/* No Data Grid: Key Highlights */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          {/* Financial Summary Card - No Data */}
+          {}
           <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
             <div className="p-5 sm:p-6">
               <div className="flex items-center gap-3 mb-4">
@@ -149,7 +149,7 @@ export function AIFinancialIntelligence({
             </div>
           </div>
 
-          {/* Risk Management Card - No Data */}
+          {}
           <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
             <div className="p-5 sm:p-6">
               <div className="flex items-center gap-3 mb-4">
@@ -166,7 +166,7 @@ export function AIFinancialIntelligence({
             </div>
           </div>
 
-          {/* Growth Potential Card - No Data */}
+          {}
           <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
             <div className="p-5 sm:p-6">
               <div className="flex items-center gap-3 mb-4">
@@ -224,9 +224,9 @@ export function AIFinancialIntelligence({
           </div>
         </div>
 
-      {/* Initial Grid: Key Highlights */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        {/* High-Level Financial Analysis Card */}
+        {}
         <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm hover:shadow-md transition-all">
           <div className="p-5 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -258,7 +258,7 @@ export function AIFinancialIntelligence({
           </div>
         </div>
 
-        {/* Risk Management Card */}
+        {}
         <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm hover:shadow-md transition-all">
           <div className="p-5 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -297,7 +297,7 @@ export function AIFinancialIntelligence({
           </div>
         </div>
 
-        {/* Smart Opportunities Card */}
+        {}
         <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm hover:shadow-md transition-all">
           <div className="p-5 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -332,12 +332,12 @@ export function AIFinancialIntelligence({
         </div>
       </div>
 
-      {/* Detailed Expansion (Hidden by default) */}
+      {}
       {detailedInsights && (
         <div className="space-y-4 sm:space-y-6 pt-4 sm:pt-6 pb-4 sm:pb-8 border-t border-slate-100 animate-fade-in">
           {aiInsights?.recommendations && aiInsights.recommendations.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              {/* Actionable Recommendations */}
+              {}
               <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 lg:p-6">
                 <h4 className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider sm:tracking-widest flex items-center gap-2">
                   <ListChecks size={14} className="text-emerald-500 sm:w-4 sm:h-4" />
@@ -368,7 +368,7 @@ export function AIFinancialIntelligence({
                 </div>
               </div>
 
-              {/* Deep Risk Assessment */}
+              {}
               <div className="space-y-3 sm:space-y-4 lg:col-span-2">
                 <h4 className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider sm:tracking-widest flex items-center gap-2 px-3 sm:px-0">
                   <ShieldCheck size={14} className="text-amber-500 sm:w-4 sm:h-4" />
@@ -429,7 +429,7 @@ export function AIFinancialIntelligence({
             </div>
           )}
 
-          {/* Long-term Opportunity Map */}
+          {}
           {aiInsights?.longTermOpportunities && aiInsights.longTermOpportunities.length > 0 ? (
             <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm hover:shadow-md transition-all">
               <div className="p-4 sm:p-5 lg:p-6">

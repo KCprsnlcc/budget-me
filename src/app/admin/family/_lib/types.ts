@@ -1,4 +1,4 @@
-// Admin Family Management Types
+
 
 export type AdminFamily = {
     id: string;
@@ -12,7 +12,7 @@ export type AdminFamily = {
     created_at: string;
     updated_at: string;
     status: "active" | "inactive";
-    // Joined data
+
     creator_email?: string;
     creator_name?: string;
     creator_avatar?: string;
@@ -32,7 +32,7 @@ export type AdminFamilyMember = {
     joined_at: string | null;
     created_at: string;
     updated_at: string;
-    // Joined data
+
     user_email?: string;
     user_name?: string;
     user_avatar?: string;
@@ -50,7 +50,7 @@ export type AdminFamilyInvitation = {
     expires_at: string | null;
     responded_at: string | null;
     created_at: string;
-    // Joined data
+
     family_name?: string;
     inviter_email?: string;
     inviter_name?: string;
@@ -66,7 +66,7 @@ export type AdminFamilyJoinRequest = {
     reviewed_at: string | null;
     review_message: string | null;
     created_at: string;
-    // Joined data
+
     family_name?: string;
     user_email?: string;
     user_name?: string;

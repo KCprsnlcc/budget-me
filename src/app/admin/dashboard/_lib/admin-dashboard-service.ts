@@ -2,10 +2,6 @@ import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 export type AdminSummary = {
   totalUsers: number;
   totalTransactions: number;
@@ -43,43 +39,33 @@ export type SystemActivity = {
   ai_requests: number;
 };
 
-// ---------------------------------------------------------------------------
-// ADMIN SUMMARY — System-wide metrics using Supabase
-// ---------------------------------------------------------------------------
-
 export async function fetchAdminSummary(): Promise<AdminSummary> {
   try {
-    // Fetch total users
+
     const { count: totalUsers } = await supabase
       .from("profiles")
       .select("id", { count: "exact", head: true });
 
-    // Fetch total transactions
     const { count: totalTransactions } = await supabase
       .from("transactions")
       .select("id", { count: "exact", head: true });
 
-    // Fetch total budgets
     const { count: totalBudgets } = await supabase
       .from("budgets")
       .select("id", { count: "exact", head: true });
 
-    // Fetch total goals
     const { count: totalGoals } = await supabase
       .from("goals")
       .select("id", { count: "exact", head: true });
 
-    // Fetch total families
     const { count: totalFamilies } = await supabase
       .from("families")
       .select("id", { count: "exact", head: true });
 
-    // Fetch AI usage (chatbot messages)
     const { count: totalAIUsage } = await supabase
       .from("chatbot_messages")
       .select("id", { count: "exact", head: true });
 
-    // Calculate system revenue (sum of all income transactions)
     const { data: revenueData } = await supabase
       .from("transactions")
       .select("amount, type")
@@ -91,7 +77,6 @@ export async function fetchAdminSummary(): Promise<AdminSummary> {
       systemRevenue += Number(row.amount);
     }
 
-    // Fetch active users (users with activity in last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -118,10 +103,6 @@ export async function fetchAdminSummary(): Promise<AdminSummary> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// USER ACTIVITY — Recent user registrations and activity
-// ---------------------------------------------------------------------------
-
 export async function fetchUserActivity(limit: number = 10): Promise<UserActivity[]> {
   try {
     const { data: profiles } = await supabase
@@ -132,7 +113,6 @@ export async function fetchUserActivity(limit: number = 10): Promise<UserActivit
 
     if (!profiles) return [];
 
-    // Fetch transaction, budget, and goal counts for each user
     const userActivities: UserActivity[] = [];
 
     for (const profile of profiles) {
@@ -171,15 +151,10 @@ export async function fetchUserActivity(limit: number = 10): Promise<UserActivit
   }
 }
 
-// ---------------------------------------------------------------------------
-// MODULE STATS — Statistics for each module
-// ---------------------------------------------------------------------------
-
 export async function fetchModuleStats(): Promise<ModuleStats[]> {
   try {
     const stats: ModuleStats[] = [];
 
-    // Transactions
     const { count: totalTransactions } = await supabase
       .from("transactions")
       .select("id", { count: "exact", head: true });
@@ -206,7 +181,6 @@ export async function fetchModuleStats(): Promise<ModuleStats[]> {
       total_amount: totalTransactionAmount,
     });
 
-    // Budgets
     const { count: totalBudgets } = await supabase
       .from("budgets")
       .select("id", { count: "exact", head: true });
@@ -233,7 +207,6 @@ export async function fetchModuleStats(): Promise<ModuleStats[]> {
       total_amount: totalBudgetAmount,
     });
 
-    // Goals
     const { count: totalGoals } = await supabase
       .from("goals")
       .select("id", { count: "exact", head: true });
@@ -259,7 +232,6 @@ export async function fetchModuleStats(): Promise<ModuleStats[]> {
       total_amount: totalGoalAmount,
     });
 
-    // Families
     const { count: totalFamilies } = await supabase
       .from("families")
       .select("id", { count: "exact", head: true });
@@ -276,7 +248,6 @@ export async function fetchModuleStats(): Promise<ModuleStats[]> {
       total_amount: 0,
     });
 
-    // AI Predictions
     const { count: totalPredictions } = await supabase
       .from("prophet_predictions")
       .select("id", { count: "exact", head: true });
@@ -288,7 +259,6 @@ export async function fetchModuleStats(): Promise<ModuleStats[]> {
       total_amount: 0,
     });
 
-    // Chatbot
     const { count: totalMessages } = await supabase
       .from("chatbot_messages")
       .select("id", { count: "exact", head: true });
@@ -307,10 +277,6 @@ export async function fetchModuleStats(): Promise<ModuleStats[]> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// SYSTEM ACTIVITY — Daily activity metrics
-// ---------------------------------------------------------------------------
-
 export async function fetchSystemActivity(days: number = 7): Promise<SystemActivity[]> {
   try {
     const activities: SystemActivity[] = [];
@@ -326,21 +292,18 @@ export async function fetchSystemActivity(days: number = 7): Promise<SystemActiv
       nextDate.setDate(nextDate.getDate() + 1);
       const nextDateStr = nextDate.toISOString().split("T")[0];
 
-      // New users - using DATE() function for proper date comparison
       const { data: newUsersData } = await supabase
         .from("profiles")
         .select("id")
         .gte("created_at", `${dateStr}T00:00:00`)
         .lt("created_at", `${nextDateStr}T00:00:00`);
 
-      // Transactions
       const { data: transactionsData } = await supabase
         .from("transactions")
         .select("id")
         .gte("created_at", `${dateStr}T00:00:00`)
         .lt("created_at", `${nextDateStr}T00:00:00`);
 
-      // AI requests
       const { data: aiRequestsData } = await supabase
         .from("chatbot_messages")
         .select("id")

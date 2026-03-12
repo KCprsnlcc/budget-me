@@ -1,4 +1,4 @@
-// Admin Budget Management Types
+
 
 export type BudgetPeriod = "day" | "week" | "month" | "quarter" | "year" | "custom";
 export type BudgetStatus = "active" | "paused" | "completed" | "archived";
@@ -25,7 +25,7 @@ export type AdminBudget = {
     rollover_amount: number;
     created_at: string;
     updated_at: string;
-    // Joined data
+
     user_email?: string;
     user_name?: string;
     user_avatar?: string;

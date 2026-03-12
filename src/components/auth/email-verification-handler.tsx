@@ -19,12 +19,7 @@ export function EmailVerificationHandler() {
       if (type === "signup" && token) {
         try {
           const supabase = createClient();
-          
-          // For email verification, we need to use verifyOtp with email
-          // Since we don't have the email directly, we'll use a different approach
-          // Try to get the current session or use the token directly
-          
-          // Method 1: Try to verify using the token as a hash (for password recovery style)
+
           const { error: hashError } = await supabase.auth.verifyOtp({
             token_hash: token,
             type: "signup",
@@ -40,8 +35,6 @@ export function EmailVerificationHandler() {
             return;
           }
 
-          // Method 2: If hash verification fails, the email was likely confirmed server-side
-          // This happens when PKCE fails but Supabase still confirms the email
           console.log("Hash verification failed, but email might be confirmed:", hashError);
           setStatus("success");
           setMessage("Email verified successfully! Redirecting to login...");

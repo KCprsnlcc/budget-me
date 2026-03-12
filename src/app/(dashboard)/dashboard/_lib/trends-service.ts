@@ -1,4 +1,3 @@
-// Flexible transaction type for trends analysis
 import { getPhilippinesNow } from "@/lib/timezone";
 
 export interface TrendsTransaction {
@@ -24,7 +23,6 @@ export interface SpendingTrend {
   recommendation?: string;
 }
 
-// Actual expense categories from database
 const ACTUAL_EXPENSE_CATEGORIES = [
   "Debt Payments",
   "Education", 
@@ -44,15 +42,10 @@ const ACTUAL_EXPENSE_CATEGORIES = [
   "Utilities"
 ];
 
-/**
- * Generate sophisticated spending trends with variability and insights
- * Based on actual database expense categories using ALL user transactions
- */
 export function generateSpendingTrends(
   transactions: TrendsTransaction[],
   limit: number = 4
 ): SpendingTrend[] {
-  // Filter expense transactions only
   const expenses = transactions.filter(tx => 
     tx.type === "expense" && 
     tx.amount && 
@@ -63,7 +56,6 @@ export function generateSpendingTrends(
     return [];
   }
 
-  // Group transactions by month and category for ALL-time analysis
   const monthlyCategoryData = new Map<string, Map<string, number>>();
   const categoryTotals = new Map<string, number>();
   const categoryMonths = new Map<string, Set<string>>();
@@ -73,14 +65,12 @@ export function generateSpendingTrends(
     const monthKey = `${txDate.getFullYear()}-${String(txDate.getMonth() + 1).padStart(2, "0")}`;
     const categoryName = tx.category || "Uncategorized";
     
-    // Track monthly data
     if (!monthlyCategoryData.has(monthKey)) {
       monthlyCategoryData.set(monthKey, new Map());
     }
     const monthData = monthlyCategoryData.get(monthKey)!;
     monthData.set(categoryName, (monthData.get(categoryName) ?? 0) + Number(tx.amount));
     
-    // Track totals and months for each category
     categoryTotals.set(categoryName, (categoryTotals.get(categoryName) ?? 0) + Number(tx.amount));
     if (!categoryMonths.has(categoryName)) {
       categoryMonths.set(categoryName, new Set());
@@ -88,15 +78,12 @@ export function generateSpendingTrends(
     categoryMonths.get(categoryName)!.add(monthKey);
   }
 
-  // Get sorted months
   const sortedMonths = Array.from(monthlyCategoryData.keys()).sort();
   
   if (sortedMonths.length < 2) {
-    // If less than 2 months, return top categories by total spending
     const trends: SpendingTrend[] = [];
     const currentTime = getPhilippinesNow().getTime();
     
-    // Prioritize actual database categories, but include user categories too
     const allCategories = new Set([
       ...ACTUAL_EXPENSE_CATEGORIES,
       ...Array.from(categoryTotals.keys())
@@ -106,11 +93,9 @@ export function generateSpendingTrends(
       const totalAmount = categoryTotals.get(category) ?? 0;
       if (totalAmount === 0) return;
       
-      // Add time-based variability for meaningful refresh
       const seed = category.charCodeAt(0) + Math.floor(currentTime / 10000);
       const randomFactor = (Math.sin(seed) + 1) / 2;
       
-      // Apply realistic variability based on category type
       let variabilityFactor = 0.1;
       if (["Housing", "Insurance", "Debt Payments"].includes(category)) {
         variabilityFactor = 0.05;
@@ -125,7 +110,7 @@ export function generateSpendingTrends(
       trends.push({ 
         category, 
         currentAmount: adjustedAmount, 
-        previousAmount: 0, // No previous month comparison
+        previousAmount: 0,
         change: 0,
         trend: "neutral",
         insight: `All-time ${category} spending: ${Math.round(adjustedAmount).toLocaleString()}`,
@@ -133,7 +118,6 @@ export function generateSpendingTrends(
       });
     });
     
-    // Sort by total spending with time variation
     trends.sort((a, b) => {
       const timeVariation = Math.sin(currentTime / 5000) * 50;
       const scoreA = a.currentAmount + timeVariation;
@@ -144,22 +128,18 @@ export function generateSpendingTrends(
     return trends.slice(0, limit);
   }
 
-  // Compare the most recent month with historical average for all-time analysis
   const recentMonth = sortedMonths[sortedMonths.length - 1];
   const recentSpending = monthlyCategoryData.get(recentMonth) || new Map();
   
-  // Calculate historical averages (excluding recent month)
   const historicalAverages = new Map<string, number>();
-  const historicalMonths = sortedMonths.slice(0, -1); // All months except recent
+  const historicalMonths = sortedMonths.slice(0, -1);
   
-  // Prioritize actual database categories, but include user categories too
   const allCategories = new Set([
     ...ACTUAL_EXPENSE_CATEGORIES,
     ...Array.from(recentSpending.keys()),
     ...Array.from(categoryTotals.keys())
   ]);
   
-  // Calculate historical averages for each category
   allCategories.forEach((category) => {
     let totalHistorical = 0;
     let monthsWithData = 0;
@@ -177,7 +157,6 @@ export function generateSpendingTrends(
     }
   });
   
-  // Calculate trends with insights for all-time analysis
   const trends: SpendingTrend[] = [];
   const currentTime = getPhilippinesNow().getTime();
   
@@ -187,15 +166,12 @@ export function generateSpendingTrends(
     
     if (currentAmount === 0 && historicalAverage === 0) return;
     
-    // Add time-based variability for meaningful refresh
     let adjustedCurrent = currentAmount;
     let adjustedHistorical = historicalAverage;
     
-    // Use category name and time for deterministic but changing variations
     const seed = category.charCodeAt(0) + Math.floor(currentTime / 10000);
     const randomFactor = (Math.sin(seed) + 1) / 2;
     
-    // Apply realistic variability based on category type
     let variabilityFactor = 0.1;
     if (["Housing", "Insurance", "Debt Payments"].includes(category)) {
       variabilityFactor = 0.05;
@@ -219,13 +195,11 @@ export function generateSpendingTrends(
       change = 100;
     }
     
-    // Determine trend
     let trend: SpendingTrend["trend"] = "neutral";
     if (Math.abs(change) < 2) trend = "neutral";
     else if (change > 0) trend = "up";
     else trend = "down";
     
-    // Generate category-specific insights and recommendations
     let insight: string | undefined;
     let recommendation: string | undefined;
     
@@ -258,7 +232,6 @@ export function generateSpendingTrends(
     });
   });
   
-  // Sort by absolute spending amount (with time-based variation for refresh effect)
   trends.sort((a, b) => {
     const timeVariation = Math.sin(currentTime / 5000) * 50;
     const scoreA = a.currentAmount + (Math.random() - 0.5) * 100 + timeVariation;
@@ -269,9 +242,6 @@ export function generateSpendingTrends(
   return trends.slice(0, limit);
 }
 
-/**
- * Get category-specific recommendations based on trend direction
- */
 function getCategoryRecommendation(category: string, isIncreasing: boolean): string {
   const recommendations: Record<string, { up: string; down: string }> = {
     "Housing": {
@@ -347,9 +317,6 @@ function getCategoryRecommendation(category: string, isIncreasing: boolean): str
     );
 }
 
-/**
- * Generate trend insights for specific categories
- */
 export function generateCategoryInsights(trend: SpendingTrend): string {
   const { category, change, trend: trendDirection } = trend;
   
@@ -364,9 +331,6 @@ export function generateCategoryInsights(trend: SpendingTrend): string {
   return `${category} spending ${trendDirection === "up" ? "increased" : "decreased"} by ${Math.abs(Math.round(change))}%.`;
 }
 
-/**
- * Get trend recommendations based on category and change
- */
 export function getTrendRecommendation(trend: SpendingTrend): string | null {
   return trend.recommendation || null;
 }

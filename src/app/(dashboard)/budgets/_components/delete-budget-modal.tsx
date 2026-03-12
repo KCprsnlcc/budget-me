@@ -52,24 +52,20 @@ export function DeleteBudgetModal({
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-md">
-      {/* Header */}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
           Delete Budget
         </span>
       </ModalHeader>
 
-      {/* Body */}
       <ModalBody className="px-5 py-8 bg-[#F9FAFB]/30">
         <div className="text-center animate-txn-in">
-          {/* Warning Message */}
           <h2 className="text-lg font-bold text-gray-900 mb-3">Delete Budget?</h2>
           <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto leading-relaxed">
             Are you sure you want to delete this budget? This action cannot be undone and all tracking data for
             this budget will be permanently lost.
           </p>
 
-          {/* Budget Details */}
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mx-auto max-w-sm">
             <div className="p-5 space-y-0 divide-y divide-gray-100">
               <div className="flex justify-between items-center py-2.5">
@@ -87,7 +83,6 @@ export function DeleteBudgetModal({
             </div>
           </div>
 
-          {/* Error Notice */}
           {deleteError && (
             <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 mx-auto max-w-sm mt-4 items-start">
               <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
@@ -98,7 +93,6 @@ export function DeleteBudgetModal({
             </div>
           )}
 
-          {/* Final Warning */}
           <div className="p-3 rounded-lg bg-white border border-gray-200 text-gray-700 mx-auto max-w-sm mt-6">
             <div className="flex gap-2.5 items-start">
               <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
@@ -113,7 +107,6 @@ export function DeleteBudgetModal({
         </div>
       </ModalBody>
 
-      {/* Footer */}
       <ModalFooter className="flex justify-between px-6 py-4">
         <Button
           variant="outline"

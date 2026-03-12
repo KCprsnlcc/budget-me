@@ -10,7 +10,6 @@ import { CreateFamilyModal, InviteMemberModal } from "../index";
 import { NO_FAMILY_TABS, NO_FAMILY_FEATURES } from "../constants";
 import type { NoFamilyTab, PublicFamily, Invitation } from "../types";
 
-// Helper function to format relative time
 const formatRelativeTime = (dateString?: string) => {
   if (!dateString) return "Unknown time";
 
@@ -64,7 +63,6 @@ export function NoFamilyState({
     setTabSwitching(true);
     setActiveTab(tab);
 
-    // Simulate brief loading delay for tab switch (like Financial Insights refresh)
     setTimeout(() => {
       setTabSwitching(false);
     }, 600);
@@ -78,20 +76,16 @@ export function NoFamilyState({
     onJoinFamily(family.id);
   };
 
-  // Check if user has already requested to join this family
   const hasRequestedFamily = (familyId: string) => {
     return joinRequests.some(req => req.family_id === familyId);
   };
 
-
-  // Skeleton loader for tab content
   const renderTabSkeleton = () => {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="space-y-4 sm:space-y-6 animate-fade-in">
           {activeTab === "create" && (
             <div className="space-y-6 sm:space-y-10">
-              {/* Features Skeleton */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 text-center">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="space-y-2 sm:space-y-4">
@@ -106,7 +100,6 @@ export function NoFamilyState({
                 ))}
               </div>
 
-              {/* Create Button Skeleton */}
               <div className="pt-4 sm:pt-6 flex flex-col items-center border-t border-slate-50">
                 <Skeleton width={140} height={32} borderRadius={8} className="sm:w-[180px] sm:h-9" />
                 <Skeleton width={120} height={10} className="mt-3 sm:mt-4" />
@@ -116,7 +109,6 @@ export function NoFamilyState({
 
           {activeTab === "join" && (
             <div className="space-y-4 sm:space-y-6">
-              {/* Search Input Skeleton */}
               <div className="max-w-6xl mx-auto">
                 <div className="relative mb-6 sm:mb-8">
                   <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2">
@@ -125,7 +117,6 @@ export function NoFamilyState({
                   <Skeleton width="100%" height={40} borderRadius={8} className="sm:h-12" />
                 </div>
 
-                {/* Join Requests Section Skeleton */}
                 <div className="mb-6 sm:mb-8">
                   <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <Skeleton width={120} height={14} className="sm:w-[150px] sm:h-4" />
@@ -160,7 +151,6 @@ export function NoFamilyState({
                   </div>
                 </div>
 
-                {/* Available Families Section Skeleton */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between px-1 mb-3 sm:mb-4">
                     <Skeleton width={100} height={10} className="sm:w-[120px]" />
@@ -189,7 +179,6 @@ export function NoFamilyState({
                   </div>
                 </div>
 
-                {/* Footer Text Skeleton */}
                 <div className="pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-slate-50 text-center">
                   <Skeleton width={180} height={10} className="mx-auto" />
                 </div>
@@ -200,7 +189,6 @@ export function NoFamilyState({
           {activeTab === "invitations" && (
             <div className="space-y-4 sm:space-y-6">
               <div className="max-w-6xl mx-auto">
-                {/* Invitation Cards Skeleton */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {Array.from({ length: 2 }).map((_, i) => (
                     <div key={i} className="p-3 sm:p-4 border border-slate-200 bg-white rounded-lg">
@@ -226,7 +214,6 @@ export function NoFamilyState({
                   ))}
                 </div>
 
-                {/* No Data State Skeleton */}
                 <div className="text-center py-8 sm:py-12">
                   <div className="flex items-center justify-center mx-auto mb-3 sm:mb-4">
                     <Skeleton width={28} height={28} borderRadius={6} className="sm:w-8 sm:h-8" />
@@ -248,7 +235,6 @@ export function NoFamilyState({
 
   return (
     <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-0 animate-fade-in">
-      {/* Header */}
       <div className="text-center mb-8 sm:mb-12">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight mb-2 sm:mb-3">
           Family Finance
@@ -258,9 +244,7 @@ export function NoFamilyState({
         </p>
       </div>
 
-      {/* No Family Tabs Container */}
       <Card className="overflow-hidden">
-        {/* Minimal Tabs */}
         <div className="flex border-b border-slate-200/60 overflow-x-auto scrollbar-hide">
           <button
             className={`flex-1 px-4 sm:px-6 py-3 sm:py-4 text-[10px] sm:text-xs font-semibold uppercase tracking-wider border-b-2 transition-all whitespace-nowrap ${activeTab === "create"
@@ -304,12 +288,10 @@ export function NoFamilyState({
         </div>
 
         <div className="p-4 sm:p-6 md:p-10">
-          {/* Show skeleton during tab switching */}
           {tabSwitching ? (
             renderTabSkeleton()
           ) : (
             <>
-              {/* Create Tab Content */}
               {activeTab === "create" && (
                 <div className="space-y-6 sm:space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 text-center">
@@ -345,7 +327,6 @@ export function NoFamilyState({
                 </div>
               )}
 
-              {/* Join Tab Content */}
               {activeTab === "join" && (
                 <div className="space-y-4 sm:space-y-6">
                   <div className="max-w-6xl mx-auto">
@@ -361,7 +342,6 @@ export function NoFamilyState({
                       />
                     </div>
 
-                    {/* Your Join Requests Section */}
                     {joinRequests.length > 0 && (
                       <div className="mb-6 sm:mb-8">
                         <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -425,7 +405,6 @@ export function NoFamilyState({
                       </div>
                     )}
 
-                    {/* Available Families Section */}
                     <div className="space-y-2 sm:space-y-3">
                       <div className="flex items-center justify-between px-1 mb-3 sm:mb-4">
                         <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -519,7 +498,6 @@ export function NoFamilyState({
                 </div>
               )}
 
-              {/* Invitations Tab Content */}
               {activeTab === "invitations" && (
                 <div className="space-y-4 sm:space-y-6">
                   <div className="max-w-6xl mx-auto">

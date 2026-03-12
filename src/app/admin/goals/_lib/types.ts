@@ -1,4 +1,4 @@
-// Admin Goal Management Types
+
 
 export type GoalCategory = "emergency" | "vacation" | "house" | "car" | "education" | "retirement" | "debt" | "general";
 export type GoalPriority = "low" | "medium" | "high" | "urgent";
@@ -28,7 +28,7 @@ export type AdminGoal = {
     image_url: string | null;
     created_at: string;
     updated_at: string;
-    // Joined data
+
     user_email?: string;
     user_name?: string;
     user_avatar?: string;

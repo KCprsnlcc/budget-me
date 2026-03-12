@@ -1,4 +1,4 @@
-// Admin Chatbot Management Types
+
 
 export type AdminChatMessage = {
     id: string;
@@ -15,13 +15,12 @@ export type AdminChatMessage = {
     } | null;
     created_at: string;
     updated_at: string;
-    // Joined data
+
     user_email?: string;
     user_name?: string;
     user_avatar?: string;
 };
 
-// A chat session represents all messages grouped by user
 export type AdminChatSession = {
     user_id: string;
     user_email: string;

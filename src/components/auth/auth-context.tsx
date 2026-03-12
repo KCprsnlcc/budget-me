@@ -12,11 +12,6 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
-/**
- * Derived boolean states to minimize re-renders (rerender-derived-state).
- * Components subscribe to `isAuthenticated` / `isLoading` booleans
- * instead of raw user/session objects when they only need status checks.
- */
 type AuthContextValue = {
   user: User | null;
   session: Session | null;
@@ -41,7 +36,6 @@ export function AuthProvider({
   const [session, setSession] = useState<Session | null>(initialSession);
   const [isLoading, setIsLoading] = useState(!initialUser && !initialSession);
 
-  // Derived boolean — only triggers re-render when auth status flips (rerender-derived-state)
   const isAuthenticated = !!user;
 
   const signOut = useCallback(async () => {
@@ -51,7 +45,7 @@ export function AuthProvider({
     setUser(null);
     setSession(null);
     setIsLoading(false);
-    // Redirect to login page using Next.js router
+
     router.push("/login");
     router.refresh();
   }, [router]);
@@ -59,7 +53,6 @@ export function AuthProvider({
   useEffect(() => {
     const supabase = createClient();
 
-    // Listen for auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {

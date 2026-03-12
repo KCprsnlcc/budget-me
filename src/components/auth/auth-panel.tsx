@@ -43,7 +43,7 @@ export function AuthPanel({
       try {
         const testimonials = await fetchTestimonials();
         if (testimonials.length > 0) {
-          // Randomly select a testimonial
+
           const randomIndex = Math.floor(Math.random() * testimonials.length);
           setTestimonial(testimonials[randomIndex]);
         }
@@ -59,9 +59,9 @@ export function AuthPanel({
 
   return (
     <>
-      {/* Left Panel: Auth Form */}
+      {}
       <div className="flex w-full shrink-0 flex-col border-r border-slate-100 bg-white sm:w-[400px] lg:w-[450px] relative z-20 h-screen">
-        {/* Fixed Header: Logo */}
+        {}
         <div className="shrink-0 px-8 pt-6 pb-2 bg-white z-10">
           {page === "register" ? (
             <>
@@ -85,7 +85,7 @@ export function AuthPanel({
           {header}
         </div>
 
-        {/* Scrollable Content */}
+        {}
         <div className="flex-1 overflow-y-auto px-8 scroll-smooth">
           <div
             className={`flex min-h-full flex-col items-center ${
@@ -96,7 +96,7 @@ export function AuthPanel({
           </div>
         </div>
 
-        {/* Fixed Footer: Legal */}
+        {}
         <div className="shrink-0 px-8 pb-6 pt-2 bg-white z-10">
           <div className="mx-auto w-full max-w-[300px] text-[10px] leading-relaxed text-slate-400 text-left">
             {FOOTER_TEXT[page]}{" "}
@@ -118,12 +118,12 @@ export function AuthPanel({
         </div>
       </div>
 
-      {/* Right Panel: Testimonial */}
+      {}
       <div className="hidden flex-1 flex-col items-center justify-center bg-white p-12 lg:flex relative overflow-hidden">
-        {/* Decorative Background Pattern */}
+        {}
         <div className="absolute inset-0 bg-[linear-gradient(#e2e8f0_1px,transparent_1px),linear-gradient(90deg,#e2e8f0_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_100%)] opacity-40" />
 
-        {/* Animated SVG Beams */}
+        {}
         <svg
           className={`absolute inset-0 h-full w-full pointer-events-none ${SVG_TRANSFORM[page]}`}
           fill="none"
@@ -179,7 +179,7 @@ export function AuthPanel({
               strokeWidth={0.5}
             />
           </g>
-          {/* Static paths - uncomment below and comment out above for animated version */}
+          {}
           <path
             d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875"
             stroke="url(#beam-gradient-0)"
@@ -201,32 +201,10 @@ export function AuthPanel({
             strokeLinecap="round"
             opacity={0.25}
           />
-          {/* Animated paths - uncomment to restore animations
-          <path
-            d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875"
-            stroke="url(#beam-gradient-0)"
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            className="animate-beam-slow"
-          />
-          <path
-            d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827"
-            stroke="url(#beam-gradient-1)"
-            strokeWidth={1}
-            strokeLinecap="round"
-            className="animate-beam-medium opacity-60"
-          />
-          <path
-            d="M-204 -381C-204 -381 -136 24 328 151C792 278 860 683 860 683"
-            stroke="url(#beam-gradient-0)"
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            className="animate-beam-fast delay-200"
-          />
-          */}
+          {}
         </svg>
 
-        {/* Top Right Action */}
+        {}
         <div className="absolute right-8 top-8 z-10">
           <Link
             href="/"
@@ -237,7 +215,7 @@ export function AuthPanel({
           </Link>
         </div>
 
-        {/* Quote Content */}
+        {}
         <div className="w-full max-w-[580px] relative z-10">
           {isLoading ? (
             <div className="animate-pulse">

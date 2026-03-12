@@ -13,7 +13,6 @@ export function Sidebar() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
 
-  // Simulate loading state on component mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -26,7 +25,7 @@ export function Sidebar() {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <aside className="w-64 bg-white text-slate-600 flex-col border-r border-slate-200 hidden md:flex shrink-0 transition-all duration-300 z-30 animate-fade-in">
-          {/* Navigation */}
+          {}
           <nav className="flex flex-col flex-1 overflow-y-auto py-4 px-2 gap-0.5 no-scrollbar">
             {DASHBOARD_NAV.map((group, index) => (
               <div key={group.label}>
@@ -41,18 +40,18 @@ export function Sidebar() {
                     </div>
                   </div>
                 ))}
-                {/* Add divider after Platform group */}
+                {}
                 {index === 0 && (
                   <div className="mx-2 my-4 h-px bg-slate-200" />
                 )}
-                {/* Add divider after Intelligence group */}
+                {}
                 {index === 1 && (
                   <div className="mx-2 my-4 h-px bg-slate-200" />
                 )}
               </div>
             ))}
 
-            {/* AI Usage Skeleton */}
+            {}
             <div className="mt-auto px-2 mb-4">
               <div className="bg-slate-50 rounded-lg border border-slate-200/60 p-2.5">
                 <div className="flex items-center gap-1.5 mb-1">
@@ -85,7 +84,7 @@ export function Sidebar() {
             </div>
           </nav>
 
-          {/* User Profile Skeleton */}
+          {}
           <div className="p-3 border-t border-slate-200/50">
             <div className="flex items-center gap-2.5">
               <Skeleton width={28} height={28} circle />
@@ -103,7 +102,7 @@ export function Sidebar() {
 
   return (
     <aside className="w-64 bg-white text-slate-600 flex-col border-r border-slate-200 hidden md:flex shrink-0 transition-all duration-300 z-30">
-      {/* Navigation */}
+      {}
       <nav className="flex flex-col flex-1 overflow-y-auto py-4 px-2 gap-0.5 no-scrollbar">
         {DASHBOARD_NAV.map((group, index) => (
           <div key={group.label}>
@@ -120,24 +119,24 @@ export function Sidebar() {
                 dot={item.dot}
               />
             ))}
-            {/* Add divider after Platform group */}
+            {}
             {index === 0 && (
               <div className="mx-2 my-4 h-px bg-slate-200" />
             )}
-            {/* Add divider after Intelligence group */}
+            {}
             {index === 1 && (
               <div className="mx-2 my-4 h-px bg-slate-200" />
             )}
           </div>
         ))}
 
-        {/* AI Usage */}
+        {}
         <div className="mt-auto px-2 mb-4">
           <AIUsageCard />
         </div>
       </nav>
 
-      {/* User Profile */}
+      {}
       <UserProfileCard />
     </aside>
   );

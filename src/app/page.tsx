@@ -10,7 +10,7 @@ import { Footer } from "@/components/landing/footer";
 export default function Home() {
   return (
     <div className="bg-white text-slate-900 overflow-x-hidden">
-      {/* Background Grid */}
+      {}
       <div
         className="fixed inset-0 z-0 pointer-events-none"
         style={{

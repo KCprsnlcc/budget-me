@@ -23,7 +23,6 @@ export function ResetPasswordForm() {
   const [success, setSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  // Check if we have the required token
   if (!token_hash || type !== "recovery") {
     return (
       <div className="text-center">
@@ -57,8 +56,7 @@ export function ResetPasswordForm() {
 
     startTransition(async () => {
       const supabase = createClient();
-      
-      // First verify the token
+
       const { error: verifyError } = await supabase.auth.verifyOtp({
         token_hash,
         type: "recovery",
@@ -69,7 +67,6 @@ export function ResetPasswordForm() {
         return;
       }
 
-      // If verification successful, update the user's password
       const { error: updateError } = await supabase.auth.updateUser({
         password,
       });
@@ -80,8 +77,7 @@ export function ResetPasswordForm() {
       }
 
       setSuccess("Password reset successfully! Redirecting to login...");
-      
-      // Redirect to login after a short delay
+
       setTimeout(() => {
         router.push("/login?message=password_reset");
       }, 2000);
@@ -90,7 +86,7 @@ export function ResetPasswordForm() {
 
   return (
     <div>
-      {/* Header */}
+      {}
       <div className="mb-8">
         <h1 className="mb-1 text-xl font-medium tracking-tight text-slate-900">
           Reset Password
@@ -100,7 +96,7 @@ export function ResetPasswordForm() {
         </p>
       </div>
 
-      {/* Success Message */}
+      {}
       {success && (
         <div
           role="alert"
@@ -110,7 +106,7 @@ export function ResetPasswordForm() {
         </div>
       )}
 
-      {/* Error Message */}
+      {}
       {error && (
         <div
           role="alert"
@@ -120,7 +116,7 @@ export function ResetPasswordForm() {
         </div>
       )}
 
-      {/* Form */}
+      {}
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-1.5">
           <Label htmlFor="password">New Password</Label>
@@ -192,7 +188,7 @@ export function ResetPasswordForm() {
         </Button>
       </form>
 
-      {/* Footer */}
+      {}
       <div className="mt-6 text-center text-xs text-slate-500">
         Remember your password?{" "}
         <Link

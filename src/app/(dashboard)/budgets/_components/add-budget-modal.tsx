@@ -48,7 +48,6 @@ import { createBudget, fetchExpenseCategories } from "../_lib/budget-service";
 
 const STEPS = ["Period", "Details", "Review"];
 
-// Helper function to convert emojis to Lucide icons
 function getLucideIcon(emoji: string): React.ComponentType<any> {
   const iconMap: Record<string, React.ComponentType<any>> = {
     // Expense Categories
@@ -93,10 +92,8 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Lookup data
   const [categories, setCategories] = useState<CategoryOption[]>([]);
 
-  // Fetch dropdown data when modal opens
   useEffect(() => {
     if (!open || !user) return;
     fetchExpenseCategories(user.id).then(setCategories);
@@ -156,12 +153,10 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
     updateField("period", period);
   }, [updateField]);
 
-  // Helper: look up category name for review step
   const catName = categories.find((c) => c.id === form.category_id)?.category_name ?? "—";
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-      {/* Header */}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
@@ -173,12 +168,9 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
       <Stepper steps={STEPS} currentStep={step} />
 
-      {/* Body */}
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* STEP 1: Period Selection */}
         {step === 1 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -217,7 +209,6 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
                         <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{period.label}</h3>
                         <p className="text-[11px] text-gray-500 leading-relaxed">{period.description}</p>
                       </div>
-                      {/* Check indicator */}
                       <div
                         className={cn(
                           "w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200",
@@ -234,7 +225,6 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
           </div>
         )}
 
-        {/* STEP 2: Budget Details */}
         {step === 2 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -319,7 +309,6 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
           </div>
         )}
 
-        {/* STEP 3: Review */}
         {step === 3 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -328,7 +317,6 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
             </div>
 
             <div className="space-y-4">
-              {/* Budget Details */}
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="p-5 space-y-0 divide-y divide-gray-100">
                   <ReviewRow label="Budget Name" value={form.budget_name || "Untitled Budget"} />
@@ -340,7 +328,6 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
                 </div>
               </div>
 
-              {/* Error Notice */}
               {saveError && (
                 <div className="flex gap-2.5 p-3 rounded-lg text-xs border border-gray-200 text-gray-700 items-start">
                   <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
@@ -351,7 +338,6 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
                 </div>
               )}
 
-              {/* Success Notice */}
               <div className="flex gap-2.5 p-3 rounded-lg text-xs border border-gray-200 text-gray-700 items-start">
                 <CheckCircle size={16} className="flex-shrink-0 mt-px text-emerald-500" />
                 <div>
@@ -366,7 +352,6 @@ export function AddBudgetModal({ open, onClose, onSuccess }: AddBudgetModalProps
         )}
       </ModalBody>
 
-      {/* Footer */}
       <ModalFooter className="flex justify-between">
         <Button
           variant="outline"

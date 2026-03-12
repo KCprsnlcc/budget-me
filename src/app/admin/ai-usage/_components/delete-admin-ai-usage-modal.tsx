@@ -66,7 +66,7 @@ export function DeleteAdminAIUsageModal({
             <span className="font-semibold text-slate-700">{usage.usage_date}</span>?
           </p>
 
-          {/* Usage Details */}
+          {}
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mx-auto max-w-sm">
             <div className="p-5 space-y-0 divide-y divide-slate-100">
               <div className="flex justify-between items-center py-2.5">
@@ -92,7 +92,7 @@ export function DeleteAdminAIUsageModal({
             </div>
           </div>
 
-          {/* Warning Notice */}
+          {}
           <div className="p-3 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 mx-auto max-w-sm mt-6">
             <div className="flex gap-2.5 items-start">
               <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />

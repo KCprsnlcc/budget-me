@@ -72,8 +72,6 @@ function formatDate(dateStr: string): string {
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-// ──────────────────────────── Skeleton Components ────────────────────────────
-
 const SummaryCardSkeleton = memo(function SummaryCardSkeleton() {
     return (
         <Card className="p-5 hover:shadow-md transition-all group cursor-pointer">
@@ -152,11 +150,11 @@ const InsightCardSkeleton = memo(function InsightCardSkeleton() {
 const TableRowSkeleton = memo(function TableRowSkeleton({ columns }: { columns: number }) {
     return (
         <TableRow className="hover:bg-slate-50/50">
-            {/* Date */}
+            {}
             <TableCell className="px-6 py-3">
                 <Skeleton width={100} height={14} />
             </TableCell>
-            {/* User */}
+            {}
             <TableCell className="px-6 py-3">
                 <div className="flex items-center gap-2.5">
                     <Skeleton width={36} height={36} circle />
@@ -166,20 +164,20 @@ const TableRowSkeleton = memo(function TableRowSkeleton({ columns }: { columns: 
                     </div>
                 </div>
             </TableCell>
-            {/* Conditional columns for reports only (Data Points & Accuracy) */}
+            {}
             {columns === 5 && (
                 <>
-                    {/* Data Points */}
+                    {}
                     <TableCell className="px-6 py-3 text-center">
                         <Skeleton width={40} height={14} className="mx-auto" />
                     </TableCell>
-                    {/* Accuracy */}
+                    {}
                     <TableCell className="px-6 py-3 text-center">
                         <Skeleton width={45} height={14} className="mx-auto" />
                     </TableCell>
                 </>
             )}
-            {/* Actions */}
+            {}
             <TableCell className="px-6 py-3 text-center">
                 <div className="flex items-center justify-center gap-1">
                     <Skeleton width={32} height={32} borderRadius={8} />
@@ -213,8 +211,6 @@ const TopUserSkeleton = memo(function TopUserSkeleton() {
     );
 });
 
-// ──────────────────────────── Summary Card ────────────────────────────
-
 const SummaryCard = memo(function SummaryCard({ data }: { data: SummaryType }) {
     const Icon = data.icon;
     return (
@@ -236,8 +232,6 @@ const SummaryCard = memo(function SummaryCard({ data }: { data: SummaryType }) {
         </Card>
     );
 });
-
-// ──────────────────────────── Report Row ────────────────────────────
 
 const ReportRow = memo(function ReportRow({
     report,
@@ -299,8 +293,6 @@ const ReportRow = memo(function ReportRow({
     );
 });
 
-// ──────────────────────────── Insight Row ────────────────────────────
-
 const InsightRow = memo(function InsightRow({
     insight,
     onView,
@@ -346,8 +338,6 @@ const InsightRow = memo(function InsightRow({
         </TableRow>
     );
 });
-
-// ──────────────────────────── Report Card ────────────────────────────
 
 const ReportCard = memo(function ReportCard({
     report,
@@ -410,8 +400,6 @@ const ReportCard = memo(function ReportCard({
     );
 });
 
-// ──────────────────────────── Insight Card ────────────────────────────
-
 const InsightCard = memo(function InsightCard({
     insight,
     onView,
@@ -466,8 +454,6 @@ const InsightCard = memo(function InsightCard({
     );
 });
 
-// ──────────────────────────── Main Page ────────────────────────────
-
 export default function AdminPredictionsPage() {
     const {
         reports,
@@ -508,10 +494,8 @@ export default function AdminPredictionsPage() {
 
     const currentYear = new Date().getFullYear();
 
-    // View mode
     const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
-    // Modals
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [addModalOpen, setAddModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -522,7 +506,6 @@ export default function AdminPredictionsPage() {
     const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
     const exportDropdownRef = useRef<HTMLDivElement>(null);
 
-    // Close export dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
@@ -536,7 +519,6 @@ export default function AdminPredictionsPage() {
         }
     }, [exportDropdownOpen]);
 
-    // Handlers
     const handleViewReport = useCallback((report: AdminPredictionReport) => {
         setSelectedReport(report);
         setSelectedInsight(null);
@@ -561,7 +543,6 @@ export default function AdminPredictionsPage() {
         setDeleteModalOpen(true);
     }, []);
 
-    // Export handlers
     const handleExportCSV = useCallback(() => {
         const currentData = dataSource === "reports" ? reports : insights;
         if (currentData.length === 0) {
@@ -609,7 +590,6 @@ export default function AdminPredictionsPage() {
         exportAdminPredictionsToPDF(exportData, summaryData);
     }, [reports, insights, stats, dataSource]);
 
-    // Summary cards data
     const summaryCards: SummaryType[] = useMemo(() => {
         if (!stats) return [];
         return [
@@ -644,7 +624,6 @@ export default function AdminPredictionsPage() {
         ];
     }, [stats]);
 
-    // Normalize chart data for bar heights
     const chartData = useMemo(() => {
         if (!stats?.reportGrowth.length) return [];
         const max = Math.max(...stats.reportGrowth.map((d) => d.count), 1);
@@ -655,7 +634,6 @@ export default function AdminPredictionsPage() {
         }));
     }, [stats]);
 
-    // Build conic-gradient for source distribution donut
     const sourceTotal = useMemo(() => {
         if (!stats) return 0;
         return stats.totalReports + stats.totalInsights;
@@ -685,16 +663,14 @@ export default function AdminPredictionsPage() {
         return `conic-gradient(${stops.join(", ")})`;
     }, [stats, sourceTotal, sourceDistribution]);
 
-    // Items for current view
     const items = dataSource === "reports" ? reports : insights;
     const itemCount = items.length;
 
-    // ─── Loading State ──────────────────────────────────────────────
     if (loading && !tableLoading) {
         return (
             <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
                 <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-                    {/* Header Skeleton */}
+                    {}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
                         <div>
                             <Skeleton width={220} height={28} className="mb-2" />
@@ -706,9 +682,9 @@ export default function AdminPredictionsPage() {
                         </div>
                     </div>
 
-                    {/* Scrollable Content Area */}
+                    {}
                     <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0">
-                        {/* Summary Stats Skeleton */}
+                        {}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {Array.from({ length: 4 }).map((_, i) => (
                                 <Card key={i} className="p-4 sm:p-5">
@@ -722,9 +698,9 @@ export default function AdminPredictionsPage() {
                             ))}
                         </div>
 
-                        {/* Charts Skeleton */}
+                        {}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                            {/* Growth Chart Skeleton */}
+                            {}
                             <Card className="lg:col-span-2 p-4 sm:p-6">
                                 <div className="flex items-center justify-between mb-6 sm:mb-8">
                                     <div>
@@ -735,7 +711,7 @@ export default function AdminPredictionsPage() {
                                 <Skeleton height={192} className="sm:h-60" />
                             </Card>
 
-                            {/* Source Distribution Skeleton */}
+                            {}
                             <Card className="p-4 sm:p-6">
                                 <Skeleton width={140} height={14} className="mb-2" />
                                 <Skeleton width={180} height={10} className="mb-4 sm:mb-6" />
@@ -756,7 +732,7 @@ export default function AdminPredictionsPage() {
                             </Card>
                         </div>
 
-                        {/* Top Users Skeleton */}
+                        {}
                         <Card className="p-4 sm:p-6">
                             <Skeleton width={80} height={14} className="mb-2" />
                             <Skeleton width={120} height={10} className="mb-4 sm:mb-6" />
@@ -767,13 +743,13 @@ export default function AdminPredictionsPage() {
                             </div>
                         </Card>
 
-                        {/* Data Source Tabs Skeleton */}
+                        {}
                         <div className="flex items-center gap-2">
                             <Skeleton width={150} height={36} borderRadius={8} />
                             <Skeleton width={120} height={36} borderRadius={8} />
                         </div>
 
-                        {/* Filters Skeleton */}
+                        {}
                         <Card className="p-3 sm:p-4">
                             <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
                                 <Skeleton width={50} height={14} />
@@ -783,7 +759,7 @@ export default function AdminPredictionsPage() {
                             </div>
                         </Card>
 
-                        {/* Cards Skeleton */}
+                        {}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {Array.from({ length: 6 }).map((_, i) => (
                                 dataSource === "reports" ? (
@@ -802,7 +778,7 @@ export default function AdminPredictionsPage() {
     return (
         <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
             <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-                {/* Header */}
+                {}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
                     <div>
                         <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">AI Predictions</h2>
@@ -845,22 +821,22 @@ export default function AdminPredictionsPage() {
                     </div>
                 </div>
 
-                {/* Scrollable Content Area */}
+                {}
                 <div
                     ref={contentRef}
                     className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth"
                 >
 
-                    {/* Summary Cards */}
+                    {}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {summaryCards.map((card) => (
                             <SummaryCard key={card.label} data={card} />
                         ))}
                     </div>
 
-                    {/* Charts Section */}
+                    {}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                        {/* Report Growth Chart */}
+                        {}
                         <Card className="lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
                             <div className="flex items-center justify-between mb-6 sm:mb-8">
                                 <div>
@@ -921,7 +897,7 @@ export default function AdminPredictionsPage() {
                             )}
                         </Card>
 
-                        {/* Source Distribution */}
+                        {}
                         <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
                             <div className="mb-4 sm:mb-6">
                                 <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Source Distribution</h3>
@@ -973,7 +949,7 @@ export default function AdminPredictionsPage() {
                         </Card>
                     </div>
 
-                    {/* Top Users Section */}
+                    {}
                     <Card className="p-4 sm:p-6 hover:shadow-md transition-all">
                         <div className="mb-4 sm:mb-6">
                             <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Top Users</h3>
@@ -1020,7 +996,7 @@ export default function AdminPredictionsPage() {
                         </div>
                     </Card>
 
-                    {/* Filters */}
+                    {}
                     <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
                         <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
                             <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
@@ -1098,7 +1074,7 @@ export default function AdminPredictionsPage() {
                         </div>
                     </Card>
 
-                    {/* Error State */}
+                    {}
                     {error && !loading && (
                         <Card className="p-8 text-center">
                             <p className="text-sm text-red-500 mb-3">{error}</p>
@@ -1108,7 +1084,7 @@ export default function AdminPredictionsPage() {
                         </Card>
                     )}
 
-                    {/* Data Display */}
+                    {}
                     {itemCount === 0 && !loading && !tableLoading ? (
                         <Card className="p-12 text-center">
                             <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
@@ -1211,7 +1187,7 @@ export default function AdminPredictionsPage() {
                         </div>
                     ) : (
                         <>
-                            {/* Grid View (Desktop) */}
+                            {}
                             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {itemCount === 0 ? (
                                     <div className="col-span-full">
@@ -1244,7 +1220,7 @@ export default function AdminPredictionsPage() {
                                 )}
                             </div>
 
-                            {/* Grid View (Mobile) */}
+                            {}
                             <div className="md:hidden space-y-4">
                                 {itemCount === 0 ? (
                                     <Card className="p-12 text-center">
@@ -1277,7 +1253,7 @@ export default function AdminPredictionsPage() {
                         </>
                     )}
 
-                    {/* Pagination */}
+                    {}
                     {!loading && !tableLoading && !error && itemCount > 0 && (
                         <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0">
                             <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
@@ -1392,7 +1368,7 @@ export default function AdminPredictionsPage() {
                     )}
                 </div>
 
-                {/* Modals */}
+                {}
                 <ViewAdminPredictionModal
                     open={viewModalOpen}
                     onClose={() => setViewModalOpen(false)}

@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { formatCurrencyPHP, getTimestampString } from "./formatters";
 import type { GoalExportData } from "./types";
 
-/**
- * Export goals as PDF
- */
 export function exportGoalsToPDF(
   goals: GoalExportData[],
   summary?: { totalGoals?: number; totalSaved?: number; totalTarget?: number; completedGoals?: number }
@@ -17,7 +14,6 @@ export function exportGoalsToPDF(
 
   const doc = createBasePDF("Goals Report", `${goals.length} goals`);
 
-  // Summary section with email-style cards
   let currentY = 45;
   const margin = 15;
 
@@ -32,7 +28,6 @@ export function exportGoalsToPDF(
     const cardHeight = 20;
     const cardSpacing = 2;
 
-    // Total Goals
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
     doc.setDrawColor(COLORS.border);
@@ -48,7 +43,6 @@ export function exportGoalsToPDF(
     doc.setFont("helvetica", "bold");
     doc.text(String(summary.totalGoals || 0), margin + 3, currentY + 14);
 
-    // Total Saved
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
     doc.setDrawColor(COLORS.border);
@@ -63,7 +57,6 @@ export function exportGoalsToPDF(
     doc.setFont("helvetica", "bold");
     doc.text(formatCurrencyPHP(summary.totalSaved || 0), margin + cardWidth + cardSpacing + 3, currentY + 14);
 
-    // Total Target
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin + (cardWidth + cardSpacing) * 2, currentY, cardWidth, cardHeight, 2, 2, "F");
     doc.setDrawColor(COLORS.border);
@@ -78,7 +71,6 @@ export function exportGoalsToPDF(
     doc.setFont("helvetica", "bold");
     doc.text(formatCurrencyPHP(summary.totalTarget || 0), margin + (cardWidth + cardSpacing) * 2 + 3, currentY + 14);
 
-    // Completed
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin + (cardWidth + cardSpacing) * 3, currentY, cardWidth, cardHeight, 2, 2, "F");
     doc.setDrawColor(COLORS.border);
@@ -96,7 +88,6 @@ export function exportGoalsToPDF(
     currentY += cardHeight + 12;
   }
 
-  // Goals table
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(COLORS.dark);
@@ -106,9 +97,8 @@ export function exportGoalsToPDF(
   const headers = ["Name", "Target", "Saved", "Remaining", "Progress", "Priority", "Status", "Deadline"];
   const keys: (keyof GoalExportData)[] = ["name", "target", "current", "remaining", "progress", "priority", "status", "deadline"];
   const formats: ("text" | "currency" | "number" | "percentage")[] = ["text", "currency", "currency", "currency", "text", "text", "text", "text"];
-  
-  // Custom column widths for better layout
-  const columnWidths = [30, 22, 22, 22, 16, 16, 16, 20]; // Total: 164mm
+
+  const columnWidths = [30, 22, 22, 22, 16, 16, 16, 20]; 
 
   addPDFTable(doc, headers, goals, keys, formats, currentY, columnWidths);
 

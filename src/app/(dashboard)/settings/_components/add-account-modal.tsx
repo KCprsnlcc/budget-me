@@ -148,18 +148,18 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
   return (
     <Modal open={open} onClose={handleClose} className="w-[95vw] sm:w-[90vw] max-w-[800px]">
       <div className="flex flex-col bg-white rounded-2xl overflow-hidden">
-        {/* Header */}
+        {}
         <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
           <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Add Account</span>
         </ModalHeader>
 
-        {/* Stepper */}
+        {}
         <Stepper currentStep={step} totalSteps={3} labels={STEPS} />
 
-        {/* Body */}
+        {}
         <ModalBody className="max-h-[60vh] bg-[#F9FAFB]/30 p-4 sm:p-6">
           <div className="max-w-2xl mx-auto">
-            {/* Step 1: Account Type */}
+            {}
             {step === 1 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div className="text-center mb-8 px-2">
@@ -206,7 +206,7 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
               </div>
             )}
 
-            {/* Step 2: Account Details */}
+            {}
             {step === 2 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div className="text-center mb-8 px-2">
@@ -299,7 +299,7 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
               </div>
             )}
 
-            {/* Step 3: Review */}
+            {}
             {step === 3 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div className="text-center mb-8 px-2">
@@ -371,7 +371,7 @@ export function AddAccountModal({ open, onClose, onAdd }: AddAccountModalProps) 
           </div>
         </ModalBody>
 
-        {/* Footer */}
+        {}
         <ModalFooter className="flex justify-between px-4 sm:px-6 py-3 sm:py-4 bg-white border-t border-gray-100">
           {step > 1 ? (
             <button

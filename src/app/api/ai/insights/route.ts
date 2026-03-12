@@ -1,16 +1,4 @@
-/**
- * POST /api/ai/insights
- * 
- * Secure backend proxy for AI financial insights (predictions page) → OpenRouter.
- * 
- * Security layers:
- * - Supabase session authentication
- * - IP + User rate limiting (10 req/min)
- * - CSRF origin validation
- * - Suspicious user-agent blocking
- * - Input validation
- * - Request metadata logging
- */
+
 
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -22,12 +10,11 @@ import {
 const AI_MODEL = "openai/gpt-oss-20b";
 
 export async function POST(request: NextRequest) {
-  // ─── Security validation ─────────────────────────────────────────
+
   const result = await validateAIRequest(request, "/api/ai/insights");
   if ("error" in result) return result.error;
   const { context } = result;
 
-  // ─── Parse & validate body ────────────────────────────────────────
   let body: any;
   try {
     body = await request.json();
@@ -45,7 +32,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "User prompt is required" }, { status: 400 });
   }
 
-  // Validate prompt lengths
   if (systemPrompt.length > 10_000) {
     return NextResponse.json({ error: "System prompt too long" }, { status: 400 });
   }
@@ -53,7 +39,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "User prompt too long" }, { status: 400 });
   }
 
-  // ─── Forward to OpenRouter (server-side) ──────────────────────────
   try {
     const apiKey = getOpenRouterApiKey();
 

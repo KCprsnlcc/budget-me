@@ -28,20 +28,12 @@ import {
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 type HoveredBar = {
   date: string;
   type: 'new_users' | 'transactions' | 'ai_requests';
   value: number;
   index: number;
 } | null;
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function formatCurrency(n: number): string {
   return n.toLocaleString("en-PH", {
@@ -65,10 +57,6 @@ function formatDate(dateStr: string): string {
     year: "numeric",
   });
 }
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 
 export default function AdminDashboardPage() {
   const [summary, setSummary] = useState<AdminSummary | null>(null);
@@ -107,7 +95,6 @@ export default function AdminDashboardPage() {
     fetchData();
   }, []);
 
-  // Stats cards - only 4 main cards
   const stats = useMemo(() => {
     if (!summary) return [];
     return [
@@ -138,7 +125,6 @@ export default function AdminDashboardPage() {
     ];
   }, [summary]);
 
-  // Chart data for system activity
   const chartData = useMemo(() => {
     if (!systemActivity.length) return [];
     const maxValue = Math.max(
@@ -162,7 +148,7 @@ export default function AdminDashboardPage() {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
-          {/* Header Skeleton */}
+          {}
           <div className="flex items-center justify-between">
             <div>
               <Skeleton width={180} height={28} className="mb-2 sm:w-[200px]" />
@@ -171,7 +157,7 @@ export default function AdminDashboardPage() {
             <Skeleton width={80} height={32} borderRadius={6} className="sm:w-[90px] sm:h-9" />
           </div>
 
-          {/* Stats Grid Skeleton - 4 cards */}
+          {}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <Card key={i} className="p-4 sm:p-5">
@@ -184,7 +170,7 @@ export default function AdminDashboardPage() {
             ))}
           </div>
 
-          {/* Module Statistics Skeleton */}
+          {}
           <div>
             <div className="flex items-center justify-between mb-4">
               <Skeleton width={140} height={14} className="sm:w-[160px] sm:h-[16px]" />
@@ -204,7 +190,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* System Activity Chart Skeleton */}
+          {}
           <Card className="p-4 sm:p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
               <div>
@@ -244,7 +230,7 @@ export default function AdminDashboardPage() {
             </div>
           </Card>
 
-          {/* Recent User Activity Skeleton */}
+          {}
           <Card className="p-4 sm:p-6">
             <div className="mb-4 sm:mb-6">
               <Skeleton width={180} height={14} className="mb-0.5 sm:w-[200px]" />
@@ -292,7 +278,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold text-slate-800 tracking-tight">
@@ -313,7 +299,7 @@ export default function AdminDashboardPage() {
         </Button>
       </div>
 
-      {/* Stats Grid - 4 main cards matching user dashboard */}
+      {}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {stats.map((stat) => {
           const IconCmp = stat.icon;
@@ -338,7 +324,7 @@ export default function AdminDashboardPage() {
         })}
       </div>
 
-      {/* Module Statistics */}
+      {}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xs sm:text-sm font-semibold text-slate-900 flex items-center gap-2">
@@ -348,32 +334,27 @@ export default function AdminDashboardPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {moduleStats.map((stat) => {
-            // Assign colors based on module type
+
             const getColorScheme = (module: string) => {
               const moduleLower = module.toLowerCase();
-              
-              // Green for Transactions & Family
+
               if (moduleLower.includes('transaction') || moduleLower.includes('family')) {
                 return { border: 'border-emerald-500', label: 'text-emerald-700', icon: 'text-emerald-600' };
               }
-              
-              // Orange for Budgets & Predictions
+
               if (moduleLower.includes('budget') || moduleLower.includes('prediction')) {
                 return { border: 'border-amber-500', label: 'text-amber-700', icon: 'text-amber-600' };
               }
-              
-              // Blue for Goals & Chatbot
+
               if (moduleLower.includes('goal') || moduleLower.includes('chatbot')) {
                 return { border: 'border-blue-500', label: 'text-blue-700', icon: 'text-blue-600' };
               }
-              
-              // Default fallback
+
               return { border: 'border-slate-500', label: 'text-slate-700', icon: 'text-slate-600' };
             };
             
             const colorScheme = getColorScheme(stat.module);
-            
-            // Determine icon, route, and description based on module type
+
             const getModuleConfig = (module: string) => {
               const moduleLower = module.toLowerCase();
               if (moduleLower.includes('transaction')) {
@@ -449,7 +430,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* System Activity Chart - Full Width */}
+      {}
       <Card className="p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
           <div>
@@ -483,7 +464,7 @@ export default function AdminDashboardPage() {
         {chartData.length > 0 ? (
           <>
             <div className="relative h-48 sm:h-60 flex items-end justify-between gap-2 sm:gap-4 px-2">
-              {/* Horizontal grid lines */}
+              {}
               <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                 <div className="w-full h-px bg-slate-100/50" />
                 <div className="w-full h-px bg-slate-100/50" />
@@ -527,7 +508,7 @@ export default function AdminDashboardPage() {
                       />
                     )}
                     
-                    {/* Tooltip */}
+                    {}
                     {hoveredBar && hoveredBar.index === i && (
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-[10px] sm:text-xs rounded shadow-sm whitespace-nowrap z-50">
                         <div className="font-medium text-slate-700">
@@ -565,7 +546,7 @@ export default function AdminDashboardPage() {
               ))}
             </div>
             
-            {/* Summary stats */}
+            {}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-100 gap-3 sm:gap-0">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 w-full sm:w-auto">
                 <div className="flex items-center gap-2">
@@ -596,7 +577,7 @@ export default function AdminDashboardPage() {
         )}
       </Card>
 
-      {/* Recent User Activity - Full Width Below */}
+      {}
       <Card className="p-4 sm:p-6 hover:shadow-md transition-all">
         <div className="mb-4 sm:mb-6">
           <h3 className="text-xs sm:text-sm font-semibold text-slate-900">
@@ -622,7 +603,7 @@ export default function AdminDashboardPage() {
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      // Fallback to initials if image fails to load
+
                       const target = e.target as HTMLImageElement;
                       target.style.display = "none";
                       if (target.nextElementSibling) {

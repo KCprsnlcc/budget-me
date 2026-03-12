@@ -6,7 +6,6 @@ import type { CategoryPrediction, MonthlyForecast, ExpenseTypeForecast, Transact
 
 const supabase = createClient();
 
-// Prophet-style forecasting parameters
 const PROPHET_CONFIG = {
   seasonalityMode: "multiplicative" as const,
   yearlySeasonality: true,
@@ -17,9 +16,6 @@ const PROPHET_CONFIG = {
   uncertaintySamples: 1000,
 };
 
-/**
- * Fetch historical transaction data for forecasting
- */
 async function fetchHistoricalTransactions(userId: string, months: number = 6) {
   const startDate = new Date(getPhilippinesNow());
   startDate.setMonth(startDate.getMonth() - months);
@@ -44,9 +40,6 @@ async function fetchHistoricalTransactions(userId: string, months: number = 6) {
   return data || [];
 }
 
-/**
- * Aggregate transactions by month
- */
 function aggregateByMonth(transactions: any[]) {
   const monthlyData: Record<string, { income: number; expenses: number; transactions: any[] }> = {};
 
@@ -71,10 +64,6 @@ function aggregateByMonth(transactions: any[]) {
   return monthlyData;
 }
 
-/**
- * Simple exponential smoothing for time series forecasting (Prophet-like)
- * Enhanced with confidence intervals and trend detection
- */
 function exponentialSmoothing(
   data: number[],
   alpha: number = 0.3,
@@ -98,13 +87,11 @@ function exponentialSmoothing(
     };
   }
 
-  // Calculate smoothed values
   const smoothed: number[] = [data[0]];
   for (let i = 1; i < data.length; i++) {
     smoothed[i] = alpha * data[i] + (1 - alpha) * smoothed[i - 1];
   }
 
-  // Calculate trend
   const lastSmoothed = smoothed[smoothed.length - 1];
   const prevSmoothed = smoothed.length > 1 ? smoothed[smoothed.length - 2] : lastSmoothed;
   const trendValue = lastSmoothed - prevSmoothed;
@@ -115,13 +102,11 @@ function exponentialSmoothing(
     trendValue > lastSmoothed * 0.02 ? "up" :
     trendValue < -lastSmoothed * 0.02 ? "down" : "stable";
 
-  // Calculate standard error for confidence intervals
   const residuals = data.map((d, i) => d - (smoothed[i] || d));
   const variance = residuals.reduce((sum, r) => sum + r * r, 0) / Math.max(1, residuals.length - 1);
   const stdError = Math.sqrt(variance);
 
-  // Generate forecasts with confidence intervals (80% and 95%)
-  const zScore95 = 1.96; // 95% confidence
+  const zScore95 = 1.96; 
   const forecast: number[] = [];
   const confidence: number[] = [];
   const upper: number[] = [];
@@ -129,12 +114,11 @@ function exponentialSmoothing(
 
   let currentValue = lastSmoothed;
   for (let i = 0; i < forecastHorizon; i++) {
-    // Apply trend continuation with decay
+
     const trendAdjustment = Math.abs(trendValue) < lastSmoothed * 0.05
       ? trendValue * 0.1
       : Math.sign(trendValue) * lastSmoothed * 0.02;
 
-    // Add small random variation
     const randomVariation = (Math.random() - 0.5) * 0.06 * currentValue;
     const randomFactor = 1 + (Math.random() - 0.5) * 0.04;
 
@@ -143,13 +127,11 @@ function exponentialSmoothing(
     const forecastValue = Math.max(0, currentValue);
     forecast.push(forecastValue);
 
-    // Calculate confidence interval (widens with forecast horizon)
     const horizonUncertainty = stdError * Math.sqrt(i + 1);
     const marginOfError = zScore95 * horizonUncertainty;
     upper.push(forecastValue + marginOfError);
     lower.push(Math.max(0, forecastValue - marginOfError));
 
-    // Confidence decreases with forecast horizon
     const randomnessPenalty = Math.abs(randomVariation) / Math.max(1, forecastValue) * 10;
     const conf = Math.max(50, 95 - i * 8 - (stdError / Math.max(1, forecastValue)) * 20 - randomnessPenalty);
     confidence.push(Math.min(98, conf));
@@ -158,19 +140,14 @@ function exponentialSmoothing(
   return { forecast, confidence, upper, lower, trend, trendStrength };
 }
 
-/**
- * Detect seasonality patterns in the data
- */
 function detectSeasonality(data: number[]): { hasSeasonality: boolean; seasonalityStrength: number } {
   if (data.length < 4) {
     return { hasSeasonality: false, seasonalityStrength: 0 };
   }
 
-  // Simple seasonality detection using variance analysis
   const mean = data.reduce((a, b) => a + b, 0) / data.length;
   const variance = data.reduce((sum, d) => sum + Math.pow(d - mean, 2), 0) / data.length;
-  
-  // Check for repeating patterns (every 3 months for quarterly)
+
   let seasonalVariance = 0;
   let count = 0;
   for (let i = 3; i < data.length; i++) {
@@ -187,9 +164,6 @@ function detectSeasonality(data: number[]): { hasSeasonality: boolean; seasonali
   };
 }
 
-/**
- * Generate income vs expenses forecast with Prophet-style confidence intervals
- */
 export async function generateIncomeExpenseForecast(userId: string): Promise<{
   historical: MonthlyForecast[];
   predicted: MonthlyForecast[];
@@ -214,11 +188,10 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
   const transactions = await fetchHistoricalTransactions(userId, 6);
   const monthlyData = aggregateByMonth(transactions);
 
-  // Get sorted months
   const sortedMonths = Object.keys(monthlyData).sort();
 
   if (sortedMonths.length < 2) {
-    // Not enough data - return defaults with Prophet config
+
     const currentMonth = formatInPhilippines(getPhilippinesNow(), 'MMM');
     return {
       historical: [{ month: currentMonth, income: 0, expense: 0, type: "current" }],
@@ -240,20 +213,16 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
     };
   }
 
-  // Build historical data
   const incomeData = sortedMonths.map((m) => monthlyData[m].income);
   const expenseData = sortedMonths.map((m) => monthlyData[m].expenses);
 
-  // Detect seasonality
   const incomeSeasonality = detectSeasonality(incomeData);
   const expenseSeasonality = detectSeasonality(expenseData);
   const avgSeasonalityStrength = (incomeSeasonality.seasonalityStrength + expenseSeasonality.seasonalityStrength) / 2;
 
-  // Generate forecasts with confidence intervals
   const incomeForecast = exponentialSmoothing(incomeData, 0.3, 3);
   const expenseForecast = exponentialSmoothing(expenseData, 0.3, 3);
 
-  // Detect changepoints (significant trend changes)
   const changepoints: string[] = [];
   for (let i = 2; i < sortedMonths.length; i++) {
     const prevIncome = incomeData[i - 1];
@@ -264,13 +233,11 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
     const incomeChange = Math.abs((currIncome - prevIncome) / Math.max(1, prevIncome));
     const expenseChange = Math.abs((currExpense - prevExpense) / Math.max(1, prevExpense));
 
-    // Changepoint if change > 25%
     if (incomeChange > 0.25 || expenseChange > 0.25) {
       changepoints.push(formatInPhilippines(new Date(sortedMonths[i] + "-01"), 'MMM'));
     }
   }
 
-  // Determine overall trend
   const incomeTrend = incomeForecast.trend;
   const expenseTrend = expenseForecast.trend;
   const trendDirection: "up" | "down" | "stable" =
@@ -278,7 +245,6 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
     incomeTrend === "down" && expenseTrend !== "down" ? "down" : "stable";
   const trendStrength = (incomeForecast.trendStrength + expenseForecast.trendStrength) / 2;
 
-  // Build historical array
   const historical: MonthlyForecast[] = sortedMonths.map((month, i) => {
     const date = new Date(month + "-01");
     return {
@@ -287,12 +253,11 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
       expense: expenseData[i],
       type: i === sortedMonths.length - 1 ? "current" : "historical",
       changepoint: changepoints.includes(formatInPhilippines(date, 'MMM')),
-      // Add year to ensure uniqueness
+
       year: date.getFullYear(),
     };
   });
 
-  // Build predicted array with confidence intervals
   const lastDate = new Date(sortedMonths[sortedMonths.length - 1] + "-01");
   const predicted: MonthlyForecast[] = incomeForecast.forecast.map((inc, i) => {
     const predDate = new Date(lastDate);
@@ -303,17 +268,16 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
       expense: Math.round(expenseForecast.forecast[i]),
       type: "predicted",
       confidence: Math.round((incomeForecast.confidence[i] + expenseForecast.confidence[i]) / 2),
-      // Prophet-style confidence intervals
+
       incomeUpper: Math.round(incomeForecast.upper[i]),
       incomeLower: Math.round(Math.max(0, incomeForecast.lower[i])),
       expenseUpper: Math.round(expenseForecast.upper[i]),
       expenseLower: Math.round(Math.max(0, expenseForecast.lower[i])),
-      // Add year to ensure uniqueness
+
       year: predDate.getFullYear(),
     };
   });
 
-  // Calculate summary stats
   const avgIncomeGrowth = incomeData.length > 1
     ? ((incomeData[incomeData.length - 1] - incomeData[0]) / Math.max(1, incomeData[0])) * 100 / (incomeData.length - 1)
     : 0;
@@ -340,13 +304,9 @@ export async function generateIncomeExpenseForecast(userId: string): Promise<{
   };
 }
 
-/**
- * Generate category spending forecast
- */
 export async function generateCategoryForecast(userId: string): Promise<CategoryPrediction[]> {
   const transactions = await fetchHistoricalTransactions(userId, 6);
-  
-  // Group by category
+
   const categoryData: Record<string, {
     name: string;
     icon?: string;
@@ -383,7 +343,6 @@ export async function generateCategoryForecast(userId: string): Promise<Category
     categoryData[categoryName].amounts[monthIndex] += Number(tx.amount);
   }
 
-  // Generate predictions for each category
   const predictions: CategoryPrediction[] = [];
 
   for (const [, data] of Object.entries(categoryData)) {
@@ -391,8 +350,7 @@ export async function generateCategoryForecast(userId: string): Promise<Category
 
     const forecast = exponentialSmoothing(data.amounts, 0.25, 1);
     const historicalAvg = data.amounts.reduce((a, b) => a + b, 0) / data.amounts.length;
-    
-    // Add small random variation to category predictions (±2-5%)
+
     let predicted = forecast.forecast[0];
     const categoryRandomFactor = 1 + (Math.random() - 0.5) * 0.1; // ±5% max variation
     const categoryRandomVariation = (Math.random() - 0.5) * 0.04 * historicalAvg; // ±2% additional
@@ -415,13 +373,9 @@ export async function generateCategoryForecast(userId: string): Promise<Category
     });
   }
 
-  // Sort by predicted amount descending
   return predictions.sort((a, b) => b.predicted - a.predicted);
 }
 
-/**
- * Generate insight text for a category
- */
 function generateCategoryInsight(category: string, changePercent: number, trend: string): string {
   if (Math.abs(changePercent) < 5) {
     return `Spending pattern for ${category} remains stable based on historical data.`;
@@ -442,16 +396,12 @@ function generateCategoryInsight(category: string, changePercent: number, trend:
   return `${category} spending trending downward by ${Math.abs(changePercent).toFixed(0)}%.`;
 }
 
-/**
- * Analyze expense types (recurring vs variable)
- */
 export async function analyzeExpenseTypes(userId: string): Promise<{
   recurring: ExpenseTypeForecast;
   variable: ExpenseTypeForecast;
 }> {
   const transactions = await fetchHistoricalTransactions(userId, 6);
 
-  // Simple heuristic: recurring expenses have similar amounts within 15% variance
   const descriptionPatterns: Record<string, number[]> = {};
 
   for (const tx of transactions) {
@@ -472,17 +422,17 @@ export async function analyzeExpenseTypes(userId: string): Promise<{
     if (amounts.length >= 2) {
       const avg = amounts.reduce((a, b) => a + b, 0) / amounts.length;
       const variance = amounts.reduce((sum, a) => sum + Math.pow(a - avg, 2), 0) / amounts.length;
-      const cv = Math.sqrt(variance) / avg; // Coefficient of variation
+      const cv = Math.sqrt(variance) / avg;
 
       if (cv < 0.15 && amounts.length >= 2) {
-        // Likely recurring
+
         recurringTotal += avg;
         recurringCount++;
       } else {
         variableTotal += avg;
       }
     } else {
-      // Single occurrence - variable
+
       variableTotal += amounts[0] || 0;
     }
   }
@@ -493,25 +443,21 @@ export async function analyzeExpenseTypes(userId: string): Promise<{
     recurring: {
       amount: Math.round(recurringTotal),
       percentage: total > 0 ? Math.round((recurringTotal / total) * 100) : 0,
-      trend: "stable", // Simplified - would need more history for trend
+      trend: "stable", 
       trendValue: 0,
     },
     variable: {
       amount: Math.round(variableTotal),
       percentage: total > 0 ? Math.round((variableTotal / total) * 100) : 0,
-      trend: "up", // Variable tends to fluctuate
+      trend: "up",
       trendValue: 2.5,
     },
   };
 }
 
-/**
- * Analyze transaction behavior patterns by transaction type
- */
 export async function analyzeTransactionBehavior(userId: string): Promise<TransactionBehaviorInsight[]> {
   const transactions = await fetchHistoricalTransactions(userId, 6);
 
-  // Group by transaction type (income, expense, cash_in)
   const typeGroups: Record<string, {
     amounts: number[];
     dates: Date[];
@@ -530,7 +476,6 @@ export async function analyzeTransactionBehavior(userId: string): Promise<Transa
 
   const insights: TransactionBehaviorInsight[] = [];
 
-  // Analyze each transaction type
   for (const [type, data] of Object.entries(typeGroups)) {
     if (data.amounts.length < 2) continue;
 
@@ -538,18 +483,15 @@ export async function analyzeTransactionBehavior(userId: string): Promise<Transa
     const variance = data.amounts.reduce((sum, a) => sum + Math.pow(a - avg, 2), 0) / data.amounts.length;
     const cv = Math.sqrt(variance) / avg;
 
-    // Determine trend based on recent vs older amounts
     const recentAvg = data.amounts.slice(-3).reduce((a, b) => a + b, 0) / Math.min(3, data.amounts.slice(-3).length);
     const olderAvg = data.amounts.slice(0, 3).reduce((a, b) => a + b, 0) / Math.min(3, data.amounts.slice(0, 3).length);
-    const isIncreasing = recentAvg > olderAvg * 1.05; // 5% threshold
-    
-    // Add small random variation to next month prediction (±1-3%)
+    const isIncreasing = recentAvg > olderAvg * 1.05; 
+
     let nextMonthValue = avg * (isIncreasing ? 1.02 : 1);
-    const behaviorRandomFactor = 1 + (Math.random() - 0.5) * 0.06; // ±3% max variation
-    const behaviorRandomVariation = (Math.random() - 0.5) * 0.02 * avg; // ±2% additional
+    const behaviorRandomFactor = 1 + (Math.random() - 0.5) * 0.06;
+    const behaviorRandomVariation = (Math.random() - 0.5) * 0.02 * avg;
     nextMonthValue = (nextMonthValue * behaviorRandomFactor) + behaviorRandomVariation;
 
-    // Map transaction types to user-friendly names
     const typeNames: Record<string, string> = {
       'income': 'Income',
       'expense': 'Expenses', 
@@ -568,17 +510,13 @@ export async function analyzeTransactionBehavior(userId: string): Promise<Transa
     });
   }
 
-  // Sort by confidence and take top results
   return insights
     .sort((a, b) => b.confidence - a.confidence)
     .slice(0, 6);
 }
 
-/**
- * Generate comprehensive prediction summary
- */
 export async function generatePredictionSummary(userId: string): Promise<PredictionSummary> {
-  // Get both historical data and forecast for accurate projections
+
   const forecast = await generateIncomeExpenseForecast(userId);
   const transactions = await fetchHistoricalTransactions(userId, 3);
   const monthlyData = aggregateByMonth(transactions);
@@ -595,7 +533,6 @@ export async function generatePredictionSummary(userId: string): Promise<Predict
     };
   }
 
-  // Use projected next month data for the cards (what's coming next month)
   const nextMonth = forecast.predicted[0];
   const currentMonth = forecast.historical[forecast.historical.length - 1];
 
@@ -603,12 +540,10 @@ export async function generatePredictionSummary(userId: string): Promise<Predict
   const projectedExpenses = nextMonth?.expense || 0;
   const projectedNet = projectedIncome - projectedExpenses;
 
-  // Use current month data for comparison and change calculation
   const currentIncome = currentMonth?.income || 0;
   const currentExpenses = currentMonth?.expense || 0;
   const currentNet = currentIncome - currentExpenses;
 
-  // Calculate projected changes based on forecast (predicted vs current)
   let incomeChange = null;
   let expenseChange = null;
 
@@ -620,7 +555,7 @@ export async function generatePredictionSummary(userId: string): Promise<Predict
       expenseChange = ((projectedExpenses - currentExpenses) / currentExpenses) * 100;
     }
   } else if (sortedMonths.length >= 2) {
-    // Fallback to historical comparison if forecast not available
+
     const prevMonth = sortedMonths[sortedMonths.length - 2];
     const prevIncome = monthlyData[prevMonth].income;
     const prevExpenses = monthlyData[prevMonth].expenses;
@@ -634,18 +569,15 @@ export async function generatePredictionSummary(userId: string): Promise<Predict
   }
 
   return {
-    monthlyIncome: projectedIncome,      // Show projected income for next month
-    monthlyExpenses: projectedExpenses, // Show projected expenses for next month
-    netBalance: projectedNet,            // Show projected net balance for next month
+    monthlyIncome: projectedIncome,      
+    monthlyExpenses: projectedExpenses,
+    netBalance: projectedNet,            
     savingsRate: projectedIncome > 0 ? (projectedNet / projectedIncome) * 100 : 0,
     incomeChange,
     expenseChange,
   };
 }
 
-/**
- * Fetch prediction history from ai_reports table
- */
 export async function fetchPredictionHistory(userId: string): Promise<PredictionHistory[]> {
   const { data, error } = await supabase
     .from("ai_reports")
@@ -660,7 +592,7 @@ export async function fetchPredictionHistory(userId: string): Promise<Prediction
   }
 
   return (data || []).map((report) => {
-    // Calculate confidence level based on accuracy score
+
     let confidenceLevel: "low" | "medium" | "high" | "very high" = "medium";
     if (report.accuracy_score) {
       if (report.accuracy_score >= 90) confidenceLevel = "very high";
@@ -669,7 +601,6 @@ export async function fetchPredictionHistory(userId: string): Promise<Prediction
       else confidenceLevel = "low";
     }
 
-    // Extract prediction data from JSON field
     const predictionData = report.prediction_data || {};
 
     return {
@@ -683,7 +614,7 @@ export async function fetchPredictionHistory(userId: string): Promise<Prediction
       model: report.model_version || "Prophet v1.0",
       confidenceLevel,
       errorMessage: report.error_message,
-      // Prediction data
+
       projectedIncome: predictionData.projectedIncome,
       projectedExpenses: predictionData.projectedExpenses,
       projectedSavings: predictionData.projectedSavings,
@@ -697,7 +628,7 @@ export async function fetchPredictionHistory(userId: string): Promise<Prediction
       transactionPatterns: predictionData.transactionPatterns,
       anomaliesDetected: predictionData.anomaliesDetected,
       savingsOpportunities: predictionData.savingsOpportunities,
-      // Full data for reconstruction
+
       fullForecastData: predictionData.fullForecastData,
       fullCategoryPredictions: predictionData.fullCategoryPredictions,
       fullExpenseTypes: predictionData.fullExpenseTypes,
@@ -706,9 +637,6 @@ export async function fetchPredictionHistory(userId: string): Promise<Prediction
   });
 }
 
-/**
- * Save prediction to history
- */
 export async function savePrediction(
   userId: string,
   prediction: {
@@ -729,12 +657,12 @@ export async function savePrediction(
     transactionPatterns?: Array<{ type: string; avgAmount: number; trend: string }>;
     anomaliesDetected?: number;
     savingsOpportunities?: number;
-    // Full data for reconstruction
+
     fullForecastData?: any;
     fullCategoryPredictions?: any[];
     fullExpenseTypes?: any;
     fullBehaviorInsights?: any[];
-    fullAIInsights?: any; // Full AI insights for financial_intelligence type
+    fullAIInsights?: any; 
   }
 ): Promise<{ success: boolean; error?: string }> {
   const { error } = await supabase
@@ -742,12 +670,12 @@ export async function savePrediction(
     .insert({
       user_id: userId,
       report_type: prediction.type,
-      timeframe: "month", // Default to month for predictions
+      timeframe: "month", 
       insights: prediction.insights,
       data_points: prediction.dataPoints,
       accuracy_score: prediction.accuracy,
       model_version: "Prophet v1.1",
-      // Store prediction data as JSON with full data for reconstruction
+
       prediction_data: {
         projectedIncome: prediction.projectedIncome,
         projectedExpenses: prediction.projectedExpenses,
@@ -762,7 +690,7 @@ export async function savePrediction(
         transactionPatterns: prediction.transactionPatterns,
         anomaliesDetected: prediction.anomaliesDetected,
         savingsOpportunities: prediction.savingsOpportunities,
-        // Store complete data for page refresh reconstruction
+
         fullForecastData: prediction.fullForecastData,
         fullCategoryPredictions: prediction.fullCategoryPredictions,
         fullExpenseTypes: prediction.fullExpenseTypes,
@@ -785,9 +713,6 @@ export async function savePrediction(
   return { success: true };
 }
 
-/**
- * Detect anomalies in transaction data
- */
 export async function detectAnomalies(userId: string): Promise<Array<{
   type: "warning" | "info" | "error";
   title: string;
@@ -804,7 +729,6 @@ export async function detectAnomalies(userId: string): Promise<Array<{
     action: string;
   }> = [];
 
-  // Check for duplicate transactions
   const txMap: Record<string, any[]> = {};
   for (const tx of transactions) {
     const key = `${tx.description}-${tx.amount}-${tx.date}`;
@@ -825,7 +749,6 @@ export async function detectAnomalies(userId: string): Promise<Array<{
     }
   }
 
-  // Check for unusual spending spikes
   const monthlyData = aggregateByMonth(transactions);
   const expenses = Object.values(monthlyData).map((m) => m.expenses);
   
@@ -846,9 +769,6 @@ export async function detectAnomalies(userId: string): Promise<Array<{
   return anomalies;
 }
 
-/**
- * Generate savings opportunities based on transaction analysis
- */
 export async function generateSavingsOpportunities(userId: string): Promise<Array<{
   title: string;
   potential: string;
@@ -864,10 +784,8 @@ export async function generateSavingsOpportunities(userId: string): Promise<Arra
 
   const opportunities: Array<{ title: string; potential: string; confidence: number }> = [];
 
-  // Calculate average monthly expenses
   const avgExpense = months.reduce((sum, m) => sum + monthlyData[m].expenses, 0) / months.length;
 
-  // Check for subscription patterns
   const descriptionCounts: Record<string, number> = {};
   for (const tx of transactions) {
     if (tx.type === "expense") {
@@ -876,13 +794,12 @@ export async function generateSavingsOpportunities(userId: string): Promise<Arra
     }
   }
 
-  // Find recurring subscriptions (3+ occurrences)
   const subscriptions = Object.entries(descriptionCounts)
     .filter(([, count]) => count >= 3)
     .sort((a, b) => b[1] - a[1]);
 
   if (subscriptions.length > 2) {
-    const potential = avgExpense * 0.05; // 5% potential savings
+    const potential = avgExpense * 0.05; 
     opportunities.push({
       title: `Optimize ${subscriptions.length} recurring subscriptions`,
       potential: `₱${potential.toFixed(0)}/month`,
@@ -890,7 +807,6 @@ export async function generateSavingsOpportunities(userId: string): Promise<Arra
     });
   }
 
-  // Check for dining/entertainment spending
   const diningTx = transactions.filter((t) => {
     const cat = t.expense_categories?.category_name?.toLowerCase();
     return t.type === "expense" && (cat?.includes("food") || cat?.includes("dining"));
@@ -907,7 +823,6 @@ export async function generateSavingsOpportunities(userId: string): Promise<Arra
     }
   }
 
-  // Check transportation costs
   const transportTx = transactions.filter((t) => {
     const cat = t.expense_categories?.category_name?.toLowerCase();
     return t.type === "expense" && cat?.includes("transport");
@@ -925,9 +840,6 @@ export async function generateSavingsOpportunities(userId: string): Promise<Arra
   return opportunities.slice(0, 3);
 }
 
-/**
- * Generate comprehensive AI insights
- */
 export async function generateAIInsights(userId: string): Promise<{
   summary: string;
   riskLevel: "low" | "medium" | "high";
@@ -939,7 +851,6 @@ export async function generateAIInsights(userId: string): Promise<{
   const anomalies = await detectAnomalies(userId);
   const opportunities = await generateSavingsOpportunities(userId);
 
-  // Determine risk level based on savings rate and anomalies
   let riskLevel: "low" | "medium" | "high" = "low";
   let riskScore = 15;
 
@@ -951,7 +862,6 @@ export async function generateAIInsights(userId: string): Promise<{
     riskScore = 45;
   }
 
-  // Calculate growth potential
   const totalPotential = opportunities.reduce((sum, o) => {
     const amount = parseFloat(o.potential.replace(/[^0-9.]/g, ""));
     return sum + (isNaN(amount) ? 0 : amount);

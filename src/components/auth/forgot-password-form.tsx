@@ -16,7 +16,7 @@ export function ForgotPasswordForm() {
 
   return (
     <div>
-      {/* Header */}
+      {}
       <div className="mb-8">
         <h1 className="mb-1 text-xl font-medium tracking-tight text-slate-900">
           Reset your password
@@ -27,7 +27,7 @@ export function ForgotPasswordForm() {
         </p>
       </div>
 
-      {/* Error Message */}
+      {}
       {error && (
         <div
           role="alert"
@@ -37,7 +37,7 @@ export function ForgotPasswordForm() {
         </div>
       )}
 
-      {/* Success Message */}
+      {}
       {success && (
         <div
           role="status"
@@ -48,7 +48,7 @@ export function ForgotPasswordForm() {
         </div>
       )}
 
-      {/* Form */}
+      {}
       <form
         className="space-y-4 mt-6"
         onSubmit={(e) => {
@@ -102,7 +102,7 @@ export function ForgotPasswordForm() {
         </Button>
       </form>
 
-      {/* Footer */}
+      {}
       <div className="mt-6 text-center text-xs text-slate-500">
         Remember your password?{" "}
         <Link

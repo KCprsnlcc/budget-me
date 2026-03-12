@@ -1,4 +1,4 @@
-// Admin Settings Management Types — Database & Activity only
+
 
 export type BackupLog = {
     id: string;
@@ -14,7 +14,7 @@ export type BackupLog = {
     started_at: string;
     completed_at: string | null;
     metadata: Record<string, any>;
-    // Joined
+
     created_by_email?: string;
     created_by_name?: string;
 };
@@ -32,7 +32,7 @@ export type SystemActivityLog = {
     created_at: string;
     execution_time_ms: number | null;
     stack_trace: string | null;
-    // Joined
+
     user_email?: string;
     user_name?: string;
 };

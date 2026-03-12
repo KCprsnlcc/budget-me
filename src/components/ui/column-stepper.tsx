@@ -24,10 +24,10 @@ const DEFAULT_DESCRIPTIONS: StepDescription = {
 export function ColumnStepper({ steps, currentStep, descriptions = DEFAULT_DESCRIPTIONS, className }: ColumnStepperProps) {
   return (
     <div className={cn("relative", className)}>
-      {/* Vertical Line */}
+      {}
       <div className="absolute left-[15px] top-5 bottom-12 w-0.5 bg-gray-200" />
 
-      {/* Steps */}
+      {}
       <div className="space-y-9 relative z-10">
         {steps.map((label, idx) => {
           const stepNum = idx + 1;

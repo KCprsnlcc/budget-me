@@ -10,14 +10,7 @@ import type {
 
 const supabase = createClient();
 
-// Model ID used for database records (no API key on client)
 const AI_MODEL = "openai/gpt-oss-20b";
-
-/**
- * AI Financial Intelligence Service
- * Generates AI-powered insights via secure backend API route (/api/ai/insights).
- * The OpenRouter API key never leaves the server.
- */
 
 interface AIInsightRequest {
   userId: string;
@@ -67,18 +60,13 @@ export interface AIInsightResponse {
   }>;
 }
 
-/**
- * Build comprehensive financial context for AI analysis
- */
 function buildFinancialContext(request: AIInsightRequest): string {
   const { forecastData, categoryPredictions, expenseTypes, behaviorInsights, summary } = request;
 
-  // Format currency
   const fmt = (n: number) => `₱${n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   let context = `# Financial Data Analysis Context\n\n`;
 
-  // 1. Income vs Expenses Forecast
   context += `## Income vs Expenses Forecast\n\n`;
   context += `### Historical Data (Last ${forecastData.historical.length} months):\n`;
   forecastData.historical.forEach((month) => {
@@ -97,7 +85,6 @@ function buildFinancialContext(request: AIInsightRequest): string {
   context += `- Trend Direction: ${forecastData.summary.trendDirection || "stable"}\n`;
   context += `- Trend Strength: ${forecastData.summary.trendStrength || 0}\n\n`;
 
-  // 2. Category Spending Forecast
   context += `## Category Spending Forecast\n\n`;
   if (categoryPredictions.length > 0) {
     categoryPredictions.forEach((cat) => {
@@ -108,12 +95,10 @@ function buildFinancialContext(request: AIInsightRequest): string {
   }
   context += `\n`;
 
-  // 3. Expense Type Forecast
   context += `## Expense Type Forecast\n\n`;
   context += `- Recurring Expenses: ${fmt(expenseTypes.recurring.amount)} (${expenseTypes.recurring.percentage}%), Trend: ${expenseTypes.recurring.trend}\n`;
   context += `- Variable Expenses: ${fmt(expenseTypes.variable.amount)} (${expenseTypes.variable.percentage}%), Trend: ${expenseTypes.variable.trend}\n\n`;
 
-  // 4. Transaction Behavior Insights
   context += `## Transaction Behavior Insights\n\n`;
   if (behaviorInsights.length > 0) {
     behaviorInsights.forEach((insight) => {
@@ -124,7 +109,6 @@ function buildFinancialContext(request: AIInsightRequest): string {
   }
   context += `\n`;
 
-  // 5. Overall Summary
   context += `## Overall Financial Summary\n\n`;
   context += `- Monthly Income: ${fmt(summary.monthlyIncome)}\n`;
   context += `- Monthly Expenses: ${fmt(summary.monthlyExpenses)}\n`;
@@ -140,17 +124,13 @@ function buildFinancialContext(request: AIInsightRequest): string {
   return context;
 }
 
-/**
- * Generate AI-powered financial insights via secure backend API route
- */
 export async function generateAIFinancialInsights(
   request: AIInsightRequest
 ): Promise<AIInsightResponse> {
   try {
-    // Build financial context
+
     const financialContext = buildFinancialContext(request);
 
-    // Build system prompt for financial analysis
     const systemPrompt = `You are an expert financial analyst AI specializing in personal finance, budgeting, and financial planning. Your role is to analyze financial data and provide actionable insights, risk assessments, and strategic recommendations.
 
 Guidelines:
@@ -197,10 +177,8 @@ You must respond with a valid JSON object containing the following structure:
   ]
 }`;
 
-    // Build user prompt with financial data
     const userPrompt = `Analyze the following financial data and provide comprehensive insights:\n\n${financialContext}\n\nProvide your analysis in the specified JSON format.`;
 
-    // ─── Call secure backend API route instead of OpenRouter directly ───
     const response = await fetch("/api/ai/insights", {
       method: "POST",
       headers: {
@@ -226,29 +204,22 @@ You must respond with a valid JSON object containing the following structure:
       throw new Error("No response from AI model");
     }
 
-    // Parse AI response
     const aiResponse: AIInsightResponse = JSON.parse(aiContent);
 
-    // Validate response structure
     if (!aiResponse.financialSummary || !aiResponse.riskLevel || !aiResponse.recommendations) {
       throw new Error("Invalid AI response structure");
     }
 
-    // Store insights in database
     await storeAIInsights(request.userId, aiResponse);
 
     return aiResponse;
   } catch (error) {
     console.error("Error generating AI insights:", error);
-    
-    // Return fallback insights
+
     return generateFallbackInsights(request);
   }
 }
 
-/**
- * Store AI insights in Supabase (using existing ai_insights table structure)
- */
 async function storeAIInsights(userId: string, insights: AIInsightResponse): Promise<void> {
   try {
     await supabase.from("ai_insights").insert({
@@ -276,17 +247,13 @@ async function storeAIInsights(userId: string, insights: AIInsightResponse): Pro
     });
   } catch (error) {
     console.error("Error storing AI insights:", error);
-    // Silent fail - don't break the flow
+
   }
 }
 
-/**
- * Generate fallback insights when AI service is unavailable
- */
 function generateFallbackInsights(request: AIInsightRequest): AIInsightResponse {
   const { summary, forecastData, categoryPredictions } = request;
 
-  // Calculate risk level
   let riskLevel: "low" | "medium" | "high" = "low";
   let riskScore = 20;
 
@@ -298,7 +265,6 @@ function generateFallbackInsights(request: AIInsightRequest): AIInsightResponse 
     riskScore = 50;
   }
 
-  // Calculate growth potential
   const avgIncome = forecastData.predicted.reduce((sum, p) => sum + p.income, 0) / forecastData.predicted.length;
   const avgExpense = forecastData.predicted.reduce((sum, p) => sum + p.expense, 0) / forecastData.predicted.length;
   const potentialSavings = (avgIncome - avgExpense) * 0.1; // 10% improvement potential
@@ -384,9 +350,6 @@ function generateFallbackInsights(request: AIInsightRequest): AIInsightResponse 
   };
 }
 
-/**
- * Fetch latest AI insights from database (using existing ai_insights table structure)
- */
 export async function fetchLatestAIInsights(userId: string): Promise<AIInsightResponse | null> {
   try {
     const { data, error } = await supabase
@@ -401,7 +364,6 @@ export async function fetchLatestAIInsights(userId: string): Promise<AIInsightRe
       return null;
     }
 
-    // Extract data from JSONB fields
     const insights = data.insights || {};
     const riskAssessment = data.risk_assessment || {};
     const opportunityAreas = data.opportunity_areas || {};

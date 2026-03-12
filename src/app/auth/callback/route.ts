@@ -10,39 +10,34 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    
-    // Handle email verification differently - redirect to verification page
+
     if (type === "signup") {
-      // For email verification, redirect to our dedicated verification page
+
       if (token) {
         return NextResponse.redirect(`${origin}/verify?token=${token}&type=${type}`);
       }
-      
-      // If no token, try standard flow
+
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      // If we can get the user, they're already logged in, redirect to dashboard
+
       if (!userError && user && user.email_confirmed_at) {
         return NextResponse.redirect(`${origin}${next}`);
       }
     }
 
-    // Handle password recovery - redirect to reset password page
     if (type === "recovery") {
       if (token) {
         return NextResponse.redirect(`${origin}/reset-password?token_hash=${token}&type=${type}`);
       }
     }
 
-    // Try standard code exchange for OAuth and other flows
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (!error) {
-      // Check if user is admin and redirect accordingly
+
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user && next === "/dashboard") {
-        // Check if user is admin
+
         const { data: roleData } = await supabase
           .from("user_roles")
           .select("role_name")
@@ -52,8 +47,7 @@ export async function GET(request: Request) {
           .maybeSingle();
         
         let isAdmin = !!roleData;
-        
-        // Fallback to profiles table if no role found in user_roles
+
         if (!isAdmin) {
           const { data: profileData } = await supabase
             .from("profiles")
@@ -63,8 +57,7 @@ export async function GET(request: Request) {
           
           isAdmin = profileData?.role === "admin";
         }
-        
-        // Redirect admin users to admin dashboard
+
         if (isAdmin) {
           next = "/admin/dashboard";
         }
@@ -82,17 +75,14 @@ export async function GET(request: Request) {
       }
     }
 
-    // If PKCE failed but it's email verification, redirect to verification page
     if (type === "signup" && (error.message?.includes("code challenge") || error.message?.includes("bad_code_verifier"))) {
       if (token) {
         return NextResponse.redirect(`${origin}/verify?token=${token}&type=${type}`);
       }
-      
-      // Even if no token, the email was likely confirmed server-side
+
       return NextResponse.redirect(`${origin}/login?message=email_verified`);
     }
   }
 
-  // OAuth code exchange failed — redirect to login with error
   return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
 }

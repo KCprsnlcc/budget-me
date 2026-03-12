@@ -3,7 +3,6 @@
 import { getPhilippinesNow, formatInPhilippines } from "@/lib/timezone";
 import type { DashboardSummary, RecentTransaction, BudgetProgress } from "./dashboard-service";
 
-// Flexible transaction type for insights generation
 export interface InsightsTransaction {
   id?: string;
   user_id?: string;
@@ -22,7 +21,6 @@ export interface InsightsTransaction {
   updated_at?: string;
 }
 
-// Flexible budget type for insights generation
 export interface InsightsBudget {
   id?: string;
   user_id?: string;
@@ -43,10 +41,6 @@ export interface InsightData {
   icon: string;
 }
 
-/**
- * Generate financial insights based on transactions, budgets, and financial data
- * Exact replication from useInsightsAndCharts.ts
- */
 export function generateInsights(
   transactions: InsightsTransaction[],
   budgets: InsightsBudget[],
@@ -56,7 +50,6 @@ export function generateInsights(
 ): InsightData[] {
   const newInsights: InsightData[] = [];
   
-  // Validate inputs
   const safeIncome = isNaN(income) || !isFinite(income) ? 0 : Math.max(0, income);
   const safeExpenses = isNaN(expenses) || !isFinite(expenses) ? 0 : Math.max(0, expenses);
   const safeSavingsRate = isNaN(savingsRate) || !isFinite(savingsRate) ? 0 : savingsRate;
@@ -68,9 +61,6 @@ export function generateInsights(
   const formatPercentage = (n: number) =>
     new Intl.NumberFormat("en-PH", { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n / 100);
   
-  // PRIORITY 1: Critical Financial Alerts
-  
-  // Zero income with expenses - CRITICAL
   if (safeIncome === 0 && safeExpenses > 0) {
     newInsights.push({
       title: "Critical: No income recorded",
@@ -80,7 +70,6 @@ export function generateInsights(
     });
   }
   
-  // Significant negative balance - URGENT
   if (balance < -5000) {
     newInsights.push({
       title: "Urgent: Significant negative balance",
@@ -97,7 +86,6 @@ export function generateInsights(
     });
   }
   
-  // Find unusually large subscription transactions
   const unusualTransactions = transactions.filter(tx => {
     const amount = typeof tx.amount === 'string' ? parseFloat(tx.amount) : tx.amount;
     return amount > 1000 && 
@@ -129,7 +117,6 @@ export function generateInsights(
     }
   }
   
-  // Budget insights
   const overBudgetCategories = budgets.filter(budget => 
     (budget.spent || 0) > (budget.amount || 0)
   );
@@ -143,7 +130,6 @@ export function generateInsights(
     });
   }
   
-  // Income vs expenses insight
   if (safeIncome < safeExpenses && safeIncome > 0) {
     const deficit = safeExpenses - safeIncome;
     const deficitPercentage = (deficit / safeIncome) * 100;
@@ -199,11 +185,8 @@ export function generateInsights(
     });
   }
   
-  // NEW INSIGHTS - SPENDING PATTERNS
-  
   const expenseTransactions = transactions.filter(tx => tx.type === 'expense');
   
-  // 1. Daily spending analysis
   const dailyAverage = safeExpenses / 30;
   const last7DaysTx = expenseTransactions.filter(tx => {
     const txDate = new Date(tx.date);
@@ -236,7 +219,6 @@ export function generateInsights(
     }
   }
   
-  // 2. Large transaction analysis
   if (expenseTransactions.length > 0 && safeExpenses > 0) {
     const largeTransactions = expenseTransactions.filter(tx => {
       const amount = typeof tx.amount === 'string' ? parseFloat(tx.amount) : tx.amount;
@@ -260,7 +242,6 @@ export function generateInsights(
     }
   }
   
-  // 3. Frequent small transactions
   const smallTransactions = expenseTransactions.filter(tx => {
     const amount = typeof tx.amount === 'string' ? parseFloat(tx.amount) : tx.amount;
     return amount < 100;
@@ -280,7 +261,6 @@ export function generateInsights(
     });
   }
   
-  // 4. Weekend vs weekday spending
   const weekendExpenses = expenseTransactions.filter(tx => {
     const day = new Date(tx.date).getDay();
     return day === 0 || day === 6;
@@ -312,7 +292,6 @@ export function generateInsights(
     }
   }
   
-  // 5. Monthly spending trend analysis
   const currentMonth = getPhilippinesNow().getMonth();
   const currentYear = getPhilippinesNow().getFullYear();
   const currentMonthTx = expenseTransactions.filter(tx => {
@@ -354,7 +333,6 @@ export function generateInsights(
     }
   }
   
-  // 6. Income consistency analysis
   const incomeTransactions = transactions.filter(tx => tx.type === 'income');
   if (incomeTransactions.length >= 2) {
     const incomeAmounts = incomeTransactions.map(tx => {
@@ -383,7 +361,6 @@ export function generateInsights(
     }
   }
   
-  // 7. Emergency fund assessment
   const monthlyExpenses = safeExpenses / Math.max(1, expenseTransactions.length / 30);
   const emergencyFundMonths = (safeIncome > safeExpenses && monthlyExpenses > 0) 
     ? (safeIncome - safeExpenses) / monthlyExpenses 
@@ -412,7 +389,6 @@ export function generateInsights(
     });
   }
   
-  // 8. Subscription and recurring payment detection
   const subscriptionKeywords = ['subscription', 'monthly', 'netflix', 'spotify', 'gym', 'membership', 'plan'];
   const potentialSubscriptions = expenseTransactions.filter(tx => {
     const notes = (tx.notes || '').toLowerCase();
@@ -436,7 +412,6 @@ export function generateInsights(
     });
   }
   
-  // 9. Cash flow timing analysis
   const transactionsByDay = new Map<number, number>();
   expenseTransactions.forEach(tx => {
     const day = new Date(tx.date).getDate();
@@ -458,7 +433,6 @@ export function generateInsights(
     });
   }
   
-  // 10. Transaction frequency patterns
   const dailyTransactionCount = new Map<string, number>();
   expenseTransactions.forEach(tx => {
     const dateKey = new Date(tx.date).toDateString();
@@ -481,7 +455,6 @@ export function generateInsights(
     });
   }
   
-  // 11. Round number spending analysis
   const roundNumberTx = expenseTransactions.filter(tx => {
     const amount = typeof tx.amount === 'string' ? parseFloat(tx.amount) : tx.amount;
     return amount % 100 === 0 || amount % 50 === 0;
@@ -496,7 +469,6 @@ export function generateInsights(
     });
   }
   
-  // 12. Category concentration analysis
   const categorySpending = new Map<string, number>();
   expenseTransactions.forEach(tx => {
     const category = tx.category || 'Uncategorized';
@@ -519,7 +491,6 @@ export function generateInsights(
     }
   }
   
-  // 13. Impulse buying detection
   const sameDayPurchases = new Map<string, typeof expenseTransactions>();
   expenseTransactions.forEach(tx => {
     const dateKey = new Date(tx.date).toDateString();
@@ -547,7 +518,6 @@ export function generateInsights(
     });
   }
   
-  // 14. Financial health score
   const healthScore = (safeIncome + safeExpenses) > 0 
     ? (safeIncome / (safeIncome + safeExpenses)) * 100 
     : 0;
@@ -582,7 +552,6 @@ export function generateInsights(
     });
   }
   
-  // 15. Seasonal spending patterns
   const monthlySpendingPattern = new Map<number, number>();
   expenseTransactions.forEach(tx => {
     const month = new Date(tx.date).getMonth();
@@ -609,7 +578,6 @@ export function generateInsights(
     }
   }
   
-  // 16. Debt-to-income warning
   const recentMonths = 3;
   let monthsWithDeficit = 0;
   
@@ -644,7 +612,6 @@ export function generateInsights(
     });
   }
   
-  // 17. Goal achievement potential
   if (safeIncome > safeExpenses) {
     const monthlySavings = safeIncome - safeExpenses;
     const yearlyPotential = monthlySavings * 12;
@@ -666,7 +633,6 @@ export function generateInsights(
     }
   }
   
-  // 18. Transaction timing optimization
   const morningTx = expenseTransactions.filter(tx => {
     const hour = new Date(tx.date).getHours();
     return hour >= 6 && hour < 12;
@@ -701,7 +667,6 @@ export function generateInsights(
     }
   }
   
-  // 19. Financial milestone tracking
   const totalWealth = safeIncome - safeExpenses;
   const milestones = [
     { amount: 100000, title: "₱100K milestone achieved!" },
@@ -715,8 +680,6 @@ export function generateInsights(
   const highestMilestone = achievedMilestones[achievedMilestones.length - 1];
   
   if (highestMilestone && achievedMilestones.length > 0) {
-    // Only show milestone if user hasn't seen it before (would need to track in DB)
-    // For now, show the most recent milestone
     const nextMilestone = milestones.find(m => totalWealth < m.amount);
     const nextTarget = nextMilestone ? nextMilestone.amount : highestMilestone.amount * 2;
     
@@ -728,11 +691,9 @@ export function generateInsights(
     });
   }
   
-  // 20. Dynamic time-based insights (change on refresh)
   const currentHour = getPhilippinesNow().getHours();
   const dayOfWeek = getPhilippinesNow().getDay();
   
-  // Time-based motivational insights
   if (currentHour >= 9 && currentHour <= 11) {
     newInsights.push({
       title: "Morning financial check-in",
@@ -756,22 +717,21 @@ export function generateInsights(
     });
   }
   
-  // Day-based insights
-  if (dayOfWeek === 0) { // Sunday
+  if (dayOfWeek === 0) {
     newInsights.push({
       title: "Sunday planning session",
       description: "Perfect time to plan your budget for the upcoming week!",
       type: "success",
       icon: "lucide:calendar",
     });
-  } else if (dayOfWeek === 1) { // Monday
+  } else if (dayOfWeek === 1) {
     newInsights.push({
       title: "Monday motivation",
       description: "Start the week strong! Review your financial goals and set weekly targets.",
       type: "success",
       icon: "lucide:target",
     });
-  } else if (dayOfWeek === 5) { // Friday
+  } else if (dayOfWeek === 5) {
     newInsights.push({
       title: "Friday financial wrap-up",
       description: "Great job this week! Review your spending patterns before the weekend.",
@@ -780,7 +740,6 @@ export function generateInsights(
     });
   }
   
-  // Random financial tips (add variety)
   const randomTips = [
     {
       title: "Tip: Track every expense",
@@ -808,8 +767,7 @@ export function generateInsights(
     },
   ];
   
-  // Add a random tip occasionally
-  if (Math.random() > 0.7) { // 30% chance
+  if (Math.random() > 0.7) {
     const randomTip = randomTips[Math.floor(Math.random() * randomTips.length)];
     newInsights.push(randomTip);
   }

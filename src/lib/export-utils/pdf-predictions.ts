@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { formatCurrencyPHP, sanitizeTextForPDF, getTimestampString } from "./formatters";
 import type { PredictionExportData, CategoryPredictionExportData, AIInsightsExportData } from "./types";
 
-/**
- * Export predictions as PDF
- */
 export function exportPredictionsToPDF(
   forecastData: PredictionExportData[],
   categoryPredictions: CategoryPredictionExportData[],
@@ -34,7 +31,6 @@ export function exportPredictionsToPDF(
   const pageWidth = doc.internal.pageSize.getWidth();
   const usableWidth = pageWidth - margin * 2;
 
-  // Summary section
   if (summary) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
@@ -46,7 +42,6 @@ export function exportPredictionsToPDF(
     const cardHeight = 20;
     const cardSpacing = 2;
 
-    // Projected Income
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
     doc.setDrawColor(COLORS.border);
@@ -62,7 +57,6 @@ export function exportPredictionsToPDF(
     doc.setFont("helvetica", "bold");
     doc.text(formatCurrencyPHP(summary.projectedIncome || 0), margin + 3, currentY + 14);
 
-    // Projected Expense
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
     doc.setDrawColor(COLORS.border);
@@ -77,7 +71,6 @@ export function exportPredictionsToPDF(
     doc.setFont("helvetica", "bold");
     doc.text(formatCurrencyPHP(summary.projectedExpense || 0), margin + cardWidth + cardSpacing + 3, currentY + 14);
 
-    // Projected Savings
     const savingsColor = (summary.projectedSavings || 0) >= 0 ? COLORS.emerald : COLORS.red;
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin + (cardWidth + cardSpacing) * 2, currentY, cardWidth, cardHeight, 2, 2, "F");
@@ -93,7 +86,6 @@ export function exportPredictionsToPDF(
     doc.setFont("helvetica", "bold");
     doc.text(formatCurrencyPHP(summary.projectedSavings || 0), margin + (cardWidth + cardSpacing) * 2 + 3, currentY + 14);
 
-    // Confidence Score
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin + (cardWidth + cardSpacing) * 3, currentY, cardWidth, cardHeight, 2, 2, "F");
     doc.setDrawColor(COLORS.border);
@@ -111,9 +103,8 @@ export function exportPredictionsToPDF(
     currentY += cardHeight + 12;
   }
 
-  // AI Financial Intelligence Section
   if (aiInsights) {
-    // Check if we need a new page
+
     if (currentY > 200) {
       doc.addPage();
       currentY = 20;
@@ -125,7 +116,6 @@ export function exportPredictionsToPDF(
     doc.text("AI Financial Intelligence", margin, currentY);
     currentY += 8;
 
-    // Financial Summary
     if (aiInsights.summary) {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
@@ -148,7 +138,6 @@ export function exportPredictionsToPDF(
       currentY += 5;
     }
 
-    // Risk Assessment
     if (aiInsights.riskLevel) {
       if (currentY > 250) {
         doc.addPage();
@@ -176,7 +165,6 @@ export function exportPredictionsToPDF(
       currentY += 5;
     }
 
-    // Growth Potential
     if (aiInsights.growthPotential) {
       if (currentY > 250) {
         doc.addPage();
@@ -204,7 +192,6 @@ export function exportPredictionsToPDF(
       currentY += 5;
     }
 
-    // Recommendations
     if (aiInsights.recommendations.length > 0) {
       if (currentY > 230) {
         doc.addPage();
@@ -223,14 +210,12 @@ export function exportPredictionsToPDF(
           currentY = 20;
         }
 
-        // Recommendation number and title
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8.5);
         doc.setTextColor(COLORS.dark);
         doc.text(`${idx + 1}. ${sanitizeTextForPDF(rec.title)}`, margin + 2, currentY);
         currentY += 5;
 
-        // Description
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
         doc.setTextColor(COLORS.gray);
@@ -244,7 +229,6 @@ export function exportPredictionsToPDF(
           currentY += 4.5;
         });
 
-        // Priority and category
         doc.setFontSize(7);
         doc.setTextColor(COLORS.textMuted);
         doc.text(`Priority: ${rec.priority.toUpperCase()} | Category: ${rec.category}`, margin + 4, currentY);
@@ -252,7 +236,6 @@ export function exportPredictionsToPDF(
       });
     }
 
-    // Risk Mitigation Strategies
     if (aiInsights.riskMitigationStrategies.length > 0) {
       if (currentY > 230) {
         doc.addPage();
@@ -271,14 +254,12 @@ export function exportPredictionsToPDF(
           currentY = 20;
         }
 
-        // Strategy title
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8.5);
         doc.setTextColor(COLORS.dark);
         doc.text(`• ${sanitizeTextForPDF(strategy.strategy)}`, margin + 2, currentY);
         currentY += 5;
 
-        // Description
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
         doc.setTextColor(COLORS.gray);
@@ -292,7 +273,6 @@ export function exportPredictionsToPDF(
           currentY += 4.5;
         });
 
-        // Impact
         doc.setFontSize(7);
         doc.setTextColor(COLORS.textMuted);
         doc.text(`Impact: ${strategy.impact.toUpperCase()}`, margin + 4, currentY);
@@ -300,7 +280,6 @@ export function exportPredictionsToPDF(
       });
     }
 
-    // Long-term Opportunities
     if (aiInsights.longTermOpportunities.length > 0) {
       if (currentY > 230) {
         doc.addPage();
@@ -319,14 +298,12 @@ export function exportPredictionsToPDF(
           currentY = 20;
         }
 
-        // Opportunity title
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8.5);
         doc.setTextColor(COLORS.dark);
         doc.text(`${idx + 1}. ${sanitizeTextForPDF(opp.opportunity)}`, margin + 2, currentY);
         currentY += 5;
 
-        // Description
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
         doc.setTextColor(COLORS.gray);
@@ -340,7 +317,6 @@ export function exportPredictionsToPDF(
           currentY += 4.5;
         });
 
-        // Timeframe and potential return
         doc.setFontSize(7);
         doc.setTextColor(COLORS.textMuted);
         doc.text(`Timeframe: ${opp.timeframe} | Potential Return: ${sanitizeTextForPDF(opp.potentialReturn)}`, margin + 4, currentY);
@@ -351,7 +327,6 @@ export function exportPredictionsToPDF(
     currentY += 5;
   }
 
-  // Forecast table
   if (forecastData.length > 0) {
     if (currentY > 200) {
       doc.addPage();
@@ -374,7 +349,6 @@ export function exportPredictionsToPDF(
     currentY += 10;
   }
 
-  // Category predictions table
   if (categoryPredictions.length > 0) {
     if (currentY > 200) {
       doc.addPage();

@@ -4,10 +4,6 @@ import type { GoalType, GoalFormState, GoalCategory, GoalContribution } from "..
 
 const supabase = createClient();
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 const CATEGORY_ICONS: Record<string, string> = {
   emergency: "shield-check",
   vacation: "airplane",
@@ -36,7 +32,6 @@ function normalizeCategory(dbCategory: string | null): GoalCategory {
     : "general";
 }
 
-/** Map a raw DB row to the UI GoalType. */
 function mapRow(row: Record<string, any>): GoalType {
   const category = normalizeCategory(row.category);
   return {
@@ -61,10 +56,6 @@ function mapRow(row: Record<string, any>): GoalType {
   };
 }
 
-// ---------------------------------------------------------------------------
-// READ — Goals list
-// ---------------------------------------------------------------------------
-
 export type GoalFilters = {
   status?: string;
   priority?: string;
@@ -79,7 +70,7 @@ export async function fetchGoalsForPage(
   page: number = 1,
   pageSize: number = 20
 ): Promise<{ data: GoalType[]; error: string | null; count: number | null }> {
-  // First, check if user is part of a family
+
   const { data: familyMember } = await supabase
     .from("family_members")
     .select("family_id")
@@ -89,13 +80,11 @@ export async function fetchGoalsForPage(
 
   const familyId = familyMember?.family_id;
 
-  // Build query to fetch both personal goals and family goals
   let query = supabase
     .from("goals")
     .select("*")
     .order("created_at", { ascending: false });
 
-  // Fetch personal goals OR family goals if user is in a family
   if (familyId) {
     query = query.or(`user_id.eq.${userId},and(is_family_goal.eq.true,family_id.eq.${familyId})`);
   } else {
@@ -111,22 +100,17 @@ export async function fetchGoalsForPage(
   if (filters.category) {
     query = query.eq("category", filters.category);
   }
-  // Remove date_part filtering as it causes database errors
-  // Date filtering will be handled client-side if needed
 
-  // Get total count for pagination (apply same filters as main query)
   let countQuery = supabase
     .from("goals")
     .select("count", { count: "exact", head: true });
 
-  // Apply the same user/family filter to count query
   if (familyId) {
     countQuery = countQuery.or(`user_id.eq.${userId},and(is_family_goal.eq.true,family_id.eq.${familyId})`);
   } else {
     countQuery = countQuery.eq("user_id", userId);
   }
 
-  // Apply the same filters to count query
   if (filters.status) {
     countQuery = countQuery.eq("status", filters.status);
   }
@@ -136,11 +120,9 @@ export async function fetchGoalsForPage(
   if (filters.category) {
     countQuery = countQuery.eq("category", filters.category);
   }
-  // Remove date_part filtering from count query as well
 
   const { count } = await countQuery;
 
-  // Add pagination to main query
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   query = query.range(from, to);
@@ -149,10 +131,6 @@ export async function fetchGoalsForPage(
   if (error) return { data: [], error: error.message, count: null };
   return { data: (data ?? []).map(mapRow), error: null, count: count ?? 0 };
 }
-
-// ---------------------------------------------------------------------------
-// CREATE
-// ---------------------------------------------------------------------------
 
 export async function createGoal(
   userId: string,
@@ -190,10 +168,6 @@ export async function createGoal(
   return { data: mapRow(data), error: null };
 }
 
-// ---------------------------------------------------------------------------
-// UPDATE
-// ---------------------------------------------------------------------------
-
 export async function updateGoal(
   goalId: string,
   form: GoalFormState
@@ -228,10 +202,6 @@ export async function updateGoal(
   return { data: mapRow(data), error: null };
 }
 
-// ---------------------------------------------------------------------------
-// DELETE
-// ---------------------------------------------------------------------------
-
 export async function deleteGoal(
   goalId: string
 ): Promise<{ error: string | null }> {
@@ -243,10 +213,6 @@ export async function deleteGoal(
   return { error: null };
 }
 
-// ---------------------------------------------------------------------------
-// CONTRIBUTE
-// ---------------------------------------------------------------------------
-
 export async function contributeToGoal(
   goalId: string,
   amount: number,
@@ -256,7 +222,6 @@ export async function contributeToGoal(
     return { data: null, error: "Contribution amount must be greater than zero." };
   }
 
-  // Create contribution record - the trigger will automatically update the goal progress
   const localDate = formatDateForInput(getPhilippinesNow());
   
   const contribution = {
@@ -267,7 +232,6 @@ export async function contributeToGoal(
     contribution_type: "manual",
   };
 
-  // Insert contribution record - trigger will handle goal progress update
   const { error: contributionError } = await supabase
     .from("goal_contributions")
     .insert(contribution);
@@ -276,7 +240,6 @@ export async function contributeToGoal(
     return { data: null, error: contributionError.message };
   }
 
-  // Fetch the updated goal to return current state
   const { data: updatedGoal, error: fetchError } = await supabase
     .from("goals")
     .select("*")
@@ -287,10 +250,6 @@ export async function contributeToGoal(
 
   return { data: mapRow(updatedGoal), error: null };
 }
-
-// ---------------------------------------------------------------------------
-// FETCH GOAL CONTRIBUTIONS
-// ---------------------------------------------------------------------------
 
 export async function fetchGoalContributions(
   goalId: string
@@ -326,10 +285,6 @@ export async function fetchGoalContributions(
   return { data: contributions, error: null };
 }
 
-// ---------------------------------------------------------------------------
-// FETCH GOAL CONTRIBUTORS (for list view - top contributors with avatars)
-// ---------------------------------------------------------------------------
-
 export interface GoalContributor {
   user_id: string;
   full_name: string;
@@ -356,14 +311,12 @@ export async function fetchGoalContributors(
 
   if (error) return { data: [], error: error.message };
 
-  // Aggregate contributions by user
   const contributorMap = new Map<string, GoalContributor>();
   
   for (const row of data || []) {
     const userId = row.user_id;
     const existing = contributorMap.get(userId);
-    
-    // Handle profiles data - Supabase might return it as array or single object
+
     const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
     
     if (existing) {
@@ -378,17 +331,12 @@ export async function fetchGoalContributors(
     }
   }
 
-  // Convert to array and sort by contribution amount
   const contributors = Array.from(contributorMap.values())
     .sort((a, b) => b.total_contributed - a.total_contributed)
     .slice(0, limit);
 
   return { data: contributors, error: null };
 }
-
-// ---------------------------------------------------------------------------
-// SUMMARY
-// ---------------------------------------------------------------------------
 
 export type GoalSummary = {
   activeGoals: number;
@@ -400,7 +348,7 @@ export type GoalSummary = {
 export async function fetchGoalSummary(
   userId: string
 ): Promise<GoalSummary> {
-  // First, check if user is part of a family
+
   const { data: familyMember } = await supabase
     .from("family_members")
     .select("family_id")
@@ -410,12 +358,10 @@ export async function fetchGoalSummary(
 
   const familyId = familyMember?.family_id;
 
-  // Build query to fetch both personal goals and family goals
   let query = supabase
     .from("goals")
     .select("status, current_amount, auto_contribute_amount");
 
-  // Fetch personal goals OR family goals if user is in a family
   if (familyId) {
     query = query.or(`user_id.eq.${userId},and(is_family_goal.eq.true,family_id.eq.${familyId})`);
   } else {

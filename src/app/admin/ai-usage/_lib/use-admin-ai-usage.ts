@@ -10,14 +10,12 @@ export function useAdminAIUsage() {
   const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters
   const [search, setSearch] = useState("");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [userFilter, setUserFilter] = useState("");
   const [usageRangeFilter, setUsageRangeFilter] = useState<"all" | "low" | "medium" | "high" | "limit">("all");
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [totalCount, setTotalCount] = useState(0);
@@ -33,7 +31,6 @@ export function useAdminAIUsage() {
       userId: userFilter || undefined,
     };
 
-    // Apply usage range filters
     if (usageRangeFilter === "low") {
       baseFilters.minUsage = 0;
       baseFilters.maxUsage = 5;
@@ -50,7 +47,6 @@ export function useAdminAIUsage() {
     return baseFilters;
   }, [startDate, endDate, userFilter, usageRangeFilter]);
 
-  // Fetch data
   const fetchData = useCallback(async (showTableLoading = false, forceRefreshStats = false) => {
     if (showTableLoading) {
       setTableLoading(true);
@@ -83,19 +79,16 @@ export function useAdminAIUsage() {
     }
   }, [filters, currentPage, pageSize, stats, users]);
 
-  // Initial load
   useEffect(() => {
     fetchData();
   }, []);
 
-  // Refetch on filter/pagination changes
   useEffect(() => {
     if (!loading) {
       fetchData(true);
     }
   }, [filters, currentPage, pageSize]);
 
-  // Search filter (client-side)
   const filteredUsageRecords = useMemo(() => {
     if (!search) return usageRecords;
     const lowerSearch = search.toLowerCase();

@@ -79,7 +79,6 @@ export function InviteMemberModal({ open, onClose, onSendInvitation }: InviteMem
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-      {/* Header */}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
@@ -91,12 +90,10 @@ export function InviteMemberModal({ open, onClose, onSendInvitation }: InviteMem
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
       <Stepper currentStep={currentStep} totalSteps={2} labels={STEPS} />
 
-      {/* Body */}
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* STEP 1: Member Details */}
+        
         {currentStep === 1 && (
           <div className="space-y-6 animate-txn-in">
             <div>
@@ -157,7 +154,6 @@ export function InviteMemberModal({ open, onClose, onSendInvitation }: InviteMem
                             <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{role.title}</h3>
                             <p className="text-[11px] text-gray-500 leading-relaxed">{role.description}</p>
                           </div>
-                          {/* Check indicator */}
                           <div
                             className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
                               selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
@@ -188,7 +184,6 @@ export function InviteMemberModal({ open, onClose, onSendInvitation }: InviteMem
           </div>
         )}
 
-        {/* STEP 2: Review */}
         {currentStep === 2 && (
           <div className="space-y-6 animate-txn-in">
             <div>
@@ -246,7 +241,6 @@ export function InviteMemberModal({ open, onClose, onSendInvitation }: InviteMem
         )}
       </ModalBody>
 
-      {/* Footer */}
       <ModalFooter className="flex justify-between px-4 sm:px-6 lg:px-8 py-3 sm:py-4 sticky bottom-0 bg-white z-10 lg:static">
         {currentStep > 1 ? (
           <button

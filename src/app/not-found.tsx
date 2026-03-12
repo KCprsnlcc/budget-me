@@ -8,7 +8,7 @@ import { Logo } from "@/components/shared/logo";
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-white text-slate-900 overflow-hidden relative">
-      {/* Background Grid */}
+      {}
       <div
         className="fixed inset-0 z-0 pointer-events-none"
         style={{
@@ -18,9 +18,9 @@ export default function NotFound() {
         }}
       />
 
-      {/* Beam Background */}
+      {}
       <div className="pointer-events-none absolute inset-0 h-full w-full bg-white">
-        {/* Grid Pattern */}
+        {}
         <div
           className="absolute inset-0 opacity-40"
           style={{
@@ -32,7 +32,7 @@ export default function NotFound() {
           }}
         />
 
-        {/* SVG Beams */}
+        {}
         <svg
           className="absolute h-full w-full -rotate-45 scale-125"
           fill="none"
@@ -61,19 +61,15 @@ export default function NotFound() {
             <path d="M-358 -213C-358 -213 -290 192 174 319C638 446 706 851 706 851" stroke="currentColor" className="text-slate-300" strokeWidth={0.5} />
             <path d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827" stroke="currentColor" className="text-slate-300" strokeWidth={0.5} />
           </g>
-          {/* Static paths - uncomment below and comment out above for animated version */}
+          {}
           <path d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875" stroke="url(#beam-gradient-404-0)" strokeWidth={1.5} strokeLinecap="round" opacity={0.3} />
           <path d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827" stroke="url(#beam-gradient-404-1)" strokeWidth={1} strokeLinecap="round" opacity={0.2} />
           <path d="M-204 -381C-204 -381 -136 24 328 151C792 278 860 683 860 683" stroke="url(#beam-gradient-404-0)" strokeWidth={1.5} strokeLinecap="round" opacity={0.25} />
-          {/* Animated paths - uncomment to restore animations
-          <path d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875" stroke="url(#beam-gradient-404-0)" strokeWidth={1.5} strokeLinecap="round" className="animate-beam-slow" />
-          <path d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827" stroke="url(#beam-gradient-404-1)" strokeWidth={1} strokeLinecap="round" className="animate-beam-medium opacity-60" />
-          <path d="M-204 -381C-204 -381 -136 24 328 151C792 278 860 683 860 683" stroke="url(#beam-gradient-404-0)" strokeWidth={1.5} strokeLinecap="round" className="animate-beam-fast" />
-          */}
+          {}
         </svg>
       </div>
 
-      {/* Navigation */}
+      {}
       <nav className="fixed w-full z-50 top-0 border-b border-slate-100 bg-white">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
@@ -82,29 +78,29 @@ export default function NotFound() {
         </div>
       </nav>
 
-      {/* Main Content */}
+      {}
       <main className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-16">
         <div className="max-w-2xl mx-auto text-center">
-          {/* Error Code */}
+          {}
           <div className="mb-4">
             <span className="text-8xl md:text-9xl font-bold text-slate-900 select-none tracking-tighter">
               404
             </span>
           </div>
 
-          {/* Headline */}
+          {}
           <h1 className="text-4xl md:text-5xl lg:text-5xl font-semibold text-slate-900 tracking-tight mb-5 leading-[1.2]">
             <span className="text-emerald-500">Page Not Found</span>
           </h1>
 
-          {/* Subheadline */}
+          {}
           <p className="text-[13px] md:text-sm text-slate-700 max-w-xl mx-auto mb-8 leading-relaxed">
             The page you're looking for doesn't exist or has been moved.{" "}
             <br className="hidden md:block" />
             Let's get you back on track with your financial planning.
           </p>
 
-          {/* Action Buttons */}
+          {}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/">
               <Button size="lg" className="min-w-[180px]">
@@ -118,7 +114,7 @@ export default function NotFound() {
             </Button>
           </div>
 
-          {/* Search Suggestion */}
+          {}
           <div className="mt-12 pt-8 border-t border-slate-100">
             <div className="flex items-center justify-center gap-2 text-slate-400 text-[13px]">
               <Search size={14} />
@@ -137,14 +133,14 @@ export default function NotFound() {
             </div>
           </div>
 
-          {/* Footer */}
+          {}
           <p className="mt-12 text-[11px] text-slate-400">
             &copy; 2026 BudgetMe. All rights reserved.
           </p>
         </div>
       </main>
 
-      {/* Animated floating elements */}
+      {}
       <div className="absolute top-1/4 left-10 w-16 h-16 rounded-full bg-red-100/50 blur-xl animate-pulse" />
       <div className="absolute bottom-1/4 right-10 w-24 h-24 rounded-full bg-slate-100/50 blur-2xl animate-pulse delay-500" />
     </div>

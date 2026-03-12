@@ -52,7 +52,6 @@ const MONTH_NAMES = [
     "July", "August", "September", "October", "November", "December",
 ];
 
-// ─── Helpers ───────────────────────────────────────────────────────────
 function formatDate(dateStr: string): string {
     return new Date(dateStr).toLocaleDateString("en-US", {
         month: "short",
@@ -99,7 +98,6 @@ const backupStatusIcon = (status: string) => {
     }
 };
 
-// ─── Summary Card Component ────────────────────────────────────────────
 const SummaryCard = memo(({ label, value, icon: Icon, change, trend }: {
     label: string;
     value: string;
@@ -124,7 +122,6 @@ const SummaryCard = memo(({ label, value, icon: Icon, change, trend }: {
 ));
 SummaryCard.displayName = "SummaryCard";
 
-// ─── Tab Button ────────────────────────────────────────────────────────
 const TabButton = memo(({ tab, activeTab, setActiveTab, icon: Icon, label }: {
     tab: SettingsTab;
     activeTab: SettingsTab;
@@ -145,7 +142,6 @@ const TabButton = memo(({ tab, activeTab, setActiveTab, icon: Icon, label }: {
 ));
 TabButton.displayName = "TabButton";
 
-// ─── Main Component ───────────────────────────────────────────────────
 export default function AdminSettingsPage() {
     const { user } = useAuth();
     const {
@@ -166,11 +162,9 @@ export default function AdminSettingsPage() {
     const [backingUp, setBackingUp] = useState(false);
     const [hoveredBar, setHoveredBar] = useState<{ name: string, count: number } | null>(null);
 
-    // Export state
     const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
     const exportDropdownRef = useRef<HTMLDivElement>(null);
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
@@ -181,13 +175,11 @@ export default function AdminSettingsPage() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Filter states
     const [searchQuery, setSearchQuery] = useState("");
     const [monthFilter, setMonthFilter] = useState<string | "all">("all");
     const [yearFilter, setYearFilter] = useState<string | "all">("all");
     const currentYear = new Date().getFullYear();
 
-    // ─── Chart Data Preparation ──────────────────────────────────────────
     const chartData = useMemo(() => {
         if (!stats?.storageUsed) return [];
         const data = Object.entries(stats.storageUsed).map(([key, count]) => ({
@@ -219,7 +211,6 @@ export default function AdminSettingsPage() {
         return `conic-gradient(${stops.join(", ")})`;
     }, [stats, typeTotal]);
 
-    // ─── Handlers ──────────────────────────────────────────────────────
     const handleBackup = useCallback(async () => {
         if (!user?.id) return;
         setBackingUp(true);
@@ -241,11 +232,9 @@ export default function AdminSettingsPage() {
         setYearFilter("all");
     }, []);
 
-    // ─── Filtered Data ─────────────────────────────────────────────────
     const filteredBackupLogs = useMemo(() => {
         let filtered = backupLogs;
 
-        // Search filter
         if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase();
             filtered = filtered.filter(backup =>
@@ -256,7 +245,6 @@ export default function AdminSettingsPage() {
             );
         }
 
-        // Month and Year filter
         if (monthFilter !== "all" || yearFilter !== "all") {
             filtered = filtered.filter(backup => {
                 const backupDate = new Date(backup.started_at);
@@ -276,7 +264,6 @@ export default function AdminSettingsPage() {
     const filteredActivityLogs = useMemo(() => {
         let filtered = activityLogs;
 
-        // Search filter
         if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase();
             filtered = filtered.filter(log =>
@@ -287,7 +274,6 @@ export default function AdminSettingsPage() {
             );
         }
 
-        // Month and Year filter
         if (monthFilter !== "all" || yearFilter !== "all") {
             filtered = filtered.filter(log => {
                 const logDate = new Date(log.created_at);
@@ -304,7 +290,6 @@ export default function AdminSettingsPage() {
         return filtered;
     }, [activityLogs, searchQuery, monthFilter, yearFilter]);
 
-    // Export handlers
     const handleExportCSV = useCallback(() => {
         if (activeTab === "backups") {
             if (filteredBackupLogs.length === 0) {
@@ -381,12 +366,11 @@ export default function AdminSettingsPage() {
         }
     }, [activeTab, filteredBackupLogs, filteredActivityLogs, stats]);
 
-    // ─── Loading State ─────────────────────────────────────────────────
     if (loading) {
         return (
             <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
                 <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-                    {/* Header Skeleton */}
+                    {}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
                         <div>
                             <Skeleton width={220} height={28} className="mb-2" />
@@ -398,9 +382,9 @@ export default function AdminSettingsPage() {
                         </div>
                     </div>
 
-                    {/* Scrollable Content Area */}
+                    {}
                     <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0">
-                        {/* Summary Cards Skeleton */}
+                        {}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {Array.from({ length: 3 }).map((_, i) => (
                                 <Card key={i} className="p-5">
@@ -414,9 +398,9 @@ export default function AdminSettingsPage() {
                             ))}
                         </div>
 
-                        {/* Charts Section Skeleton */}
+                        {}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                            {/* Bar Chart Skeleton */}
+                            {}
                             <Card className="lg:col-span-2 p-4 sm:p-6">
                                 <div className="mb-6 sm:mb-8">
                                     <Skeleton width={180} height={14} className="mb-2" />
@@ -425,7 +409,7 @@ export default function AdminSettingsPage() {
                                 <Skeleton height={192} className="sm:h-60" />
                             </Card>
 
-                            {/* Donut Chart Skeleton */}
+                            {}
                             <Card className="p-4 sm:p-6">
                                 <div className="mb-4 sm:mb-6">
                                     <Skeleton width={100} height={14} className="mb-2" />
@@ -448,7 +432,7 @@ export default function AdminSettingsPage() {
                             </Card>
                         </div>
 
-                        {/* Database Overview Skeleton */}
+                        {}
                         <Card className="p-4 sm:p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <div>
@@ -467,7 +451,7 @@ export default function AdminSettingsPage() {
                             </div>
                         </Card>
 
-                        {/* Filter Controls Skeleton */}
+                        {}
                         <Card className="p-3 sm:p-4">
                             <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
                                 <Skeleton width={60} height={14} />
@@ -487,13 +471,13 @@ export default function AdminSettingsPage() {
                             </div>
                         </Card>
 
-                        {/* Info Text Skeleton */}
+                        {}
                         <div className="flex items-start gap-2 sm:gap-3 px-1">
                             <Skeleton width={16} height={16} className="mt-0.5" />
                             <Skeleton width="100%" height={32} />
                         </div>
 
-                        {/* List Items Skeleton */}
+                        {}
                         <div className="space-y-2 sm:space-y-3">
                             {Array.from({ length: 8 }).map((_, i) => (
                                 <Card key={i} className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4">
@@ -527,7 +511,7 @@ export default function AdminSettingsPage() {
 
     return (
         <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-            {/* Header */}
+            {}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
                 <div>
                     <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">System Management</h2>
@@ -605,10 +589,10 @@ export default function AdminSettingsPage() {
                 </div>
             </div>
 
-            {/* Scrollable Content */}
+            {}
             <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth">
 
-                {/* Summary Cards */}
+                {}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <SummaryCard
                         label="System Backups"
@@ -633,9 +617,9 @@ export default function AdminSettingsPage() {
                     />
                 </div>
 
-                {/* Charts Section */}
+                {}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                    {/* Record Growth Chart */}
+                    {}
                     <Card className="lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
                         <div className="flex items-center justify-between mb-6 sm:mb-8">
                             <div>
@@ -682,7 +666,7 @@ export default function AdminSettingsPage() {
                         </div>
                     </Card>
 
-                    {/* Donut Distribution */}
+                    {}
                     <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
                         <div className="mb-4 sm:mb-6">
                             <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Storage Mix</h3>
@@ -718,7 +702,7 @@ export default function AdminSettingsPage() {
                     </Card>
                 </div>
 
-                {/* Database Overview */}
+                {}
                 <Card className="p-4 sm:p-6 hover:shadow-md transition-all">
                     <div className="flex items-center justify-between mb-4">
                         <div>
@@ -742,7 +726,7 @@ export default function AdminSettingsPage() {
                     </div>
                 </Card>
 
-                {/* Filter Controls */}
+                {}
                 <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
                     <div className="flex flex-col xl:flex-row items-start xl:items-center gap-2 sm:gap-3">
                         <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-slate-500 w-full xl:w-auto">
@@ -828,10 +812,10 @@ export default function AdminSettingsPage() {
                     </div>
                 </Card>
 
-                {/* ─── Backups Tab ───────────────────────────────────────────── */}
+                {}
                 {activeTab === "backups" && (
                     <div className="space-y-4 sm:space-y-6">
-                        {/* Backup Action Information */}
+                        {}
                         <div className="flex items-start gap-2 sm:gap-3 px-1">
                             <Shield size={16} className="text-slate-500 mt-0.5 flex-shrink-0 sm:w-[18px] sm:h-[18px]" />
                             <div className="text-[10px] sm:text-xs text-slate-600 leading-relaxed">
@@ -966,10 +950,10 @@ export default function AdminSettingsPage() {
                     </div>
                 )}
 
-                {/* ─── Activity Log Tab ──────────────────────────────────────── */}
+                {}
                 {activeTab === "activity" && (
                     <div className="space-y-4 sm:space-y-6">
-                        {/* Activity Log Information */}
+                        {}
                         <div className="flex items-start gap-2 sm:gap-3 px-1">
                             <Activity size={16} className="text-slate-500 mt-0.5 flex-shrink-0 sm:w-[18px] sm:h-[18px]" />
                             <div className="text-[10px] sm:text-xs text-slate-600 leading-relaxed">
@@ -977,7 +961,7 @@ export default function AdminSettingsPage() {
                             </div>
                         </div>
 
-                        {/* Activity Items */}
+                        {}
                         {filteredActivityLogs.length === 0 ? (
                             <div className="text-center py-8 sm:py-12">
                                 <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">

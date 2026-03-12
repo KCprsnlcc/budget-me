@@ -38,7 +38,6 @@ export function EditAdminFamilyModal({
 
     const [status, setStatus] = useState<"active" | "inactive">("active");
 
-    // Populate form when family changes
     useEffect(() => {
         if (family) {
             setFamilyName(family.family_name);
@@ -117,7 +116,7 @@ export function EditAdminFamilyModal({
 
     return (
         <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-            {/* Header */}
+            {}
             <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
                 <div className="flex items-center gap-3">
                     <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
@@ -129,12 +128,12 @@ export function EditAdminFamilyModal({
                 </div>
             </ModalHeader>
 
-            {/* Stepper */}
+            {}
             <Stepper steps={STEPS} currentStep={currentStep} />
 
-            {/* Body */}
+            {}
             <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-                {/* STEP 1: Details */}
+                {}
                 {currentStep === 1 && (
                     <div className="space-y-6 animate-txn-in">
                         <div>
@@ -147,7 +146,7 @@ export function EditAdminFamilyModal({
                         </div>
 
                         <div className="space-y-4">
-                            {/* Family Name */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Family Name <span className="text-gray-400">*</span>
@@ -161,7 +160,7 @@ export function EditAdminFamilyModal({
                                 />
                             </div>
 
-                            {/* Description */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Description <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
@@ -175,7 +174,7 @@ export function EditAdminFamilyModal({
                                 />
                             </div>
 
-                            {/* Visibility */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Visibility
@@ -222,7 +221,7 @@ export function EditAdminFamilyModal({
                                 </div>
                             </div>
 
-                            {/* Status */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Status
@@ -253,7 +252,7 @@ export function EditAdminFamilyModal({
                                 </div>
                             </div>
 
-                            {/* Max Members */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Max Members
@@ -281,7 +280,7 @@ export function EditAdminFamilyModal({
                     </div>
                 )}
 
-                {/* STEP 2: Review */}
+                {}
                 {currentStep === 2 && (
                     <div className="space-y-6 animate-txn-in">
                         <div>
@@ -339,7 +338,7 @@ export function EditAdminFamilyModal({
                 )}
             </ModalBody>
 
-            {/* Footer */}
+            {}
             <ModalFooter className="flex justify-between px-4 sm:px-6 lg:px-8 py-3 sm:py-4 sticky bottom-0 bg-white z-10 lg:static">
                 {currentStep > 1 ? (
                     <button

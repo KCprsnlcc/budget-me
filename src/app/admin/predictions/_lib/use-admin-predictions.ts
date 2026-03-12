@@ -11,7 +11,6 @@ export function useAdminPredictions() {
     const [tableLoading, setTableLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Filters
     const [search, setSearch] = useState("");
     const [month, setMonth] = useState<number | "all">("all");
     const [year, setYear] = useState<number | "all">("all");
@@ -21,7 +20,6 @@ export function useAdminPredictions() {
     const [statusFilter, setStatusFilter] = useState("");
     const [dataSource, setDataSource] = useState<"reports" | "insights">("reports");
 
-    // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [totalCount, setTotalCount] = useState(0);
@@ -43,7 +41,6 @@ export function useAdminPredictions() {
         [month, year, reportTypeFilter, userFilter, modelFilter, statusFilter, dataSource]
     );
 
-    // Fetch data
     const fetchData = useCallback(async (showTableLoading = false, forceRefreshStats = false) => {
         if (showTableLoading) {
             setTableLoading(true);
@@ -84,19 +81,16 @@ export function useAdminPredictions() {
         }
     }, [filters, currentPage, pageSize, stats, users, dataSource]);
 
-    // Initial load
     useEffect(() => {
         fetchData();
     }, []);
 
-    // Refetch on filter/pagination/dataSource changes
     useEffect(() => {
         if (!loading) {
             fetchData(true);
         }
     }, [filters, currentPage, pageSize, dataSource]);
 
-    // Search filter (client-side)
     const filteredReports = useMemo(() => {
         if (!search) return reports;
         const lowerSearch = search.toLowerCase();

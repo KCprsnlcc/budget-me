@@ -39,7 +39,6 @@ export function ViewTransactionModal({
   const { user } = useAuth();
   const [step, setStep] = useState(1);
 
-  // Analysis data
   const [similar, setSimilar] = useState<{ description: string | null; date: string; amount: number; category_icon?: React.ComponentType<any> }[]>([]);
   const [stats, setStats] = useState<{ average: number; monthlyTotal: number; count: number } | null>(null);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
@@ -57,7 +56,6 @@ export function ViewTransactionModal({
     onClose();
   }, [reset, onClose]);
 
-  // Fetch analysis data when moving to step 2
   useEffect(() => {
     if (step !== 2 || !transaction || !user) return;
     const catId = transaction.expense_category_id ?? transaction.income_category_id;
@@ -72,7 +70,6 @@ export function ViewTransactionModal({
     }).finally(() => setLoadingAnalysis(false));
   }, [step, transaction, user]);
 
-  // Fetch account balance when modal opens
   useEffect(() => {
     if (!open || !transaction || !user) return;
     
@@ -95,7 +92,7 @@ export function ViewTransactionModal({
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-      {/* Header */}
+      {}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
@@ -107,15 +104,15 @@ export function ViewTransactionModal({
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
+      {}
       <Stepper steps={STEPS} currentStep={step} />
 
-      {/* Body */}
+      {}
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* STEP 1: Overview */}
+        {}
         {step === 1 && (
           <div className="space-y-6 animate-txn-in">
-            {/* Amount Display */}
+            {}
             <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-gray-200">
               <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
                 Transaction Amount
@@ -132,7 +129,7 @@ export function ViewTransactionModal({
               </span>
             </div>
 
-            {/* Transaction Details */}
+            {}
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
               <div className="p-5 space-y-0 divide-y divide-gray-100">
                 <DetailRow label="Date" value={new Date(transaction.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} />
@@ -152,7 +149,7 @@ export function ViewTransactionModal({
               </div>
             </div>
 
-            {/* Quick Actions */}
+            {}
             <div className="flex gap-3">
               {onEdit && (
                 <Button
@@ -171,7 +168,7 @@ export function ViewTransactionModal({
           </div>
         )}
 
-        {/* STEP 2: Analysis */}
+        {}
         {step === 2 && (
           <div className="space-y-6 animate-txn-in">
             {loadingAnalysis ? (
@@ -181,7 +178,7 @@ export function ViewTransactionModal({
               </div>
             ) : (
               <>
-                {/* Spending Insights */}
+                {}
                 <div>
                   <h3 className="text-[15px] font-bold text-gray-900 mb-3">
                     Spending Insights
@@ -219,7 +216,7 @@ export function ViewTransactionModal({
                   </div>
                 </div>
 
-                {/* Similar Transactions */}
+                {}
                 <div>
                   <h3 className="text-[15px] font-bold text-gray-900 mb-3">
                     Similar Transactions
@@ -256,7 +253,7 @@ export function ViewTransactionModal({
         )}
       </ModalBody>
 
-      {/* Footer */}
+      {}
       <ModalFooter className="flex justify-between">
         {step > 1 ? (
           <Button variant="secondary" size="sm" onClick={() => setStep(1)}>

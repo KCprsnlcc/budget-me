@@ -10,7 +10,6 @@ export function useAdminAnalytics() {
     const [tableLoading, setTableLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Filters
     const [search, setSearch] = useState("");
     const [month, setMonth] = useState<number | "all">("all");
     const [year, setYear] = useState<number | "all">("all");
@@ -18,7 +17,6 @@ export function useAdminAnalytics() {
     const [timeframeFilter, setTimeframeFilter] = useState("");
     const [userFilter, setUserFilter] = useState("");
 
-    // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [totalCount, setTotalCount] = useState(0);
@@ -38,7 +36,6 @@ export function useAdminAnalytics() {
         [month, year, reportTypeFilter, timeframeFilter, userFilter]
     );
 
-    // Fetch data
     const fetchData = useCallback(async (showTableLoading = false, forceRefreshStats = false) => {
         if (showTableLoading) {
             setTableLoading(true);
@@ -71,21 +68,18 @@ export function useAdminAnalytics() {
         }
     }, [filters, currentPage, pageSize, stats, users]);
 
-    // Initial load
     useEffect(() => {
         fetchData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, []);
 
-    // Refetch on filter/pagination changes
     useEffect(() => {
         if (!loading) {
             fetchData(true);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [filters, currentPage, pageSize]);
 
-    // Search filter (client-side)
     const filteredUserSummaries = useMemo(() => {
         if (!search) return userSummaries;
         const lowerSearch = search.toLowerCase();

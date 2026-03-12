@@ -12,7 +12,7 @@ export function CTASection() {
   return (
     <section className="relative z-10 py-24 px-6 border-t border-slate-100 overflow-hidden bg-white">
       <div className="max-w-7xl mx-auto relative min-h-[400px] flex items-center">
-        {/* Text Content */}
+        {}
         <div className="max-w-2xl relative z-10">
           <h2 className="text-3xl md:text-5xl font-semibold text-slate-900 tracking-tight mb-6 leading-tight">
             Start Your Financial <br />
@@ -23,7 +23,7 @@ export function CTASection() {
             BudgetMe. Get instant clarity on your spending and savings goals.
           </p>
 
-          {/* Value Props */}
+          {}
           <div className="flex flex-wrap gap-6 mb-10 text-sm font-medium text-slate-700">
             {VALUE_PROPS.map((prop) => {
               const Icon = ICON_MAP[prop.icon];
@@ -44,9 +44,9 @@ export function CTASection() {
           </div>
         </div>
 
-        {/* Image */}
+        {}
         <div className="hidden lg:block absolute right-[-5%] top-1/2 -translate-y-1/2 h-[120%] z-0 pointer-events-none [mask-image:linear-gradient(to_bottom,black_70%,transparent_100%)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {}
           <img
             src="/images/2-persons.webp"
             alt="BudgetMe Team"

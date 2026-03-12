@@ -7,7 +7,6 @@ import type {
 
 const supabase = createClient();
 
-// ─── Backup Logs ───────────────────────────────────────────────────────
 export async function fetchBackupLogs(): Promise<{
     data: BackupLog[];
     error: string | null;
@@ -20,7 +19,6 @@ export async function fetchBackupLogs(): Promise<{
 
     if (error) return { data: [], error: error.message };
 
-    // Fetch creator profiles
     const creatorIds = [...new Set((data ?? []).filter((b: any) => b.created_by).map((b: any) => b.created_by))];
     const profileMap = new Map<string, { email: string; full_name: string | null }>();
 
@@ -50,7 +48,7 @@ export async function createBackupLog(
     backupType: "manual" | "automatic" | "scheduled",
     createdBy: string
 ): Promise<{ data: BackupLog | null; error: string | null }> {
-    // Fetch all table row counts for the backup
+
     const tables = [
         "profiles", "accounts", "income_categories", "expense_categories",
         "transactions", "budgets", "budget_categories", "budget_alerts",
@@ -69,7 +67,6 @@ export async function createBackupLog(
 
     const startTime = Date.now();
 
-    // Record row counts as part of the backup metadata
     const tableCounts: Record<string, number> = {};
     let totalSize = 0;
 
@@ -105,10 +102,6 @@ export async function createBackupLog(
     return { data, error: null };
 }
 
-/**
- * Generates a full SQL backup of the database including tables, functions, and data.
- * This function iterates through public tables and routines.
- */
 export async function generateFullSqlBackup(): Promise<string> {
     let sql = `-- BudgetMe Full Database Backup\n`;
     sql += `-- Generated: ${new Date().toISOString()}\n\n`;
@@ -117,7 +110,7 @@ export async function generateFullSqlBackup(): Promise<string> {
     sql += `SET client_min_messages = warning;\n\n`;
 
     try {
-        // 1. Get all public functions/routines
+
         sql += `-- ─── FUNCTIONS & PROCEDURES ────────────────────────────────\n\n`;
         const { data: fnData } = await (supabase as any).from('information_schema.routines')
             .select('routine_name, routine_definition, data_type')
@@ -134,7 +127,6 @@ export async function generateFullSqlBackup(): Promise<string> {
             }
         }
 
-        // 2. Get all tables and their data
         const tables = [
             "profiles", "accounts", "income_categories", "expense_categories",
             "transactions", "budgets", "budget_categories", "budget_alerts",
@@ -154,7 +146,6 @@ export async function generateFullSqlBackup(): Promise<string> {
         for (const table of tables) {
             sql += `-- ─── TABLE: ${table} ──────────────────────────────────────\n\n`;
 
-            // Try to get basic schema info
             const { data: colData } = await (supabase as any).from('information_schema.columns')
                 .select('column_name, data_type, is_nullable, column_default')
                 .eq('table_name', table)
@@ -169,7 +160,6 @@ export async function generateFullSqlBackup(): Promise<string> {
                 sql += `\n);\n\n`;
             }
 
-            // Get data for the table
             const { data: rows, error: dataError } = await supabase
                 .from(table)
                 .select('*');
@@ -202,7 +192,6 @@ export async function generateFullSqlBackup(): Promise<string> {
     }
 }
 
-// ─── Activity Logs ─────────────────────────────────────────────────────
 export async function fetchActivityLogs(
     limit: number = 50,
     severityFilter?: string
@@ -220,7 +209,6 @@ export async function fetchActivityLogs(
     const { data, error } = await query;
     if (error) return { data: [], error: error.message };
 
-    // Fetch user profiles
     const userIds = [...new Set((data ?? []).filter((a: any) => a.user_id).map((a: any) => a.user_id))];
     const profileMap = new Map<string, { email: string; full_name: string | null }>();
 
@@ -246,7 +234,6 @@ export async function fetchActivityLogs(
     return { data: mapped, error: null };
 }
 
-// ─── Statistics ────────────────────────────────────────────────────────
 export async function fetchSettingsStats(): Promise<SettingsStats | null> {
     const [
         { count: totalBackups },
@@ -274,7 +261,6 @@ export async function fetchSettingsStats(): Promise<SettingsStats | null> {
         supabase.from("ai_reports").select("*", { count: "exact", head: true }),
     ]);
 
-    // Get last backup date
     const { data: lastBackup } = await supabase
         .from("backup_logs")
         .select("completed_at")

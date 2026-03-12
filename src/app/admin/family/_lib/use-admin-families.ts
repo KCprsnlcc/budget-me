@@ -10,7 +10,6 @@ export function useAdminFamilies() {
     const [tableLoading, setTableLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Filters
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [visibilityFilter, setVisibilityFilter] = useState("");
@@ -18,7 +17,6 @@ export function useAdminFamilies() {
     const [month, setMonth] = useState<number | "all">("all");
     const [year, setYear] = useState<number | "all">("all");
 
-    // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [totalCount, setTotalCount] = useState(0);
@@ -38,7 +36,6 @@ export function useAdminFamilies() {
         [statusFilter, visibilityFilter, userFilter, month, year]
     );
 
-    // Fetch data
     const fetchData = useCallback(
         async (showTableLoading = false, forceRefreshStats = false) => {
             if (showTableLoading) {
@@ -74,19 +71,16 @@ export function useAdminFamilies() {
         [filters, currentPage, pageSize, stats, users]
     );
 
-    // Initial load
     useEffect(() => {
         fetchData();
     }, []);
 
-    // Refetch on filter/pagination changes
     useEffect(() => {
         if (!loading) {
             fetchData(true);
         }
     }, [filters, currentPage, pageSize]);
 
-    // Search filter (client-side)
     const filteredFamilies = useMemo(() => {
         if (!search) return families;
         const lowerSearch = search.toLowerCase();

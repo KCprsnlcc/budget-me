@@ -70,10 +70,8 @@ export default function FamilyPage() {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  // Get active tab from URL query params, default to "overview"
   const activeTab = (searchParams.get("tab") as ActiveTab) || "overview";
 
-  // Real Supabase data via useFamily hook
   const {
     familyState,
     familyData,
@@ -121,22 +119,19 @@ export default function FamilyPage() {
     handleContributeToGoal,
     handleRemoveMember,
     handleTransferOwnership,
-    // Goal CRUD with activity logging
+
     handleCreateFamilyGoal,
     handleUpdateFamilyGoal,
     handleDeleteFamilyGoal,
   } = useFamily();
 
-  // Get current user info
   const { user } = useAuth();
   const currentUserMember = members.find(m => m.email === user?.email);
-  
-  // Permission checks
+
   const canInviteMembers = currentUserRole === "Owner" || currentUserRole === "Admin";
   const canEditFamily = currentUserRole === "Owner" || currentUserRole === "Admin";
   const canDeleteFamily = currentUserRole === "Owner";
 
-  // Get greeting based on time of day
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
@@ -150,7 +145,6 @@ export default function FamilyPage() {
   const [hoveredBar, setHoveredBar] = useState<{ month: string; type: 'budget' | 'actual' | 'target' | 'saved'; value: number } | null>(null);
   const [mobileChartTab, setMobileChartTab] = useState<'health' | 'savings'>('health');
 
-  // Modal states
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [createFamilyModalOpen, setCreateFamilyModalOpen] = useState(false);
   const [editFamilyModalOpen, setEditFamilyModalOpen] = useState(false);
@@ -163,7 +157,6 @@ export default function FamilyPage() {
   const [discoverLoading, setDiscoverLoading] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Handle tab navigation with URL-based routing
   const handleTabChange = useCallback((tab: ActiveTab) => {
     if (tab === activeTab) return;
 
@@ -178,20 +171,17 @@ export default function FamilyPage() {
       router.push(`?${params.toString()}`, { scroll: false });
     });
 
-    // Simulate brief loading delay for tab switch (like Financial Insights refresh)
     setTimeout(() => {
       setTabSwitching(false);
     }, 600);
   }, [router, searchParams, activeTab]);
 
-  // Handle refresh discover families with loading state
   const handleRefreshDiscover = useCallback(async () => {
     setDiscoverLoading(true);
     await refreshDiscoverFamilies();
     setDiscoverLoading(false);
   }, [refreshDiscoverFamilies]);
 
-  // Handlers that open modals
   const handleOpenCreateFamily = useCallback(() => {
     setCreateFamilyModalOpen(true);
   }, []);
@@ -216,7 +206,6 @@ export default function FamilyPage() {
     setTransferOwnershipModalOpen(true);
   }, []);
 
-  // Join family via request
   const handleJoinFamily = useCallback((familyId: string) => {
     const family = publicFamilies.find(f => f.id === familyId);
     if (family) {
@@ -225,12 +214,11 @@ export default function FamilyPage() {
     }
   }, [publicFamilies]);
 
-  // Loading state - comprehensive skeleton
   if (loading || familyState === "loading") {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
-          {/* Header Skeleton */}
+          {}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <Skeleton width={250} height={32} className="mb-2" />
@@ -242,7 +230,7 @@ export default function FamilyPage() {
             </div>
           </div>
 
-          {/* Tab Navigation Skeleton */}
+          {}
           <Card className="overflow-hidden">
             <div className="flex border-b border-slate-200/60">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -251,7 +239,7 @@ export default function FamilyPage() {
             </div>
 
             <div className="p-6 space-y-6">
-              {/* Summary Cards Skeleton */}
+              {}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <Card key={i} className="p-5">
@@ -265,7 +253,7 @@ export default function FamilyPage() {
                 ))}
               </div>
 
-              {/* Charts Section Skeleton */}
+              {}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card className="p-6">
                   <Skeleton width={180} height={16} className="mb-6" />
@@ -308,7 +296,6 @@ export default function FamilyPage() {
     );
   }
 
-  // Error state
   if (familyState === "error" && error) {
     return (
       <div className="max-w-6xl mx-auto text-center py-24 animate-fade-in">
@@ -322,7 +309,6 @@ export default function FamilyPage() {
     );
   }
 
-  // No family state - ALWAYS redirect/show no-family state component
   if (familyState === "no-family") {
     return (
       <>
@@ -339,7 +325,7 @@ export default function FamilyPage() {
           handleCreateFamily={handleCreateFamily}
         />
         
-        {/* Modals for no-family state */}
+        {}
         <CreateFamilyModal
           open={createFamilyModalOpen}
           onClose={() => setCreateFamilyModalOpen(false)}
@@ -355,10 +341,9 @@ export default function FamilyPage() {
     );
   }
 
-  // User has a family - render family dashboard
   return (
     <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
-      {/* Header with Family Greeting - Responsive */}
+      {}
       <div className="flex flex-col gap-2 px-4 sm:px-0 pt-4 sm:pt-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div>
@@ -388,7 +373,7 @@ export default function FamilyPage() {
         </div>
       </div>
 
-      {/* Pending Invitation Alert */}
+      {}
       {invitations.length > 0 && (
         <Card className="p-0.5 relative overflow-hidden group mb-4 sm:mb-6">
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/30 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -415,7 +400,7 @@ export default function FamilyPage() {
         </Card>
       )}
 
-      {/* Tab Navigation */}
+      {}
       <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer mb-4 sm:mb-6">
         <div className="flex border-b border-slate-200/60 overflow-x-auto scrollbar-hide">
           <button
@@ -457,12 +442,12 @@ export default function FamilyPage() {
         </div>
 
         <div className="p-4 sm:p-6">
-          {/* Tab Content */}
+          {}
           {activeTab === "overview" && (
             tabSwitching ? (
               <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
                 <div className="space-y-6">
-                  {/* Summary Cards Skeleton */}
+                  {}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {Array.from({ length: 4 }).map((_, i) => (
                       <Card key={i} className="p-4 sm:p-5">
@@ -476,7 +461,7 @@ export default function FamilyPage() {
                     ))}
                   </div>
 
-                  {/* Charts Section Skeleton */}
+                  {}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                     <Card className="p-4 sm:p-6">
                       <Skeleton width={160} height={16} className="mb-4 sm:mb-6" />
@@ -516,7 +501,7 @@ export default function FamilyPage() {
               </SkeletonTheme>
             ) : (
               <div className="space-y-4 sm:space-y-6">
-                {/* Financial Summary Cards */}
+                {}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
                     <div className="flex justify-between items-start mb-3 sm:mb-4">
@@ -568,7 +553,7 @@ export default function FamilyPage() {
                   </Card>
                 </div>
 
-                {/* Mobile Chart Tabs */}
+                {}
                 <div className="flex p-1 bg-slate-100 rounded-lg lg:hidden mb-4">
                   <Button
                     variant="ghost"
@@ -592,9 +577,9 @@ export default function FamilyPage() {
                   </Button>
                 </div>
 
-                {/* Charts and Analytics Section */}
+                {}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {/* Family Goals Health */}
+                  {}
                   {goalsHealth.length > 0 ? (
                     <Card className={`p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer ${mobileChartTab === 'savings' ? 'hidden lg:block' : ''}`}>
                       <div className="mb-4">
@@ -658,7 +643,7 @@ export default function FamilyPage() {
                     </Card>
                   )}
 
-                  {/* Family Goals Savings Progress Chart */}
+                  {}
                   <Card className={`p-4 sm:p-6 lg:col-span-2 hover:shadow-md transition-all group cursor-pointer ${mobileChartTab === 'health' ? 'hidden lg:block' : ''}`}>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-8">
                       <div>
@@ -702,7 +687,7 @@ export default function FamilyPage() {
                                 onMouseLeave={() => setHoveredBar(null)}
                               />
 
-                              {/* Tooltip */}
+                              {}
                               {hoveredBar && hoveredBar.month === data.month && (
                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
                                   <div className="font-medium text-slate-700">{hoveredBar.month}</div>
@@ -803,7 +788,7 @@ export default function FamilyPage() {
         </div>
       </Card>
 
-      {/* Discover Families Section - Hidden for Family Owners */}
+      {}
       {!isOwner && (
         <div className="px-4 sm:px-0">
           <Card className="p-4 sm:p-6 mb-6 sm:mb-8">
@@ -840,9 +825,9 @@ export default function FamilyPage() {
           </div>
 
           {discoverLoading ? (
-            // Skeleton loader for Discover Families
+
             <div className="space-y-6 sm:space-y-8">
-              {/* Join Requests Skeleton */}
+              {}
               <div className="mb-6 sm:mb-8">
                 <div className="flex items-center justify-between mb-4">
                   <Skeleton width={140} height={14} className="sm:w-[180px] sm:h-4" />
@@ -870,7 +855,7 @@ export default function FamilyPage() {
                 </div>
               </div>
 
-              {/* Available Groups Skeleton */}
+              {}
               <div className="space-y-3">
                 <div className="flex items-center justify-between px-1 mb-4">
                   <Skeleton width={80} height={10} className="sm:w-[100px]" />
@@ -904,7 +889,7 @@ export default function FamilyPage() {
             </div>
           ) : (
             <>
-              {/* Your Join Requests Section */}
+              {}
           {joinRequests.length > 0 && (
             <div className="mb-6 sm:mb-8">
               <div className="flex items-center justify-between mb-4">
@@ -956,7 +941,7 @@ export default function FamilyPage() {
             </div>
           )}
 
-          {/* Available Families Section */}
+          {}
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1 mb-4">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -1060,7 +1045,7 @@ export default function FamilyPage() {
         />
       )}
 
-      {/* Modals */}
+      {}
       <InviteMemberModal
         open={inviteModalOpen}
         onClose={() => setInviteModalOpen(false)}

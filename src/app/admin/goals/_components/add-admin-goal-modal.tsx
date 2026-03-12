@@ -134,7 +134,6 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
         family_id: "",
     });
 
-    // Load users when modal opens
     useEffect(() => {
         if (open && users.length === 0) {
             loadUsers(true);
@@ -190,7 +189,6 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
         setLoadingMore(false);
     }, [loadingMore, hasMore, page, userSearchQuery]);
 
-    // Trigger search when query changes
     useEffect(() => {
         if (open && step === 1) {
             const timeoutId = setTimeout(() => {
@@ -200,7 +198,6 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
         }
     }, [userSearchQuery, open, step]);
 
-    // Infinite scroll
     useEffect(() => {
         const handleScroll = () => {
             if (!userListRef.current || loadingMore || !hasMore) return;
@@ -217,7 +214,6 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
         }
     }, [loadingMore, hasMore, open, step, loadUsers]);
 
-    // Load families for the selected user
     const loadUserFamilies = async (userId: string) => {
         const supabase = createClient();
         const { data } = await supabase
@@ -347,7 +343,7 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
             <Stepper steps={STEPS} currentStep={step} />
 
             <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-                {/* Step 1: User Select */}
+                {}
                 {step === 1 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
@@ -355,7 +351,7 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
                             <p className="text-[11px] text-gray-500">Choose the user for this goal.</p>
                         </div>
 
-                        {/* Search Input */}
+                        {}
                         <div className="relative mb-4">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input
@@ -442,7 +438,7 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
                     </div>
                 )}
 
-                {/* Step 2: Category Selection */}
+                {}
                 {step === 2 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
@@ -498,7 +494,7 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
                     </div>
                 )}
 
-                {/* Step 3: Goal Details */}
+                {}
                 {step === 3 && (
                     <div className="space-y-4 animate-txn-in">
                         <div>
@@ -648,7 +644,7 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
                     </div>
                 )}
 
-                {/* Step 4: Review */}
+                {}
                 {step === 4 && (
                     <div className="space-y-4 animate-txn-in">
                         <div>
@@ -728,7 +724,7 @@ export function AddAdminGoalModal({ open, onClose, onSuccess }: AddAdminGoalModa
                 )}
             </ModalBody>
 
-            {/* Footer */}
+            {}
             <ModalFooter className="flex justify-between">
                 <Button
                     variant="outline"

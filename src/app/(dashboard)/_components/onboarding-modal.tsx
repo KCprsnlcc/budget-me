@@ -107,7 +107,6 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
     cashInSource: "deposit",
   });
 
-  // Check if content is scrollable and show indicator
   useEffect(() => {
     const checkScrollable = () => {
       if (contentRef.current && typeof window !== 'undefined') {
@@ -122,7 +121,6 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
     return () => window.removeEventListener('resize', checkScrollable);
   }, [step, open]);
 
-  // Handle scroll to hide indicator
   useEffect(() => {
     const handleScroll = () => {
       if (contentRef.current) {
@@ -141,10 +139,8 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
     }
   }, []);
 
-  // Auto-scroll to top on step change for mobile/tablet
   useEffect(() => {
     if (contentRef.current && typeof window !== 'undefined') {
-      // Only auto-scroll on mobile and tablet devices
       const isMobileOrTablet = window.innerWidth < 1024;
       if (isMobileOrTablet) {
         contentRef.current.scrollTo({
@@ -155,7 +151,6 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
     }
   }, [step]);
 
-  // Reset form when modal opens
   useEffect(() => {
     if (open) {
       setStep(1);
@@ -177,13 +172,13 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
   const canProceed = useCallback(() => {
     switch (step) {
       case 1:
-        return true; // Welcome step always proceedable
+        return true;
       case 2:
         return accountType !== null;
       case 3:
         return formData.name.trim() !== "" && formData.balance !== "";
       case 4:
-        return true; // Review step
+        return true;
       default:
         return false;
     }
@@ -191,7 +186,6 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
 
   const handleNext = useCallback(async () => {
     if (step === 4) {
-      // Submit account
       setIsSubmitting(true);
       try {
         const colorName =
@@ -233,7 +227,6 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
           throw accountError;
         }
 
-        // Create initial cash-in transaction if not skipped
         if (!formData.skipCashIn && parseFloat(formData.balance) > 0) {
           const { error: transactionError } = await supabase.from("transactions").insert({
             user_id: userId,
@@ -251,23 +244,19 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
 
           if (transactionError) {
             console.error("Transaction creation error:", transactionError);
-            // Don't fail the whole process if transaction fails
             toast.warning("Account created but initial transaction failed", {
               description: "You can add the transaction manually later"
             });
           }
         }
 
-        // Mark account setup as completed in localStorage
         localStorage.setItem('accountSetupCompleted', 'true');
         localStorage.setItem('accountSetupCompletedBy', userId);
         localStorage.setItem('accountSetupCompletedAt', new Date().toISOString());
         
-        // Clear any skip data
         localStorage.removeItem('accountSetupSkipUntil');
         localStorage.removeItem('accountSetupSkippedBy');
 
-        // Success
         toast.success("Account created successfully!", {
           description: `${formData.name} is ready to use`
         });
@@ -295,17 +284,14 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
 
   const handleSkipForLater = useCallback(async () => {
     try {
-      // Calculate skip until time (25 minutes from now)
       const skipUntil = new Date(Date.now() + 25 * 60 * 1000).toISOString();
       
-      // Save to localStorage
       localStorage.setItem('accountSetupSkipUntil', skipUntil);
       localStorage.setItem('accountSetupSkippedBy', userId);
 
       setShowSkipConfirmation(false);
       onClose();
     } catch (error) {
-      // Silently fail - not critical
     }
   }, [userId, onClose]);
 
@@ -316,11 +302,8 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
     <>
     <Modal open={open} onClose={onClose} className="w-[95vw] sm:w-[90vw] max-w-[1280px] h-[92vh] sm:h-[88vh] lg:h-[85vh]">
       <div className="flex flex-col lg:flex-row h-full bg-white rounded-2xl overflow-hidden lg:overflow-visible">
-        {/* Wrapper for mobile scroll - makes entire content scrollable */}
         <div className="flex-1 flex flex-col lg:flex-row min-w-0 overflow-y-auto lg:overflow-visible">
-        {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 lg:border-r border-gray-100">
-          {/* Header - Stealth Style */}
           <div className="h-[64px] sm:h-[72px] lg:h-[88px] border-b border-gray-100 px-4 sm:px-6 lg:px-12 flex items-center justify-between shrink-0 bg-white sticky top-0 z-10 lg:static">
             <Logo variant="landing" size="md" className="h-8 sm:h-9 lg:h-10 w-auto" />
             <div className="flex items-center gap-1 sm:gap-2">
@@ -342,12 +325,10 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
             </div>
           </div>
 
-          {/* Modal Body */}
           <div 
             ref={contentRef}
             className="flex-1 overflow-y-auto lg:overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-16 bg-white scroll-smooth relative"
           >
-            {/* Scroll Indicator for Mobile/Tablet */}
             {showScrollIndicator && (
               <div className="lg:hidden fixed bottom-[80px] sm:bottom-[70px] left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-bounce">
                 <div className="bg-emerald-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 text-xs font-medium">
@@ -360,12 +341,9 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
             )}
             
             <div className="max-w-3xl mx-auto">
-            {/* Step 1: Welcome - Hero Style */}
             {step === 1 && (
               <div className="relative z-10 pt-6 sm:pt-8 md:pt-12 pb-4 sm:pb-6 md:pb-8 overflow-hidden">
-                {/* Beam Background */}
                 <div className="pointer-events-none absolute inset-0 h-full w-full -z-10 bg-white">
-                  {/* Grid Pattern */}
                   <div
                     className="absolute inset-0 opacity-40"
                     style={{
@@ -377,7 +355,6 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
                     }}
                   />
 
-                  {/* SVG Beams */}
                   <svg
                     className="absolute h-full w-full"
                     fill="none"
@@ -408,17 +385,14 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
                 </div>
 
                 <div className="max-w-4xl mx-auto text-center relative z-10">
-                  {/* Headline */}
                   <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-slate-900 tracking-tight mb-3 sm:mb-4 lg:mb-5 leading-[1.2] px-2">
                     Welcome to BudgetMe, <span className="text-emerald-500">{userName}!</span>
                   </h1>
 
-                  {/* Subheadline */}
                   <p className="text-xs sm:text-[13px] md:text-sm text-slate-700 max-w-xl mx-auto mb-6 sm:mb-7 md:mb-8 leading-relaxed px-4">
                     Let&apos;s set up your first account to start tracking your finances and achieving your goals.
                   </p>
 
-                  {/* Features Card */}
                   <div className="max-w-2xl mx-auto text-left px-2">
                     <div className="border border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm overflow-hidden shadow-sm">
                       <div className="p-4 sm:p-5 md:p-6 flex items-start gap-3 sm:gap-4 bg-[#F9FAFB]/50">
@@ -453,7 +427,6 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
               </div>
             )}
 
-            {/* Step 2: Account Type */}
             {step === 2 && (
               <div className="space-y-6 sm:space-y-8">
                 <div className="text-center mb-8 sm:mb-10 md:mb-12 px-2">
@@ -500,7 +473,6 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
               </div>
             )}
 
-            {/* Step 3: Account Details */}
             {step === 3 && (
               <div className="space-y-6 sm:space-y-8">
                 <div className="text-center mb-8 sm:mb-10 md:mb-12 px-2">
@@ -590,7 +562,6 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
               </div>
             )}
 
-            {/* Step 4: Review */}
             {step === 4 && (
               <div className="space-y-6 sm:space-y-8">
                 <div className="text-center mb-8 sm:mb-10 md:mb-12 px-2">
@@ -662,7 +633,6 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
           </div>
           </div>
 
-          {/* Footer - Using ModalFooter Component */}
           <ModalFooter className="flex justify-between px-4 sm:px-6 lg:px-8 py-3 sm:py-4 sticky bottom-0 bg-white z-10 lg:static">
             {step > 1 ? (
               <button
@@ -703,11 +673,9 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
           </ModalFooter>
         </div>
 
-        {/* Right Sidebar - Stealth Style Stepper */}
         <div className="w-full lg:w-[400px] bg-white p-6 sm:p-8 lg:p-12 border-t lg:border-t-0 lg:border-l flex flex-col shrink-0">
           <ColumnStepper steps={STEPS} currentStep={step} className="mb-8 sm:mb-10 lg:mb-12" />
 
-          {/* Help Section - Stealth Style */}
           <div className="lg:mt-auto">
             <div className="mb-3 sm:mb-4 text-[#4B5563]">
               <svg className="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -732,7 +700,6 @@ export function OnboardingModal({ open, onClose, userId, userName }: OnboardingM
       </div>
     </Modal>
 
-    {/* Skip Confirmation Dialog */}
     {showSkipConfirmation && (
       <Modal open={showSkipConfirmation} onClose={() => setShowSkipConfirmation(false)} className="max-w-md mx-4">
         <ModalHeader>

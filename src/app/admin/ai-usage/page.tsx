@@ -72,7 +72,6 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-// Simple card skeleton component
 const SimpleCardSkeleton = () => (
   <Card className="p-4">
     <div className="h-24 bg-slate-200 rounded animate-pulse" />
@@ -102,7 +101,6 @@ const SummaryCard = memo(({ item }: { item: SummaryType }) => {
 });
 
 SummaryCard.displayName = "SummaryCard";
-
 
 const AIUsageCard = memo(({
   usage,
@@ -182,7 +180,6 @@ const AIUsageCard = memo(({
 
 AIUsageCard.displayName = "AIUsageCard";
 
-
 const AIUsageRow = memo(({
   usage,
   onView,
@@ -245,7 +242,6 @@ const AIUsageRow = memo(({
 
 AIUsageRow.displayName = "AIUsageRow";
 
-
 export default function AdminAIUsagePage() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -259,7 +255,6 @@ export default function AdminAIUsagePage() {
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close export dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
@@ -307,7 +302,6 @@ export default function AdminAIUsagePage() {
     previousPage,
   } = useAdminAIUsage();
 
-  // Update date filters when month/year changes
   useEffect(() => {
     if (month === "all" && year === "all") {
       setStartDate("");
@@ -363,7 +357,6 @@ export default function AdminAIUsagePage() {
     resetFiltersToAll();
   }, [resetFiltersToAll]);
 
-  // Export handlers
   const handleExportCSV = useCallback(() => {
     if (usageRecords.length === 0) {
       alert("No usage records to export");
@@ -409,8 +402,6 @@ export default function AdminAIUsagePage() {
     exportAdminAIUsageToPDF(exportData, summary);
   }, [usageRecords, stats]);
 
-
-  // Build summary cards from real data
   const summaryItems: SummaryType[] = useMemo(() => {
     if (!stats) return [];
 
@@ -449,7 +440,6 @@ export default function AdminAIUsagePage() {
     ];
   }, [stats]);
 
-  // Normalize chart data to percentages for bar heights
   const chartData = useMemo(() => {
     if (!stats?.usageGrowth.length) return [];
     const max = Math.max(...stats.usageGrowth.map((d) => d.count), 1);
@@ -460,7 +450,6 @@ export default function AdminAIUsagePage() {
     }));
   }, [stats]);
 
-  // Build conic-gradient for feature distribution donut
   const featureTotal = useMemo(
     () => stats?.featureDistribution.reduce((sum, f) => sum + f.count, 0) || 0,
     [stats]
@@ -469,9 +458,9 @@ export default function AdminAIUsagePage() {
   const featureGradient = useMemo(() => {
     if (!stats?.featureDistribution.length) return "conic-gradient(#e2e8f0 0% 100%)";
     const colors: Record<string, string> = {
-      predictions: "#3b82f6", // blue-500
-      insights: "#10b981",    // emerald-500
-      chatbot: "#a855f7",     // purple-500
+      predictions: "#3b82f6", 
+      insights: "#10b981",  
+      chatbot: "#a855f7", 
     };
     let acc = 0;
     const stops = stats.featureDistribution.map((f) => {
@@ -483,13 +472,11 @@ export default function AdminAIUsagePage() {
     return `conic-gradient(${stops.join(", ")})`;
   }, [stats, featureTotal]);
 
-
-  // Loading state - only show full page skeleton on initial load, not filter changes
   if (loading && !tableLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-          {/* Header Skeleton */}
+          {}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
             <div>
               <Skeleton width={220} height={28} className="mb-2" />
@@ -501,9 +488,9 @@ export default function AdminAIUsagePage() {
             </div>
           </div>
 
-          {/* Scrollable Content Area for Mobile/Tablet - Skeleton */}
+          {}
           <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0">
-            {/* Summary Stats Skeleton */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Card key={i} className="p-4 sm:p-5">
@@ -517,7 +504,7 @@ export default function AdminAIUsagePage() {
               ))}
             </div>
 
-            {/* Charts Skeleton */}
+            {}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <Card className="lg:col-span-2 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -543,7 +530,7 @@ export default function AdminAIUsagePage() {
               </Card>
             </div>
 
-            {/* Top Users Skeleton */}
+            {}
             <Card className="p-4 sm:p-6">
               <div className="mb-4 sm:mb-6">
                 <Skeleton width={200} height={14} className="mb-2" />
@@ -568,7 +555,7 @@ export default function AdminAIUsagePage() {
               </div>
             </Card>
 
-            {/* Filters Skeleton */}
+            {}
             <Card className="p-3 sm:p-4">
               <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
                 <Skeleton width={50} height={14} />
@@ -579,7 +566,7 @@ export default function AdminAIUsagePage() {
               </div>
             </Card>
 
-            {/* Usage Cards Skeleton */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <SimpleCardSkeleton key={i} />
@@ -591,10 +578,9 @@ export default function AdminAIUsagePage() {
     );
   }
 
-
   return (
     <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-      {/* Header */}
+      {}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">AI Usage Management</h2>
@@ -668,23 +654,22 @@ export default function AdminAIUsagePage() {
         </div>
       </div>
 
-      {/* Scrollable Content Area for Mobile/Tablet */}
+      {}
       <div
         ref={contentRef}
         className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth"
       >
 
-        {/* Summary Cards */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {summaryItems.map((item) => (
             <SummaryCard key={item.label} item={item} />
           ))}
         </div>
 
-
-        {/* Charts Section */}
+        {}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Usage Growth Chart */}
+          {}
           <Card className="lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div>
@@ -744,8 +729,7 @@ export default function AdminAIUsagePage() {
             )}
           </Card>
 
-
-          {/* Feature Distribution */}
+          {}
           <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
             <div className="mb-4 sm:mb-6">
               <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Feature Distribution</h3>
@@ -799,8 +783,7 @@ export default function AdminAIUsagePage() {
           </Card>
         </div>
 
-
-        {/* Top Users Section */}
+        {}
         {stats?.topUsers && stats.topUsers.length > 0 && (
           <Card className="p-4 sm:p-6 hover:shadow-md transition-all">
             <div className="mb-4 sm:mb-6">
@@ -810,7 +793,7 @@ export default function AdminAIUsagePage() {
 
             <div className="space-y-3">
               {stats.topUsers.map((user, index) => {
-                // Create mock user for UserAvatar component
+
                 const mockUser: User = {
                   id: user.user_id,
                   email: user.email,
@@ -858,8 +841,7 @@ export default function AdminAIUsagePage() {
           </Card>
         )}
 
-
-        {/* Filters */}
+        {}
         <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
             <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
@@ -929,8 +911,7 @@ export default function AdminAIUsagePage() {
           </div>
         </Card>
 
-
-        {/* Error State */}
+        {}
         {error && !loading && (
           <Card className="p-8 text-center">
             <AlertCircle size={40} className="mx-auto text-red-300 mb-4" />
@@ -941,7 +922,7 @@ export default function AdminAIUsagePage() {
           </Card>
         )}
 
-        {/* Usage Records Display */}
+        {}
         {usageRecords.length === 0 ? (
           <Card className="p-12 text-center">
             <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
@@ -1002,7 +983,7 @@ export default function AdminAIUsagePage() {
           </div>
         ) : (
           <>
-            {/* Usage Cards Grid (Desktop) */}
+            {}
             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {usageRecords.length === 0 ? (
                 <div className="col-span-full">
@@ -1026,7 +1007,7 @@ export default function AdminAIUsagePage() {
               )}
             </div>
 
-            {/* Usage Cards Grid (Mobile) */}
+            {}
             <div className="md:hidden space-y-4">
               {usageRecords.length === 0 ? (
                 <Card className="p-12 text-center">
@@ -1050,8 +1031,7 @@ export default function AdminAIUsagePage() {
           </>
         )}
 
-
-        {/* Pagination */}
+        {}
         {!loading && !tableLoading && !error && usageRecords.length > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0">
             <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
@@ -1126,7 +1106,7 @@ export default function AdminAIUsagePage() {
         )}
       </div>
 
-      {/* Modals */}
+      {}
       <ViewAdminAIUsageModal
         open={viewModalOpen}
         onClose={() => setViewModalOpen(false)}

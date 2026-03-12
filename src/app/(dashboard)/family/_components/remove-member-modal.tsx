@@ -55,23 +55,19 @@ export function RemoveMemberModal({
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-md">
-      {/* Header */}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
           Remove Family Member
         </span>
       </ModalHeader>
 
-      {/* Body */}
       <ModalBody className="px-5 py-8 bg-[#F9FAFB]/30">
         <div className="text-center animate-txn-in">
-          {/* Warning Message */}
           <h2 className="text-lg font-bold text-slate-900 mb-3">Remove Member?</h2>
           <p className="text-sm text-slate-500 mb-6 max-w-xs mx-auto leading-relaxed">
             Are you sure you want to remove <span className="font-semibold">{member.name}</span> from the family group? They will lose access to all shared features.
           </p>
 
-          {/* Member Details */}
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mx-auto max-w-sm">
             <div className="p-5 space-y-0 divide-y divide-slate-100">
               <div className="flex justify-between items-center py-2.5">
@@ -103,7 +99,6 @@ export function RemoveMemberModal({
             </div>
           </div>
 
-          {/* Confirmation Input */}
           <div className="text-left mb-6 max-w-sm mx-auto mt-6">
             <label className="block text-xs font-medium text-slate-700 mb-1.5">
               Type <span className="font-bold text-rose-600">REMOVE</span> to confirm
@@ -117,7 +112,6 @@ export function RemoveMemberModal({
             />
           </div>
 
-          {/* Error Display */}
           {submitError && (
             <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 mx-auto max-w-sm mt-4">
               <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
@@ -128,7 +122,6 @@ export function RemoveMemberModal({
             </div>
           )}
 
-          {/* Final Warning */}
           <div className="p-3 rounded-lg text-xs bg-white border border-gray-200 mx-auto max-w-sm mt-6">
             <div className="flex gap-2.5 items-start">
               <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
@@ -143,7 +136,6 @@ export function RemoveMemberModal({
         </div>
       </ModalBody>
 
-      {/* Footer */}
       <ModalFooter className="flex justify-between px-4 sm:px-6 lg:px-8 py-3 sm:py-4 sticky bottom-0 bg-white z-10 lg:static">
         <button
           onClick={handleClose}

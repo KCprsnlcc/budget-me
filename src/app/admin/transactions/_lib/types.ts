@@ -1,4 +1,4 @@
-// Admin Transaction Management Types
+
 
 export type AdminTransaction = {
   id: string;
@@ -18,7 +18,7 @@ export type AdminTransaction = {
   is_recurring: boolean;
   created_at: string;
   updated_at: string;
-  // Joined data
+
   user_email?: string;
   user_name?: string;
   user_avatar?: string;
@@ -37,7 +37,7 @@ export type AdminTransactionStats = {
   netBalance: number;
   transactionGrowth: { month: string; count: number }[];
   typeDistribution: { type: string; count: number; percentage: number }[];
-  // New helpful metrics
+
   activeUsers: number;
   avgTransactionValue: number;
   topSpendingCategory: { name: string; amount: number } | null;

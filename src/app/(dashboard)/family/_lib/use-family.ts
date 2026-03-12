@@ -37,7 +37,6 @@ import {
   removeMember,
   transferOwnership,
   deleteAllUserJoinRequests,
-  // Activity logging functions
   logFamilyCreated,
   logFamilyUpdated,
   logFamilyDeleted,
@@ -77,13 +76,11 @@ export function useFamily() {
   const userId = user?.id ?? "";
   const userEmail = user?.email ?? "";
 
-  // ----- Core state -----
   const [familyState, setFamilyState] = useState<FamilyState>("loading");
   const [familyData, setFamilyData] = useState<Family | null>(null);
   const [familyId, setFamilyId] = useState<string | null>(null);
   const [familyCreatedBy, setFamilyCreatedBy] = useState<string | null>(null);
 
-  // ----- Data state -----
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [goals, setGoals] = useState<SharedGoal[]>([]);
   const [activities, setActivities] = useState<ActivityItem[]>([]);
@@ -100,7 +97,6 @@ export function useFamily() {
   const [goalsHealth, setGoalsHealth] = useState<FamilyGoalsHealthItem[]>([]);
   const [totalGoals, setTotalGoals] = useState<number>(0);
 
-  // ----- Loading / error -----
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activitiesLoading, setActivitiesLoading] = useState(false);
@@ -108,12 +104,10 @@ export function useFamily() {
   const [activityOffset, setActivityOffset] = useState(0);
   const [mutating, setMutating] = useState(false);
   
-  // ----- Pagination state -----
   const [activityCurrentPage, setActivityCurrentPage] = useState(1);
   const [activityPageSize, setActivityPageSize] = useState(10);
   const [activityTotalCount, setActivityTotalCount] = useState(0);
 
-  // ----- Current user's role in the family -----
   const currentUserRole = useMemo(() => {
     if (!userId) return null;
     if (familyCreatedBy === userId) return "Owner";
@@ -128,14 +122,13 @@ export function useFamily() {
     return familyCreatedBy === userId;
   }, [familyCreatedBy, userId]);
 
-  // ----- Fetch all data -----
   const fetchData = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
     setError(null);
 
     try {
-      // Step 1: Check if user belongs to a family
+
       const { data: family, membership, error: famErr } =
         await fetchUserFamily(userId);
 
@@ -147,7 +140,7 @@ export function useFamily() {
       }
 
       if (!family || !membership) {
-        // User has no family — fetch discovery data
+
         setFamilyState("no-family");
         setFamilyData(null);
         setFamilyId(null);
@@ -158,7 +151,6 @@ export function useFamily() {
         setPendingRequests([]);
         setOverviewStats(null);
 
-        // Fetch public families and invitations in parallel
         const [pubResult, invResult, joinReqResult] = await Promise.all([
           fetchPublicFamilies(userId),
           fetchUserInvitations(userEmail),
@@ -172,19 +164,16 @@ export function useFamily() {
         return;
       }
 
-      // User has a family
       setFamilyState("has-family");
       setFamilyData(family);
       setFamilyId(family.id);
       setFamilyCreatedBy(family.createdBy);
 
-      // If user is the owner, delete all their existing join requests
       if (family.createdBy === userId && joinRequests.length > 0) {
         await deleteAllUserJoinRequests(userId);
         setJoinRequests([]);
       }
 
-      // Step 2: Fetch all family data in parallel
       const [membersResult, goalsResult, activityResult, requestsResult, overviewResult, sentInvResult, expenseCatResult, budgetVsActualResult, goalsSavingsResult, goalsHealthResult] =
         await Promise.all([
           fetchFamilyMembers(family.id, family.createdBy),
@@ -215,13 +204,11 @@ export function useFamily() {
       setGoalsHealth(goalsHealthResult.data);
       setTotalGoals(goalsHealthResult.total);
 
-      // Also update family with members
       if (family) {
         family.members = membersResult.data;
         setFamilyData({ ...family });
       }
 
-      // Also fetch public families + invitations + join requests in background
       const [pubResult, invResult, joinReqResult] = await Promise.all([
         fetchPublicFamilies(userId),
         fetchUserInvitations(userEmail),
@@ -238,24 +225,21 @@ export function useFamily() {
     }
   }, [userId, userEmail]);
 
-  // ----- Initial fetch -----
   useEffect(() => {
     if (userId) {
       fetchData();
     }
   }, [userId, fetchData]);
 
-  // ----- Refetch helper -----
   const refetch = useCallback(async () => {
     await fetchData();
   }, [fetchData]);
 
-  // ----- Goals-specific refresh helper -----
   const refreshGoals = useCallback(async () => {
     if (!familyId) return;
     
     try {
-      // Only fetch goals-related data
+
       const [goalsResult, goalsSavingsResult, goalsHealthResult] = await Promise.all([
         fetchFamilyGoals(familyId),
         fetchFamilyGoalsSavingsProgress(familyId, 6),
@@ -265,8 +249,7 @@ export function useFamily() {
       setGoals(goalsResult.data);
       setGoalsSavingsProgress(goalsSavingsResult.data);
       setGoalsHealth(goalsHealthResult.data);
-      
-      // Update overview stats that include goals
+
       if (overviewStats) {
         const updatedOverview = await fetchFamilyOverview(familyId);
         if (!updatedOverview.error) {
@@ -278,7 +261,6 @@ export function useFamily() {
     }
   }, [familyId, overviewStats]);
 
-  // ----- Pagination functions -----
   const fetchActivitiesPage = useCallback(async (page: number, pageSize: number) => {
     if (!familyId) return;
     setActivitiesLoading(true);
@@ -304,7 +286,6 @@ export function useFamily() {
     fetchActivitiesPage(1, newPageSize);
   }, [fetchActivitiesPage]);
 
-  // ----- Load more activities (fallback for infinite scroll) -----
   const loadMoreActivities = useCallback(async () => {
     if (!familyId || activitiesLoading) return;
     setActivitiesLoading(true);
@@ -317,8 +298,6 @@ export function useFamily() {
     setActivitiesLoading(false);
   }, [familyId, activityOffset, activitiesLoading]);
 
-  // ----- Mutations -----
-
   const handleCreateFamily = useCallback(
     async (form: CreateFamilyData): Promise<{ error: string | null }> => {
       if (!userId) return { error: "Not authenticated." };
@@ -326,7 +305,7 @@ export function useFamily() {
       const result = await createFamily(userId, form);
       setMutating(false);
       if (!result.error && result.data?.id) {
-        // Log family creation activity
+
         await logFamilyCreated(result.data.id, userId, form.name);
         await fetchData();
       }
@@ -343,7 +322,7 @@ export function useFamily() {
       const result = await updateFamily(familyId, form);
       setMutating(false);
       if (!result.error) {
-        // Log family update activity
+
         await logFamilyUpdated(familyId, userId || "", form.name || oldName || "Family", form);
         await fetchData();
       }
@@ -361,7 +340,7 @@ export function useFamily() {
     const result = await deleteFamily(familyId);
     setMutating(false);
     if (!result.error) {
-      // Log family deletion activity
+
       await logFamilyDeleted(familyId, userId || "", familyName);
       await fetchData();
     }
@@ -373,20 +352,17 @@ export function useFamily() {
   }> => {
     if (!familyId || !userId) return { error: "Missing data." };
     setMutating(true);
-    
-    // If user is owner and newOwnerId is provided, transfer ownership first
+
     if (newOwnerId && isOwner) {
       const newOwner = members.find(m => m.user_id === newOwnerId);
       const currentOwner = members.find(m => m.user_id === userId) || { name: "Current Owner" };
-      
-      // Transfer ownership first
+
       const transferResult = await transferOwnership(familyId, newOwnerId, userId);
       if (transferResult.error) {
         setMutating(false);
         return { error: transferResult.error };
       }
-      
-      // Log ownership transfer
+
       if (newOwner) {
         await logOwnershipTransferred(familyId, userId, currentOwner.name, newOwner.name, newOwnerId);
       }
@@ -396,7 +372,7 @@ export function useFamily() {
     const result = await leaveFamily(familyId, userId);
     setMutating(false);
     if (!result.error) {
-      // Log member left activity
+
       await logMemberLeft(familyId, userId, userName, userId);
       await fetchData();
     }
@@ -410,7 +386,7 @@ export function useFamily() {
       const result = await sendInvitation(familyId, userId, form);
       setMutating(false);
       if (!result.error) {
-        // Log member invitation activity
+
         await logMemberInvited(familyId, userId, form.email, form.role);
         await fetchData();
       }
@@ -429,7 +405,7 @@ export function useFamily() {
       const result = await respondToInvitation(invitationId, userId, accept);
       setMutating(false);
       if (!result.error) {
-        // Log member joined activity if accepted
+
         if (accept && familyId) {
           const userName = user?.user_metadata?.full_name || user?.email || "A member";
           await logMemberJoined(familyId, userId, userName, userId);
@@ -450,7 +426,6 @@ export function useFamily() {
       setMutating(true);
       const result = await sendJoinRequest(targetFamilyId, userId, message);
 
-      // Refresh join requests after sending
       if (!result.error) {
         const joinReqResult = await fetchUserJoinRequests(userId);
         setJoinRequests(joinReqResult.data);
@@ -469,7 +444,7 @@ export function useFamily() {
       const result = await respondToJoinRequest(requestId, userId, true);
       setMutating(false);
       if (!result.error && familyId) {
-        // Get the requester's info to log the activity
+
         const request = pendingRequests.find(r => r.id === requestId);
         if (request) {
           await logMemberJoined(familyId, userId, request.name, request.id);
@@ -514,7 +489,7 @@ export function useFamily() {
       }
       
       if (member && oldRole && familyId) {
-        // Log role change activity
+
         await logRoleChanged(familyId, userId || "", member.name, memberId, oldRole, newRole);
         await fetchData();
         toast.success("Role updated successfully", {
@@ -538,7 +513,7 @@ export function useFamily() {
       const result = await contributeToGoal(goalId, userId, amount);
       setMutating(false);
       if (!result.error && goal && familyId) {
-        // Log goal contribution activity
+
         const userName = user?.user_metadata?.full_name || "A member";
         await logGoalContributed(familyId, userId, goal.name, goalId, amount, userName);
         await fetchData();
@@ -556,7 +531,7 @@ export function useFamily() {
       const result = await removeMember(memberId, userId);
       setMutating(false);
       if (!result.error && member && familyId) {
-        // Log member removal activity
+
         await logMemberRemoved(familyId, userId, member.name, memberId);
         await fetchData();
       }
@@ -574,7 +549,7 @@ export function useFamily() {
       const result = await transferOwnership(familyId, newOwnerUserId, userId);
       setMutating(false);
       if (!result.error && newOwner && familyId) {
-        // Log ownership transfer activity
+
         await logOwnershipTransferred(familyId, userId, currentOwner.name, newOwner.name, newOwnerUserId);
         await fetchData();
       }
@@ -583,8 +558,6 @@ export function useFamily() {
     [userId, familyId, members, fetchData]
   );
 
-  // ----- Goal CRUD handlers with activity logging -----
-
   const handleCreateFamilyGoal = useCallback(
     async (form: GoalFormState): Promise<{ error: string | null; data?: { id: string; name: string; target: number } }> => {
       if (!userId || !familyId) return { error: "Not authenticated or no family." };
@@ -592,7 +565,7 @@ export function useFamily() {
       const result = await createGoal(userId, { ...form, family_id: familyId, isFamily: true });
       setMutating(false);
       if (!result.error && result.data) {
-        // Log goal creation activity
+
         await logGoalCreated(familyId, userId, result.data.name, result.data.id, result.data.target);
         await fetchData();
         return { error: null, data: { id: result.data.id, name: result.data.name, target: result.data.target } };
@@ -610,7 +583,7 @@ export function useFamily() {
       const result = await updateGoal(goalId, form);
       setMutating(false);
       if (!result.error && goal) {
-        // Log goal update activity
+
         await logGoalUpdated(familyId, userId, result.data?.name || goal.name, goalId, form);
         await fetchData();
       }
@@ -627,7 +600,7 @@ export function useFamily() {
       const result = await deleteGoal(goalId);
       setMutating(false);
       if (!result.error && goal) {
-        // Log goal deletion activity
+
         await logGoalDeleted(familyId, userId, goal.name, goalId);
         await fetchData();
       }
@@ -636,12 +609,11 @@ export function useFamily() {
     [userId, familyId, goals, fetchData]
   );
 
-  // ----- Refresh discover families data only -----
   const refreshDiscoverFamilies = useCallback(async () => {
     if (!userId) return;
 
     try {
-      // Fetch only discover families data (public families and join requests)
+
       const [pubResult, joinReqResult] = await Promise.all([
         fetchPublicFamilies(userId),
         fetchUserJoinRequests(userId),
@@ -655,7 +627,7 @@ export function useFamily() {
   }, [userId]);
 
   return {
-    // State
+
     familyState,
     familyData,
     familyId,
@@ -677,21 +649,18 @@ export function useFamily() {
     currentUserRole,
     isOwner,
 
-    // Loading
     loading,
     error,
     activitiesLoading,
     hasMoreActivities,
     mutating,
 
-    // Pagination
     activityCurrentPage,
     activityPageSize,
     activityTotalCount,
     handleActivityPageChange,
     handleActivityPageSizeChange,
 
-    // Actions
     refetch,
     refreshGoals,
     refreshDiscoverFamilies,
@@ -709,7 +678,7 @@ export function useFamily() {
     handleContributeToGoal,
     handleRemoveMember,
     handleTransferOwnership,
-    // Goal CRUD with activity logging
+
     handleCreateFamilyGoal,
     handleUpdateFamilyGoal,
     handleDeleteFamilyGoal,

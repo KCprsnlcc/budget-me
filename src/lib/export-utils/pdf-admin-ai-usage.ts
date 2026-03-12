@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { getTimestampString } from "./formatters";
 import type { AIUsageAdminExportData } from "./types";
 
-/**
- * Export admin AI usage as PDF
- */
 export function exportAdminAIUsageToPDF(
     records: AIUsageAdminExportData[],
     stats?: {
@@ -22,7 +19,6 @@ export function exportAdminAIUsageToPDF(
 
     const doc = createBasePDF("AI Usage Management Report", `${records.length} records`);
 
-    // Summary section
     let currentY = 45;
     const margin = 15;
 
@@ -37,7 +33,6 @@ export function exportAdminAIUsageToPDF(
         const cardHeight = 20;
         const cardSpacing = 3;
 
-        // Total Usage card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -52,7 +47,6 @@ export function exportAdminAIUsageToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((stats.totalUsage || 0).toLocaleString(), margin + 4, currentY + 14);
 
-        // Active Users card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -67,7 +61,6 @@ export function exportAdminAIUsageToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((stats.activeUsers || 0).toLocaleString(), margin + cardWidth + cardSpacing + 4, currentY + 14);
 
-        // Avg Usage card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 2, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -82,7 +75,6 @@ export function exportAdminAIUsageToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((stats.avgUsage || 0).toFixed(1), margin + (cardWidth + cardSpacing) * 2 + 4, currentY + 14);
 
-        // Top Feature card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 3, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -100,7 +92,6 @@ export function exportAdminAIUsageToPDF(
         currentY += cardHeight + 12;
     }
 
-    // Usage table
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(COLORS.dark);
@@ -118,11 +109,10 @@ export function exportAdminAIUsageToPDF(
     ];
     const formats: ("text" | "currency" | "number" | "percentage")[] = ["text", "text", "number", "number", "number", "number"];
 
-    const columnWidths = [30, 70, 20, 20, 20, 20]; // Total: 180mm
+    const columnWidths = [30, 70, 20, 20, 20, 20]; 
 
     addPDFTable(doc, headers, records, keys, formats, currentY, columnWidths);
 
-    // Save
     const filename = `admin_ai_usage_${getTimestampString()}.pdf`;
     doc.save(filename);
 }

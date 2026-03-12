@@ -29,37 +29,31 @@ export function useTransactions() {
   const { user } = useAuth();
   const userId = user?.id ?? "";
 
-  // ----- Filter state -----
   const [month, setMonth] = useState<number | "all">("all");
   const [year, setYear] = useState<number | "all">("all");
   const [typeFilter, setTypeFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [search, setSearch] = useState("");
 
-  // ----- Pagination state -----
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
 
-  // ----- Data state -----
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   const [summary, setSummary] = useState<TransactionSummary | null>(null);
   const [categoryBreakdown, setCategoryBreakdown] = useState<CategoryBreakdown[]>([]);
   const [monthlyTrend, setMonthlyTrend] = useState<MonthlyTrendPoint[]>([]);
 
-  // ----- Lookup state -----
   const [accounts, setAccounts] = useState<AccountOption[]>([]);
   const [expenseCategories, setExpenseCategories] = useState<CategoryOption[]>([]);
   const [incomeCategories, setIncomeCategories] = useState<CategoryOption[]>([]);
   const [budgets, setBudgets] = useState<BudgetOption[]>([]);
   const [goals, setGoals] = useState<GoalOption[]>([]);
 
-  // ----- Loading / error -----
   const [loading, setLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ----- Build filters object -----
   const filters: TransactionFilters = useMemo(
     () => ({
       month,
@@ -70,7 +64,6 @@ export function useTransactions() {
     [month, year, typeFilter, categoryFilter]
   );
 
-  // ----- Fetch lookups once -----
   useEffect(() => {
     if (!userId) return;
     Promise.all([
@@ -88,7 +81,6 @@ export function useTransactions() {
     });
   }, [userId]);
 
-  // ----- Fetch main data when filters change -----
   const fetchData = useCallback(async (isFilterChange = false) => {
     if (!userId) return;
     
@@ -111,7 +103,6 @@ export function useTransactions() {
       setTotalCount(txResult.count ?? 0);
       if (txResult.error) setError(txResult.error);
       
-      // Only update summary/charts on initial load or major filter changes
       if (!isFilterChange || (month !== "all" || year !== "all")) {
         setSummary(summaryResult);
         setCategoryBreakdown(breakdownResult);
@@ -129,14 +120,12 @@ export function useTransactions() {
     fetchData();
   }, [fetchData]);
 
-  // ----- Separate effect for filter changes to avoid full refresh -----
   useEffect(() => {
     if (transactions.length > 0) {
       fetchData(true);
     }
   }, [filters, currentPage, pageSize]);
 
-  // ----- Client-side search filtering (instant, no re-query) -----
   const filteredTransactions = useMemo(() => {
     if (!search.trim()) return transactions;
     const q = search.toLowerCase();
@@ -149,10 +138,8 @@ export function useTransactions() {
     );
   }, [transactions, search]);
 
-  // ----- Refetch (passed to modals as onSuccess) -----
   const refetch = useCallback(() => {
     fetchData();
-    // Also refetch lookups in case accounts/goals changed
     if (!userId) return;
     Promise.all([
       fetchAccounts(userId),
@@ -169,12 +156,10 @@ export function useTransactions() {
     });
   }, [fetchData, userId]);
 
-  // ----- Refetch only table data (for filter changes) -----
   const refetchTable = useCallback(() => {
     fetchData(true);
   }, [fetchData]);
 
-  // ----- Reset filters -----
   const resetFilters = useCallback(() => {
     const now = new Date();
     setMonth(now.getMonth() + 1);
@@ -194,7 +179,6 @@ export function useTransactions() {
     setCurrentPage(1);
   }, []);
 
-  // Pagination helpers
   const totalPages = pageSize === Number.MAX_SAFE_INTEGER ? 1 : Math.ceil(totalCount / pageSize);
   const hasNextPage = currentPage < totalPages;
   const hasPreviousPage = currentPage > 1;
@@ -217,12 +201,10 @@ export function useTransactions() {
     }
   }, [hasPreviousPage]);
 
-  // Reset page when filters change or page size changes
   useEffect(() => {
     setCurrentPage(1);
   }, [month, year, typeFilter, categoryFilter, pageSize]);
 
-  // Handle page size change
   const handlePageSizeChange = useCallback((newSize: number | "all") => {
     if (newSize === "all") {
       setPageSize(Number.MAX_SAFE_INTEGER);
@@ -233,18 +215,15 @@ export function useTransactions() {
   }, []);
 
   return {
-    // Data
     transactions: filteredTransactions,
     summary,
     categoryBreakdown,
     monthlyTrend,
-    // Lookups
     accounts,
     expenseCategories,
     incomeCategories,
     budgets,
     goals,
-    // Filters
     month,
     setMonth,
     year,
@@ -257,13 +236,11 @@ export function useTransactions() {
     setSearch,
     resetFilters,
     resetFiltersToAll,
-    // State
     loading,
     tableLoading,
     error,
     refetch,
     refetchTable,
-    // Pagination
     currentPage,
     pageSize,
     setPageSize,

@@ -11,27 +11,20 @@ export interface GoalPermissions {
   canView: boolean;
 }
 
-/**
- * Converts role from hook to lowercase FamilyRole
- */
 export function normalizeRole(role: FamilyRoleFromHook): FamilyRole | null {
   if (!role) return null;
   return role.toLowerCase() as FamilyRole;
 }
 
-/**
- * Determines goal permissions based on family role
- */
 export function getGoalPermissions(
   currentUserRole: FamilyRoleFromHook,
   isOwner: boolean,
   goalOwnerId?: string,
   currentUserId?: string
 ): GoalPermissions {
-  // Normalize the role to lowercase
+
   const normalizedRole = normalizeRole(currentUserRole);
-  
-  // Default permissions (no access)
+
   const permissions: GoalPermissions = {
     canAdd: false,
     canEdit: false,
@@ -44,10 +37,8 @@ export function getGoalPermissions(
     return permissions;
   }
 
-  // All authenticated users can view goals
   permissions.canView = true;
 
-  // Owner gets full permissions regardless of database role
   if (isOwner) {
     permissions.canAdd = true;
     permissions.canEdit = true;
@@ -58,7 +49,7 @@ export function getGoalPermissions(
 
   switch (normalizedRole) {
     case "admin":
-      // Admin: Full access to all family goals
+
       permissions.canAdd = true;
       permissions.canEdit = true;
       permissions.canDelete = true;
@@ -66,7 +57,7 @@ export function getGoalPermissions(
       break;
 
     case "member":
-      // Member: Can only contribute to goals, cannot add/edit/delete
+
       permissions.canAdd = false;
       permissions.canEdit = false;
       permissions.canDelete = false;
@@ -74,7 +65,7 @@ export function getGoalPermissions(
       break;
 
     case "viewer":
-      // Viewer: Can manage personal goals only, read-only for family goals
+
       permissions.canAdd = false;
       permissions.canEdit = false;
       permissions.canDelete = false;
@@ -82,7 +73,6 @@ export function getGoalPermissions(
       break;
   }
 
-  // Special case: Member and Viewer can edit/delete their own personal goals (not family goals)
   if ((normalizedRole === "member" || normalizedRole === "viewer") && goalOwnerId && currentUserId) {
     if (goalOwnerId === currentUserId) {
       permissions.canEdit = true;
@@ -94,9 +84,6 @@ export function getGoalPermissions(
   return permissions;
 }
 
-/**
- * Gets the display role name from database role
- */
 export function getDisplayRole(role: string, isOwner: boolean): FamilyRole {
   if (isOwner) return "owner";
   
@@ -112,9 +99,6 @@ export function getDisplayRole(role: string, isOwner: boolean): FamilyRole {
   }
 }
 
-/**
- * Checks if a user can create family goals
- */
 export function canCreateFamilyGoals(currentUserRole: FamilyRoleFromHook, isOwner?: boolean): boolean {
   if (isOwner) return true;
   
@@ -122,9 +106,6 @@ export function canCreateFamilyGoals(currentUserRole: FamilyRoleFromHook, isOwne
   return normalizedRole === "admin";
 }
 
-/**
- * Checks if a user can edit a specific goal
- */
 export function canEditGoal(
   goal: { isFamily: boolean; user_id: string },
   currentUserRole: FamilyRoleFromHook,
@@ -132,19 +113,14 @@ export function canEditGoal(
   currentUserId?: string
 ): boolean {
   const permissions = getGoalPermissions(currentUserRole, isOwner, goal.user_id, currentUserId);
-  
-  // For family goals, check role permissions
+
   if (goal.isFamily) {
     return permissions.canEdit;
   }
-  
-  // For personal goals, user can edit their own
+
   return goal.user_id === currentUserId;
 }
 
-/**
- * Checks if a user can delete a specific goal
- */
 export function canDeleteGoal(
   goal: { isFamily: boolean; user_id: string },
   currentUserRole: FamilyRoleFromHook,
@@ -152,12 +128,10 @@ export function canDeleteGoal(
   currentUserId?: string
 ): boolean {
   const permissions = getGoalPermissions(currentUserRole, isOwner, goal.user_id, currentUserId);
-  
-  // For family goals, check role permissions
+
   if (goal.isFamily) {
     return permissions.canDelete;
   }
-  
-  // For personal goals, user can delete their own
+
   return goal.user_id === currentUserId;
 }

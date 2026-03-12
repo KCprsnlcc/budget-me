@@ -58,7 +58,6 @@ export function ActivityTab({
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [realtimeActivities, setRealtimeActivities] = useState<ActivityItem[]>([]);
   
-  // Realtime subscription
   useEffect(() => {
     if (!familyId) return;
     
@@ -74,7 +73,6 @@ export function ActivityTab({
           filter: `family_id=eq.${familyId}`,
         },
         async (payload) => {
-          // Fetch the new activity with profile data
           const { data: newActivity } = await supabase
             .from('family_activity_log')
             .select(`
@@ -117,7 +115,7 @@ export function ActivityTab({
               metadata: newActivity.metadata || {},
             };
             
-            setRealtimeActivities(prev => [activity, ...prev].slice(0, 10)); // Keep only last 10 realtime activities
+            setRealtimeActivities(prev => [activity, ...prev].slice(0, 10));
           }
         }
       )
@@ -128,12 +126,10 @@ export function ActivityTab({
     };
   }, [familyId]);
   
-  // Combine activities with realtime activities
   const allActivities = useMemo(() => {
     return [...realtimeActivities, ...activities];
   }, [realtimeActivities, activities]);
 
-  // Create mock user for avatar component
   const createMockUser = useCallback((activity: ActivityItem): User => {
     return {
       id: activity.memberEmail,
@@ -171,22 +167,17 @@ export function ActivityTab({
     return "bg-gray-100 text-gray-700 border-gray-300";
   }, []);
 
-  // Ensure activity description includes user name
   const getActivityDescription = useCallback((activity: ActivityItem) => {
-    // If the action already starts with the member name, return as-is
     if (activity.action.startsWith(activity.memberName)) {
       return activity.action;
     }
     
-    // Otherwise, prepend the member name to the action
     return `${activity.memberName} ${activity.action}`;
   }, []);
 
-  // Filter and search logic
   const filteredActivities = useMemo(() => {
     let filtered = allActivities;
     
-    // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(activity => 
@@ -197,17 +188,15 @@ export function ActivityTab({
       );
     }
     
-    // Type filter
     if (activeFilter !== "" && activeFilter !== "all") {
       filtered = filtered.filter(activity => activity.type === activeFilter);
     }
     
-    // Month and Year filter
     if (monthFilter !== "all" || yearFilter !== "all") {
       filtered = filtered.filter(activity => {
         const activityDate = new Date(activity.timestamp);
-        const activityMonth = (activityDate.getMonth() + 1).toString(); // Convert to string for comparison
-        const activityYear = activityDate.getFullYear().toString();     // Convert to string for comparison
+        const activityMonth = (activityDate.getMonth() + 1).toString();
+        const activityYear = activityDate.getFullYear().toString();
         
         const monthMatch = monthFilter === "all" || activityMonth === monthFilter;
         const yearMatch = yearFilter === "all" || activityYear === yearFilter;
@@ -219,7 +208,6 @@ export function ActivityTab({
     return filtered;
   }, [allActivities, searchQuery, activeFilter, monthFilter, yearFilter]);
   
-  // Keyboard navigation handlers
   const handleKeyDown = useCallback((e: React.KeyboardEvent, action: () => void) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -227,7 +215,6 @@ export function ActivityTab({
     }
   }, []);
   
-  // Export functionality
   const handleExport = useCallback(() => {
     const csvContent = [
       ['Timestamp', 'Member', 'Action', 'Type', 'Amount', 'Target', 'Details'],
@@ -253,13 +240,12 @@ export function ActivityTab({
     document.body.removeChild(link);
   }, [filteredActivities]);
 
-  // Reset filters
   const resetFilters = useCallback(() => {
     setSearchQuery("");
     setActiveFilter("");
     const now = getPhilippinesNow();
-    setMonthFilter((now.getMonth() + 1).toString()); // Current month
-    setYearFilter(now.getFullYear().toString()); // Current year
+    setMonthFilter((now.getMonth() + 1).toString());
+    setYearFilter(now.getFullYear().toString());
   }, []);
 
   const resetFiltersToAll = useCallback(() => {
@@ -269,7 +255,6 @@ export function ActivityTab({
     setYearFilter("all");
   }, []);
 
-  // Pagination helpers
   const totalPages = internalPageSize === Number.MAX_SAFE_INTEGER ? 1 : Math.ceil(totalCount / internalPageSize);
   const hasNextPage = internalCurrentPage < totalPages;
   const hasPreviousPage = internalCurrentPage > 1;
@@ -308,17 +293,14 @@ export function ActivityTab({
     }
   }, [onPageSizeChange]);
 
-  // Reset page when filters change
   useEffect(() => {
     setInternalCurrentPage(1);
   }, [searchQuery, activeFilter, monthFilter, yearFilter]);
 
-  // Sync with external page changes
   useEffect(() => {
     setInternalCurrentPage(currentPage);
   }, [currentPage]);
 
-  // Sync with external page size changes
   useEffect(() => {
     setInternalPageSize(pageSize);
   }, [pageSize]);
@@ -327,7 +309,6 @@ export function ActivityTab({
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="space-y-4">
-          {/* Header Skeleton */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
             <div>
               <Skeleton width={120} height={14} className="mb-2 sm:w-[150px] sm:h-4" />
@@ -336,7 +317,6 @@ export function ActivityTab({
             <Skeleton width={80} height={28} borderRadius={6} className="sm:w-[100px] sm:h-8" />
           </div>
 
-          {/* Activity List Skeleton */}
           <Card className="p-4 sm:p-6">
             <div className="space-y-3 sm:space-y-4">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -399,7 +379,6 @@ export function ActivityTab({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Filter Controls */}
       <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col xl:flex-row items-start xl:items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-slate-500 w-full xl:w-auto">
@@ -479,7 +458,6 @@ export function ActivityTab({
         </div>
       </Card>
 
-      {/* Activity Feed */}
       <div className="space-y-2 sm:space-y-3">
         {filteredActivities.length === 0 ? (
           <div className="text-center py-8 sm:py-12">
@@ -526,9 +504,7 @@ export function ActivityTab({
                   role="article"
                   aria-label={`Activity: ${getActivityDescription(activity)}`}
                   tabIndex={0}
-                  onKeyDown={(e) => handleKeyDown(e, () => {
-                    // Optional: Add click handler for keyboard navigation
-                  })}
+                  onKeyDown={(e) => handleKeyDown(e, () => {})}
                 >
                   <div className="flex-shrink-0">
                     <UserAvatar 
@@ -578,7 +554,6 @@ export function ActivityTab({
               );
             })}
             
-            {/* Load More Trigger - Only show for infinite scroll fallback */}
             {hasMore && !onPageChange && (
               <div 
                 ref={loadMoreRef}
@@ -606,7 +581,6 @@ export function ActivityTab({
           </>
         )}
 
-        {/* Pagination */}
         {!loading && !isLoading && filteredActivities.length > 0 && onPageChange && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 px-3 sm:px-4 py-3 bg-white border border-slate-200 rounded-lg mt-4 sm:mt-6">
             <div className="text-xs sm:text-sm text-slate-600">

@@ -88,12 +88,10 @@ export function DateSelector({
     const days = [];
     const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-    // Add empty cells for days before month starts
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className="h-6"></div>);
     }
 
-    // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const isSelected = selectedDate &&
         selectedDate.getDate() === day &&
@@ -169,7 +167,7 @@ export function DateSelector({
       {isOpen && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-slate-200 rounded-lg shadow-sm p-3">
           {showMonthSelector ? (
-            // Month Selector
+
             <div className="grid grid-cols-3 gap-1">
               {getMonths().map((month, index) => (
                 <button
@@ -186,7 +184,7 @@ export function DateSelector({
               ))}
             </div>
           ) : showYearSelector ? (
-            // Year Selector
+
             <div className="grid grid-cols-4 gap-1 max-h-32 overflow-y-auto">
               {getYears().map((year) => (
                 <button
@@ -203,9 +201,9 @@ export function DateSelector({
               ))}
             </div>
           ) : (
-            // Calendar View
+
             <div className="space-y-2">
-              {/* Header */}
+              {}
               <div className="flex items-center justify-between">
                 <button
                   type="button"
@@ -240,7 +238,7 @@ export function DateSelector({
                 </button>
               </div>
 
-              {/* Week Days */}
+              {}
               <div className="grid grid-cols-7 gap-1">
                 {weekDays.map((day, index) => (
                   <div
@@ -252,12 +250,12 @@ export function DateSelector({
                 ))}
               </div>
 
-              {/* Calendar Days */}
+              {}
               <div className="grid grid-cols-7 gap-1">
                 {days}
               </div>
 
-              {/* Today Button */}
+              {}
               <div className="pt-2 border-t border-slate-100">
                 <button
                   type="button"

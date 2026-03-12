@@ -2,15 +2,10 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-/**
- * Detect and save anomalies from transaction data
- * This runs server-side to compute anomalies and save them to the database
- */
 export async function detectAndSaveAnomalies(userId: string, timeframe: 'month' | 'quarter' | 'year' = 'month') {
   try {
     const supabase = await createClient();
 
-    // Calculate date range
     const now = new Date();
     const endDate = now.toISOString().split('T')[0];
     let startDate: string;
@@ -39,7 +34,6 @@ export async function detectAndSaveAnomalies(userId: string, timeframe: 'month' 
 
     const anomaliesToSave: any[] = [];
 
-    // Fetch transactions for the period
     const { data: transactions, error: transError } = await supabase
       .from('transactions')
       .select('*, expense_category_id, expense_categories(category_name)')
@@ -51,7 +45,7 @@ export async function detectAndSaveAnomalies(userId: string, timeframe: 'month' 
     if (transError) throw transError;
 
     if (transactions && transactions.length > 0) {
-      // Group by category
+
       const categorySpending: Record<string, { total: number; count: number; transactions: any[] }> = {};
       
       transactions.forEach(t => {
@@ -64,7 +58,6 @@ export async function detectAndSaveAnomalies(userId: string, timeframe: 'month' 
         categorySpending[categoryName].transactions.push(t);
       });
 
-      // Detect unusual spending patterns (spending > 40% above average)
       for (const [category, data] of Object.entries(categorySpending)) {
         const avgSpending = data.total / data.count;
         const recentSpending = data.transactions
@@ -93,7 +86,6 @@ export async function detectAndSaveAnomalies(userId: string, timeframe: 'month' 
       }
     }
 
-    // Detect budget overspend
     const { data: budgets, error: budgetError } = await supabase
       .from('budgets')
       .select('*')
@@ -120,10 +112,8 @@ export async function detectAndSaveAnomalies(userId: string, timeframe: 'month' 
       });
     }
 
-    // Save anomalies to database (only if they don't already exist)
     if (anomaliesToSave.length > 0) {
-      // Check for existing anomalies with the same category (regardless of status or time)
-      // This prevents recreating anomalies that were previously dismissed or resolved
+
       const { data: existingAnomalies } = await supabase
         .from('admin_anomalies')
         .select('anomaly_data')
@@ -133,7 +123,6 @@ export async function detectAndSaveAnomalies(userId: string, timeframe: 'month' 
         (existingAnomalies || []).map(a => a.anomaly_data?.category).filter(Boolean)
       );
 
-      // Filter out anomalies that already exist (in any status)
       const newAnomalies = anomaliesToSave.filter(
         a => !existingCategories.has(a.anomaly_data.category)
       );

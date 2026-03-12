@@ -73,53 +73,44 @@ export function MembersTab({
   const [processingInvitationId, setProcessingInvitationId] = useState<string | null>(null);
   const [processingInvitationAction, setProcessingInvitationAction] = useState<'accept' | 'decline' | null>(null);
 
-  // Modal states
   const [transferOwnershipModalOpen, setTransferOwnershipModalOpen] = useState(false);
   const [removeMemberModalOpen, setRemoveMemberModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<FamilyMember | null>(null);
 
-  // Get current user's role and permissions
   const currentUserMember = members.find(m => m.email === currentUserEmail);
   const currentUserRole = currentUserMember?.role;
   const isOwner = currentUserRole === "Owner";
   const isAdmin = currentUserRole === "Admin";
-  const canManageRoles = isOwner || isAdmin; // Owners and Admins can manage roles
+  const canManageRoles = isOwner || isAdmin;
   const canInviteMembers = currentUserRole === "Owner" || currentUserRole === "Admin";
   const canEditFamily = currentUserRole === "Owner" || currentUserRole === "Admin";
   const canDeleteFamily = currentUserRole === "Owner";
   const canApproveRequests = currentUserRole === "Owner" || currentUserRole === "Admin";
 
-  // Permission logic for managing member roles
   const canManageMemberRole = (memberRole: string, memberEmail: string) => {
     const isTargetCurrentUser = memberEmail === currentUserEmail;
     
     if (currentUserRole === "Owner") {
-      // Owner can manage anyone's role except their own
       return !isTargetCurrentUser;
     }
     if (currentUserRole === "Admin") {
-      // Admin can manage Members, Viewers, and other Admins, but not their own role or the Owner
       return memberRole !== "Owner" && !isTargetCurrentUser;
     }
-    return false; // Members and Viewers cannot manage roles
+    return false;
   };
 
-  // Permission logic for removing members
   const canRemoveMember = (memberRole: string, memberEmail: string) => {
     const isTargetCurrentUser = memberEmail === currentUserEmail;
     
     if (currentUserRole === "Owner") {
-      // Owner can remove anyone except themselves
       return !isTargetCurrentUser;
     }
     if (currentUserRole === "Admin") {
-      // Admin can remove Members and Viewers, but not Owners or other Admins
       return (memberRole === "Member" || memberRole === "Viewer") && !isTargetCurrentUser;
     }
-    return false; // Members and Viewers cannot remove anyone
+    return false;
   };
 
-  // Create icon mapping from string constants
   const getRoleIcon = (role: string) => {
     const iconMap: Record<string, React.ElementType> = {
       "Crown": Crown,
@@ -130,7 +121,6 @@ export function MembersTab({
     return iconMap[ROLE_ICONS[role as keyof typeof ROLE_ICONS]] || Eye;
   };
 
-  // Create role options for FilterDropdown
   const getRoleOptions = (currentMemberRole: string) => {
     const options = [
       { value: "Admin", label: "Admin", icon: Shield, color: "text-blue-600" },
@@ -199,7 +189,6 @@ export function MembersTab({
     setProcessingInvitationAction(null);
   };
 
-  // Modal handlers
   const handleOpenTransferOwnership = () => {
     setTransferOwnershipModalOpen(true);
   };
@@ -232,8 +221,6 @@ export function MembersTab({
     return { error: "Remove member function not available" };
   };
 
-
-
   if (!familyData) {
     return (
       <div className="text-center py-12">
@@ -255,9 +242,7 @@ export function MembersTab({
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="space-y-4 sm:space-y-6 w-full">
-          {/* Top Row: Pending Join Requests and My Invitations side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Pending Join Requests Skeleton - Left Column */}
             <Card className="p-4 sm:p-6 border-blue-100">
               <Skeleton width={160} height={14} className="mb-2 sm:w-[200px] sm:h-4" />
               <Skeleton width={200} height={10} className="mb-4 sm:mb-6 sm:w-[250px] sm:h-3" />
@@ -283,7 +268,6 @@ export function MembersTab({
               </div>
             </Card>
 
-            {/* My Invitations Skeleton - Right Column */}
             <Card className="p-4 sm:p-6 border-emerald-100">
               <Skeleton width={120} height={14} className="mb-2 sm:w-[150px] sm:h-4" />
               <Skeleton width={160} height={10} className="mb-4 sm:mb-6 sm:w-[200px] sm:h-3" />
@@ -310,7 +294,6 @@ export function MembersTab({
             </Card>
           </div>
 
-          {/* Full Width: Family Members Section Skeleton */}
           <Card className="p-4 sm:p-6">
             <div className="mb-4 sm:mb-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
@@ -351,12 +334,10 @@ export function MembersTab({
               ))}
             </div>
             
-            {/* Save Role Changes Button Skeleton */}
             <div className="mt-4 sm:mt-6 pt-4 border-t border-slate-100">
               <Skeleton width="100%" height={36} borderRadius={6} className="sm:h-10" />
             </div>
             
-            {/* About Roles Info Skeleton */}
             <div className="mt-4 sm:mt-6 pt-4 border-t border-slate-100">
               <div className="flex items-center justify-between">
                 <Skeleton width={140} height={14} className="sm:w-[180px] sm:h-4" />
@@ -379,9 +360,7 @@ export function MembersTab({
 
   return (
     <div className="space-y-4 sm:space-y-6 w-full">
-      {/* Top Row: Pending Join Requests and My Invitations side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Pending Join Requests Section - Left Column */}
         {pendingRequests.length > 0 ? (
           <Card className="p-4 sm:p-6 border-blue-100 hover:shadow-md transition-all group cursor-pointer">
             <div className="mb-4">
@@ -494,7 +473,6 @@ export function MembersTab({
           </Card>
         )}
 
-        {/* My Invitations Section - Right Column */}
         <Card className="p-4 sm:p-6 border-emerald-100 hover:shadow-md transition-all group cursor-pointer">
           <div className="mb-4">
             <h3 className="text-xs sm:text-sm font-semibold text-slate-900">
@@ -586,7 +564,6 @@ export function MembersTab({
         </Card>
       </div>
 
-      {/* Full Width: Family Members Section */}
       <Card className="p-4 sm:p-6">
         <div className="mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
@@ -598,7 +575,6 @@ export function MembersTab({
                 {canManageRoles ? "Manage current family members and their roles" : "View current family members"}
               </p>
             </div>
-            {/* Transfer Ownership Button (Owner only) */}
             {currentUserRole === "Owner" && onTransferOwnership && members.filter(m => m.id !== currentUserMember?.id && m.status === "active").length > 0 && (
               <Button
                 variant="ghost"
@@ -664,7 +640,6 @@ export function MembersTab({
                         </div>
                       </div>
                       <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                        {/* Role Management Controls - For Owners and Admins */}
                         {canManageMemberRole(member.role, member.email) ? (
                           <div className="flex items-center gap-1.5 sm:gap-2">
                             <RoleDropdown
@@ -675,7 +650,6 @@ export function MembersTab({
                               className="min-w"
                             />
                             
-                            {/* Remove member button */}
                             {canRemoveMember(member.role, member.email) && (
                               <Button
                                 variant="ghost"
@@ -689,7 +663,6 @@ export function MembersTab({
                             )}
                           </div>
                         ) : (
-                          /* Static Badge for members that cannot be managed */
                           <span className="text-[10px] sm:text-xs font-medium text-slate-600">
                             {member.role}
                           </span>
@@ -731,7 +704,6 @@ export function MembersTab({
               </div>
             )}
             
-            {/* Save Role Changes Button */}
             {canManageRoles && Object.keys(roleChanges).length > 0 && (
               <div className="mt-4 sm:mt-6 pt-4 border-t border-slate-100">
                 <div className="flex items-center gap-2">
@@ -760,7 +732,6 @@ export function MembersTab({
               </div>
             )}
             
-            {/* About Roles Info - Compact */}
             <div className="mt-4 sm:mt-6 pt-4 border-t border-slate-100">
               <details className="group">
                 <summary className="flex items-center justify-between cursor-pointer text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-800">
@@ -802,7 +773,6 @@ export function MembersTab({
             </div>
           </Card>
 
-      {/* Transfer Ownership Modal */}
       <TransferOwnershipModal
         open={transferOwnershipModalOpen}
         onClose={handleCloseTransferOwnership}
@@ -811,7 +781,6 @@ export function MembersTab({
         currentOwnerId={currentUserMember?.id || ""}
       />
 
-      {/* Remove Member Modal */}
       <RemoveMemberModal
         open={removeMemberModalOpen}
         onClose={handleCloseRemoveMember}

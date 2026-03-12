@@ -77,7 +77,6 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
   const hasFamily = familyState === "has-family" && familyData;
   const familyName = familyData?.name || "";
 
-  // Check permissions
   const permissions = getGoalPermissions(currentUserRole, isOwner, undefined, user?.id);
   const canCreateFamilyGoalsBool = canCreateFamilyGoals(currentUserRole, isOwner);
 
@@ -105,11 +104,11 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
     let error: string | null = null;
     
     if (form.isFamily && familyData?.id) {
-      // Use family goal handler with activity logging
+
       const result = await handleCreateFamilyGoal(form);
       error = result.error;
     } else {
-      // Use regular goal handler for individual goals
+
       const goalForm = {
         ...form,
         family_id: undefined
@@ -153,7 +152,7 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-      {/* Header */}
+      {}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
@@ -165,12 +164,12 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
+      {}
       <Stepper steps={STEPS} currentStep={step} />
 
-      {/* Body */}
+      {}
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* STEP 1: Category Selection */}
+        {}
         {step === 1 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -210,7 +209,7 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
                         <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{category.label}</h3>
                         <p className="text-[11px] text-gray-500 leading-relaxed">{category.description}</p>
                       </div>
-                      {/* Check indicator */}
+                      {}
                       <div
                         className={cn(
                           "w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200",
@@ -227,7 +226,7 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
           </div>
         )}
 
-        {/* STEP 2: Goal Details */}
+        {}
         {step === 2 && (
           <div className="space-y-4 animate-txn-in">
             <div>
@@ -371,7 +370,7 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
           </div>
         )}
 
-        {/* STEP 3: Review */}
+        {}
         {step === 3 && (
           <div className="space-y-4 animate-txn-in">
             <div>
@@ -443,7 +442,7 @@ export function AddGoalModal({ open, onClose, onSuccess, defaultFamilyGoal = fal
         )}
       </ModalBody>
 
-      {/* Footer */}
+      {}
       <ModalFooter className="flex justify-between">
         <Button
           variant="outline"

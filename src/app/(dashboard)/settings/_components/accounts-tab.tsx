@@ -12,7 +12,6 @@ import { getUserAccounts, createAccount, updateAccount, deleteAccount, setDefaul
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
-// Account type icon mapping
 const ACCOUNT_TYPE_ICONS = {
   checking: Landmark,
   savings: PiggyBank,
@@ -30,7 +29,6 @@ export function AccountsTab() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
-  // Load accounts
   useEffect(() => {
     async function loadAccounts() {
       if (!user?.id) return;
@@ -56,7 +54,7 @@ export function AccountsTab() {
       const result = await createAccount(user.id, newAccount);
       
       if (result.success && result.accountId) {
-        // Reload accounts
+
         const data = await getUserAccounts(user.id);
         setAccounts(data);
       }
@@ -69,7 +67,7 @@ export function AccountsTab() {
     if (!user?.id) return;
 
     try {
-      // Check if balance changed
+
       const originalAccount = accounts.find(a => a.id === updatedAccount.id);
       const balanceChanged = originalAccount && originalAccount.balance !== updatedAccount.balance;
       
@@ -77,11 +75,9 @@ export function AccountsTab() {
         const balanceDiff = updatedAccount.balance - originalAccount.balance;
         const adjustmentType = balanceDiff > 0 ? "deposit" : "withdrawal";
         const adjustmentAmount = Math.abs(balanceDiff);
-        
-        // Import the adjustment function
+
         const { adjustAccountBalance } = await import("../_lib/settings-service");
-        
-        // Adjust balance with transaction
+
         const adjustResult = await adjustAccountBalance(
           user.id,
           updatedAccount.id,
@@ -94,8 +90,7 @@ export function AccountsTab() {
           return;
         }
       }
-      
-      // Update other account details
+
       const result = await updateAccount(user.id, updatedAccount.id, {
         name: updatedAccount.name,
         color: updatedAccount.color,
@@ -105,7 +100,7 @@ export function AccountsTab() {
       });
       
       if (result.success) {
-        // Reload accounts
+
         const data = await getUserAccounts(user.id);
         setAccounts(data);
       }
@@ -121,7 +116,7 @@ export function AccountsTab() {
       const result = await deleteAccount(user.id, accountId);
       
       if (result.success) {
-        // Reload accounts
+
         const data = await getUserAccounts(user.id);
         setAccounts(data);
       }
@@ -137,7 +132,7 @@ export function AccountsTab() {
       const result = await setDefaultAccount(user.id, accountId);
       
       if (result.success) {
-        // Reload accounts
+
         const data = await getUserAccounts(user.id);
         setAccounts(data);
       }
@@ -171,7 +166,7 @@ export function AccountsTab() {
 
   return (
     <div className="p-6 space-y-6 animate-in fade-in duration-300">
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between mb-2">
         <div>
           <h3 className="text-sm font-semibold text-slate-900">Your Accounts</h3>
@@ -183,7 +178,7 @@ export function AccountsTab() {
         </Button>
       </div>
 
-      {/* Loading State */}
+      {}
       {isLoading ? (
         <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -229,7 +224,7 @@ export function AccountsTab() {
                 key={account.id}
                 className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-all"
               >
-                {/* Header Section */}
+                {}
                 <div className="p-4 sm:p-5 bg-[#F9FAFB]/50 border-b border-slate-100">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
@@ -251,7 +246,7 @@ export function AccountsTab() {
                   </div>
                 </div>
 
-                {/* Details Section */}
+                {}
                 <div className="p-4 sm:p-5 space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-xs sm:text-sm text-slate-500">Current Balance</span>
@@ -276,7 +271,7 @@ export function AccountsTab() {
                   )}
                 </div>
 
-                {/* Actions Section */}
+                {}
                 <div className="px-4 sm:px-5 pb-4 pt-2 border-t border-slate-100 flex justify-center gap-3">
                   <Button 
                     variant="ghost" 
@@ -313,7 +308,7 @@ export function AccountsTab() {
           })}
         </div>
       ) : (
-        /* Empty State */
+        
         <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
           <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
             <Wallet className="text-slate-400" size={32} />
@@ -328,7 +323,7 @@ export function AccountsTab() {
         </div>
       )}
 
-      {/* Modals */}
+      {}
       <AddAccountModal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}

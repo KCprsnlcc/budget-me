@@ -53,7 +53,6 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
     </div>
   );
 
-  // Render modal in a portal at document.body level to ensure it's above all other content
   return typeof document !== "undefined" ? createPortal(modalContent, document.body) : null;
 }
 

@@ -33,8 +33,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Parallel fetch of user + session using Promise.all() (async-parallel)
-  // Both use React.cache() for per-request deduplication (server-cache-react)
+
   const [user, session] = await Promise.all([getUser(), getSession()]);
 
   return (

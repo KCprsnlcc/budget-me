@@ -25,7 +25,6 @@ export function useBudgets() {
   const { user } = useAuth();
   const userId = user?.id ?? "";
 
-  // ----- Filter state -----
   const [month, setMonth] = useState<number | "all">("all");
   const [year, setYear] = useState<number | "all">("all");
   const [statusFilter, setStatusFilter] = useState("");
@@ -33,24 +32,19 @@ export function useBudgets() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [search, setSearch] = useState("");
 
-  // ----- Pagination state -----
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
 
-  // ----- Data state -----
   const [budgets, setBudgets] = useState<BudgetType[]>([]);
   const [monthlyTrend, setMonthlyTrend] = useState<BudgetMonthlyTrendPoint[]>([]);
 
-  // ----- Lookup state -----
   const [expenseCategories, setExpenseCategories] = useState<CategoryOption[]>([]);
 
-  // ----- Loading / error -----
   const [loading, setLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ----- Build filters object -----
   const filters: BudgetFilters = useMemo(
     () => ({
       month,
@@ -62,13 +56,11 @@ export function useBudgets() {
     [month, year, statusFilter, periodFilter, categoryFilter]
   );
 
-  // ----- Fetch lookups once -----
   useEffect(() => {
     if (!userId) return;
     fetchExpenseCategories(userId).then(setExpenseCategories);
   }, [userId]);
 
-  // ----- Fetch main data when filters change -----
   const fetchData = useCallback(async (isFilterChange = false) => {
     if (!userId) return;
     
@@ -88,7 +80,6 @@ export function useBudgets() {
       setTotalCount(budgetsResult.totalCount);
       if (budgetsResult.error) setError(budgetsResult.error);
       
-      // Only update trend data on initial load or major filter changes
       if (!isFilterChange || (month !== "all" || year !== "all")) {
         setMonthlyTrend(trendResult);
       }
@@ -104,14 +95,12 @@ export function useBudgets() {
     fetchData();
   }, [fetchData]);
 
-  // ----- Separate effect for filter changes to avoid full refresh -----
   useEffect(() => {
     if (budgets.length > 0) {
       fetchData(true);
     }
   }, [filters, currentPage, pageSize]);
 
-  // ----- Client-side search filtering (instant, no re-query) -----
   const filteredBudgets = useMemo(() => {
     if (!search.trim()) return budgets;
     const q = search.toLowerCase();
@@ -124,7 +113,6 @@ export function useBudgets() {
     );
   }, [budgets, search]);
 
-  // ----- Computed aggregates -----
   const summary: BudgetSummary = useMemo(
     () => computeBudgetSummary(filteredBudgets),
     [filteredBudgets]
@@ -135,19 +123,16 @@ export function useBudgets() {
     [filteredBudgets]
   );
 
-  // ----- Refetch (passed to modals as onSuccess) -----
   const refetch = useCallback(() => {
     fetchData();
     if (!userId) return;
     fetchExpenseCategories(userId).then(setExpenseCategories);
   }, [fetchData, userId]);
 
-  // ----- Refetch only table data (for filter changes) -----
   const refetchTable = useCallback(() => {
     fetchData(true);
   }, [fetchData]);
 
-  // ----- Reset filters -----
   const resetFilters = useCallback(() => {
     const now = new Date();
     setMonth(now.getMonth() + 1);
@@ -169,7 +154,6 @@ export function useBudgets() {
     setCurrentPage(1);
   }, []);
 
-  // Pagination helpers
   const totalPages = Math.ceil(totalCount / pageSize);
   const hasNextPage = currentPage < totalPages;
   const hasPreviousPage = currentPage > 1;
@@ -192,12 +176,10 @@ export function useBudgets() {
     }
   }, [hasPreviousPage]);
 
-  // Reset page when filters change or page size changes
   useEffect(() => {
     setCurrentPage(1);
   }, [month, year, statusFilter, periodFilter, categoryFilter, pageSize]);
 
-  // Handle page size change
   const handlePageSizeChange = useCallback((newSize: number | "all") => {
     if (newSize === "all") {
       setPageSize(Number.MAX_SAFE_INTEGER);
@@ -208,14 +190,11 @@ export function useBudgets() {
   }, []);
 
   return {
-    // Data
     budgets: filteredBudgets,
     summary,
     categoryAllocation,
     monthlyTrend,
-    // Lookups
     expenseCategories,
-    // Filters
     month, setMonth,
     year, setYear,
     statusFilter,
@@ -228,13 +207,11 @@ export function useBudgets() {
     setSearch,
     resetFilters,
     resetFiltersToAll,
-    // State
     loading,
     tableLoading,
     error,
     refetch,
     refetchTable,
-    // Pagination
     currentPage,
     pageSize,
     setPageSize,

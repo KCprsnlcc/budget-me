@@ -21,10 +21,6 @@ import type {
 
 const supabase = createClient();
 
-/* ------------------------------------------------------------------ */
-/*  Row → Client-type mappers                                         */
-/* ------------------------------------------------------------------ */
-
 function mapFamilyRow(row: any): Family {
   return {
     id: row.id,
@@ -41,7 +37,6 @@ function mapFamilyRow(row: any): Family {
 function mapMemberRow(row: any): FamilyMember {
   const profile = row.profiles ?? {};
   
-  // Use profile data if available, otherwise provide sensible defaults
   const fullName = profile.full_name || "Unknown Member";
   const email = profile.email || "";
   
@@ -52,7 +47,6 @@ function mapMemberRow(row: any): FamilyMember {
     .toUpperCase()
     .slice(0, 2) || "??";
 
-  // Determine display role: creator of the family is "Owner"
   const dbRole: string = row.role ?? "member";
   let displayRole: "Owner" | "Admin" | "Member" | "Viewer";
   if (row._isOwner) {
@@ -103,14 +97,12 @@ function mapGoalRow(row: any): SharedGoal {
       amount: Number(c.amount),
       date: c.contribution_date ?? c.created_at,
     }))
-    // Sort contributions by date in descending order (latest first)
     .sort((a: GoalContribution, b: GoalContribution) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
-      return dateB - dateA; // Descending order
+      return dateB - dateA;
     });
 
-  // Map DB status to UI status
   let uiStatus: SharedGoal["status"];
   const dbStatus = row.status ?? "in_progress";
   if (dbStatus === "completed") {
@@ -118,7 +110,6 @@ function mapGoalRow(row: any): SharedGoal {
   } else if (dbStatus === "paused") {
     uiStatus = "paused";
   } else {
-    // Determine on-track vs at-risk by progress vs time
     const progress = row.target_amount > 0
       ? Number(row.current_amount) / Number(row.target_amount)
       : 0;
@@ -177,10 +168,9 @@ function mapJoinRequestRow(row: any): JoinRequest {
     message: row.message ?? "",
     requestedAt: row.created_at,
     status: row.status as JoinRequest["status"],
-    // Fields for 'sent' requests UI
     createdBy: row.families?.profiles?.full_name || row.families?.profiles?.email || "Unknown",
     createdByAvatar: row.families?.profiles?.avatar_url || undefined,
-    memberCount: 0, // Fallback
+    memberCount: 0,
   } as JoinRequest;
 }
 
@@ -211,10 +201,6 @@ function mapInvitationRow(row: any): Invitation {
     status: row.status as Invitation["status"],
   };
 }
-
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                           */
-/* ------------------------------------------------------------------ */
 
 export function formatRelativeTime(dateStr: string): string {
   return formatRelativeTimeInPhilippines(dateStr);
@@ -258,14 +244,9 @@ function mapActivityType(
   }
 }
 
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch user's family membership                             */
-/* ------------------------------------------------------------------ */
-
 export async function fetchUserFamily(
   userId: string
 ): Promise<{ data: Family | null; membership: any | null; error: string | null }> {
-  // Find the user's active family membership
   const { data: membership, error: memErr } = await supabase
     .from("family_members")
     .select("*")
@@ -277,7 +258,6 @@ export async function fetchUserFamily(
   if (memErr) return { data: null, membership: null, error: memErr.message };
   if (!membership) return { data: null, membership: null, error: null };
 
-  // Fetch the family
   const { data: familyRow, error: famErr } = await supabase
     .from("families")
     .select("*")
@@ -290,10 +270,6 @@ export async function fetchUserFamily(
   const family = mapFamilyRow(familyRow);
   return { data: family, membership, error: null };
 }
-
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch family members with profiles                         */
-/* ------------------------------------------------------------------ */
 
 export async function fetchFamilyMembers(
   familyId: string,
@@ -323,12 +299,10 @@ export async function fetchFamilyMembers(
       profileMap[p.id] = p;
     }
     
-    // For users without profiles, create a placeholder entry
     const usersWithoutProfiles = userIds.filter(id => !profileMap[id]);
     
     if (usersWithoutProfiles.length > 0) {
       for (const userId of usersWithoutProfiles) {
-        // Create a placeholder profile entry
         profileMap[userId] = {
           id: userId,
           full_name: "Unknown Member",
@@ -341,7 +315,6 @@ export async function fetchFamilyMembers(
   }
 
   const members = (data ?? []).map((row: any) => {
-    // Tag owner based on families.created_by
     row._isOwner = row.user_id === familyCreatedBy;
     row.profiles = profileMap[row.user_id] ?? {};
     return mapMemberRow(row);
@@ -349,10 +322,6 @@ export async function fetchFamilyMembers(
 
   return { data: members, error: null };
 }
-
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch family goals with contributions                      */
-/* ------------------------------------------------------------------ */
 
 export async function fetchFamilyGoals(
   familyId: string
@@ -394,7 +363,6 @@ export async function fetchFamilyGoals(
     }
   }
 
-  // Get member count per goal (contributors)
   const goals = (data ?? []).map((row: any) => {
     row.profiles = profileMap[row.user_id] ?? {};
     if (row.goal_contributions) {
@@ -413,10 +381,6 @@ export async function fetchFamilyGoals(
 
   return { data: goals, error: null };
 }
-
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch family activity log                                  */
-/* ------------------------------------------------------------------ */
 
 export async function fetchFamilyActivity(
   familyId: string,
@@ -458,10 +422,6 @@ export async function fetchFamilyActivity(
   return { data: activities, error: null, hasMore: offset + limit < totalCount };
 }
 
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch pending join requests for a family                   */
-/* ------------------------------------------------------------------ */
-
 export async function fetchJoinRequests(
   familyId: string
 ): Promise<{ data: JoinRequest[]; error: string | null }> {
@@ -496,14 +456,9 @@ export async function fetchJoinRequests(
   return { data: requests, error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch public families (for discovery / join tab)           */
-/* ------------------------------------------------------------------ */
-
 export async function fetchPublicFamilies(
   userId: string
 ): Promise<{ data: PublicFamily[]; error: string | null }> {
-  // Fetch public families that the user is NOT already a member of
   const { data: userMemberships } = await supabase
     .from("family_members")
     .select("family_id")
@@ -529,7 +484,6 @@ export async function fetchPublicFamilies(
   const { data, error } = await query;
   if (error) return { data: [], error: error.message };
 
-  // Get member counts for each family
   const familyIds = (data ?? []).map((f: any) => f.id);
   const { data: memberCounts } = await supabase
     .from("family_members")
@@ -542,7 +496,6 @@ export async function fetchPublicFamilies(
     countMap[m.family_id] = (countMap[m.family_id] || 0) + 1;
   });
 
-  // Get creator names separately to avoid FK join issues
   const creatorIds = (data ?? []).map((f: any) => f.created_by);
   const { data: creatorProfiles } = await supabase
     .from("profiles")
@@ -567,10 +520,6 @@ export async function fetchPublicFamilies(
   return { data: families, error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch pending invitations for the current user             */
-/* ------------------------------------------------------------------ */
-
 export async function fetchUserInvitations(
   userEmail: string
 ): Promise<{ data: Invitation[]; error: string | null }> {
@@ -586,7 +535,6 @@ export async function fetchUserInvitations(
 
   if (error) return { data: [], error: error.message };
 
-  // Fetch inviter profiles separately since invited_by points to auth.users, not profiles
   const invitations = data ?? [];
   const inviterIds = [...new Set(invitations.map((inv: any) => inv.invited_by).filter(Boolean))];
   
@@ -601,7 +549,6 @@ export async function fetchUserInvitations(
     }
   }
 
-  // Map invitations with profile data
   const mappedInvitations = invitations.map((inv: any) => {
     inv.profiles = profileMap[inv.invited_by] ?? {};
     return mapInvitationRow(inv);
@@ -609,10 +556,6 @@ export async function fetchUserInvitations(
 
   return { data: mappedInvitations, error: null };
 }
-
-/* ------------------------------------------------------------------ */
-/*  CREATE — Create a new family                                      */
-/* ------------------------------------------------------------------ */
 
 export async function createFamily(
   userId: string,
@@ -622,7 +565,6 @@ export async function createFamily(
     return { data: null, error: "Family name is required." };
   }
 
-  // Ensure user has a profile before creating family
   const { data: existingProfile } = await supabase
     .from("profiles")
     .select("id")
@@ -630,7 +572,7 @@ export async function createFamily(
     .maybeSingle();
 
   if (!existingProfile) {
-    // Try to create profile from auth user metadata
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -671,7 +613,6 @@ export async function createFamily(
 
   if (createErr) return { data: null, error: createErr.message };
 
-  // Add creator as admin member (Owner is derived from created_by)
   const { error: memberErr } = await supabase.from("family_members").insert({
     family_id: familyRow.id,
     user_id: userId,
@@ -687,10 +628,6 @@ export async function createFamily(
 
   return { data: mapFamilyRow(familyRow), error: null };
 }
-
-/* ------------------------------------------------------------------ */
-/*  UPDATE — Edit family details                                      */
-/* ------------------------------------------------------------------ */
 
 export async function updateFamily(
   familyId: string,
@@ -716,14 +653,9 @@ export async function updateFamily(
   return { data: mapFamilyRow(data), error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  DELETE — Delete a family                                          */
-/* ------------------------------------------------------------------ */
-
 export async function deleteFamily(
   familyId: string
 ): Promise<{ error: string | null }> {
-  // Delete members first (cascade might handle this, but be explicit)
   await supabase.from("family_members").delete().eq("family_id", familyId);
   await supabase.from("family_invitations").delete().eq("family_id", familyId);
   await supabase
@@ -741,15 +673,10 @@ export async function deleteFamily(
   return { error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  DELETE — Leave a family (remove own membership)                   */
-/* ------------------------------------------------------------------ */
-
 export async function leaveFamily(
   familyId: string,
   userId: string
 ): Promise<{ error: string | null }> {
-  // Prevent the family owner from leaving without transferring ownership
   const { data: family, error: famErr } = await supabase
     .from("families")
     .select("created_by")
@@ -765,7 +692,6 @@ export async function leaveFamily(
     };
   }
 
-  // Verify user is an active member
   const { data: membership, error: memErr } = await supabase
     .from("family_members")
     .select("id")
@@ -788,10 +714,6 @@ export async function leaveFamily(
   return { error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  CREATE — Send an invitation                                       */
-/* ------------------------------------------------------------------ */
-
 export async function sendInvitation(
   familyId: string,
   userId: string,
@@ -803,13 +725,11 @@ export async function sendInvitation(
     return { error: "Email is required." };
   }
 
-  // Basic email format validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return { error: "Please enter a valid email address." };
   }
 
-  // Self-invite check
   const { data: selfProfile } = await supabase
     .from("profiles")
     .select("email")
@@ -820,7 +740,6 @@ export async function sendInvitation(
     return { error: "You cannot invite yourself." };
   }
 
-  // Check if the invitee is already a family owner
   const { data: inviteeProfile } = await supabase
     .from("profiles")
     .select("id")
@@ -828,7 +747,6 @@ export async function sendInvitation(
     .maybeSingle();
 
   if (inviteeProfile) {
-    // Check if this user is an owner of any family
     const { data: ownedFamilies } = await supabase
       .from("families")
       .select("id, name")
@@ -840,7 +758,6 @@ export async function sendInvitation(
     }
   }
 
-  // Check if email user is already a member of this family
   const { data: existingMembers } = await supabase
     .from("family_members")
     .select("user_id, status")
@@ -862,7 +779,6 @@ export async function sendInvitation(
     }
   }
 
-  // Check for existing pending invitation for same email + family
   const { data: existingInvitation } = await supabase
     .from("family_invitations")
     .select("id, expires_at")
@@ -878,14 +794,13 @@ export async function sendInvitation(
     if (!isExpired) {
       return { error: "A pending invitation already exists for this email." };
     }
-    // Expired invitation exists — mark it expired so we can send a new one
+
     await supabase
       .from("family_invitations")
       .update({ status: "expired" })
       .eq("id", existingInvitation.id);
   }
 
-  // Generate a simple token
   const token = crypto.randomUUID();
 
   const { error } = await supabase.from("family_invitations").insert({
@@ -902,10 +817,6 @@ export async function sendInvitation(
   return { error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  UPDATE — Accept / Decline invitation                              */
-/* ------------------------------------------------------------------ */
-
 export async function respondToInvitation(
   invitationId: string,
   userId: string,
@@ -919,14 +830,12 @@ export async function respondToInvitation(
 
   if (fetchErr) return { error: fetchErr.message };
 
-  // Validate invitation is still pending
   if (invitation.status !== "pending") {
     return { error: "This invitation has already been responded to." };
   }
 
-  // Check if invitation has expired
   if (invitation.expires_at && new Date(invitation.expires_at) < new Date()) {
-    // Mark as expired
+
     await supabase
       .from("family_invitations")
       .update({ status: "expired" })
@@ -935,7 +844,7 @@ export async function respondToInvitation(
   }
 
   if (accept) {
-    // Check if the user is already a family owner
+
     const { data: ownedFamilies } = await supabase
       .from("families")
       .select("id, name")
@@ -946,7 +855,6 @@ export async function respondToInvitation(
       return { error: "You are already a family owner and cannot join another family. Please transfer or delete your family first." };
     }
 
-    // Ensure user has a profile before adding to family (same logic as createFamily)
     let profileExists = false;
     const { data: userProfile } = await supabase
       .from("profiles")
@@ -957,7 +865,7 @@ export async function respondToInvitation(
     if (userProfile) {
       profileExists = true;
     } else {
-      // Try to create profile from auth user metadata
+
       try {
         const { data: { user } } = await supabase.auth.getUser();
         
@@ -974,7 +882,7 @@ export async function respondToInvitation(
           
           if (profileErr) {
             console.error("Failed to create profile:", profileErr);
-            // Check if it's a duplicate key error (profile already exists)
+
             if (profileErr.message?.includes('duplicate') || profileErr.message?.includes('already exists')) {
               profileExists = true;
             } else {
@@ -983,8 +891,7 @@ export async function respondToInvitation(
           } else {
             profileExists = true;
           }
-          
-          // Verify profile was created by reading it back
+
           if (profileExists) {
             const { data: verifyProfile } = await supabase
               .from("profiles")
@@ -1005,7 +912,6 @@ export async function respondToInvitation(
       }
     }
 
-    // Get the inviter's role and family info to determine the new member's role
     const { data: family, error: familyErr } = await supabase
       .from("families")
       .select("created_by")
@@ -1014,7 +920,6 @@ export async function respondToInvitation(
 
     if (familyErr) return { error: "Family not found." };
 
-    // Get inviter's membership to check their role
     const { data: inviterMembership, error: inviterErr } = await supabase
       .from("family_members")
       .select("role")
@@ -1023,24 +928,20 @@ export async function respondToInvitation(
       .eq("status", "active")
       .maybeSingle();
 
-    // Determine the role based on inviter's role
-    // If invited by owner (created_by), assign the role from invitation or default to member
-    // If invited by admin, assign member role
     let assignedRole = "member";
     const isInvitedByOwner = invitation.invited_by === family.created_by;
     
     if (isInvitedByOwner) {
-      // Owner can assign any role specified in the invitation
+
       assignedRole = invitation.role ?? "member";
     } else if (inviterMembership?.role === "admin") {
-      // Admin can only invite as member
+
       assignedRole = "member";
     } else {
-      // Default to member for any other case
+
       assignedRole = "member";
     }
 
-    // Check if user already has a membership record (could be removed/inactive)
     const { data: existingMembership, error: checkErr } = await supabase
       .from("family_members")
       .select("id, status")
@@ -1049,7 +950,7 @@ export async function respondToInvitation(
       .maybeSingle();
 
     if (existingMembership) {
-      // User was previously a member - reactivate their membership
+
       const { error: updateErr } = await supabase
         .from("family_members")
         .update({
@@ -1067,7 +968,7 @@ export async function respondToInvitation(
 
       if (updateErr) return { error: updateErr.message };
     } else {
-      // New member - create membership record
+
       const { error: memberErr } = await supabase.from("family_members").insert({
         family_id: invitation.family_id,
         user_id: userId,
@@ -1085,7 +986,6 @@ export async function respondToInvitation(
     }
   }
 
-  // Delete invitation record AFTER successfully processing (accept or decline)
   const { error: deleteErr } = await supabase
     .from("family_invitations")
     .delete()
@@ -1096,16 +996,12 @@ export async function respondToInvitation(
   return { error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  CREATE — Send a join request for a public family                  */
-/* ------------------------------------------------------------------ */
-
 export async function sendJoinRequest(
   familyId: string,
   userId: string,
   message?: string
 ): Promise<{ error: string | null }> {
-  // Check if the user is already a family owner
+
   const { data: ownedFamilies } = await supabase
     .from("families")
     .select("id, name")
@@ -1116,7 +1012,6 @@ export async function sendJoinRequest(
     return { error: "You are already a family owner and cannot join another family. Please transfer or delete your family first." };
   }
 
-  // Ensure user has a profile before sending join request
   const { data: existingProfile } = await supabase
     .from("profiles")
     .select("id")
@@ -1124,7 +1019,7 @@ export async function sendJoinRequest(
     .maybeSingle();
 
   if (!existingProfile) {
-    // Try to create profile from auth user metadata
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -1141,7 +1036,7 @@ export async function sendJoinRequest(
         
         if (profileErr) {
           console.error("Failed to create profile:", profileErr);
-          // Check if it's a duplicate key error (profile already exists)
+
           if (!profileErr.message?.includes('duplicate') && !profileErr.message?.includes('already exists')) {
             return { error: "Failed to create user profile. Please try again." };
           }
@@ -1149,11 +1044,10 @@ export async function sendJoinRequest(
       }
     } catch (err) {
       console.error("Error creating profile:", err);
-      // Continue anyway, profile might exist
+
     }
   }
 
-  // Check if request already exists
   const { data: existing } = await supabase
     .from("family_join_requests")
     .select("id")
@@ -1177,10 +1071,6 @@ export async function sendJoinRequest(
   return { error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  UPDATE — Approve / Decline a join request                         */
-/* ------------------------------------------------------------------ */
-
 export async function respondToJoinRequest(
   requestId: string,
   reviewerId: string,
@@ -1194,7 +1084,6 @@ export async function respondToJoinRequest(
 
   if (fetchErr) return { error: fetchErr.message };
 
-  // Verify reviewer has permission (must be owner or admin)
   const { data: family, error: familyErr } = await supabase
     .from("families")
     .select("created_by")
@@ -1206,7 +1095,7 @@ export async function respondToJoinRequest(
   const isOwner = reviewerId === family.created_by;
 
   if (!isOwner) {
-    // Check if reviewer is an admin
+
     const { data: reviewerMembership, error: reviewerErr } = await supabase
       .from("family_members")
       .select("role")
@@ -1221,7 +1110,7 @@ export async function respondToJoinRequest(
   }
 
   if (approve) {
-    // Check if the requester is a family owner
+
     const { data: ownedFamilies } = await supabase
       .from("families")
       .select("id, name")
@@ -1232,7 +1121,6 @@ export async function respondToJoinRequest(
       return { error: "This user is a family owner and cannot join another family." };
     }
 
-    // Ensure requester has a profile before adding to family
     let profileExists = false;
     const { data: userProfile } = await supabase
       .from("profiles")
@@ -1243,9 +1131,7 @@ export async function respondToJoinRequest(
     if (userProfile) {
       profileExists = true;
     } else {
-      // Create a basic profile for the requester
-      // Note: We can't access their auth metadata from here, so create a minimal profile
-      // The user's profile will be updated with their actual data when they log in
+
       try {
         const { error: profileErr } = await supabase
           .from("profiles")
@@ -1259,7 +1145,7 @@ export async function respondToJoinRequest(
         
         if (profileErr) {
           console.error("Failed to create profile:", profileErr);
-          // Check if it's a duplicate key error (profile already exists)
+
           if (profileErr.message?.includes('duplicate') || profileErr.message?.includes('already exists')) {
             profileExists = true;
           } else {
@@ -1268,8 +1154,7 @@ export async function respondToJoinRequest(
         } else {
           profileExists = true;
         }
-        
-        // Verify profile was created by reading it back
+
         if (profileExists) {
           const { data: verifyProfile } = await supabase
             .from("profiles")
@@ -1287,7 +1172,6 @@ export async function respondToJoinRequest(
       }
     }
 
-    // Check if user already has a membership record (could be removed/inactive)
     const { data: existingMembership, error: checkErr } = await supabase
       .from("family_members")
       .select("id, status")
@@ -1296,7 +1180,7 @@ export async function respondToJoinRequest(
       .maybeSingle();
 
     if (existingMembership) {
-      // User was previously a member - reactivate their membership
+
       const { error: updateErr } = await supabase
         .from("family_members")
         .update({
@@ -1312,7 +1196,7 @@ export async function respondToJoinRequest(
 
       if (updateErr) return { error: updateErr.message };
     } else {
-      // New member - create membership record
+
       const { error: memberErr } = await supabase.from("family_members").insert({
         family_id: request.family_id,
         user_id: request.user_id,
@@ -1328,7 +1212,6 @@ export async function respondToJoinRequest(
     }
   }
 
-  // Delete join request record AFTER successfully processing (approve or decline)
   const { error: deleteErr } = await supabase
     .from("family_join_requests")
     .delete()
@@ -1338,10 +1221,6 @@ export async function respondToJoinRequest(
 
   return { error: null };
 }
-
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch user's pending join requests                          */
-/* ------------------------------------------------------------------ */
 
 export async function fetchUserJoinRequests(
   userId: string
@@ -1364,7 +1243,6 @@ export async function fetchUserJoinRequests(
 
   if (error) return { data: [], error: error.message };
 
-  // Get member counts for each family
   const familyIds = (data ?? []).map((req: any) => req.family_id);
   const { data: memberCounts } = await supabase
     .from("family_members")
@@ -1377,7 +1255,6 @@ export async function fetchUserJoinRequests(
     countMap[m.family_id] = (countMap[m.family_id] || 0) + 1;
   });
 
-  // Get creator names
   const creatorIds = (data ?? []).map((req: any) => req.families?.created_by).filter(Boolean);
   const { data: creatorProfiles } = await supabase
     .from("profiles")
@@ -1389,7 +1266,6 @@ export async function fetchUserJoinRequests(
     creatorMap[p.id] = p.full_name ?? "Unknown";
   });
 
-  // Enrich the data
   const enrichedData = (data ?? []).map((req: any) => ({
     ...req,
     memberCount: countMap[req.family_id] ?? 0,
@@ -1399,10 +1275,6 @@ export async function fetchUserJoinRequests(
 
   return { data: enrichedData, error: null };
 }
-
-/* ------------------------------------------------------------------ */
-/*  DELETE — Delete all user's join requests                          */
-/* ------------------------------------------------------------------ */
 
 export async function deleteAllUserJoinRequests(
   userId: string
@@ -1417,10 +1289,6 @@ export async function deleteAllUserJoinRequests(
   return { error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  UPDATE — Change member role                                       */
-/* ------------------------------------------------------------------ */
-
 export async function updateMemberRole(
   memberId: string,
   newRole: string,
@@ -1434,7 +1302,6 @@ export async function updateMemberRole(
 
   const dbRole = roleMap[newRole] ?? "member";
 
-  // Fetch member record to get user_id, family_id, and current role
   const { data: member, error: fetchErr } = await supabase
     .from("family_members")
     .select("user_id, family_id, role")
@@ -1445,12 +1312,10 @@ export async function updateMemberRole(
     return { error: "Member not found." };
   }
 
-  // Check if requesting user is trying to change their own role
   if (requestingUserId && member.user_id === requestingUserId) {
     return { error: "You cannot change your own role." };
   }
 
-  // Fetch the family to check ownership
   const { data: family, error: familyErr } = await supabase
     .from("families")
     .select("created_by")
@@ -1463,7 +1328,6 @@ export async function updateMemberRole(
 
   const isOwner = requestingUserId && family.created_by === requestingUserId;
 
-  // Check if requesting user is an admin
   let isAdmin = false;
   if (requestingUserId && !isOwner) {
     const { data: requestingMember } = await supabase
@@ -1477,24 +1341,21 @@ export async function updateMemberRole(
     isAdmin = requestingMember?.role === "admin";
   }
 
-  // Validate permissions
   if (requestingUserId && !isOwner && !isAdmin) {
     return { error: "Only family owners and admins can change member roles." };
   }
 
-  // Admins can change roles of members, viewers, and other admins (but not their own)
   if (isAdmin && !isOwner) {
-    // Admins cannot change owner roles
+
     if (member.role === "owner") {
       return { error: "Admins cannot change the owner's role." };
     }
-    // Admins can only assign admin, member, or viewer roles (not owner)
+
     if (dbRole !== "admin" && dbRole !== "member" && dbRole !== "viewer") {
       return { error: "Admins can only assign Admin, Member, or Viewer roles." };
     }
   }
 
-  // Use the RPC function for permission-enforced role reassignment
   if (requestingUserId) {
     const { error: rpcErr } = await supabase.rpc("reassign_member_role", {
       p_family_id: member.family_id,
@@ -1504,7 +1365,7 @@ export async function updateMemberRole(
     });
 
     if (rpcErr) {
-      // Provide user-friendly error messages
+
       if (rpcErr.message.includes("permission denied") || rpcErr.message.includes("policy")) {
         return { error: "You don't have permission to change this member's role." };
       }
@@ -1517,7 +1378,7 @@ export async function updateMemberRole(
       return { error: rpcErr.message };
     }
   } else {
-    // Fallback: direct update when no requesting user context
+
     const { error } = await supabase
       .from("family_members")
       .update({
@@ -1530,7 +1391,7 @@ export async function updateMemberRole(
       .eq("id", memberId);
 
     if (error) {
-      // Provide user-friendly error messages
+
       if (error.message.includes("permission denied") || error.message.includes("policy")) {
         return { error: "You don't have permission to change this member's role." };
       }
@@ -1541,10 +1402,6 @@ export async function updateMemberRole(
   return { error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  CREATE — Contribute to a goal                                     */
-/* ------------------------------------------------------------------ */
-
 export async function contributeToGoal(
   goalId: string,
   userId: string,
@@ -1552,7 +1409,6 @@ export async function contributeToGoal(
 ): Promise<{ error: string | null }> {
   if (amount <= 0) return { error: "Amount must be greater than zero." };
 
-  // Insert contribution
   const { error: contribErr } = await supabase
     .from("goal_contributions")
     .insert({
@@ -1564,7 +1420,6 @@ export async function contributeToGoal(
 
   if (contribErr) return { error: contribErr.message };
 
-  // Update goal current_amount
   const { data: goal } = await supabase
     .from("goals")
     .select("current_amount, target_amount")
@@ -1588,10 +1443,6 @@ export async function contributeToGoal(
   return { error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch overview stats for family dashboard                  */
-/* ------------------------------------------------------------------ */
-
 export interface FamilyOverviewStats {
   totalMembers: number;
   activeMembers: number;
@@ -1605,7 +1456,7 @@ export interface FamilyOverviewStats {
 export async function fetchFamilyOverview(
   familyId: string
 ): Promise<{ data: FamilyOverviewStats | null; error: string | null }> {
-  // Members count
+
   const { data: memberData } = await supabase
     .from("family_members")
     .select("status")
@@ -1619,7 +1470,6 @@ export async function fetchFamilyOverview(
     (m: any) => m.status === "pending"
   ).length;
 
-  // Goals stats
   const { data: goalsData } = await supabase
     .from("goals")
     .select("current_amount, target_amount, status")
@@ -1653,10 +1503,6 @@ export async function fetchFamilyOverview(
   };
 }
 
-/* ------------------------------------------------------------------ */
-/*  Types for family dashboard charts                                 */
-/* ------------------------------------------------------------------ */
-
 export interface FamilyCategoryBreakdown {
   name: string;
   color: string;
@@ -1684,14 +1530,10 @@ export interface FamilyGoalsHealthItem {
   color: string;
 }
 
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch family expense categories (donut chart data)         */
-/* ------------------------------------------------------------------ */
-
 export async function fetchFamilyExpenseCategories(
   familyId: string
 ): Promise<{ data: FamilyCategoryBreakdown[]; total: number; error: string | null }> {
-  // Get all active family members
+
   const { data: members } = await supabase
     .from("family_members")
     .select("user_id")
@@ -1703,7 +1545,6 @@ export async function fetchFamilyExpenseCategories(
     return { data: [], total: 0, error: null };
   }
 
-  // Fetch expense transactions for all family members
   const { data: transactions } = await supabase
     .from("transactions")
     .select("amount, expense_categories ( category_name, color )")
@@ -1711,7 +1552,6 @@ export async function fetchFamilyExpenseCategories(
     .eq("type", "expense")
     .eq("status", "completed");
 
-  // Aggregate by category
   const map = new Map<string, { color: string; amount: number }>();
   for (const row of transactions ?? []) {
     const cat = row.expense_categories as Record<string, any> | null;
@@ -1740,15 +1580,11 @@ export async function fetchFamilyExpenseCategories(
   return { data, total, error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch family budget vs actual spending (6-month chart)    */
-/* ------------------------------------------------------------------ */
-
 export async function fetchFamilyBudgetVsActual(
   familyId: string,
   months: number = 6
 ): Promise<{ data: FamilyMonthlyChartPoint[]; error: string | null }> {
-  // Get all active family members
+
   const { data: members } = await supabase
     .from("family_members")
     .select("user_id")
@@ -1757,7 +1593,7 @@ export async function fetchFamilyBudgetVsActual(
 
   const userIds = (members ?? []).map((m: any) => m.user_id);
   if (userIds.length === 0) {
-    // Return empty data for each month
+
     const now = getPhilippinesNow();
     const emptyData: FamilyMonthlyChartPoint[] = [];
     for (let i = months - 1; i >= 0; i--) {
@@ -1782,7 +1618,6 @@ export async function fetchFamilyBudgetVsActual(
     const endDate = new Date(y, m, 0);
     const end = `${y}-${String(m).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}`;
 
-    // Fetch all family transactions for this month
     const { data } = await supabase
       .from("transactions")
       .select("type, amount")
@@ -1810,15 +1645,11 @@ export async function fetchFamilyBudgetVsActual(
   return { data: points, error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch family goals savings progress (6-month chart)         */
-/* ------------------------------------------------------------------ */
-
 export async function fetchFamilyGoalsSavingsProgress(
   familyId: string,
   months: number = 6
 ): Promise<{ data: FamilyGoalsSavingsPoint[]; error: string | null }> {
-  // Get all active family members
+
   const { data: members } = await supabase
     .from("family_members")
     .select("user_id")
@@ -1830,7 +1661,6 @@ export async function fetchFamilyGoalsSavingsProgress(
     return { data: [], error: null };
   }
 
-  // Fetch all family goals from active family members only
   const { data: goals } = await supabase
     .from("goals")
     .select("target_amount, current_amount, created_at")
@@ -1838,7 +1668,6 @@ export async function fetchFamilyGoalsSavingsProgress(
     .eq("is_family_goal", true)
     .eq("is_public", false); // Ensure we don't get any public goals
 
-  // Calculate totals (similar to goals page)
   const totalTarget = (goals ?? []).reduce((s, g) => s + Number(g.target_amount), 0);
   const totalSaved = (goals ?? []).reduce((s, g) => s + Number(g.current_amount), 0);
   const savedPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
@@ -1850,7 +1679,6 @@ export async function fetchFamilyGoalsSavingsProgress(
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const label = formatInPhilippines(d, 'MMM');
 
-    // Use the same progressive calculation as goals page
     const factor = (months - i) / months;
     const targetHeight = Math.round(80 * factor + 20);
     const savedHeight = Math.round(savedPct * factor);
@@ -1869,14 +1697,10 @@ export async function fetchFamilyGoalsSavingsProgress(
   return { data: points, error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch family goals health (donut chart data)                  */
-/* ------------------------------------------------------------------ */
-
 export async function fetchFamilyGoalsHealth(
   familyId: string
 ): Promise<{ data: FamilyGoalsHealthItem[]; total: number; error: string | null }> {
-  // Get all active family members
+
   const { data: members } = await supabase
     .from("family_members")
     .select("user_id")
@@ -1888,7 +1712,6 @@ export async function fetchFamilyGoalsHealth(
     return { data: [], total: 0, error: null };
   }
 
-  // Fetch all family goals from active family members only
   const { data: goals } = await supabase
     .from("goals")
     .select("status")
@@ -1896,7 +1719,6 @@ export async function fetchFamilyGoalsHealth(
     .eq("is_family_goal", true)
     .eq("is_public", false); // Ensure we don't get any public goals
 
-  // Count goals by status
   const statusCounts = {
     completed: 0,
     in_progress: 0,
@@ -1922,15 +1744,11 @@ export async function fetchFamilyGoalsHealth(
   return { data: healthData, total, error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  DELETE — Remove a family member (admin/owner action)              */
-/* ------------------------------------------------------------------ */
-
 export async function removeMember(
   memberId: string,
   requestingUserId: string
 ): Promise<{ error: string | null }> {
-  // Fetch the target member record
+
   const { data: member, error: fetchErr } = await supabase
     .from("family_members")
     .select("user_id, family_id, status")
@@ -1945,12 +1763,10 @@ export async function removeMember(
     return { error: "This member is not currently active." };
   }
 
-  // Prevent self-removal (use leave family instead)
   if (member.user_id === requestingUserId) {
     return { error: "You cannot remove yourself. Use the leave family option instead." };
   }
 
-  // Check family ownership
   const { data: family, error: famErr } = await supabase
     .from("families")
     .select("created_by")
@@ -1961,12 +1777,10 @@ export async function removeMember(
     return { error: "Family not found." };
   }
 
-  // Cannot remove the family owner
   if (member.user_id === family.created_by) {
     return { error: "Cannot remove the family owner. Transfer ownership first." };
   }
 
-  // Check that the requesting user has permission (owner or admin)
   const isOwner = family.created_by === requestingUserId;
   if (!isOwner) {
     const { data: reqMember } = await supabase
@@ -1991,16 +1805,12 @@ export async function removeMember(
   return { error: null };
 }
 
-/* ------------------------------------------------------------------ */
-/*  UPDATE — Transfer family ownership                                */
-/* ------------------------------------------------------------------ */
-
 export async function transferOwnership(
   familyId: string,
   newOwnerUserId: string,
   currentOwnerUserId: string
 ): Promise<{ error: string | null }> {
-  // Use the RPC function for atomic ownership transfer
+
   const { error } = await supabase.rpc("transfer_family_ownership", {
     p_family_id: familyId,
     p_new_owner_user_id: newOwnerUserId,
@@ -2010,10 +1820,6 @@ export async function transferOwnership(
   if (error) return { error: error.message };
   return { error: null };
 }
-
-/* ------------------------------------------------------------------ */
-/*  READ — Fetch sent (outgoing) invitations for a family             */
-/* ------------------------------------------------------------------ */
 
 export interface SentInvitation {
   id: string;
@@ -2038,7 +1844,6 @@ export async function fetchSentInvitations(
 
   if (error) return { data: [], error: error.message };
 
-  // Collect unique invited_by IDs and batch-fetch profile names
   const inviterIds = [
     ...new Set((data ?? []).map((r: any) => r.invited_by).filter(Boolean)),
   ];
@@ -2065,24 +1870,6 @@ export async function fetchSentInvitations(
   }));
 
   return { data: invitations, error: null };
-}
-
-/* ------------------------------------------------------------------ */
-/*  ACTIVITY LOGGING — Audit trail for family operations               */
-/* ------------------------------------------------------------------ */
-
-export interface ActivityLogEntry {
-  id: string;
-  familyId: string;
-  userId: string;
-  activityType: string;
-  description: string;
-  targetType?: string;
-  targetId?: string;
-  targetName?: string;
-  amount?: number;
-  metadata?: Record<string, any>;
-  createdAt: string;
 }
 
 async function logActivity(
@@ -2114,7 +1901,6 @@ async function logActivity(
   return { error: null };
 }
 
-// Family activity logging
 export async function logFamilyCreated(
   familyId: string,
   userId: string,
@@ -2153,7 +1939,6 @@ export async function logFamilyDeleted(
   });
 }
 
-// Member activity logging
 export async function logMemberJoined(
   familyId: string,
   userId: string,
@@ -2249,7 +2034,6 @@ export async function logOwnershipTransferred(
   );
 }
 
-// Goal activity logging
 export async function logGoalCreated(
   familyId: string,
   userId: string,
@@ -2320,7 +2104,6 @@ export async function logGoalContributed(
   });
 }
 
-// Transaction activity logging (only for family-related transactions)
 export async function logTransactionAdded(
   familyId: string,
   userId: string,
@@ -2386,13 +2169,12 @@ export async function logTransactionDeleted(
   );
 }
 
-// Fetch activity log for a family
 export async function fetchFamilyActivityLog(
   familyId: string,
   limit: number = 50,
   offset: number = 0
 ): Promise<{ data: ActivityItem[]; error: string | null; hasMore: boolean; totalCount?: number }> {
-  // Use a raw query to properly join with profiles
+
   const { data: rawData, error } = await supabase
     .from("family_activity_log")
     .select(`
@@ -2417,7 +2199,6 @@ export async function fetchFamilyActivityLog(
     return { data: [], error: error.message, hasMore: false };
   }
 
-  // Fetch profiles separately for all user_ids in the results
   const userIds = [...new Set((rawData || []).map((row: any) => row.user_id).filter(Boolean))];
   
   let profilesMap: Record<string, any> = {};
@@ -2436,8 +2217,7 @@ export async function fetchFamilyActivityLog(
   const activities: ActivityItem[] = (rawData || []).map((row: any) => {
     const profile = profilesMap[row.user_id] || {};
     const fullName = profile.full_name || profile.email || "Unknown User";
-    
-    // Map activity_type to ActivityItem type
+
     let activityType: "transaction" | "goal" | "member" | "budget";
     if (row.activity_type.includes("transaction")) {
       activityType = "transaction";
@@ -2464,7 +2244,6 @@ export async function fetchFamilyActivityLog(
     };
   });
 
-  // Check if there are more records
   const { count } = await supabase
     .from("family_activity_log")
     .select("id", { count: "exact", head: true })

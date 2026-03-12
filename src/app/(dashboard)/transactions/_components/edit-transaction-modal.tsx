@@ -76,10 +76,8 @@ interface EditTransactionModalProps {
   onSuccess?: () => void;
 }
 
-// Helper function to convert emojis to Lucide icons
 function getLucideIcon(emoji: string): React.ComponentType<any> {
   const iconMap: Record<string, React.ComponentType<any>> = {
-    // Expense Categories
     "🏠": Home,
     "🚗": Car,
     "🍽️": Utensils,
@@ -90,9 +88,8 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
     "🛍️": Package,
     "📚": BookOpen,
     "🛡️": Shield,
-    "🎯": Flag, // Goal Contribution
+    "🎯": Flag, 
     
-    // Income Categories
     "💰": PhilippinePeso,
     "💻": Laptop,
     "📈": TrendingUp,
@@ -102,14 +99,12 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
     "🎁": Gift,
     "💵": Banknote,
     
-    // Default/fallback
     "📋": FileText,
   };
   
   return iconMap[emoji] || FileText;
 }
 
-// Helper function to get account icon
 function getAccountIcon(accountName: string): React.ComponentType<any> {
   const name = accountName.toLowerCase();
   if (name.includes("bank") || name.includes("checking") || name.includes("savings")) return Building2;
@@ -123,7 +118,6 @@ function getAccountIcon(accountName: string): React.ComponentType<any> {
   return FileText;
 }
 
-// Helper function to get budget icon from category
 function getBudgetIcon(categoryIcon: string | null | undefined): React.ComponentType<any> {
   if (!categoryIcon) return FileText;
   return getLucideIcon(categoryIcon);
@@ -153,14 +147,12 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Lookup data
   const [accounts, setAccounts] = useState<AccountOption[]>([]);
   const [expenseCategories, setExpenseCategories] = useState<CategoryOption[]>([]);
   const [incomeCategories, setIncomeCategories] = useState<CategoryOption[]>([]);
   const [budgets, setBudgets] = useState<BudgetOption[]>([]);
   const [goals, setGoals] = useState<GoalOption[]>([]);
 
-  // Fetch dropdown data when modal opens
   useEffect(() => {
     if (!open || !user) return;
     const uid = user.id;
@@ -241,27 +233,21 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
     []
   );
 
-  // Helper: auto-select contribution category when goal is selected for contribution type
   const handleGoalSelectWithCategory = useCallback((value: string) => {
-    // First update the goal field
     updateField("goal", value);
     
-    // Only auto-select category if transaction type is contribution
     if (form.type === "contribution" && value) {
-      // Try to find "Goal Contribution" category first
       let contributionCategory = expenseCategories.find(cat => 
         cat.category_name.toLowerCase() === "goal contribution" ||
         cat.category_name.toLowerCase() === "contribution"
       );
       
-      // If not found, try "Investments" category
       if (!contributionCategory) {
         contributionCategory = expenseCategories.find(cat => 
           cat.category_name.toLowerCase() === "investments"
         );
       }
       
-      // If still not found, try categories containing "goal", "saving", or "investment"
       if (!contributionCategory) {
         contributionCategory = expenseCategories.find(cat => 
           cat.category_name.toLowerCase().includes("goal") ||
@@ -270,15 +256,13 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
         );
       }
       
-      // If found, auto-select the category and clear budget
       if (contributionCategory) {
         updateField("expense_category_id", contributionCategory.id);
-        updateField("budget", ""); // Clear budget for contributions
+        updateField("budget", ""); 
       }
     }
   }, [form.type, expenseCategories, updateField]);
 
-  // Helper: look up display names for review step
   const accountName = accounts.find((a) => a.id === form.account)?.account_name ?? "—";
   const accountBalance = accounts.find((a) => a.id === form.account)?.balance;
   const catName = categories.find((c) => c.id === categoryValue)?.category_name ?? "—";
@@ -288,7 +272,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-      {/* Header */}
+      {}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
@@ -300,12 +284,12 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
+      {}
       <Stepper steps={STEPS} currentStep={step} />
 
-      {/* Body */}
+      {}
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* STEP 1: Transaction Type */}
+        {}
         {step === 1 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -361,7 +345,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
           </div>
         )}
 
-        {/* STEP 2: Transaction Details */}
+        {}
         {step === 2 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -373,7 +357,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
               </h2>
             </div>
             <div className="space-y-5">
-              {/* Amount */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Amount <span className="text-gray-400">*</span>
@@ -391,7 +375,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                 </div>
               </div>
 
-              {/* Date */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Date <span className="text-gray-400">*</span>
@@ -404,7 +388,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                 />
               </div>
 
-              {/* Category + Budget */}
+              {}
               <div className={`grid gap-4 ${form.type === "expense" ? "grid-cols-2" : "grid-cols-1"}`}>
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
@@ -450,7 +434,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                 )}
               </div>
 
-              {/* Goal */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Goal Contribution
@@ -469,7 +453,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                 />
               </div>
 
-              {/* Account */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Account <span className="text-gray-400">*</span>
@@ -489,7 +473,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                 />
               </div>
 
-              {/* Description */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Description <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
@@ -506,7 +490,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
           </div>
         )}
 
-        {/* STEP 3: Review Changes */}
+        {}
         {step === 3 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -518,7 +502,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
               </h2>
             </div>
             <div className="space-y-4">
-              {/* Amount Display */}
+              {}
               <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-gray-200">
                 <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Updated Amount</div>
                 <div
@@ -533,7 +517,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                 </span>
               </div>
 
-              {/* Review Details */}
+              {}
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="p-5 space-y-0 divide-y divide-gray-100">
                   <ReviewRow label="Date" value={form.date ? new Date(form.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"} />
@@ -559,7 +543,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                 </div>
               </div>
 
-              {/* Budget Impact Notice */}
+              {}
               {form.type === "expense" && form.budget && (
                 <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
                   <TrendingUp size={16} className="flex-shrink-0 mt-px text-blue-500" />
@@ -575,7 +559,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                 </div>
               )}
 
-              {/* Error Notice */}
+              {}
               {saveError && (
                 <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
                   <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
@@ -585,7 +569,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
                   </div>
                 </div>
               )}
-              {/* Success Notice */}
+              {}
               <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
                 <CheckCircle size={16} className="flex-shrink-0 mt-px text-emerald-500" />
                 <div>
@@ -600,7 +584,7 @@ export function EditTransactionModal({ open, onClose, transaction, onSuccess }: 
         )}
       </ModalBody>
 
-      {/* Footer */}
+      {}
       <ModalFooter className="flex justify-between">
         {step > 1 ? (
           <Button variant="secondary" size="sm" onClick={handleBack}>

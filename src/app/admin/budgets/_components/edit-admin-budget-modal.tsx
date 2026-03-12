@@ -129,7 +129,6 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
         status: "active",
     });
 
-    // Pre-fill form when modal opens
     useEffect(() => {
         if (open && budget) {
             setFormData({
@@ -212,7 +211,6 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
         setExpenseCategories(expenseCatsData ?? []);
     };
 
-    // Search debounce
     useEffect(() => {
         if (open && currentStep === 1) {
             const timeoutId = setTimeout(() => {
@@ -222,7 +220,6 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
         }
     }, [userSearchQuery, open, currentStep]);
 
-    // Infinite scroll
     useEffect(() => {
         const handleScroll = () => {
             if (!userListRef.current || loadingMore || !hasMore) return;
@@ -341,7 +338,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
             <Stepper steps={STEPS} currentStep={currentStep} />
 
             <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-                {/* Step 1: User Select */}
+                {}
                 {currentStep === 1 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
@@ -354,7 +351,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
                             </p>
                         </div>
 
-                        {/* Search Input */}
+                        {}
                         <div className="relative mb-4">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input
@@ -437,7 +434,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
                     </div>
                 )}
 
-                {/* Step 2: Budget Details */}
+                {}
                 {currentStep === 2 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
@@ -449,7 +446,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
                             </h2>
                         </div>
                         <div className="space-y-5">
-                            {/* Budget Name */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Budget Name <span className="text-gray-400">*</span>
@@ -463,7 +460,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
                                 />
                             </div>
 
-                            {/* Amount */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Budget Amount <span className="text-gray-400">*</span>
@@ -481,7 +478,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
                                 </div>
                             </div>
 
-                            {/* Period + Status */}
+                            {}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
@@ -517,7 +514,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
                                 </div>
                             </div>
 
-                            {/* Dates */}
+                            {}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
@@ -543,7 +540,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
                                 </div>
                             </div>
 
-                            {/* Category */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Category <span className="text-gray-400">*</span>
@@ -562,7 +559,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
                                 />
                             </div>
 
-                            {/* Description */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Description <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
@@ -579,7 +576,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
                     </div>
                 )}
 
-                {/* Step 3: Review */}
+                {}
                 {currentStep === 3 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
@@ -591,7 +588,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
                             </h2>
                         </div>
                         <div className="space-y-4">
-                            {/* Period Display */}
+                            {}
                             <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
                                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Budget Period</div>
                                 <div className="flex items-center justify-center gap-2 my-2">
@@ -601,7 +598,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
                                 </div>
                             </div>
 
-                            {/* Review Details */}
+                            {}
                             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                                 <div className="p-5 space-y-0 divide-y divide-gray-100">
                                     <ReviewRow label="User" value={selectedUser?.full_name || selectedUser?.email || "—"} />
@@ -615,7 +612,7 @@ export function EditAdminBudgetModal({ open, onClose, budget, onSuccess }: EditA
                                 </div>
                             </div>
 
-                            {/* Warning Notice */}
+                            {}
                             <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 items-start">
                                 <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
                                 <div>

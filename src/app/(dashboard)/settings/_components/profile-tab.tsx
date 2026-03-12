@@ -33,18 +33,15 @@ export function ProfileTab() {
   });
   const [avatarUrl, setAvatarUrl] = useState("");
   const [hasChanges, setHasChanges] = useState(false);
-  
-  // Ref for auto-scroll
+
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to top when tab loads
   useEffect(() => {
     if (!isLoading && containerRef.current) {
       containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [isLoading]);
 
-  // Load profile data
   useEffect(() => {
     async function loadProfile() {
       if (!user?.id) return;
@@ -127,7 +124,6 @@ export function ProfileTab() {
     const file = e.target.files?.[0];
     if (!file || !user?.id) return;
 
-    // Validate file
     if (!file.type.startsWith("image/")) {
       return;
     }
@@ -154,7 +150,7 @@ export function ProfileTab() {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="p-6 space-y-8 animate-in fade-in duration-300">
-          {/* Profile Picture Section Skeleton */}
+          {}
           <div className="flex items-center gap-6 pb-6 border-b border-slate-100">
             <Skeleton circle width={80} height={80} />
             <div className="flex-1">
@@ -163,7 +159,7 @@ export function ProfileTab() {
             </div>
           </div>
 
-          {/* Profile Form Skeleton */}
+          {}
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -203,7 +199,7 @@ export function ProfileTab() {
 
   return (
     <div ref={containerRef} className="p-6 space-y-8 animate-in fade-in duration-300">
-      {/* Profile Picture Section */}
+      {}
       <div className="flex items-center gap-6 pb-6 border-b border-slate-100">
         <div className="relative group">
           <div className="w-20 h-20 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center overflow-hidden">
@@ -230,22 +226,19 @@ export function ProfileTab() {
             <input
               type="file"
               accept="image/*"
-              onChange={handleFileUpload}
               className="hidden"
-              disabled={isUploading}
+              onChange={handleFileUpload}
             />
           </label>
         </div>
         <div>
-          <h4 className="text-sm font-semibold text-slate-900 mb-2">Profile Picture</h4>
-          <p className="text-[10px] text-slate-400 flex items-center">
-            <Info size={10} className="mr-1" />
-            JPEG, PNG, GIF, or WebP (max 5MB)
-          </p>
+          <h3 className="text-sm font-semibold text-slate-900">
+            {formData.firstName} {formData.lastName}
+          </h3>
+          <p className="text-xs text-slate-500 mt-1">Update your profile information</p>
         </div>
       </div>
 
-      {/* Profile Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">

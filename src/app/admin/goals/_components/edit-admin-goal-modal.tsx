@@ -135,7 +135,6 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
         family_id: "",
     });
 
-    // Populate form when goal changes
     useEffect(() => {
         if (goal && open) {
             setForm({
@@ -208,7 +207,6 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
         setLoadingMore(false);
     }, [loadingMore, hasMore, page, userSearchQuery]);
 
-    // Trigger search when query changes
     useEffect(() => {
         if (open && step === 1) {
             const timeoutId = setTimeout(() => {
@@ -218,7 +216,6 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
         }
     }, [userSearchQuery, open, step]);
 
-    // Infinite scroll
     useEffect(() => {
         const handleScroll = () => {
             if (!userListRef.current || loadingMore || !hasMore) return;
@@ -235,7 +232,6 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
         }
     }, [loadingMore, hasMore, open, step, loadUsers]);
 
-    // Load families for the selected user
     const loadUserFamilies = async (userId: string) => {
         const supabase = createClient();
         const { data } = await supabase
@@ -354,7 +350,7 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
             <Stepper steps={STEPS} currentStep={step} />
 
             <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-                {/* Step 1: User Select */}
+                {}
                 {step === 1 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
@@ -362,7 +358,7 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                             <p className="text-[11px] text-gray-500">Change or confirm the user for this goal.</p>
                         </div>
 
-                        {/* Search Input */}
+                        {}
                         <div className="relative mb-4">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input
@@ -443,7 +439,7 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                     </div>
                 )}
 
-                {/* Step 2: Category Selection */}
+                {}
                 {step === 2 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
@@ -501,7 +497,7 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                     </div>
                 )}
 
-                {/* Step 3: Goal Details */}
+                {}
                 {step === 3 && (
                     <div className="space-y-4 animate-txn-in">
                         <div>
@@ -651,7 +647,7 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                     </div>
                 )}
 
-                {/* Step 4: Review */}
+                {}
                 {step === 4 && (
                     <div className="space-y-4 animate-txn-in">
                         <div>
@@ -731,7 +727,7 @@ export function EditAdminGoalModal({ open, onClose, goal, onSuccess }: EditAdmin
                 )}
             </ModalBody>
 
-            {/* Footer */}
+            {}
             <ModalFooter className="flex justify-between">
                 <Button
                     variant="outline"

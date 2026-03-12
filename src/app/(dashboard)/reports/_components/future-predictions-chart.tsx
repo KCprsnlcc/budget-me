@@ -44,7 +44,7 @@ export function FuturePredictionsChart({
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
+      {}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="text-center p-3 rounded-lg bg-slate-50">
           <p className="text-lg font-bold text-emerald-600">
@@ -66,7 +66,7 @@ export function FuturePredictionsChart({
         </div>
       </div>
 
-      {/* Line/Area Chart */}
+      {}
       {(chartType === 'line' || chartType === 'area') && (
         <div className="space-y-4">
           <div className="relative h-64">
@@ -79,7 +79,7 @@ export function FuturePredictionsChart({
                   const historicalLength = predictionData.forecast?.historical?.length || 0;
                   return (
                     <>
-                      {/* Income line */}
+                      {}
                       <path
                         d={allData.map((m, idx) => {
                           const x = (idx / (allData.length - 1)) * 100;
@@ -93,7 +93,7 @@ export function FuturePredictionsChart({
                         vectorEffect="non-scaling-stroke"
                       />
                       
-                      {/* Income prediction line (dashed) */}
+                      {}
                       {predictionData.forecast?.predicted && predictionData.forecast.predicted.length > 0 && predictionData.forecast?.historical && predictionData.forecast.historical.length > 0 && (
                         <path
                           d={[predictionData.forecast.historical[predictionData.forecast.historical.length - 1], ...predictionData.forecast.predicted].map((m, idx) => {
@@ -110,7 +110,7 @@ export function FuturePredictionsChart({
                         />
                       )}
                       
-                      {/* Expense line */}
+                      {}
                       <path
                         d={allData.map((m, idx) => {
                           const x = (idx / (allData.length - 1)) * 100;
@@ -124,7 +124,7 @@ export function FuturePredictionsChart({
                         vectorEffect="non-scaling-stroke"
                       />
                       
-                      {/* Expense prediction line (dashed) */}
+                      {}
                       {predictionData.forecast?.predicted && predictionData.forecast.predicted.length > 0 && predictionData.forecast?.historical && predictionData.forecast.historical.length > 0 && (
                         <path
                           d={[predictionData.forecast.historical[predictionData.forecast.historical.length - 1], ...predictionData.forecast.predicted].map((m, idx) => {
@@ -143,7 +143,7 @@ export function FuturePredictionsChart({
 
                       {chartType === 'area' && (
                         <>
-                          {/* Income area */}
+                          {}
                           <path
                             d={`${allData.map((m, idx) => {
                               const x = (idx / (allData.length - 1)) * 100;
@@ -153,7 +153,7 @@ export function FuturePredictionsChart({
                             fill="#10b981"
                             fillOpacity="0.1"
                           />
-                          {/* Expense area */}
+                          {}
                           <path
                             d={`${allData.map((m, idx) => {
                               const x = (idx / (allData.length - 1)) * 100;
@@ -166,7 +166,7 @@ export function FuturePredictionsChart({
                         </>
                       )}
                       
-                      {/* Data points */}
+                      {}
                       {allData.map((m, idx) => {
                         const x = (idx / (allData.length - 1)) * 100;
                         const yIncome = 100 - ((m.income / maxValue) * 100);
@@ -199,7 +199,7 @@ export function FuturePredictionsChart({
               </svg>
             </div>
           </div>
-          {/* X-axis labels */}
+          {}
           <div className="flex justify-between px-2 mt-4">
             {[...(predictionData.forecast?.historical || []), ...(predictionData.forecast?.predicted || [])].map((m, idx) => (
               <span key={idx} className="text-[10px] font-medium text-slate-400 uppercase tracking-wider text-center truncate" style={{ maxWidth: `${100 / ((predictionData.forecast?.historical?.length || 0) + (predictionData.forecast?.predicted?.length || 0))}%` }}>
@@ -207,7 +207,7 @@ export function FuturePredictionsChart({
               </span>
             ))}
           </div>
-          {/* Legend */}
+          {}
           <div className="flex items-center justify-center gap-6 mt-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-emerald-500" />
@@ -225,7 +225,7 @@ export function FuturePredictionsChart({
         </div>
       )}
 
-      {/* Column/Bar Chart */}
+      {}
       {(chartType === 'column' || chartType === 'bar') && predictionData.forecast?.predicted && (
         <div className="space-y-3">
           {predictionData.forecast.predicted.map((month, idx) => (
@@ -251,7 +251,7 @@ export function FuturePredictionsChart({
         </div>
       )}
 
-      {/* Pie/Donut Chart - Category Predictions */}
+      {}
       {(chartType === 'pie' || chartType === 'donut') && predictionData.categories.length > 0 && (
         <div className="space-y-4">
           <h4 className="text-sm font-semibold text-slate-900">Category Predictions</h4>

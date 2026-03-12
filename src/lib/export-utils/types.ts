@@ -1,6 +1,4 @@
-/**
- * Transaction export interfaces
- */
+
 export interface TransactionExportData extends Record<string, string | number | boolean | null | undefined> {
   id: string;
   date: string;
@@ -12,9 +10,6 @@ export interface TransactionExportData extends Record<string, string | number | 
   notes: string | null;
 }
 
-/**
- * User export interfaces
- */
 export interface UserExportData extends Record<string, string | number | boolean | null | undefined> {
   id: string;
   full_name: string | null;
@@ -24,9 +19,6 @@ export interface UserExportData extends Record<string, string | number | boolean
   created_at: string;
 }
 
-/**
- * Goal export interfaces
- */
 export interface GoalExportData extends Record<string, string | number | boolean | null | undefined> {
   id: string;
   name: string;
@@ -42,9 +34,6 @@ export interface GoalExportData extends Record<string, string | number | boolean
   isFamily: boolean;
 }
 
-/**
- * Budget export interfaces
- */
 export interface BudgetExportData extends Record<string, string | number | boolean | null | undefined> {
   id: string;
   budget_name: string;
@@ -60,9 +49,6 @@ export interface BudgetExportData extends Record<string, string | number | boole
   end_date: string;
 }
 
-/**
- * Chat message export interfaces
- */
 export interface ChatMessageExportData extends Record<string, string | number | boolean | null | undefined> {
   timestamp: string;
   role: string;
@@ -71,9 +57,6 @@ export interface ChatMessageExportData extends Record<string, string | number | 
   userName?: string;
 }
 
-/**
- * Prediction export interfaces
- */
 export interface PredictionExportData extends Record<string, string | number | boolean | null | undefined> {
   month: string;
   type: string;
@@ -118,11 +101,8 @@ export interface AIInsightsExportData {
   }>;
 }
 
-/**
- * Report export interfaces
- */
 export interface ReportExportData {
-  // Summary data
+
   summary: {
     totalTransactions: number;
     activeBudgets: number;
@@ -132,14 +112,14 @@ export interface ReportExportData {
     goalsNearing: number;
     lastUpdated: string;
   };
-  // Report settings
+
   settings: {
     reportType: string;
     timeframe: string;
     chartType: string;
     dateRange: string;
   };
-  // Anomaly data
+
   anomalies: Array<{
     id: string;
     title: string;
@@ -150,9 +130,9 @@ export interface ReportExportData {
     amount: number | string | null;
     detectedAt: string;
   }>;
-  // Chart data (varies by report type)
+
   chartData: any;
-  // AI insights
+
   aiInsights?: {
     summary: string;
     riskLevel: string;
@@ -172,9 +152,6 @@ export interface ReportExportData {
   } | null;
 }
 
-/**
- * Admin Export interfaces
- */
 export interface AIUsageAdminExportData extends Record<string, string | number | boolean | null | undefined> {
   id: string;
   usage_date: string;

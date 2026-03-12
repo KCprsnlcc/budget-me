@@ -1,6 +1,4 @@
-/**
- * Shared chart rendering utilities for different chart types
- */
+
 
 interface ChartRendererProps {
   chartType: 'pie' | 'donut' | 'column' | 'bar' | 'line' | 'area';

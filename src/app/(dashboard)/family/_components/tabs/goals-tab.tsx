@@ -18,10 +18,8 @@ import { ViewGoalModal } from "@/app/(dashboard)/goals/_components/view-goal-mod
 import { EditGoalModal } from "@/app/(dashboard)/goals/_components/edit-goal-modal";
 import { DeleteGoalModal } from "@/app/(dashboard)/goals/_components/delete-goal-modal";
 
-// Import types for the modals
 import type { GoalType } from "@/app/(dashboard)/goals/_components/types";
 
-// Import permissions
 import { getGoalPermissions, type FamilyRoleFromHook } from "@/app/(dashboard)/goals/_lib/permissions";
 
 interface GoalsTabProps {
@@ -60,7 +58,6 @@ export function GoalsTab({
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
   
-  // Modal states
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -69,7 +66,6 @@ export function GoalsTab({
   
   const [selectedGoal, setSelectedGoal] = useState<GoalType | SharedGoal | null>(null);
 
-  // Close export dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
@@ -148,9 +144,7 @@ export function GoalsTab({
     return diffDays > 0 ? diffDays : 0;
   };
 
-  // Convert SharedGoal to GoalType for modals
   const convertToGoalType = (sharedGoal: SharedGoal): GoalType => {
-    // Map SharedGoal status to GoalStatus
     const statusMap: Record<string, "in_progress" | "completed" | "overdue" | "behind"> = {
       "on-track": "in_progress",
       "at-risk": "behind", 
@@ -160,26 +154,25 @@ export function GoalsTab({
 
     return {
       id: sharedGoal.id,
-      user_id: "", // We don't have the creator ID in SharedGoal, but it's not needed for the modals
+      user_id: "",
       name: sharedGoal.name,
-      description: null, // Default description since not in SharedGoal
+      description: null,
       target: sharedGoal.target,
       current: sharedGoal.saved,
-      priority: "medium", // Default priority since not in SharedGoal
+      priority: "medium",
       status: statusMap[sharedGoal.status] || "in_progress",
-      category: "general", // Default category since not in SharedGoal
+      category: "general",
       deadline: sharedGoal.targetDate || new Date().toISOString().split('T')[0],
-      monthlyContribution: 0, // Default since not in SharedGoal
-      isFamily: true, // These are family goals
-      is_public: false, // Default since not in SharedGoal
-      family_id: null, // Not available in SharedGoal but not critical
-      notes: null, // Default since not in SharedGoal
+      monthlyContribution: 0,
+      isFamily: true,
+      is_public: false,
+      family_id: null,
+      notes: null,
       created_at: sharedGoal.createdAt,
-      updated_at: sharedGoal.createdAt, // Use createdAt as fallback
+      updated_at: sharedGoal.createdAt,
     };
   };
 
-  // Modal handlers with refresh
   const handleAddGoal = async () => {
     setAddModalOpen(true);
   };
@@ -204,7 +197,6 @@ export function GoalsTab({
     setDeleteModalOpen(true);
   };
 
-  // Refresh handler with loading state
   const handleRefreshGoals = async () => {
     console.log('handleRefreshGoals called');
     if (onRefreshGoals) {
@@ -229,12 +221,10 @@ export function GoalsTab({
     return goal.status === activeFilter;
   });
 
-  // Calculate overall family goals progress
   const totalTarget = goals.reduce((sum, goal) => sum + goal.target, 0);
   const totalSaved = goals.reduce((sum, goal) => sum + goal.saved, 0);
   const overallProgressPercentage = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
   
-  // Determine overall status based on progress percentage
   const getOverallStatus = () => {
     if (overallProgressPercentage >= 75) return { text: "On Track", variant: "success" as const };
     if (overallProgressPercentage >= 50) return { text: "Good Progress", variant: "warning" as const };
@@ -243,14 +233,12 @@ export function GoalsTab({
   
   const overallStatus = getOverallStatus();
 
-  // Get permissions for family goals
   const permissions = getGoalPermissions(currentUserRole || 'Viewer', isOwner, undefined, currentUserId);
 
   if (isLoading || isGoalOperationLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="space-y-4 sm:space-y-6">
-          {/* Header Skeleton */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
             <div>
               <Skeleton width={120} height={14} className="mb-2 sm:w-[150px] sm:h-4" />
@@ -262,7 +250,6 @@ export function GoalsTab({
             </div>
           </div>
 
-          {/* Overall Family Goal Progress Skeleton */}
           <Card className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
               <div>
@@ -280,11 +267,9 @@ export function GoalsTab({
             </div>
           </Card>
 
-          {/* Goals Grid Skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
               <Card key={i} className="p-4 sm:p-6">
-                {/* Goal Header Skeleton */}
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
                   <div className="flex items-center gap-2 sm:gap-3">
                     <Skeleton width={32} height={32} borderRadius="50%" className="sm:w-10 sm:h-10" />
@@ -299,7 +284,6 @@ export function GoalsTab({
                   </div>
                 </div>
 
-                {/* Progress Section Skeleton */}
                 <div className="space-y-3 mb-4 sm:mb-6">
                   <div className="flex justify-between">
                     <Skeleton width={60} height={10} className="sm:w-20 sm:h-3" />
@@ -312,7 +296,6 @@ export function GoalsTab({
                   </div>
                 </div>
 
-                {/* Member Contributions Skeleton */}
                 <div className="border-t border-slate-100 pt-4">
                   <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <Skeleton width={80} height={10} className="sm:w-[100px] sm:h-3" />
@@ -334,7 +317,6 @@ export function GoalsTab({
                   </div>
                 </div>
 
-                {/* Quick Actions Skeleton */}
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
                   <Skeleton width="50%" height={24} borderRadius={6} className="sm:h-7" />
                   <Skeleton width="50%" height={24} borderRadius={6} className="sm:h-7" />
@@ -538,10 +520,8 @@ export function GoalsTab({
                 key={goal.id}
                 className="p-4 sm:p-6 hover:shadow-md transition-all group"
               >
-                {/* Goal Header */}
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
                   <div className="flex items-center gap-2 sm:gap-3">
-                    {/* Creator avatar - use existing creatorAvatar if available, otherwise show goal icon */}
                     {goal.creatorAvatar ? (
                       <img
                         src={goal.creatorAvatar}
@@ -599,7 +579,6 @@ export function GoalsTab({
                   </div>
                 </div>
 
-                {/* Progress Section */}
                 <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                   <div className="flex justify-between text-[10px] sm:text-xs">
                     <span className="text-slate-500 font-medium">Overall Progress</span>
@@ -626,7 +605,6 @@ export function GoalsTab({
                   </div>
                 </div>
 
-                {/* Member Contributions with Avatar Fetching */}
                 <div className="border-t border-slate-100 pt-4">
                   <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <h5 className="text-[10px] sm:text-xs font-semibold text-slate-700">Member Contributions</h5>
@@ -643,7 +621,6 @@ export function GoalsTab({
                     {goal.contributions.slice(0, 3).map((contribution) => (
                       <div key={contribution.id} className="flex items-center justify-between text-[10px] sm:text-xs">
                         <div className="flex items-center gap-1.5 sm:gap-2">
-                          {/* Avatar fetching for contributors */}
                           {contribution.memberId ? (
                             <UserAvatar 
                               user={{ id: contribution.memberId } as any} 
@@ -687,7 +664,6 @@ export function GoalsTab({
                   </div>
                 </div>
 
-                {/* Quick Actions */}
                 <div className="flex items-center gap-2 mt-3 sm:mt-4 pt-3 border-t border-slate-100">
                   {permissions.canContribute && (
                     <Button
@@ -714,7 +690,6 @@ export function GoalsTab({
         </div>
       </div>
 
-      {/* Consistent Goal Modals */}
       <AddGoalModal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}

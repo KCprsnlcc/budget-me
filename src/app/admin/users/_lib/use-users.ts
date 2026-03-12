@@ -5,21 +5,19 @@ import { User, UserFilters, UserStats, PaginationState } from "./types";
 import { fetchUsers, fetchUserStats } from "./user-service";
 
 export function useUsers() {
-  // ----- Data state -----
+
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ----- Filter state -----
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [month, setMonth] = useState<number | "all">("all");
   const [year, setYear] = useState<number | "all">("all");
 
-  // ----- Pagination state -----
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -37,7 +35,6 @@ export function useUsers() {
     hasPreviousPage,
   };
 
-  // ----- Build filters object -----
   const filters: UserFilters = useMemo(
     () => ({
       search,
@@ -51,7 +48,6 @@ export function useUsers() {
     [search, roleFilter, statusFilter, month, year]
   );
 
-  // ----- Fetch main data when filters change -----
   const fetchData = useCallback(async (isFilterChange = false) => {
     if (isFilterChange) {
       setTableLoading(true);
@@ -68,8 +64,7 @@ export function useUsers() {
 
       setUsers(usersResult.users);
       setTotalCount(usersResult.totalCount);
-      
-      // Only update stats on initial load
+
       if (!isFilterChange && statsResult) {
         setStats(statsResult);
       }
@@ -85,7 +80,6 @@ export function useUsers() {
     fetchData();
   }, [fetchData]);
 
-  // ----- Client-side search filtering (instant, no re-query) -----
   const filteredUsers = useMemo(() => {
     if (!search.trim()) return users;
     const q = search.toLowerCase();
@@ -97,12 +91,10 @@ export function useUsers() {
     );
   }, [users, search]);
 
-  // ----- Refetch (passed to modals as onSuccess) -----
   const refetch = useCallback(() => {
     fetchData();
   }, [fetchData]);
 
-  // ----- Reset filters to current month/year -----
   const resetFilters = useCallback(() => {
     const now = new Date();
     setMonth(now.getMonth() + 1);
@@ -113,7 +105,6 @@ export function useUsers() {
     setCurrentPage(1);
   }, []);
 
-  // ----- Reset filters to all time -----
   const resetFiltersToAll = useCallback(() => {
     setMonth("all");
     setYear("all");
@@ -123,7 +114,6 @@ export function useUsers() {
     setCurrentPage(1);
   }, []);
 
-  // Pagination helpers
   const goToPage = useCallback((page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -142,12 +132,10 @@ export function useUsers() {
     }
   }, [hasPreviousPage]);
 
-  // Reset page when filters change or page size changes
   useEffect(() => {
     setCurrentPage(1);
   }, [roleFilter, statusFilter, month, year, pageSize]);
 
-  // Handle page size change
   const handlePageSizeChange = useCallback((newSize: number | "all") => {
     if (newSize === "all") {
       setPageSize(Number.MAX_SAFE_INTEGER);
@@ -158,15 +146,15 @@ export function useUsers() {
   }, []);
 
   return {
-    // Data
+
     users: filteredUsers,
     stats,
-    // State
+
     loading,
     tableLoading,
     error,
     refetch,
-    // Filters
+
     search,
     setSearch,
     roleFilter,
@@ -179,7 +167,7 @@ export function useUsers() {
     setYear,
     resetFilters,
     resetFiltersToAll,
-    // Pagination
+
     pagination,
     currentPage,
     pageSize,

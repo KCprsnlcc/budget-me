@@ -28,7 +28,6 @@ export function ModelSelectorDropdown({
     [onSelectModel]
   );
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -42,7 +41,6 @@ export function ModelSelectorDropdown({
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-xs font-medium text-gray-600 group"
@@ -58,17 +56,14 @@ export function ModelSelectorDropdown({
         />
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
-          {/* Header */}
           <div className="px-3 py-2 bg-[#F9FAFB]/50 border-b border-gray-100">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
               Select Model
             </span>
           </div>
 
-          {/* Model Options */}
           <div className="max-h-64 overflow-y-auto">
             {models.map((model) => {
               const isSelected = selectedModel === model.id;

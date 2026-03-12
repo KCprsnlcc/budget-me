@@ -155,7 +155,6 @@ export function LeaveFamilyModal({
                             <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{member.name}</h3>
                             <p className="text-[11px] text-gray-500 leading-relaxed">{member.role}</p>
                           </div>
-                          {/* Check indicator */}
                           <div
                             className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
                               selected ? "opacity-100 scale-100" : "opacity-0 scale-50"

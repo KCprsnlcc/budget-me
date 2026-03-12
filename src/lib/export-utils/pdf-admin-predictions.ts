@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { getTimestampString } from "./formatters";
 import type { PredictionAdminExportData } from "./types";
 
-/**
- * Export admin predictions as PDF
- */
 export function exportAdminPredictionsToPDF(
     predictions: PredictionAdminExportData[],
     summary?: {
@@ -22,7 +19,6 @@ export function exportAdminPredictionsToPDF(
 
     const doc = createBasePDF("AI Predictions Report", `${predictions.length} items`);
 
-    // Summary section
     let currentY = 45;
     const margin = 15;
 
@@ -37,7 +33,6 @@ export function exportAdminPredictionsToPDF(
         const cardHeight = 20;
         const cardSpacing = 3;
 
-        // Total Reports card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -52,7 +47,6 @@ export function exportAdminPredictionsToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.totalReports || 0).toLocaleString(), margin + 4, currentY + 14);
 
-        // Total Insights card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -67,7 +61,6 @@ export function exportAdminPredictionsToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.totalInsights || 0).toLocaleString(), margin + cardWidth + cardSpacing + 4, currentY + 14);
 
-        // Avg Accuracy card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 2, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -82,7 +75,6 @@ export function exportAdminPredictionsToPDF(
         doc.setFont("helvetica", "bold");
         doc.text(`${(summary.avgAccuracy || 0).toFixed(1)}%`, margin + (cardWidth + cardSpacing) * 2 + 4, currentY + 14);
 
-        // AI Confidence card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 3, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -100,7 +92,6 @@ export function exportAdminPredictionsToPDF(
         currentY += cardHeight + 12;
     }
 
-    // Predictions table
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(COLORS.dark);
@@ -118,11 +109,10 @@ export function exportAdminPredictionsToPDF(
     ];
     const formats: ("text" | "currency" | "number" | "percentage")[] = ["text", "text", "text", "text", "text", "number"];
 
-    const columnWidths = [30, 70, 20, 20, 20, 20]; // Total: 180mm
+    const columnWidths = [30, 70, 20, 20, 20, 20]; 
 
     addPDFTable(doc, headers, predictions, keys, formats, currentY, columnWidths);
 
-    // Save
     const filename = `admin_predictions_${getTimestampString()}.pdf`;
     doc.save(filename);
 }

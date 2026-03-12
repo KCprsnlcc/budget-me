@@ -1,4 +1,4 @@
-// Admin AI Predictions Management Types
+
 
 export type AdminPredictionReport = {
     id: string;
@@ -19,7 +19,7 @@ export type AdminPredictionReport = {
     prediction_data: any;
     created_at: string;
     updated_at: string;
-    // Joined data
+
     user_email?: string;
     user_name?: string;
     user_avatar?: string;
@@ -55,7 +55,7 @@ export type AdminAIInsight = {
     admin_validated: boolean;
     validation_notes: string | null;
     data_sources_used: any;
-    // Joined data
+
     user_email?: string;
     user_name?: string;
     user_avatar?: string;
@@ -68,7 +68,7 @@ export type AdminPredictionStats = {
     avgConfidence: number;
     reportGrowth: { month: string; count: number }[];
     modelDistribution: { model: string; count: number; percentage: number }[];
-    // New helpful metrics
+
     activeUsers: number;
     totalDataPoints: number;
     anomaliesDetected: number;

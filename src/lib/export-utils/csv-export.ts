@@ -3,9 +3,6 @@ import { downloadBlob } from "./helpers";
 import { getTimestampString } from "./formatters";
 import type { ChatMessageExportData, PredictionExportData, CategoryPredictionExportData, AIInsightsExportData, ReportExportData } from "./types";
 
-/**
- * Export data as CSV
- */
 export function exportToCSV<T extends Record<string, string | number | boolean | null | undefined>>(
   data: T[],
   filename: string
@@ -25,16 +22,12 @@ export function exportToCSV<T extends Record<string, string | number | boolean |
   downloadBlob(blob, filename);
 }
 
-/**
- * Export chat messages as CSV
- */
 export function exportChatToCSV(messages: ChatMessageExportData[], userName?: string): void {
   if (messages.length === 0) {
     alert("No messages to export");
     return;
   }
 
-  // Update role names for CSV export
   const exportData = messages.map(msg => ({
     ...msg,
     role: msg.role === "You" || msg.role === "user" ? (msg.userName || userName || "You") : "BudgetSense AI"
@@ -44,9 +37,6 @@ export function exportChatToCSV(messages: ChatMessageExportData[], userName?: st
   exportToCSV(exportData, filename);
 }
 
-/**
- * Export predictions as CSV
- */
 export function exportPredictionsToCSV(
   forecastData: PredictionExportData[],
   categoryPredictions: CategoryPredictionExportData[],
@@ -57,7 +47,6 @@ export function exportPredictionsToCSV(
     return;
   }
 
-  // Export forecast data
   if (forecastData.length > 0) {
     const forecastCSV = Papa.unparse(forecastData, {
       header: true,
@@ -68,7 +57,6 @@ export function exportPredictionsToCSV(
     downloadBlob(forecastBlob, `predictions_forecast_${getTimestampString()}.csv`);
   }
 
-  // Export category predictions
   if (categoryPredictions.length > 0) {
     const categoryCSV = Papa.unparse(categoryPredictions, {
       header: true,
@@ -79,9 +67,8 @@ export function exportPredictionsToCSV(
     downloadBlob(categoryBlob, `predictions_categories_${getTimestampString()}.csv`);
   }
 
-  // Export AI insights
   if (aiInsights) {
-    // Recommendations
+
     if (aiInsights.recommendations.length > 0) {
       const recommendationsCSV = Papa.unparse(aiInsights.recommendations, {
         header: true,
@@ -92,7 +79,6 @@ export function exportPredictionsToCSV(
       downloadBlob(recommendationsBlob, `predictions_recommendations_${getTimestampString()}.csv`);
     }
 
-    // Risk Mitigation Strategies
     if (aiInsights.riskMitigationStrategies.length > 0) {
       const strategiesCSV = Papa.unparse(aiInsights.riskMitigationStrategies, {
         header: true,
@@ -103,7 +89,6 @@ export function exportPredictionsToCSV(
       downloadBlob(strategiesBlob, `predictions_risk_strategies_${getTimestampString()}.csv`);
     }
 
-    // Long-term Opportunities
     if (aiInsights.longTermOpportunities.length > 0) {
       const opportunitiesCSV = Papa.unparse(aiInsights.longTermOpportunities, {
         header: true,
@@ -116,11 +101,8 @@ export function exportPredictionsToCSV(
   }
 }
 
-/**
- * Export comprehensive report as CSV
- */
 export function exportReportToCSV(reportData: ReportExportData): void {
-  // Export summary
+
   const summaryCSV = Papa.unparse([reportData.summary], {
     header: true,
     quotes: true,
@@ -129,7 +111,6 @@ export function exportReportToCSV(reportData: ReportExportData): void {
   const summaryBlob = new Blob([summaryCSV], { type: "text/csv;charset=utf-8;" });
   downloadBlob(summaryBlob, `report_summary_${getTimestampString()}.csv`);
 
-  // Export anomalies
   if (reportData.anomalies && reportData.anomalies.length > 0) {
     const anomaliesCSV = Papa.unparse(reportData.anomalies, {
       header: true,
@@ -140,7 +121,6 @@ export function exportReportToCSV(reportData: ReportExportData): void {
     downloadBlob(anomaliesBlob, `report_anomalies_${getTimestampString()}.csv`);
   }
 
-  // Export AI insights recommendations
   if (reportData.aiInsights?.recommendations && reportData.aiInsights.recommendations.length > 0) {
     const recommendationsCSV = Papa.unparse(reportData.aiInsights.recommendations, {
       header: true,
@@ -151,7 +131,6 @@ export function exportReportToCSV(reportData: ReportExportData): void {
     downloadBlob(recommendationsBlob, `report_recommendations_${getTimestampString()}.csv`);
   }
 
-  // Export chart data based on report type
   if (reportData.chartData) {
     if (reportData.settings.reportType === 'spending' && reportData.chartData.categories) {
       const chartCSV = Papa.unparse(reportData.chartData.categories, {

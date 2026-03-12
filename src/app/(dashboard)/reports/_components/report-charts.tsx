@@ -47,7 +47,7 @@ export function ReportCharts({
         </div>
       </div>
 
-      {/* No Data State */}
+      {}
       {!chartData && reportSettings.reportType !== 'predictions' ? (
         <EmptyState
           icon={BarChart3}
@@ -56,7 +56,7 @@ export function ReportCharts({
         />
       ) : (
         <>
-          {/* Spending by Category */}
+          {}
           {reportSettings.reportType === 'spending' && (
             <SpendingCategoryChart
               chartData={chartData}
@@ -64,7 +64,7 @@ export function ReportCharts({
             />
           )}
 
-          {/* Income vs Expense */}
+          {}
           {reportSettings.reportType === 'income-expense' && (
             <IncomeExpenseChart
               chartData={chartData}
@@ -72,7 +72,7 @@ export function ReportCharts({
             />
           )}
 
-          {/* Savings Analysis */}
+          {}
           {reportSettings.reportType === 'savings' && (
             <SavingsAnalysisChart
               chartData={chartData}
@@ -80,7 +80,7 @@ export function ReportCharts({
             />
           )}
 
-          {/* Goals Progress */}
+          {}
           {reportSettings.reportType === 'goals' && (
             <GoalsProgressChart
               chartData={chartData}
@@ -88,7 +88,7 @@ export function ReportCharts({
             />
           )}
 
-          {/* Spending Trends */}
+          {}
           {reportSettings.reportType === 'trends' && (
             <SpendingTrendsChart
               chartData={chartData}
@@ -96,7 +96,7 @@ export function ReportCharts({
             />
           )}
 
-          {/* Future Predictions */}
+          {}
           {reportSettings.reportType === 'predictions' && (
             <FuturePredictionsChart
               predictionData={predictionData}

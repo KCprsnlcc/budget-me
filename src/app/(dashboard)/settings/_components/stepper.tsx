@@ -30,7 +30,7 @@ export function Stepper({ steps, currentStep, variant = "default" }: StepperProp
         return (
           <div key={step.number} className="flex items-center">
             <div className="flex flex-col items-center gap-1">
-              {/* Step Dot */}
+              {}
               <div
                 className={cn(
                   "flex items-center justify-center rounded-full font-semibold transition-all duration-300",
@@ -46,7 +46,7 @@ export function Stepper({ steps, currentStep, variant = "default" }: StepperProp
                   step.number
                 )}
               </div>
-              {/* Step Label */}
+              {}
               <span
                 className={cn(
                   "font-medium uppercase tracking-wider transition-colors duration-300",
@@ -58,7 +58,7 @@ export function Stepper({ steps, currentStep, variant = "default" }: StepperProp
                 {step.label}
               </span>
             </div>
-            {/* Connector */}
+            {}
             {!isLast && (
               <div
                 className={cn(

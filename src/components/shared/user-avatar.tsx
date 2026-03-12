@@ -31,8 +31,7 @@ export function UserAvatar({ user, size = "md", className = "", showName = false
     const fetchProfile = async () => {
       try {
         const supabase = createClient();
-        
-        // First check if user is authenticated
+
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
           setIsLoading(false);
@@ -52,13 +51,13 @@ export function UserAvatar({ user, size = "md", className = "", showName = false
             hint: error.hint,
             code: error.code
           });
-          // Don't set profile, will fall back to user metadata
+
         } else {
           setProfile(data);
         }
       } catch (error) {
         console.error("Unexpected error fetching user profile:", error instanceof Error ? error.message : error);
-        // Don't set profile, will fall back to user metadata
+
       } finally {
         setIsLoading(false);
       }
@@ -79,8 +78,7 @@ export function UserAvatar({ user, size = "md", className = "", showName = false
     : user.email?.slice(0, 2).toUpperCase() || "U";
 
   const displayName = profile?.full_name || user.user_metadata?.full_name || user.email || "User";
-  
-  // Use avatar from profile (database) first, then fallback to user_metadata
+
   const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url;
 
   if (isLoading) {
@@ -100,7 +98,7 @@ export function UserAvatar({ user, size = "md", className = "", showName = false
             loading="lazy"
             decoding="async"
             onError={(e) => {
-              // Fallback to initials if image fails to load
+
               const target = e.target as HTMLImageElement;
               target.style.display = "none";
               if (target.nextElementSibling) {

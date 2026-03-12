@@ -73,7 +73,6 @@ import {
   type AIInsightsExportData,
 } from "@/lib/export-utils";
 
-// Icon mapping for category predictions
 const CATEGORY_ICONS: Record<string, React.ComponentType<any>> = {
   "Food & Dining": Utensils,
   "Shopping": ShoppingBag,
@@ -85,7 +84,6 @@ const CATEGORY_ICONS: Record<string, React.ComponentType<any>> = {
   "Housing": PiggyBank,
 };
 
-// Helper to get icon for category
 function getCategoryIcon(categoryName: string): React.ComponentType<any> {
   for (const [key, icon] of Object.entries(CATEGORY_ICONS)) {
     if (categoryName.toLowerCase().includes(key.toLowerCase())) {
@@ -95,7 +93,6 @@ function getCategoryIcon(categoryName: string): React.ComponentType<any> {
   return ShoppingBag;
 }
 
-// Helper to format currency
 function formatCurrency(amount: number): string {
   return `₱${amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
@@ -114,13 +111,11 @@ export default function PredictionsPage() {
   const [hoveredBar, setHoveredBar] = useState<{month: string, year?: number, type: 'income' | 'expense', value: number, dataType: 'historical' | 'predicted', index: number} | null>(null);
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [isFilteringYear, setIsFilteringYear] = useState(false);
-  
-  // Responsive state management
+
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Close export dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
@@ -134,7 +129,6 @@ export default function PredictionsPage() {
     }
   }, [exportDropdownOpen]);
 
-  // Real data states
   const [forecastData, setForecastData] = useState<{
     historical: MonthlyForecast[];
     predicted: MonthlyForecast[];
@@ -192,15 +186,12 @@ export default function PredictionsPage() {
     }>;
   } | null>(null);
   const [predictionHistory, setPredictionHistory] = useState<PredictionHistory[]>([]);
-  
-  // AI Rate Limit State
+
   const [rateLimitStatus, setRateLimitStatus] = useState<AIUsageStatus | null>(null);
 
-  // Fetch all prediction data - only called explicitly after user action
   const fetchPredictions = useCallback(async (isInitialLoad = false) => {
     if (!user?.id) return;
 
-    // Skip automatic fetch on initial load - require explicit user action
     if (isInitialLoad) {
       return;
     }
@@ -237,8 +228,7 @@ export default function PredictionsPage() {
       setPredictionHistory(history);
       
       setHasGeneratedPredictions(true);
-      
-      // Try to fetch latest AI insights from database
+
       try {
         const { fetchLatestAIInsights } = await import("./_lib/ai-insights-service");
         const latestInsights = await fetchLatestAIInsights(user.id);
@@ -258,7 +248,7 @@ export default function PredictionsPage() {
         }
       } catch (error) {
         console.error("Error fetching AI insights:", error);
-        // Silent fail - AI insights are optional
+
       }
     } catch (error) {
       console.error("Error fetching predictions:", error);
@@ -267,14 +257,6 @@ export default function PredictionsPage() {
     }
   }, [user?.id]);
 
-  // Removed automatic initial load - predictions only fetched on explicit user action
-  // useEffect(() => {
-  //   if (user?.id) {
-  //     fetchPredictions();
-  //   }
-  // }, [user?.id, fetchPredictions]);
-
-  // Check for existing saved data on initial load - ONLY fetch from database, don't regenerate
   useEffect(() => {
     const loadExistingData = async () => {
       if (!user?.id) {
@@ -283,19 +265,17 @@ export default function PredictionsPage() {
       }
       
       try {
-        // Fetch prediction history to check for existing data
+
         const history = await fetchPredictionHistory(user.id);
         
         if (history && history.length > 0) {
-          // User has existing predictions - just load the history
+
           setPredictionHistory(history);
-          
-          // Get the most recent prediction data from history
+
           const latestPrediction = history[0];
-          
-          // Use the full saved data if available, otherwise reconstruct from summary
+
           if (latestPrediction.fullForecastData) {
-            // Full data is available - use it directly
+
             setForecastData(latestPrediction.fullForecastData);
             setHasGeneratedPredictions(true);
             
@@ -310,8 +290,7 @@ export default function PredictionsPage() {
             if (latestPrediction.fullBehaviorInsights) {
               setBehaviorInsights(latestPrediction.fullBehaviorInsights);
             }
-            
-            // Reconstruct summary from saved data
+
             setSummary({
               monthlyIncome: latestPrediction.projectedIncome || 0,
               monthlyExpenses: latestPrediction.projectedExpenses || 0,
@@ -323,7 +302,7 @@ export default function PredictionsPage() {
               expenseChange: latestPrediction.expenseGrowth || null,
             });
           } else if (latestPrediction.projectedIncome !== undefined) {
-            // Fallback: reconstruct from summary data (for older predictions)
+
             setHasGeneratedPredictions(true);
             
             const reconstructedForecast = {
@@ -412,8 +391,7 @@ export default function PredictionsPage() {
               expenseChange: latestPrediction.expenseGrowth || null,
             });
           }
-          
-          // Try to fetch latest AI insights from database
+
           try {
             const { fetchLatestAIInsights } = await import("./_lib/ai-insights-service");
             const latestInsights = await fetchLatestAIInsights(user.id);
@@ -433,12 +411,12 @@ export default function PredictionsPage() {
             }
           } catch (error) {
             console.error("Error fetching AI insights:", error);
-            // Silent fail - AI insights are optional
+
           }
         }
       } catch (error) {
         console.error("Error checking for existing predictions:", error);
-        // Silent fail - no existing data is not an error
+
       } finally {
         setIsCheckingExistingData(false);
       }
@@ -447,7 +425,6 @@ export default function PredictionsPage() {
     loadExistingData();
   }, [user?.id]);
 
-  // Fetch AI rate limit status
   useEffect(() => {
     const fetchRateLimitStatus = async () => {
       if (!user?.id) return;
@@ -461,8 +438,7 @@ export default function PredictionsPage() {
     };
 
     fetchRateLimitStatus();
-    
-    // Refresh every 30 seconds
+
     const interval = setInterval(fetchRateLimitStatus, 30000);
     return () => clearInterval(interval);
   }, [user?.id]);
@@ -479,23 +455,20 @@ export default function PredictionsPage() {
     setDetailedInsights(prev => !prev);
   }, []);
 
-  // Handle year filter change with skeleton loader
   const handleYearChange = useCallback((year: string) => {
     setIsFilteringYear(true);
     setSelectedYear(year);
-    // Show skeleton for 300ms to give visual feedback
+
     setTimeout(() => {
       setIsFilteringYear(false);
     }, 300);
   }, []);
 
-  // Export handlers
   const handleExportCSV = useCallback(() => {
     if (!forecastData && categoryPredictions.length === 0 && !aiInsights) {
       return;
     }
 
-    // Prepare forecast data
     const forecastExportData: PredictionExportData[] = [
       ...(forecastData?.historical || []).map((d) => ({
         month: d.month,
@@ -513,7 +486,6 @@ export default function PredictionsPage() {
       })),
     ];
 
-    // Prepare category predictions data
     const categoryExportData: CategoryPredictionExportData[] = categoryPredictions.map((pred) => ({
       category: pred.category,
       historicalAvg: pred.actual,
@@ -524,7 +496,6 @@ export default function PredictionsPage() {
       confidence: `${pred.confidence}%`,
     }));
 
-    // Prepare AI insights data
     const aiInsightsExportData: AIInsightsExportData | null = aiInsights ? {
       summary: aiInsights.summary,
       riskLevel: aiInsights.riskLevel.toUpperCase(),
@@ -559,7 +530,6 @@ export default function PredictionsPage() {
       return;
     }
 
-    // Prepare forecast data
     const forecastExportData: PredictionExportData[] = [
       ...(forecastData?.historical || []).map((d) => ({
         month: d.month,
@@ -577,7 +547,6 @@ export default function PredictionsPage() {
       })),
     ];
 
-    // Prepare category predictions data
     const categoryExportData: CategoryPredictionExportData[] = categoryPredictions.map((pred) => ({
       category: pred.category,
       historicalAvg: pred.actual,
@@ -588,7 +557,6 @@ export default function PredictionsPage() {
       confidence: `${pred.confidence}%`,
     }));
 
-    // Prepare summary
     const exportSummary = {
       avgGrowth: forecastData?.summary.avgGrowth || 0,
       maxSavings: forecastData?.summary.maxSavings || 0,
@@ -598,7 +566,6 @@ export default function PredictionsPage() {
       projectedSavings: (forecastData?.predicted?.[0]?.income || 0) - (forecastData?.predicted?.[0]?.expense || 0),
     };
 
-    // Prepare AI insights data
     const aiInsightsExportData: AIInsightsExportData | null = aiInsights ? {
       summary: aiInsights.summary,
       riskLevel: aiInsights.riskLevel.toUpperCase(),
@@ -631,7 +598,6 @@ export default function PredictionsPage() {
   const handleGeneratePredictions = useCallback(async () => {
     if (!user?.id) return;
 
-    // Check rate limit before generating
     const { allowed, error: limitError } = await checkAIUsage(user.id, "predictions");
     if (!allowed) {
       toast.error("Daily limit reached", {
@@ -641,14 +607,13 @@ export default function PredictionsPage() {
     }
 
     setIsGenerating(true);
-    
-    // Show loading toast
+
     const loadingToast = toast.loading("Generating predictions...", {
       description: "Analyzing your financial data with AI",
     });
 
     try {
-      // Increment usage
+
       const { success: incrementSuccess } = await incrementAIUsage(user.id, "predictions");
       if (!incrementSuccess) {
         toast.error("Failed to track usage", {
@@ -658,11 +623,9 @@ export default function PredictionsPage() {
         return;
       }
 
-      // Refresh rate limit status
       const { status } = await checkAIUsage(user.id, "predictions");
       setRateLimitStatus(status);
 
-      // Only fetch and update prediction-related data (not everything)
       const [
         newForecast,
         newCategories,
@@ -677,7 +640,6 @@ export default function PredictionsPage() {
         generatePredictionSummary(user.id),
       ]);
 
-      // Calculate growth percentages
       const incomeGrowth = newSummaryData.incomeChange || 0;
       const expenseGrowth = newSummaryData.expenseChange || 0;
       const currentSavings = newSummaryData.monthlyIncome - newSummaryData.monthlyExpenses;
@@ -692,7 +654,6 @@ export default function PredictionsPage() {
         ? ((currentSavings - prevSavings) / Math.abs(prevSavings)) * 100
         : 0;
 
-      // Save prediction with comprehensive data including full forecast
       await savePrediction(user.id, {
         type: "predictions",
         insights: [
@@ -722,22 +683,20 @@ export default function PredictionsPage() {
         })) || [],
         anomaliesDetected: anomalies?.length || 0,
         savingsOpportunities: savingsOpportunities?.length || 0,
-        // Store complete forecast data for reconstruction
+
         fullForecastData: newForecast,
         fullCategoryPredictions: newCategories,
         fullExpenseTypes: newExpenseTypeData,
         fullBehaviorInsights: newBehavior,
       });
 
-      // Update only the prediction-related states
       setForecastData(newForecast);
       setCategoryPredictions(newCategories);
       setExpenseTypes(newExpenseTypeData);
       setBehaviorInsights(newBehavior);
       setSummary(newSummaryData);
       setHasGeneratedPredictions(true);
-      
-      // Dismiss loading toast and show success
+
       toast.success("Predictions generated successfully", {
         id: loadingToast,
         description: "Your financial forecast has been updated",
@@ -745,8 +704,7 @@ export default function PredictionsPage() {
       
     } catch (error) {
       console.error("Error generating predictions:", error);
-      
-      // Show error toast
+
       toast.error("Failed to generate predictions", {
         id: loadingToast,
         description: "Please try again later",
@@ -756,11 +714,9 @@ export default function PredictionsPage() {
     }
   }, [user?.id, forecastData, anomalies, savingsOpportunities]);
 
-  // Handler for AI Insights generation (separate from predictions)
   const handleGenerateAIInsights = useCallback(async () => {
     if (!user?.id || !forecastData || !summary || !expenseTypes) return;
 
-    // Check rate limit before generating
     const { allowed, error: limitError } = await checkAIUsage(user.id, "insights");
     if (!allowed) {
       toast.error("Daily limit reached", {
@@ -770,14 +726,13 @@ export default function PredictionsPage() {
     }
 
     setIsGeneratingInsights(true);
-    
-    // Show loading toast
+
     const loadingToast = toast.loading("Generating AI insights...", {
       description: "Analyzing your spending patterns with OpenRouter AI",
     });
 
     try {
-      // Increment usage
+
       const { success: incrementSuccess } = await incrementAIUsage(user.id, "insights");
       if (!incrementSuccess) {
         toast.error("Failed to track usage", {
@@ -787,14 +742,11 @@ export default function PredictionsPage() {
         return;
       }
 
-      // Refresh rate limit status
       const { status } = await checkAIUsage(user.id, "insights");
       setRateLimitStatus(status);
 
-      // Import AI insights service
       const { generateAIFinancialInsights } = await import("./_lib/ai-insights-service");
 
-      // Generate comprehensive AI insights using OpenRouter API
       const aiResponse = await generateAIFinancialInsights({
         userId: user.id,
         forecastData,
@@ -804,7 +756,6 @@ export default function PredictionsPage() {
         summary,
       });
 
-      // Update AI insights state with full structure
       setAiInsights({
         summary: aiResponse.financialSummary,
         riskLevel: aiResponse.riskLevel,
@@ -817,7 +768,6 @@ export default function PredictionsPage() {
         longTermOpportunities: aiResponse.longTermOpportunities,
       });
 
-      // Also update anomalies and savings opportunities
       const [newAnomalies, newSavings] = await Promise.all([
         detectAnomalies(user.id),
         generateSavingsOpportunities(user.id),
@@ -826,8 +776,7 @@ export default function PredictionsPage() {
       setAnomalies(newAnomalies);
       setSavingsOpportunities(newSavings);
       setHasGeneratedInsights(true);
-      
-      // Dismiss loading toast and show success
+
       toast.success("AI insights generated successfully", {
         id: loadingToast,
         description: "Your financial intelligence has been updated with real AI analysis",
@@ -835,8 +784,7 @@ export default function PredictionsPage() {
       
     } catch (error) {
       console.error("Error generating AI insights:", error);
-      
-      // Show error toast
+
       toast.error("Failed to generate AI insights", {
         id: loadingToast,
         description: "Please try again later",
@@ -846,32 +794,27 @@ export default function PredictionsPage() {
     }
   }, [user?.id, forecastData, categoryPredictions, expenseTypes, behaviorInsights, summary]);
 
-  // Combine historical and predicted for chart display
   const chartData = [
     ...(forecastData?.historical || []),
     ...(forecastData?.predicted || []),
   ];
 
-  // Extract unique years from chart data
   const availableYears = Array.from(new Set(chartData.map(d => d.year).filter((year): year is number => typeof year === 'number'))).sort();
-  
-  // Filter chart data by selected year
+
   const filteredChartData = selectedYear === "all" || selectedYear === "" 
     ? chartData 
     : chartData.filter(d => d.year?.toString() === selectedYear);
 
-  // Calculate percentages for visualization
   const maxChartValue = Math.max(
     ...filteredChartData.map((d) => Math.max(d.income, d.expense)),
     1
   );
 
-  // Loading state for explicit generation or initial data check
   if (loading || isCheckingExistingData) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-          {/* Page Header Skeleton */}
+          {}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
             <div>
               <div className="flex items-center gap-3 mb-2">
@@ -887,9 +830,9 @@ export default function PredictionsPage() {
             </div>
           </div>
 
-          {/* Scrollable Content Area for Mobile/Tablet - Skeleton */}
+          {}
           <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0">
-            {/* Prediction Summary Cards Skeleton */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 3 }).map((_, i) => (
                 <Card key={i} className="p-4 sm:p-5">
@@ -903,7 +846,7 @@ export default function PredictionsPage() {
               ))}
             </div>
 
-            {/* Interactive Prediction Chart Skeleton */}
+            {}
             <Card className="p-4 sm:p-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 sm:mb-8">
                 <div>
@@ -940,7 +883,7 @@ export default function PredictionsPage() {
               </div>
             </Card>
 
-            {/* Category Predictions Table Skeleton */}
+            {}
             <Card className="overflow-hidden">
               <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -992,9 +935,9 @@ export default function PredictionsPage() {
               </div>
             </Card>
 
-            {/* Expense Type Forecast and Transaction Behavior Insight Skeleton */}
+            {}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              {/* Expense Type Forecast Skeleton */}
+              {}
               <Card className="p-4 sm:p-6">
                 <div className="mb-4">
                   <Skeleton width={160} height={14} className="mb-2" />
@@ -1017,7 +960,7 @@ export default function PredictionsPage() {
                 </div>
               </Card>
 
-              {/* Transaction Behavior Insight Skeleton */}
+              {}
               <Card className="lg:col-span-2 overflow-hidden">
                 <div className="p-3 sm:p-4 border-b border-slate-100 bg-slate-50/50">
                   <div className="mb-2">
@@ -1060,7 +1003,7 @@ export default function PredictionsPage() {
               </Card>
             </div>
 
-            {/* AI Financial Intelligence Skeleton */}
+            {}
             <Card className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
                 <div>
@@ -1073,7 +1016,7 @@ export default function PredictionsPage() {
                 </div>
               </div>
 
-              {/* Initial Grid: Key Highlights Skeleton */}
+              {}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <Card key={i} className="p-4 sm:p-5 h-full">
@@ -1101,7 +1044,7 @@ export default function PredictionsPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-      {/* Page Header */}
+      {}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
         <div>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -1144,7 +1087,7 @@ export default function PredictionsPage() {
                 <span className="hidden sm:inline">Export</span>
                 <MoreHorizontal size={12} className="ml-1" />
               </Button>
-              {/* Dropdown */}
+              {}
               {exportDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50">
                   <Button
@@ -1181,16 +1124,16 @@ export default function PredictionsPage() {
         </div>
       </div>
 
-      {/* Scrollable Content Area for Mobile/Tablet */}
+      {}
       <div
         ref={contentRef}
         className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth"
       >
 
-      {/* Prediction Summary Cards - No Data State */}
+      {}
       {!hasGeneratedPredictions ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Projected Income Growth Card - No Data */}
+          {}
           <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-3 sm:mb-4">
               <div className="text-slate-300">
@@ -1205,7 +1148,7 @@ export default function PredictionsPage() {
             </div>
           </Card>
 
-          {/* Projected Expense Growth Card - No Data */}
+          {}
           <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-3 sm:mb-4">
               <div className="text-slate-300">
@@ -1220,7 +1163,7 @@ export default function PredictionsPage() {
             </div>
           </Card>
 
-          {/* Projected Savings Growth Card - No Data */}
+          {}
           <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
             <div className="flex justify-between items-start mb-3 sm:mb-4">
               <div className="text-slate-300">
@@ -1237,7 +1180,7 @@ export default function PredictionsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Projected Income Growth Card */}
+        {}
         <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-3 sm:mb-4">
             <div className="text-slate-500">
@@ -1264,7 +1207,7 @@ export default function PredictionsPage() {
           </div>
         </Card>
 
-        {/* Projected Expense Growth Card */}
+        {}
         <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-3 sm:mb-4">
             <div className="text-slate-500">
@@ -1291,7 +1234,7 @@ export default function PredictionsPage() {
           </div>
         </Card>
 
-        {/* Projected Savings Growth Card */}
+        {}
         <Card className="p-4 sm:p-5 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex justify-between items-start mb-3 sm:mb-4">
             <div className="text-slate-500">
@@ -1321,7 +1264,7 @@ export default function PredictionsPage() {
       </div>
       )}
 
-      {/* Interactive Prediction Chart - No Data State */}
+      {}
       {!hasGeneratedPredictions ? (
         <Card className="p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -1360,7 +1303,7 @@ export default function PredictionsPage() {
               <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-emerald-500"></div>
               <span className="text-[9px] sm:text-[10px] font-medium text-slate-500">Expenses</span>
             </div>
-            {/* Year Filter - Badge style dropdown */}
+            {}
             {availableYears.length > 0 && (
               <ChartYearDropdown
                 value={selectedYear}
@@ -1372,7 +1315,7 @@ export default function PredictionsPage() {
         </div>
 
         {isFilteringYear ? (
-          // Skeleton loader while filtering
+
           <div className="animate-pulse">
             <div className="relative h-48 sm:h-60 flex items-end justify-between gap-1 sm:gap-2 px-2 border-b border-slate-50">
               {Array.from({ length: 9 }).map((_, i) => (
@@ -1391,7 +1334,7 @@ export default function PredictionsPage() {
         ) : (
           <>
         <div className="relative h-48 sm:h-60 flex items-end justify-between gap-1 sm:gap-2 px-2 border-b border-slate-50">
-          {/* Grid lines */}
+          {}
           <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
             <div className="w-full h-px bg-slate-100/50" />
             <div className="w-full h-px bg-slate-100/50" />
@@ -1438,7 +1381,7 @@ export default function PredictionsPage() {
                   </>
                 )}
                 
-                {/* Tooltip */}
+                {}
                 {hoveredBar && hoveredBar.index === i && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-[10px] sm:text-xs rounded shadow-sm whitespace-nowrap z-50">
                     <div className="font-medium text-slate-700">{hoveredBar.month}</div>
@@ -1500,7 +1443,7 @@ export default function PredictionsPage() {
       </Card>
       )}
               
-      {/* Category Predictions Table - No Data State */}
+      {}
       {!hasGeneratedPredictions ? (
         <Card className="overflow-hidden hover:shadow-md transition-all group cursor-pointer">
           <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
@@ -1615,10 +1558,10 @@ export default function PredictionsPage() {
         </Card>
       )}
 
-      {/* Expense Type Forecast and Transaction Behavior Insight - No Data State */}
+      {}
       {!hasGeneratedPredictions ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Expense Type Forecast - No Data */}
+          {}
           <Card className="lg:col-span-1 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
             <div className="mb-3 sm:mb-4">
               <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Expense Type Forecast</h3>
@@ -1633,7 +1576,7 @@ export default function PredictionsPage() {
             </div>
           </Card>
 
-          {/* Transaction Behavior Insight - No Data */}
+          {}
           <Card className="lg:col-span-2 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
             <div className="p-3 sm:p-4 border-b border-slate-100 bg-slate-50/50">
               <div className="mb-2">
@@ -1652,7 +1595,7 @@ export default function PredictionsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Expense Type Forecast */}
+        {}
         <Card className="lg:col-span-1 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
           <div className="mb-3 sm:mb-4">
             <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Expense Type Forecast</h3>
@@ -1702,7 +1645,7 @@ export default function PredictionsPage() {
           </div>
         </Card>
 
-        {/* Transaction Behavior Insight */}
+        {}
         <Card className="lg:col-span-2 overflow-hidden hover:shadow-md transition-all group cursor-pointer">
           <div className="p-3 sm:p-4 border-b border-slate-100 bg-slate-50/50">
             <div className="mb-2">
@@ -1748,7 +1691,7 @@ export default function PredictionsPage() {
       </div>
       )}
 
-      {/* AI Financial Intelligence Section */}
+      {}
       <AIFinancialIntelligence
         hasGeneratedInsights={hasGeneratedInsights}
         hasGeneratedPredictions={hasGeneratedPredictions}
@@ -1764,7 +1707,7 @@ export default function PredictionsPage() {
       />
       </div>
 
-      {/* Modals */}
+      {}
       <HistoryModal
         open={historyModalOpen}
         onClose={() => setHistoryModalOpen(false)}

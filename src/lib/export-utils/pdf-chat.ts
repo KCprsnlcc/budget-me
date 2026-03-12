@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { sanitizeTextForPDF, getTimestampString } from "./formatters";
 import type { ChatMessageExportData } from "./types";
 
-/**
- * Export chat messages as PDF with clean structure
- */
 export function exportChatToPDF(messages: ChatMessageExportData[], userName?: string): void {
   if (messages.length === 0) {
     alert("No messages to export");
@@ -18,23 +15,21 @@ export function exportChatToPDF(messages: ChatMessageExportData[], userName?: st
   const margin = 15;
   const pageWidth = doc.internal.pageSize.getWidth();
   const usableWidth = pageWidth - margin * 2;
-  const contentWidth = usableWidth * 0.7; // 70% width for content
+  const contentWidth = usableWidth * 0.7; 
 
   messages.forEach((msg, index) => {
     const isUser = msg.role === "You" || msg.role === "user";
-    
-    // Check if we need a new page
+
     if (currentY > 260) {
       doc.addPage();
       currentY = 20;
     }
 
-    // Message header (role + timestamp)
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     
     if (isUser) {
-      // User: name on right, timestamp on right below
+
       doc.setTextColor(COLORS.blue);
       const displayName = msg.userName || userName || "You";
       doc.text(displayName, pageWidth - margin, currentY, { align: "right" });
@@ -45,7 +40,7 @@ export function exportChatToPDF(messages: ChatMessageExportData[], userName?: st
       doc.setTextColor(COLORS.textMuted);
       doc.text(msg.timestamp, pageWidth - margin, currentY, { align: "right" });
     } else {
-      // AI: name on left, timestamp on left below
+
       doc.setTextColor(COLORS.emerald);
       doc.text("BudgetSense AI", margin, currentY);
       
@@ -58,15 +53,12 @@ export function exportChatToPDF(messages: ChatMessageExportData[], userName?: st
     
     currentY += 7;
 
-    // Calculate content start position
     const contentStartX = isUser ? pageWidth - margin - contentWidth : margin;
 
-    // Message content - clean and simple
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(COLORS.gray);
-    
-    // Process content line by line
+
     const lines = msg.content.split('\n');
     
     lines.forEach(line => {
@@ -76,11 +68,10 @@ export function exportChatToPDF(messages: ChatMessageExportData[], userName?: st
       }
 
       if (!line.trim()) {
-        currentY += 3; // Empty line spacing
+        currentY += 3; 
         return;
       }
 
-      // Headers
       if (line.startsWith('### ')) {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9);
@@ -140,7 +131,6 @@ export function exportChatToPDF(messages: ChatMessageExportData[], userName?: st
         return;
       }
 
-      // Lists
       if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
         const listText = line.trim().substring(2);
         const bulletX = isUser ? pageWidth - margin - contentWidth + 2 : contentStartX + 2;
@@ -156,7 +146,6 @@ export function exportChatToPDF(messages: ChatMessageExportData[], userName?: st
         return;
       }
 
-      // Numbered lists
       if (/^\d+\.\s/.test(line.trim())) {
         const match = line.trim().match(/^(\d+)\.\s(.+)$/);
         if (match) {
@@ -176,17 +165,15 @@ export function exportChatToPDF(messages: ChatMessageExportData[], userName?: st
         }
       }
 
-      // Regular text - handle bold formatting
       const boldRegex = /\*\*(.+?)\*\*/g;
       const hasBold = boldRegex.test(line);
       
       if (hasBold) {
-        // Split by bold markers and render
+
         const parts = line.split(/(\*\*.+?\*\*)/g);
         
         if (isUser) {
-          // For user messages, we need to render right-aligned
-          // Combine all parts first to get total width
+
           let combinedText = '';
           parts.forEach(part => {
             if (part.startsWith('**') && part.endsWith('**')) {
@@ -202,7 +189,7 @@ export function exportChatToPDF(messages: ChatMessageExportData[], userName?: st
             currentY += 5;
           });
         } else {
-          // For AI messages, render left-aligned with bold
+
           let xPos = contentStartX;
           parts.forEach(part => {
             if (part.startsWith('**') && part.endsWith('**')) {
@@ -228,7 +215,7 @@ export function exportChatToPDF(messages: ChatMessageExportData[], userName?: st
           currentY += 5;
         }
       } else {
-        // Regular text without formatting
+
         const textLines = doc.splitTextToSize(line, contentWidth);
         textLines.forEach((textLine: string) => {
           if (isUser) {
@@ -241,7 +228,6 @@ export function exportChatToPDF(messages: ChatMessageExportData[], userName?: st
       }
     });
 
-    // Model info (if available)
     if (msg.model && !isUser) {
       currentY += 1;
       doc.setFont("helvetica", "normal");
@@ -251,10 +237,8 @@ export function exportChatToPDF(messages: ChatMessageExportData[], userName?: st
       currentY += 4;
     }
 
-    // Add spacing between messages
     currentY += 8;
 
-    // Subtle divider line
     if (index < messages.length - 1) {
       doc.setDrawColor(COLORS.border);
       doc.setLineWidth(0.1);

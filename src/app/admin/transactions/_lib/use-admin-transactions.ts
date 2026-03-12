@@ -10,7 +10,6 @@ export function useAdminTransactions() {
   const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters
   const [search, setSearch] = useState("");
   const [month, setMonth] = useState<number | "all">("all");
   const [year, setYear] = useState<number | "all">("all");
@@ -18,7 +17,6 @@ export function useAdminTransactions() {
   const [userFilter, setUserFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [totalCount, setTotalCount] = useState(0);
@@ -38,7 +36,6 @@ export function useAdminTransactions() {
     [month, year, typeFilter, userFilter, statusFilter]
   );
 
-  // Fetch data
   const fetchData = useCallback(async (showTableLoading = false, forceRefreshStats = false) => {
     if (showTableLoading) {
       setTableLoading(true);
@@ -71,19 +68,16 @@ export function useAdminTransactions() {
     }
   }, [filters, currentPage, pageSize, stats, users]);
 
-  // Initial load
   useEffect(() => {
     fetchData();
   }, []);
 
-  // Refetch on filter/pagination changes
   useEffect(() => {
     if (!loading) {
       fetchData(true);
     }
   }, [filters, currentPage, pageSize]);
 
-  // Search filter (client-side)
   const filteredTransactions = useMemo(() => {
     if (!search) return transactions;
     const lowerSearch = search.toLowerCase();

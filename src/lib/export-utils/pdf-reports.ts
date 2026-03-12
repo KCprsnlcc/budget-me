@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { sanitizeTextForPDF, getTimestampString } from "./formatters";
 import type { ReportExportData } from "./types";
 
-/**
- * Export comprehensive report as PDF
- */
 export function exportReportToPDF(reportData: ReportExportData): void {
   const doc = createBasePDF(
     "Financial Report",
@@ -17,7 +14,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
   const pageWidth = doc.internal.pageSize.getWidth();
   const usableWidth = pageWidth - margin * 2;
 
-  // Summary Section
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(COLORS.dark);
@@ -28,7 +24,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
   const cardHeight = 20;
   const cardSpacing = 2;
 
-  // Total Transactions
   doc.setFillColor(COLORS.cardBg);
   doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
   doc.setDrawColor(COLORS.border);
@@ -44,7 +39,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
   doc.setFont("helvetica", "bold");
   doc.text(String(reportData.summary.totalTransactions), margin + 3, currentY + 14);
 
-  // Active Budgets
   doc.setFillColor(COLORS.cardBg);
   doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
   doc.setDrawColor(COLORS.border);
@@ -59,7 +53,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
   doc.setFont("helvetica", "bold");
   doc.text(String(reportData.summary.activeBudgets), margin + cardWidth + cardSpacing + 3, currentY + 14);
 
-  // Active Goals (if available)
   if (reportData.summary.activeGoals !== undefined) {
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin + (cardWidth + cardSpacing) * 2, currentY, cardWidth, cardHeight, 2, 2, "F");
@@ -76,7 +69,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
     doc.text(String(reportData.summary.activeGoals), margin + (cardWidth + cardSpacing) * 2 + 3, currentY + 14);
   }
 
-  // Last Updated
   doc.setFillColor(COLORS.cardBg);
   doc.roundedRect(margin + (cardWidth + cardSpacing) * 3, currentY, cardWidth, cardHeight, 2, 2, "F");
   doc.setDrawColor(COLORS.border);
@@ -94,7 +86,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
 
   currentY += cardHeight + 12;
 
-  // Anomaly Detection Section
   if (reportData.anomalies && reportData.anomalies.length > 0) {
     if (currentY > 200) {
       doc.addPage();
@@ -117,7 +108,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
         anomaly.severity === 'high' ? COLORS.red :
         anomaly.severity === 'medium' ? COLORS.amber : COLORS.blue;
 
-      // Anomaly card
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(margin, currentY, usableWidth, 25, 2, 2, "F");
       doc.setDrawColor(severityColor);
@@ -127,26 +117,22 @@ export function exportReportToPDF(reportData: ReportExportData): void {
       doc.setLineWidth(0.2);
       doc.roundedRect(margin, currentY, usableWidth, 25, 2, 2, "S");
 
-      // Severity badge
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7);
       doc.setTextColor(severityColor);
       doc.text(anomaly.severity.toUpperCase(), margin + 3, currentY + 5);
 
-      // Title
       doc.setFont("helvetica", "bold");
       doc.setFontSize(9);
       doc.setTextColor(COLORS.dark);
       doc.text(sanitizeTextForPDF(anomaly.title), margin + 3, currentY + 11);
 
-      // Description
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7.5);
       doc.setTextColor(COLORS.gray);
       const descLines = doc.splitTextToSize(sanitizeTextForPDF(anomaly.description), usableWidth - 6);
       doc.text(descLines[0], margin + 3, currentY + 16);
 
-      // Category and amount
       doc.setFontSize(7);
       doc.setTextColor(COLORS.textMuted);
       let detailText = `${anomaly.category}`;
@@ -161,7 +147,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
     currentY += 5;
   }
 
-  // AI Financial Insights Section
   if (reportData.aiInsights) {
     if (currentY > 200) {
       doc.addPage();
@@ -174,7 +159,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
     doc.text("AI Financial Insights", margin, currentY);
     currentY += 8;
 
-    // Financial Summary
     if (reportData.aiInsights.summary) {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
@@ -197,7 +181,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
       currentY += 5;
     }
 
-    // Risk Assessment
     if (reportData.aiInsights.riskLevel) {
       if (currentY > 250) {
         doc.addPage();
@@ -225,7 +208,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
       currentY += 5;
     }
 
-    // Recommendations
     if (reportData.aiInsights.recommendations && reportData.aiInsights.recommendations.length > 0) {
       if (currentY > 230) {
         doc.addPage();
@@ -244,14 +226,12 @@ export function exportReportToPDF(reportData: ReportExportData): void {
           currentY = 20;
         }
 
-        // Recommendation number and title
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8.5);
         doc.setTextColor(COLORS.dark);
         doc.text(`${idx + 1}. ${sanitizeTextForPDF(rec.title)}`, margin + 2, currentY);
         currentY += 5;
 
-        // Description
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
         doc.setTextColor(COLORS.gray);
@@ -265,7 +245,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
           currentY += 4.5;
         });
 
-        // Priority and category
         doc.setFontSize(7);
         doc.setTextColor(COLORS.textMuted);
         let detailText = `Priority: ${rec.priority.toUpperCase()} | Category: ${rec.category}`;
@@ -277,7 +256,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
       });
     }
 
-    // Actionable Steps
     if (reportData.aiInsights.actionableSteps && reportData.aiInsights.actionableSteps.length > 0) {
       if (currentY > 230) {
         doc.addPage();
@@ -319,7 +297,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
     currentY += 5;
   }
 
-  // Chart Data Section (varies by report type)
   if (reportData.chartData) {
     if (currentY > 200) {
       doc.addPage();
@@ -332,7 +309,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
     doc.text("Charts Rendered", margin, currentY);
     currentY += 10;
 
-    // Spending by Category
     if (reportData.settings.reportType === 'spending' && reportData.chartData.categories) {
       const headers = ["Category", "Amount", "Percentage"];
       const keys = ["name", "amount", "percentage"];
@@ -348,7 +324,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
       currentY = addPDFTable(doc, headers, tableData, keys, formats, currentY, columnWidths);
     }
 
-    // Income vs Expense
     if (reportData.settings.reportType === 'income-expense' && reportData.chartData.monthly) {
       const headers = ["Month", "Income", "Expenses", "Net Savings"];
       const keys = ["month", "income", "expenses", "netSavings"];
@@ -365,7 +340,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
       currentY = addPDFTable(doc, headers, tableData, keys, formats, currentY, columnWidths);
     }
 
-    // Savings Analysis
     if (reportData.settings.reportType === 'savings' && reportData.chartData.funds) {
       const headers = ["Fund Name", "Current", "Target", "Progress"];
       const keys = ["name", "amount", "target", "percentage"];
@@ -382,7 +356,6 @@ export function exportReportToPDF(reportData: ReportExportData): void {
       currentY = addPDFTable(doc, headers, tableData, keys, formats, currentY, columnWidths);
     }
 
-    // Goals Progress
     if (reportData.settings.reportType === 'goals' && reportData.chartData.goals) {
       const headers = ["Goal Name", "Current", "Target", "Progress"];
       const keys = ["name", "current", "target", "percentage"];

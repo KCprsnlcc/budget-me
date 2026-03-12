@@ -69,7 +69,6 @@ export function ViewGoalModal({
   const { user } = useAuth();
   const { familyData, familyState, currentUserRole, isOwner, members } = useFamily();
 
-  // Fetch contributors and contributions when goal changes
   useEffect(() => {
     if (goal?.id) {
       setLoadingContributors(true);
@@ -140,7 +139,6 @@ export function ViewGoalModal({
 
   if (!goal) return null;
 
-  // Compute permissions for this goal
   const permissions = getGoalPermissions(currentUserRole, isOwner, goal.user_id, user?.id);
   const canEdit = canEditGoalFn(goal, currentUserRole, isOwner, user?.id);
   const canDelete = canDeleteGoalFn(goal, currentUserRole, isOwner, user?.id);
@@ -153,7 +151,7 @@ export function ViewGoalModal({
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-      {/* Header */}
+      {}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <h3 className="text-sm font-semibold text-gray-900">{goal.name}</h3>
         <div className="flex items-center gap-3">
@@ -163,11 +161,11 @@ export function ViewGoalModal({
         </div>
       </ModalHeader>
 
-      {/* Body */}
+      {}
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* Stepper */}
+        {}
         <Stepper steps={STEPS} currentStep={step} />
-        {/* STEP 1: Overview */}
+        {}
         {step === 1 && (
           <div className="space-y-4 animate-txn-in">
             <div className="text-center py-6 bg-[#F9FAFB]/50 rounded-xl border border-gray-200">
@@ -224,7 +222,7 @@ export function ViewGoalModal({
               </div>
             </div>
 
-            {/* Family Context Section */}
+            {}
             {goal.isFamily && (
               <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
                 <Users size={16} className="text-gray-600 flex-shrink-0 mt-0.5" />
@@ -245,7 +243,7 @@ export function ViewGoalModal({
               </div>
             )}
 
-            {/* Public Goal Context */}
+            {}
             {goal.is_public && !goal.isFamily && (
               <div className="p-3 rounded-lg border border-gray-200 bg-white flex items-start gap-3">
                 <Globe size={16} className="text-gray-600 flex-shrink-0 mt-0.5" />
@@ -260,7 +258,7 @@ export function ViewGoalModal({
           </div>
         )}
 
-        {/* STEP 2: Analysis */}
+        {}
         {step === 2 && (
           <div className="space-y-4 animate-txn-in">
             <div>
@@ -268,7 +266,7 @@ export function ViewGoalModal({
               <p className="text-xs text-slate-500">Comprehensive goal performance and projections</p>
             </div>
 
-            {/* Goal Performance Overview */}
+            {}
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-white rounded-lg p-3 border border-gray-200">
                 <div className="text-[10px] text-gray-500 mb-2">Goal Utilization</div>
@@ -308,7 +306,7 @@ export function ViewGoalModal({
               </div>
             </div>
 
-            {/* Goal Details */}
+            {}
             <div className="space-y-3">
               <div className="p-4 rounded-lg border border-slate-200">
                 <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Goal Name</div>
@@ -375,7 +373,7 @@ export function ViewGoalModal({
               )}
             </div>
 
-            {/* Projected Completion */}
+            {}
             <div>
               <h4 className="text-xs font-semibold text-slate-900 mb-3">Projected Completion</h4>
               <div className="p-3 rounded-lg border border-slate-100">
@@ -407,7 +405,7 @@ export function ViewGoalModal({
                 </div>
               </div>
             </div>
-            {/* Member Contributions Section */}
+            {}
             {(
               <div className="mt-6">
                 <h4 className="text-xs font-semibold text-slate-900 mb-3 flex items-center gap-2">
@@ -419,7 +417,7 @@ export function ViewGoalModal({
                 {contributors.length > 0 ? (
                   <div className="space-y-3">
                     {contributors.map((contributor) => {
-                      // Create mock user for UserAvatar component
+
                       const mockUser = {
                         id: contributor.user_id,
                         email: contributor.full_name,
@@ -435,7 +433,7 @@ export function ViewGoalModal({
                       return (
                         <div key={contributor.user_id} className="p-3 rounded-lg border border-gray-200 bg-white">
                           <div className="flex items-center gap-3">
-                            {/* Avatar */}
+                            {}
                             <UserAvatar 
                               user={mockUser} 
                               size="lg"
@@ -458,13 +456,13 @@ export function ViewGoalModal({
                   </div>
                 )}
                 
-                {/* Contribution Audit Log */}
+                {}
                 {contributions.length > 0 && (
                   <div className="mt-4">
                     <h5 className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.05em] mb-2">Contribution History</h5>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
                       {contributions.map((contribution) => {
-                        // Create mock user for UserAvatar component
+
                         const mockUser = {
                           id: contribution.user_id,
                           email: contribution.user_name,
@@ -506,7 +504,7 @@ export function ViewGoalModal({
         )}
       </ModalBody>
 
-      {/* Footer */}
+      {}
       <ModalFooter className="flex justify-between">
         <Button
           variant="outline"
@@ -518,7 +516,7 @@ export function ViewGoalModal({
           Back
         </Button>
         <div className="flex gap-2">
-          {/* Action buttons removed per user request */}
+          {}
         </div>
         <Button
           size="sm"

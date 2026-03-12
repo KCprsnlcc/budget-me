@@ -123,7 +123,6 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
         description: "",
     });
 
-    // Load users when modal opens
     useEffect(() => {
         if (open && users.length === 0) {
             loadUsers(true);
@@ -179,7 +178,6 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
         setLoadingMore(false);
     }, [loadingMore, hasMore, page, userSearchQuery]);
 
-    // Load user-specific data when user is selected
     const loadUserData = async (userId: string) => {
         const supabase = createClient();
 
@@ -192,7 +190,6 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
         setExpenseCategories(expenseCatsData ?? []);
     };
 
-    // Search debounce
     useEffect(() => {
         if (open && currentStep === 1) {
             const timeoutId = setTimeout(() => {
@@ -202,7 +199,6 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
         }
     }, [userSearchQuery, open, currentStep]);
 
-    // Infinite scroll
     useEffect(() => {
         const handleScroll = () => {
             if (!userListRef.current || loadingMore || !hasMore) return;
@@ -323,7 +319,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
             <Stepper steps={STEPS} currentStep={currentStep} />
 
             <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-                {/* Step 1: User Select */}
+                {}
                 {currentStep === 1 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
@@ -333,7 +329,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                             </p>
                         </div>
 
-                        {/* Search Input */}
+                        {}
                         <div className="relative mb-4">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input
@@ -416,7 +412,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                     </div>
                 )}
 
-                {/* Step 2: Budget Details */}
+                {}
                 {currentStep === 2 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
@@ -428,7 +424,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                             </h2>
                         </div>
                         <div className="space-y-5">
-                            {/* Budget Name */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Budget Name <span className="text-gray-400">*</span>
@@ -442,7 +438,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                                 />
                             </div>
 
-                            {/* Amount */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Budget Amount <span className="text-gray-400">*</span>
@@ -460,7 +456,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                                 </div>
                             </div>
 
-                            {/* Period */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Period <span className="text-gray-400">*</span>
@@ -478,7 +474,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                                 />
                             </div>
 
-                            {/* Dates */}
+                            {}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
@@ -504,7 +500,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                                 </div>
                             </div>
 
-                            {/* Category */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Category <span className="text-gray-400">*</span>
@@ -523,7 +519,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                                 />
                             </div>
 
-                            {/* Description */}
+                            {}
                             <div>
                                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                                     Description <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
@@ -540,7 +536,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                     </div>
                 )}
 
-                {/* Step 3: Review */}
+                {}
                 {currentStep === 3 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
@@ -552,7 +548,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                             </h2>
                         </div>
                         <div className="space-y-4">
-                            {/* Period Display */}
+                            {}
                             <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
                                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Budget Period</div>
                                 <div className="flex items-center justify-center gap-2 my-2">
@@ -562,7 +558,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                                 </div>
                             </div>
 
-                            {/* Review Details */}
+                            {}
                             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                                 <div className="p-5 space-y-0 divide-y divide-gray-100">
                                     <ReviewRow label="User" value={selectedUser?.full_name || selectedUser?.email || "—"} />
@@ -575,7 +571,7 @@ export function AddAdminBudgetModal({ open, onClose, onSuccess }: AddAdminBudget
                                 </div>
                             </div>
 
-                            {/* Warning Notice */}
+                            {}
                             <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 items-start">
                                 <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
                                 <div>

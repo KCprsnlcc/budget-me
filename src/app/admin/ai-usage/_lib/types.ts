@@ -1,4 +1,4 @@
-// Admin AI Usage Management Types
+
 
 export type AdminAIUsage = {
   id: string;
@@ -10,7 +10,7 @@ export type AdminAIUsage = {
   total_used: number;
   created_at: string;
   updated_at: string;
-  // Joined data
+
   user_email?: string;
   user_name?: string;
   user_avatar?: string;
@@ -22,12 +22,12 @@ export type AdminAIUsageStats = {
   avgUsagePerUser: number;
   usageGrowth: { date: string; count: number }[];
   featureDistribution: { feature: string; count: number; percentage: number }[];
-  // New helpful metrics
+
   activeUsersToday: number;
   usersAtLimit: number;
   peakUsageHour: number | null;
   topFeature: { name: string; count: number };
-  dailyGrowth: number; // percentage
+  dailyGrowth: number; 
   topUsers: { 
     user_id: string; 
     email: string; 

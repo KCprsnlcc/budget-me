@@ -34,7 +34,6 @@ export function TransferOwnershipModal({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Filter out current owner from potential successors
   const eligibleMembers = familyMembers.filter(member => 
     member.user_id !== currentOwnerId && member.status === "active"
   );
@@ -81,7 +80,6 @@ export function TransferOwnershipModal({
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-      {/* Header */}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
@@ -93,12 +91,10 @@ export function TransferOwnershipModal({
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
       <Stepper currentStep={currentStep} totalSteps={2} labels={STEPS} />
 
-      {/* Body */}
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* STEP 1: Select Successor */}
+        
         {currentStep === 1 && (
           <div className="space-y-6">
             <div>
@@ -110,7 +106,6 @@ export function TransferOwnershipModal({
               </p>
             </div>
 
-            {/* Warning Box */}
             <div className="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-lg">
               <AlertTriangle className="text-gray-600 mt-0.5" size={16} />
               <div className="text-xs text-gray-700">
@@ -121,7 +116,6 @@ export function TransferOwnershipModal({
               </div>
             </div>
 
-            {/* Member Selection */}
             <div className="space-y-3">
               <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                 Eligible Members ({eligibleMembers.length})
@@ -161,7 +155,6 @@ export function TransferOwnershipModal({
                             <p className="text-[11px] text-gray-500 leading-relaxed">{member.email}</p>
                             <p className="text-[10px] text-gray-400 mt-1">{member.role}</p>
                           </div>
-                          {/* Check indicator */}
                           <div
                             className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
                               selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
@@ -189,7 +182,6 @@ export function TransferOwnershipModal({
           </div>
         )}
 
-        {/* STEP 2: Review & Confirm */}
         {currentStep === 2 && selectedMember && (
           <div className="space-y-6">
             <div>
@@ -201,7 +193,6 @@ export function TransferOwnershipModal({
               </p>
             </div>
 
-            {/* Transfer Summary Card */}
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
               <div className="p-5 space-y-0 divide-y divide-gray-100">
                 <div className="flex justify-between items-center py-2.5">
@@ -232,7 +223,6 @@ export function TransferOwnershipModal({
               </div>
             </div>
 
-            {/* Info Box */}
             <div className="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-lg">
               <Crown className="text-gray-600 mt-0.5" size={16} />
               <div className="text-xs text-gray-700">
@@ -246,7 +236,6 @@ export function TransferOwnershipModal({
               </div>
             </div>
 
-            {/* Error Display */}
             {submitError && (
               <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
                 <AlertTriangle size={16} className="flex-shrink-0 mt-px text-red-500" />
@@ -260,7 +249,6 @@ export function TransferOwnershipModal({
         )}
       </ModalBody>
 
-      {/* Footer */}
       <ModalFooter className="flex justify-between px-4 sm:px-6 lg:px-8 py-3 sm:py-4 sticky bottom-0 bg-white z-10 lg:static">
         {currentStep > 1 ? (
           <button

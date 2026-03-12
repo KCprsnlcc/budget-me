@@ -109,7 +109,6 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
     const contentRef = useRef<HTMLDivElement>(null);
     const [showScrollIndicator, setShowScrollIndicator] = useState(false);
 
-    // Load users
     const loadUsers = useCallback(async (reset: boolean = false) => {
         if (reset) {
             setLoadingUsers(true);
@@ -159,14 +158,12 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
         setLoadingMore(false);
     }, [loadingMore, hasMore, page, userSearchQuery]);
 
-    // Load users on open
     useEffect(() => {
         if (open && users.length === 0) {
             loadUsers(true);
         }
     }, [open]);
 
-    // Search debounce
     useEffect(() => {
         if (open && currentStep === 1) {
             const timeoutId = setTimeout(() => {
@@ -176,7 +173,6 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
         }
     }, [userSearchQuery, open, currentStep]);
 
-    // Infinite scroll
     useEffect(() => {
         const handleScroll = () => {
             if (!userListRef.current || loadingMore || !hasMore) return;
@@ -193,7 +189,6 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
         }
     }, [loadingMore, hasMore, open, currentStep, loadUsers]);
 
-    // Check if content is scrollable and show indicator
     useEffect(() => {
         const checkScrollable = () => {
             if (contentRef.current && typeof window !== 'undefined') {
@@ -208,7 +203,6 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
         return () => window.removeEventListener('resize', checkScrollable);
     }, [currentStep, open]);
 
-    // Handle scroll to hide indicator
     useEffect(() => {
         const handleScroll = () => {
             if (contentRef.current) {
@@ -227,10 +221,9 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
         }
     }, []);
 
-    // Auto-scroll to top on step change for mobile/tablet
     useEffect(() => {
         if (contentRef.current && typeof window !== 'undefined') {
-            // Only auto-scroll on mobile and tablet devices
+
             const isMobileOrTablet = window.innerWidth < 1024;
             if (isMobileOrTablet) {
                 contentRef.current.scrollTo({
@@ -266,7 +259,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
         }
 
         if (currentStep === 3) {
-            // Generate prediction for the user
+
             setGenerating(true);
             try {
                 const [forecastData, categoryPredictions, expenseTypes, behaviorInsights, summary] = await Promise.all([
@@ -280,7 +273,6 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                 const dataPoints = forecastData.historical.length + forecastData.predicted.length;
                 const accuracy = forecastData.summary.confidence;
 
-                // Generate AI insights if type is financial_intelligence
                 let aiInsights: AIInsightResponse | undefined;
                 if (selectedGenerationType === "financial_intelligence") {
                     aiInsights = await generateAIFinancialInsights({
@@ -293,7 +285,6 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                     });
                 }
 
-                // Save the prediction
                 const result = await savePrediction(selectedUserId, {
                     type: selectedGenerationType,
                     insights: aiInsights 
@@ -386,7 +377,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
 
             <ModalBody className="px-4 sm:px-5 py-4 sm:py-5 overflow-y-auto lg:overflow-y-auto scroll-smooth relative">
                 <div ref={contentRef} className="h-full overflow-y-auto">
-                {/* Scroll Indicator for Mobile/Tablet */}
+                {}
                 {showScrollIndicator && (
                     <div className="lg:hidden fixed bottom-[70px] sm:bottom-[80px] left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-bounce">
                         <div className="bg-emerald-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 text-xs font-medium">
@@ -397,7 +388,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                         </div>
                     </div>
                 )}
-                {/* Step 1: User Select */}
+                {}
                 {currentStep === 1 && (
                     <div className="animate-txn-in">
                         <div className="mb-4 sm:mb-5">
@@ -407,7 +398,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                             </p>
                         </div>
 
-                        {/* Search Input */}
+                        {}
                         <div className="relative mb-3 sm:mb-4">
                             <Search size={13} className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input
@@ -493,7 +484,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                     </div>
                 )}
 
-                {/* Step 2: Type Select */}
+                {}
                 {currentStep === 2 && (
                     <div className="animate-txn-in">
                         <div className="mb-4 sm:mb-5">
@@ -503,7 +494,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                             </p>
                         </div>
 
-                        {/* Selected User Preview */}
+                        {}
                         {selectedUser && (
                             <div className="p-3 sm:p-4 border border-slate-200 rounded-xl mb-4 sm:mb-5">
                                 <div className="flex items-center gap-2.5 sm:gap-3">
@@ -527,7 +518,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                             </div>
                         )}
 
-                        {/* Generation Type Cards */}
+                        {}
                         <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
                             {GENERATION_TYPES.map((type, idx) => {
                                 const selected = selectedGenerationType === type.id;
@@ -573,7 +564,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                     </div>
                 )}
 
-                {/* Step 3: Generate */}
+                {}
                 {currentStep === 3 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
@@ -590,7 +581,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                             </p>
                         </div>
 
-                        {/* Selected User Preview */}
+                        {}
                         {selectedUser && (
                             <div className="p-4 bg-white border border-slate-200 rounded-xl mb-5">
                                 <div className="flex items-center gap-3">
@@ -614,10 +605,10 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                             </div>
                         )}
 
-                        {/* Generation Info - Different based on type */}
+                        {}
                         <div className="space-y-3">
                             {selectedGenerationType === "predictions" ? (
-                                // AI Predictions - Prophet ML forecasting
+
                                 [
                                     { label: "Income vs Expenses Forecast", desc: "Prophet ML predictions with confidence intervals", icon: BarChart3 },
                                     { label: "Category Spending Forecast", desc: "Detailed predictions for each spending category", icon: PieChart },
@@ -638,7 +629,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                     );
                                 })
                             ) : (
-                                // AI Financial Intelligence - Comprehensive AI analysis
+
                                 [
                                     { label: "Financial Health Summary", desc: "Comprehensive overview of current financial situation", icon: Flag },
                                     { label: "Risk Assessment & Analysis", desc: "Identify financial risks with mitigation strategies", icon: AlertTriangle },
@@ -676,7 +667,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                     </div>
                 )}
 
-                {/* Step 4: Review */}
+                {}
                 {currentStep === 4 && (
                     <div className="animate-txn-in">
                         <div className="mb-4 sm:mb-5">
@@ -690,7 +681,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
 
                         {generationResult ? (
                             <div className="space-y-3 sm:space-y-4">
-                                {/* Status */}
+                                {}
                                 <div className={`p-4 sm:p-5 rounded-xl border text-center ${generationResult.success
                                         ? "border-emerald-500"
                                         : "border-emerald-500"
@@ -707,15 +698,15 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                     </p>
                                 </div>
 
-                                {/* Results */}
+                                {}
                                 {generationResult.success && (
                                     <>
-                                        {/* Predictions Results - Only show for predictions type */}
+                                        {}
                                         {selectedGenerationType === "predictions" && generationResult.summary && (
                                             <div className="space-y-3 sm:space-y-4">
-                                                {/* Summary Cards - Income, Expenses, Savings */}
+                                                {}
                                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                                                    {/* Projected Income Card */}
+                                                    {}
                                                     <div className="border border-slate-200 rounded-xl p-4">
                                                         <div className="flex justify-between items-start mb-3">
                                                             <div className="text-slate-500">
@@ -738,7 +729,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                                         <div className="text-[10px] text-slate-500 mt-1">Next month projection</div>
                                                     </div>
 
-                                                    {/* Projected Expense Card */}
+                                                    {}
                                                     <div className="border border-slate-200 rounded-xl p-4">
                                                         <div className="flex justify-between items-start mb-3">
                                                             <div className="text-slate-500">
@@ -761,7 +752,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                                         <div className="text-[10px] text-slate-500 mt-1">Next month projection</div>
                                                     </div>
 
-                                                    {/* Projected Savings Card */}
+                                                    {}
                                                     <div className="border border-slate-200 rounded-xl p-4">
                                                         <div className="flex justify-between items-start mb-3">
                                                             <div className="text-slate-500">
@@ -788,7 +779,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                                     </div>
                                                 </div>
 
-                                                {/* Income vs Expenses Summary */}
+                                                {}
                                                 <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                         <BarChart3 size={14} className="text-emerald-500" />
@@ -816,7 +807,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                                     </div>
                                                 </div>
 
-                                                {/* Category Predictions */}
+                                                {}
                                                 {generationResult.categoryPredictions && generationResult.categoryPredictions.length > 0 && (
                                                     <div className="border border-slate-200 rounded-xl p-5">
                                                         <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -850,7 +841,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                                     </div>
                                                 )}
 
-                                                {/* Expense Types */}
+                                                {}
                                                 {generationResult.expenseTypes && (
                                                     <div className="border border-slate-200 rounded-xl p-5">
                                                         <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -884,7 +875,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                                     </div>
                                                 )}
 
-                                                {/* Transaction Behavior */}
+                                                {}
                                                 {generationResult.behaviorInsights && generationResult.behaviorInsights.length > 0 && (
                                                     <div className="border border-slate-200 rounded-xl p-5">
                                                         <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -915,10 +906,10 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                             </div>
                                         )}
 
-                                        {/* AI Insights Details - Only show for financial_intelligence */}
+                                        {}
                                         {selectedGenerationType === "financial_intelligence" && generationResult.aiInsights && (
                                             <div className="space-y-4">
-                                                {/* Financial Summary */}
+                                                {}
                                                 <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                         <Wand2 size={14} className="text-emerald-500" />
@@ -929,7 +920,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                                     </p>
                                                 </div>
 
-                                                {/* Risk Assessment */}
+                                                {}
                                                 <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                         <AlertTriangle size={14} className={
@@ -956,7 +947,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                                     </p>
                                                 </div>
 
-                                                {/* Growth Potential */}
+                                                {}
                                                 <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                         <TrendingUp size={14} className="text-emerald-500" />
@@ -970,7 +961,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                                     </p>
                                                 </div>
 
-                                                {/* Recommendations */}
+                                                {}
                                                 {generationResult.aiInsights.recommendations.length > 0 && (
                                                     <div className="border border-slate-200 rounded-xl p-5">
                                                         <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -997,7 +988,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                                     </div>
                                                 )}
 
-                                                {/* Risk Mitigation Strategies */}
+                                                {}
                                                 {generationResult.aiInsights.riskMitigationStrategies.length > 0 && (
                                                     <div className="border border-slate-200 rounded-xl p-5">
                                                         <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -1018,7 +1009,7 @@ export function AddAdminPredictionModal({ open, onClose, onSuccess }: AddAdminPr
                                                     </div>
                                                 )}
 
-                                                {/* Long-term Opportunities */}
+                                                {}
                                                 {generationResult.aiInsights.longTermOpportunities.length > 0 && (
                                                     <div className="border border-slate-200 rounded-xl p-5">
                                                         <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">

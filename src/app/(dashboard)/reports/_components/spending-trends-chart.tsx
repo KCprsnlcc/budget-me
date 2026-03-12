@@ -23,7 +23,7 @@ export function SpendingTrendsChart({ chartData, chartType }: SpendingTrendsChar
 
   return (
     <div className="space-y-4">
-      {/* Card view for column/bar */}
+      {}
       {(chartType === 'column' || chartType === 'bar') && (
         <div className="space-y-3">
           {chartData.categories.map((cat, idx) => {
@@ -55,7 +55,7 @@ export function SpendingTrendsChart({ chartData, chartType }: SpendingTrendsChar
         </div>
       )}
 
-      {/* Pie/Donut Chart */}
+      {}
       {(chartType === 'pie' || chartType === 'donut') && (
         <div className="flex flex-col items-center gap-6">
           <div className="flex items-center gap-6 mb-6">
@@ -102,7 +102,7 @@ export function SpendingTrendsChart({ chartData, chartType }: SpendingTrendsChar
         </div>
       )}
 
-      {/* Line/Area Chart */}
+      {}
       {(chartType === 'line' || chartType === 'area') && (
         <div className="space-y-4">
           <div className="relative h-64">

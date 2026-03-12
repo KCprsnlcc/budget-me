@@ -31,7 +31,6 @@ interface ViewAdminChatbotModalProps {
     session: AdminChatSession | null;
 }
 
-// Exact same markdown components as /chatbot page for assistant messages
 const assistantMarkdownComponents = {
     table: ({ children }: any) => (
         <div className="overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm my-4">
@@ -119,16 +118,16 @@ function ChatBubble({ message, copiedId, onCopy }: { message: AdminChatMessage; 
 
     return (
         <div className={`mx-auto max-w-full ${isAssistant ? "flex justify-start" : "flex justify-end"}`}>
-            {/* Message Content */}
+            {}
             <div className={`${isAssistant ? "space-y-2 flex-1" : "max-w-[90%] sm:max-w-[85%]"} relative group`}>
-                {/* Message Bubble — exact same classes as /chatbot page */}
+                {}
                 <div
                     className={`${isAssistant
                         ? "rounded-[2rem] rounded-tl-sm text-slate-800 transition-all"
                         : "bg-emerald-500 text-white rounded-[2rem] rounded-tr-sm px-4 sm:px-6 py-2.5 sm:py-3.5 shadow-sm"
                         }`}
                 >
-                    {/* File Attachment */}
+                    {}
                     {message.attachment && (
                         <div className={`mb-1.5 sm:mb-2 p-1.5 sm:p-2 rounded-lg ${isAssistant ? "bg-slate-100" : "bg-emerald-600"}`}>
                             <div className="flex items-center gap-1.5 sm:gap-2">
@@ -143,7 +142,7 @@ function ChatBubble({ message, copiedId, onCopy }: { message: AdminChatMessage; 
                         </div>
                     )}
 
-                    {/* Message content — matches /chatbot: user = plain text, assistant = markdown */}
+                    {}
                     {isAssistant ? (
                         <div className="text-sm leading-relaxed text-slate-700">
                             <ReactMarkdown
@@ -160,7 +159,7 @@ function ChatBubble({ message, copiedId, onCopy }: { message: AdminChatMessage; 
                     )}
                 </div>
 
-                {/* Copy button footer — same as /chatbot page */}
+                {}
                 <div className={`flex gap-1.5 sm:gap-2 ${isAssistant ? "opacity-100 justify-start" : "opacity-0 justify-end"} group-hover:opacity-100 transition-all duration-200`}>
                     <button
                         onClick={() => onCopy(message.id, message.content)}
@@ -183,7 +182,7 @@ function MessagesSkeleton() {
     return (
         <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
             <div className="space-y-6 sm:space-y-8">
-                {/* User message skeleton - right aligned */}
+                {}
                 <div className="flex justify-end">
                     <div className="max-w-[90%] sm:max-w-[85%]">
                         <Skeleton
@@ -194,7 +193,7 @@ function MessagesSkeleton() {
                     </div>
                 </div>
 
-                {/* Assistant message skeleton - left aligned, full width */}
+                {}
                 <div className="flex justify-start">
                     <div className="flex-1 space-y-2">
                         <Skeleton height={96} borderRadius={32} />
@@ -204,7 +203,7 @@ function MessagesSkeleton() {
                     </div>
                 </div>
 
-                {/* User message skeleton */}
+                {}
                 <div className="flex justify-end">
                     <div className="max-w-[90%] sm:max-w-[85%]">
                         <Skeleton
@@ -215,7 +214,7 @@ function MessagesSkeleton() {
                     </div>
                 </div>
 
-                {/* Assistant message skeleton */}
+                {}
                 <div className="flex justify-start">
                     <div className="flex-1 space-y-2">
                         <Skeleton height={140} borderRadius={32} />
@@ -248,10 +247,9 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
 
     const scrollToBottom = useCallback(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        // Don't hide immediately - let the scroll handler detect when we're at bottom
+
     }, []);
 
-    // Fetch initial messages
     useEffect(() => {
         if (open && session) {
             setLoadingMessages(true);
@@ -270,7 +268,6 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
         }
     }, [open, session]);
 
-    // Auto-scroll to bottom on initial load only
     useEffect(() => {
         if (messages.length > 0 && isInitialLoad) {
             setTimeout(() => {
@@ -280,25 +277,19 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
         }
     }, [messages.length, isInitialLoad]);
 
-    // Handle scroll for infinite loading and scroll-to-bottom button visibility
     const handleScroll = useCallback(() => {
         if (!chatContainerRef.current || loadingMessages) return;
 
         const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
 
-        // Show scroll-to-bottom button when user is not near the bottom (more than 100px from bottom)
-        // Use a smaller threshold to prevent flickering
         const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
         setShowScrollToBottom(!isNearBottom && messages.length > 0);
 
-        // Handle infinite loading
         if (loadingMore || !hasMore) return;
 
-        // Load more when scrolled near the top (within 100px) and not initial load
         if (scrollTop < 100 && !isInitialLoad && messages.length > 0) {
             setLoadingMore(true);
 
-            // Get the oldest message timestamp
             const oldestMessage = messages[0];
             if (!oldestMessage || !oldestMessage.created_at) {
                 setLoadingMore(false);
@@ -310,13 +301,11 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
             fetchUserChatMessages(session!.user_id, 10, beforeTimestamp).then(({ data, error, hasMore: more }) => {
                 if (!error) {
                     if (data.length > 0) {
-                        // Store current scroll position relative to bottom
+
                         const scrollFromBottom = scrollHeight - scrollTop - clientHeight;
 
-                        // Prepend older messages
                         setMessages(prev => [...data, ...prev]);
 
-                        // Maintain scroll position after new messages are added
                         setTimeout(() => {
                             if (chatContainerRef.current) {
                                 const newScrollHeight = chatContainerRef.current.scrollHeight;
@@ -346,7 +335,6 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
         aud: "authenticated",
     } as SupabaseUser;
 
-    // Group messages by date
     const groupedMessages = messages
         .filter(msg => msg.content && msg.content.trim() !== "")
         .reduce<Record<string, AdminChatMessage[]>>((acc, msg) => {
@@ -358,7 +346,7 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
 
     return (
         <Modal open={open} onClose={onClose} className="max-w-3xl">
-            {/* Header — matches chatbot page header style */}
+            {}
             <ModalHeader onClose={onClose} className="px-4 sm:px-6 py-3 bg-white/80 backdrop-blur-sm border-b border-slate-100">
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                     <UserAvatar
@@ -384,7 +372,7 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
                 </div>
             </ModalHeader>
 
-            {/* Session stats bar */}
+            {}
             <div className="px-4 sm:px-6 py-2.5 bg-slate-50/50 border-b border-slate-100 flex items-center gap-4 text-[10px]">
                 <div className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -405,7 +393,7 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
                 )}
             </div>
 
-            {/* Messages Container — exact same bg and spacing as /chatbot page */}
+            {}
             <ModalBody className="p-0 relative">
                 <div
                     ref={chatContainerRef}
@@ -421,11 +409,11 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
                         </div>
                     ) : (
                         <div className="space-y-6 sm:space-y-8">
-                            {/* Loading more indicator at top */}
+                            {}
                             {loadingMore && (
                                 <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
                                     <div className="space-y-4 sm:space-y-6">
-                                        {/* Skeleton for older messages being loaded */}
+                                        {}
                                         <div className="flex justify-end">
                                             <div className="max-w-[90%] sm:max-w-[85%]">
                                                 <Skeleton height={48} borderRadius={32} width={200} />
@@ -442,7 +430,7 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
 
                             {Object.entries(groupedMessages).map(([dateKey, msgs]) => (
                                 <div key={dateKey}>
-                                    {/* Date separator */}
+                                    {}
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="flex-1 h-px bg-slate-100" />
                                         <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider px-2">
@@ -451,7 +439,7 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
                                         <div className="flex-1 h-px bg-slate-100" />
                                     </div>
 
-                                    {/* Messages — same spacing as /chatbot page */}
+                                    {}
                                     <div className="space-y-6 sm:space-y-8">
                                         {msgs.map((msg) => (
                                             <ChatBubble
@@ -470,7 +458,7 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
                     )}
                 </div>
 
-                {/* Scroll to Bottom Button */}
+                {}
                 {showScrollToBottom && (
                     <button
                         onClick={scrollToBottom}
@@ -481,7 +469,7 @@ export function ViewAdminChatbotModal({ open, onClose, session }: ViewAdminChatb
                 )}
             </ModalBody>
 
-            {/* Footer */}
+            {}
             <ModalFooter className="flex justify-between px-6 py-4">
                 <div className="text-[10px] text-slate-400">
                     Conversation started {format(new Date(session.first_message_at), "MMM dd, yyyy")}

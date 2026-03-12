@@ -36,7 +36,6 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
   const pageMeta = PAGE_TITLES[pathname] || { category: "Platform", title: "Dashboard" };
   const [loading, setLoading] = useState(true);
 
-  // Simulate loading state on component mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -45,7 +44,6 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
@@ -75,10 +73,10 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 sticky top-0 animate-fade-in">
           <div className="flex items-center gap-2 md:gap-4">
-            {/* Mobile menu */}
+            {}
             <Skeleton width={32} height={32} borderRadius={8} />
             
-            {/* Breadcrumb */}
+            {}
             <nav className="flex items-center text-xs text-slate-500 overflow-hidden">
               <Skeleton width={16} height={16} className="h-4 w-auto shrink-0" />
               <Skeleton width={12} height={12} className="mx-1 md:mx-2 text-slate-400 hidden sm:block" />
@@ -89,7 +87,7 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
           </div>
 
           <div className="flex items-center gap-2 md:gap-3">
-            {/* User Menu Skeleton */}
+            {}
             <Skeleton width={120} height={36} borderRadius={8} />
           </div>
         </header>
@@ -97,11 +95,10 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
     );
   }
 
-  
   return (
     <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 sticky top-0">
       <div className="flex items-center gap-2 md:gap-4">
-        {/* Mobile menu */}
+        {}
         <button
           className="md:hidden text-slate-500 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-50 cursor-pointer"
           onClick={onMobileMenuOpen}
@@ -110,7 +107,7 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
           <Menu size={20} />
         </button>
 
-        {/* Breadcrumb */}
+        {}
         <nav className="flex items-center text-xs text-slate-500 overflow-hidden">
           <Logo variant="icon" size="sm" className="h-4 w-auto shrink-0" />
           <ChevronRight size={12} className="mx-1 md:mx-2 text-slate-400 hidden sm:block" />
@@ -125,7 +122,7 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2 md:gap-3">
-        {/* User Menu */}
+        {}
         {user && (
           <div className="relative" ref={userMenuRef}>
             <button
@@ -146,15 +143,15 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
               <ChevronDown size={14} className="text-slate-400" />
             </button>
 
-            {/* Dropdown */}
+            {}
             {isUserMenuOpen && (
               <>
-                {/* Backdrop */}
+                {}
                 <div
                   className="fixed inset-0 z-30"
                   onClick={() => setIsUserMenuOpen(false)}
                 />
-                {/* Menu */}
+                {}
                 <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg border border-slate-200 shadow-lg z-40 py-1">
                   <div className="px-3 py-2 border-b border-slate-100">
                     <div className="flex items-center gap-2">

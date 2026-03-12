@@ -1,6 +1,6 @@
 export interface FamilyMember {
   id: string;
-  user_id?: string; // Add user_id for backend operations
+  user_id?: string;
   name: string;
   email: string;
   initials: string;

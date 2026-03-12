@@ -10,7 +10,6 @@ export function useAdminGoals() {
     const [tableLoading, setTableLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Filters
     const [search, setSearch] = useState("");
     const [month, setMonth] = useState<number | "all">("all");
     const [year, setYear] = useState<number | "all">("all");
@@ -20,7 +19,6 @@ export function useAdminGoals() {
     const [userFilter, setUserFilter] = useState("");
     const [familyFilter, setFamilyFilter] = useState("");
 
-    // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [totalCount, setTotalCount] = useState(0);
@@ -42,7 +40,6 @@ export function useAdminGoals() {
         [month, year, statusFilter, priorityFilter, categoryFilter, userFilter, familyFilter]
     );
 
-    // Fetch data
     const fetchData = useCallback(async (showTableLoading = false, forceRefreshStats = false) => {
         if (showTableLoading) {
             setTableLoading(true);
@@ -75,19 +72,16 @@ export function useAdminGoals() {
         }
     }, [filters, currentPage, pageSize, stats, users]);
 
-    // Initial load
     useEffect(() => {
         fetchData();
     }, []);
 
-    // Refetch on filter/pagination changes
     useEffect(() => {
         if (!loading) {
             fetchData(true);
         }
     }, [filters, currentPage, pageSize]);
 
-    // Search filter (client-side)
     const filteredGoals = useMemo(() => {
         if (!search) return goals;
         const lowerSearch = search.toLowerCase();

@@ -54,7 +54,6 @@ export function useTestimonials(): UseTestimonialsReturn {
       try {
         let avatarUrl = input.avatar_url;
 
-        // Upload avatar if provided
         if (avatarFile) {
           const { url, error: uploadError } = await uploadTestimonialAvatar(
             avatarFile,
@@ -68,7 +67,6 @@ export function useTestimonials(): UseTestimonialsReturn {
           }
         }
 
-        // Submit testimonial
         const { error: submitError } = await submitTestimonial(
           {
             ...input,
@@ -81,7 +79,6 @@ export function useTestimonials(): UseTestimonialsReturn {
           return { error: submitError, success: false };
         }
 
-        // Refetch testimonials to include the new one (if approved immediately)
         await fetchData();
 
         return { error: null, success: true };
@@ -95,7 +92,6 @@ export function useTestimonials(): UseTestimonialsReturn {
     [user?.id, fetchData]
   );
 
-  // Split testimonials into two rows for marquee effect
   const midPoint = Math.ceil(testimonials.length / 2);
   const testimonialsRow1 = testimonials.slice(0, midPoint);
   const testimonialsRow2 = testimonials.slice(midPoint);

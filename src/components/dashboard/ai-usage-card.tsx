@@ -30,10 +30,8 @@ export function AIUsageCard() {
       }
     };
 
-    // Initial fetch
     fetchStatus();
 
-    // Subscribe to realtime changes for this user's usage
     const channel = supabase
       .channel('ai-usage-changes')
       .on(
@@ -45,19 +43,17 @@ export function AIUsageCard() {
           filter: `user_id=eq.${user?.id}`,
         },
         () => {
-          // Refetch when data changes
+
           fetchStatus();
         }
       )
       .subscribe();
 
-    // Cleanup subscription on unmount
     return () => {
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
 
-  // Update countdown timer
   useEffect(() => {
     if (!status) return;
 
@@ -152,7 +148,7 @@ export function AIUsageCard() {
         </span>
       </div>
       
-      {/* Feature breakdown - subtle */}
+      {}
       <div className="mt-2 pt-2 border-t border-slate-200/50 grid grid-cols-3 gap-1 text-[8px] text-slate-400">
         <div className="text-center">
           <span className="block font-medium text-slate-600">{status.predictionsUsed}</span>

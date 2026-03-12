@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { formatCurrencyPHP, getTimestampString } from "./formatters";
 import type { TransactionAdminExportData } from "./types";
 
-/**
- * Export admin transactions as PDF
- */
 export function exportAdminTransactionsToPDF(
     transactions: TransactionAdminExportData[],
     summary?: { totalIncome?: number; totalExpenses?: number; netBalance?: number }
@@ -17,7 +14,6 @@ export function exportAdminTransactionsToPDF(
 
     const doc = createBasePDF("Transaction Management Report", `${transactions.length} transactions`);
 
-    // Summary section with cards
     let currentY = 45;
     const margin = 15;
 
@@ -28,12 +24,10 @@ export function exportAdminTransactionsToPDF(
         doc.text("Transaction Summary", margin, currentY);
         currentY += 8;
 
-        // Summary cards with subtle borders
         const cardWidth = 58;
         const cardHeight = 20;
         const cardSpacing = 3;
 
-        // Income card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -48,7 +42,6 @@ export function exportAdminTransactionsToPDF(
         doc.setFont("helvetica", "bold");
         doc.text(formatCurrencyPHP(summary.totalIncome || 0), margin + 4, currentY + 14);
 
-        // Expenses card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -63,7 +56,6 @@ export function exportAdminTransactionsToPDF(
         doc.setFont("helvetica", "bold");
         doc.text(formatCurrencyPHP(summary.totalExpenses || 0), margin + cardWidth + cardSpacing + 4, currentY + 14);
 
-        // Net Balance card
         const netColor = (summary.netBalance || 0) >= 0 ? COLORS.emerald : COLORS.red;
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 2, currentY, cardWidth, cardHeight, 2, 2, "F");
@@ -82,7 +74,6 @@ export function exportAdminTransactionsToPDF(
         currentY += cardHeight + 12;
     }
 
-    // Transactions table
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(COLORS.dark);
@@ -93,12 +84,10 @@ export function exportAdminTransactionsToPDF(
     const keys: (keyof TransactionAdminExportData)[] = ["date", "user_email", "description", "type", "category", "amount"];
     const formats: ("text" | "currency" | "number" | "percentage")[] = ["text", "text", "text", "text", "text", "currency"];
 
-    // Custom column widths for better layout (in mm)
-    const columnWidths = [20, 50, 40, 20, 25, 25]; // Total: 180mm
+    const columnWidths = [20, 50, 40, 20, 25, 25]; 
 
     addPDFTable(doc, headers, transactions, keys, formats, currentY, columnWidths);
 
-    // Save
     const filename = `admin_transactions_${getTimestampString()}.pdf`;
     doc.save(filename);
 }

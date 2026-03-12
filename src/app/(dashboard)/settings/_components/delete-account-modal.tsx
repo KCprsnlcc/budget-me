@@ -30,27 +30,27 @@ export function DeleteAccountModal({ open, onClose, account, onDelete }: DeleteA
   return (
     <Modal open={open} onClose={handleClose} className="w-[95vw] sm:w-[90vw] max-w-[500px]">
       <div className="flex flex-col bg-white rounded-2xl overflow-hidden">
-        {/* Header */}
+        {}
         <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
           <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Delete Account</span>
         </ModalHeader>
 
-        {/* Body */}
+        {}
         <ModalBody className="bg-[#F9FAFB]/30 p-4 sm:p-6">
           <div className="max-w-md mx-auto">
             <div className="text-center animate-in fade-in duration-300">
-              {/* Warning Icon */}
+              {}
               <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle className="w-8 h-8 text-red-600" />
               </div>
 
-              {/* Warning Message */}
+              {}
               <h2 className="text-xl font-bold text-gray-900 mb-3">Delete Account?</h2>
               <p className="text-sm text-gray-600 mb-6 leading-relaxed">
                 Are you sure you want to delete this account? This action cannot be undone and will permanently remove the account and all associated transactions from your records.
               </p>
 
-              {/* Account Details */}
+              {}
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="p-4 space-y-0 divide-y divide-gray-100">
                   <div className="flex justify-between items-center py-3">
@@ -72,7 +72,7 @@ export function DeleteAccountModal({ open, onClose, account, onDelete }: DeleteA
                 </div>
               </div>
 
-              {/* Final Warning */}
+              {}
               <div className="p-3 rounded-lg text-xs bg-red-50 border border-red-200 text-red-800 mt-6">
                 <div className="flex gap-2.5 items-start">
                   <AlertTriangle size={16} className="flex-shrink-0 mt-px" />
@@ -88,7 +88,7 @@ export function DeleteAccountModal({ open, onClose, account, onDelete }: DeleteA
           </div>
         </ModalBody>
 
-        {/* Footer */}
+        {}
         <ModalFooter className="flex justify-between px-4 sm:px-6 py-3 sm:py-4 bg-white border-t border-gray-100">
           <button
             onClick={handleClose}

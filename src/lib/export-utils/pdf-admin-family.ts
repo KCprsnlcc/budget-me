@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { getTimestampString } from "./formatters";
 import type { FamilyAdminExportData } from "./types";
 
-/**
- * Export admin families as PDF
- */
 export function exportAdminFamiliesToPDF(
     families: FamilyAdminExportData[],
     summary?: {
@@ -22,7 +19,6 @@ export function exportAdminFamiliesToPDF(
 
     const doc = createBasePDF("Family Management Report", `${families.length} families`);
 
-    // Summary section
     let currentY = 45;
     const margin = 15;
 
@@ -37,7 +33,6 @@ export function exportAdminFamiliesToPDF(
         const cardHeight = 20;
         const cardSpacing = 3;
 
-        // Total Families card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -52,7 +47,6 @@ export function exportAdminFamiliesToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.totalFamilies || 0).toLocaleString(), margin + 4, currentY + 14);
 
-        // Total Members card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -67,7 +61,6 @@ export function exportAdminFamiliesToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.totalMembers || 0).toLocaleString(), margin + cardWidth + cardSpacing + 4, currentY + 14);
 
-        // Avg Members card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 2, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -82,7 +75,6 @@ export function exportAdminFamiliesToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.avgMembers || 0).toFixed(1), margin + (cardWidth + cardSpacing) * 2 + 4, currentY + 14);
 
-        // Public Families card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 3, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -100,7 +92,6 @@ export function exportAdminFamiliesToPDF(
         currentY += cardHeight + 12;
     }
 
-    // Families table
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(COLORS.dark);
@@ -117,11 +108,10 @@ export function exportAdminFamiliesToPDF(
     ];
     const formats: ("text" | "currency" | "number" | "percentage")[] = ["text", "text", "number", "text", "text"];
 
-    const columnWidths = [50, 70, 20, 25, 15]; // Total: 180mm
+    const columnWidths = [50, 70, 20, 25, 15]; 
 
     addPDFTable(doc, headers, families, keys, formats, currentY, columnWidths);
 
-    // Save
     const filename = `admin_families_${getTimestampString()}.pdf`;
     doc.save(filename);
 }

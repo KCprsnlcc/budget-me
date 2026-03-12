@@ -68,7 +68,7 @@ export function Features() {
                 </a>
               </div>
 
-              {/* AI Visual decoration */}
+              {}
               {feature.wide && (
                 <div className="w-full md:w-64 h-48 bg-slate-50 rounded-lg border border-slate-200 relative overflow-hidden flex items-center justify-center">
                   <div

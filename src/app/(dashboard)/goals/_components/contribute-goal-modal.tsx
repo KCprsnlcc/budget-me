@@ -51,7 +51,6 @@ interface ContributeGoalModalProps {
   onContribute?: (goalId: string, amount: number) => Promise<{ error: string | null }>;
 }
 
-// Helper function to get account icon
 function getAccountIcon(accountName: string): React.ComponentType<any> {
   const name = accountName.toLowerCase();
   if (name.includes("bank") || name.includes("checking") || name.includes("savings")) return Building2;
@@ -81,7 +80,6 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
     setSaveError(null);
   }, []);
 
-  // Fetch accounts when modal opens
   useEffect(() => {
     if (!open || !user) return;
     fetchAccounts(user.id).then(setAccounts);
@@ -103,9 +101,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
     if (isNaN(parsed) || parsed <= 0) return;
     setSaving(true);
     setSaveError(null);
-    
-    // Use onContribute if provided (for family goals with activity logging)
-    // Otherwise use the default service function
+
     const { error } = onContribute 
       ? await onContribute(goal.id, parsed)
       : await contributeToGoal(goal.id, parsed, user?.id);
@@ -145,7 +141,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-      {/* Header */}
+      {}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <h3 className="text-sm font-semibold text-gray-900">Contribute to Goal</h3>
         <div className="flex items-center gap-3">
@@ -155,12 +151,12 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
+      {}
       <Stepper steps={STEPS} currentStep={step} />
 
-      {/* Body */}
+      {}
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* STEP 1: Amount Selection */}
+        {}
         {step === 1 && (
           <div className="space-y-4 animate-txn-in">
             <div>
@@ -168,7 +164,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
               <p className="text-xs text-slate-500">How much would you like to contribute to {goal.name}?</p>
             </div>
 
-            {/* Goal Summary */}
+            {}
             <div className="bg-white rounded-lg p-4 border border-gray-200">
               <div className="mb-3">
                 <h4 className="text-sm font-semibold text-gray-900">{goal.name}</h4>
@@ -191,7 +187,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
               </div>
             </div>
 
-            {/* Amount Input */}
+            {}
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1.5">Contribution Amount</label>
               <div className="relative">
@@ -214,7 +210,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
               )}
             </div>
 
-            {/* Quick Amount Buttons */}
+            {}
             <div>
               <p className="text-xs text-slate-500 mb-2">Quick amounts:</p>
               <div className="grid grid-cols-4 gap-2">
@@ -248,7 +244,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
           </div>
         )}
 
-        {/* STEP 2: Account Selection */}
+        {}
         {step === 2 && (
           <div className="space-y-4 animate-txn-in">
             <div>
@@ -256,14 +252,14 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
               <p className="text-xs text-slate-500">Choose which account to use for this contribution</p>
             </div>
 
-            {/* Contribution Summary */}
+            {}
             <div className="bg-white rounded-lg p-4 border border-gray-200">
               <div className="text-xs text-gray-500 mb-1">Contributing</div>
               <div className="text-2xl font-bold text-gray-900">{formatCurrency(amount || "0")}</div>
               <div className="text-xs text-gray-600 mt-1">to {goal.name}</div>
             </div>
 
-            {/* Account Selection */}
+            {}
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1.5">Account <span className="text-gray-400">*</span></label>
               <SearchableDropdown
@@ -281,7 +277,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
               />
             </div>
 
-            {/* Account Balance Warning */}
+            {}
             {selectedAccount && parseFloat(amount) > selectedAccount.balance && (
               <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
                 <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
@@ -294,7 +290,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
               </div>
             )}
 
-            {/* Account Balance Info */}
+            {}
             {selectedAccount && (
               <div className="p-3 rounded-lg bg-white border border-gray-200 flex items-start gap-3">
                 <Info size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
@@ -310,7 +306,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
           </div>
         )}
 
-        {/* STEP 3: Review */}
+        {}
         {step === 3 && (
           <div className="space-y-4 animate-txn-in">
             <div>
@@ -318,14 +314,14 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
               <p className="text-xs text-slate-500">Confirm your contribution details</p>
             </div>
 
-            {/* Contribution Summary */}
+            {}
             <div className="text-center py-6 bg-[#F9FAFB]/50 rounded-xl border border-gray-200">
               <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Contribution Amount</div>
               <div className="text-3xl font-bold text-gray-900">{formatCurrency(amount || "0")}</div>
               <div className="text-xs text-gray-600 mt-1 font-medium">to {goal.name}</div>
             </div>
 
-            {/* Progress Impact */}
+            {}
             <div className="grid grid-cols-2 gap-3">
               <div className="p-4 rounded-lg bg-white border border-gray-200">
                 <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">Current Progress</div>
@@ -339,7 +335,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
               </div>
             </div>
 
-            {/* Goal Details */}
+            {}
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
               <div className="p-5 space-y-0 divide-y divide-gray-100">
                 <div className="flex justify-between items-center py-2.5">
@@ -404,7 +400,7 @@ export function ContributeGoalModal({ open, onClose, goal, onSuccess, onContribu
         )}
       </ModalBody>
 
-      {/* Footer */}
+      {}
       <ModalFooter className="flex justify-between">
         <Button
           variant="outline"

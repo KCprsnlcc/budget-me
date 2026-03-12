@@ -1,12 +1,9 @@
 import React from "react";
 
-// DB check: period IN ('day','week','month','quarter','year','custom')
 export type BudgetPeriod = "day" | "week" | "month" | "quarter" | "year" | "custom";
 
-// DB check: status IN ('active','paused','completed','archived')
 export type BudgetStatus = "active" | "paused" | "completed" | "archived";
 
-// Derived UI status from spent vs amount ratio
 export type BudgetHealthStatus = "on-track" | "caution" | "at-risk";
 
 export interface BudgetType {
@@ -30,7 +27,6 @@ export interface BudgetType {
   rollover_amount: number;
   created_at: string;
   updated_at: string;
-  // Joined fields
   expense_category_name?: string;
   expense_category_icon?: string;
   expense_category_color?: string;
@@ -87,7 +83,6 @@ export interface DeleteBudgetModalProps extends BudgetModalProps {
   onSuccess?: () => void;
 }
 
-// Helper: derive health status from spent/amount ratio
 export function deriveBudgetHealth(spent: number, amount: number): BudgetHealthStatus {
   if (amount <= 0) return "at-risk";
   const pct = spent / amount;

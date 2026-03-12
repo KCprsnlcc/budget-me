@@ -51,7 +51,6 @@ export function useAdminSettings() {
         fetchData();
     }, []);
 
-    // Refetch activity logs when severity changes
     useEffect(() => {
         if (!loading) {
             (async () => {

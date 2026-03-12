@@ -16,11 +16,9 @@ export function PageLoadingFallback() {
       if (!start) start = timestamp;
       const elapsed = timestamp - start;
 
-      // Progress animation: ramp up to 100%
       const target = Math.min(100, (elapsed / 8) * (1 - elapsed / 15000));
       setProgress(Math.max(0, target));
 
-      // When we reach 100%, hide the component after a short delay
       if (target >= 100) {
         timeoutId = setTimeout(() => {
           setShouldHide(true);
@@ -38,7 +36,6 @@ export function PageLoadingFallback() {
     };
   }, []);
 
-  // Don't render anything if we should hide
   if (shouldHide) {
     return null;
   }

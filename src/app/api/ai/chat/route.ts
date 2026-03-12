@@ -1,17 +1,4 @@
-/**
- * POST /api/ai/chat
- * 
- * Secure backend proxy for chatbot → OpenRouter.
- * All AI requests go through this endpoint. The API key never leaves the server.
- * 
- * Security layers:
- * - Supabase session authentication
- * - IP + User rate limiting (10 req/min)
- * - CSRF origin validation
- * - Suspicious user-agent blocking
- * - Input validation (prompt length)
- * - Request metadata logging
- */
+
 
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -22,12 +9,11 @@ import {
 } from "@/lib/ai-security";
 
 export async function POST(request: NextRequest) {
-  // ─── Security validation ─────────────────────────────────────────
+
   const result = await validateAIRequest(request, "/api/ai/chat");
   if ("error" in result) return result.error;
   const { context } = result;
 
-  // ─── Parse & validate body ────────────────────────────────────────
   let body: any;
   try {
     body = await request.json();
@@ -45,7 +31,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Model ID is required" }, { status: 400 });
   }
 
-  // Validate each message content length
   for (const msg of messages) {
     if (typeof msg.content === "string") {
       const validationError = validatePromptLength(msg.content);
@@ -55,7 +40,6 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // ─── Forward to OpenRouter (server-side) ──────────────────────────
   try {
     const apiKey = getOpenRouterApiKey();
 
@@ -80,7 +64,6 @@ export async function POST(request: NextRequest) {
       const errorData = await response.json().catch(() => ({}));
       console.error("[AI-CHAT] OpenRouter error:", response.status, errorData);
 
-      // Map OpenRouter errors to user-friendly messages
       const statusMap: Record<number, string> = {
         401: "AI service configuration error. Contact support.",
         402: "Insufficient AI credits. Please switch to a free model.",

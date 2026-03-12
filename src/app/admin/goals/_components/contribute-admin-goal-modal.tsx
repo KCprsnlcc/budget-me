@@ -53,7 +53,6 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
 
-    // User Selection State
     const [users, setUsers] = useState<UserOption[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -62,16 +61,14 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
     const [userSearchQuery, setUserSearchQuery] = useState("");
     const userListRef = useRef<HTMLDivElement>(null);
 
-    // Form State
     const [selectedUserId, setSelectedUserId] = useState<string>("");
     const [amount, setAmount] = useState("");
 
-    // Reset when opened
     useEffect(() => {
         if (open) {
             setCurrentStep(1);
             setAmount("");
-            // Default to goal owner if exists
+
             if (goal?.user_id) setSelectedUserId(goal.user_id);
             if (users.length === 0) loadUsers(true);
         }
@@ -126,7 +123,6 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
         setLoadingMore(false);
     }, [loadingMore, hasMore, page, userSearchQuery]);
 
-    // Trigger search when query changes
     useEffect(() => {
         if (open && currentStep === 1) {
             const timeoutId = setTimeout(() => {
@@ -136,7 +132,6 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
         }
     }, [userSearchQuery, open, currentStep]);
 
-    // Infinite scroll
     useEffect(() => {
         const handleScroll = () => {
             if (!userListRef.current || loadingMore || !hasMore) return;
@@ -210,7 +205,6 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
     const newProgress = Math.min(Math.round(((goal.current_amount + parsedAmount) / goal.target_amount) * 100), 100);
     const newRemaining = Math.max(goal.target_amount - (goal.current_amount + parsedAmount), 0);
 
-    // Fallback if the selected user isn't in the loaded list (like if it defaulted to goal owner but we haven't scrolled to them)
     const selectedUserRecord = users.find((u) => u.id === selectedUserId);
     const displayingUserParams = selectedUserRecord || {
         full_name: selectedUserId === goal.user_id ? goal.user_name : "Unknown",
@@ -233,7 +227,7 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
             <Stepper steps={STEPS} currentStep={currentStep} />
 
             <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30 min-h-[400px]">
-                {/* Step 1: User Select */}
+                {}
                 {currentStep === 1 && (
                     <div className="animate-txn-in">
                         <div className="mb-5">
@@ -243,7 +237,7 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                             </p>
                         </div>
 
-                        {/* Search Input */}
+                        {}
                         <div className="relative mb-4">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input
@@ -344,7 +338,7 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                     </div>
                 )}
 
-                {/* Step 2: Amount Selection */}
+                {}
                 {currentStep === 2 && (
                     <div className="space-y-4 animate-txn-in">
                         <div>
@@ -352,7 +346,7 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                             <p className="text-xs text-slate-500">How much would you like to contribute to {goal.goal_name}?</p>
                         </div>
 
-                        {/* Goal Summary */}
+                        {}
                         <div className="bg-white rounded-lg p-4 border border-gray-200">
                             <div className="mb-3">
                                 <h4 className="text-sm font-semibold text-gray-900">{goal.goal_name}</h4>
@@ -375,7 +369,7 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                             </div>
                         </div>
 
-                        {/* Amount Input */}
+                        {}
                         <div>
                             <label className="block text-xs font-medium text-slate-700 mb-1.5">Contribution Amount</label>
                             <div className="relative">
@@ -398,7 +392,7 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                             )}
                         </div>
 
-                        {/* Quick Amount Buttons */}
+                        {}
                         <div>
                             <p className="text-xs text-slate-500 mb-2">Quick amounts:</p>
                             <div className="grid grid-cols-4 gap-2">
@@ -432,7 +426,7 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                     </div>
                 )}
 
-                {/* Step 3: Review */}
+                {}
                 {currentStep === 3 && (
                     <div className="space-y-4 animate-txn-in">
                         <div>
@@ -440,14 +434,14 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                             <p className="text-xs text-slate-500">Confirm the details before finalizing the contribution.</p>
                         </div>
 
-                        {/* Contribution Summary */}
+                        {}
                         <div className="text-center py-6 bg-[#F9FAFB]/50 rounded-xl border border-gray-200">
                             <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Contribution Amount</div>
                             <div className="text-3xl font-bold text-gray-900">{formatCurrency(parsedAmount)}</div>
                             <div className="text-xs text-gray-600 mt-1 font-medium">to {goal.goal_name}</div>
                         </div>
 
-                        {/* Progress Impact */}
+                        {}
                         <div className="grid grid-cols-2 gap-3">
                             <div className="p-4 rounded-lg bg-white border border-gray-200">
                                 <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">Current Progress</div>
@@ -461,7 +455,7 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                             </div>
                         </div>
 
-                        {/* Goal Details */}
+                        {}
                         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                             <div className="p-5 space-y-0 divide-y divide-gray-100">
                                 <div className="flex justify-between items-center py-2.5">
@@ -508,7 +502,7 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                 )}
             </ModalBody>
 
-            {/* Footer */}
+            {}
             <ModalFooter className="px-6 py-4">
                 {currentStep > 1 && (
                     <Button variant="outline" size="sm" className="flex-1 max-w-[120px]" onClick={handleBack} disabled={loading}>

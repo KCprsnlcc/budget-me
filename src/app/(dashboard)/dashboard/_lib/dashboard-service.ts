@@ -7,10 +7,6 @@ import type { Invitation } from "@/app/(dashboard)/family/_components/types";
 
 const supabase = createClient();
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 export type DashboardSummary = {
   totalBalance: number;
   monthlyIncome: number;
@@ -76,14 +72,9 @@ export type InsightItem = {
   _refreshId?: string;
 };
 
-// ---------------------------------------------------------------------------
-// SUMMARY — Total Balance, Income, Expenses, Savings Rate + changes
-// ---------------------------------------------------------------------------
-
 export async function fetchDashboardSummary(
   userId: string
 ): Promise<DashboardSummary> {
-  // Fetch all-time transactions for summary stats
   const { data: allData } = await supabase
     .from("transactions")
     .select("type, amount, date")
@@ -91,7 +82,6 @@ export async function fetchDashboardSummary(
     .eq("status", "completed")
     .order("date", { ascending: false });
 
-  // Fetch total balance from accounts
   const { data: accountsData } = await supabase
     .from("accounts")
     .select("balance")
@@ -103,7 +93,6 @@ export async function fetchDashboardSummary(
     0
   );
 
-  // Aggregate all-time data
   let totalIncome = 0;
   let totalExpenses = 0;
   
@@ -124,16 +113,12 @@ export async function fetchDashboardSummary(
     monthlyIncome: totalIncome,
     monthlyExpenses: totalExpenses,
     savingsRate,
-    balanceChange: null, // No meaningful change calculation for all-time data
-    incomeChange: null, // No meaningful change calculation for all-time data
-    expenseChange: null, // No meaningful change calculation for all-time data
-    savingsRateChange: null, // No meaningful change calculation for all-time data
+    balanceChange: null,
+    incomeChange: null,
+    expenseChange: null,
+    savingsRateChange: null,
   };
 }
-
-// ---------------------------------------------------------------------------
-// RECENT TRANSACTIONS — Latest 5
-// ---------------------------------------------------------------------------
 
 export async function fetchRecentTransactions(
   userId: string,
@@ -176,10 +161,6 @@ export async function fetchRecentTransactions(
   });
 }
 
-// ---------------------------------------------------------------------------
-// BUDGET PROGRESS — Active budgets with spent/amount
-// ---------------------------------------------------------------------------
-
 export async function fetchBudgetProgress(
   userId: string,
   limit: number = 5
@@ -213,14 +194,9 @@ export async function fetchBudgetProgress(
   });
 }
 
-// ---------------------------------------------------------------------------
-// CATEGORY BREAKDOWN — Expense categories for donut chart (current month)
-// ---------------------------------------------------------------------------
-
 export async function fetchCategoryBreakdown(
   userId: string
 ): Promise<CategoryBreakdownItem[]> {
-  // Fetch all-time expense transactions for category breakdown
   const { data } = await supabase
     .from("transactions")
     .select("amount, expense_categories ( category_name, color )")
@@ -245,10 +221,6 @@ export async function fetchCategoryBreakdown(
     .map(([name, v]) => ({ name, color: v.color, amount: v.amount }))
     .sort((a, b) => b.amount - a.amount);
 }
-
-// ---------------------------------------------------------------------------
-// MONTHLY CHART — Income vs Expenses for last N months
-// ---------------------------------------------------------------------------
 
 export async function fetchMonthlyChart(
   userId: string,
@@ -288,15 +260,10 @@ export async function fetchMonthlyChart(
   return points;
 }
 
-// ---------------------------------------------------------------------------
-// SPENDING TRENDS — Top 4 expense categories, current vs previous month
-// ---------------------------------------------------------------------------
-
 export async function fetchSpendingTrends(
   userId: string,
   limit: number = 4
 ): Promise<SpendingTrend[]> {
-  // Fetch all-time expense transactions with categories
   const { data } = await supabase
     .from("transactions")
     .select("amount, date, type, category, expense_categories ( category_name )")
@@ -305,7 +272,6 @@ export async function fetchSpendingTrends(
     .eq("status", "completed")
     .order("date", { ascending: false });
 
-  // Transform to trends service format
   const trendsTransactions = (data ?? []).map(row => {
     const cat = row.expense_categories as Record<string, any> | null;
     return {
@@ -316,13 +282,8 @@ export async function fetchSpendingTrends(
     };
   });
 
-  // Use the new trends service with sophisticated analysis
   return generateSpendingTrends(trendsTransactions, limit);
 }
-
-// ---------------------------------------------------------------------------
-// PENDING INVITATIONS — Fetch latest invitation for dashboard
-// ---------------------------------------------------------------------------
 
 export async function fetchLatestInvitation(
   userEmail: string
@@ -333,19 +294,13 @@ export async function fetchLatestInvitation(
     return null;
   }
   
-  // Return only the first (latest) invitation
   return data[0];
 }
-
-// ---------------------------------------------------------------------------
-// ACCEPT / DECLINE INVITATION
-// ---------------------------------------------------------------------------
 
 export async function acceptInvitation(
   invitationId: string,
   userId: string
 ): Promise<{ error: string | null }> {
-  // Import the function from family-service to maintain consistency
   const { respondToInvitation } = await import("@/app/(dashboard)/family/_lib/family-service");
   return respondToInvitation(invitationId, userId, true);
 }
@@ -353,19 +308,13 @@ export async function acceptInvitation(
 export async function declineInvitation(
   invitationId: string
 ): Promise<{ error: string | null }> {
-  // Import the function from family-service to maintain consistency
   const { respondToInvitation } = await import("@/app/(dashboard)/family/_lib/family-service");
   return respondToInvitation(invitationId, "", false);
 }
 
-// ---------------------------------------------------------------------------
-// INSIGHTS — Generate comprehensive financial insights (ALL 19+ algorithms)
-// ---------------------------------------------------------------------------
-
 export async function fetchInsights(
   userId: string
 ): Promise<InsightItem[]> {
-  // Fetch all-time transactions with full details for comprehensive insights
   const { data: transactions } = await supabase
     .from("transactions")
     .select("id, type, amount, notes, date, category, expense_category_id, income_category_id")
@@ -373,14 +322,12 @@ export async function fetchInsights(
     .eq("status", "completed")
     .order("date", { ascending: false });
 
-  // Fetch active budgets with full details
   const { data: budgets } = await supabase
     .from("budget_details")
     .select("id, budget_name, expense_category_name, amount, spent, percentage_used")
     .eq("user_id", userId)
     .eq("status", "active");
 
-  // Calculate all-time aggregates for insights
   let totalIncome = 0;
   let totalExpenses = 0;
   const txRows = transactions ?? [];
@@ -393,7 +340,6 @@ export async function fetchInsights(
   
   const overallSavingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
 
-  // Transform to proper types for insights service
   const typedTransactions: InsightsTransaction[] = txRows.map(row => ({
     ...row,
     amount: Number(row.amount),
@@ -409,7 +355,6 @@ export async function fetchInsights(
     percentage_used: Number(b.percentage_used) || 0,
   }));
 
-  // Generate comprehensive insights using ALL 19+ algorithms from old implementation
   const insightsData = generateInsights(
     typedTransactions,
     typedBudgets,
@@ -418,23 +363,18 @@ export async function fetchInsights(
     overallSavingsRate
   );
 
-  // Add some randomness to insight selection and timestamp for variety
   const shuffledInsights = [...insightsData].sort(() => Math.random() - 0.5);
   const topInsights = shuffledInsights.slice(0, 4);
   
-  // Add timestamp to ensure refresh detection
   const timestamp = formatDateForInput(getPhilippinesNow());
 
-  // Map to InsightItem format with proper types and icons
   const mappedInsights = topInsights.map((insight, index) => ({
     type: insight.type,
     title: insight.title,
     description: insight.description,
     icon: insight.icon,
-    // Add timestamp to force re-render (not displayed but changes object reference)
     _refreshId: `${timestamp}-${index}`,
   }));
 
-  // Return top 4 insights only
   return mappedInsights;
 }

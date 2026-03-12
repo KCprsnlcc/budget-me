@@ -161,7 +161,7 @@ const GoalCard = memo(({
         </div>
       </div>
 
-      {/* Contributor Avatars */}
+      {}
       {!contributorsLoading && contributors && contributors.length > 0 && (
         <div className="mt-4 flex items-center gap-2">
           <div className="flex -space-x-2">
@@ -186,7 +186,7 @@ const GoalCard = memo(({
         </div>
       )}
       
-      {/* Loading placeholder for contributors */}
+      {}
       {contributorsLoading && (
         <div className="mt-4 flex items-center gap-2">
           <div className="flex -space-x-2">
@@ -240,7 +240,7 @@ GoalCard.displayName = "GoalCard";
 export default function GoalsPage() {
   const currentYear = new Date().getFullYear();
   const { goals, allGoals, summary, search, setSearch, statusFilter, setStatusFilter, priorityFilter, setPriorityFilter, categoryFilter, setCategoryFilter, month, setMonth, year, setYear, resetFilters, resetFiltersToAll, loading, tableLoading, error, refetch,
-    // Pagination
+
     currentPage,
     pageSize,
     setPageSize,
@@ -269,8 +269,7 @@ export default function GoalsPage() {
   const [mobileChartTab, setMobileChartTab] = useState<'overview' | 'health'>('overview');
   const exportDropdownRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  
-  // State for goal contributors (avatars to display on goal cards)
+
   const [goalContributors, setGoalContributors] = useState<Record<string, { user_id: string; full_name: string; avatar_url: string | null; total_contributed: number }[]>>({});
   const [contributorsLoading, setContributorsLoading] = useState(false);
 
@@ -325,7 +324,6 @@ export default function GoalsPage() {
     { label: "Completed", value: (summary?.completedGoals ?? 0).toString() },
   ], [summary]);
 
-  // Export handlers
   const handleExportCSV = useCallback(() => {
     if (goals.length === 0) { alert("No goals to export"); return; }
     const exportData = goals.map((goal) => ({
@@ -384,7 +382,6 @@ export default function GoalsPage() {
     }
   }, [goals]);
 
-  // Close export dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
@@ -441,12 +438,11 @@ export default function GoalsPage() {
     return `conic-gradient(#10b981 0% ${cPct}%, #3b82f6 ${cPct}% ${cPct + ipPct}%, #f59e0b ${cPct + ipPct}% 100%)`;
   }, [allGoals.length, goalHealthData]);
 
-  // Loading state - only show full page skeleton on initial load, not filter changes
   if (loading && !tableLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-          {/* Header Skeleton */}
+          {}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
             <div>
               <Skeleton width={180} height={28} className="mb-2" />
@@ -459,9 +455,9 @@ export default function GoalsPage() {
             </div>
           </div>
 
-          {/* Scrollable Content Area for Mobile/Tablet - Skeleton */}
+          {}
           <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0">
-            {/* Summary Stats Skeleton */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {Array.from({ length: 3 }).map((_, i) => (
                 <Card key={i} className="p-4 sm:p-5">
@@ -475,7 +471,7 @@ export default function GoalsPage() {
               ))}
             </div>
 
-            {/* Charts Skeleton */}
+            {}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <Card className="lg:col-span-2 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -505,7 +501,7 @@ export default function GoalsPage() {
               </Card>
             </div>
 
-            {/* Overall Progress Skeleton */}
+            {}
             <Card className="p-4 sm:p-6">
               <div className="flex items-center justify-between mb-2">
                 <div>
@@ -517,7 +513,7 @@ export default function GoalsPage() {
               <Skeleton height={10} borderRadius={5} className="sm:h-3" />
             </Card>
 
-            {/* Filters Skeleton */}
+            {}
             <Card className="p-3 sm:p-4">
               <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
                 <Skeleton width={50} height={14} />
@@ -528,7 +524,7 @@ export default function GoalsPage() {
               </div>
             </Card>
 
-            {/* Goal Cards Skeleton */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <Card key={i} className="p-4 sm:p-5">
@@ -569,7 +565,7 @@ export default function GoalsPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-      {/* Header */}
+      {}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">Financial Goals</h2>
@@ -612,7 +608,7 @@ export default function GoalsPage() {
                 <span className="hidden sm:inline">Export</span>
                 <MoreHorizontal size={12} className="ml-1" />
               </Button>
-              {/* Dropdown */}
+              {}
               {exportDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50">
                   <Button
@@ -647,13 +643,13 @@ export default function GoalsPage() {
         </div>
       </div>
 
-      {/* Scrollable Content Area for Mobile/Tablet */}
+      {}
       <div
         ref={contentRef}
         className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth"
       >
 
-      {/* Summary Stats */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {summaryData.slice(0, 3).map((item, index) => {
           const icons = [Flag, PiggyBank, TrendingUp];
@@ -698,9 +694,9 @@ export default function GoalsPage() {
         })}
       </div>
 
-      {/* Charts Section */}
+      {}
       <div>
-        {/* Mobile Chart Tabs */}
+        {}
         <div className="flex p-1 bg-slate-100 rounded-lg lg:hidden mb-4">
           <Button
             variant="ghost"
@@ -725,7 +721,7 @@ export default function GoalsPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Progress Chart */}
+        {}
         <Card className={`lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer ${mobileChartTab === 'health' ? 'hidden lg:block' : ''}`}>
           <div className="flex items-center justify-between mb-6 sm:mb-8">
             <div>
@@ -769,7 +765,7 @@ export default function GoalsPage() {
                       onMouseLeave={() => setHoveredBar(null)}
                     />
 
-                    {/* Tooltip */}
+                    {}
                     {hoveredBar && hoveredBar.month === data.month && (
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-[10px] sm:text-xs rounded shadow-sm whitespace-nowrap z-50">
                         <div className="font-medium text-slate-700">{hoveredBar.month}</div>
@@ -808,7 +804,7 @@ export default function GoalsPage() {
           )}
         </Card>
 
-        {/* Goal Health */}
+        {}
         <Card className={`p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer ${mobileChartTab === 'overview' ? 'hidden lg:flex' : ''}`}>
           <h3 className="text-xs sm:text-sm font-semibold text-slate-900 mb-2">Goal Health</h3>
           <p className="text-[10px] sm:text-xs text-slate-500 mb-4 sm:mb-6 font-light">Track your goal completion status</p>
@@ -855,7 +851,7 @@ export default function GoalsPage() {
         </div>
       </div>
 
-      {/* Overall Goal Progress */}
+      {}
       <Card className="p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex items-center justify-between mb-2">
           <div>
@@ -871,7 +867,7 @@ export default function GoalsPage() {
         </div>
       </Card>
 
-      {/* Filters */}
+      {}
       <Card className="p-3 sm:p-4 hover:shadow-md transition-all group cursor-pointer">
         <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
@@ -955,7 +951,7 @@ export default function GoalsPage() {
         </div>
       </Card>
 
-      {/* Error State */}
+      {}
       {error && !loading && (
         <div className="flex flex-col items-center justify-center py-20">
           <p className="text-sm text-red-600 mb-2">{error}</p>
@@ -963,7 +959,7 @@ export default function GoalsPage() {
         </div>
       )}
 
-      {/* Empty State */}
+      {}
       {!loading && !error && goals.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20">
           <Inbox size={48} className="text-slate-300 mb-3" />
@@ -975,7 +971,7 @@ export default function GoalsPage() {
         </div>
       )}
 
-      {/* Goals Display */}
+      {}
       {viewMode === 'table' ? (
         <Card className="overflow-hidden">
           {tableLoading ? (
@@ -1072,7 +1068,7 @@ export default function GoalsPage() {
         </div>
       ) : (
         <>
-          {/* Goal Cards Grid (Desktop) */}
+          {}
           <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {goals.map((goal) => {
                 const _canEdit = canEditGoalFn(goal, currentUserRole, isOwner, user?.id);
@@ -1096,7 +1092,7 @@ export default function GoalsPage() {
               })}
             </div>
 
-          {/* Goal Cards Grid (Mobile) */}
+          {}
           <div className="md:hidden space-y-4">
             {goals.map((goal) => {
               const _canEdit = canEditGoalFn(goal, currentUserRole, isOwner, user?.id);
@@ -1122,7 +1118,7 @@ export default function GoalsPage() {
         </>
       )}
 
-      {/* Pagination */}
+      {}
       {!loading && !tableLoading && !error && goals.length > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0">
           <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
@@ -1197,7 +1193,7 @@ export default function GoalsPage() {
       )}
       </div>
 
-      {/* Modals */}
+      {}
       <AddGoalModal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}

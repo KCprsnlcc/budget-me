@@ -27,7 +27,6 @@ export const formatDate = (dateString: string): string => {
 };
 
 export const getDaysRemaining = (startDate: string, period: BudgetPeriod, endDate?: string): number => {
-  // For custom periods or if endDate is provided, use endDate directly
   if (endDate) {
     const end = new Date(endDate + "T23:59:59");
     const now = new Date();

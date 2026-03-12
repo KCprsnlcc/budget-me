@@ -65,17 +65,17 @@ export function DeleteAdminPredictionModal({
 
     return (
         <Modal open={open} onClose={onClose} className="max-w-md">
-            {/* Header */}
+            {}
             <ModalHeader onClose={onClose} className="px-5 py-3.5 bg-white border-b border-slate-100">
                 <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                     Delete {itemType}
                 </span>
             </ModalHeader>
 
-            {/* Body */}
+            {}
             <ModalBody className="px-5 py-8 bg-[#F9FAFB]/30">
                 <div className="text-center animate-txn-in">
-                    {/* Warning Message */}
+                    {}
                     <h2 className="text-lg font-bold text-slate-900 mb-3">
                         Delete {itemType} Permanently?
                     </h2>
@@ -83,7 +83,7 @@ export function DeleteAdminPredictionModal({
                         This action cannot be undone. The {itemType.toLowerCase()} will be permanently deleted from the user's account.
                     </p>
 
-                    {/* Details */}
+                    {}
                     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mx-auto max-w-sm">
                         <div className="p-5 space-y-0 divide-y divide-gray-100">
                             <div className="flex justify-between items-center py-2.5">
@@ -105,7 +105,7 @@ export function DeleteAdminPredictionModal({
                         </div>
                     </div>
 
-                    {/* Final Warning */}
+                    {}
                     <div className="p-3 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 mx-auto max-w-sm mt-6">
                         <div className="flex gap-2.5 items-start">
                             <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
@@ -122,7 +122,7 @@ export function DeleteAdminPredictionModal({
                 </div>
             </ModalBody>
 
-            {/* Footer */}
+            {}
             <ModalFooter className="px-6 py-4">
                 <Button variant="outline" size="sm" className="flex-1" onClick={onClose} disabled={loading}>
                     Cancel

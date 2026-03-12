@@ -60,7 +60,6 @@ export async function fetchResolvedAnomalies(userId: string, timeframe: string =
   try {
     const supabase = await createClient();
 
-    // Calculate date range based on timeframe
     const now = new Date();
     let startDate = new Date();
     
@@ -91,7 +90,6 @@ export async function fetchResolvedAnomalies(userId: string, timeframe: string =
       return { success: false, error: error.message, data: [] };
     }
 
-    // Transform data to match AnomalyAlert interface
     const transformedData = data.map((anomaly) => ({
       id: anomaly.id,
       type: anomaly.anomaly_type as any,

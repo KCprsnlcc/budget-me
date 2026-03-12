@@ -6,7 +6,6 @@ import { fetchUserFinancialContext, formatUserContextForAI } from "./user-data-s
 
 const supabase = createClient();
 
-// Available models from OpenRouter (configuration only — no API key exposed)
 export const AVAILABLE_MODELS: AIModel[] = [
   {
     id: "openai/gpt-oss-20b",
@@ -89,7 +88,6 @@ export const AVAILABLE_MODELS: AIModel[] = [
   },
 ];
 
-// System prompt for BudgetSense AI
 const SYSTEM_PROMPT = `You are BudgetSense AI, a personal financial assistant integrated into the BudgetSense budgeting application. Your role is to help users understand their finances, analyze spending patterns, provide budgeting advice, and answer questions about their financial data.
 
 Guidelines:
@@ -137,27 +135,22 @@ export interface ExportResult {
   error?: string;
 }
 
-// Fetch available models (returns local config, could be enhanced to fetch from OpenRouter)
 export async function fetchAvailableModels(): Promise<{ data: AIModel[]; error: string | null }> {
   try {
-    // Return the locally configured models
     return { data: AVAILABLE_MODELS, error: null };
   } catch (err) {
     return { data: [], error: "Failed to load AI models" };
   }
 }
 
-// Send message via secure backend API route (no direct OpenRouter access)
 export async function sendMessageToAI(
   messages: MessageType[],
   modelId: string,
   userId: string
 ): Promise<SendMessageResult> {
   try {
-    // Check if any message has image attachments
     const hasImageAttachment = messages.some(msg => msg.attachment && msg.attachment.type.startsWith('image/'));
 
-    // Check if the selected model supports vision
     const selectedModel = AVAILABLE_MODELS.find(model => model.id === modelId);
     if (hasImageAttachment && selectedModel && !selectedModel.hasVision) {
       return {
@@ -166,7 +159,6 @@ export async function sendMessageToAI(
       };
     }
 
-    // Fetch user's financial context from Supabase
     let userContext = "";
     try {
       const { data: userData, error: userDataError } = await fetchUserFinancialContext(userId);
@@ -174,17 +166,13 @@ export async function sendMessageToAI(
         userContext = "\n\n" + formatUserContextForAI(userData);
       }
     } catch {
-      // Silent fail - continue without user context
     }
 
-    // Build system prompt with user context
     const enhancedSystemPrompt = SYSTEM_PROMPT + userContext;
 
-    // Build messages array for API
     const apiMessages = [
       { role: "system", content: enhancedSystemPrompt },
       ...messages.map((msg) => {
-        // If message has image attachment, use content array format
         if (msg.attachment && msg.attachment.type.startsWith('image/') && msg.attachment.url) {
           return {
             role: msg.role,
@@ -203,7 +191,6 @@ export async function sendMessageToAI(
           };
         }
 
-        // Regular text message
         return {
           role: msg.role,
           content: msg.content,
@@ -211,7 +198,6 @@ export async function sendMessageToAI(
       }),
     ];
 
-    // ─── Call secure backend API route instead of OpenRouter directly ───
     const response = await fetch("/api/ai/chat", {
       method: "POST",
       headers: {
@@ -228,7 +214,6 @@ export async function sendMessageToAI(
       const errorData = await response.json().catch(() => ({}));
       const errorMessage = errorData.error || `API error: ${response.status}`;
 
-      // Handle specific status codes
       if (response.status === 401) {
         return {
           success: false,
@@ -242,7 +227,6 @@ export async function sendMessageToAI(
         };
       }
       if (response.status === 403) {
-        // Log the actual error for debugging
         console.error("[CHATBOT] 403 error:", errorData);
         return {
           success: false,
@@ -250,7 +234,6 @@ export async function sendMessageToAI(
         };
       }
 
-      // Check for image analysis errors
       if (response.status === 400 && hasImageAttachment) {
         return {
           success: false,
@@ -274,7 +257,6 @@ export async function sendMessageToAI(
       };
     }
 
-    // Create AI message
     const aiMessage: MessageType = {
       id: `ai-${Date.now()}`,
       role: "assistant",
@@ -286,11 +268,9 @@ export async function sendMessageToAI(
       model: modelId,
     };
 
-    // Persist to database if table exists (graceful degradation)
     try {
       await persistMessage(userId, aiMessage);
     } catch {
-      // Silent fail - message still works even if persistence fails
     }
 
     return {
@@ -306,21 +286,17 @@ export async function sendMessageToAI(
   }
 }
 
-// Persist message to database (best effort)
 async function persistMessage(userId: string, message: MessageType): Promise<void> {
   try {
-    // Check if chatbot_messages table exists by attempting a minimal query
     const { error: tableCheckError } = await supabase
       .from("chatbot_messages")
       .select("id")
       .limit(1);
 
-    // If table doesn't exist, skip persistence
     if (tableCheckError?.message?.includes("does not exist")) {
       return;
     }
 
-    // Persist the message
     await supabase.from("chatbot_messages").insert({
       user_id: userId,
       role: message.role,
@@ -329,14 +305,11 @@ async function persistMessage(userId: string, message: MessageType): Promise<voi
       created_at: new Date().toISOString(),
     });
   } catch {
-    // Silent fail - don't break the chat flow if persistence fails
   }
 }
 
-// Save welcome message to database
 export async function saveWelcomeMessage(userId: string, userProfile?: { fullName?: string | null; email?: string; avatarUrl?: string | null; role?: string; currencyPreference?: string }): Promise<{ success: boolean; error?: string }> {
   try {
-    // Import the welcome message generator
     const { generateWelcomeMessage } = await import('./welcome-messages');
     const { question, suggestions } = generateWelcomeMessage(userProfile as any);
 
@@ -351,7 +324,6 @@ export async function saveWelcomeMessage(userId: string, userProfile?: { fullNam
       model: getDefaultModel().id,
     };
 
-    // Save message with suggestions
     await supabase.from("chatbot_messages").insert({
       user_id: userId,
       role: welcomeMessage.role,
@@ -368,14 +340,6 @@ export async function saveWelcomeMessage(userId: string, userProfile?: { fullNam
   }
 }
 
-// Fetch chat history from database with pagination
-/**
- * Fetches content for specific messages by their IDs.
- * Used for lazy loading message content when messages come into view.
- * 
- * @param messageIds - Array of message IDs to fetch content for
- * @returns Promise with message content mapped by ID
- */
 export async function fetchMessageContent(
   messageIds: string[]
 ): Promise<{ data: Record<string, string>; error: string | null }> {
@@ -393,7 +357,6 @@ export async function fetchMessageContent(
       return { data: {}, error: error.message };
     }
 
-    // Map content by message ID
     const contentMap: Record<string, string> = {};
     (data || []).forEach((row) => {
       contentMap[row.id] = row.content || "";
@@ -405,19 +368,6 @@ export async function fetchMessageContent(
   }
 }
 
-/**
- * Fetches chat history with optimized loading strategy.
- * 
- * OPTIMIZATION: This function now supports two loading modes:
- * 1. Metadata-only mode: Loads only essential fields (id, role, timestamp, model) for initial page load
- * 2. Full content mode: Loads complete message content when needed
- * 
- * @param userId - The user ID to fetch chat history for
- * @param limit - Number of messages to fetch
- * @param before - Timestamp to fetch messages before (for pagination)
- * @param metadataOnly - If true, only loads essential fields without content
- * @returns Promise with message data, error status, and hasMore flag
- */
 export async function fetchChatHistory(
   userId: string,
   limit: number = 20,
@@ -425,20 +375,17 @@ export async function fetchChatHistory(
   metadataOnly: boolean = false
 ): Promise<{ data: MessageType[]; error: string | null; hasMore: boolean }> {
   try {
-    // Select fields based on loading mode
     const selectFields = metadataOnly
       ? "id, role, created_at, model, suggestions, attachment"
       : "*";
 
-    // Check if chatbot_messages table exists
     let query = supabase
       .from("chatbot_messages")
       .select(selectFields)
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
-      .limit(limit + 1); // Fetch one extra to check if there are more
+      .limit(limit + 1);
 
-    // If before timestamp is provided, fetch messages before that timestamp
     if (before) {
       query = query.lt("created_at", before);
     }
@@ -446,7 +393,6 @@ export async function fetchChatHistory(
     const { data, error } = await query;
 
     if (error?.message?.includes("does not exist")) {
-      // Table doesn't exist, return empty array
       return { data: [], error: null, hasMore: false };
     }
 
@@ -454,14 +400,13 @@ export async function fetchChatHistory(
       return { data: [], error: error.message, hasMore: false };
     }
 
-    // Check if there are more messages
     const hasMore = (data || []).length > limit;
     const messages = (data || []).slice(0, limit);
 
     const mappedMessages: MessageType[] = messages.map((row: any) => ({
       id: row.id,
       role: row.role as "assistant" | "user",
-      content: metadataOnly ? "" : row.content, // Empty content in metadata-only mode
+      content: metadataOnly ? "" : row.content,
       timestamp: new Date(row.created_at).toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
@@ -469,28 +414,24 @@ export async function fetchChatHistory(
       model: row.model,
       suggestions: row.suggestions || [],
       attachment: row.attachment || undefined,
-      created_at: row.created_at, // Keep for pagination
-      isContentLoaded: !metadataOnly, // Track if content is loaded
+      created_at: row.created_at,
+      isContentLoaded: !metadataOnly,
     }));
 
-    // Reverse to show oldest first
     return { data: mappedMessages.reverse(), error: null, hasMore };
   } catch (err) {
-    return { data: [], error: null, hasMore: false }; // Graceful degradation
+    return { data: [], error: null, hasMore: false };
   }
 }
 
-// Clear all chat messages for user
 export async function clearChatHistory(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    // Check if chatbot_messages table exists
     const { error: tableCheckError } = await supabase
       .from("chatbot_messages")
       .select("id")
       .limit(1);
 
     if (tableCheckError?.message?.includes("does not exist")) {
-      // Table doesn't exist, consider it successful
       return { success: true };
     }
 
@@ -510,7 +451,6 @@ export async function clearChatHistory(userId: string): Promise<{ success: boole
   }
 }
 
-// Export chat in various formats
 export async function exportChat(
   messages: MessageType[],
   format: ExportFormat,
@@ -522,18 +462,16 @@ export async function exportChat(
 
     switch (format) {
       case "pdf": {
-        // Generate HTML for PDF-like formatting
         const html = generatePDFHtml(messages, modelName);
         downloadFile(`${filename}.pdf`, html, "text/html");
         return { success: true, filename: `${filename}.pdf` };
       }
 
       case "csv": {
-        // Generate CSV format
         let csv = "Role,Timestamp,Content,Model\n";
         messages.forEach((msg) => {
           const role = msg.role === "assistant" ? "BudgetSense AI" : "You";
-          const content = `"${msg.content.replace(/"/g, '""')}"`; // Escape quotes
+          const content = `"${msg.content.replace(/"/g, '""')}"`;
           const timestamp = msg.timestamp || "";
           const model = msg.model || "";
           csv += `${role},"${timestamp}",${content},"${model}"\n`;
@@ -552,7 +490,6 @@ export async function exportChat(
   }
 }
 
-// Helper function to download file
 function downloadFile(filename: string, content: string, mimeType: string): void {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
@@ -565,7 +502,6 @@ function downloadFile(filename: string, content: string, mimeType: string): void
   URL.revokeObjectURL(url);
 }
 
-// Generate HTML for PDF export
 function generatePDFHtml(messages: MessageType[], modelName: string): string {
   const messageHtml = messages
     .map((msg) => {
@@ -666,7 +602,6 @@ function generatePDFHtml(messages: MessageType[], modelName: string): string {
   `;
 }
 
-// Get default model
 export function getDefaultModel(): AIModel {
   return AVAILABLE_MODELS.find((m) => m.isDefault) || AVAILABLE_MODELS[0];
 }

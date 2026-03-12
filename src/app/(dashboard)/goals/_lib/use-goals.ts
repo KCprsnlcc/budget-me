@@ -14,7 +14,6 @@ export function useGoals() {
   const { user } = useAuth();
   const userId = user?.id ?? "";
 
-  // ----- Filter state -----
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -22,19 +21,16 @@ export function useGoals() {
   const [month, setMonth] = useState<number | "all">("all");
   const [year, setYear] = useState<number | "all">("all");
 
-  // ----- Pagination state -----
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [goals, setGoals] = useState<GoalType[]>([]);
   const [summary, setSummary] = useState<GoalSummary | null>(null);
 
-  // ----- Loading / error -----
   const [loading, setLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ----- Build filters object -----
   const filters: GoalFilters = useMemo(
     () => ({
       status: statusFilter || undefined,
@@ -46,7 +42,6 @@ export function useGoals() {
     [statusFilter, priorityFilter, categoryFilter, month, year]
   );
 
-  // ----- Fetch main data when filters change -----
   const fetchData = useCallback(async (isFilterChange = false) => {
     if (!userId) return;
     
@@ -66,8 +61,7 @@ export function useGoals() {
       setGoals(goalsResult.data);
       setTotalCount(goalsResult.count ?? 0);
       if (goalsResult.error) setError(goalsResult.error);
-      
-      // Only update summary on initial load or major filter changes
+
       if (!isFilterChange || (month !== "all" || year !== "all")) {
         setSummary(summaryResult);
       }
@@ -83,18 +77,15 @@ export function useGoals() {
     fetchData();
   }, [fetchData]);
 
-  // ----- Separate effect for filter changes to avoid full refresh -----
   useEffect(() => {
     if (goals.length > 0) {
       fetchData(true);
     }
   }, [filters, currentPage, pageSize]);
 
-  // ----- Client-side search and date filtering (instant, no re-query) -----
   const filteredGoals = useMemo(() => {
     let filtered = goals;
-    
-    // Apply search filtering
+
     if (search.trim()) {
       const q = search.toLowerCase();
       filtered = filtered.filter(
@@ -105,8 +96,7 @@ export function useGoals() {
           (g.notes ?? "").toLowerCase().includes(q)
       );
     }
-    
-    // Apply date filtering
+
     if (month !== "all") {
       filtered = filtered.filter((g) => {
         const goalDate = new Date(g.deadline + "T00:00:00");
@@ -124,17 +114,14 @@ export function useGoals() {
     return filtered;
   }, [goals, search, month, year]);
 
-  // ----- Refetch (passed to modals as onSuccess) -----
   const refetch = useCallback(() => {
     fetchData();
   }, [fetchData]);
 
-  // ----- Refetch only table data (for filter changes) -----
   const refetchTable = useCallback(() => {
     fetchData(true);
   }, [fetchData]);
 
-  // ----- Reset filters -----
   const resetFilters = useCallback(() => {
     setStatusFilter("");
     setPriorityFilter("");
@@ -155,7 +142,6 @@ export function useGoals() {
     setCurrentPage(1);
   }, []);
 
-  // Pagination helpers
   const totalPages = pageSize === Number.MAX_SAFE_INTEGER ? 1 : Math.ceil(totalCount / pageSize);
   const hasNextPage = currentPage < totalPages;
   const hasPreviousPage = currentPage > 1;
@@ -178,12 +164,10 @@ export function useGoals() {
     }
   }, [hasPreviousPage]);
 
-  // Reset page when filters change or page size changes
   useEffect(() => {
     setCurrentPage(1);
   }, [statusFilter, priorityFilter, categoryFilter, month, year, pageSize]);
 
-  // Handle page size change
   const handlePageSizeChange = useCallback((newSize: number | "all") => {
     if (newSize === "all") {
       setPageSize(Number.MAX_SAFE_INTEGER);
@@ -194,11 +178,11 @@ export function useGoals() {
   }, []);
 
   return {
-    // Data
+
     goals: filteredGoals,
     allGoals: goals,
     summary,
-    // Filters
+
     statusFilter,
     setStatusFilter,
     priorityFilter,
@@ -211,13 +195,13 @@ export function useGoals() {
     year, setYear,
     resetFilters,
     resetFiltersToAll,
-    // State
+
     loading,
     tableLoading,
     error,
     refetch,
     refetchTable,
-    // Pagination
+
     currentPage,
     pageSize,
     setPageSize,

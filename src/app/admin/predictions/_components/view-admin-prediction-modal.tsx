@@ -84,7 +84,6 @@ export function ViewAdminPredictionModal({
     if (dataSource === "reports" && !report) return null;
     if (dataSource === "insights" && !insight) return null;
 
-    // Unified data extraction
     const item = dataSource === "reports" ? report! : insight!;
     const userId = item.user_id;
     const userEmail = item.user_email;
@@ -97,7 +96,7 @@ export function ViewAdminPredictionModal({
 
     return (
         <Modal open={open} onClose={handleClose} className="max-w-[520px]">
-            {/* Header */}
+            {}
             <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-slate-100">
                 <div className="flex items-center gap-3">
                     <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
@@ -109,15 +108,15 @@ export function ViewAdminPredictionModal({
                 </div>
             </ModalHeader>
 
-            {/* Stepper */}
+            {}
             <Stepper steps={STEPS} currentStep={step} />
 
-            {/* Body */}
+            {}
             <ModalBody className="px-5 py-5">
-                {/* STEP 1: Overview */}
+                {}
                 {step === 1 && (
                     <div className="space-y-6 animate-txn-in">
-                        {/* Header */}
+                        {}
                         <div className="text-center p-6 border border-slate-200 rounded-xl">
                             <div className="flex justify-center mb-3">
                                 <UserAvatar
@@ -158,7 +157,7 @@ export function ViewAdminPredictionModal({
                             )}
                         </div>
 
-                        {/* Key Information */}
+                        {}
                         <div>
                             <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">
                                 {dataSource === "reports" ? "Report" : "Insight"} Information
@@ -206,7 +205,7 @@ export function ViewAdminPredictionModal({
                             </div>
                         </div>
 
-                        {/* Admin Status (insights only) */}
+                        {}
                         {dataSource === "insights" && insight!.validation_notes && (
                             <div>
                                 <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Admin Notes</h4>
@@ -224,15 +223,15 @@ export function ViewAdminPredictionModal({
                     </div>
                 )}
 
-                {/* STEP 2: Data & Analysis */}
+                {}
                 {step === 2 && (
                     <div className="space-y-4 animate-txn-in">
                         {dataSource === "reports" && report && report.prediction_data ? (
                             <>
-                                {/* Predictions Type - Use fullForecastData, fullCategoryPredictions, etc. */}
+                                {}
                                 {report.report_type === "predictions" && report.prediction_data.fullForecastData ? (
                                     <div className="space-y-4">
-                                        {/* Extract summary from saved data */}
+                                        {}
                                         {(() => {
                                             const summary = {
                                                 monthlyIncome: report.prediction_data.projectedIncome || 0,
@@ -244,7 +243,7 @@ export function ViewAdminPredictionModal({
                                             
                                             return (
                                                 <>
-                                                    {/* Summary Cards */}
+                                                    {}
                                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                         <div className="border border-slate-200 rounded-xl p-4">
                                                             <div className="flex justify-between items-start mb-3">
@@ -288,7 +287,7 @@ export function ViewAdminPredictionModal({
                                                         </div>
                                                     </div>
 
-                                                    {/* Income vs Expenses */}
+                                                    {}
                                                     <div className="border border-slate-200 rounded-xl p-5">
                                                         <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                             <BarChart3 size={14} className="text-emerald-500" />Income vs Expenses Forecast
@@ -312,7 +311,7 @@ export function ViewAdminPredictionModal({
                                             );
                                         })()}
 
-                                        {/* Category Predictions */}
+                                        {}
                                         {report.prediction_data.fullCategoryPredictions && report.prediction_data.fullCategoryPredictions.length > 0 && (
                                             <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -339,7 +338,7 @@ export function ViewAdminPredictionModal({
                                             </div>
                                         )}
 
-                                        {/* Expense Types */}
+                                        {}
                                         {report.prediction_data.fullExpenseTypes && (
                                             <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -364,7 +363,7 @@ export function ViewAdminPredictionModal({
                                             </div>
                                         )}
 
-                                        {/* Transaction Behavior */}
+                                        {}
                                         {report.prediction_data.fullBehaviorInsights && report.prediction_data.fullBehaviorInsights.length > 0 && (
                                             <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -388,7 +387,7 @@ export function ViewAdminPredictionModal({
                                     </div>
                                 ) : report.report_type === "financial_intelligence" && report.prediction_data.fullAIInsights ? (
                                     <div className="space-y-4">
-                                        {/* Financial Summary */}
+                                        {}
                                         <div className="border border-slate-200 rounded-xl p-5">
                                             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                 <Wand2 size={14} className="text-emerald-500" />Financial Summary
@@ -396,7 +395,7 @@ export function ViewAdminPredictionModal({
                                             <p className="text-xs text-slate-600 leading-relaxed">{report.prediction_data.fullAIInsights.financialSummary}</p>
                                         </div>
 
-                                        {/* Risk Assessment */}
+                                        {}
                                         <div className="border border-slate-200 rounded-xl p-5">
                                             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                 <AlertTriangle size={14} className="text-emerald-500" />Risk Assessment
@@ -410,7 +409,7 @@ export function ViewAdminPredictionModal({
                                             <p className="text-xs text-slate-600 leading-relaxed">{report.prediction_data.fullAIInsights.riskAnalysis}</p>
                                         </div>
 
-                                        {/* Growth Potential */}
+                                        {}
                                         <div className="border border-slate-200 rounded-xl p-5">
                                             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                 <TrendingUp size={14} className="text-emerald-500" />Growth Potential
@@ -419,7 +418,7 @@ export function ViewAdminPredictionModal({
                                             <p className="text-xs text-slate-600 leading-relaxed">{report.prediction_data.fullAIInsights.growthAnalysis}</p>
                                         </div>
 
-                                        {/* Recommendations */}
+                                        {}
                                         {report.prediction_data.fullAIInsights.recommendations.length > 0 && (
                                             <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -441,7 +440,7 @@ export function ViewAdminPredictionModal({
                                             </div>
                                         )}
 
-                                        {/* Risk Mitigation */}
+                                        {}
                                         {report.prediction_data.fullAIInsights.riskMitigationStrategies.length > 0 && (
                                             <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -461,7 +460,7 @@ export function ViewAdminPredictionModal({
                                             </div>
                                         )}
 
-                                        {/* Long-term Opportunities */}
+                                        {}
                                         {report.prediction_data.fullAIInsights.longTermOpportunities.length > 0 && (
                                             <div className="border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -490,15 +489,14 @@ export function ViewAdminPredictionModal({
                             </>
                         ) : dataSource === "insights" && insight ? (
                             <div className="space-y-4">
-                                {/* Extract data from JSONB fields based on actual database structure */}
+                                {}
                                 {(() => {
-                                    // Extract insights from JSONB field
+
                                     const insightsData = insight.insights || {};
                                     const riskData = insight.risk_assessment || {};
                                     const recommendationsData = insight.recommendations || [];
                                     const opportunityData = insight.opportunity_areas || {};
 
-                                    // Extract nested data
                                     const financialSummary = insightsData.financial_summary || "";
                                     const growthPotential = insightsData.growth_potential || "";
                                     const growthAnalysis = insightsData.growth_analysis || "";
@@ -512,7 +510,7 @@ export function ViewAdminPredictionModal({
 
                                     return hasCompleteData ? (
                                         <>
-                                            {/* Financial Summary */}
+                                            {}
                                             {financialSummary && (
                                                 <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -522,7 +520,7 @@ export function ViewAdminPredictionModal({
                                                 </div>
                                             )}
 
-                                            {/* Risk Assessment */}
+                                            {}
                                             {(riskLevel || riskScore || riskAnalysis) && (
                                                 <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -542,7 +540,7 @@ export function ViewAdminPredictionModal({
                                                 </div>
                                             )}
 
-                                            {/* Growth Potential */}
+                                            {}
                                             {(growthPotential || growthAnalysis) && (
                                                 <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -557,7 +555,7 @@ export function ViewAdminPredictionModal({
                                                 </div>
                                             )}
 
-                                            {/* Recommendations */}
+                                            {}
                                             {Array.isArray(recommendationsData) && recommendationsData.length > 0 && (
                                                 <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -584,7 +582,7 @@ export function ViewAdminPredictionModal({
                                                 </div>
                                             )}
 
-                                            {/* Risk Mitigation Strategies */}
+                                            {}
                                             {Array.isArray(riskMitigationStrategies) && riskMitigationStrategies.length > 0 && (
                                                 <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -611,7 +609,7 @@ export function ViewAdminPredictionModal({
                                                 </div>
                                             )}
 
-                                            {/* Long-term Opportunities */}
+                                            {}
                                             {Array.isArray(longTermOpportunities) && longTermOpportunities.length > 0 && (
                                                 <div className="border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -647,7 +645,7 @@ export function ViewAdminPredictionModal({
                                         </>
                                     ) : (
                                         <>
-                                            {/* Fallback: Show basic info when no detailed insights available */}
+                                            {}
                                             <div className="bg-white border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                     <AlertTriangle size={14} className="text-amber-500" />No Detailed Insights Available
@@ -655,7 +653,7 @@ export function ViewAdminPredictionModal({
                                                 <p className="text-xs text-slate-600 mb-4">This AI insight record doesn't contain detailed analysis data. It may be an older record or the data structure has changed.</p>
                                             </div>
 
-                                            {/* Show basic risk assessment if available */}
+                                            {}
                                             {riskData && Object.keys(riskData).length > 0 && (
                                                 <div className="bg-white border border-slate-200 rounded-xl p-5">
                                                     <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
@@ -672,7 +670,7 @@ export function ViewAdminPredictionModal({
                                                 </div>
                                             )}
 
-                                            {/* AI Service Information */}
+                                            {}
                                             <div className="bg-white border border-slate-200 rounded-xl p-5">
                                                 <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
                                                     <Wand2Icon size={14} className="text-violet-500" />AI Service Information
@@ -713,7 +711,7 @@ export function ViewAdminPredictionModal({
                 )}
             </ModalBody>
 
-            {/* Footer */}
+            {}
             <ModalFooter className="flex justify-between">
                 {step > 1 ? (
                     <Button variant="secondary" size="sm" onClick={() => setStep(1)}>

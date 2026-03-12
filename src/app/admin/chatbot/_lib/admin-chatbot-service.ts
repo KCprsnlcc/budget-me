@@ -3,7 +3,6 @@ import type { AdminChatMessage, AdminChatSession, AdminChatbotStats, AdminChatbo
 
 const supabase = createClient();
 
-// Map raw DB row to AdminChatMessage
 function mapRow(row: Record<string, any>, profile?: Record<string, any> | null): AdminChatMessage {
     return {
         id: row.id,
@@ -21,20 +20,7 @@ function mapRow(row: Record<string, any>, profile?: Record<string, any> | null):
     };
 }
 
-// Fetch chat sessions grouped by user (one row per user)
-export /**
- * Fetches admin chat sessions with optimized data loading.
- * 
- * OPTIMIZATION: This function now only loads essential fields (user_id, role, model, created_at, content)
- * and immediately truncates message content to 120 characters to minimize memory usage and data transfer.
- * Individual chat messages are only loaded when viewing a specific chat session.
- * 
- * @param filters - Filtering options for the sessions
- * @param page - Page number for pagination
- * @param pageSize - Number of sessions per page
- * @param search - Search term for filtering sessions
- * @returns Promise with session data, error status, and total count
- */
+export 
 async function fetchAdminChatSessions(
     filters: AdminChatbotFilters = {},
     page: number = 1,
@@ -42,7 +28,7 @@ async function fetchAdminChatSessions(
     search: string = ""
 ): Promise<{ data: AdminChatSession[]; error: string | null; count: number }> {
     try {
-        // Build date filter for query
+
         let dateFilter: { start?: string; end?: string } = {};
         if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
             const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01T00:00:00`;
@@ -56,8 +42,6 @@ async function fetchAdminChatSessions(
             };
         }
 
-        // Optimized approach: Only select minimal fields needed for session aggregation
-        // Exclude 'id' and 'attachment' fields to reduce data transfer
         let query = supabase
             .from("chatbot_messages")
             .select("user_id, role, model, created_at, content")
@@ -72,7 +56,6 @@ async function fetchAdminChatSessions(
         const { data: rawData, error } = await query;
         if (error) return { data: [], error: error.message, count: 0 };
 
-        // Group by user_id to create session summaries
         const sessionMap = new Map<string, {
             user_id: string;
             total_messages: number;
@@ -87,7 +70,7 @@ async function fetchAdminChatSessions(
 
         for (const msg of rawData ?? []) {
             const existing = sessionMap.get(msg.user_id);
-            // Truncate content immediately to save memory - only keep preview length
+
             const truncatedContent = msg.content?.slice(0, 120) || "—";
             
             if (!existing) {
@@ -107,7 +90,7 @@ async function fetchAdminChatSessions(
                 if (msg.role === "user") existing.user_messages++;
                 else existing.assistant_messages++;
                 if (msg.model) existing.models_used.add(msg.model);
-                // Track earliest/latest (data is descending, so first seen = latest)
+
                 if (msg.created_at < existing.first_message_at) existing.first_message_at = msg.created_at;
                 if (msg.created_at > existing.last_message_at) {
                     existing.last_message_at = msg.created_at;
@@ -117,7 +100,6 @@ async function fetchAdminChatSessions(
             }
         }
 
-        // Get user profiles
         const userIds = Array.from(sessionMap.keys());
         const { data: profiles } = userIds.length > 0
             ? await supabase.from("profiles").select("id, email, full_name, avatar_url").in("id", userIds)
@@ -127,7 +109,6 @@ async function fetchAdminChatSessions(
             (profiles ?? []).map((p: any) => [p.id, { email: p.email, full_name: p.full_name, avatar_url: p.avatar_url }])
         );
 
-        // Build sessions array
         let sessions: AdminChatSession[] = Array.from(sessionMap.values()).map((s) => {
             const profile = profileMap.get(s.user_id);
             return {
@@ -146,10 +127,8 @@ async function fetchAdminChatSessions(
             };
         });
 
-        // Sort by last message date (most recent first)
         sessions.sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
 
-        // Apply search filter
         if (search.trim()) {
             const lowerSearch = search.toLowerCase();
             sessions = sessions.filter(
@@ -162,7 +141,6 @@ async function fetchAdminChatSessions(
 
         const totalCount = sessions.length;
 
-        // Paginate
         const from = (page - 1) * pageSize;
         const to = from + pageSize;
         const paginatedSessions = sessions.slice(from, to);
@@ -173,7 +151,6 @@ async function fetchAdminChatSessions(
     }
 }
 
-// Fetch all messages for a specific user (for conversation view) with pagination
 export async function fetchUserChatMessages(
     userId: string,
     limit: number = 20,
@@ -186,7 +163,6 @@ export async function fetchUserChatMessages(
         .order("created_at", { ascending: false })
         .limit(limit + 1); // Fetch one extra to check if there are more
 
-    // If before timestamp is provided, fetch messages before that timestamp
     if (before) {
         query = query.lt("created_at", before);
     }
@@ -195,56 +171,46 @@ export async function fetchUserChatMessages(
 
     if (error) return { data: [], error: error.message, hasMore: false };
 
-    // Fetch user profile
     const { data: profileData } = await supabase
         .from("profiles")
         .select("id, email, full_name, avatar_url")
         .eq("id", userId)
         .single();
 
-    // Check if there are more messages
     const hasMore = (data ?? []).length > limit;
     const messages = (data ?? []).slice(0, limit);
 
     const mappedData = messages.map((row: any) => mapRow(row, profileData));
-    
-    // Reverse to show oldest first
+
     return { data: mappedData.reverse(), error: null, hasMore };
 }
 
-// Fetch admin chatbot statistics
 export async function fetchAdminChatbotStats(): Promise<AdminChatbotStats | null> {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
 
-    // Total messages
     const { count: totalMessages } = await supabase
         .from("chatbot_messages")
         .select("*", { count: "exact", head: true });
 
-    // User messages count
     const { count: totalUserMessages } = await supabase
         .from("chatbot_messages")
         .select("*", { count: "exact", head: true })
         .eq("role", "user");
 
-    // Assistant messages count
     const { count: totalAssistantMessages } = await supabase
         .from("chatbot_messages")
         .select("*", { count: "exact", head: true })
         .eq("role", "assistant");
 
-    // Active users (unique users with messages)
     const { data: activeUsersData } = await supabase
         .from("chatbot_messages")
         .select("user_id");
     const activeUsers = new Set((activeUsersData ?? []).map((m: any) => m.user_id)).size;
 
-    // Average messages per user
     const avgMessagesPerUser = activeUsers > 0 ? (totalMessages ?? 0) / activeUsers : 0;
 
-    // Message growth (last 6 months)
     const messageGrowth: { month: string; count: number }[] = [];
     for (let i = 5; i >= 0; i--) {
         const d = new Date(currentYear, currentMonth - 1 - i, 1);
@@ -264,14 +230,12 @@ export async function fetchAdminChatbotStats(): Promise<AdminChatbotStats | null
         messageGrowth.push({ month: label, count: count ?? 0 });
     }
 
-    // Month-over-month growth
     const currentMonthCount = messageGrowth[messageGrowth.length - 1]?.count ?? 0;
     const previousMonthCount = messageGrowth[messageGrowth.length - 2]?.count ?? 0;
     const monthOverMonthGrowth = previousMonthCount > 0
         ? ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100
         : 0;
 
-    // Role distribution
     const { data: roleData } = await supabase
         .from("chatbot_messages")
         .select("role");
@@ -288,7 +252,6 @@ export async function fetchAdminChatbotStats(): Promise<AdminChatbotStats | null
         percentage: Math.round((count / totalRole) * 100),
     }));
 
-    // Model distribution (only assistant messages with models)
     const { data: modelData } = await supabase
         .from("chatbot_messages")
         .select("model")
@@ -309,7 +272,6 @@ export async function fetchAdminChatbotStats(): Promise<AdminChatbotStats | null
         percentage: Math.round((count / totalModel) * 100),
     }));
 
-    // Top users by message count
     const { data: userMsgData } = await supabase
         .from("chatbot_messages")
         .select("user_id, created_at");
@@ -324,7 +286,6 @@ export async function fetchAdminChatbotStats(): Promise<AdminChatbotStats | null
         });
     }
 
-    // Get top 5 users
     const sortedUsers = Array.from(userTotals.entries())
         .sort((a, b) => b[1].total_messages - a[1].total_messages)
         .slice(0, 5);
@@ -362,21 +323,18 @@ export async function fetchAdminChatbotStats(): Promise<AdminChatbotStats | null
     };
 }
 
-// Delete chatbot message (admin)
 export async function deleteAdminChatMessage(msgId: string): Promise<{ error: string | null }> {
     const { error } = await supabase.from("chatbot_messages").delete().eq("id", msgId);
     if (error) return { error: error.message };
     return { error: null };
 }
 
-// Delete all messages for a user session
 export async function deleteUserChatSession(userId: string): Promise<{ error: string | null }> {
     const { error } = await supabase.from("chatbot_messages").delete().eq("user_id", userId);
     if (error) return { error: error.message };
     return { error: null };
 }
 
-// Fetch all users for filter dropdown
 export async function fetchAllUsers(): Promise<{ id: string; email: string; full_name: string | null }[]> {
     const { data } = await supabase
         .from("profiles")
@@ -385,7 +343,6 @@ export async function fetchAllUsers(): Promise<{ id: string; email: string; full
     return data ?? [];
 }
 
-// Fetch distinct models used
 export async function fetchDistinctModels(): Promise<string[]> {
     const { data } = await supabase
         .from("chatbot_messages")

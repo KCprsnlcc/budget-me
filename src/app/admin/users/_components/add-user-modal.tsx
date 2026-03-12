@@ -29,7 +29,6 @@ const ROLES = [
   { value: "admin", label: "Admin", desc: "Full system access with administrative privileges and user management." },
 ];
 
-// Password generator function
 function generatePassword(length: number = 16): string {
   const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const lowercase = "abcdefghijklmnopqrstuvwxyz";
@@ -38,18 +37,16 @@ function generatePassword(length: number = 16): string {
   const allChars = uppercase + lowercase + numbers + symbols;
 
   let password = "";
-  // Ensure at least one of each type
+
   password += uppercase[Math.floor(Math.random() * uppercase.length)];
   password += lowercase[Math.floor(Math.random() * lowercase.length)];
   password += numbers[Math.floor(Math.random() * numbers.length)];
   password += symbols[Math.floor(Math.random() * symbols.length)];
 
-  // Fill the rest randomly
   for (let i = password.length; i < length; i++) {
     password += allChars[Math.floor(Math.random() * allChars.length)];
   }
 
-  // Shuffle the password
   return password.split('').sort(() => Math.random() - 0.5).join('');
 }
 
@@ -71,7 +68,6 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
     password: "", // Start empty to avoid hydration mismatch
   });
 
-  // Set initial password on mount
   useEffect(() => {
     if (open && !formData.password) {
       setFormData(prev => ({ ...prev, password: generatePassword() }));
@@ -160,12 +156,12 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
+      {}
       <Stepper steps={STEPS} currentStep={currentStep} />
 
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
 
-        {/* Step 1: Role Type */}
+        {}
         {currentStep === 1 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -213,7 +209,7 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
           </div>
         )}
 
-        {/* Step 2: User Details */}
+        {}
         {currentStep === 2 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -225,7 +221,7 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
               </h2>
             </div>
             <div className="space-y-5">
-              {/* Email */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                   Email Address <span className="text-slate-400">*</span>
@@ -239,7 +235,7 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                 />
               </div>
 
-              {/* Full Name */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                   Full Name <span className="text-slate-400">*</span>
@@ -253,7 +249,7 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                 />
               </div>
 
-              {/* Password */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                   Password <span className="text-slate-400">*</span>
@@ -304,7 +300,7 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                 </p>
               </div>
 
-              {/* Phone + Date of Birth */}
+              {}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
@@ -332,7 +328,7 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                 </div>
               </div>
 
-              {/* Active Status */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1.5 uppercase tracking-[0.04em]">
                   Status
@@ -348,7 +344,7 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
           </div>
         )}
 
-        {/* Step 3: Review */}
+        {}
         {currentStep === 3 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -360,7 +356,7 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
               </h2>
             </div>
             <div className="space-y-4">
-              {/* User Role Display */}
+              {}
               <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">User Role</div>
                 <div className="flex items-center justify-center gap-2 my-2">
@@ -378,7 +374,7 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                 </span>
               </div>
 
-              {/* Review Details */}
+              {}
               <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="p-5 space-y-0 divide-y divide-slate-100">
                   <ReviewRow label="Full Name" value={formData.full_name || "—"} />
@@ -389,7 +385,7 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                 </div>
               </div>
 
-              {/* Warning Notice */}
+              {}
               <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 items-start">
                 <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
                 <div>

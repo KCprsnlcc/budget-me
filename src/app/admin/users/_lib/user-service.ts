@@ -3,9 +3,6 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { User, UserFormState, UserFilters, UserStats } from "./types";
 
-/**
- * Fetch users with filters and pagination
- */
 export async function fetchUsers(
   filters: UserFilters,
   page: number = 1,
@@ -16,7 +13,6 @@ export async function fetchUsers(
   try {
     let query = supabase.from("profiles").select("*", { count: "exact" });
 
-    // Apply filters
     if (filters.search) {
       query = query.or(`email.ilike.%${filters.search}%,full_name.ilike.%${filters.search}%`);
     }
@@ -38,12 +34,10 @@ export async function fetchUsers(
       query = query.lte("created_at", filters.dateTo);
     }
 
-    // Get total count
     const { count } = await supabase
       .from("profiles")
       .select("*", { count: "exact", head: true });
 
-    // Apply pagination
     const offset = (page - 1) * pageSize;
     const limit = pageSize === Number.MAX_SAFE_INTEGER ? count || 1000 : pageSize;
 
@@ -63,25 +57,20 @@ export async function fetchUsers(
   }
 }
 
-/**
- * Fetch user statistics for dashboard cards
- */
 export async function fetchUserStats(): Promise<UserStats> {
   const supabase = await createClient();
 
   try {
-    // Total users
+
     const { count: totalUsers } = await supabase
       .from("profiles")
       .select("id", { count: "exact", head: true });
 
-    // Active users
     const { count: activeUsers } = await supabase
       .from("profiles")
       .select("id", { count: "exact", head: true })
       .eq("is_active", true);
 
-    // New this month
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
@@ -91,13 +80,11 @@ export async function fetchUserStats(): Promise<UserStats> {
       .select("id", { count: "exact", head: true })
       .gte("created_at", startOfMonth.toISOString());
 
-    // Admin count
     const { count: adminCount } = await supabase
       .from("profiles")
       .select("id", { count: "exact", head: true })
       .eq("role", "admin");
 
-    // User growth (last 6 months)
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
@@ -107,7 +94,6 @@ export async function fetchUserStats(): Promise<UserStats> {
       .gte("created_at", sixMonthsAgo.toISOString())
       .order("created_at", { ascending: true });
 
-    // Group by month
     const monthCounts = new Map<string, number>();
     growthData?.forEach((user) => {
       const date = new Date(user.created_at);
@@ -120,7 +106,6 @@ export async function fetchUserStats(): Promise<UserStats> {
       count,
     }));
 
-    // Role distribution
     const { data: roleData } = await supabase
       .from("profiles")
       .select("role");
@@ -151,14 +136,11 @@ export async function fetchUserStats(): Promise<UserStats> {
   }
 }
 
-/**
- * Create a new user
- */
 export async function createUser(data: UserFormState): Promise<User> {
   const supabase = await createAdminClient();
 
   try {
-    // First, create the auth user with Supabase Auth
+
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: data.email,
       password: data.password,
@@ -171,7 +153,6 @@ export async function createUser(data: UserFormState): Promise<User> {
     if (authError) throw authError;
     if (!authData.user) throw new Error("Failed to create auth user");
 
-    // Then upsert the profile with additional information
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .upsert({
@@ -200,9 +181,6 @@ export async function createUser(data: UserFormState): Promise<User> {
   }
 }
 
-/**
- * Update an existing user
- */
 export async function updateUser(id: string, data: Partial<UserFormState>): Promise<User> {
   const supabase = await createAdminClient();
 
@@ -237,9 +215,6 @@ export async function updateUser(id: string, data: Partial<UserFormState>): Prom
   }
 }
 
-/**
- * Deactivate a user (soft delete)
- */
 export async function deactivateUser(id: string): Promise<void> {
   const supabase = await createClient();
 
@@ -259,9 +234,6 @@ export async function deactivateUser(id: string): Promise<void> {
   }
 }
 
-/**
- * Activate a user
- */
 export async function activateUser(id: string): Promise<void> {
   const supabase = await createClient();
 
@@ -281,9 +253,6 @@ export async function activateUser(id: string): Promise<void> {
   }
 }
 
-/**
- * Delete a user permanently
- */
 export async function deleteUser(id: string): Promise<void> {
   const supabase = await createClient();
 

@@ -6,7 +6,6 @@ export async function syncUserProfile(userId: string) {
   const supabase = await createClient();
   
   try {
-    // Check if profile already exists
     const { data: existingProfile } = await supabase
       .from("profiles")
       .select("id")
@@ -17,14 +16,12 @@ export async function syncUserProfile(userId: string) {
       return { success: true, message: "Profile already exists" };
     }
 
-    // Get user data from auth.users using admin function
     const { data: userData, error: userError } = await supabase.rpc('get_user_metadata', { 
       user_id: userId 
     });
 
     if (userError) {
       console.error("Error fetching user metadata:", userError);
-      // Create basic profile without metadata
       const { error: insertError } = await supabase
         .from("profiles")
         .insert({
@@ -42,7 +39,6 @@ export async function syncUserProfile(userId: string) {
       return { success: true, message: "Created basic profile" };
     }
 
-    // Create profile with user metadata
     const { error: insertError } = await supabase
       .from("profiles")
       .insert({

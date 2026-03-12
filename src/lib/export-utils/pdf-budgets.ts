@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { formatCurrencyPHP, getTimestampString } from "./formatters";
 import type { BudgetExportData } from "./types";
 
-/**
- * Export budgets as PDF
- */
 export function exportBudgetsToPDF(
   budgets: BudgetExportData[],
   summary?: { totalBudgets?: number; totalBudget?: number; totalSpent?: number; remaining?: number }
@@ -17,7 +14,6 @@ export function exportBudgetsToPDF(
 
   const doc = createBasePDF("Budgets Report", `${budgets.length} budgets`);
 
-  // Summary section with email-style cards
   let currentY = 45;
   const margin = 15;
 
@@ -32,7 +28,6 @@ export function exportBudgetsToPDF(
     const cardHeight = 20;
     const cardSpacing = 2;
 
-    // Total Budgets
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
     doc.setDrawColor(COLORS.border);
@@ -48,7 +43,6 @@ export function exportBudgetsToPDF(
     doc.setFont("helvetica", "bold");
     doc.text(String(summary.totalBudgets || 0), margin + 3, currentY + 14);
 
-    // Total Budget Amount
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
     doc.setDrawColor(COLORS.border);
@@ -63,7 +57,6 @@ export function exportBudgetsToPDF(
     doc.setFont("helvetica", "bold");
     doc.text(formatCurrencyPHP(summary.totalBudget || 0), margin + cardWidth + cardSpacing + 3, currentY + 14);
 
-    // Total Spent
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin + (cardWidth + cardSpacing) * 2, currentY, cardWidth, cardHeight, 2, 2, "F");
     doc.setDrawColor(COLORS.border);
@@ -78,7 +71,6 @@ export function exportBudgetsToPDF(
     doc.setFont("helvetica", "bold");
     doc.text(formatCurrencyPHP(summary.totalSpent || 0), margin + (cardWidth + cardSpacing) * 2 + 3, currentY + 14);
 
-    // Remaining
     const remainingColor = (summary.remaining || 0) >= 0 ? COLORS.emerald : COLORS.red;
     doc.setFillColor(COLORS.cardBg);
     doc.roundedRect(margin + (cardWidth + cardSpacing) * 3, currentY, cardWidth, cardHeight, 2, 2, "F");
@@ -97,7 +89,6 @@ export function exportBudgetsToPDF(
     currentY += cardHeight + 12;
   }
 
-  // Budgets table
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(COLORS.dark);
@@ -107,9 +98,8 @@ export function exportBudgetsToPDF(
   const headers = ["Name", "Category", "Period", "Budget", "Spent", "Remaining", "Usage", "Health"];
   const keys: (keyof BudgetExportData)[] = ["budget_name", "category", "period", "amount", "spent", "remaining", "percentage", "health"];
   const formats: ("text" | "currency" | "number" | "percentage")[] = ["text", "text", "text", "currency", "currency", "currency", "text", "text"];
-  
-  // Custom column widths for better layout
-  const columnWidths = [28, 22, 18, 22, 22, 22, 14, 16]; // Total: 164mm
+
+  const columnWidths = [28, 22, 18, 22, 22, 22, 14, 16]; 
 
   addPDFTable(doc, headers, budgets, keys, formats, currentY, columnWidths);
 

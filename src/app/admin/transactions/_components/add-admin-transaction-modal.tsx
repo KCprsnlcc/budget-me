@@ -62,9 +62,6 @@ const TRANSACTION_TYPES = [
   { value: "contribution", label: "Contribution", desc: "Money allocated to savings goals or investments.", icon: Flag },
 ];
 
-
-
-// Helper function to convert emojis to Lucide icons
 function getLucideIcon(emoji: string): React.ComponentType<any> {
   const iconMap: Record<string, React.ComponentType<any>> = {
     "🏠": Home,
@@ -91,7 +88,6 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
   return iconMap[emoji] || FileText;
 }
 
-// Helper function to get account icon
 function getAccountIcon(accountName: string): React.ComponentType<any> {
   const name = accountName.toLowerCase();
   if (name.includes("bank") || name.includes("checking") || name.includes("savings")) return Building2;
@@ -105,7 +101,6 @@ function getAccountIcon(accountName: string): React.ComponentType<any> {
   return FileText;
 }
 
-// Helper function to get budget icon from category
 function getBudgetIcon(categoryIcon: string | null | undefined): React.ComponentType<any> {
   if (!categoryIcon) return FileText;
   return getLucideIcon(categoryIcon);
@@ -187,7 +182,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
     goal_id: "",
   });
 
-  // Load users when modal opens
   useEffect(() => {
     if (open && users.length === 0) {
       loadUsers(true);
@@ -217,7 +211,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
       .order("email")
       .range(from, to);
 
-    // Apply search filter if present
     if (userSearchQuery.trim()) {
       const searchTerm = userSearchQuery.toLowerCase();
       query = query.or(`email.ilike.%${searchTerm}%,full_name.ilike.%${searchTerm}%`);
@@ -230,7 +223,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
         setUsers(data);
         setPage(2);
       } else {
-        // Prevent duplicates by filtering out users that already exist
+
         setUsers(prev => {
           const existingIds = new Set(prev.map(u => u.id));
           const newUsers = data.filter(u => !existingIds.has(u.id));
@@ -238,7 +231,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
         });
         setPage(prev => prev + 1);
       }
-      // Check if we got a full page - if yes, there might be more
+
       setHasMore(data.length === pageSize);
     }
 
@@ -246,7 +239,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
     setLoadingMore(false);
   }, [loadingMore, hasMore, page, userSearchQuery]);
 
-  // Trigger search when query changes - only when modal is open and on step 1
   useEffect(() => {
     if (open && currentStep === 1) {
       const timeoutId = setTimeout(() => {
@@ -255,13 +247,13 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
       return () => clearTimeout(timeoutId);
     }
   }, [userSearchQuery, open, currentStep]);
-  // Infinite scroll handler - only when modal is open and on step 1
+
   useEffect(() => {
     const handleScroll = () => {
       if (!userListRef.current || loadingMore || !hasMore) return;
       
       const { scrollTop, scrollHeight, clientHeight } = userListRef.current;
-      // Trigger when user scrolls near the bottom (within 50px)
+
       if (scrollTop + clientHeight >= scrollHeight - 50) {
         loadUsers(false);
       }
@@ -274,11 +266,9 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
     }
   }, [loadingMore, hasMore, open, currentStep, loadUsers]);
 
-  // Load user-specific data when user is selected
   const loadUserData = async (userId: string) => {
     const supabase = createClient();
-    
-    // Load accounts
+
     const { data: accountsData } = await supabase
       .from("accounts")
       .select("id, account_name, account_number_masked, balance")
@@ -287,7 +277,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
       .order("account_name");
     setAccounts(accountsData ?? []);
 
-    // Load expense categories
     const { data: expenseCatsData } = await supabase
       .from("expense_categories")
       .select("id, category_name, icon, color")
@@ -296,7 +285,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
       .order("category_name");
     setExpenseCategories(expenseCatsData ?? []);
 
-    // Load income categories
     const { data: incomeCatsData } = await supabase
       .from("income_categories")
       .select("id, category_name, icon, color")
@@ -305,7 +293,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
       .order("category_name");
     setIncomeCategories(incomeCatsData ?? []);
 
-    // Load budgets
     const { data: budgetsData } = await supabase
       .from("budgets")
       .select(`
@@ -324,7 +311,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
       category_icon: budget.expense_categories?.icon || null,
     })));
 
-    // Load goals
     const { data: goalsData } = await supabase
       .from("goals")
       .select("id, goal_name")
@@ -364,7 +350,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
         toast.error("Please select a user");
         return;
       }
-      // Load user data for step 2
+
       await loadUserData(formData.user_id);
     }
     if (currentStep === 2) {
@@ -376,7 +362,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
         toast.error("Amount must be greater than 0");
         return;
       }
-      // Validate category based on type
+
       if (formData.type === "income" && !formData.income_category_id) {
         toast.error("Please select an income category");
         return;
@@ -413,7 +399,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
         expense_category_id: null,
       };
 
-      // Set category IDs based on type
       if (formData.type === "income" && formData.income_category_id) {
         payload.income_category_id = formData.income_category_id;
       } else if ((formData.type === "expense" || formData.type === "contribution") && formData.expense_category_id) {
@@ -444,7 +429,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
   const selectedGoal = goals.find(g => g.id === formData.goal_id);
   const selectedBudget = budgets.find(b => b.id === formData.budget_id);
 
-  // Helper: update field
   const updateField = useCallback(
     <K extends keyof FormData>(key: K, value: FormData[K]) => {
       setFormData((prev) => ({ ...prev, [key]: value }));
@@ -452,7 +436,6 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
     []
   );
 
-  // Helper: auto-select contribution category when goal is selected for contribution type
   const handleGoalSelectWithCategory = useCallback((value: string) => {
     updateField("goal_id", value);
     
@@ -499,7 +482,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
       <Stepper steps={STEPS} currentStep={currentStep} />
       
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* Step 1: User Select */}
+        {}
         {currentStep === 1 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -507,7 +490,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
               <p className="text-[11px] text-gray-500">Choose the user for this transaction.</p>
             </div>
             
-            {/* Search Input */}
+            {}
             <div className="relative mb-4">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -529,8 +512,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
               <div ref={userListRef} className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
                 {users.map((user, idx) => {
                   const selected = formData.user_id === user.id;
-                  
-                  // Create mock Supabase user for UserAvatar
+
                   const supabaseUser: SupabaseUser = {
                     id: user.id,
                     email: user.email,
@@ -586,7 +568,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                   </div>
                 )}
                 
-                {/* Loading more skeleton */}
+                {}
                 {loadingMore && (
                   <>
                     {Array.from({ length: 3 }).map((_, i) => (
@@ -599,7 +581,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
           </div>
         )}
 
-        {/* Step 2: Transaction Details */}
+        {}
         {currentStep === 2 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -611,7 +593,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
               </h2>
             </div>
             <div className="space-y-5">
-              {/* Transaction Type */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Transaction Type <span className="text-gray-400">*</span>
@@ -646,7 +628,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                             <h3 className="text-[13px] font-bold text-gray-900 mb-0.5">{type.label}</h3>
                             <p className="text-[11px] text-gray-500 leading-relaxed">{type.desc}</p>
                           </div>
-                          {/* Check indicator */}
+                          {}
                           <div
                             className={`w-[18px] h-[18px] rounded-full bg-emerald-500 text-white flex items-center justify-center transition-all duration-200 ${
                               selected ? "opacity-100 scale-100" : "opacity-0 scale-50"
@@ -661,7 +643,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 </div>
               </div>
 
-              {/* Amount */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Amount <span className="text-gray-400">*</span>
@@ -679,7 +661,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 </div>
               </div>
 
-              {/* Date */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Date <span className="text-gray-400">*</span>
@@ -692,7 +674,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 />
               </div>
 
-              {/* Category + Budget */}
+              {}
               <div className={`grid gap-4 ${formData.type === "expense" ? "grid-cols-2" : "grid-cols-1"}`}>
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
@@ -738,7 +720,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 )}
               </div>
 
-              {/* Goal */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Goal Contribution
@@ -757,7 +739,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 />
               </div>
 
-              {/* Account */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Account <span className="text-gray-400">*</span>
@@ -777,7 +759,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 />
               </div>
 
-              {/* Description */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Description <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
@@ -791,7 +773,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 />
               </div>
 
-              {/* Notes */}
+              {}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-700 mb-1.5 uppercase tracking-[0.04em]">
                   Notes <span className="text-gray-400 font-normal lowercase tracking-normal">(optional)</span>
@@ -808,7 +790,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
           </div>
         )}
 
-        {/* Step 3: Review */}
+        {}
         {currentStep === 3 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -820,7 +802,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
               </h2>
             </div>
             <div className="space-y-4">
-              {/* Transaction Type Display */}
+              {}
               <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
                 <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Transaction Type</div>
                 <div className="flex items-center justify-center gap-2 my-2">
@@ -833,7 +815,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 </div>
               </div>
 
-              {/* Review Details */}
+              {}
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="p-5 space-y-0 divide-y divide-gray-100">
                   <ReviewRow label="User" value={selectedUser?.full_name || selectedUser?.email || "—"} />
@@ -860,7 +842,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 </div>
               </div>
 
-              {/* Budget Impact Notice */}
+              {}
               {formData.type === "expense" && selectedBudget && (
                 <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
                   <TrendingUp size={16} className="flex-shrink-0 mt-px text-blue-500" />
@@ -873,7 +855,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
                 </div>
               )}
 
-              {/* Warning Notice */}
+              {}
               <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-slate-200 text-slate-700 items-start">
                 <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
                 <div>

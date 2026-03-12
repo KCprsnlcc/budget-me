@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { getTimestampString } from "./formatters";
 import type { AnalyticsAdminExportData } from "./types";
 
-/**
- * Export admin user analytics summaries as PDF
- */
 export function exportAdminAnalyticsToPDF(
     summaries: AnalyticsAdminExportData[],
     summary?: {
@@ -22,7 +19,6 @@ export function exportAdminAnalyticsToPDF(
 
     const doc = createBasePDF("User Analytics Management Report", `${summaries.length} user summaries`);
 
-    // Summary section
     let currentY = 45;
     const margin = 15;
 
@@ -37,7 +33,6 @@ export function exportAdminAnalyticsToPDF(
         const cardHeight = 20;
         const cardSpacing = 3;
 
-        // Total Reports card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -52,7 +47,6 @@ export function exportAdminAnalyticsToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.totalReports || 0).toLocaleString(), margin + 4, currentY + 14);
 
-        // Active Users card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -67,7 +61,6 @@ export function exportAdminAnalyticsToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.activeUsers || 0).toLocaleString(), margin + cardWidth + cardSpacing + 4, currentY + 14);
 
-        // Avg Confidence card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 2, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -82,7 +75,6 @@ export function exportAdminAnalyticsToPDF(
         doc.setFont("helvetica", "bold");
         doc.text(summary.avgConfidence || "0%", margin + (cardWidth + cardSpacing) * 2 + 4, currentY + 14);
 
-        // Data Points card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 3, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -100,7 +92,6 @@ export function exportAdminAnalyticsToPDF(
         currentY += cardHeight + 12;
     }
 
-    // Records table
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(COLORS.dark);
@@ -119,11 +110,10 @@ export function exportAdminAnalyticsToPDF(
     ];
     const formats: ("text" | "currency" | "number" | "percentage")[] = ["text", "text", "number", "number", "number", "number", "text"];
 
-    const columnWidths = [35, 45, 15, 15, 20, 15, 35]; // Total: 180mm
+    const columnWidths = [35, 45, 15, 15, 20, 15, 35]; 
 
     addPDFTable(doc, headers, summaries, keys, formats, currentY, columnWidths);
 
-    // Save
     const filename = `admin_analytics_${getTimestampString()}.pdf`;
     doc.save(filename);
 }

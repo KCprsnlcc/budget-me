@@ -28,7 +28,6 @@ export function useDashboard() {
   const userId = user?.id ?? "";
   const userEmail = user?.email ?? "";
 
-  // ----- Data state -----
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [recentTransactions, setRecentTransactions] = useState<RecentTransaction[]>([]);
   const [budgetProgress, setBudgetProgress] = useState<BudgetProgress[]>([]);
@@ -38,19 +37,16 @@ export function useDashboard() {
   const [latestInvitation, setLatestInvitation] = useState<Invitation | null>(null);
   const [insights, setInsights] = useState<InsightItem[]>([]);
 
-  // ----- Loading / error -----
   const [loading, setLoading] = useState(true);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [trendsLoading, setTrendsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ----- Derived: user display name -----
   const userName =
     user?.user_metadata?.full_name ||
     user?.email?.split("@")[0] ||
     "there";
 
-  // ----- Greeting based on time of day -----
   const [greeting, setGreeting] = useState(() => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
@@ -58,7 +54,6 @@ export function useDashboard() {
     return "Good evening";
   });
 
-  // Update greeting every minute to keep it current
   useEffect(() => {
     const updateGreeting = () => {
       const hour = new Date().getHours();
@@ -70,14 +65,12 @@ export function useDashboard() {
       setGreeting(prev => prev !== newGreeting ? newGreeting : prev);
     };
 
-    // Update immediately and then every minute
     updateGreeting();
-    const interval = setInterval(updateGreeting, 60000); // Update every minute
+    const interval = setInterval(updateGreeting, 60000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // ----- Fetch all dashboard data -----
   const fetchData = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
@@ -123,13 +116,11 @@ export function useDashboard() {
     fetchData();
   }, [fetchData]);
 
-  // ----- Invitation actions -----
   const handleAcceptInvitation = useCallback(
     async (invitationId: string) => {
       const { error } = await acceptInvitation(invitationId, userId);
       if (error) return { error };
       setLatestInvitation(null);
-      // Refresh data after accepting
       fetchData();
       return { error: null };
     },
@@ -146,22 +137,18 @@ export function useDashboard() {
     []
   );
 
-  // ----- Refetch -----
   const refetch = useCallback(() => {
     fetchData();
   }, [fetchData]);
 
-  // ----- Refresh insights only -----
   const refreshInsights = useCallback(async () => {
     if (!userId) return;
     setInsightsLoading(true);
     
     try {
-      // Add cache-busting by including timestamp in a way that forces fresh data
       const cacheBuster = Date.now();
       const insightsResult = await fetchInsights(userId);
       
-      // Force state update even if data is the same by adding timestamp
       setInsights(insightsResult.map(insight => ({
         ...insight,
         _cacheBust: cacheBuster
@@ -173,17 +160,14 @@ export function useDashboard() {
     }
   }, [userId]);
 
-  // ----- Refresh spending trends only -----
   const refreshSpendingTrends = useCallback(async () => {
     if (!userId) return;
     setTrendsLoading(true);
     
     try {
-      // Add cache-busting by including timestamp
       const cacheBuster = Date.now();
       const trendsResult = await fetchSpendingTrends(userId, 4);
       
-      // Force state update even if data is the same by adding timestamp
       setSpendingTrends(trendsResult.map(trend => ({
         ...trend,
         _cacheBust: cacheBuster
@@ -196,7 +180,6 @@ export function useDashboard() {
   }, [userId]);
 
   return {
-    // Data
     summary,
     recentTransactions,
     budgetProgress,
@@ -205,10 +188,8 @@ export function useDashboard() {
     spendingTrends,
     latestInvitation,
     insights,
-    // User info
     userName,
     greeting,
-    // State
     loading,
     insightsLoading,
     trendsLoading,
@@ -216,7 +197,6 @@ export function useDashboard() {
     refetch,
     refreshInsights,
     refreshSpendingTrends,
-    // Actions
     handleAcceptInvitation,
     handleDeclineInvitation,
   };

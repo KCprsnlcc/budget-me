@@ -88,15 +88,12 @@ export default function ChatbotPage() {
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
 
-  // File upload state
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // AI Rate Limit State
   const [rateLimitStatus, setRateLimitStatus] = useState<AIUsageStatus | null>(null);
 
-  // Close export dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
@@ -110,13 +107,11 @@ export default function ChatbotPage() {
     }
   }, [exportDropdownOpen]);
 
-  // Fetch available models and chat history on mount
   useEffect(() => {
     const initializeChat = async () => {
       if (!user?.id) return;
 
       try {
-        // Fetch user profile data
         const { data: profileData } = await fetchUserProfile(user.id);
         if (profileData) {
           const profile: UserProfile = {
@@ -133,26 +128,21 @@ export default function ChatbotPage() {
           setUserProfile(profile);
         }
 
-        // Fetch available models
         const { data: availableModels, error: modelsError } = await fetchAvailableModels();
         if (!modelsError && availableModels.length > 0) {
           setModels(availableModels);
-          // Only set default model if no model is currently selected
           if (!selectedModel || !availableModels.find(m => m.id === selectedModel)) {
             const defaultModel = availableModels.find((m) => m.isDefault) || availableModels[0];
             setSelectedModel(defaultModel.id);
           }
         }
 
-        // Fetch chat history from Supabase - Load recent messages with full content
         const { data: history, error: historyError, hasMore: more } = await fetchChatHistory(user.id, 5, undefined, false);
         if (!historyError && history && history.length > 0) {
-          // Filter out any messages with empty content
           const validMessages = history.filter(msg => msg.content && msg.content.trim() !== "");
           setMessages(validMessages);
           setHasMore(more);
 
-          // Set suggestions from the first assistant message if it has them
           const firstAssistantMessage = validMessages.find(msg => msg.role === "assistant");
           if (firstAssistantMessage?.suggestions && firstAssistantMessage.suggestions.length > 0) {
             setDynamicSuggestions(firstAssistantMessage.suggestions);
@@ -160,7 +150,6 @@ export default function ChatbotPage() {
             setDynamicSuggestions([]);
           }
         } else {
-          // No chat history, show and save personalized welcome message with dynamic suggestions
           const { question, suggestions, userProfile: profile } = generateWelcomeMessage(userProfile);
 
           const welcomeMessage: MessageType = {
@@ -178,11 +167,9 @@ export default function ChatbotPage() {
           setMessages([welcomeMessage]);
           setDynamicSuggestions(suggestions);
 
-          // Save welcome message to database
           await saveWelcomeMessage(user.id, userProfile);
         }
       } catch (err) {
-        // On error, show welcome message
         const { question, suggestions } = generateWelcomeMessage(userProfile);
 
         const welcomeMessage: MessageType = {
@@ -209,7 +196,6 @@ export default function ChatbotPage() {
     }
   }, [authLoading, user]);
 
-  // Fetch AI rate limit status
   useEffect(() => {
     const fetchRateLimitStatus = async () => {
       if (!user?.id) return;
@@ -224,17 +210,14 @@ export default function ChatbotPage() {
 
     fetchRateLimitStatus();
 
-    // Refresh every 30 seconds
     const interval = setInterval(fetchRateLimitStatus, 30000);
     return () => clearInterval(interval);
   }, [user?.id]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    // Don't hide immediately - let the scroll handler detect when we're at bottom
   }, []);
 
-  // Auto-scroll to bottom on initial load only
   useEffect(() => {
     if (messages.length > 0 && isInitialLoad) {
       setTimeout(() => {
@@ -244,25 +227,19 @@ export default function ChatbotPage() {
     }
   }, [messages.length, isInitialLoad]);
 
-  // Handle scroll for infinite loading and scroll-to-bottom button visibility
   const handleScroll = useCallback(() => {
     if (!messagesContainerRef.current || loading) return;
 
     const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
 
-    // Show scroll-to-bottom button when user is not near the bottom (more than 100px from bottom)
-    // Use a smaller threshold to prevent flickering
     const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
     setShowScrollToBottom(!isNearBottom && messages.length > 0);
 
-    // Handle infinite loading
     if (loadingMore || !hasMore) return;
 
-    // Load more when scrolled near the top (within 100px) and not initial load
     if (scrollTop < 100 && !isInitialLoad && messages.length > 0) {
       setLoadingMore(true);
 
-      // Get the oldest message timestamp
       const oldestMessage = messages[0];
       if (!oldestMessage || !oldestMessage.created_at) {
         setLoadingMore(false);
@@ -274,13 +251,10 @@ export default function ChatbotPage() {
       fetchChatHistory(user!.id, 10, beforeTimestamp, false).then(({ data, error, hasMore: more }) => {
         if (!error) {
           if (data.length > 0) {
-            // Store current scroll position relative to bottom
             const scrollFromBottom = scrollHeight - scrollTop - clientHeight;
 
-            // Prepend older messages
             setMessages(prev => [...data, ...prev]);
 
-            // Maintain scroll position after new messages are added
             setTimeout(() => {
               if (messagesContainerRef.current) {
                 const newScrollHeight = messagesContainerRef.current.scrollHeight;
@@ -296,7 +270,6 @@ export default function ChatbotPage() {
     }
   }, [messages, loadingMore, hasMore, user, isInitialLoad, loading]);
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -304,7 +277,6 @@ export default function ChatbotPage() {
     }
   }, [input]);
 
-  // File upload handlers
   const handleFileSelect = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
@@ -313,8 +285,6 @@ export default function ChatbotPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // GPT can scan virtually all file types - no type restrictions
-    // Only limit by file size (max 25MB for better processing)
     if (file.size > 25 * 1024 * 1024) {
       setError('File size must be less than 25MB');
       return;
@@ -334,7 +304,6 @@ export default function ChatbotPage() {
   const handleSend = useCallback(async () => {
     if ((!input.trim() && !attachedFile) || isSending || !user?.id) return;
 
-    // Check rate limit before sending
     const { allowed, error: limitError } = await checkAIUsage(user.id, "chatbot");
     if (!allowed) {
       toast.error("Daily limit reached", {
@@ -345,7 +314,6 @@ export default function ChatbotPage() {
 
     const trimmedInput = input.trim();
 
-    // Convert file to base64 if it's an image
     let base64Data: string | undefined;
     if (attachedFile && attachedFile.type.startsWith('image/')) {
       try {
@@ -353,7 +321,6 @@ export default function ChatbotPage() {
           const reader = new FileReader();
           reader.onload = () => {
             const result = reader.result as string;
-            // Remove data URL prefix to get just the base64
             const base64 = result.split(',')[1];
             resolve(base64);
           };
@@ -367,7 +334,6 @@ export default function ChatbotPage() {
       }
     }
 
-    // Create user message with unique ID
     const userMessageId = `user-${Date.now()}-${Math.random()}`;
     const userMessage: MessageType = {
       id: userMessageId,
@@ -385,7 +351,6 @@ export default function ChatbotPage() {
       } : undefined,
     };
 
-    // Optimistically add user message
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setAttachedFile(null);
@@ -395,7 +360,6 @@ export default function ChatbotPage() {
     setIsSending(true);
     setError(null);
 
-    // Increment usage
     try {
       const { success: incrementSuccess, status: newStatus } = await incrementAIUsage(user.id, "chatbot");
       if (incrementSuccess && newStatus) {
@@ -405,7 +369,6 @@ export default function ChatbotPage() {
       console.error("Error incrementing usage:", error);
     }
 
-    // Persist user message to database
     try {
       await supabase.from("chatbot_messages").insert({
         user_id: user.id,
@@ -417,12 +380,10 @@ export default function ChatbotPage() {
         created_at: new Date().toISOString(),
       });
     } catch {
-      // Silent fail - don't break the chat flow if persistence fails
     }
 
     try {
-      // Prepare messages for API (including current context)
-      const contextMessages = [...messages, userMessage].slice(-10); // Keep last 10 messages for context
+      const contextMessages = [...messages, userMessage].slice(-10);
 
       const result: SendMessageResult = await sendMessageToAI(
         contextMessages,
@@ -432,7 +393,6 @@ export default function ChatbotPage() {
 
       if (!result.success) {
         setError(result.error || "Failed to get AI response");
-        // Remove the user message on error so they can retry
         setMessages((prev) => prev.filter((m) => m.id !== userMessageId));
         return;
       }
@@ -444,7 +404,6 @@ export default function ChatbotPage() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to send message";
       setError(errorMessage);
-      // Remove the user message on error so they can retry
       setMessages((prev) => prev.filter((m) => m.id !== userMessageId));
     } finally {
       setIsSending(false);
@@ -467,7 +426,6 @@ export default function ChatbotPage() {
           return;
         }
 
-        // Reset with new randomized welcome message and suggestions
         const { question, suggestions } = generateWelcomeMessage(userProfile);
 
         const welcomeMessage: MessageType = {
@@ -485,7 +443,6 @@ export default function ChatbotPage() {
         setMessages([welcomeMessage]);
         setDynamicSuggestions(suggestions);
 
-        // Save welcome message to database
         await saveWelcomeMessage(user.id, userProfile);
         setTypingMessageId(null);
         setError(null);
@@ -542,7 +499,6 @@ export default function ChatbotPage() {
         text: content,
       });
     } else {
-      // Fallback: copy to clipboard
       navigator.clipboard.writeText(content);
     }
   }, []);
@@ -567,13 +523,10 @@ export default function ChatbotPage() {
   }, []);
 
   const renderMessageContent = (content: string | undefined, role: MessageRole, messageId: string) => {
-    // Handle undefined content
     const safeContent = content || "";
 
-    // Only apply typing effect to assistant messages that match the typing ID
     const isTyping = role === "assistant" && typingMessageId === messageId;
 
-    // For user messages, always render immediately without typing effect
     if (role === "user") {
       return (
         <div className="text-sm leading-relaxed text-white whitespace-pre-wrap break-words">
@@ -582,9 +535,7 @@ export default function ChatbotPage() {
       );
     }
 
-    // Custom components for markdown rendering (assistant messages only)
     const components = {
-      // Style tables
       table: ({ children }: any) => (
         <div className="overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-sm my-4">
           <div className="overflow-x-auto">
@@ -625,7 +576,6 @@ export default function ChatbotPage() {
           {children}
         </td>
       ),
-      // Style headers
       h1: ({ children }: any) => (
         <h1 className={`text-xl font-bold mt-6 mb-4 ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
           {children}
@@ -646,7 +596,6 @@ export default function ChatbotPage() {
           {children}
         </h4>
       ),
-      // Style lists
       ul: ({ children }: any) => (
         <ul className="space-y-1 mb-4">
           {children}
@@ -662,31 +611,26 @@ export default function ChatbotPage() {
           {children}
         </li>
       ),
-      // Style paragraphs
       p: ({ children }: any) => (
         <p className={`mb-2 ${role === "assistant" ? "text-slate-700" : "text-white"}`}>
           {children}
         </p>
       ),
-      // Style blockquotes
       blockquote: ({ children }: any) => (
         <blockquote className={`border-l-4 border-slate-300 pl-4 py-2 my-4 ${role === "assistant" ? "text-slate-600" : "text-slate-300"}`}>
           {children}
         </blockquote>
       ),
-      // Style code
       code: ({ inline, children }: any) => (
         <code className={`${inline ? 'bg-slate-100 px-1 py-0.5 rounded text-slate-800 text-xs' : 'block bg-slate-900 text-slate-100 p-4 rounded-lg text-sm my-4'}`}>
           {children}
         </code>
       ),
-      // Style bold text
       strong: ({ children }: any) => (
         <strong className={`font-semibold ${role === "assistant" ? "text-slate-900" : "text-white"}`}>
           {children}
         </strong>
       ),
-      // Style links
       a: ({ href, children }: any) => (
         <a href={href} className="text-emerald-500 hover:text-emerald-600 underline">
           {children}
@@ -716,16 +660,12 @@ export default function ChatbotPage() {
     );
   };
 
-  // Loading state
   if (loading || authLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-7xl mx-auto h-[calc(100vh-140px)] min-h-[600px] space-y-4 sm:space-y-6 animate-fade-in">
-          {/* Messenger Container Skeleton */}
           <Card className="flex h-full overflow-hidden rounded-xl border border-slate-200/60 shadow-sm">
-            {/* Main Chat Area Skeleton */}
             <main className="flex-1 flex flex-col min-w-0 bg-white relative">
-              {/* Header Skeleton */}
               <header className="h-14 sm:h-16 flex items-center justify-between px-4 sm:px-6 bg-white/80 backdrop-blur-sm flex-shrink-0 z-10 border-b border-slate-100">
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -742,21 +682,16 @@ export default function ChatbotPage() {
                 </div>
 
                 <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                  {/* Model Selector Skeleton - Hidden on mobile */}
                   <div className="hidden sm:block">
                     <Skeleton width={140} height={32} borderRadius={4} />
                   </div>
                   <div className="hidden sm:block h-8 w-px bg-slate-200 mx-1" />
-                  {/* Clear Chat Button Skeleton */}
                   <Skeleton width={32} height={32} borderRadius={8} className="sm:w-10 sm:h-10" />
-                  {/* Export Chat Button Skeleton */}
                   <Skeleton width={32} height={32} borderRadius={8} className="sm:w-10 sm:h-10" />
                 </div>
               </header>
 
-              {/* Messages Area Skeleton */}
               <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
-                {/* Welcome Message Skeleton */}
                 <div className="mx-auto max-w-3xl flex justify-start">
                   <div className="flex gap-2 sm:gap-3">
                     <Skeleton width={28} height={28} borderRadius={50} className="sm:w-8 sm:h-8" />
@@ -769,7 +704,6 @@ export default function ChatbotPage() {
                   </div>
                 </div>
 
-                {/* User Message Skeleton */}
                 <div className="mx-auto max-w-3xl flex justify-end">
                   <div className="max-w-[90%] sm:max-w-[85%] space-y-1.5 sm:space-y-2">
                     <Skeleton width="100%" height={12} className="sm:h-[14px]" />
@@ -777,7 +711,6 @@ export default function ChatbotPage() {
                   <Skeleton width={28} height={28} borderRadius={50} className="sm:w-8 sm:h-8 ml-2" />
                 </div>
 
-                {/* Assistant Response Skeleton */}
                 <div className="mx-auto max-w-3xl flex justify-start">
                   <div className="flex gap-2 sm:gap-3">
                     <Skeleton width={28} height={28} borderRadius={50} className="sm:w-8 sm:h-8" />
@@ -793,19 +726,15 @@ export default function ChatbotPage() {
                 </div>
               </div>
 
-              {/* Input Area Skeleton */}
               <div className="p-2 sm:p-3 bg-white border-t border-slate-100 relative z-20 flex-shrink-0">
                 <div className="mx-auto max-w-3xl">
                   <div className="relative flex items-end gap-1.5 sm:gap-2 bg-slate-50 border border-slate-200/60 rounded-3xl p-1.5 sm:p-2">
-                    {/* Attachment Button Skeleton */}
                     <Skeleton width={32} height={32} borderRadius={50} className="sm:w-10 sm:h-10" />
 
-                    {/* Textarea Skeleton */}
                     <div className="flex-1">
                       <Skeleton height={28} borderRadius={4} className="sm:h-8" />
                     </div>
 
-                    {/* Send Button Skeleton */}
                     <Skeleton width={32} height={32} borderRadius={50} className="sm:w-10 sm:h-10" />
                   </div>
 
@@ -826,11 +755,8 @@ export default function ChatbotPage() {
 
   return (
     <div className="max-w-7xl mx-auto h-[calc(100vh-140px)] min-h-[600px] space-y-4 sm:space-y-6 animate-fade-in">
-      {/* Messenger Container */}
       <Card className="flex h-full overflow-hidden rounded-xl border border-slate-200/60 shadow-sm">
-        {/* Main Chat Area */}
         <main className="flex-1 flex flex-col min-w-0 bg-white relative">
-          {/* Header */}
           <header className="h-14 sm:h-16 flex items-center justify-between px-4 sm:px-6 bg-white/80 backdrop-blur-sm flex-shrink-0 z-10 border-b border-slate-100">
             <div className="flex items-center gap-3 sm:gap-4 min-w-0">
               <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -851,7 +777,6 @@ export default function ChatbotPage() {
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               <div className="hidden sm:block h-8 w-px bg-slate-200 mx-1" />
 
-              {/* Model Selector Dropdown - Hidden on mobile */}
               <div className="hidden sm:block">
                 <ModelSelectorDropdown
                   selectedModel={selectedModel}
@@ -862,7 +787,6 @@ export default function ChatbotPage() {
 
               <div className="hidden sm:block h-8 w-px bg-slate-200 mx-1" />
 
-              {/* Clear Chat Button */}
               <button
                 onClick={() => setClearChatModalOpen(true)}
                 disabled={isPending}
@@ -872,7 +796,6 @@ export default function ChatbotPage() {
                 <Trash2 size={18} className="sm:w-5 sm:h-5" />
               </button>
 
-              {/* Export Chat Dropdown - Clickable for mobile/tablet */}
               <div className="relative" ref={exportDropdownRef}>
                 <Button
                   variant="ghost"
@@ -884,7 +807,6 @@ export default function ChatbotPage() {
                   <Download size={18} className="sm:w-5 sm:h-5" />
                   <MoreHorizontal size={10} className="sm:w-3 sm:h-3 ml-0.5" />
                 </Button>
-                {/* Dropdown - Show on click for mobile/tablet, hover for desktop */}
                 {exportDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-44 sm:w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50">
                     <Button
@@ -917,7 +839,6 @@ export default function ChatbotPage() {
             </div>
           </header>
 
-          {/* Error Banner */}
           {error && (
             <div className="bg-red-50 border-b border-red-100 px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between">
               <div className="flex items-center gap-1.5 sm:gap-2 text-red-700 min-w-0">
@@ -933,7 +854,6 @@ export default function ChatbotPage() {
             </div>
           )}
 
-          {/* Messages Container */}
           <div className="flex-1 relative bg-white min-h-0 flex flex-col">
             <div
               ref={messagesContainerRef}
@@ -948,10 +868,8 @@ export default function ChatbotPage() {
                 </div>
               ) : (
                 <>
-                  {/* Loading more indicator at top */}
                   {loadingMore && (
                     <div className="space-y-4">
-                      {/* Skeleton for older messages being loaded */}
                       <div className="flex justify-end">
                         <div className="max-w-[90%] sm:max-w-[85%]">
                           <Skeleton height={48} borderRadius={32} width={200} />
@@ -971,16 +889,13 @@ export default function ChatbotPage() {
                       className={`mx-auto max-w-3xl ${msg.role === "user" ? "flex justify-end" : "flex justify-start"
                         }`}
                     >
-                      {/* Message Content */}
                       <div className={`${msg.role === "user" ? "max-w-[90%] sm:max-w-[85%]" : "space-y-2 sm:space-y-3 flex-1"} relative group`}>
-                        {/* Message Bubble */}
                         <div
                           className={`${msg.role === "assistant"
                             ? "rounded-[2rem] rounded-tl-sm text-slate-800 transition-all"
                             : "bg-emerald-500 text-white rounded-[2rem] rounded-tr-sm px-4 sm:px-6 py-2.5 sm:py-3.5 shadow-sm"
                             }`}
                         >
-                          {/* File Attachment */}
                           {msg.attachment && (
                             <div className={`mb-1.5 sm:mb-2 p-1.5 sm:p-2 rounded-lg ${msg.role === "user" ? "bg-emerald-600" : "bg-slate-100"}`}>
                               <div className="flex items-center gap-1.5 sm:gap-2">
@@ -997,9 +912,7 @@ export default function ChatbotPage() {
                           {renderMessageContent(msg.content, msg.role, msg.id)}
                         </div>
 
-                        {/* Copy Button as Footer */}
                         <div className={`flex gap-1.5 sm:gap-2 ${msg.role === "assistant" ? "opacity-100 justify-start" : "opacity-0 justify-end"} group-hover:opacity-100 transition-all duration-200`}>
-                          {/* Share Button - Only for Assistant Messages */}
                           {msg.role === "assistant" && msg.content && (
                             <button
                               onClick={() => handleShareMessage(msg.content)}
@@ -1023,7 +936,6 @@ export default function ChatbotPage() {
                           </button>
                         </div>
 
-                        {/* Suggestion Chips - Only for first assistant message with dynamic suggestions */}
                         {msg.role === "assistant" && index === 0 && dynamicSuggestions.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-1">
                             {dynamicSuggestions.map((suggestion, idx) => (
@@ -1047,7 +959,6 @@ export default function ChatbotPage() {
               <div className="h-4" />
             </div>
 
-            {/* Scroll to Bottom Button */}
             {showScrollToBottom && (
               <button
                 onClick={scrollToBottom}
@@ -1058,10 +969,8 @@ export default function ChatbotPage() {
             )}
           </div>
 
-          {/* Input Area */}
           <div className="p-2 sm:p-3 bg-white border-t border-slate-100 relative z-20 flex-shrink-0">
             <div className="mx-auto max-w-3xl">
-              {/* Attached File Preview */}
               {attachedFile && (
                 <div className="mb-2 flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2">
                   <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
@@ -1100,7 +1009,6 @@ export default function ChatbotPage() {
               )}
 
               <div className="relative flex items-end gap-1.5 sm:gap-2 bg-slate-50 border border-slate-200/60 rounded-3xl p-1.5 sm:p-2 focus-within:border-slate-300 transition-all shadow-sm">
-                {/* Hidden File Input */}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -1109,7 +1017,6 @@ export default function ChatbotPage() {
                   disabled={isSending || uploadingFile}
                 />
 
-                {/* Attachment Button */}
                 <button
                   onClick={handleFileSelect}
                   disabled={isSending || uploadingFile}
@@ -1135,7 +1042,6 @@ export default function ChatbotPage() {
                   className="w-full bg-transparent border-none text-xs sm:text-sm text-slate-600 placeholder-slate-400 focus:outline-none resize-none py-1.5 max-h-32 leading-relaxed disabled:opacity-50"
                 />
 
-                {/* Send Button */}
                 <button
                   onClick={handleSend}
                   disabled={(!input.trim() && !attachedFile) || isSending || !rateLimitStatus?.canUseAI}
@@ -1169,7 +1075,6 @@ export default function ChatbotPage() {
         </main>
       </Card>
 
-      {/* Modals */}
       <ClearChatModal
         open={clearChatModalOpen}
         onClose={() => setClearChatModalOpen(false)}

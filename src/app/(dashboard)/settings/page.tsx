@@ -18,7 +18,6 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  // Simulate initial page load
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
@@ -26,20 +25,19 @@ export default function SettingsPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Show initial skeleton loader
   if (isInitialLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-          {/* Page Header Skeleton */}
+          {}
           <div>
             <Skeleton width={120} height={28} className="mb-2" />
             <Skeleton width={300} height={16} />
           </div>
 
-          {/* Settings Tabs Container Skeleton */}
+          {}
           <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-            {/* Tab Navigation Skeleton */}
+            {}
             <div className="flex border-b border-slate-100">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="px-6 py-4 flex items-center gap-2">
@@ -49,9 +47,9 @@ export default function SettingsPage() {
               ))}
             </div>
 
-            {/* Tab Content Skeleton */}
+            {}
             <div className="p-6 space-y-8">
-              {/* Profile Picture Section Skeleton */}
+              {}
               <div className="flex items-center gap-6 pb-6 border-b border-slate-100">
                 <Skeleton circle width={80} height={80} />
                 <div className="flex-1">
@@ -60,7 +58,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Form Fields Skeleton */}
+              {}
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {Array.from({ length: 4 }).map((_, i) => (
@@ -92,15 +90,15 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      {/* Page Header */}
+      {}
       <div>
         <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">Settings</h2>
         <p className="text-sm text-slate-500 mt-1 font-light">Manage your profile, accounts, and preferences.</p>
       </div>
 
-      {/* Settings Tabs Container */}
+      {}
       <div className="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-        {/* Tab Navigation */}
+        {}
         <div className="flex border-b border-slate-100 overflow-x-auto no-scrollbar">
           {TABS.map((tab) => {
             const Icon = tab.icon;
@@ -124,7 +122,7 @@ export default function SettingsPage() {
           })}
         </div>
 
-        {/* Tab Panels */}
+        {}
         <div className="min-h-[400px] max-h-[600px] overflow-y-auto">
           {activeTab === "profile" && <ProfileTab />}
           {activeTab === "accounts" && <AccountsTab />}

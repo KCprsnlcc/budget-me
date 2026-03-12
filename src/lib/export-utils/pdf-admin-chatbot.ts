@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { getTimestampString } from "./formatters";
 import type { ChatbotAdminExportData } from "./types";
 
-/**
- * Export admin chatbot sessions as PDF
- */
 export function exportAdminChatbotToPDF(
     sessions: ChatbotAdminExportData[],
     summary?: {
@@ -22,7 +19,6 @@ export function exportAdminChatbotToPDF(
 
     const doc = createBasePDF("Chatbot Management Report", `${sessions.length} sessions`);
 
-    // Summary section
     let currentY = 45;
     const margin = 15;
 
@@ -37,7 +33,6 @@ export function exportAdminChatbotToPDF(
         const cardHeight = 20;
         const cardSpacing = 3;
 
-        // Total Messages card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -52,7 +47,6 @@ export function exportAdminChatbotToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.totalMessages || 0).toLocaleString(), margin + 4, currentY + 14);
 
-        // Active Users card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -67,7 +61,6 @@ export function exportAdminChatbotToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.activeUsers || 0).toLocaleString(), margin + cardWidth + cardSpacing + 4, currentY + 14);
 
-        // User Messages card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 2, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -82,7 +75,6 @@ export function exportAdminChatbotToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.totalUserMessages || 0).toLocaleString(), margin + (cardWidth + cardSpacing) * 2 + 4, currentY + 14);
 
-        // AI Responses card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 3, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -100,7 +92,6 @@ export function exportAdminChatbotToPDF(
         currentY += cardHeight + 12;
     }
 
-    // Sessions table
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(COLORS.dark);
@@ -118,11 +109,10 @@ export function exportAdminChatbotToPDF(
     ];
     const formats: ("text" | "currency" | "number" | "percentage")[] = ["text", "text", "number", "text", "text", "text"];
 
-    const columnWidths = [45, 35, 15, 30, 25, 30]; // Total: 180mm
+    const columnWidths = [45, 35, 15, 30, 25, 30]; 
 
     addPDFTable(doc, headers, sessions, keys, formats, currentY, columnWidths);
 
-    // Save
     const filename = `admin_chatbot_${getTimestampString()}.pdf`;
     doc.save(filename);
 }

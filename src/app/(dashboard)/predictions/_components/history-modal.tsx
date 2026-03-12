@@ -75,7 +75,7 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-2xl">
-      {/* Header */}
+      {}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
@@ -87,16 +87,16 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
         </div>
       </ModalHeader>
 
-      {/* Body */}
+      {}
       <ModalBody className="p-0 bg-[#F9FAFB]/30">
         {view === "list" ? (
           <div className="animate-txn-in">
-            {/* List Header */}
+            {}
             <div className="px-5 py-4 border-b border-gray-100 bg-white">
               <h3 className="text-sm font-semibold text-gray-900">Recent Predictions</h3>
             </div>
             
-            {/* Prediction List */}
+            {}
             <div className="max-h-96 overflow-y-auto">
               <div className="divide-y divide-gray-100">
                 {history.length > 0 ? (
@@ -152,7 +152,7 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
           <div className="animate-txn-in">
             {selectedItem && (
               <div className="px-5 py-6 bg-white">
-                {/* Detail Header */}
+                {}
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-4">
                     {getStatusIcon(selectedItem.status)}
@@ -173,7 +173,7 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
                   {getStatusBadge(selectedItem.status)}
                 </div>
 
-                {/* Projected Growth Metrics */}
+                {}
                 {(selectedItem.projectedIncome || selectedItem.projectedExpenses || selectedItem.projectedSavings) && (
                   <div className="mb-6">
                     <h4 className="text-[15px] font-bold text-gray-900 mb-3">Projected Metrics</h4>
@@ -236,7 +236,7 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
                   </div>
                 )}
 
-                {/* Category Spending Forecast */}
+                {}
                 {selectedItem.topCategories && selectedItem.topCategories.length > 0 && (
                   <div className="mb-6">
                     <h4 className="text-[15px] font-bold text-gray-900 mb-3">Top Categories</h4>
@@ -259,7 +259,7 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
                   </div>
                 )}
 
-                {/* Expense Type Forecast */}
+                {}
                 {(selectedItem.recurringExpenses !== undefined || selectedItem.variableExpenses !== undefined) && (
                   <div className="mb-6">
                     <h4 className="text-[15px] font-bold text-gray-900 mb-3">Expense Breakdown</h4>
@@ -288,7 +288,7 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
                   </div>
                 )}
 
-                {/* Transaction Behavior Insights */}
+                {}
                 {selectedItem.transactionPatterns && selectedItem.transactionPatterns.length > 0 && (
                   <div className="mb-6">
                     <h4 className="text-[15px] font-bold text-gray-900 mb-3">Transaction Patterns</h4>
@@ -311,7 +311,7 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
                   </div>
                 )}
 
-                {/* Analysis Summary */}
+                {}
                 <div className="mb-6">
                   <h4 className="text-[15px] font-bold text-gray-900 mb-3 flex items-center gap-2">
                     <Brain size={16} className="text-emerald-500" />
@@ -355,7 +355,7 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
                   </div>
                 </div>
 
-                {/* Status Message */}
+                {}
                 {selectedItem.status === "failed" && (
                   <div className="flex gap-2.5 p-3 rounded-lg text-xs border border-gray-200 text-gray-700 items-start bg-white">
                     <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
@@ -373,7 +373,7 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
         )}
       </ModalBody>
 
-      {/* Footer */}
+      {}
       <ModalFooter className="flex justify-between">
         {view === "details" ? (
           <Button variant="secondary" size="sm" onClick={handleBack}>
@@ -390,7 +390,6 @@ export function HistoryModal({ open, onClose, history = [] }: HistoryModalProps)
   );
 }
 
-// Helper component for detail rows
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between items-center py-2.5">

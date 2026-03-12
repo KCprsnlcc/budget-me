@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { getTimestampString } from "./formatters";
 import type { UserExportData } from "./types";
 
-/**
- * Export admin users as PDF
- */
 export function exportAdminUsersToPDF(
     users: UserExportData[],
     summary?: { totalUsers?: number; activeUsers?: number; adminCount?: number }
@@ -17,7 +14,6 @@ export function exportAdminUsersToPDF(
 
     const doc = createBasePDF("User Management Report", `${users.length} users`);
 
-    // Summary section with email-style cards
     let currentY = 45;
     const margin = 15;
 
@@ -28,12 +24,10 @@ export function exportAdminUsersToPDF(
         doc.text("Summary", margin, currentY);
         currentY += 8;
 
-        // Summary cards with subtle borders
         const cardWidth = 58;
         const cardHeight = 20;
         const cardSpacing = 3;
 
-        // Total Users card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -48,7 +42,6 @@ export function exportAdminUsersToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.totalUsers || 0).toString(), margin + 4, currentY + 14);
 
-        // Active Users card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -63,7 +56,6 @@ export function exportAdminUsersToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.activeUsers || 0).toString(), margin + cardWidth + cardSpacing + 4, currentY + 14);
 
-        // Admins card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 2, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -81,7 +73,6 @@ export function exportAdminUsersToPDF(
         currentY += cardHeight + 12;
     }
 
-    // Users table
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(COLORS.dark);
@@ -92,12 +83,10 @@ export function exportAdminUsersToPDF(
     const keys: (keyof UserExportData)[] = ["id", "full_name", "email", "role", "status", "created_at"];
     const formats: ("text" | "currency" | "number" | "percentage")[] = ["text", "text", "text", "text", "text", "text"];
 
-    // Custom column widths for better layout (in mm)
-    const columnWidths = [15, 35, 60, 20, 15, 35]; // Total: 180mm
+    const columnWidths = [15, 35, 60, 20, 15, 35]; 
 
     addPDFTable(doc, headers, users, keys, formats, currentY, columnWidths);
 
-    // Save
     const filename = `admin_users_${getTimestampString()}.pdf`;
     doc.save(filename);
 }

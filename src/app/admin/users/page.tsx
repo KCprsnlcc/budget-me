@@ -70,7 +70,6 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-// Memoized components for better performance
 const SummaryCard = memo(({ item }: { item: SummaryType }) => {
   const Icon = item.icon;
   return (
@@ -99,7 +98,7 @@ const UserCard = memo(({
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
 }) => {
-  // Convert admin User to Supabase User format for UserAvatar
+
   const supabaseUser: SupabaseUser = {
     id: user.id,
     email: user.email,
@@ -170,7 +169,7 @@ const UserRow = memo(({
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
 }) => {
-  // Convert admin User to Supabase User format for UserAvatar
+
   const supabaseUser: SupabaseUser = {
     id: user.id,
     email: user.email,
@@ -240,7 +239,6 @@ export default function UsersPage() {
   const contentRef = useRef<HTMLDivElement>(null);
   const [hoveredBar, setHoveredBar] = useState<{ month: string; count: number } | null>(null);
 
-  // Close export dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
@@ -305,7 +303,6 @@ export default function UsersPage() {
     }, 150);
   }, []);
 
-  // Export handlers
   const handleExportCSV = useCallback(() => {
     if (users.length === 0) {
       alert("No users to export");
@@ -348,7 +345,6 @@ export default function UsersPage() {
     exportAdminUsersToPDF(exportData, summary);
   }, [users, stats]);
 
-  // Build summary cards from real data
   const summaryItems: SummaryType[] = useMemo(() => {
     if (!stats) return [];
     return [
@@ -359,7 +355,6 @@ export default function UsersPage() {
     ];
   }, [stats]);
 
-  // Chart data for user growth
   const chartData = useMemo(() => {
     if (!stats?.userGrowth.length) return [];
     const max = Math.max(...stats.userGrowth.map((d) => d.count), 1);
@@ -370,7 +365,6 @@ export default function UsersPage() {
     }));
   }, [stats]);
 
-  // Role distribution gradient
   const roleGradient = useMemo(() => {
     if (!stats?.roleDistribution.length) return "conic-gradient(#e2e8f0 0% 100%)";
     const colors = { user: "#10b981", admin: "#a855f7", moderator: "#3b82f6" };
@@ -389,12 +383,11 @@ export default function UsersPage() {
     [stats]
   );
 
-  // Loading state - only show full page skeleton on initial load
   if (loading && !tableLoading) {
     return (
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-          {/* Header Skeleton */}
+          {}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
             <div>
               <Skeleton width={180} height={28} className="mb-2" />
@@ -406,9 +399,9 @@ export default function UsersPage() {
             </div>
           </div>
 
-          {/* Scrollable Content Area - Skeleton */}
+          {}
           <div className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0">
-            {/* Summary Stats Skeleton */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Card key={i} className="p-4 sm:p-5">
@@ -421,7 +414,7 @@ export default function UsersPage() {
               ))}
             </div>
 
-            {/* Charts Skeleton */}
+            {}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <Card className="lg:col-span-2 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -447,7 +440,7 @@ export default function UsersPage() {
               </Card>
             </div>
 
-            {/* Filters Skeleton */}
+            {}
             <Card className="p-3 sm:p-4">
               <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
                 <Skeleton width={50} height={14} />
@@ -458,7 +451,7 @@ export default function UsersPage() {
               </div>
             </Card>
 
-            {/* User Cards Skeleton */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <UserCardSkeleton key={i} />
@@ -484,7 +477,7 @@ export default function UsersPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 animate-fade-in h-full flex flex-col overflow-hidden lg:overflow-visible">
-      {/* Header */}
+      {}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-0 pt-4 sm:pt-0 shrink-0">
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">User Management</h2>
@@ -525,7 +518,7 @@ export default function UsersPage() {
                 <span className="hidden sm:inline">Export</span>
                 <MoreHorizontal size={12} className="ml-1" />
               </Button>
-              {/* Dropdown */}
+              {}
               {exportDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-1 z-50">
                   <Button
@@ -560,21 +553,21 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Scrollable Content Area */}
+      {}
       <div
         ref={contentRef}
         className="flex-1 overflow-y-auto lg:overflow-visible space-y-4 sm:space-y-6 px-4 sm:px-0 pb-4 sm:pb-0 scroll-smooth"
       >
-        {/* Summary Cards */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {summaryItems.map((item) => (
             <SummaryCard key={item.label} item={item} />
           ))}
         </div>
 
-        {/* Charts Section */}
+        {}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* User Growth Chart */}
+          {}
           <Card className="lg:col-span-2 p-4 sm:p-6 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-all group cursor-pointer">
             <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div>
@@ -635,7 +628,7 @@ export default function UsersPage() {
             )}
           </Card>
 
-          {/* Role Distribution */}
+          {}
           <Card className="p-4 sm:p-6 flex flex-col bg-white border border-slate-200 rounded-xl hover:shadow-md transition-all group cursor-pointer">
             <div className="mb-4 sm:mb-6">
               <h3 className="text-xs sm:text-sm font-semibold text-slate-900">Role Distribution</h3>
@@ -688,7 +681,7 @@ export default function UsersPage() {
           </Card>
         </div>
 
-        {/* Filters */}
+        {}
         <Card className="p-3 sm:p-4 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-all group cursor-pointer">
           <div className="flex flex-col xl:flex-row items-center gap-2 sm:gap-3">
             <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 w-full xl:w-auto">
@@ -769,7 +762,7 @@ export default function UsersPage() {
           </div>
         </Card>
 
-        {/* Error State */}
+        {}
         {error && !loading && (
           <Card className="p-8 text-center bg-white border border-slate-200 rounded-xl">
             <p className="text-sm text-slate-600 mb-3">{error}</p>
@@ -779,7 +772,7 @@ export default function UsersPage() {
           </Card>
         )}
 
-        {/* Users Display */}
+        {}
         {users.length === 0 ? (
           <Card className="p-12 text-center bg-white border border-slate-200 rounded-xl">
             <Inbox size={40} className="mx-auto text-slate-300 mb-4" />
@@ -846,7 +839,7 @@ export default function UsersPage() {
           </div>
         ) : (
           <>
-            {/* User Cards Grid (Desktop) */}
+            {}
             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {users.length === 0 ? (
                 <div className="col-span-full">
@@ -865,7 +858,7 @@ export default function UsersPage() {
               )}
             </div>
 
-            {/* User Cards Grid (Mobile) */}
+            {}
             <div className="md:hidden space-y-4">
               {users.length === 0 ? (
                 <Card className="p-12 text-center bg-white border border-slate-200 rounded-xl">
@@ -884,7 +877,7 @@ export default function UsersPage() {
           </>
         )}
 
-        {/* Pagination */}
+        {}
         {!loading && !tableLoading && !error && users.length > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-lg gap-3 sm:gap-0">
             <div className="text-xs sm:text-sm text-slate-600 text-center sm:text-left">
@@ -959,7 +952,7 @@ export default function UsersPage() {
         )}
       </div>
 
-      {/* Modals */}
+      {}
       <AddUserModal open={addModalOpen} onClose={() => setAddModalOpen(false)} onSuccess={refetch} />
       <ViewUserModal open={viewModalOpen} onClose={() => setViewModalOpen(false)} user={selectedUser} onEdit={handleViewToEdit} />
       <EditUserModal open={editModalOpen} onClose={() => setEditModalOpen(false)} user={selectedUser} onSuccess={refetch} />

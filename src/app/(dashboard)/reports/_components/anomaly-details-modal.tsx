@@ -136,7 +136,7 @@ export function AnomalyDetailsModal({
 
   return (
     <Modal open={isOpen} onClose={handleClose} className="max-w-[520px]">
-      {/* Header */}
+      {}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
@@ -148,12 +148,12 @@ export function AnomalyDetailsModal({
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
+      {}
       <Stepper steps={STEPS} currentStep={step} />
 
-      {/* Body */}
+      {}
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* STEP 1: Overview */}
+        {}
         {step === 1 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -166,7 +166,7 @@ export function AnomalyDetailsModal({
               <p className="text-[11px] text-gray-500">{anomalyData.description}</p>
             </div>
 
-            {/* Severity Alert */}
+            {}
             <div className="p-4 rounded-xl mb-5 bg-white border border-gray-200">
               <div className="flex items-start gap-3">
                 <AlertTriangle size={20} className={`flex-shrink-0 mt-0.5 ${
@@ -184,7 +184,7 @@ export function AnomalyDetailsModal({
               </div>
             </div>
 
-            {/* Anomaly Summary */}
+            {}
             <div className="grid grid-cols-2 gap-3">
               <div className="p-4 rounded-lg bg-white border border-gray-200">
                 <div className="text-[11px] font-semibold text-gray-600 uppercase tracking-[0.05em] mb-2">Category</div>
@@ -215,7 +215,7 @@ export function AnomalyDetailsModal({
               </div>
             </div>
 
-            {/* Timestamp */}
+            {}
             <div className="flex items-center gap-2 text-xs text-gray-500 mt-4">
               <Calendar size={14} />
               <span>Detected: {anomalyData.timestamp}</span>
@@ -223,7 +223,7 @@ export function AnomalyDetailsModal({
           </div>
         )}
 
-        {/* STEP 2: Details */}
+        {}
         {step === 2 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -235,7 +235,7 @@ export function AnomalyDetailsModal({
               </h2>
             </div>
 
-            {/* Related Transactions */}
+            {}
             <div className="mb-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Related Transactions</h3>
               <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -256,7 +256,7 @@ export function AnomalyDetailsModal({
               </div>
             </div>
 
-            {/* Historical Data */}
+            {}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Historical Comparison</h3>
               <div className="space-y-2">
@@ -277,7 +277,7 @@ export function AnomalyDetailsModal({
           </div>
         )}
 
-        {/* STEP 3: Actions */}
+        {}
         {step === 3 && (
           <div className="animate-txn-in">
             <div className="mb-5">
@@ -289,7 +289,7 @@ export function AnomalyDetailsModal({
               </h2>
             </div>
 
-            {/* Recommendations */}
+            {}
             {recommendations.length > 0 && (
               <div className="space-y-3 mb-5">
                 {recommendations.map((rec, idx) => (
@@ -301,7 +301,7 @@ export function AnomalyDetailsModal({
               </div>
             )}
 
-            {/* Action Buttons */}
+            {}
             {anomalyData.status === "active" && (
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
                 <Button 
@@ -329,7 +329,7 @@ export function AnomalyDetailsModal({
         )}
       </ModalBody>
 
-      {/* Footer */}
+      {}
       <ModalFooter className="flex justify-between">
         <Button
           variant="outline"

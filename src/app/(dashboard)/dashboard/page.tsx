@@ -39,10 +39,6 @@ import { useDashboard } from "./_lib/use-dashboard";
 import type { InsightItem } from "./_lib/dashboard-service";
 import { OnboardingCheck } from "../_components/onboarding-check";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function formatCurrency(n: number): string {
   return n.toLocaleString("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 2 });
 }
@@ -67,7 +63,6 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-// Map category emoji icon strings to Lucide components
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
   "🏠": Receipt, "🚗": Bus, "🍽️": ChefHat, "🛒": ShoppingCart,
   "💡": Receipt, "⚕️": Receipt, "🎬": Clapperboard, "🛍️": ShoppingCart,
@@ -81,7 +76,6 @@ function getCategoryIcon(emoji: string | null): React.ComponentType<any> {
   return ICON_MAP[emoji] || FileText;
 }
 
-// Map insight type to visual props
 function getInsightVisuals(type: InsightItem["type"]) {
   switch (type) {
     case "warning":
@@ -96,7 +90,6 @@ function getInsightVisuals(type: InsightItem["type"]) {
   }
 }
 
-// Budget status → visual colors
 function getBudgetVisuals(status: string) {
   switch (status) {
     case "Over Budget":
@@ -108,7 +101,6 @@ function getBudgetVisuals(status: string) {
   }
 }
 
-// Spending trend → visual colors
 function getTrendVisuals(trend: "up" | "down" | "neutral") {
   switch (trend) {
     case "down":
@@ -120,12 +112,8 @@ function getTrendVisuals(trend: "up" | "down" | "neutral") {
   }
 }
 
-// Donut chart colors
 const DONUT_COLORS = ["#10b981", "#f59e0b", "#64748b", "#cbd5e1", "#8b5cf6", "#f97316", "#06b6d4"];
 
-// ---------------------------------------------------------------------------
-// Type definitions for better type safety
-// ---------------------------------------------------------------------------
 type StatType = {
   label: string;
   value: string;
@@ -148,7 +136,6 @@ type InsightType = {
   iconColor: string;
 };
 
-// Memoized components for better performance
 const StatCard = memo(({ stat }: { stat: StatType }) => {
   const IconCmp = stat.icon;
   return (
@@ -200,22 +187,18 @@ export default function DashboardPage() {
   const [hoveredBar, setHoveredBar] = useState<{ month: string; type: 'income' | 'expense'; value: number } | null>(null);
   const [expandedInsight, setExpandedInsight] = useState<string | null>(null);
 
-  // Handle refresh insights with loading state (only refresh insights, not whole dashboard)
   const handleRefreshInsights = async () => {
     refreshInsights();
   };
 
-  // Handle refresh spending trends with loading state (only refresh trends, not whole dashboard)
   const handleRefreshSpendingTrends = async () => {
     refreshSpendingTrends();
   };
 
-  // Toggle insight expand functionality (exact function from old implementation)
   const handleToggleInsightExpand = (insightTitle: string) => {
     setExpandedInsight(expandedInsight === insightTitle ? null : insightTitle);
   };
 
-  // Get insight style based on type (exact function from old implementation)
   const getInsightStyle = (type: string) => {
     switch (type) {
       case 'success':
@@ -245,7 +228,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Get additional context message based on insight type (exact function from old implementation)
   const getInsightContextMessage = (type: string) => {
     switch (type) {
       case 'success':
@@ -261,7 +243,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Build stats from real summary data
   const stats: StatType[] = useMemo(() => {
     if (!summary) return [];
     return [
@@ -300,7 +281,6 @@ export default function DashboardPage() {
     ];
   }, [summary]);
 
-  // Build insight cards from real data
   const insightCards: InsightType[] = useMemo(() => {
     return insights.map((ins) => {
       const vis = getInsightVisuals(ins.type);
@@ -313,24 +293,20 @@ export default function DashboardPage() {
         borderColor: vis.borderColor,
         labelColor: vis.labelColor,
         actionColor: vis.actionColor,
-        icon: ins.icon || vis.icon, // Use icon from insights service if available
+        icon: ins.icon || vis.icon,
         iconColor: vis.iconColor,
       };
     });
   }, [insights]);
 
-  // InsightCard component with access to state variables
   const InsightCard = memo(({ insight }: { insight: InsightType }) => {
     const isExpanded = expandedInsight === insight.title;
     const style = getInsightStyle(insight.type);
 
-    // Handle both string icons (from insights service) and React component icons
     const renderIcon = () => {
       if (typeof insight.icon === 'string') {
-        // Use Iconify for string icon names (e.g., "lucide:alert-triangle")
         return <Icon icon={insight.icon} width={14} height={14} className={`sm:w-4 sm:h-4 ${insight.iconColor}`} />;
       } else {
-        // Use React component icon
         const IconCmp = insight.icon;
         return <IconCmp size={14} className={`sm:w-4 sm:h-4 ${insight.iconColor}`} />;
       }
@@ -351,7 +327,6 @@ export default function DashboardPage() {
           {insight.description}
         </p>
 
-        {/* Expanded content - exact implementation from old FinancialInsights */}
         {isExpanded && (
           <div className="mt-2 sm:mt-3 text-xs sm:text-sm text-slate-600 animate__animated animate__fadeIn">
             <p className="text-[10px] sm:text-xs leading-relaxed">
@@ -360,7 +335,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Action button with expand/collapse functionality - exact implementation from old FinancialInsights */}
         <Button
           variant="ghost"
           size="xs"
@@ -375,7 +349,6 @@ export default function DashboardPage() {
 
   InsightCard.displayName = "InsightCard";
 
-  // Normalize chart data to percentages for bar heights
   const chartData = useMemo(() => {
     if (!monthlyChart.length) return [];
     const max = Math.max(...monthlyChart.map((d) => Math.max(d.income, d.expense)), 1);
@@ -388,7 +361,6 @@ export default function DashboardPage() {
     }));
   }, [monthlyChart]);
 
-  // Donut chart gradient from real category breakdown
   const donutStyle = useMemo(() => {
     if (!categoryBreakdown.length) return { background: "#e2e8f0" };
     const total = categoryBreakdown.reduce((s, c) => s + c.amount, 0);
@@ -409,19 +381,15 @@ export default function DashboardPage() {
     [categoryBreakdown]
   );
 
-  // Chart tab switch state
   const [activeChartTab, setActiveChartTab] = useState<'overview' | 'categories'>('overview');
 
-  // Current month label for chart highlighting
   const currentMonthLabel = new Date().toLocaleDateString("en-US", { month: "short" });
 
-  // Loading state
   if (loading) {
     return (
       <OnboardingCheck>
       <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
         <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
-          {/* Welcome Header Skeleton */}
           <div className="flex flex-col gap-4 sm:gap-6">
             <div>
               <Skeleton width={120} height={12} className="mb-2" />
@@ -429,7 +397,6 @@ export default function DashboardPage() {
               <Skeleton width={300} height={14} className="sm:h-[16px]" />
             </div>
 
-            {/* Pending Invitation Skeleton */}
             <Card className="p-4 sm:p-5">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <Skeleton width={40} height={40} borderRadius={50} />
@@ -445,7 +412,6 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          {/* Financial Insights Skeleton */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -469,7 +435,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Stats Grid Skeleton */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <Card key={i} className="p-4 sm:p-5">
@@ -483,9 +448,7 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Charts + Categories Skeleton */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-            {/* Income vs Expenses Chart Skeleton */}
             <Card className="lg:col-span-2 p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-2 sm:gap-0">
                 <div>
@@ -506,7 +469,6 @@ export default function DashboardPage() {
               <Skeleton height={180} className="sm:h-[200px] lg:h-[240px]" />
             </Card>
 
-            {/* Expense Categories Skeleton */}
             <Card className="p-4 sm:p-6 flex flex-col">
               <div className="mb-4 sm:mb-6">
                 <Skeleton width={90} height={14} className="sm:w-[100px] sm:h-[16px]" />
@@ -526,7 +488,6 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          {/* Spending Trends Skeleton */}
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Skeleton width={16} height={16} />
@@ -548,9 +509,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Budget Progress & Recent Transactions Skeleton */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Budget Progress Skeleton */}
             <Card className="p-4 sm:p-6 flex flex-col">
               <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div>
@@ -582,7 +541,6 @@ export default function DashboardPage() {
               </div>
             </Card>
 
-            {/* Recent Transactions Skeleton */}
             <Card className="p-4 sm:p-6 flex flex-col">
               <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div>
@@ -619,7 +577,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <OnboardingCheck>
@@ -635,7 +592,6 @@ export default function DashboardPage() {
   return (
     <OnboardingCheck>
     <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
-      {/* Welcome Header */}
       <div className="flex flex-col gap-4 sm:gap-6">
         <div>
           <div className="text-xs font-semibold text-emerald-600 mb-1 uppercase tracking-wide">
@@ -649,7 +605,6 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Pending Invitations - Show only latest */}
         {latestInvitation ? (
           <Card className="p-4 sm:p-6 border border-slate-100">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -704,7 +659,6 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Financial Insights */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
@@ -723,7 +677,6 @@ export default function DashboardPage() {
           </Button>
         </div>
         {insightsLoading ? (
-          // Skeleton loader for insights
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="bg-white rounded-xl border border-slate-200/60 p-3 sm:p-4">
@@ -763,7 +716,6 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Stats Grid */}
       {stats.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {stats.map((stat) => (
@@ -789,9 +741,7 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      {/* Charts + Categories */}
       <div>
-        {/* Mobile Chart Tabs */}
         <div className="flex p-1 bg-slate-100 rounded-lg lg:hidden mb-4">
           <Button 
             variant="ghost" 
@@ -812,7 +762,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Income vs Expenses Chart - Show on desktop or when overview tab is active */}
           {(activeChartTab === 'overview' || !activeChartTab) && (
             <Card className="lg:col-span-2 p-4 sm:p-6 hover:shadow-md transition-all group cursor-pointer">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-2 sm:gap-0">
@@ -835,7 +784,6 @@ export default function DashboardPage() {
               {chartData.length > 0 ? (
                 <>
                   <div className="relative h-48 sm:h-60 flex items-end justify-between gap-2 sm:gap-6 px-2 border-b border-slate-50">
-                    {/* Grid lines */}
                     <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                       <div className="w-full h-px bg-slate-100/50" />
                       <div className="w-full h-px bg-slate-100/50" />
@@ -855,7 +803,6 @@ export default function DashboardPage() {
                           onMouseLeave={() => setHoveredBar(null)}
                         />
 
-                        {/* Tooltip */}
                         {hoveredBar && hoveredBar.month === d.month && (
                           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white border border-slate-200 text-slate-900 text-xs rounded shadow-sm whitespace-nowrap z-50">
                             <div className="font-medium text-slate-700">{hoveredBar.month}</div>
@@ -894,7 +841,6 @@ export default function DashboardPage() {
             </Card>
           )}
 
-          {/* Expense Categories - Show on desktop or when categories tab is active on mobile */}
           <Card className={`p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer ${activeChartTab === 'overview' ? 'hidden lg:flex' : ''}`}>
               <div className="mb-4 sm:mb-6">
                 <h3 className="text-sm font-semibold text-slate-900">Categories</h3>
@@ -912,7 +858,6 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <>
-                  {/* Donut Chart */}
                   <div className="flex items-center justify-center mb-4 sm:mb-6">
                     <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full flex-shrink-0 relative"
                       style={donutStyle}>
@@ -922,7 +867,6 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   </div>
-                  {/* Legend */}
                   <div className="space-y-2 sm:space-y-3 max-h-32 sm:max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300 pr-1">
                     {categoryBreakdown.map((cat, idx) => {
                       const pct = categoryTotal > 0 ? Math.round((cat.amount / categoryTotal) * 100) : 0;
@@ -943,7 +887,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Spending Trends */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
@@ -962,7 +905,6 @@ export default function DashboardPage() {
           </Button>
         </div>
         {trendsLoading ? (
-          // Skeleton loader for spending trends
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="bg-white rounded-xl border border-slate-200/60 p-3 sm:p-4">
@@ -1022,9 +964,7 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Budget Progress & Recent Transactions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Budget Progress */}
         <Card className="p-4 sm:p-6 flex flex-col hover:shadow-md transition-all group cursor-pointer">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
@@ -1091,7 +1031,6 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        {/* Recent Transactions */}
         <Card className="p-4 sm:p-6 flex flex-col">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>

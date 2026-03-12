@@ -25,10 +25,10 @@ export function RegisterForm() {
 
   return (
     <div>
-      {/* Social Auth */}
+      {}
       <SocialAuthButtons />
 
-      {/* Divider */}
+      {}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-slate-100" />
@@ -38,7 +38,7 @@ export function RegisterForm() {
         </div>
       </div>
 
-      {/* Error Message */}
+      {}
       {error && (
         <div
           role="alert"
@@ -48,7 +48,7 @@ export function RegisterForm() {
         </div>
       )}
 
-      {/* Success Message */}
+      {}
       {success && (
         <div
           role="status"
@@ -59,7 +59,7 @@ export function RegisterForm() {
         </div>
       )}
 
-      {/* Form */}
+      {}
       <form
         className="space-y-4"
         onSubmit={(e) => {
@@ -242,7 +242,7 @@ export function RegisterForm() {
         </Button>
       </form>
 
-      {/* Footer */}
+      {}
       <div className="mt-6 text-center text-xs text-slate-500">
         Already have an account?{" "}
         <Link

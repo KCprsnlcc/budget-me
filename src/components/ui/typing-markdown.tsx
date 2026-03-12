@@ -23,7 +23,6 @@ export function TypingMarkdown({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDelayed, setIsDelayed] = useState(true);
 
-  // Handle initial delay
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsDelayed(false);
@@ -32,7 +31,6 @@ export function TypingMarkdown({
     return () => clearTimeout(timer);
   }, [delay]);
 
-  // Typing effect
   useEffect(() => {
     if (isDelayed || currentIndex >= content.length) {
       if (currentIndex >= content.length && onComplete) {

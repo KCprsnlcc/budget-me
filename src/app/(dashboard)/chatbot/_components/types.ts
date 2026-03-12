@@ -13,8 +13,8 @@ export type MessageType = {
     size: number;
     url?: string;
   };
-  created_at?: string; // For pagination
-  isContentLoaded?: boolean; // Track if message content is loaded (for lazy loading)
+  created_at?: string;
+  isContentLoaded?: boolean;
 };
 
 export type AIModel = {
@@ -64,7 +64,6 @@ export const DEFAULT_SUGGESTIONS: ChatSuggestion[] = [
 
 export type ExportFormat = "pdf" | "csv";
 
-// Extended types for backend integration
 export interface ChatSession {
   id: string;
   userId: string;

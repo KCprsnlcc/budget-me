@@ -5,7 +5,6 @@ const supabase = createClient();
 
 const DAILY_LIMIT = 25;
 
-// Map raw DB row to AdminAIUsage
 function mapRow(row: Record<string, any>): AdminAIUsage {
   const profile = row.profiles as Record<string, any> | null;
 
@@ -25,7 +24,6 @@ function mapRow(row: Record<string, any>): AdminAIUsage {
   };
 }
 
-// Fetch all AI usage records with filters (admin view)
 export async function fetchAdminAIUsage(
   filters: AdminAIUsageFilters = {},
   page: number = 1,
@@ -37,7 +35,6 @@ export async function fetchAdminAIUsage(
     .order("usage_date", { ascending: false })
     .order("total_used", { ascending: false });
 
-  // Apply filters
   if (filters.startDate) {
     query = query.gte("usage_date", filters.startDate);
   }
@@ -54,7 +51,6 @@ export async function fetchAdminAIUsage(
     query = query.lte("total_used", filters.maxUsage);
   }
 
-  // Pagination
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   query = query.range(from, to);
@@ -62,19 +58,16 @@ export async function fetchAdminAIUsage(
   const { data, error, count } = await query;
   if (error) return { data: [], error: error.message, count: null };
 
-  // Fetch user profiles separately
   const userIds = [...new Set((data ?? []).map((usage: any) => usage.user_id))];
   const { data: profiles } = await supabase
     .from("profiles")
     .select("id, email, full_name, avatar_url")
     .in("id", userIds);
 
-  // Create a map of user profiles
   const profileMap = new Map(
     (profiles ?? []).map((p: any) => [p.id, { email: p.email, full_name: p.full_name, avatar_url: p.avatar_url }])
   );
 
-  // Map usage records with user data
   const mappedData = (data ?? []).map((row: any) => {
     const profile = profileMap.get(row.user_id);
     return mapRow({ ...row, profiles: profile });
@@ -83,12 +76,10 @@ export async function fetchAdminAIUsage(
   return { data: mappedData, error: null, count: count ?? 0 };
 }
 
-// Fetch admin AI usage statistics
 export async function fetchAdminAIUsageStats(): Promise<AdminAIUsageStats | null> {
   const today = new Date().toISOString().split("T")[0];
   const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
 
-  // Total usage across all time
   const { data: allUsage } = await supabase
     .from("ai_usage_rate_limits")
     .select("total_used, predictions_used, insights_used, chatbot_used");
@@ -98,23 +89,19 @@ export async function fetchAdminAIUsageStats(): Promise<AdminAIUsageStats | null
   const totalInsights = (allUsage ?? []).reduce((sum, u) => sum + u.insights_used, 0);
   const totalChatbot = (allUsage ?? []).reduce((sum, u) => sum + u.chatbot_used, 0);
 
-  // Total unique users
   const { data: uniqueUsers } = await supabase
     .from("ai_usage_rate_limits")
     .select("user_id");
   const totalUsers = new Set((uniqueUsers ?? []).map((u: any) => u.user_id)).size;
 
-  // Average usage per user
   const avgUsagePerUser = totalUsers > 0 ? totalUsage / totalUsers : 0;
 
-  // Active users today
   const { data: todayUsage } = await supabase
     .from("ai_usage_rate_limits")
     .select("user_id")
     .eq("usage_date", today);
   const activeUsersToday = new Set((todayUsage ?? []).map((u: any) => u.user_id)).size;
 
-  // Users at limit today
   const { data: limitUsers } = await supabase
     .from("ai_usage_rate_limits")
     .select("user_id")
@@ -122,7 +109,6 @@ export async function fetchAdminAIUsageStats(): Promise<AdminAIUsageStats | null
     .gte("total_used", DAILY_LIMIT);
   const usersAtLimit = (limitUsers ?? []).length;
 
-  // Usage growth (last 7 days)
   const usageGrowth: { date: string; count: number }[] = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(Date.now() - i * 86400000);
@@ -138,14 +124,12 @@ export async function fetchAdminAIUsageStats(): Promise<AdminAIUsageStats | null
     usageGrowth.push({ date: label, count });
   }
 
-  // Daily growth
   const todayCount = usageGrowth[usageGrowth.length - 1]?.count ?? 0;
   const yesterdayCount = usageGrowth[usageGrowth.length - 2]?.count ?? 0;
   const dailyGrowth = yesterdayCount > 0 
     ? ((todayCount - yesterdayCount) / yesterdayCount) * 100 
     : 0;
 
-  // Feature distribution
   const featureTotal = totalPredictions + totalInsights + totalChatbot;
   const featureDistribution = [
     {
@@ -165,12 +149,10 @@ export async function fetchAdminAIUsageStats(): Promise<AdminAIUsageStats | null
     },
   ];
 
-  // Top feature
   const topFeature = featureDistribution.reduce((max, curr) => 
     curr.count > max.count ? curr : max
   );
 
-  // Top users by total usage
   const { data: userUsageData } = await supabase
     .from("ai_usage_rate_limits")
     .select("user_id, total_used, predictions_used, insights_used, chatbot_used");
@@ -187,12 +169,10 @@ export async function fetchAdminAIUsageStats(): Promise<AdminAIUsageStats | null
     });
   }
 
-  // Get top 5 users
   const sortedUsers = Array.from(userTotals.entries())
     .sort((a, b) => b[1].total - a[1].total)
     .slice(0, 5);
 
-  // Fetch user profiles
   const topUserIds = sortedUsers.map(([userId]) => userId);
   const { data: profiles } = await supabase
     .from("profiles")
@@ -230,14 +210,12 @@ export async function fetchAdminAIUsageStats(): Promise<AdminAIUsageStats | null
   };
 }
 
-// Delete AI usage record (admin)
 export async function deleteAdminAIUsage(usageId: string): Promise<{ error: string | null }> {
   const { error } = await supabase.from("ai_usage_rate_limits").delete().eq("id", usageId);
   if (error) return { error: error.message };
   return { error: null };
 }
 
-// Reset user's AI usage for a specific date (admin)
 export async function resetUserAIUsage(userId: string, date: string): Promise<{ error: string | null }> {
   const { error } = await supabase
     .from("ai_usage_rate_limits")
@@ -254,7 +232,6 @@ export async function resetUserAIUsage(userId: string, date: string): Promise<{ 
   return { error: null };
 }
 
-// Fetch all users for filter dropdown
 export async function fetchAllUsers(): Promise<{ id: string; email: string; full_name: string | null }[]> {
   const { data } = await supabase
     .from("profiles")

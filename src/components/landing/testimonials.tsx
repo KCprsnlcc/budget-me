@@ -92,12 +92,12 @@ export function Testimonials() {
       className="relative z-10 py-16 bg-slate-50/50 border-y border-slate-100 overflow-hidden"
     >
       <div className="max-w-7xl mx-auto relative">
-        {/* Edge Fades */}
+        {}
         <div className="absolute left-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-r from-slate-50 via-slate-50/90 to-transparent z-20 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-l from-slate-50 via-slate-50/90 to-transparent z-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-50 via-slate-50/90 to-transparent z-20 pointer-events-none" />
 
-        {/* Header */}
+        {}
         <div className="text-center mb-12 relative z-10 pt-8">
           <h2 className="text-emerald-600 text-[10px] font-bold tracking-widest uppercase mb-2">
             Testimonials
@@ -109,7 +109,7 @@ export function Testimonials() {
             See why thousands of users are switching to BudgetMe for their daily financial planning.
           </p>
           
-          {/* Write Review Button */}
+          {}
           <Button
             onClick={handleOpenModal}
             variant="secondary"
@@ -120,7 +120,7 @@ export function Testimonials() {
           </Button>
         </div>
 
-        {/* Marquee Rows */}
+        {}
         {isLoading ? (
           <div className="relative overflow-hidden py-4 space-y-6">
             <div className="flex gap-6">
@@ -146,7 +146,7 @@ export function Testimonials() {
         )}
       </div>
 
-      {/* Write Review Modal */}
+      {}
       <WriteReviewModal
         open={isModalOpen}
         onClose={handleCloseModal}

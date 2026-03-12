@@ -24,7 +24,6 @@ import type { AdminTransaction, AdminTransactionStats, AdminTransactionFilters }
 
 const supabase = createClient();
 
-// Helper: Emoji to Lucide icon mapping
 function getLucideIcon(emoji: string): React.ComponentType<any> {
   const iconMap: Record<string, React.ComponentType<any>> = {
     "🏠": Home, "🚗": Car, "🍽️": Utensils, "🛒": ShoppingCart,
@@ -36,7 +35,6 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
   return iconMap[emoji] || FileText;
 }
 
-// Map raw DB row to AdminTransaction
 function mapRow(row: Record<string, any>): AdminTransaction {
   const acct = row.accounts as Record<string, any> | null;
   const expCat = row.expense_categories as Record<string, any> | null;
@@ -71,11 +69,10 @@ function mapRow(row: Record<string, any>): AdminTransaction {
     category_name: categorySource?.category_name ?? undefined,
     category_icon: categorySource?.icon ? getLucideIcon(categorySource.icon) : undefined,
     category_color: categorySource?.color ?? undefined,
-    goal_name: undefined, // Goal relationship not available in admin view
+    goal_name: undefined, 
   };
 }
 
-// Fetch all transactions with filters (admin view)
 export async function fetchAdminTransactions(
   filters: AdminTransactionFilters = {},
   page: number = 1,
@@ -95,7 +92,6 @@ export async function fetchAdminTransactions(
     .order("date", { ascending: false })
     .order("created_at", { ascending: false });
 
-  // Apply filters
   if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
     const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
     const endDate = new Date(filters.year, filters.month, 0);
@@ -115,7 +111,6 @@ export async function fetchAdminTransactions(
     );
   }
 
-  // Pagination
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   query = query.range(from, to);
@@ -123,19 +118,16 @@ export async function fetchAdminTransactions(
   const { data, error, count } = await query;
   if (error) return { data: [], error: error.message, count: null };
 
-  // Fetch user profiles separately
   const userIds = [...new Set((data ?? []).map((tx: any) => tx.user_id))];
   const { data: profiles } = await supabase
     .from("profiles")
     .select("id, email, full_name, avatar_url")
     .in("id", userIds);
 
-  // Create a map of user profiles
   const profileMap = new Map(
     (profiles ?? []).map((p: any) => [p.id, { email: p.email, full_name: p.full_name, avatar_url: p.avatar_url }])
   );
 
-  // Map transactions with user data
   const mappedData = (data ?? []).map((row: any) => {
     const profile = profileMap.get(row.user_id);
     return mapRow({ ...row, profiles: profile });
@@ -144,18 +136,15 @@ export async function fetchAdminTransactions(
   return { data: mappedData, error: null, count: count ?? 0 };
 }
 
-// Fetch admin transaction statistics
 export async function fetchAdminTransactionStats(): Promise<AdminTransactionStats | null> {
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 
-  // Total transactions
   const { count: totalTransactions } = await supabase
     .from("transactions")
     .select("*", { count: "exact", head: true });
 
-  // Total income and expenses
   const { data: allTxns } = await supabase
     .from("transactions")
     .select("type, amount")
@@ -169,22 +158,18 @@ export async function fetchAdminTransactionStats(): Promise<AdminTransactionStat
     else if (tx.type === "expense") totalExpenses += amt;
   }
 
-  // Active users (users with at least one transaction)
   const { data: activeUsersData } = await supabase
     .from("transactions")
     .select("user_id");
   const activeUsers = new Set((activeUsersData ?? []).map((tx: any) => tx.user_id)).size;
 
-  // Average transaction value
   const avgTransactionValue = totalTransactions ? (totalIncome + totalExpenses) / totalTransactions : 0;
 
-  // Pending transactions
   const { count: pendingTransactions } = await supabase
     .from("transactions")
     .select("*", { count: "exact", head: true })
     .eq("status", "pending");
 
-  // Transaction growth (last 6 months)
   const transactionGrowth: { month: string; count: number }[] = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date(currentYear, currentMonth - 1 - i, 1);
@@ -204,14 +189,12 @@ export async function fetchAdminTransactionStats(): Promise<AdminTransactionStat
     transactionGrowth.push({ month: label, count: count ?? 0 });
   }
 
-  // Month-over-month growth
   const currentMonthCount = transactionGrowth[transactionGrowth.length - 1]?.count ?? 0;
   const previousMonthCount = transactionGrowth[transactionGrowth.length - 2]?.count ?? 0;
   const monthOverMonthGrowth = previousMonthCount > 0 
     ? ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100 
     : 0;
 
-  // Type distribution
   const { data: typeData } = await supabase
     .from("transactions")
     .select("type");
@@ -228,7 +211,6 @@ export async function fetchAdminTransactionStats(): Promise<AdminTransactionStat
     percentage: Math.round((count / total) * 100),
   }));
 
-  // Top spending category
   const { data: categoryData } = await supabase
     .from("transactions")
     .select(`
@@ -254,7 +236,6 @@ export async function fetchAdminTransactionStats(): Promise<AdminTransactionStat
     }
   }
 
-  // Top users by transaction volume
   const { data: userTxData } = await supabase
     .from("transactions")
     .select("user_id, amount")
@@ -271,12 +252,10 @@ export async function fetchAdminTransactionStats(): Promise<AdminTransactionStat
     });
   }
 
-  // Get top 5 users
   const sortedUsers = Array.from(userTotals.entries())
     .sort((a, b) => b[1].total_amount - a[1].total_amount)
     .slice(0, 5);
 
-  // Fetch user profiles with full data
   const topUserIds = sortedUsers.map(([userId]) => userId);
   const { data: profiles } = await supabase
     .from("profiles")
@@ -313,14 +292,12 @@ export async function fetchAdminTransactionStats(): Promise<AdminTransactionStat
   };
 }
 
-// Delete transaction (admin)
 export async function deleteAdminTransaction(txId: string): Promise<{ error: string | null }> {
   const { error } = await supabase.from("transactions").delete().eq("id", txId);
   if (error) return { error: error.message };
   return { error: null };
 }
 
-// Fetch all users for filter dropdown
 export async function fetchAllUsers(): Promise<{ id: string; email: string; full_name: string | null }[]> {
   const { data } = await supabase
     .from("profiles")

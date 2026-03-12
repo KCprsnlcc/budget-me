@@ -2,7 +2,6 @@ export { AnomalyDetailsModal } from "./anomaly-details-modal";
 export { Stepper } from "./stepper";
 export * from "./types";
 
-// Chart components
 export { SpendingCategoryChart } from "./spending-category-chart";
 export { IncomeExpenseChart } from "./income-expense-chart";
 export { SavingsAnalysisChart } from "./savings-analysis-chart";

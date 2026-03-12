@@ -45,7 +45,7 @@ export function ModulesShowcase() {
   return (
     <section id="modules" className="relative z-10 py-16 px-6 overflow-hidden">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+        {}
         <div className="text-center mb-16">
           <h2 className="text-emerald-600 text-[10px] font-bold tracking-widest uppercase mb-3">
             Interface
@@ -58,7 +58,7 @@ export function ModulesShowcase() {
           </p>
         </div>
 
-        {/* Grid */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {MODULE_CARDS.map((card) => {
             const PrimaryIcon = ICON_MAP[card.icon];
@@ -71,7 +71,7 @@ export function ModulesShowcase() {
                 key={card.title}
                 className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300 group"
               >
-                {/* Icon Preview */}
+                {}
                 <div className="h-40 bg-slate-50 flex items-center justify-center p-8">
                   <div className="flex items-center gap-4">
                     {PrimaryIcon && (
@@ -83,7 +83,7 @@ export function ModulesShowcase() {
                   </div>
                 </div>
 
-                {/* Content */}
+                {}
                 <div className="p-6">
                   <h4 className="text-[17px] font-bold text-slate-900 mb-2">
                     {card.title}
@@ -99,7 +99,7 @@ export function ModulesShowcase() {
                     <ArrowUpRight size={14} className="text-slate-400" />
                   </a>
 
-                  {/* Tech Ticker */}
+                  {}
                   <div className="mt-6 pt-4 border-t border-slate-50 overflow-hidden opacity-30 group-hover:opacity-100 transition-opacity">
                     <div className="flex animate-marquee gap-8 whitespace-nowrap text-[9px] font-bold uppercase tracking-widest text-slate-400">
                       <span>Browser Native &bull; Works on all devices</span>

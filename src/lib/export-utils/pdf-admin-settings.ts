@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { getTimestampString } from "./formatters";
 import type { BackupAdminExportData, ActivityAdminExportData } from "./types";
 
-/**
- * Export admin backup logs as PDF
- */
 export function exportAdminBackupsToPDF(
     backups: BackupAdminExportData[],
     summary?: {
@@ -21,7 +18,6 @@ export function exportAdminBackupsToPDF(
 
     const doc = createBasePDF("System Backup Report", `${backups.length} logs`);
 
-    // Summary section
     let currentY = 45;
     const margin = 15;
 
@@ -36,7 +32,6 @@ export function exportAdminBackupsToPDF(
         const cardHeight = 20;
         const cardSpacing = 3;
 
-        // Total Backups card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -51,7 +46,6 @@ export function exportAdminBackupsToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.totalBackups || 0).toLocaleString(), margin + 4, currentY + 14);
 
-        // Last Backup card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -69,7 +63,6 @@ export function exportAdminBackupsToPDF(
         currentY += cardHeight + 12;
     }
 
-    // Backups table
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(COLORS.dark);
@@ -88,7 +81,7 @@ export function exportAdminBackupsToPDF(
     ];
     const formats: ("text" | "currency" | "number" | "percentage")[] = ["text", "text", "text", "text", "text", "number", "text"];
 
-    const columnWidths = [30, 20, 20, 40, 20, 20, 30]; // Total: 180mm
+    const columnWidths = [30, 20, 20, 40, 20, 20, 30]; 
 
     addPDFTable(doc, headers, backups, keys, formats, currentY, columnWidths);
 
@@ -96,9 +89,6 @@ export function exportAdminBackupsToPDF(
     doc.save(filename);
 }
 
-/**
- * Export admin activity logs as PDF
- */
 export function exportAdminActivityToPDF(
     activities: ActivityAdminExportData[],
     summary?: {
@@ -113,7 +103,6 @@ export function exportAdminActivityToPDF(
 
     const doc = createBasePDF("System Activity Report", `${activities.length} logs`);
 
-    // Summary section
     let currentY = 45;
     const margin = 15;
 
@@ -128,7 +117,6 @@ export function exportAdminActivityToPDF(
         const cardHeight = 20;
         const cardSpacing = 4;
 
-        // Total Logs card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -143,7 +131,6 @@ export function exportAdminActivityToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.totalLogs || 0).toLocaleString(), margin + 4, currentY + 14);
 
-        // Recent Errors card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -161,7 +148,6 @@ export function exportAdminActivityToPDF(
         currentY += cardHeight + 12;
     }
 
-    // Activity table
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(COLORS.dark);
@@ -178,7 +164,7 @@ export function exportAdminActivityToPDF(
     ];
     const formats: ("text" | "currency" | "number" | "percentage")[] = ["text", "text", "text", "text", "text"];
 
-    const columnWidths = [30, 30, 60, 40, 20]; // Total: 180mm
+    const columnWidths = [30, 30, 60, 40, 20]; 
 
     addPDFTable(doc, headers, activities, keys, formats, currentY, columnWidths);
 

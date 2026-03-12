@@ -12,7 +12,6 @@ export interface AIUsageStatus {
   remaining: number;
   canUseAI: boolean;
   nextResetAt: Date;
-  // Breakdown by feature for display purposes
   predictionsUsed: number;
   insightsUsed: number;
   chatbotUsed: number;
@@ -20,9 +19,6 @@ export interface AIUsageStatus {
 
 const DAILY_LIMIT = 25;
 
-/**
- * Check if user can use AI features (shared limit across all AI features)
- */
 export async function checkAIUsage(
   userId: string,
   usageType: AIUsageType
@@ -30,7 +26,6 @@ export async function checkAIUsage(
   try {
     const today = new Date().toISOString().split("T")[0];
 
-    // Get or create today's usage record
     let { data: usage, error } = await supabase
       .from("ai_usage_rate_limits")
       .select("*")
@@ -42,7 +37,6 @@ export async function checkAIUsage(
       throw error;
     }
 
-    // If no record exists, create one
     if (!usage) {
       const { data: newUsage, error: insertError } = await supabase
         .from("ai_usage_rate_limits")
@@ -61,7 +55,6 @@ export async function checkAIUsage(
       usage = newUsage;
     }
 
-    // Calculate next reset time (midnight tomorrow)
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(0, 0, 0, 0);
@@ -94,9 +87,6 @@ export async function checkAIUsage(
   }
 }
 
-/**
- * Increment usage for a specific AI feature (counts toward shared limit)
- */
 export async function incrementAIUsage(
   userId: string,
   usageType: AIUsageType
@@ -104,7 +94,6 @@ export async function incrementAIUsage(
   try {
     const today = new Date().toISOString().split("T")[0];
 
-    // First check if allowed
     const { allowed, status: currentStatus } = await checkAIUsage(
       userId,
       usageType
@@ -116,7 +105,6 @@ export async function incrementAIUsage(
       };
     }
 
-    // Determine which column to increment
     let updateData: Record<string, number> = {
       total_used: currentStatus.totalUsed + 1,
     };
@@ -133,7 +121,6 @@ export async function incrementAIUsage(
         break;
     }
 
-    // Update usage
     const { data: updatedUsage, error } = await supabase
       .from("ai_usage_rate_limits")
       .update(updateData)
@@ -144,7 +131,6 @@ export async function incrementAIUsage(
 
     if (error) throw error;
 
-    // Get updated status
     const { status: newStatus } = await checkAIUsage(userId, usageType);
 
     return { success: true, status: newStatus };
@@ -157,9 +143,6 @@ export async function incrementAIUsage(
   }
 }
 
-/**
- * Get current usage status
- */
 export async function getAIUsageStatus(
   userId: string
 ): Promise<AIUsageStatus> {
@@ -167,9 +150,6 @@ export async function getAIUsageStatus(
   return status;
 }
 
-/**
- * Format time remaining until next reset
- */
 export function formatTimeRemaining(nextResetAt: Date): string {
   const now = new Date();
   const diff = nextResetAt.getTime() - now.getTime();

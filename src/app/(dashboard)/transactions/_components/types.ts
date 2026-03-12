@@ -18,7 +18,6 @@ export type TransactionType = {
   is_recurring: boolean;
   created_at: string;
   updated_at: string;
-  // Joined fields
   account_name?: string;
   account_number_masked?: string;
   category_name?: string;

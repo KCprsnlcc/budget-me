@@ -3,9 +3,6 @@ import { COLORS } from "./constants";
 import { formatCurrencyPHP, getTimestampString } from "./formatters";
 import type { GoalAdminExportData } from "./types";
 
-/**
- * Export admin goals as PDF
- */
 export function exportAdminGoalsToPDF(
     goals: GoalAdminExportData[],
     summary?: {
@@ -22,7 +19,6 @@ export function exportAdminGoalsToPDF(
 
     const doc = createBasePDF("Goal Management Report", `${goals.length} goals`);
 
-    // Summary section
     let currentY = 45;
     const margin = 15;
 
@@ -37,7 +33,6 @@ export function exportAdminGoalsToPDF(
         const cardHeight = 20;
         const cardSpacing = 3;
 
-        // Total Goals card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -52,7 +47,6 @@ export function exportAdminGoalsToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.totalGoals || 0).toLocaleString(), margin + 4, currentY + 14);
 
-        // Active Saves card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + cardWidth + cardSpacing, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -67,7 +61,6 @@ export function exportAdminGoalsToPDF(
         doc.setFont("helvetica", "bold");
         doc.text((summary.activeSaves || 0).toLocaleString(), margin + cardWidth + cardSpacing + 4, currentY + 14);
 
-        // Total Saved card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 2, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -82,7 +75,6 @@ export function exportAdminGoalsToPDF(
         doc.setFont("helvetica", "bold");
         doc.text(formatCurrencyPHP(summary.totalSaved || 0), margin + (cardWidth + cardSpacing) * 2 + 4, currentY + 14);
 
-        // Completed Goals card
         doc.setFillColor(COLORS.cardBg);
         doc.roundedRect(margin + (cardWidth + cardSpacing) * 3, currentY, cardWidth, cardHeight, 2, 2, "F");
         doc.setDrawColor(COLORS.border);
@@ -100,7 +92,6 @@ export function exportAdminGoalsToPDF(
         currentY += cardHeight + 12;
     }
 
-    // Goals table
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(COLORS.dark);
@@ -119,11 +110,10 @@ export function exportAdminGoalsToPDF(
     ];
     const formats: ("text" | "currency" | "number" | "percentage")[] = ["text", "text", "currency", "currency", "percentage", "text", "text"];
 
-    const columnWidths = [45, 55, 20, 20, 15, 15, 10]; // Total: 180mm
+    const columnWidths = [45, 55, 20, 20, 15, 15, 10]; 
 
     addPDFTable(doc, headers, goals, keys, formats, currentY, columnWidths);
 
-    // Save
     const filename = `admin_goals_${getTimestampString()}.pdf`;
     doc.save(filename);
 }

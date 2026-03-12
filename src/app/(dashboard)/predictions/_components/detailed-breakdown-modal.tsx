@@ -86,25 +86,22 @@ export function DetailedBreakdownModal({
 
   const canContinue = true;
 
-  // Format currency helper
   const formatCurrency = (amount: number): string => {
     return `₱${amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  // Combine forecast data
   const allMonths = [
     ...(forecastData?.historical || []),
     ...(forecastData?.predicted || [])
   ];
 
-  // Calculate totals
   const totalPredictedIncome = forecastData?.predicted.reduce((sum, p) => sum + p.income, 0) || 0;
   const totalPredictedExpenses = forecastData?.predicted.reduce((sum, p) => sum + p.expense, 0) || 0;
   const netSavings = totalPredictedIncome - totalPredictedExpenses; // Always allow continue (final step closes modal)
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-3xl">
-      {/* Header */}
+      {}
       <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
@@ -116,7 +113,7 @@ export function DetailedBreakdownModal({
         </div>
       </ModalHeader>
 
-      {/* Stepper */}
+      {}
       <div className="flex items-center justify-center px-5 py-3.5 bg-white border-b border-gray-100" aria-label="Progress">
         {STEPS.map((label, idx) => {
           const stepNum = idx + 1;
@@ -162,12 +159,12 @@ export function DetailedBreakdownModal({
         })}
       </div>
 
-      {/* Body */}
+      {}
       <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-        {/* STEP 1: Overview */}
+        {}
         {step === 1 && (
           <div className="space-y-6 animate-txn-in">
-            {/* Summary Cards */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all group cursor-pointer bg-white">
                 <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">
@@ -211,7 +208,7 @@ export function DetailedBreakdownModal({
               </div>
             </div>
 
-            {/* Key Insights */}
+            {}
             <div>
               <h3 className="text-[15px] font-bold text-gray-900 mb-3">Key Insights</h3>
               <div className="space-y-3">
@@ -253,7 +250,7 @@ export function DetailedBreakdownModal({
           </div>
         )}
 
-        {/* STEP 2: Monthly Forecast - Simplified */}
+        {}
         {step === 2 && (
           <div className="space-y-4 animate-txn-in">
             <div className="flex items-center gap-2">
@@ -261,12 +258,12 @@ export function DetailedBreakdownModal({
               <h3 className="text-sm font-bold text-gray-900">Monthly Financial Forecast</h3>
             </div>
 
-            {/* Compact Monthly Cards */}
+            {}
             <div className="space-y-3">
               {forecastData?.predicted && forecastData.predicted.length > 0 ? (
                 forecastData.predicted.map((item, idx) => (
                   <div key={`${item.month}-${idx}`} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all">
-                    {/* Month Header */}
+                    {}
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1.5">
                         <Calendar size={12} className="text-gray-400" />
@@ -282,9 +279,9 @@ export function DetailedBreakdownModal({
                       )}
                     </div>
 
-                    {/* Income & Expenses Grid */}
+                    {}
                     <div className="grid grid-cols-2 gap-2 mb-2">
-                      {/* Income */}
+                      {}
                       <div>
                         <div className="flex items-center justify-between mb-0.5">
                           <span className="text-[10px] text-gray-500">Income</span>
@@ -292,7 +289,7 @@ export function DetailedBreakdownModal({
                         <div className="text-sm font-bold text-emerald-600">{formatCurrency(item.income)}</div>
                       </div>
 
-                      {/* Expenses */}
+                      {}
                       <div>
                         <div className="flex items-center justify-between mb-0.5">
                           <span className="text-[10px] text-gray-500">Expenses</span>
@@ -301,7 +298,7 @@ export function DetailedBreakdownModal({
                       </div>
                     </div>
 
-                    {/* Single Progress Bar */}
+                    {}
                     <div className="w-full bg-gray-100 rounded-full h-1.5 mb-2">
                       <div 
                         className="bg-rose-500 h-1.5 rounded-full transition-all" 
@@ -309,7 +306,7 @@ export function DetailedBreakdownModal({
                       />
                     </div>
 
-                    {/* Net Savings */}
+                    {}
                     <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                       <span className="text-[10px] font-medium text-gray-500">Net Savings</span>
                       <span className={`text-sm font-bold ${(item.income - item.expense) >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
@@ -326,7 +323,7 @@ export function DetailedBreakdownModal({
               )}
             </div>
 
-            {/* Quick Stats */}
+            {}
             {forecastData?.historical && forecastData.historical.length > 0 && (
               <div className="bg-white rounded-lg p-3 border border-gray-200">
                 <div className="text-[10px] font-semibold text-gray-600 mb-2">Historical Analysis ({forecastData.historical.length} months)</div>
@@ -349,7 +346,7 @@ export function DetailedBreakdownModal({
           </div>
         )}
 
-        {/* STEP 3: Categories - Simplified */}
+        {}
         {step === 3 && (
           <div className="space-y-5 animate-txn-in">
             <h3 className="text-base font-bold text-gray-900">Category Spending Analysis</h3>
@@ -398,7 +395,7 @@ export function DetailedBreakdownModal({
         )}
       </ModalBody>
 
-      {/* Footer */}
+      {}
       <ModalFooter className="flex justify-between">
         {step > 1 ? (
           <Button variant="secondary" size="sm" onClick={handleBack}>

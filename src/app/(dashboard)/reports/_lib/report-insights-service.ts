@@ -4,14 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
 
-// Model ID used for database records (no API key on client)
 const AI_MODEL = "openai/gpt-oss-20b";
-
-/**
- * Report AI Insights Service
- * Generates AI-powered insights for financial reports via secure backend API route.
- * The OpenRouter API key never leaves the server.
- */
 
 export interface ReportAIInsightRequest {
   userId: string;
@@ -51,20 +44,15 @@ export interface ReportAIInsightResponse {
   actionableSteps: string[];
 }
 
-/**
- * Build comprehensive report context for AI analysis
- */
 function buildReportContext(request: ReportAIInsightRequest): string {
   const { reportType, timeframe, reportData } = request;
 
-  // Format currency
   const fmt = (n: number) => `₱${n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   let context = `# Financial Report Analysis Context\n\n`;
   context += `Report Type: ${reportType}\n`;
   context += `Timeframe: ${timeframe}\n\n`;
 
-  // Add summary data
   if (reportData.summary) {
     context += `## Summary Statistics\n\n`;
     Object.entries(reportData.summary).forEach(([key, value]) => {
@@ -77,7 +65,6 @@ function buildReportContext(request: ReportAIInsightRequest): string {
     context += `\n`;
   }
 
-  // Add anomalies
   if (reportData.anomalies && reportData.anomalies.length > 0) {
     context += `## Detected Anomalies\n\n`;
     reportData.anomalies.forEach((anomaly, idx) => {
@@ -93,7 +80,6 @@ function buildReportContext(request: ReportAIInsightRequest): string {
     context += `\n`;
   }
 
-  // Add chart data
   if (reportData.chartData) {
     context += `## Chart Data Analysis\n\n`;
     
@@ -133,17 +119,13 @@ function buildReportContext(request: ReportAIInsightRequest): string {
   return context;
 }
 
-/**
- * Generate AI-powered report insights via secure backend API route
- */
 export async function generateReportAIInsights(
   request: ReportAIInsightRequest
 ): Promise<ReportAIInsightResponse> {
   try {
-    // Build report context
+
     const reportContext = buildReportContext(request);
 
-    // Build system prompt for report analysis
     const systemPrompt = `You are an expert financial analyst AI specializing in personal finance reporting, budgeting, and financial planning. Your role is to analyze financial report data and provide actionable insights, risk assessments, and strategic recommendations.
 
 Guidelines:
@@ -193,10 +175,8 @@ You must respond with a valid JSON object containing the following structure:
   ]
 }`;
 
-    // Build user prompt with report data
     const userPrompt = `Analyze the following financial report data and provide comprehensive insights:\n\n${reportContext}\n\nProvide your analysis in the specified JSON format.`;
 
-    // ─── Call secure backend API route instead of OpenRouter directly ───
     const response = await fetch("/api/ai/report-insights", {
       method: "POST",
       headers: {
@@ -222,29 +202,22 @@ You must respond with a valid JSON object containing the following structure:
       throw new Error("No response from AI model");
     }
 
-    // Parse AI response
     const aiResponse: ReportAIInsightResponse = JSON.parse(aiContent);
 
-    // Validate response structure
     if (!aiResponse.summary || !aiResponse.riskLevel || !aiResponse.recommendations) {
       throw new Error("Invalid AI response structure");
     }
 
-    // Store insights in database
     await storeReportInsights(request.userId, request.reportType, request.timeframe, aiResponse);
 
     return aiResponse;
   } catch (error) {
     console.error("Error generating report AI insights:", error);
-    
-    // Return fallback insights
+
     return generateFallbackReportInsights(request);
   }
 }
 
-/**
- * Store report AI insights in Supabase (ai_reports table)
- */
 async function storeReportInsights(
   userId: string,
   reportType: string,
@@ -273,17 +246,13 @@ async function storeReportInsights(
     });
   } catch (error) {
     console.error("Error storing report insights:", error);
-    // Silent fail - don't break the flow
+
   }
 }
 
-/**
- * Generate fallback insights when AI service is unavailable
- */
 function generateFallbackReportInsights(request: ReportAIInsightRequest): ReportAIInsightResponse {
   const { reportData } = request;
 
-  // Calculate basic risk level
   let riskLevel: "low" | "medium" | "high" = "low";
   let riskScore = 20;
 
@@ -369,9 +338,6 @@ function generateFallbackReportInsights(request: ReportAIInsightRequest): Report
   };
 }
 
-/**
- * Fetch cached report insights from database
- */
 export async function fetchCachedReportInsights(
   userId: string,
   reportType: string,
@@ -393,7 +359,6 @@ export async function fetchCachedReportInsights(
       return null;
     }
 
-    // Extract data from JSONB fields
     const insights = data.insights || {};
 
     return {
@@ -402,7 +367,7 @@ export async function fetchCachedReportInsights(
       riskScore: insights.risk_score || 50,
       riskAnalysis: insights.risk_analysis || "",
       recommendations: data.recommendations || [],
-      insights: [], // Would need to be stored separately if needed
+      insights: [], 
       actionableSteps: insights.actionable_steps || [],
     };
   } catch (error) {

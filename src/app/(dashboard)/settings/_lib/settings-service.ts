@@ -4,10 +4,6 @@ import type { Account, ProfileFormData } from "../_components/types";
 
 const supabase = createClient();
 
-// ============================================================================
-// PROFILE OPERATIONS
-// ============================================================================
-
 export interface ProfileData {
   id: string;
   email: string;
@@ -19,9 +15,6 @@ export interface ProfileData {
   updated_at: string;
 }
 
-/**
- * Get user profile data
- */
 export async function getUserProfile(userId: string): Promise<ProfileData | null> {
   const { data, error } = await supabase
     .from("profiles")
@@ -37,9 +30,6 @@ export async function getUserProfile(userId: string): Promise<ProfileData | null
   return data;
 }
 
-/**
- * Update user profile
- */
 export async function updateUserProfile(
   userId: string,
   updates: Partial<ProfileFormData>
@@ -72,16 +62,12 @@ export async function updateUserProfile(
   }
 }
 
-/**
- * Upload profile picture
- */
 export async function uploadProfilePicture(
   userId: string,
   file: File
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
-    // Upload to Supabase Storage
-    // Path must include userId as folder to match RLS policy
+
     const fileExt = file.name.split(".").pop();
     const fileName = `${Date.now()}.${fileExt}`;
     const filePath = `${userId}/${fileName}`;
@@ -98,12 +84,10 @@ export async function uploadProfilePicture(
       return { success: false, error: uploadError.message };
     }
 
-    // Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from("profile-pictures")
       .getPublicUrl(filePath);
 
-    // Update profile with new avatar URL
     const { error: updateError } = await supabase
       .from("profiles")
       .update({
@@ -127,10 +111,6 @@ export async function uploadProfilePicture(
   }
 }
 
-// ============================================================================
-// ACCOUNT OPERATIONS
-// ============================================================================
-
 export interface AccountData {
   id: string;
   user_id: string;
@@ -146,9 +126,6 @@ export interface AccountData {
   updated_at: string;
 }
 
-/**
- * Get all user accounts
- */
 export async function getUserAccounts(userId: string): Promise<Account[]> {
   const { data, error } = await supabase
     .from("accounts")
@@ -175,15 +152,12 @@ export async function getUserAccounts(userId: string): Promise<Account[]> {
   }));
 }
 
-/**
- * Create a new account
- */
 export async function createAccount(
   userId: string,
   account: Omit<Account, "id">
 ): Promise<{ success: boolean; accountId?: string; error?: string }> {
   try {
-    // If this is set as default, unset all other defaults first
+
     if (account.isDefault) {
       await supabase
         .from("accounts")
@@ -216,7 +190,6 @@ export async function createAccount(
       return { success: false, error: error.message };
     }
 
-    // Log activity
     await logAccountActivity(userId, "account_created", {
       account_id: data.id,
       account_name: account.name,
@@ -234,16 +207,13 @@ export async function createAccount(
   }
 }
 
-/**
- * Update an existing account
- */
 export async function updateAccount(
   userId: string,
   accountId: string,
   updates: Partial<Account>
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // If setting as default, unset all other defaults first
+
     if (updates.isDefault) {
       await supabase
         .from("accounts")
@@ -272,7 +242,6 @@ export async function updateAccount(
       return { success: false, error: error.message };
     }
 
-    // Log activity
     await logAccountActivity(userId, "account_updated", {
       account_id: accountId,
       updates: updateData,
@@ -288,9 +257,6 @@ export async function updateAccount(
   }
 }
 
-/**
- * Adjust account balance (deposit or withdrawal)
- */
 export async function adjustAccountBalance(
   userId: string,
   accountId: string,
@@ -299,7 +265,7 @@ export async function adjustAccountBalance(
   reason: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Get current balance
+
     const { data: account, error: fetchError } = await supabase
       .from("accounts")
       .select("balance")
@@ -316,7 +282,6 @@ export async function adjustAccountBalance(
       ? currentBalance + amount 
       : currentBalance - amount;
 
-    // Update balance
     const { error: updateError } = await supabase
       .from("accounts")
       .update({
@@ -331,7 +296,6 @@ export async function adjustAccountBalance(
       return { success: false, error: updateError.message };
     }
 
-    // Create transaction record
     const { error: transactionError } = await supabase
       .from("transactions")
       .insert({
@@ -349,10 +313,9 @@ export async function adjustAccountBalance(
 
     if (transactionError) {
       console.error("Error creating transaction:", transactionError);
-      // Don't fail the whole operation
+
     }
 
-    // Log activity
     await logAccountActivity(userId, "account_balance_change", {
       account_id: accountId,
       adjustment_type: type,
@@ -372,21 +335,17 @@ export async function adjustAccountBalance(
   }
 }
 
-/**
- * Set an account as default
- */
 export async function setDefaultAccount(
   userId: string,
   accountId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Unset all defaults first
+
     await supabase
       .from("accounts")
       .update({ is_default: false })
       .eq("user_id", userId);
 
-    // Set new default
     const { error } = await supabase
       .from("accounts")
       .update({
@@ -411,22 +370,19 @@ export async function setDefaultAccount(
   }
 }
 
-/**
- * Delete an account
- */
 export async function deleteAccount(
   userId: string,
   accountId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Check if account has transactions
+
     const { count } = await supabase
       .from("transactions")
       .select("id", { count: "exact", head: true })
       .eq("account_id", accountId);
 
     if ((count || 0) > 0) {
-      // Soft delete - mark as closed
+
       const { error } = await supabase
         .from("accounts")
         .update({
@@ -441,7 +397,7 @@ export async function deleteAccount(
         return { success: false, error: error.message };
       }
     } else {
-      // Hard delete if no transactions
+
       const { error } = await supabase
         .from("accounts")
         .delete()
@@ -454,7 +410,6 @@ export async function deleteAccount(
       }
     }
 
-    // Log activity
     await logAccountActivity(userId, "account_deleted", {
       account_id: accountId,
     });
@@ -469,13 +424,6 @@ export async function deleteAccount(
   }
 }
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Log account activity to system log
- */
 async function logAccountActivity(
   userId: string,
   activityType: string,
@@ -491,7 +439,7 @@ async function logAccountActivity(
       created_at: getPhilippinesNow(),
     });
   } catch (error) {
-    // Silently fail - logging is not critical
+
     console.error("Error logging activity:", error);
   }
 }

@@ -46,7 +46,6 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
         onClose();
     }, [reset, onClose]);
 
-    // Helper function to convert user summary to Supabase User format for UserAvatar
     const createMockUser = (summary: UserAnalyticsSummary): SupabaseUser => {
         return {
             id: summary.user_id,
@@ -65,7 +64,7 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
 
     return (
         <Modal open={actualOpen} onClose={handleClose} className="max-w-[520px]">
-            {/* Header */}
+            {}
             <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-slate-100">
                 <div className="flex items-center gap-3">
                     <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
@@ -77,15 +76,15 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                 </div>
             </ModalHeader>
 
-            {/* Stepper */}
+            {}
             <Stepper steps={STEPS} currentStep={step} />
 
-            {/* Body */}
+            {}
             <ModalBody className="px-5 py-5 bg-[#F9FAFB]/30">
-                {/* STEP 1: Overview */}
+                {}
                 {step === 1 && (
                     <div className="space-y-6 animate-txn-in">
-                        {/* User Header */}
+                        {}
                         <div className="text-center p-6 bg-[#F9FAFB]/50 rounded-xl border border-slate-200">
                             <div className="flex justify-center mb-3">
                                 <UserAvatar
@@ -106,7 +105,7 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                             </div>
                         </div>
 
-                        {/* Analytics Summary */}
+                        {}
                         <div>
                             <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Analytics Summary</h4>
                             <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -135,7 +134,7 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                             </div>
                         </div>
 
-                        {/* Performance Metrics */}
+                        {}
                         <div>
                             <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Performance Metrics</h4>
                             <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -159,7 +158,7 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                             </div>
                         </div>
 
-                        {/* Report Types */}
+                        {}
                         {userSummary.report_type_breakdown && userSummary.report_type_breakdown.length > 0 && (
                             <div>
                                 <h4 className="text-[11px] font-semibold text-slate-700 mb-3 uppercase tracking-[0.04em]">Report Types</h4>
@@ -180,10 +179,10 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                     </div>
                 )}
 
-                {/* STEP 2: Analysis */}
+                {}
                 {step === 2 && (
                     <div className="space-y-6 animate-txn-in">
-                        {/* User Information */}
+                        {}
                         <div>
                             <h3 className="text-[15px] font-bold text-slate-900 mb-3">
                                 User Information
@@ -209,7 +208,7 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                             </div>
                         </div>
 
-                        {/* Analytics Metadata */}
+                        {}
                         <div>
                             <h3 className="text-[15px] font-bold text-slate-900 mb-3">
                                 Analytics Metadata
@@ -259,7 +258,7 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                             </div>
                         </div>
 
-                        {/* Analytics ID */}
+                        {}
                         <div>
                             <h3 className="text-[15px] font-bold text-slate-900 mb-3">
                                 User ID
@@ -274,7 +273,7 @@ export function ViewAdminAnalyticsModal({ open, isOpen, onClose, userSummary }: 
                 )}
             </ModalBody>
 
-            {/* Footer */}
+            {}
             <ModalFooter className="flex justify-between">
                 {step > 1 ? (
                     <Button variant="secondary" size="sm" onClick={() => setStep(1)}>
