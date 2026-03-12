@@ -10,15 +10,13 @@ import type {
 
 const supabase = createClient();
 
-// OpenRouter API Configuration
-const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const OPENROUTER_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || "";
+// Model ID used for database records (no API key on client)
 const AI_MODEL = "openai/gpt-oss-20b";
 
 /**
  * AI Financial Intelligence Service
- * Generates AI-powered insights using OpenRouter API (openai/gpt-oss-20b)
- * Based on Income vs Expenses Forecast, Category Spending, Expense Types, and Transaction Behavior
+ * Generates AI-powered insights via secure backend API route (/api/ai/insights).
+ * The OpenRouter API key never leaves the server.
  */
 
 interface AIInsightRequest {
@@ -143,17 +141,12 @@ function buildFinancialContext(request: AIInsightRequest): string {
 }
 
 /**
- * Generate AI-powered financial insights using OpenRouter API
+ * Generate AI-powered financial insights via secure backend API route
  */
 export async function generateAIFinancialInsights(
   request: AIInsightRequest
 ): Promise<AIInsightResponse> {
   try {
-    // Validate API key
-    if (!OPENROUTER_API_KEY) {
-      throw new Error("OpenRouter API key not configured");
-    }
-
     // Build financial context
     const financialContext = buildFinancialContext(request);
 
@@ -207,35 +200,26 @@ You must respond with a valid JSON object containing the following structure:
     // Build user prompt with financial data
     const userPrompt = `Analyze the following financial data and provide comprehensive insights:\n\n${financialContext}\n\nProvide your analysis in the specified JSON format.`;
 
-    // Make API request to OpenRouter
-    const response = await fetch(OPENROUTER_API_URL, {
+    // ─── Call secure backend API route instead of OpenRouter directly ───
+    const response = await fetch("/api/ai/insights", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": typeof window !== "undefined" ? window.location.origin : "",
-        "X-Title": "BudgetSense AI Predictions",
       },
       body: JSON.stringify({
-        model: AI_MODEL,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 2048,
-        response_format: { type: "json_object" },
+        systemPrompt,
+        userPrompt,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("OpenRouter API Error:", errorData);
-      throw new Error(`API error: ${response.status}`);
+      console.error("AI Insights API Error:", errorData);
+      throw new Error(errorData.error || `API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const aiContent = data.choices?.[0]?.message?.content;
+    const aiContent = data.content;
 
     if (!aiContent) {
       throw new Error("No response from AI model");

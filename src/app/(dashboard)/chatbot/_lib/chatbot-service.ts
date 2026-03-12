@@ -6,11 +6,7 @@ import { fetchUserFinancialContext, formatUserContextForAI } from "./user-data-s
 
 const supabase = createClient();
 
-// OpenRouter API Configuration
-const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const OPENROUTER_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || "";
-
-// Available models from OpenRouter
+// Available models from OpenRouter (configuration only — no API key exposed)
 export const AVAILABLE_MODELS: AIModel[] = [
   {
     id: "openai/gpt-oss-20b",
@@ -145,28 +141,19 @@ export interface ExportResult {
 export async function fetchAvailableModels(): Promise<{ data: AIModel[]; error: string | null }> {
   try {
     // Return the locally configured models
-    // In a production environment, this could fetch from OpenRouter API
     return { data: AVAILABLE_MODELS, error: null };
   } catch (err) {
     return { data: [], error: "Failed to load AI models" };
   }
 }
 
-// Send message to OpenRouter API
+// Send message via secure backend API route (no direct OpenRouter access)
 export async function sendMessageToAI(
   messages: MessageType[],
   modelId: string,
   userId: string
 ): Promise<SendMessageResult> {
   try {
-    // Validate API key
-    if (!OPENROUTER_API_KEY) {
-      return {
-        success: false,
-        error: "OpenRouter API key not configured. Please add NEXT_PUBLIC_OPENROUTER_API_KEY to your environment.",
-      };
-    }
-
     // Check if any message has image attachments
     const hasImageAttachment = messages.some(msg => msg.attachment && msg.attachment.type.startsWith('image/'));
 
@@ -224,56 +211,27 @@ export async function sendMessageToAI(
       }),
     ];
 
-    // Make API request to OpenRouter
-    console.log('Sending to AI:', {
-      model: modelId,
-      messageCount: apiMessages.length,
-      hasImages: apiMessages.some(msg => Array.isArray(msg.content))
-    });
-
-    const response = await fetch(OPENROUTER_API_URL, {
+    // ─── Call secure backend API route instead of OpenRouter directly ───
+    const response = await fetch("/api/ai/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": typeof window !== "undefined" ? window.location.origin : "",
-        "X-Title": "BudgetSense AI",
       },
       body: JSON.stringify({
-        model: modelId,
         messages: apiMessages,
-        temperature: 0.7,
-        max_tokens: 2048,
-        stream: false,
+        modelId,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('OpenRouter API Error:', errorData);
+      const errorMessage = errorData.error || `API error: ${response.status}`;
 
-      // Check for image analysis errors
-      const hasImageAttachment = apiMessages.some(msg => Array.isArray(msg.content));
-      const errorMessage = errorData.error?.message || errorData.message || `API error: ${response.status}`;
-
-      // Handle specific error cases
+      // Handle specific status codes
       if (response.status === 401) {
         return {
           success: false,
-          error: "Invalid API key. Please check your OpenRouter API key configuration.",
-        };
-      }
-      if (response.status === 400) {
-        // Check if this is an image analysis error
-        if (hasImageAttachment && (errorMessage.includes('image') || errorMessage.includes('vision') || errorMessage.includes('multimodal'))) {
-          return {
-            success: false,
-            error: "The selected model doesn't support image analysis. Please delete this message with the image and try again with a model that supports images, or remove the image and send a text message instead.",
-          };
-        }
-        return {
-          success: false,
-          error: `Invalid request format: ${errorMessage}`,
+          error: "Your session has expired. Please refresh the page and log in again.",
         };
       }
       if (response.status === 429) {
@@ -282,10 +240,18 @@ export async function sendMessageToAI(
           error: "Rate limit exceeded. Please wait a moment before sending another message.",
         };
       }
-      if (response.status === 402) {
+      if (response.status === 403) {
         return {
           success: false,
-          error: "Insufficient credits. This model requires payment. Please switch to a free model or add credits to your OpenRouter account.",
+          error: "Access denied. Please ensure you are logged in.",
+        };
+      }
+
+      // Check for image analysis errors
+      if (response.status === 400 && hasImageAttachment) {
+        return {
+          success: false,
+          error: "The selected model doesn't support image analysis. Please delete this message with the image and try again with a model that supports images, or remove the image and send a text message instead.",
         };
       }
 
@@ -296,7 +262,7 @@ export async function sendMessageToAI(
     }
 
     const data = await response.json();
-    const aiContent = data.choices?.[0]?.message?.content;
+    const aiContent = data.content;
 
     if (!aiContent) {
       return {
@@ -695,11 +661,6 @@ function generatePDFHtml(messages: MessageType[], modelName: string): string {
     </body>
     </html>
   `;
-}
-
-// Validate API key format
-export function isValidAPIKey(key: string): boolean {
-  return key.startsWith("sk-or-") && key.length > 20;
 }
 
 // Get default model
