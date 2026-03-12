@@ -227,14 +227,6 @@ export default function ReportsPage() {
   const handleGenerateAIInsights = useCallback(async () => {
     if (!user?.id || !summaryData || !chartData) return;
 
-    const { allowed } = await checkAIUsage(user.id, "report-insights");
-    if (!allowed) {
-      toast.error("Unable to generate insights", {
-        description: "Please try again later.",
-      });
-      return;
-    }
-
     setIsGeneratingInsights(true);
     
     const loadingToast = toast.loading("Generating AI insights...", {
@@ -242,20 +234,6 @@ export default function ReportsPage() {
     });
 
     try {
-
-      // Report insights don't count towards usage limit
-      const { success: incrementSuccess } = await incrementAIUsage(user.id, "report-insights");
-      if (!incrementSuccess) {
-        toast.error("Failed to track usage", {
-          description: "Please try again",
-        });
-        setIsGeneratingInsights(false);
-        return;
-      }
-
-      const { status } = await checkAIUsage(user.id, "report-insights");
-      setRateLimitStatus(status);
-
       const insights = await generateReportAIInsights({
         userId: user.id,
         reportType: reportSettings.reportType,
@@ -1005,8 +983,7 @@ export default function ReportsPage() {
               size="sm" 
               onClick={handleGenerateAIInsights} 
               className="flex-1 sm:flex-none text-xs h-8 sm:h-9 px-3 sm:px-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isGeneratingInsights || !rateLimitStatus?.canUseAI}
-              title={!rateLimitStatus?.canUseAI ? "Daily limit reached" : ""}
+              disabled={isGeneratingInsights}
             >
               {isGeneratingInsights ? (
                 <>
