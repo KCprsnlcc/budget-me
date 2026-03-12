@@ -202,6 +202,7 @@ You must respond with a valid JSON object containing the following structure:
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "same-origin",
       body: JSON.stringify({
         systemPrompt,
         userPrompt,
