@@ -106,9 +106,9 @@ export function Hero() {
                   <div
                     key={spec.title}
 
-                    className="w-72 shrink-0 text-center"
+                    className="w-72 shrink-0 text-left"
                   >
-                    <div className="text-slate-900 text-[11px] font-bold mb-2 flex items-center justify-center gap-2 uppercase tracking-tight">
+                    <div className="text-slate-900 text-[11px] font-bold mb-2 flex items-center gap-2 uppercase tracking-tight">
                       {Icon && (
                         <Icon
                           size={16}
@@ -118,7 +118,7 @@ export function Hero() {
                       )}
                       {spec.title}
                     </div>
-                    <p className="text-[11px] text-slate-500 leading-relaxed uppercase tracking-wider">
+                    <p className="text-[11px] text-slate-500 leading-relaxed uppercase tracking-wider text-center">
                       {spec.description}
                     </p>
                   </div>
