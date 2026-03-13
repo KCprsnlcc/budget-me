@@ -122,7 +122,7 @@ const TransactionCard = memo(({
   onDelete: (tx: AdminTransaction) => void;
 }) => {
   const isIncome = isIncomeType(tx);
-  const catName = tx.category_name ?? tx.type;
+  const catName = tx.category_name ?? (tx.type === "contribution" ? "Contribution" : tx.type);
 
   return (
     <Card className="p-4 hover:shadow-md transition-all group cursor-pointer">
@@ -217,7 +217,7 @@ const TransactionRow = memo(({
       </TableCell>
       <TableCell className="px-6 py-4">
         <span className={`text-xs font-medium ${isIncome ? "text-blue-600" : "text-emerald-600"}`}>
-          {tx.category_name ?? tx.type}
+          {tx.category_name ?? (tx.type === "contribution" ? "Contribution" : tx.type)}
         </span>
       </TableCell>
       <TableCell className="px-6 py-4 text-right font-medium text-slate-900">

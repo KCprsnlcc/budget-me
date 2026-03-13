@@ -88,7 +88,7 @@ export function ViewTransactionModal({
 
   const isIncome = transaction.type === "income" || transaction.type === "cash_in";
   const absAmount = transaction.amount.toFixed(2);
-  const catName = transaction.category_name ?? transaction.type;
+  const catName = transaction.category_name ?? (transaction.type === "contribution" ? "Contribution" : transaction.type);
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[520px]">
