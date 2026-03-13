@@ -88,7 +88,7 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
     "🛍️": Package,
     "📚": BookOpen,
     "🛡️": Shield,
-    "🎯": Flag, // Goal Contribution
+    "🎯": Flag, 
     
     "💰": PhilippinePeso,
     "💻": Laptop,
@@ -238,7 +238,7 @@ export function AddTransactionModal({ open, onClose, onSuccess }: AddTransaction
       
       if (contributionCategory) {
         updateField("expense_category_id", contributionCategory.id);
-        updateField("budget", ""); // Clear budget for contributions
+        updateField("budget", ""); 
       }
     }
   }, [form.type, expenseCategories, updateField]);

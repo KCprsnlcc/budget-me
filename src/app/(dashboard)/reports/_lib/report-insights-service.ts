@@ -242,7 +242,7 @@ async function storeReportInsights(
       ai_model: AI_MODEL,
       confidence_level: 0.85,
       generated_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), 
     });
   } catch (error) {
     console.error("Error storing report insights:", error);

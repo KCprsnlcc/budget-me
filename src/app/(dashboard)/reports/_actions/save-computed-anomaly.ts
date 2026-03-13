@@ -22,7 +22,7 @@ export async function saveComputedAnomaly(anomaly: AnomalyAlert, userId: string)
       .eq("user_id", userId)
       .eq("anomaly_type", dbAnomalyType)
       .eq("resolution_status", "open")
-      .gte("detected_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
+      .gte("detected_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
       .limit(1);
 
     if (checkError) {

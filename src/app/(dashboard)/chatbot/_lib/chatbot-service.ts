@@ -203,7 +203,7 @@ export async function sendMessageToAI(
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "same-origin", // Ensure cookies are sent
+      credentials: "same-origin",
       body: JSON.stringify({
         messages: apiMessages,
         modelId,

@@ -374,7 +374,7 @@ export default function ChatbotPage() {
         user_id: user.id,
         role: userMessage.role,
         content: userMessage.content,
-        model: null, // User messages don't have a model
+        model: null, 
         suggestions: [],
         attachment: userMessage.attachment || null,
         created_at: new Date().toISOString(),

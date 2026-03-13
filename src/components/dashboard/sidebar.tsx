@@ -16,7 +16,7 @@ export function Sidebar() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 800); // 0.8 seconds loading time
+    }, 800); 
 
     return () => clearTimeout(timer);
   }, []);

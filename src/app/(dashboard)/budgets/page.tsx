@@ -142,7 +142,6 @@ BudgetRow.displayName = "BudgetRow";
 
 function getLucideIcon(emoji: string): React.ComponentType<any> {
   const iconMap: Record<string, React.ComponentType<any>> = {
-    // Expense Categories
     "🏠": Home,
     "🚗": Car,
     "🍽️": Utensils,
@@ -154,7 +153,6 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
     "📚": BookOpen,
     "🛡️": Shield,
     
-    // Income Categories
     "💰": PhilippinePeso,
     "💻": Laptop,
     "📈": TrendingUpIcon,
@@ -164,7 +162,6 @@ function getLucideIcon(emoji: string): React.ComponentType<any> {
     "🎁": Gift,
     "💵": Banknote,
     
-    // Default/fallback
     "📋": FileText,
   };
   
@@ -190,7 +187,6 @@ export default function BudgetsPage() {
     tableLoading,
     error,
     refetch,
-    // Pagination
     currentPage,
     pageSize,
     setPageSize,

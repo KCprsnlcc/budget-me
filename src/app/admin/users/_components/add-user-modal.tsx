@@ -65,7 +65,7 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
     language: "en",
     currency_preference: "PHP",
     is_active: true,
-    password: "", // Start empty to avoid hydration mismatch
+    password: "", 
   });
 
   useEffect(() => {

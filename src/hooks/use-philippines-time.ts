@@ -8,20 +8,15 @@ import {
   isTodayInPhilippines
 } from '@/lib/timezone';
 
-/**
- * Hook for Philippines timezone operations
- * Provides reactive updates for current time and date formatting
- */
 export function usePhilippinesTime() {
   const [currentTime, setCurrentTime] = useState(getPhilippinesNow());
   const [today, setToday] = useState(getPhilippinesToday());
 
   useEffect(() => {
-    // Update time every minute
     const interval = setInterval(() => {
       setCurrentTime(getPhilippinesNow());
       setToday(getPhilippinesToday());
-    }, 60000); // 1 minute
+    }, 60000);
 
     return () => clearInterval(interval);
   }, []);

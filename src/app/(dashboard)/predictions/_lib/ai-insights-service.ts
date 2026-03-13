@@ -243,7 +243,7 @@ async function storeAIInsights(userId: string, insights: AIInsightResponse): Pro
       },
       confidence_level: 0.85,
       generated_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     });
   } catch (error) {
     console.error("Error storing AI insights:", error);
@@ -267,7 +267,7 @@ function generateFallbackInsights(request: AIInsightRequest): AIInsightResponse 
 
   const avgIncome = forecastData.predicted.reduce((sum, p) => sum + p.income, 0) / forecastData.predicted.length;
   const avgExpense = forecastData.predicted.reduce((sum, p) => sum + p.expense, 0) / forecastData.predicted.length;
-  const potentialSavings = (avgIncome - avgExpense) * 0.1; // 10% improvement potential
+  const potentialSavings = (avgIncome - avgExpense) * 0.1; 
 
   return {
     financialSummary: `Your current savings rate is ${summary.savingsRate.toFixed(1)}%. ${

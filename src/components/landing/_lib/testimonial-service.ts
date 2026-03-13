@@ -74,20 +74,15 @@ export async function submitTestimonial(
   }
 }
 
-/**
- * Upload avatar image to Supabase Storage
- */
 export async function uploadTestimonialAvatar(
   file: File,
   userId?: string
 ): Promise<{ url: string | null; error: string | null }> {
   try {
-    // Generate unique filename
     const fileExt = file.name.split(".").pop()?.toLowerCase() || "webp";
     const fileName = `testimonial-${userId || "anon"}-${Date.now()}.${fileExt}`;
     const filePath = `testimonials/${fileName}`;
 
-    // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(filePath, file, {
@@ -100,7 +95,6 @@ export async function uploadTestimonialAvatar(
       return { url: null, error: uploadError.message };
     }
 
-    // Get public URL
     const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
     return { url: data.publicUrl, error: null };

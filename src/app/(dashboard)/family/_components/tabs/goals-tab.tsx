@@ -11,7 +11,6 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { GOAL_FILTERS } from "../constants";
 import type { SharedGoal } from "../types";
 
-// Import the consistent goal modals
 import { AddGoalModal } from "@/app/(dashboard)/goals/_components/add-goal-modal";
 import { ContributeGoalModal } from "@/app/(dashboard)/goals/_components/contribute-goal-modal";
 import { ViewGoalModal } from "@/app/(dashboard)/goals/_components/view-goal-modal";
@@ -417,7 +416,6 @@ export function GoalsTab({
                     size="sm"
                     className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
                     onClick={() => {
-                      // Export PDF logic here
                       setExportDropdownOpen(false);
                     }}
                   >
@@ -428,7 +426,6 @@ export function GoalsTab({
                     size="sm"
                     className="w-full justify-start text-xs text-slate-600 hover:bg-slate-50"
                     onClick={() => {
-                      // Export CSV logic here
                       setExportDropdownOpen(false);
                     }}
                   >

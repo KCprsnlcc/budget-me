@@ -28,7 +28,7 @@ function mapFamilyRow(row: any): Family {
     description: row.description ?? "",
     type: row.is_public ? "public" : "private",
     currency: row.currency_pref ?? "PHP",
-    members: [], // populated separately
+    members: [], 
     createdAt: row.created_at,
     createdBy: row.created_by,
   };
@@ -67,8 +67,8 @@ function mapMemberRow(row: any): FamilyMember {
   };
 
   return {
-    id: row.id, // Use family_members.id for role updates
-    user_id: row.user_id, // Keep user_id separate
+    id: row.id,
+    user_id: row.user_id, 
     name: fullName,
     email: email,
     initials,
@@ -1575,7 +1575,7 @@ export async function fetchFamilyExpenseCategories(
       percentage: total > 0 ? Math.round((v.amount / total) * 100) : 0,
     }))
     .sort((a, b) => b.amount - a.amount)
-    .slice(0, 5); // Top 5 categories
+    .slice(0, 5); 
 
   return { data, total, error: null };
 }
@@ -1626,8 +1626,8 @@ export async function fetchFamilyBudgetVsActual(
       .gte("date", start)
       .lte("date", end);
 
-    let budget = 0; // Income treated as "budget" for family context
-    let actual = 0; // Expenses
+    let budget = 0; 
+    let actual = 0; 
 
     for (const row of data ?? []) {
       const amt = Number(row.amount);
@@ -1666,7 +1666,7 @@ export async function fetchFamilyGoalsSavingsProgress(
     .select("target_amount, current_amount, created_at")
     .in("user_id", userIds)
     .eq("is_family_goal", true)
-    .eq("is_public", false); // Ensure we don't get any public goals
+    .eq("is_public", false);
 
   const totalTarget = (goals ?? []).reduce((s, g) => s + Number(g.target_amount), 0);
   const totalSaved = (goals ?? []).reduce((s, g) => s + Number(g.current_amount), 0);
@@ -1717,7 +1717,7 @@ export async function fetchFamilyGoalsHealth(
     .select("status")
     .in("user_id", userIds)
     .eq("is_family_goal", true)
-    .eq("is_public", false); // Ensure we don't get any public goals
+    .eq("is_public", false); 
 
   const statusCounts = {
     completed: 0,
@@ -1739,7 +1739,7 @@ export async function fetchFamilyGoalsHealth(
     { name: "In Progress", value: statusCounts.in_progress, color: "#3b82f6" },
     { name: "Behind", value: statusCounts.behind, color: "#f59e0b" },
     { name: "Overdue", value: statusCounts.overdue, color: "#ef4444" },
-  ].filter(item => item.value > 0); // Only show statuses that have goals
+  ].filter(item => item.value > 0); 
 
   return { data: healthData, total, error: null };
 }
@@ -2226,7 +2226,7 @@ export async function fetchFamilyActivityLog(
     } else if (row.activity_type.includes("member") || row.activity_type.includes("family")) {
       activityType = "member";
     } else {
-      activityType = "budget"; // fallback
+      activityType = "budget"; 
     }
 
     return {

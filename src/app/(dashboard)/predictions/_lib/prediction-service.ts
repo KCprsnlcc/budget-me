@@ -352,8 +352,8 @@ export async function generateCategoryForecast(userId: string): Promise<Category
     const historicalAvg = data.amounts.reduce((a, b) => a + b, 0) / data.amounts.length;
 
     let predicted = forecast.forecast[0];
-    const categoryRandomFactor = 1 + (Math.random() - 0.5) * 0.1; // ±5% max variation
-    const categoryRandomVariation = (Math.random() - 0.5) * 0.04 * historicalAvg; // ±2% additional
+    const categoryRandomFactor = 1 + (Math.random() - 0.5) * 0.1;
+    const categoryRandomVariation = (Math.random() - 0.5) * 0.04 * historicalAvg;
     predicted = (predicted * categoryRandomFactor) + categoryRandomVariation;
     
     const change = predicted - historicalAvg;
@@ -695,7 +695,7 @@ export async function savePrediction(
         fullCategoryPredictions: prediction.fullCategoryPredictions,
         fullExpenseTypes: prediction.fullExpenseTypes,
         fullBehaviorInsights: prediction.fullBehaviorInsights,
-        fullAIInsights: prediction.fullAIInsights, // Save full AI insights
+        fullAIInsights: prediction.fullAIInsights, 
       },
     });
 

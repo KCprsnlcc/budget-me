@@ -161,7 +161,7 @@ export async function fetchUserChatMessages(
         .select("*")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
-        .limit(limit + 1); // Fetch one extra to check if there are more
+        .limit(limit + 1); 
 
     if (before) {
         query = query.lt("created_at", before);

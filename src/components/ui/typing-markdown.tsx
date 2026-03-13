@@ -48,7 +48,7 @@ export function TypingMarkdown({
   }, [currentIndex, content, speed, isDelayed, onComplete]);
 
   if (isDelayed) {
-    return <div className="invisible">.</div>; // Invisible placeholder during delay
+    return <div className="invisible">.</div>; 
   }
 
   return (

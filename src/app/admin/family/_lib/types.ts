@@ -98,8 +98,8 @@ export type AdminFamilyStats = {
 
 export type AdminFamilyFilters = {
     status?: string;
-    visibility?: string; // "public" | "private"
-    userId?: string; // creator
+    visibility?: string; 
+    userId?: string;
     month?: number | "all";
     year?: number | "all";
 };

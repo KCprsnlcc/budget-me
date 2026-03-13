@@ -96,11 +96,11 @@ function mapRow(row: Record<string, any>): TransactionType {
 }
 
 export type TransactionFilters = {
-  month?: number | "all"; // 1-12 or "all"
-  year?: number | "all"; // year number or "all"
-  type?: string; // "income" | "expense" | etc., or "" for all
+  month?: number | "all"; 
+  year?: number | "all";
+  type?: string; 
   accountId?: string;
-  categoryId?: string; // expense or income category id
+  categoryId?: string; 
   goalId?: string;
 };
 
@@ -127,7 +127,7 @@ export async function fetchTransactions(
 
   if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
     const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
-    const endDate = new Date(filters.year, filters.month, 0); // last day
+    const endDate = new Date(filters.year, filters.month, 0);
     const end = `${filters.year}-${String(filters.month).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}`;
     query = query.gte("date", start).lte("date", end);
   } else if (filters.year !== "all" && filters.year) {
@@ -156,7 +156,7 @@ export async function fetchTransactions(
 
   if (filters.month !== "all" && filters.year !== "all" && filters.month && filters.year) {
     const start = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
-    const endDate = new Date(filters.year, filters.month, 0); // last day
+    const endDate = new Date(filters.year, filters.month, 0);
     const end = `${filters.year}-${String(filters.month).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}`;
     countQuery = countQuery.gte("date", start).lte("date", end);
   } else if (filters.year !== "all" && filters.year) {

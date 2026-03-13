@@ -203,7 +203,7 @@ export async function fetchAdminAIUsageStats(): Promise<AdminAIUsageStats | null
     featureDistribution,
     activeUsersToday,
     usersAtLimit,
-    peakUsageHour: null, // Not tracking hourly data
+    peakUsageHour: null, 
     topFeature: { name: topFeature.feature, count: topFeature.count },
     dailyGrowth,
     topUsers,

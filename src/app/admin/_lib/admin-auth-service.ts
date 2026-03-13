@@ -64,7 +64,7 @@ export async function getUserRole(userId: string): Promise<{ role: string | null
       .single();
 
     if (profileError) {
-      return { role: "user", error: null }; // Default role
+      return { role: "user", error: null }; 
     }
 
     return { role: profileData.role || "user", error: null };

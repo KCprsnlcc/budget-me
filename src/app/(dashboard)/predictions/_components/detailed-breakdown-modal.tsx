@@ -97,7 +97,7 @@ export function DetailedBreakdownModal({
 
   const totalPredictedIncome = forecastData?.predicted.reduce((sum, p) => sum + p.income, 0) || 0;
   const totalPredictedExpenses = forecastData?.predicted.reduce((sum, p) => sum + p.expense, 0) || 0;
-  const netSavings = totalPredictedIncome - totalPredictedExpenses; // Always allow continue (final step closes modal)
+  const netSavings = totalPredictedIncome - totalPredictedExpenses; 
 
   return (
     <Modal open={open} onClose={handleClose} className="max-w-3xl">

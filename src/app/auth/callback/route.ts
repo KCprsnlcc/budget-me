@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const token = searchParams.get("token");
   let next = searchParams.get("next") ?? "/dashboard";
-  const type = searchParams.get("type"); // signup, recovery, magiclink, etc.
+  const type = searchParams.get("type");
 
   if (code) {
     const supabase = await createClient();

@@ -39,7 +39,7 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 600); // 0.6 seconds loading time
+    }, 600); 
 
     return () => clearTimeout(timer);
   }, []);

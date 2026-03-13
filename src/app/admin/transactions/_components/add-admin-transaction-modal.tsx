@@ -243,7 +243,7 @@ export function AddAdminTransactionModal({ open, onClose, onSuccess }: AddAdminT
     if (open && currentStep === 1) {
       const timeoutId = setTimeout(() => {
         loadUsers(true);
-      }, 300); // Debounce search
+      }, 300);
       return () => clearTimeout(timeoutId);
     }
   }, [userSearchQuery, open, currentStep]);

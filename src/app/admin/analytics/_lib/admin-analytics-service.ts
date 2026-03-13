@@ -218,7 +218,7 @@ export async function fetchUserAnalyticsDetails(userId: string): Promise<{ data:
                 recommendations: latestReport?.recommendations || null,
             },
             charts: {
-                spending_by_category: null, // Will be populated from transactions
+                spending_by_category: null,
                 income_vs_expense: null,
                 trends: null,
             },
@@ -359,7 +359,7 @@ export async function fetchAdminAnalyticsStats(): Promise<AdminAnalyticsStats | 
 
     return {
         totalReports: totalReports ?? 0,
-        totalInsightsGenerated: reports.length, // approximation
+        totalInsightsGenerated: reports.length,
         avgConfidenceLevel: validConfidenceCount ? totalConfidence / validConfidenceCount : 0,
         avgAccuracyScore: validAccuracyCount ? totalAccuracy / validAccuracyCount : 0,
         totalDataPointsAnalyzed,

@@ -42,7 +42,7 @@ export type AdminTransactionStats = {
   avgTransactionValue: number;
   topSpendingCategory: { name: string; amount: number } | null;
   pendingTransactions: number;
-  monthOverMonthGrowth: number; // percentage
+  monthOverMonthGrowth: number;
   topUsers: { 
     user_id: string; 
     email: string; 

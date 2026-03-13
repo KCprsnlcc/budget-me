@@ -22,7 +22,7 @@ export function PageLoadingFallback() {
       if (target >= 100) {
         timeoutId = setTimeout(() => {
           setShouldHide(true);
-        }, 300); // Small delay to show 100% briefly
+        }, 300); 
       } else {
         frame = requestAnimationFrame(animate);
       }

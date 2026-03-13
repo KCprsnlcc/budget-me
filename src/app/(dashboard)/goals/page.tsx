@@ -363,8 +363,8 @@ export default function GoalsPage() {
       const contributorsMap: Record<string, { user_id: string; full_name: string; avatar_url: string | null; total_contributed: number }[]> = {};
       
       for (const goal of goals) {
-        if (goal.current > 0) { // Only fetch if goal has contributions
-          const { data, error } = await fetchGoalContributors(goal.id, 100); // Fetch up to 100 to get accurate count
+        if (goal.current > 0) {
+          const { data, error } = await fetchGoalContributors(goal.id, 100);
           if (error) {
             console.error(`Error fetching contributors for goal ${goal.id}:`, error);
           } else if (data && data.length > 0) {

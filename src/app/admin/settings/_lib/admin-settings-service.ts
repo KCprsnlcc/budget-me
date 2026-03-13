@@ -75,7 +75,7 @@ export async function createBackupLog(
             .from(table)
             .select("*", { count: "exact", head: true });
         tableCounts[table] = count ?? 0;
-        totalSize += (count ?? 0) * 500; // rough avg row size estimate
+        totalSize += (count ?? 0) * 500;
     }
 
     const durationMs = Date.now() - startTime;
