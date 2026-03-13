@@ -79,18 +79,15 @@ export function PreferencesTab() {
       </div>
 
       {}
-      <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-5 hover:shadow-md transition-all cursor-pointer">
-        <div className="flex items-start gap-3">
-          <div className="text-blue-500">
-            <Info size={18} />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-1">About Data Privacy</h3>
-            <p className="text-[11px] text-gray-500 leading-relaxed">
-              Your settings are automatically saved. We prioritize your data privacy and security.
-              Currently running BudgetMe Prototype v1.0.
-            </p>
-          </div>
+      <div className="flex items-start gap-3">
+        <div className="text-blue-500">
+          <Info size={18} />
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900 mb-1">About Data Privacy</h3>
+          <p className="text-[11px] text-gray-500 leading-relaxed">
+            Your settings are automatically saved. We prioritize your data privacy and security.
+          </p>
         </div>
       </div>
     </div>
