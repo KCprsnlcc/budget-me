@@ -79,16 +79,14 @@ export function PreferencesTab() {
       </div>
 
       {}
-      <div className="flex items-start gap-3">
-        <div className="text-blue-500">
-          <Info size={18} />
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">About Data Privacy</h3>
-          <p className="text-[11px] text-gray-500 leading-relaxed">
-            Your settings are automatically saved. We prioritize your data privacy and security.
-          </p>
-        </div>
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-1">About Data Privacy</h3>
+        <p className="text-[11px] text-gray-500 leading-relaxed">
+          Your settings are automatically saved. We prioritize your data privacy and security. 
+          All financial data is encrypted and stored securely. We never share your personal information 
+          with third parties without your explicit consent. You have full control over your data and can 
+          export or delete it at any time.
+        </p>
       </div>
     </div>
   );
