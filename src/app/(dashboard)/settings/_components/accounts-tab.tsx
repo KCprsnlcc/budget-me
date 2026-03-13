@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Plus, Wallet, Star, Pencil, Trash2, Loader2, CreditCard, TrendingUp, Wallet2, PiggyBank, Landmark } from "lucide-react";
+import { Plus, Wallet, Eye, Edit, Trash2, Loader2, CreditCard, TrendingUp, Wallet2, PiggyBank, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Account } from "./types";
 import { AddAccountModal, DeleteAccountModal, EditAccountModal } from "./index";
@@ -232,17 +232,14 @@ export function AccountsTab() {
                         <Icon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: iconColor }} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm sm:text-base font-bold text-slate-900 truncate">{account.name}</h4>
+                        <h4 className={`text-sm sm:text-base font-bold truncate ${account.isDefault ? 'text-emerald-600' : 'text-slate-900'}`}>
+                          {account.name}
+                        </h4>
                         <p className="text-xs sm:text-sm font-medium text-slate-600 uppercase tracking-wider capitalize">
                           {account.type}
                         </p>
                       </div>
                     </div>
-                    {account.isDefault && (
-                      <span className="px-2 py-0.5 text-[10px] font-semibold text-emerald-700 rounded-full border border-emerald-200 shrink-0 ml-2">
-                        Default
-                      </span>
-                    )}
                   </div>
                 </div>
 
@@ -272,31 +269,29 @@ export function AccountsTab() {
                 </div>
 
                 {}
-                <div className="px-4 sm:px-5 pb-4 pt-2 border-t border-slate-100 flex justify-center gap-3">
+                <div className="px-4 sm:px-5 pb-4 pt-2 border-t border-slate-100 flex justify-center gap-1">
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8 hover:bg-slate-100" 
+                    className="h-8 w-8" 
+                    title="View Details" 
+                    onClick={() => openEditModal(account)}
+                  >
+                    <Eye size={16} />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8" 
                     title="Edit" 
                     onClick={() => openEditModal(account)}
                   >
-                    <Pencil size={16} />
+                    <Edit size={16} />
                   </Button>
-                  {!account.isDefault && (
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 hover:bg-amber-50 hover:text-amber-600" 
-                      title="Set as Default" 
-                      onClick={() => handleSetDefault(account.id)}
-                    >
-                      <Star size={16} />
-                    </Button>
-                  )}
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50" 
+                    className="h-8 w-8 text-red-500 hover:text-red-600" 
                     title="Delete" 
                     onClick={() => openDeleteModal(account)}
                   >
