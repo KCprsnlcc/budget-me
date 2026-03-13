@@ -21,8 +21,25 @@ import { contributeToAdminGoal } from "../_lib/admin-goal-service";
 import type { AdminGoal } from "../_lib/types";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import Skeleton from "react-loading-skeleton";
+import { fetchAccounts } from "../../../(dashboard)/transactions/_lib/transaction-service";
+import type { AccountOption } from "../../../(dashboard)/transactions/_components/types";
+import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
+import { CreditCard, Wallet, Building2, Landmark, Home as HomeIcon, Car as CarIcon, Zap, FileText, TrendingUp } from "lucide-react";
 
-const STEPS = ["User Select", "Amount", "Review"];
+function getAccountIcon(accountName: string): React.ComponentType<any> {
+    const name = accountName.toLowerCase();
+    if (name.includes("bank") || name.includes("checking") || name.includes("savings")) return Building2;
+    if (name.includes("credit") || name.includes("card")) return CreditCard;
+    if (name.includes("cash") || name.includes("wallet")) return Wallet;
+    if (name.includes("investment") || name.includes("brokerage")) return TrendingUp;
+    if (name.includes("loan") || name.includes("mortgage")) return Landmark;
+    if (name.includes("utility") || name.includes("phone") || name.includes("internet")) return Zap;
+    if (name.includes("car") || name.includes("auto")) return CarIcon;
+    if (name.includes("home") || name.includes("house")) return HomeIcon;
+    return FileText;
+}
+
+const STEPS = ["User Select", "Amount", "Account", "Review"];
 
 interface ContributeAdminGoalModalProps {
     open: boolean;
@@ -63,16 +80,32 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
 
     const [selectedUserId, setSelectedUserId] = useState<string>("");
     const [amount, setAmount] = useState("");
+    const [account, setAccount] = useState("");
+    const [accounts, setAccounts] = useState<AccountOption[]>([]);
+    const [loadingAccounts, setLoadingAccounts] = useState(false);
 
     useEffect(() => {
         if (open) {
             setCurrentStep(1);
             setAmount("");
+            setAccount("");
+            setAccounts([]);
 
             if (goal?.user_id) setSelectedUserId(goal.user_id);
             if (users.length === 0) loadUsers(true);
         }
     }, [open, goal]);
+
+    useEffect(() => {
+        if (selectedUserId) {
+            setLoadingAccounts(true);
+            fetchAccounts(selectedUserId).then(setAccounts).finally(() => setLoadingAccounts(false));
+            setAccount("");
+        } else {
+            setAccounts([]);
+            setAccount("");
+        }
+    }, [selectedUserId]);
 
     const loadUsers = useCallback(async (reset: boolean = false) => {
         if (reset) {
@@ -153,6 +186,8 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
         setUserSearchQuery("");
         setSelectedUserId("");
         setAmount("");
+        setAccount("");
+        setAccounts([]);
         onClose();
     };
 
@@ -169,6 +204,12 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                 return;
             }
         }
+        if (currentStep === 3) {
+            if (!account) {
+                toast.error("Please select an account for this contribution.");
+                return;
+            }
+        }
         setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
     };
 
@@ -181,7 +222,7 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
 
         try {
             setLoading(true);
-            const { error } = await contributeToAdminGoal(goal.id, parseFloat(amount), selectedUserId);
+            const { error } = await contributeToAdminGoal(goal.id, parseFloat(amount), selectedUserId, account);
 
             if (error) {
                 toast.error(error);
@@ -211,6 +252,10 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
         email: selectedUserId === goal.user_id ? goal.user_email : ""
     };
 
+    const selectedAccount = accounts.find(a => a.id === account);
+    const accountBalance = selectedAccount?.balance ?? 0;
+    const newAccountBalance = accountBalance - parsedAmount;
+
     return (
         <Modal open={open} onClose={handleClose} className="max-w-2xl">
             <ModalHeader onClose={handleClose} className="px-5 py-3.5 bg-white border-b border-slate-100">
@@ -219,7 +264,7 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                         Goal Contribution
                     </span>
                     <span className="text-[10px] text-slate-400 font-medium tracking-wide">
-                        Step {currentStep} of 3
+                        Step {currentStep} of 4
                     </span>
                 </div>
             </ModalHeader>
@@ -430,6 +475,78 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                 {currentStep === 3 && (
                     <div className="space-y-4 animate-txn-in">
                         <div>
+                            <h4 className="text-sm font-semibold text-slate-900 mb-2">Select Account</h4>
+                            <p className="text-xs text-slate-500">Choose which account to use for this contribution from the selected user.</p>
+                        </div>
+
+                        {}
+                        <div className="bg-white rounded-lg p-4 border border-gray-200">
+                            <div className="text-xs text-gray-500 mb-1">Contributing</div>
+                            <div className="text-2xl font-bold text-gray-900">{formatCurrency(parsedAmount)}</div>
+                            <div className="text-xs text-gray-600 mt-1">to {goal.goal_name}</div>
+                        </div>
+
+                        {}
+                        <div>
+                            <label className="block text-xs font-medium text-slate-700 mb-1.5">User Account <span className="text-gray-400">*</span></label>
+                            {loadingAccounts ? (
+                                <div className="h-10 w-full bg-slate-50 animate-pulse rounded-lg border border-slate-200" />
+                            ) : (
+                                <SearchableDropdown
+                                    value={account}
+                                    onChange={setAccount}
+                                    options={accounts.map((a) => ({
+                                        value: a.id,
+                                        label: a.account_name,
+                                        icon: getAccountIcon(a.account_name),
+                                        subtitle: `Balance: ₱${a.balance.toFixed(2)}`,
+                                    }))}
+                                    placeholder="Select user account..."
+                                    className="w-full"
+                                    allowEmpty={false}
+                                />
+                            )}
+                            {accounts.length === 0 && !loadingAccounts && (
+                                <p className="text-[10px] text-amber-600 mt-1.5 flex items-center gap-1">
+                                    <AlertTriangle size={10} />
+                                    This user has no accounts. You must create an account for them first.
+                                </p>
+                            )}
+                        </div>
+
+                        {}
+                        {selectedAccount && parsedAmount > selectedAccount.balance && (
+                            <div className="flex gap-2.5 p-3 rounded-lg text-xs bg-white border border-gray-200 text-gray-700 items-start">
+                                <AlertTriangle size={16} className="flex-shrink-0 mt-px text-amber-500" />
+                                <div>
+                                    <h4 className="font-bold text-[10px] uppercase tracking-widest mb-0.5 text-gray-900">Insufficient Balance</h4>
+                                    <p className="text-[11px] leading-relaxed">
+                                        The contribution amount exceeds the account balance. Current balance: {formatCurrency(selectedAccount.balance)}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {}
+                        {selectedAccount && (
+                            <div className="p-3 rounded-lg bg-white border border-gray-200 flex items-start gap-3">
+                                <Info size={16} className="flex-shrink-0 mt-0.5 text-gray-600" />
+                                <div>
+                                    <div className="font-medium text-sm text-gray-900">Account Balance Impact</div>
+                                    <div className="text-xs text-gray-600 mt-1 space-y-1">
+                                        <div>Current Balance: <span className="font-semibold">{formatCurrency(selectedAccount.balance)}</span></div>
+                                        <div>After Contribution: <span className="font-semibold">{formatCurrency(newAccountBalance)}</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {}
+                {currentStep === 4 && (
+                    <div className="space-y-4 animate-txn-in">
+                        <div>
                             <h4 className="text-sm font-semibold text-slate-900 mb-2">Review Contribution</h4>
                             <p className="text-xs text-slate-500">Confirm the details before finalizing the contribution.</p>
                         </div>
@@ -477,6 +594,10 @@ export function ContributeAdminGoalModal({ open, onClose, goal, onSuccess }: Con
                                 <div className="flex justify-between items-center py-2.5">
                                     <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Contributor</span>
                                     <span className="text-[13px] font-semibold text-gray-700">{displayingUserParams.full_name || displayingUserParams.email || "Unknown"}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2.5">
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Source Account</span>
+                                    <span className="text-[13px] font-semibold text-gray-700">{selectedAccount?.account_name || "Unknown"}</span>
                                 </div>
                                 {newProgress >= 100 && (
                                     <div className="flex justify-between items-center py-2.5">

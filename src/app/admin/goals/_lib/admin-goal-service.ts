@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { formatDateForInput, getPhilippinesNow } from "@/lib/timezone";
 import type { AdminGoal, AdminGoalStats, AdminGoalFilters, AdminGoalFormState } from "./types";
 
 const supabase = createClient();
@@ -302,14 +303,44 @@ export async function fetchAllUsers(): Promise<{ id: string; email: string; full
 export async function contributeToAdminGoal(
     goalId: string,
     amount: number,
-    userId?: string
+    userId?: string,
+    accountId?: string
 ): Promise<{ error: string | null }> {
     if (amount <= 0) {
         return { error: "Contribution amount must be greater than zero." };
     }
 
-    const now = new Date();
-    const dateStr = now.toISOString().split('T')[0];
+    const dateStr = formatDateForInput(getPhilippinesNow());
+
+    let transactionId = null;
+
+    if (accountId && userId) {
+        const { data: goalData } = await supabase
+            .from("goals")
+            .select("goal_name")
+            .eq("id", goalId)
+            .single();
+
+        const { data: txn, error: txnError } = await supabase
+            .from("transactions")
+            .insert({
+                user_id: userId,
+                amount: amount,
+                date: dateStr,
+                type: "contribution",
+                description: `Admin Goal contribution: ${goalData?.goal_name || goalId}`,
+                account_id: accountId,
+                goal_id: goalId,
+                status: "completed"
+            })
+            .select("id")
+            .single();
+
+        if (txnError) {
+            return { error: `Failed to create transaction: ${txnError.message}` };
+        }
+        transactionId = txn.id;
+    }
 
     const contribution = {
         goal_id: goalId,
@@ -317,6 +348,8 @@ export async function contributeToAdminGoal(
         amount: amount,
         contribution_date: dateStr,
         contribution_type: "manual",
+        transaction_id: transactionId,
+        source_account_id: accountId || null,
     };
 
     const { error: contributionError } = await supabase

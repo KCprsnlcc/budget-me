@@ -216,20 +216,53 @@ export async function deleteGoal(
 export async function contributeToGoal(
   goalId: string,
   amount: number,
-  userId?: string
+  userId?: string,
+  accountId?: string
 ): Promise<{ data: GoalType | null; error: string | null }> {
   if (amount <= 0) {
     return { data: null, error: "Contribution amount must be greater than zero." };
   }
 
   const localDate = formatDateForInput(getPhilippinesNow());
-  
+
+  let transactionId = null;
+
+  if (accountId && userId) {
+    const { data: goalData } = await supabase
+      .from("goals")
+      .select("goal_name")
+      .eq("id", goalId)
+      .single();
+
+    const { data: txn, error: txnError } = await supabase
+      .from("transactions")
+      .insert({
+        user_id: userId,
+        amount: amount,
+        date: localDate,
+        type: "contribution",
+        description: `Goal contribution: ${goalData?.goal_name || goalId}`,
+        account_id: accountId,
+        goal_id: goalId,
+        status: "completed"
+      })
+      .select("id")
+      .single();
+
+    if (txnError) {
+      return { data: null, error: `Failed to create transaction: ${txnError.message}` };
+    }
+    transactionId = txn.id;
+  }
+
   const contribution = {
     goal_id: goalId,
     user_id: userId || null,
     amount: amount,
     contribution_date: localDate,
     contribution_type: "manual",
+    transaction_id: transactionId,
+    source_account_id: accountId || null,
   };
 
   const { error: contributionError } = await supabase
@@ -268,7 +301,7 @@ export async function fetchGoalContributions(
     .order("created_at", { ascending: false });
 
   if (error) return { data: [], error: error.message };
-  
+
   const contributions = (data || []).map(row => ({
     id: row.id,
     goal_id: row.goal_id,
@@ -312,13 +345,13 @@ export async function fetchGoalContributors(
   if (error) return { data: [], error: error.message };
 
   const contributorMap = new Map<string, GoalContributor>();
-  
+
   for (const row of data || []) {
     const userId = row.user_id;
     const existing = contributorMap.get(userId);
 
     const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
-    
+
     if (existing) {
       existing.total_contributed += Number(row.amount);
     } else {
