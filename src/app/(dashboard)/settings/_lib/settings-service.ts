@@ -38,8 +38,8 @@ export async function updateUserProfile(
     const { error } = await supabase
       .from("profiles")
       .update({
-        full_name: updates.firstName && updates.lastName 
-          ? `${updates.firstName} ${updates.lastName}` 
+        full_name: updates.firstName && updates.lastName
+          ? `${updates.firstName} ${updates.lastName}`
           : undefined,
         phone: updates.phone,
         date_of_birth: updates.dateOfBirth,
@@ -55,9 +55,9 @@ export async function updateUserProfile(
     return { success: true };
   } catch (error) {
     console.error("Error updating profile:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Unknown error" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error"
     };
   }
 }
@@ -278,8 +278,8 @@ export async function adjustAccountBalance(
     }
 
     const currentBalance = parseFloat(account.balance?.toString() || "0");
-    const newBalance = type === "deposit" 
-      ? currentBalance + amount 
+    const newBalance = type === "deposit"
+      ? currentBalance + amount
       : currentBalance - amount;
 
     const { error: updateError } = await supabase
@@ -294,26 +294,6 @@ export async function adjustAccountBalance(
     if (updateError) {
       console.error("Error updating balance:", updateError);
       return { success: false, error: updateError.message };
-    }
-
-    const { error: transactionError } = await supabase
-      .from("transactions")
-      .insert({
-        user_id: userId,
-        account_id: accountId,
-        type: type === "deposit" ? "income" : "expense",
-        amount: amount,
-        description: reason,
-        notes: `Balance adjustment: ${type}`,
-        date: getPhilippinesNow().toISOString().split("T")[0],
-        status: "completed",
-        created_at: getPhilippinesNow(),
-        updated_at: getPhilippinesNow(),
-      });
-
-    if (transactionError) {
-      console.error("Error creating transaction:", transactionError);
-
     }
 
     await logAccountActivity(userId, "account_balance_change", {
