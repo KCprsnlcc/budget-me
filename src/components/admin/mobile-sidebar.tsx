@@ -1,9 +1,9 @@
 "use client";
 
 import { X } from "lucide-react";
+import Image from "next/image";
 import { ADMIN_NAV } from "@/lib/constants";
 import { NavItem } from "./nav-item";
-import { Logo } from "@/components/shared/logo";
 import { UserProfileCard } from "@/components/dashboard/user-profile-card";
 
 interface MobileSidebarProps {
@@ -23,7 +23,13 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
 
       <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white text-slate-600 flex flex-col border-r border-slate-200 z-50 md:hidden animate-slide-in-left">
         <div className="flex items-center justify-between p-4 border-b border-slate-200">
-          <Logo variant="icon" size="md" />
+          <Image 
+            src="/logos/light-no-bg-logo-2.svg" 
+            alt="BudgetMe Logo" 
+            width={120} 
+            height={32}
+            priority
+          />
           <button
             onClick={onClose}
             className="text-slate-500 hover:text-slate-700 cursor-pointer"
