@@ -137,7 +137,7 @@ const SessionCard = memo(({
                     />
                     <div className="min-w-0">
                         <h4 className="text-sm font-semibold text-slate-900 truncate">
-                            {session.user_name || session.user_email}
+                            {session.user_name || session.user_email.split('@')[0] || 'Unknown User'}
                         </h4>
                         <p className="text-[11px] text-slate-500 truncate">{session.user_email}</p>
                     </div>
@@ -196,37 +196,37 @@ const SessionRow = memo(({
 
     return (
         <TableRow className="group hover:bg-slate-50/80 transition-colors cursor-pointer" onClick={() => onView(session)}>
-            <TableCell className="px-6 py-4">
+            <TableCell className="px-6 py-4 w-[25%]">
                 <div className="flex items-center gap-3">
                     <UserAvatar
                         user={mockUser}
                         size="md"
                         className="ring-1 ring-white shadow-sm flex-shrink-0"
                     />
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-slate-900 truncate">
-                            {session.user_name || session.user_email}
+                            {session.user_name || session.user_email.split('@')[0] || 'Unknown User'}
                         </p>
                         <p className="text-[11px] text-slate-500 truncate">{session.user_email}</p>
                     </div>
                 </div>
             </TableCell>
-            <TableCell className="px-6 py-4">
+            <TableCell className="px-6 py-4 w-[10%]">
                 <span className="text-sm font-semibold text-slate-900">{session.total_messages}</span>
             </TableCell>
-            <TableCell className="px-6 py-4 max-w-xs">
+            <TableCell className="px-6 py-4 w-[30%]">
                 <div className="flex items-start gap-2">
                     <div className="flex items-center justify-center flex-shrink-0 mt-0.5 text-slate-500">
                         {session.last_message_role === "assistant" ? <Bot size={14} /> : <User size={14} />}
                     </div>
-                    <p className="text-[12px] text-slate-600 truncate">{session.last_message_preview}</p>
+                    <p className="text-[12px] text-slate-600 line-clamp-2 break-words flex-1">{session.last_message_preview}</p>
                 </div>
             </TableCell>
-            <TableCell className="px-6 py-4 text-slate-500">
-                {session.models_used.length > 0 ? session.models_used[0] : "—"}
+            <TableCell className="px-6 py-4 w-[15%] text-slate-500">
+                <span className="truncate block">{session.models_used.length > 0 ? session.models_used[0] : "—"}</span>
             </TableCell>
-            <TableCell className="px-6 py-4 text-slate-400 text-xs">
-                {formatRelativeTime(session.last_message_at)}
+            <TableCell className="px-6 py-4 w-[10%] text-slate-400 text-xs">
+                <span className="whitespace-nowrap">{formatRelativeTime(session.last_message_at)}</span>
             </TableCell>
             <TableCell className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-center gap-1">
@@ -733,23 +733,25 @@ export default function AdminChatbotPage() {
                         {tableLoading ? (
                             <FilterTableSkeleton rows={getSafeSkeletonCount(pageSize)} columns={6} />
                         ) : (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="px-6 py-3">User</TableHead>
-                                        <TableHead className="px-6 py-3">Messages</TableHead>
-                                        <TableHead className="px-6 py-3">Last Message</TableHead>
-                                        <TableHead className="px-6 py-3">Models</TableHead>
-                                        <TableHead className="px-6 py-3">Last Active</TableHead>
-                                        <TableHead className="px-6 py-3 text-center">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {sessions.map((s) => (
-                                        <SessionRow key={s.user_id} session={s} onView={handleView} onDelete={handleDelete} />
-                                    ))}
-                                </TableBody>
-                            </Table>
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="px-6 py-3 w-[25%]">User</TableHead>
+                                            <TableHead className="px-6 py-3 w-[10%]">Messages</TableHead>
+                                            <TableHead className="px-6 py-3 w-[30%]">Last Message</TableHead>
+                                            <TableHead className="px-6 py-3 w-[15%]">Models</TableHead>
+                                            <TableHead className="px-6 py-3 w-[10%]">Last Active</TableHead>
+                                            <TableHead className="px-6 py-3 w-[10%] text-center">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {sessions.map((s) => (
+                                            <SessionRow key={s.user_id} session={s} onView={handleView} onDelete={handleDelete} />
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
                         )}
                     </Card>
                 ) : tableLoading ? (

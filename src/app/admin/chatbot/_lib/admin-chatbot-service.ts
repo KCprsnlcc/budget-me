@@ -109,6 +109,17 @@ async function fetchAdminChatSessions(
             (profiles ?? []).map((p: any) => [p.id, { email: p.email, full_name: p.full_name, avatar_url: p.avatar_url }])
         );
 
+        const missingUserIds = userIds.filter(id => !profileMap.has(id));
+        if (missingUserIds.length > 0) {
+            const { data: authUsers } = await supabase.auth.admin.listUsers();
+            const authUserMap = new Map(
+                (authUsers?.users ?? [])
+                    .filter((u: any) => missingUserIds.includes(u.id))
+                    .map((u: any) => [u.id, { email: u.email, full_name: u.user_metadata?.full_name ?? null, avatar_url: u.user_metadata?.avatar_url ?? null }])
+            );
+            authUserMap.forEach((value, key) => profileMap.set(key, value));
+        }
+
         let sessions: AdminChatSession[] = Array.from(sessionMap.values()).map((s) => {
             const profile = profileMap.get(s.user_id);
             return {
