@@ -28,6 +28,7 @@ import { TypingEffect } from "@/components/ui/typing-effect";
 import { TypingMarkdown } from "@/components/ui/typing-markdown";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import {
   ModelSelectorDropdown,
   ClearChatModal,
@@ -636,6 +637,7 @@ export default function ChatbotPage() {
           {children}
         </a>
       ),
+      br: () => <br />,
     };
 
     return (
@@ -647,10 +649,12 @@ export default function ChatbotPage() {
             delay={200}
             components={components}
             onComplete={() => setTypingMessageId(null)}
+            rehypePlugins={[rehypeRaw]}
           />
         ) : (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
             components={components}
           >
             {safeContent}

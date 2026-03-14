@@ -23,6 +23,7 @@ import { fetchUserChatMessages } from "../_lib/admin-chatbot-service";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 
 interface ViewAdminChatbotModalProps {
@@ -111,6 +112,7 @@ const assistantMarkdownComponents = {
             {children}
         </a>
     ),
+    br: () => <br />,
 };
 
 function ChatBubble({ message, copiedId, onCopy }: { message: AdminChatMessage; copiedId: string | null; onCopy: (id: string, content: string) => void }) {
@@ -147,6 +149,7 @@ function ChatBubble({ message, copiedId, onCopy }: { message: AdminChatMessage; 
                         <div className="text-sm leading-relaxed text-slate-700">
                             <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
+                                rehypePlugins={[rehypeRaw]}
                                 components={assistantMarkdownComponents}
                             >
                                 {message.content}

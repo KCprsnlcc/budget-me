@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 interface TypingMarkdownProps {
   content: string;
   speed?: number;
   delay?: number;
   components?: any;
+  rehypePlugins?: any[];
   onComplete?: () => void;
 }
 
@@ -17,6 +19,7 @@ export function TypingMarkdown({
   speed = 7, 
   delay = 200, 
   components,
+  rehypePlugins = [rehypeRaw],
   onComplete 
 }: TypingMarkdownProps) {
   const [displayedContent, setDisplayedContent] = useState("");
@@ -54,6 +57,7 @@ export function TypingMarkdown({
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
+      rehypePlugins={rehypePlugins}
       components={components}
     >
       {displayedContent}
