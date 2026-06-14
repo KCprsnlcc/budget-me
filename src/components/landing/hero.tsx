@@ -55,12 +55,23 @@ export function Hero() {
             <path d="M-358 -213C-358 -213 -290 192 174 319C638 446 706 851 706 851" stroke="currentColor" className="text-slate-300" strokeWidth={0.5} />
             <path d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827" stroke="currentColor" className="text-slate-300" strokeWidth={0.5} />
           </g>
-          {}
-          <path d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875" stroke="url(#beam-gradient-0)" strokeWidth={1.5} strokeLinecap="round" opacity={0.3} />
-          <path d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827" stroke="url(#beam-gradient-1)" strokeWidth={1} strokeLinecap="round" opacity={0.2} />
-          <path d="M-204 -381C-204 -381 -136 24 328 151C792 278 860 683 860 683" stroke="url(#beam-gradient-0)" strokeWidth={1.5} strokeLinecap="round" opacity={0.25} />
-          {}
+          {/* Animated paths */}
+          <path d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875" stroke="url(#beam-gradient-0)" strokeWidth={1.5} strokeLinecap="round" className="animate-beam-slow" />
+          <path d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827" stroke="url(#beam-gradient-1)" strokeWidth={1} strokeLinecap="round" className="animate-beam-medium opacity-60" />
+          <path d="M-204 -381C-204 -381 -136 24 328 151C792 278 860 683 860 683" stroke="url(#beam-gradient-0)" strokeWidth={1.5} strokeLinecap="round" className="animate-beam-fast" />
         </svg>
+      </div>
+
+      {/* Left Hero Image */}
+      <div className="hidden xl:block absolute left-5 top-1/2 -translate-y-1/2 h-[70%] z-20 pointer-events-none [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/left-side-hero.webp" alt="" className="h-full w-auto object-contain object-left-bottom" />
+      </div>
+
+      {/* Right Hero Image */}
+      <div className="hidden xl:block absolute right-5 top-1/2 -translate-y-1/2 h-[70%] z-20 pointer-events-none [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/right-side-hero.webp" alt="" className="h-full w-auto object-contain object-right-bottom" />
       </div>
 
       <div className="relative z-10">
@@ -89,42 +100,40 @@ export function Hero() {
           </div>
         </div>
 
-        {}
+        {/* Tech Specs Marquee */}
         <div className="relative w-full">
-          {}
-          {}
+          {/* Edge Fades */}
+          <div className="absolute left-[-20px] top-0 bottom-0 w-40 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-[-20px] top-0 bottom-0 w-40 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
+          <div className="absolute bottom-[-40px] left-0 right-0 h-32 bg-gradient-to-t from-white via-white/40 to-transparent z-10 pointer-events-none" />
 
           <div className="relative overflow-hidden py-12">
-            {}
-            {}
-            <div className="flex gap-24 items-start justify-center px-4">
-              {}
-              {}
-              {TECH_SPECS.map((spec) => {
-                const Icon = ICON_MAP[spec.icon];
-                return (
-                  <div
-                    key={spec.title}
-
-                    className="w-72 shrink-0 text-left"
-                  >
-                    <div className="text-slate-900 text-[11px] font-bold mb-2 flex items-center gap-2 uppercase tracking-tight">
-                      {Icon && (
-                        <Icon
-                          size={16}
-
-                          className="text-emerald-500"
-                        />
-                      )}
-                      {spec.title}
+            <div className="flex animate-marquee gap-24 items-start w-max px-4">
+              {/* Triple repeat for seamless loop */}
+              {[...Array(3)].map((_, repeatIdx) =>
+                TECH_SPECS.map((spec) => {
+                  const Icon = ICON_MAP[spec.icon];
+                  return (
+                    <div
+                      key={`${repeatIdx}-${spec.title}`}
+                      className="w-72 shrink-0 group hover:translate-y-[-2px] transition-transform duration-300"
+                    >
+                      <div className="text-slate-900 text-[11px] font-bold mb-2 flex items-center gap-2 uppercase tracking-tight">
+                        {Icon && (
+                          <Icon
+                            size={16}
+                            className="text-emerald-500 group-hover:scale-110 transition-transform"
+                          />
+                        )}
+                        {spec.title}
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-relaxed uppercase tracking-wider">
+                        {spec.description}
+                      </p>
                     </div>
-                    <p className="text-[11px] text-slate-500 leading-relaxed uppercase tracking-wider text-center">
-                      {spec.description}
-                    </p>
-                  </div>
-                );
-              })}
-              {}
+                  );
+                })
+              )}
             </div>
           </div>
 
