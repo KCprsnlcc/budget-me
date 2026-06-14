@@ -179,29 +179,28 @@ export function AuthPanel({
               strokeWidth={0.5}
             />
           </g>
-          {}
+          {/* Animated paths */}
           <path
             d="M-380 -189C-380 -189 -312 216 152 343C616 470 684 875 684 875"
             stroke="url(#beam-gradient-0)"
             strokeWidth={1.5}
             strokeLinecap="round"
-            opacity={0.3}
+            className="animate-beam-slow"
           />
           <path
             d="M-336 -237C-336 -237 -268 168 196 295C660 422 728 827 728 827"
             stroke="url(#beam-gradient-1)"
             strokeWidth={1}
             strokeLinecap="round"
-            opacity={0.2}
+            className="animate-beam-medium opacity-60"
           />
           <path
             d="M-204 -381C-204 -381 -136 24 328 151C792 278 860 683 860 683"
             stroke="url(#beam-gradient-0)"
             strokeWidth={1.5}
             strokeLinecap="round"
-            opacity={0.25}
+            className="animate-beam-fast"
           />
-          {}
         </svg>
 
         {}
